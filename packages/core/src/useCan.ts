@@ -35,6 +35,8 @@ export interface UseCanResult {
   readonly allowed: boolean;
   readonly reason: string|undefined;
   readonly isLoading: boolean;
+  /** True only when the current permission query itself failed; never exposes the error. */
+  readonly isError: boolean;
 }
 
 /**
@@ -130,5 +132,6 @@ export function useCan(options: () => UseCanOptions): UseCanResult {
     },
     get reason() { return query.isEnabled && query.isSuccess ? query.data?.reason : undefined; },
     get isLoading() { return adminContext.accessControlProvider !== null && query.isLoading; },
+    get isError() { return adminContext.accessControlProvider !== null && query.isEnabled && query.isError; },
   });
 }

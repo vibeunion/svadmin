@@ -127,4 +127,56 @@ test.describe('form engine reset host entry', () => {
     await expect(page.getByTestId('navigation-count')).toHaveText('0');
     await expect(page.getByTestId('success-count')).toHaveText('0');
   });
+
+  test('AutoForm reset retires the open unsaved guard and only the fresh navigation runs', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto('/?view=form-reset&kind=auto');
+    const host = productHost(page);
+    const name = host.getByRole('textbox', { name: /^Name/ });
+    const description = host.getByRole('textbox', { name: /^Description/ });
+    const confirm = page.getByRole('alertdialog');
+
+    await expect(name).toHaveValue('Baseline');
+    await expect(description).toHaveValue('Baseline description');
+
+    // 真实输入产生 dirty 状态，再由公开 guard 捕获一次待执行导航。
+    await name.fill('Dirty draft');
+    await page.getByTestId('trigger-stale-navigation').click();
+    await expect(confirm).toBeVisible();
+    await expect(page.getByTestId('stale-navigation-count')).toHaveText('0');
+
+    // 模态打开后外部按钮不可点击；通过明确的 test-only DOM event 入口调用
+    // 真实 bind:this reset（不 force click，也不访问 Svelte internals）。
+    await page.evaluate(() => {
+      window.dispatchEvent(new Event('svadmin:form-reset-call'));
+    });
+
+    await expect(confirm).toBeHidden();
+    await expect(page.getByTestId('reset-calls')).toHaveText('1');
+    await expect(name).toHaveValue('Baseline');
+    await expect(description).toHaveValue('Baseline description');
+    await expect(page.getByTestId('stale-navigation-count')).toHaveText('0');
+    await expect(page.getByTestId('fresh-navigation-count')).toHaveText('0');
+    await expect(page.getByTestId('write-count')).toHaveText('0');
+    await expect(page.getByTestId('success-count')).toHaveText('0');
+
+    // 新输入只允许新 guard 的导航执行一次，旧导航保持 0。
+    await name.fill('Fresh dirty draft');
+    await page.getByTestId('trigger-fresh-navigation').click();
+    await expect(confirm).toBeVisible();
+    await expect(page.getByTestId('fresh-navigation-count')).toHaveText('0');
+    await confirm.getByRole('button', { name: 'Confirm' }).click();
+
+    await expect(confirm).toBeHidden();
+    await expect(page.getByTestId('fresh-navigation-count')).toHaveText('1');
+    await expect(page.getByTestId('stale-navigation-count')).toHaveText('0');
+    await expect(page.getByTestId('write-count')).toHaveText('0');
+    await expect(page.getByTestId('success-count')).toHaveText('0');
+
+    // reset 后表单仍可继续编辑。
+    await name.fill('Still editable');
+    await expect(name).toHaveValue('Still editable');
+    expect(errors).toEqual([]);
+  });
 });

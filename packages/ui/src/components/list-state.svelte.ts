@@ -5,7 +5,14 @@ import { snapshotPlainData } from '@svadmin/core/schema';
 import type { SavedListViewState } from './saved-list-views.js';
 
 type URLState = ReturnType<typeof readURLState>;
-type ListStateSnapshot = Pick<SavedListViewState, 'search' | 'filters' | 'sorters' | 'pagination'>;
+
+/** AutoTable 可恢复的列表查询快照；不包含列可见性、草稿或远程视图元数据。 */
+export interface ListStateSnapshot {
+  search: string;
+  filters: Filter[];
+  sorters: Sort[];
+  pagination: Pagination;
+}
 
 interface ListStateOptions {
   fields: () => FieldDefinition[];
@@ -14,10 +21,12 @@ interface ListStateOptions {
   externalPagination: () => Pagination | undefined;
   externalSorters: () => Sort[] | undefined;
   initialURLState: URLState;
+  initialListState?: ListStateSnapshot | undefined;
   initialViewState: SavedListViewState | undefined;
   syncWithLocation: () => boolean;
   writeURLState: (state: Parameters<typeof writeURLState>[0]) => void;
   onDirty: () => void;
+  onStateChange?: ((state: ListStateSnapshot) => void) | undefined;
 }
 
 export function cloneListFilter(filter: Filter): Filter {
@@ -29,6 +38,34 @@ export function cloneListFilter(filter: Filter): Filter {
     };
   }
   return { operator: filter.operator, value: filter.value.map(cloneListFilter) };
+}
+
+export function cloneListStateSnapshot(state: ListStateSnapshot): ListStateSnapshot {
+  return {
+    search: state.search,
+    filters: state.filters.map(cloneListFilter),
+    sorters: state.sorters.map(sorter => ({ ...sorter })),
+    pagination: { ...state.pagination },
+  };
+}
+
+/** 将可恢复的查询快照收敛为持久化视图契约；分页可选字段在写入前补齐。 */
+export function captureSavedListViewState(
+  snapshot: ListStateSnapshot,
+  columns: Pick<SavedListViewState, 'columnVisibility' | 'columnOrder'>,
+  fallbackPageSize: number,
+): SavedListViewState {
+  return {
+    search: snapshot.search,
+    filters: snapshot.filters.map(cloneListFilter),
+    sorters: snapshot.sorters.map(sorter => ({ ...sorter })),
+    pagination: {
+      current: snapshot.pagination.current ?? 1,
+      pageSize: snapshot.pagination.pageSize ?? fallbackPageSize,
+    },
+    columnVisibility: { ...columns.columnVisibility },
+    columnOrder: [...columns.columnOrder],
+  };
 }
 
 function editableValues(filters: Filter[], fields: FieldDefinition[]): Record<string, string> {
@@ -49,23 +86,29 @@ function editableValues(filters: Filter[], fields: FieldDefinition[]): Record<st
 }
 
 export function createListState(options: ListStateOptions) {
-  const url = options.initialURLState;
+  const url: URLState = untrack(() => options.syncWithLocation()) ? options.initialURLState : {};
+  const initialListState = options.initialListState
+    ? cloneListStateSnapshot(options.initialListState)
+    : undefined;
   const initialView = options.initialViewState;
-  let pagination = $state<Pagination>(untrack(() => options.externalPagination() ?? {
-    current: url.page ?? initialView?.pagination.current ?? 1,
-    pageSize: url.pageSize ?? initialView?.pagination.pageSize ?? options.defaultPageSize(),
-  }));
+  const initialPagination = initialListState?.pagination ?? initialView?.pagination;
+  let pagination = $state<Pagination>(untrack(() => options.externalPagination() ?? definedOptions({
+    ...initialPagination,
+    current: url.page ?? initialPagination?.current ?? 1,
+    pageSize: url.pageSize ?? initialPagination?.pageSize ?? options.defaultPageSize(),
+  })));
   let sorters = $state<Sort[]>(untrack(() => {
     const defaultSort = options.defaultSort();
     return options.externalSorters() ?? (url.sortField
       ? [{ field: url.sortField, order: url.sortOrder ?? 'asc' }]
-      : initialView?.sorters ?? (defaultSort ? [defaultSort] : []));
+      : initialListState?.sorters ?? initialView?.sorters ?? (defaultSort ? [defaultSort] : []));
   }));
-  let filters = $state<Filter[]>(url.filters ?? initialView?.filters ?? []);
+  let filters = $state<Filter[]>(url.filters ?? initialListState?.filters ?? initialView?.filters ?? []);
   let filterValues = $state(untrack(() => editableValues(filters, options.fields())));
-  let searchText = $state(url.search ?? initialView?.search ?? '');
+  let searchText = $state(url.search ?? initialListState?.search ?? initialView?.search ?? '');
   let appliedSearchText = $state(untrack(() => searchText));
   let searchTimer: ReturnType<typeof setTimeout> | undefined;
+  let lastNotifiedState = untrack(() => JSON.stringify(captureState()));
 
   const searchableFields = $derived(options.fields().filter(field => field.searchable));
   const filterableFields = $derived(options.fields().filter(field => field.filterable));
@@ -119,6 +162,13 @@ export function createListState(options: ListStateOptions) {
       search: appliedSearchText || undefined,
       filters,
     });
+  });
+  $effect(() => {
+    const snapshot = captureState();
+    const serialized = JSON.stringify(snapshot);
+    if (serialized === lastNotifiedState) return;
+    lastNotifiedState = serialized;
+    untrack(() => options.onStateChange?.(snapshot));
   });
   $effect(() => cancelSearch);
 
@@ -198,21 +248,25 @@ export function createListState(options: ListStateOptions) {
       search: appliedSearchText,
       filters: filters.map(cloneListFilter),
       sorters: sorters.map(sorter => ({ ...sorter })),
-      pagination: {
+      pagination: definedOptions({
         current: pagination.current ?? 1,
         pageSize: pagination.pageSize ?? options.defaultPageSize(),
-      },
+        mode: pagination.mode,
+      }),
     };
   }
 
   function applyState(state: ListStateSnapshot): void {
     cancelSearch();
-    searchText = state.search;
-    appliedSearchText = state.search;
-    filters = state.filters;
-    filterValues = editableValues(state.filters, options.fields());
-    pagination = { ...pagination, ...state.pagination };
-    sorters = state.sorters;
+    const snapshot = cloneListStateSnapshot(state);
+    const controlledPagination = options.externalPagination();
+    const controlledSorters = options.externalSorters();
+    searchText = snapshot.search;
+    appliedSearchText = snapshot.search;
+    filters = snapshot.filters;
+    filterValues = editableValues(snapshot.filters, options.fields());
+    pagination = controlledPagination ?? { ...pagination, ...snapshot.pagination };
+    sorters = controlledSorters ?? snapshot.sorters;
   }
 
   function resetToDefaults(): void {

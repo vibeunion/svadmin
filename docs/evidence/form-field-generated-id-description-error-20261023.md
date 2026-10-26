@@ -71,4 +71,5 @@ node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts src/comp
 
 - 未覆盖 `ArrayField` 行级分组、`Transfer`、`TreeSelect`、`Cascader`、`DateRangeInput`、富文本和文件上传的同类组合；其既有分支已有独立证据，但不在本轮新增断言内。
 - 未运行真实浏览器、屏幕阅读器、全仓测试/typecheck/build、发布包或部署。
-- 修正版主线程独立复核尚未执行。
+- “修正版主线程独立复核尚未执行”是交付时的历史状态；第 67-68 行已记录主线程
+  对修正版 **22/22** 的独立复核。

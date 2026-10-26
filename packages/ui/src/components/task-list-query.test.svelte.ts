@@ -5,6 +5,7 @@ import { resetContext, type TaskProvider, type TaskRecord } from '@svadmin/core'
 import type { ComponentProps } from 'svelte';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import Host from './task-list-query.test-host.svelte';
+import { exactRoleName } from '../../test/accessible-name';
 
 const clients: QueryClient[] = [];
 const record: TaskRecord = { id: 'one', title: 'Verified task', status: 'processing' };
@@ -50,7 +51,7 @@ describe('TaskList with the real task query', () => {
       } else {
         expect(view.queryByRole('alert')).toBeNull();
       }
-      expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
+      expect(view.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
       if (condition === 'direct') expect(view.getByText('Direct task')).toBeTruthy();
       await view.rerender({
         provider,
@@ -68,9 +69,9 @@ describe('TaskList with the real task query', () => {
     const { view, client } = mount({ queryOptions: { enabled: true } }, provider);
     await view.findByRole('alert');
     expect(view.container.textContent).not.toContain('PRIVATE_LIST');
-    expect(view.getByRole('button', { name: 'Retry' })).toBeTruthy();
+    expect(view.getByRole('button', { name: exactRoleName('Retry') })).toBeTruthy();
     await view.rerender({ settings: { queryOptions: { enabled: false } } });
-    expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
+    expect(view.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
     expect(provider.list).toHaveBeenCalledOnce();
     expect(client.isFetching()).toBe(0);
     await view.rerender({ settings: { queryOptions: { enabled: true } } });
@@ -86,9 +87,9 @@ describe('TaskList with the real task query', () => {
     read.mockRejectedValueOnce(new Error('PRIVATE_LIST')).mockImplementationOnce(() => pending);
     const { view } = mount({ dlq }, provider);
     await view.findByRole('alert');
-    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(view.getByRole('button', { name: exactRoleName('Retry') }));
     await waitFor(() => expect(read).toHaveBeenCalledTimes(2));
-    expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
+    expect(view.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
     await act(async () => { finish({ data: [record], total: 1 }); await pending; });
     await view.findByText('Verified task');
     expect(view.queryByRole('alert')).toBeNull();
@@ -112,7 +113,7 @@ describe('TaskList with the real task query', () => {
     expect(await view.findByText(message)).toBeTruthy();
     expect(view.queryByText('0 task(s)')).toBeNull();
     expect(view.queryByRole('table')).toBeNull();
-    expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
+    expect(view.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
     await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)); });
     expect(client.isFetching()).toBe(0);
     expect(provider.list).not.toHaveBeenCalled();
@@ -175,7 +176,7 @@ describe('TaskList with the real task query', () => {
       await refetch;
     });
     expect(view.queryByText('Late task')).toBeNull();
-    expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
+    expect(view.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
   });
 
   it('only exposes details when selection is supported and preserves form semantics', async () => {
@@ -304,7 +305,7 @@ describe('TaskList with the real task query', () => {
   it('runs a new query when params change and shows the new result', async () => {
     const provider = source();
     provider.list.mockImplementation(async params => {
-      const page = (params?.['pagination'] as { page?: number } | undefined)?.page;
+      const page = (params?.pagination as { page?: number } | undefined)?.page;
       return page === 2
         ? { data: [{ ...record, id: 'two', title: 'Second page task' }], total: 2 }
         : { data: [record], total: 2 };
@@ -330,7 +331,7 @@ describe('TaskList with the real task query', () => {
     const first = { pagination: { page: 1, pageSize: 10 } };
     const second = { pagination: { page: 2, pageSize: 10 } };
     provider.list.mockImplementation(async params => {
-      if ((params?.['pagination'] as { page?: number } | undefined)?.page === 1) {
+      if ((params?.pagination as { page?: number } | undefined)?.page === 1) {
         startOld();
         return oldPending;
       }
@@ -356,7 +357,7 @@ describe('TaskList with the real task query', () => {
   it('passes the active tenant meta and queries again after the tenant changes', async () => {
     const provider = source();
     provider.list.mockImplementation(async params => {
-      const tenantId = (params?.['meta'] as { tenantId?: string } | undefined)?.tenantId;
+      const tenantId = (params?.meta as { tenantId?: string } | undefined)?.tenantId;
       return tenantId === 'tenant-2'
         ? { data: [{ ...record, id: 'two', title: 'Tenant two task' }], total: 1 }
         : { data: [record], total: 1 };
@@ -379,7 +380,7 @@ describe('TaskList with the real task query', () => {
     let finishOld!: (value: { data: TaskRecord[]; total: number }) => void;
     const oldPending = new Promise<{ data: TaskRecord[]; total: number }>(resolve => { finishOld = resolve; });
     provider.list.mockImplementation(async params => {
-      const tenantId = (params?.['meta'] as { tenantId?: string } | undefined)?.tenantId;
+      const tenantId = (params?.meta as { tenantId?: string } | undefined)?.tenantId;
       if (tenantId === 'tenant-1') {
         startOld();
         return oldPending;

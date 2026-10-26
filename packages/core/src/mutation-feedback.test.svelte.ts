@@ -7,7 +7,7 @@ import { resetContext } from './context.svelte';
 import { getToastQueue, resetToast } from './toast.svelte';
 import { HttpError, type AuditLogProvider, type AuthProvider, type DataProvider, type LiveProvider, type NotificationProvider, type ResourceDefinition } from './index';
 import Host from './mutation-feedback.test-host.svelte';
-import type { FeedbackOperation, FeedbackState } from './mutation-feedback.test-types';
+import type { FeedbackOperation, FeedbackState } from './mutation-feedback.test.types';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync } from 'node:fs';

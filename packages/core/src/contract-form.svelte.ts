@@ -166,6 +166,11 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
   function isCurrent(scope: Scope): boolean {
     return targetCurrent(scope) && sessionCurrent(scope);
   }
+  function readCurrent(scope: Scope): boolean {
+    return enabled() && state.ok && state.scope.targetKey === scope.targetKey &&
+      context.authProvider === scope.authProvider && context.routerProvider === scope.router &&
+      sessionCurrent(scope);
+  }
   function ready(): boolean {
     return state.ok && isCurrent(state.scope) && hydratedKey === state.scope.key;
   }
@@ -201,7 +206,7 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
         const response = await scope.provider.getOne(snapshotOneParams({
           resource: scope.contract.name, id: scope.id, ...definedOptions({ meta: scope.meta }),
         }));
-        if (!isCurrent(scope)) throw cancelled();
+        if (!readCurrent(scope)) throw cancelled();
         const result = decodeOneResult(snapshotPlainData(response), value => parseContractRecord(scope.contract, value));
         if (result.data.id !== scope.id) return rejectProviderResponse();
         return result;

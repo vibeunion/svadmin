@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Host from '../../test/fixtures/FormEngineResetHarness.svelte';
 
 beforeEach(() => {
@@ -31,6 +31,36 @@ describe('form engine explicit reset', () => {
     expect(name.getAttribute('aria-invalid')).not.toBe('true');
     expect(view.queryByRole('region', { name: 'Please fix the following errors' })).toBeNull();
     expect(view.queryByText('Draft description')).toBeNull();
+  });
+
+  it('AutoForm reports real form dirtiness and reset returns to the clean baseline', async () => {
+    const view = render(Host, { kind: 'auto' });
+    const name = await view.findByRole('textbox', { name: /^Name/ });
+
+    await waitFor(() => expect(view.component.currentDirty()).toBe(false));
+    await fireEvent.input(name, { target: { value: 'Dirty draft' } });
+    await waitFor(() => expect(view.component.currentDirty()).toBe(true));
+
+    view.component.reset();
+
+    await waitFor(() => expect(view.component.currentDirty()).toBe(false));
+    expect(name).toHaveProperty('value', 'Baseline');
+    expect(view.component.dirtyStates().at(-1)).toBe(false);
+  });
+
+  it('AutoForm reports a clean state after a successful save', async () => {
+    const view = render(Host, { kind: 'auto' });
+    const name = await view.findByRole('textbox', { name: /^Name/ });
+
+    await fireEvent.input(name, { target: { value: 'Saved draft' } });
+    await waitFor(() => expect(view.component.currentDirty()).toBe(true));
+    await fireEvent.click(view.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(view.component.pendingWriteCount()).toBe(1));
+
+    view.component.resolveWrite(0, { name: 'Saved draft', description: 'Baseline description' });
+
+    await waitFor(() => expect(view.component.successCount()).toBe(1));
+    await waitFor(() => expect(view.component.currentDirty()).toBe(false));
   });
 
   it('StepsForm reset restores the first step, baseline values and validation feedback', async () => {
@@ -218,6 +248,34 @@ describe('form engine explicit reset', () => {
     expect(view.queryByRole('textbox', { name: /^Name/ })).toBeNull();
     expect(view.component.successCount()).toBe(0);
     expect(view.component.navigationCount()).toBe(0);
+  });
+
+  it('AutoForm reset dismisses an open unsaved-changes guard and retires its pending action', async () => {
+    const view = render(Host, { kind: 'auto' });
+    const name = await view.findByRole('textbox', { name: /^Name/ }) as HTMLInputElement;
+    const staleNavigation = vi.fn();
+    const freshNavigation = vi.fn();
+
+    await fireEvent.input(name, { target: { value: 'Dirty draft' } });
+    view.component.guardedNavigation(staleNavigation);
+    await view.findByRole('alertdialog');
+
+    view.component.reset();
+
+    await waitFor(() => expect(view.queryByRole('alertdialog')).toBeNull());
+    await waitFor(() => expect(name.value).toBe('Baseline'));
+    // 旧 action 必须随 reset 退休，不能被后续确认复活。
+    expect(staleNavigation).not.toHaveBeenCalled();
+
+    await fireEvent.input(name, { target: { value: 'Fresh dirty draft' } });
+    view.component.guardedNavigation(freshNavigation);
+    await view.findByRole('alertdialog');
+    expect(freshNavigation).not.toHaveBeenCalled();
+
+    await fireEvent.click(view.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(freshNavigation).toHaveBeenCalledTimes(1));
+    expect(staleNavigation).not.toHaveBeenCalled();
+    expect(view.queryByRole('alertdialog')).toBeNull();
   });
 
   it('StepsForm reset is a no-op when access control denies the form', async () => {

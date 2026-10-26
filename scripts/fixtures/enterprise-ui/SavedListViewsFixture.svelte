@@ -40,6 +40,26 @@
     columnVisibility: {},
     columnOrder: [],
   };
+  // seed=stale：两个远端视图各自含一个不同的失效列，仅由新 seed 参数启用，默认行为不变。
+  const staleSeedViews: SavedListView[] = [
+    {
+      id: 'stale-visibility-view', name: 'Stale visibility view', source: 'team', readOnly: false, version: 4,
+      state: {
+        ...seedState,
+        search: 'stale-visibility',
+        columnVisibility: { email: true, retiredOwner: false },
+      },
+    },
+    {
+      id: 'stale-order-view', name: 'Stale order view', source: 'team', readOnly: false, version: 7,
+      state: {
+        ...seedState,
+        search: 'stale-order',
+        columnOrder: ['team', 'id', 'legacyTeam', 'email'],
+      },
+    },
+  ];
+
   let remoteViews: SavedListView[] = params.get('seed') === 'remote' ? [
     {
       id: 'team-view', name: 'Team saved', source: 'team', readOnly: false, version: 2,
@@ -49,7 +69,7 @@
       id: 'system-view', name: 'System saved', source: 'system', readOnly: true, version: 5,
       state: { ...seedState, search: 'system-seed' },
     },
-  ] : [];
+  ] : params.get('seed') === 'stale' ? staleSeedViews : [];
 
   const listCalls = $state<unknown[]>([]);
   const saveCalls = $state<unknown[]>([]);

@@ -20,6 +20,7 @@
   } from '@tanstack/svelte-table';
   import type { Column, Header, Row, TableFeatures } from '@tanstack/table-core';
   import { createAtom, useSelector } from '@tanstack/svelte-store';
+  import { useQueryClient } from '@tanstack/svelte-query';
   import {
     column_getCanSort,
     column_getSize,
@@ -37,7 +38,7 @@
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
-  import { captureAdminContext, captureAuthSession, useGetIdentity, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData, type ExportFormat, type TaskProvider } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, useGetIdentity, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData, type ExportFormat, type TaskProvider, parseQueryKey } from '@svadmin/core';
   import { snapshotPlainData, parseContractRouteId, formatContractRouteId } from '@svadmin/core/schema';
   import {
     checkedTableRows,
@@ -56,7 +57,9 @@
   import { readURLState, writeURLState } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { createSavedListViews } from './saved-list-views.svelte.js';
-  import { createListState } from './list-state.svelte.js';
+  import {
+    captureSavedListViewState, cloneListStateSnapshot, createListState, type ListStateSnapshot,
+  } from './list-state.svelte.js';
   import { createListSelection } from './list-selection.svelte.js';
   import { createListColumnPreferences } from './list-column-preferences.svelte.js';
   import { createListDeletion } from './list-deletion.svelte.js';
@@ -139,6 +142,10 @@
     pagination?: { current: number; pageSize: number };
     /** Externally controlled sorters */
     sorters?: Sort[];
+    /** 初次挂载时恢复的查询快照；优先级低于受控分页/排序和已启用的 URL 状态。 */
+    initialListState?: ListStateSnapshot | undefined;
+    /** 查询快照变化回调；搜索在 debounce 应用后才触发。 */
+    onListStateChange?: ((state: ListStateSnapshot) => void) | undefined;
     /** 批量操作必须按 selection.scope 区分明确 ID 与全部查询结果。 */
     batchActions?: Snippet<[{ selectedIds: (string | number)[]; selection: BatchSelection }]>;
     /** Summary row rendered at table footer */
@@ -181,6 +188,8 @@
     summary,
     pagination: externalPagination,
     sorters: externalSorters,
+    initialListState,
+    onListStateChange,
     deleteVariables,
     savedViewProvider,
     applyRemoteDefaultView = false,
@@ -195,6 +204,7 @@
   let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
   const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
+  const queryClient = useQueryClient();
   const parsed = useParsed();
   const navigation = useNavigation();
 
@@ -257,6 +267,26 @@
     || urlState.search !== undefined
     || urlState.filters !== undefined
   ));
+  const initialListStateSnapshot = untrack(() => initialListState
+    ? cloneListStateSnapshot(initialListState)
+    : undefined);
+  const initialPreferenceScope: ListPreferenceScope = untrack(() => listPreferenceScope);
+  const initialPreferenceSessionKey = untrack(() => preferenceSession.cacheKey);
+  let initialListStateRetired = !initialListStateSnapshot;
+  let initialIdentityHydrationPending = !!initialListStateSnapshot
+    && initialPreferenceScope.identityKey?.startsWith('unresolved:') === true;
+
+  function sameScopeExceptIdentity(left: ListPreferenceScope, right: ListPreferenceScope): boolean {
+    return left.resourceName === right.resourceName
+      && left.providerName === right.providerName
+      && left.tenantIdentity === right.tenantIdentity;
+  }
+
+  function initialListStateApplies(scope: ListPreferenceScope): boolean {
+    return !!initialListStateSnapshot && !initialListStateRetired
+      && sameScopeExceptIdentity(scope, initialPreferenceScope);
+  }
+
   const savedViewModel = createSavedListViews({
     scope: () => listPreferenceScope,
     columns: () => savedViewColumnIds,
@@ -264,7 +294,9 @@
     isScopeLoaded: preferenceScopeIsLoaded,
     readPreference: readScopedPreference,
     hasExplicitURLState,
-    canApplyRemoteDefault: () => applyRemoteDefaultView && !externalPagination && !externalSorters,
+    initialStateOverridesSavedView: !!initialListStateSnapshot,
+    canApplyRemoteDefault: () => applyRemoteDefaultView && !externalPagination && !externalSorters
+      && !initialListStateApplies(listPreferenceScope),
     captureState: () => {
       listState.flushSearch();
       return getCurrentSavedViewState();
@@ -281,6 +313,7 @@
   // The table can stay mounted while the surrounding tenant/provider changes.
   // Keep persistence effects paused until the new scope has been loaded.
   let loadedPreferenceScopeId = $state(untrack(() => listPreferenceScopeId(listPreferenceScope)));
+  const queryScopeReady = $derived(loadedPreferenceScopeId === listPreferenceScopeId(listPreferenceScope));
 
   // Snapshot resource values for initial state (untrack to avoid reactive tracking)
   const storedPageSize = parseInt(readLocalPreference('svadmin-default-page-size') ?? '', 10);
@@ -292,10 +325,12 @@
     externalPagination: () => externalPagination,
     externalSorters: () => externalSorters,
     initialURLState: urlState,
+    initialListState: initialListStateSnapshot,
     initialViewState,
     syncWithLocation: () => syncWithLocation,
     writeURLState: (state) => writeURLState(state, adminContext),
     onDirty: markSavedViewDirty,
+    onStateChange: (state) => onListStateChange?.(state),
   });
   const pagination = $derived(listState.pagination);
   const sorters = $derived(listState.sorters);
@@ -332,7 +367,8 @@
     get resource() { void activeRendering; return binding.resource; },
     get dataProviderName() { return binding.dataProviderName; },
     errorNotification: false,
-    get queryOptions() { return { enabled: canRead }; },
+    // 作用域恢复完成前不发送查询，避免把旧作用域快照作为新作用域的首帧请求。
+    get queryOptions() { return { enabled: canRead && queryScopeReady }; },
     get pagination() { return queryPagination; },
     get sorters() { return querySorters; },
     get filters() { return queryFilters; },
@@ -507,15 +543,14 @@
   });
 
   function getCurrentSavedViewState(): SavedListViewState {
-    return {
-      ...listState.captureState(),
-      ...columnPreferences.captureState(),
-    };
+    return captureSavedListViewState(
+      listState.captureState(), columnPreferences.captureState(), initPageSize,
+    );
   }
 
   function applySavedViewState(state: SavedListViewState): void {
     listState.applyState(state);
-    sortingAtom.set(state.sorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
+    sortingAtom.set(listState.sorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
     columnPreferences.applyState(state);
     selectionModel.reset();
   }
@@ -532,10 +567,30 @@
     const scopeId = listPreferenceScopeId(scope);
     if (scopeId === loadedPreferenceScopeId) return;
 
+    if (initialListStateSnapshot) {
+      const identityHydration = initialIdentityHydrationPending
+        && sameScopeExceptIdentity(scope, initialPreferenceScope)
+        && preferenceSession.cacheKey === initialPreferenceSessionKey
+        && scope.identityKey !== undefined
+        && !scope.identityKey.startsWith('unresolved:');
+      if (identityHydration) {
+        initialIdentityHydrationPending = false;
+      } else {
+        initialListStateRetired = true;
+        initialIdentityHydrationPending = false;
+      }
+    }
+
     const activeSavedView = savedViewModel.restoreScope(scope);
     const restoredColumns = columnPreferences.readScope(scope);
 
-    if (!hasExplicitURLState && activeSavedView) {
+    if (!hasExplicitURLState && initialListStateApplies(scope)) {
+      // 挂载快照已由 createListState 应用；首次身份 hydrate 只保留用户编辑，不重放快照。
+      // 初始快照优先于旧活动视图时取消活动标记，但不删除保存视图或写入其他作用域。
+      savedViewModel.clearActiveSavedView();
+      columnPreferences.applyState(restoredColumns);
+      selectionModel.reset();
+    } else if (!hasExplicitURLState && activeSavedView) {
       applySavedView(activeSavedView);
     } else {
       if (!hasExplicitURLState) resetToDefaultListState();
@@ -872,6 +927,15 @@
   }
   function refreshList() {
     if (canRead && !query.isFetching) void listResult.refetch();
+  }
+  function refreshPermission() {
+    const resource = resourceName;
+    void queryClient.invalidateQueries({
+      predicate: query => {
+        const parsed = parseQueryKey(query.queryKey);
+        return parsed?.kind === 'access' && parsed.resource === resource;
+      },
+    }).catch(() => {});
   }
   const gridRowIndex = $derived(new Map(tableView.rows.map(row => [rowIdValue(row), row])));
   const gridColumns = $derived.by(() => {
@@ -1322,6 +1386,9 @@
             <div>
               <h4 class="svadmin-u-2689f3958069 svadmin-u-fc7473ca09eb">{i18n.t("common.savedViews")}</h4>
               <p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t("common.savedViewsHint")}</p>
+              {#if savedViewModel.staleSavedViewColumns.length > 0}
+                <p role="status">{i18n.t('common.savedViewStaleFields', { count: savedViewModel.staleSavedViewColumns.length })}</p>
+              {/if}
             </div>
             {#if savedViewModel.remoteViewsLoading}
               <p role="status">{i18n.t('common.loading')}</p>
@@ -1627,8 +1694,13 @@
           </div>
         {/each}
       </div>
+    {:else if listPermission.isError}
+      <p role="alert">{i18n.t('common.permissionUnavailable')}</p>
+      <Button type="button" variant="outline" onclick={refreshPermission}>
+        {i18n.t('common.retry')}
+      </Button>
     {:else if !canRead}
-      <p role="alert">{i18n.t('common.operationFailed')}</p>
+      <p role="alert">{i18n.t('common.permissionDenied')}</p>
     {:else if query.error || query.isError || !pageRecords.ok}
       <DataState
         state="error"
@@ -1992,7 +2064,7 @@
     open={detailOpen}
     recordId={detailRecordId}
     onClose={closeDetail}
-    extraSections={detailWorkspace ? workspaceSections : undefined}
+    {...definedOptions({ extraSections: detailWorkspace ? workspaceSections : undefined })}
   />
 {/if}
 

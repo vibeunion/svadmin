@@ -95,18 +95,20 @@
         variant={mode === 'split' ? 'secondary' : 'ghost'}
         size="sm"
         class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34 svadmin-u-012fbd121f37"
+        aria-pressed={mode === 'split'}
         onclick={() => { mode = 'split'; }}
       >
-        <Columns2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+        <Columns2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" aria-hidden="true" />
         Side by Side
       </Button>
       <Button
         variant={mode === 'unified' ? 'secondary' : 'ghost'}
         size="sm"
         class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34 svadmin-u-012fbd121f37"
+        aria-pressed={mode === 'unified'}
         onclick={() => { mode = 'unified'; }}
       >
-        <AlignJustify class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+        <AlignJustify class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" aria-hidden="true" />
         Unified
       </Button>
     </div>

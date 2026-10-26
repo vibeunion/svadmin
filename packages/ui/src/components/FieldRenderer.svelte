@@ -24,6 +24,8 @@
   import DateTimeInput from './DateTimeInput.svelte';
   import DateRangeInput, { type DateRangeInputValue } from './DateRangeInput.svelte';
   import FileUpload from './FileUpload.svelte';
+  import type { UploadCancelHandler, UploadHandler } from './file-upload-types.js';
+  import FileUploadField from './FileUploadField.svelte';
   import ColorPicker from './ColorPicker.svelte';
   import Rate from './Rate.svelte';
   import TagsInput from './TagsInput.svelte';
@@ -41,17 +43,28 @@
   type FieldOption = NonNullable<FieldDefinition['options']>[number];
   const i18n = useTranslation();
 
-  let { field, value, onchange, disabled, invalid = false, errorId, id, children, nativeSubmit = true } = $props<{
+  let {
+    field, value, onchange, disabled, invalid = false, errorId, id, children, nativeSubmit = true,
+    upload, cancelUpload, onUploadStateChange, fileReferenceMode = false, fileScopeKey,
+  } = $props<{
     field: FieldDefinition;
     value: unknown;
     onchange: (val: unknown) => void;
     disabled?: boolean;
     invalid?: boolean;
-    errorId?: string | undefined;
-    id?: string | undefined;
+    errorId?: string;
+    id?: string;
     children?: Snippet;
     /** 嵌套数组的可序列化值由外层 JSON 提交；原始文件保留原生通道。 */
     nativeSubmit?: boolean;
+    /** 开启异步上传后，字段值只保存可序列化引用，不再接收 File。 */
+    upload?: UploadHandler;
+    cancelUpload?: UploadCancelHandler;
+    onUploadStateChange?: (state: { busy: boolean; unresolved: boolean }) => void;
+    /** AutoForm 的 JSON 文件模式；独立 FieldRenderer 默认保留原生 multipart。 */
+    fileReferenceMode?: boolean;
+    /** 记录/上传作用域或 reset 变化时只重挂载文件字段。 */
+    fileScopeKey?: string | number | object;
   }>();
 
   const instanceId = $props.id();
@@ -107,18 +120,21 @@
     }
   }
 
-  // Images management
+  // Images management：禁用态保留回显，但所有入口都不能改值。
   function addImage() {
+    if (disabled) return;
     onchange([...imagesVal, '']);
   }
 
   function updateImage(index: number, url: string) {
+    if (disabled) return;
     const next = [...imagesVal];
     next[index] = url;
     onchange(next);
   }
 
   function removeImage(index: number) {
+    if (disabled) return;
     onchange(imagesVal.filter((_: string, i: number) => i !== index));
   }
 </script>
@@ -154,6 +170,8 @@
       {...definedOptions({ describedby: describedBy })}
       invalid={invalid}
       nativeSubmit={false}
+      {fileReferenceMode}
+      {...definedOptions({ upload, cancelUpload, onUploadStateChange, fileScopeKey })}
     />
 
   {:else if field.type === 'text' || field.type === 'image'}
@@ -215,14 +233,13 @@
   {:else if field.type === 'color'}
     <ColorPicker
       id={controlId}
-      name={nativeFieldName}
       value={strVal}
       onchange={onchange}
       required={field.required}
       invalid={invalid}
-      describedby={describedBy}
       ariaLabel={field.label}
       {disabled}
+      {...definedOptions({ name: nativeFieldName, describedby: describedBy })}
     />
 
   {:else if field.type === 'number'}
@@ -491,15 +508,14 @@
 
   {:else if field.type === 'tags'}
     <TagsInput
-      name={nativeArrayName}
       value={tagsVal}
       onchange={onchange}
       placeholder={i18n.t('field.tagsPlaceholder')}
       required={field.required}
       invalid={invalid}
-      describedby={describedBy}
       ariaLabel={field.label}
       {disabled}
+      {...definedOptions({ name: nativeArrayName, describedby: describedBy })}
     />
 
   {:else if field.type === 'date' || field.type === 'time' || field.type === 'datetime'}
@@ -537,14 +553,16 @@
       endId={`${controlId}-end`}
       startAriaLabel={`${field.label} ${i18n.t('common.startDate')}`}
       endAriaLabel={`${field.label} ${i18n.t('common.endDate')}`}
-      startName={nativeSubmit ? `${field.key}.start` : undefined}
-      endName={nativeSubmit ? `${field.key}.end` : undefined}
       value={value as DateRangeInputValue | null}
       onchange={(next) => onchange(next)}
       required={field.required}
       invalid={invalid}
-      describedby={describedBy}
       {disabled}
+      {...definedOptions({
+        startName: nativeSubmit ? `${field.key}.start` : undefined,
+        endName: nativeSubmit ? `${field.key}.end` : undefined,
+        describedby: describedBy,
+      })}
     />
 
   {:else if field.type === 'rate' || field.type === 'rating'}
@@ -554,26 +572,41 @@
       onchange={onchange}
       required={field.required}
       invalid={invalid}
-      describedby={describedBy}
       ariaLabel={field.label}
       {disabled}
+      {...definedOptions({ describedby: describedBy })}
     />
 
   {:else if field.type === 'file'}
-    <!-- File 不能通过 JSON 传输，保留既有 multipart 字段名。 -->
-    <FileUpload
-      id={controlId}
-      name={field.key}
-      multiple={field.multiple}
-      required={field.required && !value}
-      disabled={disabled}
-      ariaLabel={field.label}
-      invalid={invalid}
-      {...definedOptions({ describedby: describedBy })}
-      accept={field.accept}
-      maxSize={field.maxSize}
-      onChange={(items) => onchange(field.multiple ? items.map(item => item.file) : items[0]?.file ?? null)}
-    />
+    {#if fileReferenceMode || upload}
+      <!-- AutoForm 显式 JSON 文件模式：只写入可序列化引用。 -->
+      {#key fileScopeKey}
+        <FileUploadField
+          id={controlId}
+          {field}
+          {value}
+          {onchange}
+          {invalid}
+          {...definedOptions({ describedby: describedBy })}
+          {...definedOptions({ disabled, upload, cancelUpload, onUploadStateChange })}
+        />
+      {/key}
+    {:else}
+      <!-- 独立 FieldRenderer 保留原生 multipart 字段名与 File 值。 -->
+      <FileUpload
+        id={controlId}
+        name={field.key}
+        multiple={field.multiple}
+        required={field.required && !value}
+        disabled={disabled}
+        ariaLabel={field.label}
+        invalid={invalid}
+        {...definedOptions({ describedby: describedBy })}
+        accept={field.accept}
+        maxSize={field.maxSize}
+        onChange={(items) => onchange(field.multiple ? items.map(item => item.file) : items[0]?.file ?? null)}
+      />
+    {/if}
 
   {:else if field.type === 'images'}
     {#each imagesVal as url, imageIndex (imageIndex)}
@@ -596,12 +629,29 @@
           {#if url}
             <div class="svadmin-u-665f07fe73cc svadmin-u-012fbd121f37"><MediaThumbnail src={url} alt="preview" size="full" fit="cover" showOverlay={false} /></div>
           {/if}
-          <TooltipButton tooltip={i18n.t('common.removeImage')} variant="ghost" size="icon" class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-012fbd121f37" onclick={() => removeImage(i)}>
+          <TooltipButton
+            tooltip={i18n.t('common.removeImage')}
+            variant="ghost"
+            size="icon"
+            class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-012fbd121f37"
+            aria-describedby={describedBy}
+            aria-invalid={invalid || undefined}
+            {disabled}
+            onclick={() => removeImage(i)}
+          >
             <X class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           </TooltipButton>
         </div>
       {/each}
-      <Button variant="outline" size="sm" type="button" onclick={addImage}>
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        aria-describedby={describedBy}
+        aria-invalid={invalid || undefined}
+        {disabled}
+        onclick={addImage}
+      >
         <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" /> {i18n.t('field.addImage')}
       </Button>
     </div>

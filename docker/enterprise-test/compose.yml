@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: svadmin_test
+      POSTGRES_PASSWORD: ${SVADMIN_TEST_DB_PASSWORD:?set SVADMIN_TEST_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d svadmin_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "127.0.0.1:15432:5432"
+
+  postgrest:
+    image: postgrest/postgrest:v12.2.12
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgresql://authenticator:${SVADMIN_TEST_DB_PASSWORD}@db:5432/svadmin_test
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${SVADMIN_TEST_JWT_SECRET:?set SVADMIN_TEST_JWT_SECRET}
+      PGRST_JWT_AUD: authenticated
+    ports:
+      - "127.0.0.1:15433:3000"

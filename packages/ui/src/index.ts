@@ -41,6 +41,8 @@ export type {
   SavedListViewSubject,
 } from './components/saved-list-views.js';
 export type { BatchSelection } from './components/table-contract.js';
+export { cloneListFilter, cloneListStateSnapshot } from './components/list-state.svelte.js';
+export type { ListStateSnapshot } from './components/list-state.svelte.js';
 export { default as AutoForm } from './components/AutoForm.svelte';
 export { default as ShowPage } from './components/ShowPage.svelte';
 export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
@@ -168,6 +170,9 @@ export type { PresenceUser } from './components/PresenceAvatarGroup.svelte';
 export { default as PrintableBill } from './components/PrintableBill.svelte';
 export type { BillItem } from './components/PrintableBill.svelte';
 export { default as JsonSchemaForm } from './components/JsonSchemaForm.svelte';
+export type { JsonSchemaFormSchema } from './components/json-schema-form-state.js';
+export type { SchemaFormReferenceDocuments } from './components/enterprise/schema-form-references.js';
+export type { SchemaFormIssue, SchemaIssueCode } from './components/enterprise/json-schema-form.js';
 export { default as MentionsInput } from './components/MentionsInput.svelte';
 export type { MentionOption } from './components/MentionsInput.svelte';
 export { default as KanbanBoard } from './components/KanbanBoard.svelte';
@@ -175,9 +180,18 @@ export type { KanbanCard, KanbanColumn } from './components/KanbanBoard.svelte';
 export { default as PivotTable } from './components/PivotTable.svelte';
 export type { AggregationFn } from './components/PivotTable.svelte';
 export { default as MultiTabKeepAlive } from './components/MultiTabKeepAlive.svelte';
-export type { WorkspaceTab } from './components/MultiTabKeepAlive.svelte';
+export type {
+  WorkspaceTab,
+  WorkspaceTabLimitReachedDetail,
+  WorkspaceTabOpenRejectReason,
+  WorkspaceTabOpenResult,
+  WorkspaceTabOpenStatus,
+} from './components/MultiTabKeepAlive.svelte';
 export { createWorkspaceTabStateAdapter } from './components/workspace-tab-state.js';
 export type {
+  WorkspaceDraftDataIssue,
+  WorkspaceDraftJsonObject,
+  WorkspaceDraftJsonValue,
   WorkspaceTabClearResult,
   WorkspaceTabIdentity,
   WorkspaceTabRef,

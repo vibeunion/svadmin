@@ -18,6 +18,7 @@
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
+  import LazyWorkspaceTabs from './components/LazyWorkspaceTabs.svelte';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
@@ -34,6 +35,7 @@
   ]);
   const menu = $derived.by<MenuItem[]>(() => [
     { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
+    { name: 'workspace_tabs', label: currentLocale === 'zh-CN' ? '多标签工作台' : 'Multi-tab Workspace', icon: 'folder', href: '/workspace' },
     ...createExampleMenu(currentLocale),
   ]);
   const appTitle = 'svadmin example';
@@ -55,6 +57,10 @@
     pages['health_office'] = { list: LazyOfficeWorkspace };
     return pages;
   });
+
+  const pageRoutes = [
+    { path: '/workspace', component: LazyWorkspaceTabs, title: 'Multi-tab Workspace' },
+  ];
 </script>
 
 <AdminApp
@@ -65,6 +71,7 @@
   notificationPreferencesProvider={exampleNotificationPreferences}
   {chatProvider}
   {resourcePages}
+  {pageRoutes}
   {menu}
   title={appTitle}
   bind:locale={currentLocale}

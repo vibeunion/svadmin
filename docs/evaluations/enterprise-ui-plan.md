@@ -856,6 +856,31 @@ Excel 兼容作为批次一门禁，它们属于按需 B4-02；DatePicker/DateRa
 | 4 | Workflow / DecisionTable | 版本、发布、模拟、审计、执行结果 | 按需扩展 |
 | 4 | 富文本/代码/文档 | 大内容、安全、版本、只读与编辑边界 | 按需扩展 |
 
+### 当前状态索引（2026-10-23）
+
+上表保留 2026-09-19 的初始台账，不作为当前完成判定。当前复核口径如下：
+
+- B2-01、B2-04、B2-05、B2-06、B2-10 与 B3-03 的本地子范围已有直接测试或浏览器证据；
+  B2-06 当前采用纯叶子值级联，B2-10 已覆盖表单 reset、提交状态、关闭保护、
+  旧回执隔离和 `aria-busy`，B3-03 的 dry-run 仍是客户端预检，不是服务端试运行。
+- B2-11 已验证 `$ref`、`oneOf`、外部 URI 等输入 fail-closed；受控引用解析仍需
+  产品/安全契约，不能把拒绝证据当作完整 Schema 支持。
+- B3-01、B3-02、B3-03、B3-05、B3-08、B3-09 的受控本地路径已有部分或完整证据；
+  真实 Provider/RBAC/租户、版本历史模型、标签淘汰策略、持久化、读屏、发布和部署
+  仍按 `docs/evaluations/enterprise-ui-remaining-20261023.md` 及验收矩阵分别处理。
+- B2-09 的错误摘要、字段级说明/错误 IDREF、数组父级分组与行身份已有定向证据；
+  但行级/子字段错误需要新的错误路径模型，不能在无消费者契约时凭空新增
+  `rowErrors` 或索引格式；复合控件全矩阵、完整 Tab、真实读屏、服务端错误映射和
+  发布仍未关闭。
+- B3-08 的任务列表/DLQ 与通知偏好本地状态、错误恢复、Provider 切换和实例隔离
+  已有定向证据；任务持久化、业务取消与传输层取消、通知存储一致性、真实权限/
+  租户隔离、读屏、发布和部署仍由 Provider/服务端及外部验收负责。
+- B3-10 的 Dashboard 查询、筛选/时间范围 URL 恢复、错误重试、迟到响应隔离和
+  metric/text 钻取已有本地及受控消费者证据；真实聚合口径、网络取消、错误码、
+  RBAC/租户、SSR/持久化、读屏、发布和部署仍未关闭。
+- 未经产品确认，不新增 TreeSelect 的父值/strict 模式、Schema resolver、版本
+  `VersionProvider` 或多标签 `maxTabs/LRU` 公共 API。
+
 ## 通用完成标准
 
 每项至少记录：公开 API、数据正确性、加载/失败/重试、权限/身份/租户隔离、键盘和屏幕阅读器、国际化、性能场景、真实消费者构建、许可、对应提交的测试证据。
@@ -945,3 +970,29 @@ typecheck、build 或发布。控件仍是原生 input 包装而非自绘日历�
 不代表真实后端。最终无失败；首轮唯一红测来自新增测试额外断言快捷选择后
 select 复位占位值，与产品现状不符，该非验收断言已移除，必需断言未弱化。
 见 `../evidence/date-time-policy-browser-20261022.md`。
+
+### 2026-10-24 B3-09 多标签消费者当前补记
+
+#### 2026-10-26 生命周期矩阵复验
+
+清理上一轮遗留的 fixture Vite 进程后，当前
+`playwright.workspace-tabs.cross-browser.config.ts` 完整执行 **81/81 passed**，
+exit `0`，耗时 **10.3m**，无 skip；Chromium/WebKit/Firefox desktop 各 **27/27**。
+此前 77/78、78/78、15/15 等结果继续保留为历史阶段，不与本次重复累计。该结果
+收口当前本地 workspace 生命周期、真实菜单 SPA、标签关闭/驱逐和刷新恢复的三引擎
+矩阵；真实后端/Provider、生产 storage、跨窗口、读屏、发布部署与在线验收仍未关闭。
+
+最终生产源码 UI 定向 build exit `0`（仅既有 `import.meta.env` 打包警告）；
+build 结束后独立运行 workspace 专属 spec **12/12 passed**、exit `0`、约 1.2m，
+12 项实际执行无 skip，为本轮最新浏览器结果（Chromium），与历史 12/12 分属
+不同批次，不累计。局部类型检查纳入 svelte2tsx 虚拟源 `AutoTable`、
+`DraggableHeader`、`AutoTableIdentityHydrationHost` 及真实源
+`list-state.svelte.ts`、`saved-list-views.svelte.ts`、`saved-list-views.ts`，
+在 strict/exactOptionalPropertyTypes/noUncheckedIndexedAccess/
+noPropertyAccessFromIndexSignature、`skipLibCheck:false` 下完整目标
+syntactic + semantic 诊断总数为 **0**；此前 AutoTable 的 6 个 TS7006 是前轮
+漏纳 `DraggableHeader` 虚拟源导致的类型丢失，不是基线错误。对应回归改为断言
+完整目标 diagnostics 为 `[]`。真实 dirty 表单消费者已由后续
+`AutoForm.onDirtyChange` 修正接入基础关闭保护；完整滚动边界、跨窗口、
+真实后端/RBAC/存储、读屏与发布部署仍未验收，本文其余历史结论不变。
+见 `../evidence/workspace-tabs-consumer-20261024.md`。

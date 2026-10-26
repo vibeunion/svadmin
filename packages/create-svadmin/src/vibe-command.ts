@@ -277,8 +277,9 @@ export async function vibeCommand(args: string[], packageRoot: string, manifest:
     return;
   }
   if (options.command === 'catalog') {
-    console.log('query' in options
-      ? JSON.stringify({ query: options.query, pages: searchVibePages(options.query) }, null, 2)
+    const query = 'query' in options && typeof options.query === 'string' ? options.query : undefined;
+    console.log(query !== undefined
+      ? JSON.stringify({ query, pages: searchVibePages(query) }, null, 2)
       : fs.readFileSync(path.join(packageRoot, 'blueprints/customer-workspace/svadmin.vibe.json'), 'utf8'));
     return;
   }

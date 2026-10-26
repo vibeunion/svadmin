@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AutoFormAccessibilityHarness from '../../test/fixtures/AutoFormAccessibilityHarness.svelte';
 import FieldRenderer from './FieldRenderer.svelte';
 import type { FieldDefinition } from '@svadmin/core';
@@ -123,6 +123,146 @@ describe('AutoForm accessibility', () => {
     expect(controls).toHaveLength(2);
     for (const control of controls) {
       expect(control.getAttribute('aria-describedby')).toBe(`${description.id} shared-error`);
+    }
+  });
+
+  it('keeps daterange preset, start, and end feedback isolated per FieldRenderer instance', async () => {
+    const presets = [{ label: 'First week', value: { start: '2026-09-01', end: '2026-09-07' } }];
+    const preset = requireValue(presets[0]);
+    const initialValue = { start: '2026-08-01', end: '2026-08-10' };
+    const initialInputValues = [initialValue.start, initialValue.end];
+    const makeField = (description: string): FieldDefinition => ({
+      key: 'period', label: 'Period', type: 'daterange', description,
+      dateInput: { presets },
+    });
+    const fieldA = makeField('First help');
+    const fieldB = makeField('Second help');
+    const errorIdA = 'period-error-a';
+    const errorIdB = 'period-error-b';
+    const onchange = vi.fn();
+
+    interface RangeControls {
+      preset: HTMLSelectElement;
+      start: HTMLInputElement;
+      end: HTMLInputElement;
+    }
+    const readControls = (container: HTMLElement): RangeControls => {
+      const inputs = [...container.querySelectorAll<HTMLInputElement>('input')];
+      expect(inputs).toHaveLength(2);
+      return {
+        preset: requireValue(container.querySelector<HTMLSelectElement>('select')),
+        start: requireValue(inputs[0]),
+        end: requireValue(inputs[1]),
+      };
+    };
+    const controlsOf = ({ preset: select, start, end }: RangeControls) => [select, start, end];
+    const inputValuesOf = ({ start, end }: RangeControls) => [start.value, end.value];
+    const feedbackOf = (descriptionId: string, errorId: string) => `${descriptionId} ${errorId}`;
+
+    const hostErrors: HTMLParagraphElement[] = [];
+    const attachError = (view: ReturnType<typeof render>, id: string, text: string): void => {
+      const error = document.createElement('p');
+      error.id = id;
+      error.textContent = text;
+      view.container.append(error);
+      hostErrors.push(error);
+    };
+    try {
+      const viewA = render(FieldRenderer, {
+        field: fieldA, value: initialValue, onchange, invalid: true, errorId: errorIdA,
+      });
+      const viewB = render(FieldRenderer, {
+        field: fieldB, value: initialValue, onchange, invalid: true, errorId: errorIdB,
+      });
+      attachError(viewA, errorIdA, 'Error A');
+      attachError(viewB, errorIdB, 'Error B');
+      const controlsA = readControls(viewA.container);
+      const controlsB = readControls(viewB.container);
+      const descriptionA = requireValue(
+        viewA.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+      );
+      const descriptionB = requireValue(
+        viewB.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+      );
+      expect(descriptionA.id).not.toBe(descriptionB.id);
+
+      const instances = [
+        { view: viewA, controls: controlsA, descriptionId: descriptionA.id, errorId: errorIdA,
+          otherDescriptionId: descriptionB.id, otherErrorId: errorIdB },
+        { view: viewB, controls: controlsB, descriptionId: descriptionB.id, errorId: errorIdB,
+          otherDescriptionId: descriptionA.id, otherErrorId: errorIdA },
+      ] as const;
+      for (const instance of instances) {
+        const { view, controls, descriptionId, errorId } = instance;
+        const expected = feedbackOf(descriptionId, errorId);
+        for (const control of controlsOf(controls)) {
+          expect(control.getAttribute('aria-describedby')).toBe(expected);
+          expect(control.getAttribute('aria-invalid')).toBe('true');
+          const refs = requireValue(control.getAttribute('aria-describedby')).split(/\s+/);
+          expect(refs).not.toContain(instance.otherDescriptionId);
+          expect(refs).not.toContain(instance.otherErrorId);
+          for (const ref of refs) {
+            expect(view.container.contains(requireValue(document.getElementById(ref)))).toBe(true);
+          }
+        }
+      }
+      expect(viewA.container.contains(descriptionB)).toBe(false);
+      expect(viewB.container.contains(descriptionA)).toBe(false);
+      expect(viewA.container.querySelector(`#${errorIdB}`)).toBeNull();
+      expect(viewB.container.querySelector(`#${errorIdA}`)).toBeNull();
+      expect(inputValuesOf(controlsA)).toEqual(initialInputValues);
+      expect(inputValuesOf(controlsB)).toEqual(initialInputValues);
+
+      await viewA.rerender({ field: fieldA, value: initialValue, invalid: false, errorId: undefined });
+      expect(onchange).not.toHaveBeenCalled();
+      for (const control of controlsOf(controlsA)) {
+        expect(control.getAttribute('aria-describedby')).toBe(descriptionA.id);
+        expect(control.hasAttribute('aria-invalid')).toBe(false);
+      }
+      expect(inputValuesOf(controlsA)).toEqual(initialInputValues);
+
+      await viewA.rerender({
+        field: { ...fieldA, description: '' }, value: initialValue, invalid: false, errorId: undefined,
+      });
+      expect(onchange).not.toHaveBeenCalled();
+      expect(viewA.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+      for (const control of controlsOf(controlsA)) {
+        expect(control.hasAttribute('aria-describedby')).toBe(false);
+        expect(control.hasAttribute('aria-invalid')).toBe(false);
+      }
+      expect(inputValuesOf(controlsA)).toEqual(initialInputValues);
+
+      for (const control of controlsOf(controlsB)) {
+        expect(control.getAttribute('aria-describedby')).toBe(feedbackOf(descriptionB.id, errorIdB));
+        expect(control.getAttribute('aria-invalid')).toBe('true');
+      }
+
+      await viewB.rerender({
+        field: { ...fieldB, description: '' }, value: initialValue, invalid: true, errorId: errorIdB,
+      });
+      for (const control of controlsOf(controlsB)) {
+        expect(control.getAttribute('aria-describedby')).toBe(errorIdB);
+        expect(control.getAttribute('aria-invalid')).toBe('true');
+      }
+
+      await viewB.rerender({
+        field: { ...fieldB, description: '' }, value: initialValue, invalid: false, errorId: undefined,
+      });
+      expect(onchange).not.toHaveBeenCalled();
+      for (const control of controlsOf(controlsB)) {
+        expect(control.hasAttribute('aria-describedby')).toBe(false);
+        expect(control.hasAttribute('aria-invalid')).toBe(false);
+      }
+      expect(inputValuesOf(controlsB)).toEqual(initialInputValues);
+
+      await fireEvent.change(controlsB.preset, { target: { value: '0' } });
+      expect(onchange).toHaveBeenCalledExactlyOnceWith(preset.value);
+      await waitFor(() => {
+        expect(inputValuesOf(controlsB)).toEqual([preset.value.start, preset.value.end]);
+      });
+      expect(inputValuesOf(controlsA)).toEqual(initialInputValues);
+    } finally {
+      for (const error of hostErrors) error.remove();
     }
   });
 

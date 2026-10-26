@@ -6,6 +6,7 @@ import Host from './builtin-pm.test-host.svelte';
 import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 import type { NotificationPreferences } from './NotificationsSettings.svelte';
 import userEvent from '@testing-library/user-event';
+import { exactRoleName } from '../../test/accessible-name';
 
 const dataProvider = {
   getList: async () => ({ data: [], total: 0 }),
@@ -97,7 +98,7 @@ describe('builtin capability boundaries', () => {
     expect(view.container.innerHTML).not.toContain('PRIVATE_NOTIFICATION_LOAD');
     expect(screen.queryByRole('switch')).toBeNull();
     expect(screen.getByRole('button', { name: 'Save' })).toHaveProperty('disabled', true);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
 
     const security = requireValue(document.querySelector('[id$="-email-security"]'));
@@ -227,7 +228,7 @@ describe('builtin capability boundaries', () => {
     await waitFor(() => expect(screen.getByText('Operation failed')).toBeTruthy());
     expect(view.container.innerHTML).not.toContain('PRIVATE_MEMBER_LOAD');
     expect(screen.queryByText('No members yet')).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     await screen.findByText('Recovered member');
 
     const email = screen.getByLabelText('Member email');
@@ -260,7 +261,7 @@ describe('builtin capability boundaries', () => {
     };
     render(Host, { bundle, page: 'members', members: provider });
     await screen.findByText('Operation failed');
-    const retry = screen.getByRole('button', { name: 'Retry' });
+    const retry = screen.getByRole('button', { name: exactRoleName('Retry') });
     const email = screen.getByLabelText('Member email');
     await fireEvent.input(email, { target: { value: 'member@example.com' } });
     await act(() => {
@@ -269,7 +270,7 @@ describe('builtin capability boundaries', () => {
     });
     expect(provider.list).toHaveBeenCalledOnce();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Loading...' })).toHaveProperty('disabled', true));
-    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+    expect(screen.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
     if (outcome === 'success') resolveInvite();
     else rejectInvite(new Error('PRIVATE_INVITE_ERROR'));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Send Invite' })).toHaveProperty('disabled', false));
@@ -283,7 +284,7 @@ describe('builtin capability boundaries', () => {
     }
     expect(provider.invite).toHaveBeenCalledOnce();
     expect(screen.getByRole('button', { name: 'Send Invite' })).toHaveProperty('disabled', false);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     await waitFor(() => expect(provider.list).toHaveBeenCalledTimes(2));
   });
 
@@ -369,10 +370,13 @@ describe('builtin capability boundaries', () => {
       getAuditLogs,
     } satisfies AuthProvider;
     render(Host, { bundle: { ...bundle, authProvider }, page: 'audit' });
-    expect(await screen.findByText('Audit offline')).toBeTruthy();
+    expect(await screen.findByText('Something went wrong')).toBeTruthy();
+    expect(screen.queryByText('Audit offline')).toBeNull();
+    expect(document.body.textContent).not.toContain('Audit offline');
     await fireEvent.click(screen.getByRole('button', { name: /Retry/ }));
     await waitFor(() => expect(getAuditLogs).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(screen.queryByText('Audit offline')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Something went wrong')).toBeNull());
+    expect(document.body.textContent).not.toContain('Audit offline');
   });
 
   it('discards enrollment secrets from a replaced provider', async () => {
@@ -436,7 +440,7 @@ describe('builtin capability boundaries', () => {
     expect(view.container.innerHTML).not.toContain('PRIVATE_COMPANY_LOAD');
     expect(screen.queryByDisplayValue('Original company')).toBeNull();
     expect(screen.queryByText('No organization details')).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     const input = await screen.findByDisplayValue('Original company');
     await fireEvent.input(input, { target: { value: 'Updated company' } });
     await fireEvent.submit(requireValue(input.closest('form')));

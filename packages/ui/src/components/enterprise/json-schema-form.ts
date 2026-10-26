@@ -1,6 +1,6 @@
 /** JsonSchemaForm 当前支持的标量子集。未知断言必须显式拒绝，不能假装已校验。 */
 export type JsonScalar = string | number | boolean | null;
-export type SchemaIssueCode = 'unsupported-schema' | 'invalid-schema' | 'required' | 'type' | 'enum' | 'minimum' | 'maximum' | 'multipleOf' | 'minLength' | 'maxLength' | 'additionalProperties' | 'invalid-value' | 'minItems' | 'maxItems';
+export type SchemaIssueCode = 'unsupported-schema' | 'invalid-schema' | 'ref-invalid' | 'ref-cycle' | 'ref-limit' | 'oneOf-invalid' | 'oneOf-unsupported' | 'oneOf-unselected' | 'oneOf-ambiguous' | 'required' | 'type' | 'enum' | 'minimum' | 'maximum' | 'multipleOf' | 'minLength' | 'maxLength' | 'additionalProperties' | 'invalid-value' | 'minItems' | 'maxItems';
 export interface SchemaFormIssue { path: string; code: SchemaIssueCode }
 export interface SchemaFormField {
   key: string;

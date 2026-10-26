@@ -1,12 +1,21 @@
-import { fireEvent, render, within } from '@testing-library/svelte';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FieldDefinition } from '@svadmin/core';
 import { requireValue } from '../../../../scripts/test-assertions';
 import FieldRenderer from './FieldRenderer.svelte';
 import ArrayField from './fields/ArrayField.svelte';
 import ArrayFieldHost from './array-field-feedback.test-host.svelte';
+import AutoFormFocusHost from '../../test/fixtures/AutoFormFocusHarness.svelte';
 import { snapshotPlainData } from '@svadmin/core/schema';
 import { arrayFieldOrderKey, arrayFieldRowKey, withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
+import { exactRoleName } from '../../test/accessible-name';
+
+beforeEach(() => {
+  Object.defineProperty(Element.prototype, 'animate', {
+    configurable: true,
+    value: () => ({ cancel: () => {}, finished: Promise.resolve() }),
+  });
+});
 
 const field: FieldDefinition = {
   key: 'rows', label: 'Rows', type: 'array', description: 'Enter the items',
@@ -69,6 +78,65 @@ describe('Array field feedback and disablement', () => {
     expect(input.hasAttribute('disabled')).toBe(true);
     await fireEvent.input(input, { target: { value: 'Ignored' } });
     expect(onchange).not.toHaveBeenCalled();
+  });
+
+  it('links the empty required array Add action to help and its AutoForm instance error', async () => {
+    const fields: FieldDefinition[] = [{
+      key: 'rows', label: 'Rows', type: 'array', description: 'Enter the items',
+      required: true, defaultValue: [], validate: () => 'Add at least one row',
+      subFields: [{ key: 'name', label: 'Name', type: 'text' }],
+    }];
+    const first = render(AutoFormFocusHost, { fields });
+    const second = render(AutoFormFocusHost, { fields });
+    const submit = async (view: typeof first) => {
+      const save = within(view.container).getByRole('button', { name: 'Save' });
+      save.focus();
+      await fireEvent.click(save);
+      return within(view.container).findByRole('region', { name: 'Please fix the following errors' });
+    };
+
+    const summaryA = await submit(first);
+    expect(summaryA.textContent).toContain('Add at least one row');
+    const addA = within(first.container).getByRole('button', { name: 'Add' });
+    await waitFor(() => expect(document.activeElement).toBe(addA));
+    const descriptionA = requireValue(
+      first.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+    );
+    const errorA = requireValue(first.container.querySelector<HTMLElement>('[role="alert"][id]'));
+    expect(descriptionA.textContent).toBe('Enter the items');
+    expect(errorA.textContent).toBe('Add at least one row');
+    const describedByA = requireValue(addA.getAttribute('aria-describedby')).split(' ');
+    expect(describedByA).toEqual([descriptionA.id, errorA.id]);
+    expect(document.getElementById(descriptionA.id)).toBe(descriptionA);
+    expect(document.getElementById(errorA.id)).toBe(errorA);
+    expect(addA.getAttribute('aria-invalid')).toBe('true');
+
+    const summaryB = await submit(second);
+    expect(summaryB.textContent).toContain('Add at least one row');
+    const addB = within(second.container).getByRole('button', { name: 'Add' });
+    await waitFor(() => expect(document.activeElement).toBe(addB));
+    const descriptionB = requireValue(
+      second.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+    );
+    const errorB = requireValue(second.container.querySelector<HTMLElement>('[role="alert"][id]'));
+    const describedByB = requireValue(addB.getAttribute('aria-describedby')).split(' ');
+    expect(describedByB).toEqual([descriptionB.id, errorB.id]);
+    expect(new Set([descriptionA.id, descriptionB.id, errorA.id, errorB.id]).size).toBe(4);
+    expect(first.container.contains(descriptionB)).toBe(false);
+    expect(first.container.contains(errorB)).toBe(false);
+    expect(second.container.contains(descriptionA)).toBe(false);
+    expect(second.container.contains(errorA)).toBe(false);
+    expect(addB.getAttribute('aria-invalid')).toBe('true');
+
+    await fireEvent.click(addA);
+    await waitFor(() => expect(
+      within(first.container).queryByRole('region', { name: 'Please fix the following errors' }),
+    ).toBeNull());
+    expect(addA.getAttribute('aria-describedby')).toBe(descriptionA.id);
+    expect(addA.hasAttribute('aria-invalid')).toBe(false);
+    expect(addA.hasAttribute('disabled')).toBe(false);
+    expect(addB.getAttribute('aria-describedby')).toBe(`${descriptionB.id} ${errorB.id}`);
+    expect(addB.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('propagates disablement through nested array fields', async () => {
@@ -150,7 +218,7 @@ describe('Array field feedback and disablement', () => {
       value: [{ name: 'First', attachment: null }, { name: 'Second', attachment: null }], onchange,
     } });
     try {
-      const row = within(form).getByRole('group', { name: 'Rows 1' });
+      const row = within(form).getByRole('group', { name: exactRoleName('Rows 1') });
       const input = requireValue(row.querySelector<HTMLInputElement>('input[type="file"]'));
       const transfer = new DataTransfer();
       transfer.items.add(new File(['first'], 'first.txt', { type: 'text/plain' }));
@@ -161,13 +229,13 @@ describe('Array field feedback and disablement', () => {
       expect(input.files?.[0]?.name).toBe('first.txt');
       await fireEvent.click(within(row).getByRole('button', { name: 'Move Down' }));
       await view.rerender({ value: requireValue(onchange.mock.lastCall)[0] });
-      expect(within(form).getByRole('group', { name: 'Rows 2' })).toBe(row);
+      expect(within(form).getByRole('group', { name: exactRoleName('Rows 2') })).toBe(row);
       expect(row.querySelector('input[type="file"]')).toBe(input);
       expect(input.files?.[0]?.name).toBe('first.txt');
-      const otherRow = within(form).getByRole('group', { name: 'Rows 1' });
-      await fireEvent.click(within(otherRow).getByRole('button', { name: 'Remove' }));
+      const otherRow = within(form).getByRole('group', { name: exactRoleName('Rows 1') });
+      await fireEvent.click(within(otherRow).getByRole('button', { name: exactRoleName('Remove') }));
       await view.rerender({ value: requireValue(onchange.mock.lastCall)[0] });
-      expect(within(form).getByRole('group', { name: 'Rows 1' })).toBe(row);
+      expect(within(form).getByRole('group', { name: exactRoleName('Rows 1') })).toBe(row);
       const submitted = new FormData(form).get('attachment');
       if (!(submitted instanceof File)) throw new Error('Expected file after row movement');
       expect(submitted.name).toBe('first.txt');
@@ -218,19 +286,19 @@ describe('Array field feedback and disablement', () => {
       { key: 'name', label: 'Name', type: 'text' },
       { key: 'attachment', label: 'Attachment', type: 'file' },
     ] }, initial: [{ name: 'First', attachment: null }, { name: 'Second', attachment: null }] });
-    const row = view.getByRole('group', { name: 'Rows 1' });
+    const row = view.getByRole('group', { name: exactRoleName('Rows 1') });
     const input = requireValue(row.querySelector<HTMLInputElement>('input[type="file"]'));
     const name = within(row).getByRole('textbox', { name: 'Name' });
     const transfer = new DataTransfer();
     transfer.items.add(new File(['first'], 'first.txt', { type: 'text/plain' }));
     input.files = transfer.files;
     await fireEvent.change(input);
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(row);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(row);
     expect(row.querySelector('input[type="file"]')).toBe(input);
     await fireEvent.input(name, { target: { value: 'Edited' } });
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(row);
-    await fireEvent.click(within(row).getByRole('button', { name: 'Move Down' }));
-    expect(view.getByRole('group', { name: 'Rows 2' })).toBe(row);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(row);
+    await fireEvent.click(within(row).getByRole('button', { name: exactRoleName('Move Down') }));
+    expect(view.getByRole('group', { name: exactRoleName('Rows 2') })).toBe(row);
     expect(within(row).getByRole('textbox', { name: 'Name' })).toBe(name);
     expect(view.getByTestId('changes').textContent).toBe('3');
     const form = requireValue(view.container.querySelector('form'));
@@ -242,17 +310,17 @@ describe('Array field feedback and disablement', () => {
   it('does not reuse a row for an equal-valued external replacement', async () => {
     const onchange = vi.fn<(value: unknown) => void>();
     const view = render(FieldRenderer, { field, value: [{ name: 'Same' }, { name: 'Same' }], onchange });
-    const firstRow = view.getByRole('group', { name: 'Rows 1' });
-    const secondRow = view.getByRole('group', { name: 'Rows 2' });
-    await fireEvent.click(within(firstRow).getByRole('button', { name: 'Move Down' }));
+    const firstRow = view.getByRole('group', { name: exactRoleName('Rows 1') });
+    const secondRow = view.getByRole('group', { name: exactRoleName('Rows 2') });
+    await fireEvent.click(within(firstRow).getByRole('button', { name: exactRoleName('Move Down') }));
     const moved: unknown = requireValue(onchange.mock.lastCall)[0];
     if (!Array.isArray(moved)) throw new Error('Expected moved array');
     await view.rerender({ value: moved });
-    expect(view.getByRole('group', { name: 'Rows 2' })).toBe(firstRow);
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(secondRow);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 2') })).toBe(firstRow);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(secondRow);
     await view.rerender({ value: [moved[0], { name: 'Same' }] });
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(secondRow);
-    expect(view.getByRole('group', { name: 'Rows 2' })).not.toBe(firstRow);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(secondRow);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 2') })).not.toBe(firstRow);
     expect(firstRow.isConnected).toBe(false);
   });
 
@@ -261,8 +329,8 @@ describe('Array field feedback and disablement', () => {
     const first = { name: 'First' };
     const second = { name: 'Second' };
     const view = render(FieldRenderer, { field, value: [first, second], onchange });
-    await fireEvent.click(within(view.getByRole('group', { name: 'Rows 1' }))
-      .getByRole('button', { name: 'Move Down' }));
+    await fireEvent.click(within(view.getByRole('group', { name: exactRoleName('Rows 1') }))
+      .getByRole('button', { name: exactRoleName('Move Down') }));
     const moved: unknown = requireValue(onchange.mock.lastCall)[0];
     if (!Array.isArray(moved)) throw new Error('Expected array');
     expect(moved[0]).toBe(second);
@@ -282,14 +350,14 @@ describe('Array field feedback and disablement', () => {
     const shared = { name: 'Shared' };
     const onchange = vi.fn<(value: unknown) => void>();
     const view = render(FieldRenderer, { field, value: [shared, shared], onchange });
-    const first = view.getByRole('group', { name: 'Rows 1' });
-    const second = view.getByRole('group', { name: 'Rows 2' });
+    const first = view.getByRole('group', { name: exactRoleName('Rows 1') });
+    const second = view.getByRole('group', { name: exactRoleName('Rows 2') });
     await fireEvent.input(within(first).getByRole('textbox', { name: 'Name' }), {
       target: { value: 'Edited' },
     });
     await view.rerender({ value: requireValue(onchange.mock.lastCall)[0] });
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(first);
-    expect(view.getByRole('group', { name: 'Rows 2' })).toBe(second);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(first);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 2') })).toBe(second);
     expect(requireValue(first.querySelector('input')).value).toBe('Edited');
     expect(requireValue(second.querySelector('input')).value).toBe('Shared');
     expect(shared.name).toBe('Shared');
@@ -299,15 +367,15 @@ describe('Array field feedback and disablement', () => {
     const shared = { name: 'Shared' };
     const onchange = vi.fn<(value: unknown) => void>();
     const view = render(FieldRenderer, { field, value: [shared, shared], onchange });
-    const first = view.getByRole('group', { name: 'Rows 1' });
-    const second = view.getByRole('group', { name: 'Rows 2' });
-    await fireEvent.click(within(first).getByRole('button', { name: 'Move Down' }));
+    const first = view.getByRole('group', { name: exactRoleName('Rows 1') });
+    const second = view.getByRole('group', { name: exactRoleName('Rows 2') });
+    await fireEvent.click(within(first).getByRole('button', { name: exactRoleName('Move Down') }));
     await view.rerender({ value: requireValue(onchange.mock.lastCall)[0] });
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(second);
-    expect(view.getByRole('group', { name: 'Rows 2' })).toBe(first);
-    await fireEvent.click(within(second).getByRole('button', { name: 'Remove' }));
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(second);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 2') })).toBe(first);
+    await fireEvent.click(within(second).getByRole('button', { name: exactRoleName('Remove') }));
     await view.rerender({ value: requireValue(onchange.mock.lastCall)[0] });
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(first);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(first);
     expect(second.isConnected).toBe(false);
   });
 
@@ -315,10 +383,10 @@ describe('Array field feedback and disablement', () => {
     const shared = { name: 'Shared' };
     const onchange = vi.fn<(value: unknown) => void>();
     const view = render(FieldRenderer, { field, value: [shared, shared], onchange });
-    const first = view.getByRole('group', { name: 'Rows 1' });
-    await fireEvent.click(within(first).getByRole('button', { name: 'Move Down' }));
+    const first = view.getByRole('group', { name: exactRoleName('Rows 1') });
+    await fireEvent.click(within(first).getByRole('button', { name: exactRoleName('Move Down') }));
     await view.rerender({ value: [shared, shared] });
-    expect(view.getByRole('group', { name: 'Rows 1' })).toBe(first);
+    expect(view.getByRole('group', { name: exactRoleName('Rows 1') })).toBe(first);
   });
 
   it('moves nested rows and submits only the controlled outer JSON', async () => {
@@ -333,7 +401,7 @@ describe('Array field feedback and disablement', () => {
       value, onchange,
     } });
     try {
-      const first = within(form).getByRole('group', { name: 'Children 1' });
+      const first = within(form).getByRole('group', { name: exactRoleName('Children 1') });
       await fireEvent.click(within(first).getByRole('button', { name: 'Move Down' }));
       const next = requireValue(onchange.mock.lastCall)[0];
       expect(next).toEqual([{ children: [{ name: 'Second' }, { name: 'First' }] }]);
@@ -341,7 +409,7 @@ describe('Array field feedback and disablement', () => {
       expect(value).toEqual([{ children: [{ name: 'First' }, { name: 'Second' }] }]);
       await view.rerender({ value: next });
       expect(Array.from(new FormData(form))).toEqual([['rows', JSON.stringify(next)]]);
-      expect(within(form).getByRole('group', { name: 'Children 2' })).toBe(first);
+      expect(within(form).getByRole('group', { name: exactRoleName('Children 2') })).toBe(first);
       const callsAfterMove = onchange.mock.calls.length;
       await view.rerender({ disabled: true });
       await fireEvent.click(within(first).getByRole('button', { name: 'Move Up' }));

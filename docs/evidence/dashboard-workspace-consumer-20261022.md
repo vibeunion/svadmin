@@ -13,7 +13,7 @@
   verifier；只跑同专属 18 项与 `git diff --check`。
 - 状态：主线程已独立复核上一版浏览器 **18/18、1.2m**、example 配置单测
   **6/6、1.10s**、diffcheck `0`；本轮截图 helper 修复后 pi 自测 **18/18、1.4m**，
-  待主线程复核新截图。
+  后续主线程已独立复核新截图，结果见下方最终复核。
 
 ## 主线程独立复核记录
 
@@ -52,13 +52,13 @@
   `output/playwright/dashboard-workspace-example-20261022/`；本轮同名覆盖
   `*-detail.png` 与 `*-detail-returned.png`。
 
-## 待主线程复核项
+## 历史待主线程复核项（已由下方结果取代）
 
-- 本轮 pi **18/18、1.4m** 与新的 detail 截图待主线程独立复核。
+- 本轮 pi **18/18、1.4m** 与新的 detail 截图在当时待主线程独立复核。
 - 需主线程确认新 `webkit-narrow-detail.png`、`chromium-desktop-detail.png`
   不再处于淡入低 opacity 中间态；helper 已通过 computed opacity 和
   `getAnimations` 等待保证，但不把 pi 自测当作视觉认证。
-- 主线程已复核上一版 18/18；本轮仅截图 helper 变化，仍需按新结果独立记录，
+- 主线程已复核上一版 18/18；本轮仅截图 helper 变化，后续已按新结果独立记录，
   不与上一版合并。
 
 ## 最终主线程复核

@@ -1,10 +1,11 @@
 # AutoForm / StepsForm 显式 reset 生命周期证据（2026-10-23）
 
-## 最新主线程浏览器复核
+## 最新主线程浏览器复核（2026-10-24）
 
-- 独立执行 `scripts/fixtures/enterprise-ui` 下 `bunx playwright test --config=./playwright.form-reset.config.ts`：10/10 passed，exit 0，6.0s；`git diff --check` exit 0。与 pi 的 10/10、9.8s 分开记录。
-- 已审查真实组件挂载、`bind:this` 公共方法调用、默认值恢复、校验反馈清除、步骤恢复和写入/导航/成功回调计数。按钮属于测试宿主，不是新增产品功能。
-- 只读/拒绝场景证明可见状态保持且没有写入、导航和成功回调，不单独证明内部状态完全未变。此浏览器组没有在途写入，不证明迟到响应隔离；仍不覆盖 Firefox/WebKit、真实后端或读屏。
+- 主线程独立执行 `bunx playwright test --config scripts/fixtures/enterprise-ui/playwright.form-reset.config.ts`：**36/36 passed、exit 0、27.5s**；配置为 Chromium/WebKit/Firefox × desktop/narrow，每项目 6 个场景。pi 前一轮独立结果为 36/36、27.8s，分开记录、不合并计数。
+- 当前矩阵保留 5 个既有场景并新增 1 个关闭保护场景，详见第 9 节；第 7 节 10/10 Chromium 两视口保留为历史记录，不作为当前跨引擎结论。
+- 已审查真实组件挂载、`bind:this` 公共方法调用、默认值恢复、校验反馈清除、步骤恢复、关闭保护退休和写入/导航/成功回调计数。按钮属于测试宿主，不是新增产品功能。
+- 只读/拒绝场景证明可见状态保持且没有写入、导航和成功回调，不单独证明内部状态完全未变。此浏览器组没有在途写入，不证明迟到响应隔离；仍不覆盖真实后端或读屏。
 
 ## 1. 范围与结论
 
@@ -116,6 +117,9 @@ Harness 使用真实 `AdminApp`、`provideAdminContext`、`QueryClient`、受控
 8. AutoForm `show` 只读 reset no-op：字段保持禁用和基线值，无保存按钮，不回调、不导航。
 9. AutoForm 授权拒绝 reset no-op：拒绝提示保持，不出现表单字段，不回调、不导航。
 10. StepsForm 授权拒绝 reset no-op：拒绝提示保持，不出现表单字段，不回调、不导航。
+11. AutoForm reset 退休已打开的关闭保护（最终审查轮新增）：旧、新导航使用两个独立
+    `vi.fn()`；dirty 后打开旧 guard，reset 后弹窗关闭、值回基线且旧 0；再次 dirty
+    打开新 guard，确认后新 1、旧仍 0，弹窗关闭。
 
 ## 5. 运行证据边界
 
@@ -126,8 +130,8 @@ cd packages/ui
 bunx vitest run --config ./vitest.config.ts src/components/form-engine-reset.test.svelte.ts
 ```
 
-- pi 结果：`Test Files 1 passed (1)`、`Tests 10 passed (10)`、原始 exit code `0`、
-  duration `7.27s`。
+- 当时 pi 结果：`Test Files 1 passed (1)`、`Tests 10 passed (10)`、原始 exit code
+  `0`、duration `7.27s`（该轮尚未包含关闭保护用例）。
 - `git diff --check`：原始 exit code `0`。
 - 未运行其他测试文件、未组合跑多文件、未运行浏览器/读屏、未调用真实后端。
 
@@ -212,5 +216,38 @@ bunx playwright test --config=./playwright.form-reset.config.ts
 6. 每个用例都断言产品表单作用域内不存在名称含 `reset` 的按钮，确认证据不是
    虚构产品入口。
 
-未覆盖边界：StepsForm 没有 `show` 只读模式，故只验证拒绝 no-op；未覆盖
-webkit/firefox、真实读屏、真实后端取消/幂等、发布与部署。
+未覆盖边界（2026-10-23 历史记录）：StepsForm 没有 `show` 只读模式，故只验证
+拒绝 no-op；该轮未覆盖 webkit/firefox、真实读屏、真实后端取消/幂等、发布与部署。
+webkit/firefox 的 reset 场景已由第 9 节 2026-10-24 矩阵补充，不再以本段作为当前跨引擎结论。
+
+## 8. AutoForm reset 关闭保护最终回归（2026-10-24 收口）
+
+- 生产最小改动（主线程已审查）：`AutoForm.reset()` 在允许且非只读时，除清空
+  `submission`/`submitError` 并调用 Core `form.reset()` 外，同时设置
+  `confirmOpen = false`、`pendingNavigation = null`，使 reset 前的关闭保护弹窗与
+  其捕获的待执行导航一起退休。未改 StepsForm、ModalForm、DrawerForm 或 Core。
+- 测试仅改 `packages/ui/src/components/form-engine-reset.test.svelte.ts` 单文件新增
+  用例，未改其他测试或生产码。旧、新导航改为两个独立 `vi.fn()`，不再共用一个
+  计数变量，因此能证明 `reset` 后旧 action 未被后续确认执行，而不是只观察总数。
+- 断言顺序：dirty → 旧 guard 打开 → reset → 弹窗关闭、值回基线、旧 0；再次 dirty
+  → 新 guard 打开 → Confirm → 新 1、旧仍 0、弹窗关闭。
+- 唯一运行命令：
+  `bun run --cwd packages/ui test src/components/form-engine-reset.test.svelte.ts`
+  pi 结果：1 文件通过，**11/11**，exit code **0**，duration **7.52s**。
+- 主线程此前已审查上述生产最小改动，并记录组合 **15/15**、**8.39s**；该组合数字
+  是历史记录，不替代本次单文件 11/11，也不合并计数。
+- 主线程随后独立复验同一单文件：**11/11**，exit code **0**，duration **7.50s**。
+- 因此本条本地回归现已由主线程确认；该结果仍不覆盖真实服务、读屏、跨浏览器、
+  分发包与部署。
+
+未覆盖：真实服务、真实读屏、跨浏览器、分发包与部署；也不证明后端取消/回滚/幂等。
+
+## 9. 三引擎双视口浏览器矩阵与关闭保护场景（2026-10-24）
+
+- 本轮只修改测试文件：`scripts/fixtures/enterprise-ui/FormResetBrowserFixture.svelte`、`form-reset.spec.ts`、`playwright.form-reset.config.ts`；未改生产代码、配置安装树或产品入口。
+- 专属配置扩展为 Chromium/WebKit/Firefox × desktop（1440×1000）/narrow（390×844），保留既有 5 个场景，新增 1 个“reset 退休已打开未保存保护”场景；每项目 6 个场景，共 **36 cases**。
+- 主线程独立运行 `bunx playwright test --config scripts/fixtures/enterprise-ui/playwright.form-reset.config.ts`：**exit 0、36/36 passed、27.5s**。pi 前一轮独立为 36/36、27.8s，两次为独立运行，不合并或相加计数。
+- 新增场景断言链：真实 dirty 输入 → 公开未保存保护打开 `alertdialog` → 通过明确的 test-only DOM event（`window.dispatchEvent(new Event('svadmin:form-reset-call'))`）调用真实 `bind:this.reset()`，不 force click、不读取 Svelte 内部状态 → 弹窗关闭、值与描述恢复基线、旧导航保持 0、无 write/success；再次 dirty 后 Confirm 仅执行新导航 1 次、旧导航仍 0，且表单继续可编辑，`pageerror` 为空。
+- 旧、新导航使用独立计数器分别断言，不使用合计计数掩盖旧 action 被执行。
+- 主线程审查发现旧文件未使用的 `fixture()` helper 造成 lint 问题，已由本 writer 删除；仅清理未使用代码，不改变运行时行为。
+- 边界：该测试宿主入口不是产品 reset 按钮，也不是真实 router 跳转；narrow 视口仅用于既有布局回归，不是新增视觉或移动端验收。该矩阵不证明真实服务、RBAC、读屏、分发包或发布。第 7 节 10/10 Chromium 两视口为历史记录；当前跨引擎结论以本节 36/36 为准。

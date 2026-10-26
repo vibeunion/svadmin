@@ -24,10 +24,11 @@
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  const resources: ResourceDefinition[] = [];
 
   provideAdminContext(definedReactiveOptions({
     dataProvider,
-    resources: [] as ResourceDefinition[],
+    resources,
     get tenant() { return tenant; },
   }));
 </script>

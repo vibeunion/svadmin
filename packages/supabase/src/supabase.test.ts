@@ -165,6 +165,17 @@ describe('Supabase DataProvider', () => {
     expect(result.data['id']).toBe(2);
   });
 
+  test('delete requests a representation before strict response validation', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    const result = await dp.deleteOne({ resource: 'posts', id: 1 });
+
+    expect(result.data).toEqual({ id: 1 });
+    expect(client.from).toHaveBeenCalledWith('posts');
+  });
+
   test('custom invokes RPC with prefix rpc/', async () => {
     const { createSupabaseDataProvider } = await import('./data-provider');
     const client = createMockSupabaseClient();

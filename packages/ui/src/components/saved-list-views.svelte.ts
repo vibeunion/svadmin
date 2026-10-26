@@ -17,6 +17,7 @@ import {
   type ListPreferenceScope,
   type SavedListView,
   type SavedListViewAccess,
+  type SavedListViewDecodeReport,
   type SavedListViewMutation,
   type SavedListViewProvider,
   type SavedListViewState,
@@ -30,6 +31,8 @@ interface SavedListViewsOptions {
   isScopeLoaded: () => boolean;
   readPreference: (scope: ListPreferenceScope, key: string, legacyKey: string) => string | null;
   hasExplicitURLState: boolean;
+  /** 初始查询快照已优先于持久化视图时，不把旧活动视图标记为当前视图；默认 false。 */
+  initialStateOverridesSavedView?: boolean;
   canApplyRemoteDefault: () => boolean;
   captureState: () => SavedListViewState;
   applyState: (state: SavedListViewState) => void;
@@ -42,24 +45,30 @@ export function createSavedListViews(options: SavedListViewsOptions) {
   const preferenceScopeIsLoaded = options.isScopeLoaded;
   const hasExplicitURLState = options.hasExplicitURLState;
 
-  function readPreferences(scope: ListPreferenceScope) {
+  function readPreferences(scope: ListPreferenceScope, report?: SavedListViewDecodeReport) {
+    report ??= { prunedColumnIds: [], prunedColumnsByView: {} };
     const savedViews = readSavedListViews(options.readPreference(
       scope, savedListViewsStorageKey(scope), legacySavedListViewsStorageKey(scope.resourceName),
-    ), savedViewColumnIds);
+    ), savedViewColumnIds, 'local', report);
     const candidate = options.readPreference(
       scope, activeSavedListViewStorageKey(scope), legacyActiveSavedListViewStorageKey(scope.resourceName),
     );
     const activeSavedView = savedViews.find(view => view.id === candidate);
-    return { savedViews, activeSavedView };
+    return { savedViews, activeSavedView, prunedColumnIds: report.prunedColumnIds };
   }
 
-  const initial = untrack(() => readPreferences(listPreferenceScope));
-  const initialSavedView = hasExplicitURLState ? undefined : initial.activeSavedView;
+  const initialReport: SavedListViewDecodeReport = { prunedColumnIds: [], prunedColumnsByView: {} };
+  const initial = untrack(() => readPreferences(listPreferenceScope, initialReport));
+  const initialSavedView = hasExplicitURLState || (options.initialStateOverridesSavedView ?? false)
+    ? undefined
+    : initial.activeSavedView;
   let savedViews = $state<SavedListView[]>(initial.savedViews);
   let activeSavedViewId = $state<string | undefined>(initialSavedView?.id);
   let savedViewName = $state('');
   let savedViewsOpen = $state(false);
   let savedViewSource = $state<'local' | 'team' | 'system'>('local');
+  let localStaleColumns = $state<Record<string, string[]>>({ ...initialReport.prunedColumnsByView });
+  let remoteStaleColumns = $state<Record<string, string[]>>({});
   let remoteSavedViews = $state<SavedListView[]>([]);
   let remoteViewsLoading = $state(false);
   let remoteViewsFailed = $state(false);
@@ -84,6 +93,18 @@ export function createSavedListViews(options: SavedListViewsOptions) {
     });
   });
   const activeSavedViewName = $derived(availableSavedViews.find(view => view.id === activeSavedViewId)?.name);
+
+  function clearStaleColumns(
+    key: 'local' | 'remote', viewId: string,
+  ): void {
+    const current = key === 'local' ? localStaleColumns : remoteStaleColumns;
+    if (!(viewId in current)) return;
+    const next = Object.fromEntries(
+      Object.entries(current).filter(([id]) => id !== viewId),
+    );
+    if (key === 'local') localStaleColumns = next;
+    else remoteStaleColumns = next;
+  }
 
   function persistSavedViews(): void {
     if (typeof window === 'undefined' || !preferenceScopeIsLoaded()) return;
@@ -124,11 +145,14 @@ export function createSavedListViews(options: SavedListViewsOptions) {
   // 表格完成列偏好和查询恢复后才打开持久化门，避免把旧租户状态写入新作用域。
   function restoreScope(scope: ListPreferenceScope): SavedListView | undefined {
     remoteDefaultEligible = true;
-    const preferences = readPreferences(scope);
+    const report: SavedListViewDecodeReport = { prunedColumnIds: [], prunedColumnsByView: {} };
+    const preferences = readPreferences(scope, report);
     savedViewName = '';
     savedViewsOpen = false;
     savedViews = preferences.savedViews;
     remoteSavedViews = [];
+    localStaleColumns = { ...report.prunedColumnsByView };
+    remoteStaleColumns = {};
     activeSavedViewId = preferences.activeSavedView?.id;
     return preferences.activeSavedView;
   }
@@ -139,6 +163,7 @@ export function createSavedListViews(options: SavedListViewsOptions) {
     const columns = savedViewColumnIds;
     void remoteViewsReload;
     remoteSavedViews = [];
+    remoteStaleColumns = {};
     remoteViewsLoading = false;
     remoteViewsFailed = false;
     accessDrafts.clear();
@@ -156,7 +181,9 @@ export function createSavedListViews(options: SavedListViewsOptions) {
     remoteViewsLoading = true;
     void Promise.resolve().then(() => provider.list({ ...scope })).then(value => {
       if (epoch !== remoteViewEpoch || !preferenceScopeIsLoaded()) return;
-      remoteSavedViews = decodeRemoteSavedListViews(value, columns, !!(provider.save || provider.remove || provider.setDefault || provider.updateAccess));
+      const report: SavedListViewDecodeReport = { prunedColumnIds: [], prunedColumnsByView: {} };
+      remoteSavedViews = decodeRemoteSavedListViews(value, columns, !!(provider.save || provider.remove || provider.setDefault || provider.updateAccess), report);
+      remoteStaleColumns = { ...report.prunedColumnsByView };
       if (options.canApplyRemoteDefault() && remoteDefaultEligible) {
         const defaults = remoteSavedViews.filter(view => view.default === true);
         if (!hasExplicitURLState && !activeSavedViewId && defaults.length === 1 && defaults[0]) {
@@ -203,6 +230,7 @@ export function createSavedListViews(options: SavedListViewsOptions) {
     savedViews = existing
       ? savedViews.map(candidate => candidate.id === existing.id ? view : candidate)
       : [view, ...savedViews].slice(0, 25);
+    if (existing) clearStaleColumns('local', existing.id);
     activeSavedViewId = view.id;
     savedViewName = '';
     persistSavedViews();
@@ -221,6 +249,7 @@ export function createSavedListViews(options: SavedListViewsOptions) {
       return;
     }
     savedViews = savedViews.filter(view => view.id !== id);
+    clearStaleColumns('local', id);
     if (activeSavedViewId === id) activeSavedViewId = undefined;
     persistSavedViews();
     persistActiveSavedView();
@@ -248,6 +277,7 @@ export function createSavedListViews(options: SavedListViewsOptions) {
         id: mutation.id, expectedVersion: mutation.expectedVersion,
       })) {
         remoteSavedViews = remoteSavedViews.filter(view => view.id !== mutation.id);
+        clearStaleColumns('remote', mutation.id);
         if (activeSavedViewId === mutation.id) activeSavedViewId = undefined;
         persistActiveSavedView();
         return;
@@ -264,6 +294,7 @@ export function createSavedListViews(options: SavedListViewsOptions) {
       }
       const view = { ...decoded.view, readOnly: decoded.view.readOnly !== false };
       remoteSavedViews = [view, ...remoteSavedViews.filter(candidate => candidate.id !== view.id)];
+      clearStaleColumns('remote', view.id);
       savedViewName = '';
     } catch {
       if (current()) savedViewMutationError = 'failure';
@@ -399,6 +430,22 @@ export function createSavedListViews(options: SavedListViewsOptions) {
     set savedViewSource(value: 'local' | 'team' | 'system') { savedViewSource = value; },
     get remoteViewsLoading() { return remoteViewsLoading; },
     get remoteViewsFailed() { return remoteViewsFailed; },
+    get staleSavedViewColumns() {
+      const visibleLocal = new Set<string>();
+      const visibleRemote = new Set<string>();
+      for (const view of availableSavedViews) {
+        if (view.source === 'team' || view.source === 'system') visibleRemote.add(view.id);
+        else visibleLocal.add(view.id);
+      }
+      const columns = new Set<string>();
+      for (const [viewId, pruned] of Object.entries(localStaleColumns)) {
+        if (visibleLocal.has(viewId)) for (const columnId of pruned) columns.add(columnId);
+      }
+      for (const [viewId, pruned] of Object.entries(remoteStaleColumns)) {
+        if (visibleRemote.has(viewId)) for (const columnId of pruned) columns.add(columnId);
+      }
+      return [...columns];
+    },
     get savedViewMutationPending() { return savedViewMutationPending; },
     get savedViewMutationError() { return savedViewMutationError; },
     accessDrafts, accessSubjects, accessSubjectsLoading, accessSubjectsFailed, accessSubjectQueries,

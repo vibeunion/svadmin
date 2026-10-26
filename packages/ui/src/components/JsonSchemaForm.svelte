@@ -11,13 +11,19 @@
     schemaFormSnapshot, writeSchemaFormPath,
     type JsonSchemaFormSchema,
   } from './json-schema-form-state.js';
-  import { readRecursiveSchemaForm, validateRecursiveSchemaForm, schemaFormPointer } from './enterprise/recursive-schema-form.js';
-  import { parseSchemaNumber, type SchemaFormIssue } from './enterprise/json-schema-form.js';
+  import {
+    readRecursiveSchemaForm, validateRecursiveSchemaForm, schemaFormPointer,
+    pruneRecursiveSchemaFormValue, selectRecursiveOneOfBranch, switchRecursiveOneOfBranch,
+    type RecursiveSchemaFormNode,
+  } from './enterprise/recursive-schema-form.js';
+  import { resolveSchemaFormReferences, type SchemaFormReferenceDocuments } from './enterprise/schema-form-references.js';
+  import { parseSchemaNumber, type JsonScalar, type SchemaFormIssue } from './enterprise/json-schema-form.js';
   interface JsonSchema extends JsonSchemaFormSchema {
     properties?: Record<string, JsonSchema>;
     items?: JsonSchema;
-    visibleWhen?: SchemaFormSchema['visibleWhen'];
-    pattern?: string;
+    oneOf?: JsonSchema[];
+    discriminator?: { propertyName: string };
+    $defs?: Record<string, JsonSchema>;
   }
 
   interface Props {
@@ -31,6 +37,10 @@
     locale?: string;
     onerror?: (error: unknown) => void;
     onvalidationerror?: (issues: SchemaFormIssue[]) => void;
+    /** Schema 配置本身不可用时调用；与值校验 onvalidationerror 分离。 */
+    onschemaerror?: (issues: SchemaFormIssue[]) => void;
+    /** 宿主已取得的普通 Schema 文档；键必须与 `$ref` 的 URI 精确匹配。 */
+    referenceDocuments?: SchemaFormReferenceDocuments;
     /** Use a unique stable prefix when several schema forms share a page. */
     idPrefix?: string;
     class?: string;
@@ -46,6 +56,8 @@
     locale,
     onerror,
     onvalidationerror,
+    onschemaerror,
+    referenceDocuments = {},
     idPrefix,
     class: className = '',
   }: Props = $props();
@@ -57,12 +69,19 @@
   const labels = $derived(isZh ? { add: '添加项目', remove: '删除', empty: '暂无项目', failed: '提交未完成，请检查状态后重试。', invalid: '请检查表单输入。' }
     : { add: 'Add item', remove: 'Remove item', empty: 'No items', failed: 'Submission did not complete. Check its status before retrying.', invalid: 'Check the form input.' });
   let isSubmitting = $state(false);
-  const model = $derived(readRecursiveSchemaForm(schema));
+  // 引用只展开一次；递归编译、默认值、渲染、条件显示、只读与提交共用同一结果。
+  const resolution = $derived(resolveSchemaFormReferences(schema, referenceDocuments));
+  const resolvedSchema = $derived(resolution.schema);
+  const model = $derived(readRecursiveSchemaForm(resolvedSchema));
   // 两个已发布的 schema 子集分别验证；任何一个都不接受时关闭表单。
   const coreSchema = $derived.by(() => {
-    try { assertSchemaFormSchema(schema as SchemaFormSchema); return schema as SchemaFormSchema; }
+    if (!resolvedSchema) return undefined;
+    try { assertSchemaFormSchema(resolvedSchema as SchemaFormSchema); return resolvedSchema as SchemaFormSchema; }
     catch { return undefined; }
   });
+  const configurationIssues = $derived(resolution.issues.length
+    ? resolution.issues
+    : model.issues.length && !coreSchema ? model.issues : []);
   let validationIssues = $state<SchemaFormIssue[]>([]);
   let parseIssues = $state<SchemaFormIssue[]>([]);
   let failure = $state<'invalid' | 'failed' | null>(null);
@@ -86,10 +105,30 @@
     return undefined;
   }
 
+  /** Resolve a branch only when the data already carries one unique explicit discriminator value. */
+  function selectOneOfSchema(node: JsonSchema, current: unknown): JsonSchema | undefined {
+    const propertyName = node.discriminator?.propertyName;
+    if (!propertyName || !node.oneOf?.length) return undefined;
+    const value = recordValue(current, propertyName);
+    if (value === undefined) return undefined;
+    const matched = node.oneOf.filter(branch => {
+      const selector = branch?.properties?.[propertyName];
+      const values = selector ? choices(selector) : undefined;
+      return values?.some(choice => Object.is(choice, value)) ?? false;
+    });
+    return matched.length === 1 ? matched[0] : undefined;
+  }
+
   function mergeDefaults(node: JsonSchema, current: unknown, present: boolean, budget = { nodes: 0 }): unknown {
     if (++budget.nodes > 1000) throw new Error('Schema form data limit exceeded.');
     const candidate = present ? current : cloneDefault(node);
     if (candidate === null || (present && candidate === undefined)) return candidate;
+    // 只对已显式携带 discriminator 的分支补默认值；未选择或歧义时绝不猜测分支。
+    if (node.oneOf && node.discriminator) {
+      const branch = selectOneOfSchema(node, candidate);
+      if (!branch) return candidate;
+      return mergeDefaults(branch, candidate, true, budget);
+    }
     if (node.type === 'array') {
       if (Array.isArray(candidate) && candidate.length > 1000 - budget.nodes) throw new Error('Schema form data limit exceeded.');
       return Array.isArray(candidate)
@@ -110,14 +149,32 @@
 
   const prepared = $derived.by(() => {
     try {
-      if (model.issues.length && !coreSchema) return { ok: false as const };
-      const seeded = mergeDefaults(schema, value, true);
-      return { ok: true as const, value: initializeSchemaForm(schema, seeded as Record<string, unknown>) };
+      if (configurationIssues.length || !resolvedSchema) return { ok: false as const };
+      const seeded = mergeDefaults(resolvedSchema as JsonSchema, value, true);
+      return { ok: true as const, value: initializeSchemaForm(resolvedSchema as JsonSchema, seeded as Record<string, unknown>) };
     } catch {
       return { ok: false as const };
     }
   });
   const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);
+  let reportedConfiguration = '';
+  let reportedSchema: JsonSchema | undefined;
+  $effect.pre(() => {
+    const issues = configurationIssues;
+    if (!issues.length) {
+      reportedConfiguration = '';
+      reportedSchema = schema;
+      return;
+    }
+    const fingerprint = issues.map(issue => `${issue.code}@${issue.path}`).join('|');
+    if (schema === reportedSchema && fingerprint === reportedConfiguration) return;
+    reportedConfiguration = fingerprint;
+    reportedSchema = schema;
+    untrack(() => {
+      try { onschemaerror?.(issues.map(issue => ({ ...issue }))); }
+      catch { /* 配置观察者不参与可用性判定。 */ }
+    });
+  });
   $effect.pre(() => {
     const next = [schema, value, disabled, readonly, onsubmit];
     untrack(() => {
@@ -143,14 +200,59 @@
   function choices(node: JsonSchema): JsonSchema['enum'] {
     return node.enum ?? (Object.hasOwn(node, 'const') ? [node.const ?? null] : undefined);
   }
+  function childValue(current: unknown, key: string): unknown {
+    if (Array.isArray(current)) {
+      if (!/^(0|[1-9]\d*)$/u.test(key)) return undefined;
+      // 数组索引必须按自身数据属性读取；recordValue 对数组刻意返回 undefined。
+      const descriptor = Object.getOwnPropertyDescriptor(current, key);
+      return descriptor !== undefined && 'value' in descriptor ? descriptor.value : undefined;
+    }
+    return recordValue(current, key);
+  }
   function pathReadonly(path: readonly string[]): boolean {
-    let node: JsonSchema | undefined = schema;
+    let node: JsonSchema | undefined = resolvedSchema;
+    let current: unknown = prepared.ok ? prepared.value : value;
+    if (!node) return false;
+    // 每层先检查自身 readOnly，再按 discriminator 解析分支，避免根 oneOf 丢弃自身约束。
     if (node.readOnly) return true;
+    const rootBranch = selectOneOfSchema(node, current);
+    if (rootBranch) {
+      node = rootBranch;
+      if (node.readOnly) return true;
+    }
     for (const key of path) {
-      node = node && (nodeType(node) === 'array' ? node.items : node.properties?.[key]);
+      if (!node) return false;
+      const branch = selectOneOfSchema(node, current);
+      if (branch) {
+        node = branch;
+        if (node.readOnly) return true;
+      }
+      node = nodeType(node) === 'array' ? node.items : node.properties?.[key];
+      current = childValue(current, key);
       if (node?.readOnly) return true;
     }
-    return false;
+    if (!node) return false;
+    const selected = selectOneOfSchema(node, current);
+    return selected?.readOnly === true;
+  }
+  /** discriminator 属性若声明 readOnly，只锁定分支选择器，不冻结同分支的其他可编辑字段。 */
+  function discriminatorLocked(path: readonly string[]): boolean {
+    let node: JsonSchema | undefined = resolvedSchema;
+    let current: unknown = prepared.ok ? prepared.value : value;
+    for (const key of path) {
+      if (!node) return false;
+      const branch = selectOneOfSchema(node, current);
+      if (branch) node = branch;
+      node = nodeType(node) === 'array' ? node.items : node.properties?.[key];
+      current = childValue(current, key);
+    }
+    if (!node) return false;
+    const propertyName = node.discriminator?.propertyName;
+    if (!propertyName) return false;
+    const selected = selectOneOfSchema(node, current);
+    // 未选中分支时，只有所有候选分支都只读才保护选择器，避免误冻结其他可编辑配置。
+    const branches = selected ? [selected] : node.oneOf ?? [];
+    return branches.length > 0 && branches.every(branch => branch.properties?.[propertyName]?.readOnly === true);
   }
   function invalid(issues: SchemaFormIssue[]): void {
     failure = 'invalid';
@@ -163,8 +265,9 @@
   function isVisibleIssuePath(pointer: string): boolean {
     if (!coreSchema || !prepared.ok || !pointer.startsWith('/')) return true;
     const path = pointer.slice(1).split('/').map(segment => segment.replaceAll('~1', '/').replaceAll('~0', '~'));
-    let node: JsonSchema | undefined = schema;
+    let node: JsonSchema | undefined = resolvedSchema;
     for (const segment of path) {
+      if (!node) return true;
       const kind = nodeType(node);
       node = kind === 'array' ? node.items : node.properties?.[segment];
       if (!node) return true;
@@ -189,11 +292,23 @@
       current && typeof current === 'object' && Object.hasOwn(current, key) ? (current as Record<string, unknown>)[key] : undefined
     ), prepared.ok ? prepared.value : {});
   }
+  function recordValue(current: unknown, key: string): unknown {
+    if (current === null || typeof current !== 'object' || Array.isArray(current) || !Object.hasOwn(current, key)) return undefined;
+    const descriptor = Object.getOwnPropertyDescriptor(current, key);
+    return descriptor !== undefined && 'value' in descriptor ? descriptor.value : undefined;
+  }
+  function oneOfOptionIndex(choices: readonly JsonScalar[][], current: unknown): string {
+    for (const [branch, values] of choices.entries()) {
+      const valueIndex = values.findIndex(value => Object.is(value, current));
+      if (valueIndex >= 0) return `${branch}:${valueIndex}`;
+    }
+    return '';
+  }
 
   function writePath(path: string[], nextValue: unknown): boolean {
     if (!editable() || !prepared.ok || pathReadonly(path)) return false;
     try {
-      value = writeSchemaFormPath(prepared.value, path, nextValue);
+      value = path.length ? writeSchemaFormPath(prepared.value, path, nextValue) : schemaFormSnapshot(nextValue);
       internalValue = value;
       failure = null;
       validationIssues = [];
@@ -246,8 +361,10 @@
     if (!editable() || !prepared.ok || !onsubmit) return;
     let payload: Record<string, unknown>;
     try {
-      const result = coreSchema ? prepareSchemaFormValue(coreSchema, prepared.value) : undefined;
-      const detailedIssues = model.issues.length ? [] : validateRecursiveSchemaForm(model, prepared.value);
+      // 分支切换后只提交当前 discriminator 对应分支；旧分支字段不会随草稿误提交。
+      const submittedValue = pruneRecursiveSchemaFormValue(model, prepared.value);
+      const result = coreSchema ? prepareSchemaFormValue(coreSchema, submittedValue) : undefined;
+      const detailedIssues = model.issues.length ? [] : validateRecursiveSchemaForm(model, submittedValue);
       // 隐藏字段暂不参与校验，但保留解析错误，重新显示时仍需修正。
       const activeParseIssues = parseIssues.filter(issue => isVisibleIssuePath(issue.path));
       const problems = [...activeParseIssues, ...(result
@@ -263,7 +380,7 @@
         formElement?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
         return;
       }
-      payload = schemaFormSnapshot(result?.data ?? prepared.value);
+      payload = schemaFormSnapshot(result?.data ?? submittedValue);
     } catch { invalid([{ path: '', code: 'invalid-value' }]); return; }
     const currentValue = value, currentSchema = schema, handler = onsubmit, revision = authorityRevision;
     const fingerprint = JSON.stringify(schemaFormSnapshot(prepared.value));
@@ -295,10 +412,10 @@
   onsubmit={handleSubmit}
   class={cn('svadmin-u-3e7ce58d64fa svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23 svadmin-u-359090c2d529', className)}
 >
-  {#if schema.title}
+  {#if resolvedSchema?.title}
     <div class="svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
-      <h3 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{schema.title}</h3>
-      {#if schema.description}<p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{schema.description}</p>{/if}
+      <h3 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{resolvedSchema.title}</h3>
+      {#if resolvedSchema.description}<p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{resolvedSchema.description}</p>{/if}
     </div>
   {/if}
 
@@ -306,7 +423,7 @@
     <p role="alert" data-testid="schema-form-errors">{labels[!prepared.ok ? 'invalid' : failure ?? 'invalid']}</p>
   {/if}
 
-  {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}
+  {#snippet renderField(node: JsonSchema, compiled: RecursiveSchemaFormNode | undefined, path: string[], title: string, required = false)}
     {@const current = readPath(path)}
     {@const id = `${prefix}_${path.map(encodeURIComponent).join('/')}`}
     {@const type = nodeType(node)}
@@ -315,8 +432,67 @@
     {@const options = choices(node)}
     {@const descriptionId = node.description ? `${id}:description` : undefined}
     {@const errorId = error ? `${id}:error` : undefined}
+    {@const oneOf = compiled?.kind === 'oneOf' ? compiled : undefined}
+    {@const oneOfSelection = oneOf ? selectRecursiveOneOfBranch(oneOf, current) : 'oneOf-unselected'}
+    {@const branchIndex = typeof oneOfSelection === 'number' ? oneOfSelection : -1}
+    {@const branchSchema = oneOf && branchIndex >= 0 ? node.oneOf?.[branchIndex] : undefined}
+    {@const branchCompiled = oneOf && branchIndex >= 0 ? oneOf.branches[branchIndex] : undefined}
+    {@const oneOfValue = oneOf ? recordValue(current, oneOf.propertyName) : undefined}
+    {@const selectorId = `${id}:branch`}
+    {@const selectorLocked = fieldLocked || discriminatorLocked(path)}
+    {@const selectionError = oneOf ? validationIssues.some(issue => issue.path === schemaFormPointer([...path, oneOf.propertyName]) || issue.path === schemaFormPointer([...path, 'oneOf'])) : false}
     {#if coreSchema && !isSchemaFormNodeVisible(node as SchemaFormSchema, prepared.ok ? prepared.value : {})}
       <!-- 隐藏字段保留草稿，但不进入提交数据。 -->
+    {:else if oneOf}
+      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, selectionError ? `${selectorId}:error` : undefined].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
+        <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
+        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
+        <div class="svadmin-u-da7c36cd8867">
+          <label for={selectorId} class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
+            {oneOf.propertyName}{#if required}<span class="svadmin-u-811148b13d1e">*</span>{/if}
+          </label>
+          <select id={selectorId} disabled={selectorLocked} aria-invalid={selectionError ? 'true' : undefined} aria-describedby={selectionError ? `${selectorId}:error` : undefined} value={oneOfOptionIndex(oneOf.values, oneOfValue)} onchange={(event) => {
+            if (selectorLocked || !editable()) return;
+            const token = event.currentTarget.value;
+            if (!/^(0|[1-9]\d*):(0|[1-9]\d*)$/u.test(token)) return;
+            const [branchToken, valueToken] = token.split(':');
+            const branch = Number(branchToken), valueIndex = Number(valueToken);
+            const selected = oneOf.values[branch]?.[valueIndex];
+            const next = switchRecursiveOneOfBranch(oneOf, current ?? {}, branch, selected);
+            const branchSchema = next ? node.oneOf?.[branch] : undefined;
+            // 显式切换后才按目标分支播种默认值，绝不在未选择时猜测分支。
+            const seeded = branchSchema
+              ? mergeDefaults(branchSchema as JsonSchema, next, true) as Record<string, unknown>
+              : next;
+            if (next) writePath(path, seeded as Record<string, unknown>);
+          }} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
+            <option value="">{i18n.t('common.selectOption')}</option>
+            {#each oneOf.values as branchValues, branch (branch)}
+              {#each branchValues as value, valueIndex (valueIndex)}
+                <option value={`${branch}:${valueIndex}`}>{String(value)}</option>
+              {/each}
+            {/each}
+          </select>
+          {#if selectionError}<p id={`${selectorId}:error`}>{i18n.t('validation.invalidFormat')}</p>{/if}
+        </div>
+        {#if branchSchema && branchCompiled}
+          {#if branchCompiled.kind === 'object'}
+            <fieldset disabled={fieldLocked} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
+              <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{branchSchema.title ?? title}</legend>
+              {#if branchSchema.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{branchSchema.description}</p>{/if}
+              <div class="svadmin-u-9c6cdfa2ba3d">
+                {#each Object.entries(branchSchema.properties ?? {}) as [key, child] (key)}
+                  {#if key !== oneOf.propertyName}
+                    {@render renderField(child, branchCompiled.properties[key], [...path, key], child.title ?? key, branchSchema.required?.includes(key) ?? false)}
+                  {/if}
+                {/each}
+              </div>
+            </fieldset>
+          {:else}
+            {@render renderField(branchSchema, branchCompiled, path, title, required)}
+          {/if}
+        {/if}
+      </fieldset>
     {:else if type === 'object' || node.properties}
       <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
@@ -324,7 +500,7 @@
         {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         <div class="svadmin-u-9c6cdfa2ba3d">
           {#each Object.entries(node.properties ?? {}) as [key, child] (key)}
-            {@render renderField(child, [...path, key], child.title ?? key, node.required?.includes(key) ?? false)}
+            {@render renderField(child, compiled?.kind === 'object' ? compiled.properties[key] : undefined, [...path, key], child.title ?? key, node.required?.includes(key) ?? false)}
           {/each}
         </div>
       </fieldset>
@@ -335,7 +511,7 @@
         {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
         {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         {#each items as _, index (index)}
-          {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`)}
+          {@render renderField(node.items ?? { type: 'string' }, compiled?.kind === 'array' ? compiled.item : undefined, [...path, String(index)], `${title} ${index + 1}`)}
           <Button type="button" variant="ghost" size="sm" disabled={fieldLocked || (node.minItems !== undefined && items.length <= node.minItems)} onclick={() => removeArrayItem(path, index)}>
             <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.remove}
           </Button>
@@ -373,12 +549,15 @@
 
   <fieldset class="schema-form-fields svadmin-u-3e7ce58d64fa" disabled={locked}>
   {#if prepared.ok}
-  <div class="svadmin-u-9c6cdfa2ba3d">
-    {#each Object.entries(schema.properties ?? {}) as [key, node] (key)}
-      {@render renderField(node, [key], node.title ?? key, schema.required?.includes(key) ?? false)}
-    {/each}
-  </div>
-
+    {#if model.node?.kind === 'oneOf'}
+      {@render renderField(resolvedSchema as JsonSchema, model.node, [], resolvedSchema?.title ?? '', false)}
+    {:else}
+      <div class="svadmin-u-9c6cdfa2ba3d">
+        {#each Object.entries(resolvedSchema?.properties ?? {}) as [key, node] (key)}
+          {@render renderField(node, model.node?.kind === 'object' ? model.node.properties[key] : undefined, [key], node.title ?? key, resolvedSchema?.required?.includes(key) ?? false)}
+        {/each}
+      </div>
+    {/if}
   {/if}
   <div class="svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14">
     <Button type="submit" size="sm" disabled={locked} class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab">

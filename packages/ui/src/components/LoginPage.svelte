@@ -69,7 +69,7 @@
     if (result.success) {
       onSuccess?.();
     } else {
-      error = result.error?.message ?? i18n.t('common.loginFailed');
+      error = i18n.t('common.loginFailed');
     }
   }
 </script>

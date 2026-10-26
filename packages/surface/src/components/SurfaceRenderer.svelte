@@ -69,14 +69,26 @@
   ]);
   // 复用 PR #428 的请求所有权与会话隔离实现，不维护第二套缓存。
   const sourceCache = createSurfaceSourceCache({
-    set: (id, state) => { sourceStates.set(id, state); },
+    set: (id, state) => {
+      if (state.status !== 'error') {
+        sourceStates.set(id, state);
+        return;
+      }
+      const message = state.error.code === 'access_denied'
+        ? activeMessages.accessDenied
+        : state.error.code === 'provider_result_not_json' || state.error.code === 'binding_pointer_not_found'
+          ? state.error.message
+          : activeMessages.providerUnavailable;
+      sourceStates.set(id, { ...state, error: { ...state.error, message } });
+    },
     remove: (id) => { sourceStates.delete(id); },
-    onError: (state) => { onError?.({ type: 'data', error: state.error }); },
+    onError: (state, diagnostic) => { onError?.({ type: 'data', error: diagnostic ?? state.error }); },
   });
 
-  function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
-    const message = failure instanceof Error ? failure.message : activeMessages.providerUnavailable;
-    return { status: 'error', sourceId, error: { code: 'provider_failed', sourceId, message } };
+  function providerError(sourceId: string): SurfaceSourceDataState {
+    return { status: 'error', sourceId, error: {
+      code: 'provider_failed', sourceId, message: activeMessages.providerUnavailable,
+    } };
   }
 
   const sourceRequests: SurfaceSourceRequest[] = $derived.by(() => {
@@ -97,11 +109,18 @@
         request.id === snapshot.source.id && sameSourceIdentity(request.identity, identity));
       return {
         id: snapshot.source.id, identity, isCurrent,
-        async load(isRequestCurrent) {
-          if (!provider) return providerError(snapshot.source.id, providerFailure);
+        async load(isRequestCurrent, reportDiagnostic) {
+          if (!provider) {
+            reportDiagnostic?.({
+              code: 'provider_failed', sourceId: snapshot.source.id,
+              message: providerFailure instanceof Error ? providerFailure.message : 'Data provider request failed',
+            });
+            return providerError(snapshot.source.id);
+          }
           try {
             return await loadSurfaceSource({
               source: snapshot.source, resourcePolicy: snapshot.resourcePolicy, provider,
+              ...(reportDiagnostic === undefined ? {} : { reportDiagnostic }),
               async authorize(resource, action) {
                 if (!isRequestCurrent()) return { can: false };
                 // 授权检查与缓存身份必须使用同一个所属上下文，不能回退到无关全局授权。
@@ -112,7 +131,13 @@
                 return isRequestCurrent() ? decision : { can: false };
               },
             });
-          } catch (failure) { return providerError(snapshot.source.id, failure); }
+          } catch (failure) {
+            reportDiagnostic?.({
+              code: 'provider_failed', sourceId: snapshot.source.id,
+              message: failure instanceof Error ? failure.message : 'Data provider request failed',
+            });
+            return providerError(snapshot.source.id);
+          }
         },
       };
     });

@@ -29,11 +29,11 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   const instanceId = $props.id();
-  const scope: DetailWorkspaceScope = $derived({
+  const scope: DetailWorkspaceScope = $derived(definedOptions({
     resourceName,
     recordId,
     meta: adminContext.getProviderMeta(resourceName, { recordId }),
-  });
+  }));
 
   const parentRead = useCan(() => ({
     resource: resourceName,

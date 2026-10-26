@@ -3,6 +3,7 @@
 
   import type { Action } from '@svadmin/core';
   import { captureAdminContext, useCan } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
   import type { Snippet } from 'svelte';
   import DataState from './content/DataState.svelte';
 
@@ -23,6 +24,7 @@
   }: Props = $props();
 
   const adminContext = captureAdminContext();
+  const i18n = useTranslation();
   const resource = $derived(adminContext.getResource(resourceName));
   const accessControlEnabled = $derived(Boolean(adminContext.accessControlProvider));
   const actionAllowedByResource = $derived(
@@ -58,7 +60,10 @@
       && (!accessControlEnabled || permission.allowed)
       && (!requireSourceRead || !accessControlEnabled || sourceReadPermission.allowed),
   );
-  const denialReason = $derived(permission.reason ?? sourceReadPermission.reason);
+  const permissionError = $derived(permission.isError || sourceReadPermission.isError);
+  const denialDescription = $derived(
+    permissionError ? i18n.t('common.permissionUnavailable') : i18n.t('common.permissionDenied'),
+  );
 </script>
 
 {#if permissionPending}
@@ -66,5 +71,5 @@
 {:else if allowed}
   {@render children()}
 {:else}
-  <DataState state="forbidden" {...definedOptions({ "description": denialReason })} />
+  <DataState state={permissionError ? 'error' : 'forbidden'} description={denialDescription} />
 {/if}

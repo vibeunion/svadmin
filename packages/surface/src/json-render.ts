@@ -76,7 +76,7 @@ export function jsonRenderSpecToSurfaceSpec(input: unknown, catalog: SurfaceCata
     const element = parsed.elements[childId];
     if (!element) return { ok: false, issues: [issue(jsonPointer(['elements', childId]), 'Missing child element')] };
     const widget = readWidgetElement(element, childId);
-    if ('error' in widget) return { ok: false, issues: [issue(jsonPointer(['elements', childId]), widget.error)] };
+    if (typeof widget.error === 'string') return { ok: false, issues: [issue(jsonPointer(['elements', childId]), widget.error)] };
     widgets.push(widget);
   }
   if (new Set(children).size !== children.length || Object.keys(parsed.elements).length !== children.length + 1) return { ok: false, issues: [issue('/elements', 'Every element must occur exactly once in the surface tree')] };

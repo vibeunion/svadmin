@@ -4,13 +4,26 @@
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import { Type } from 'typebox';
   import AutoForm from '../../../packages/ui/src/components/AutoForm.svelte';
+  import { Editor } from '@svadmin/editor';
+  import { setRichTextEditor } from '../../../packages/ui/src/editor-config.svelte';
   import { definedOptions } from '@svadmin/core/options';
 
   let successCount = $state(0);
   let payload = $state('No submission');
   let resourceName = $state('form-products');
   const client = new QueryClient();
-  const compound = new URLSearchParams(window.location.search).get('compound') === 'array';
+  const compound = new URLSearchParams(window.location.search).get('compound');
+  const arrayCompound = compound === 'array';
+  const daterangeCompound = compound === 'daterange';
+  const treeSelectCompound = compound === 'tree-select';
+  const transferCompound = compound === 'transfer';
+  const cascaderCompound = compound === 'cascader';
+  const richtextCompound = compound === 'richtext';
+  const tagsCompound = compound === 'tags';
+  const multiselectCompound = compound === 'multiselect';
+  const imagesCompound = compound === 'images';
+  // 只在 richtext 组合场景注册真实编辑器，避免其它组合夹具走富文本路径。
+  if (richtextCompound) setRichTextEditor(Editor);
   const edit = new URLSearchParams(window.location.search).get('edit') === '1';
   let holdRead = new URLSearchParams(window.location.search).get('hold') === 'initial';
   const heldReads: { resolve: () => void; reject: (error: Error) => void }[] = [];
@@ -21,28 +34,99 @@
   let providerSequence = 0;
   let recordRevision = 0;
   const rowShape = { rows: Type.Array(Type.Object({ title: Type.String({ minLength: 1 }) }), { minItems: 1 }) };
+  const periodShape = {
+    period: Type.Object({
+      start: Type.String({ format: 'date' }),
+      end: Type.String({ format: 'date' }),
+    }, { additionalProperties: false }),
+  };
+  const departmentShape = { department: Type.String({ minLength: 1 }) };
+  const rolesShape = { roles: Type.Array(Type.String(), { minItems: 1 }) };
+  const regionShape = { region: Type.Array(Type.String(), { minItems: 1 }) };
+  const bodyShape = { body: Type.String({ minLength: 1 }) };
+  const tagsShape = { tags: Type.Array(Type.String(), { minItems: 1 }) };
+  const labelsShape = { labels: Type.Array(Type.String(), { minItems: 1 }) };
+  const imagesShape = { images: Type.Array(Type.String(), { minItems: 1 }) };
   function makeResource(name: string): ResourceDefinition {
     return {
       name,
       label: 'Products',
       contract: defineResource(name, {
-        record: Type.Object({ id: Type.String(), name: Type.String(), description: Type.String(), ...(compound ? rowShape : {}) }),
+        record: Type.Object({ id: Type.String(), name: Type.String(), description: Type.String(), ...(arrayCompound ? rowShape : {}), ...(daterangeCompound ? periodShape : {}), ...(treeSelectCompound ? departmentShape : {}), ...(transferCompound ? rolesShape : {}), ...(cascaderCompound ? regionShape : {}), ...(richtextCompound ? bodyShape : {}), ...(tagsCompound ? tagsShape : {}), ...(multiselectCompound ? labelsShape : {}), ...(imagesCompound ? imagesShape : {}) }),
         create: Type.Object({
           name: Type.String({ minLength: 1 }),
           description: Type.String({ minLength: 1 }),
-          ...(compound ? rowShape : {}),
+          ...(arrayCompound ? rowShape : {}),
+          ...(daterangeCompound ? periodShape : {}),
+          ...(treeSelectCompound ? departmentShape : {}),
+          ...(transferCompound ? rolesShape : {}),
+          ...(cascaderCompound ? regionShape : {}),
+          ...(richtextCompound ? bodyShape : {}), ...(tagsCompound ? tagsShape : {}), ...(multiselectCompound ? labelsShape : {}), ...(imagesCompound ? imagesShape : {}),
         }),
         update: Type.Object({
           name: Type.String({ minLength: 1 }),
           description: Type.String({ minLength: 1 }),
-          ...(compound ? rowShape : {}),
+          ...(arrayCompound ? rowShape : {}),
+          ...(daterangeCompound ? periodShape : {}),
+          ...(treeSelectCompound ? departmentShape : {}),
+          ...(transferCompound ? rolesShape : {}),
+          ...(cascaderCompound ? regionShape : {}),
+          ...(richtextCompound ? bodyShape : {}), ...(tagsCompound ? tagsShape : {}), ...(multiselectCompound ? labelsShape : {}), ...(imagesCompound ? imagesShape : {}),
         }),
       }),
       fields: [
-        ...(compound ? [{
+        ...(daterangeCompound ? [{
+          key: 'period', label: 'Period', type: 'daterange' as const, description: 'Choose a product period.', required: true,
+          dateInput: {
+            presets: [
+              { label: 'First week', value: { start: '2026-09-01', end: '2026-09-07' } },
+              { label: 'Second week', value: { start: '2026-09-08', end: '2026-09-14' } },
+            ],
+          },
+        }] : []),
+        ...(arrayCompound ? [{
           key: 'rows', label: 'Rows', type: 'array' as const, description: 'Add product rows.', defaultValue: [],
           validate: (value: unknown) => Array.isArray(value) && value.length > 0 ? undefined : 'Add a row',
           subFields: [{ key: 'title', label: 'Title', type: 'text' as const }],
+        }] : []),
+        ...(treeSelectCompound ? [{
+          key: 'department', label: 'Department', type: 'tree-select' as const, description: 'Choose a department.', required: true,
+          treeOptions: [{ label: 'Leaf', value: 'leaf' }],
+        }] : []),
+        ...(transferCompound ? [{
+          key: 'roles', label: 'Roles', type: 'transfer' as const, description: 'Assign product roles.', required: true,
+          transferData: [
+            { key: 'admin', title: 'Administrator' },
+            { key: 'viewer', title: 'Viewer' },
+          ],
+        }] : []),
+        ...(cascaderCompound ? [{
+          key: 'region', label: 'Region', type: 'cascader' as const, description: 'Choose a region.', required: true,
+          changeOnSelect: true,
+          cascaderOptions: [{
+            label: 'East', value: 'east',
+            children: [
+              { label: 'Shanghai', value: 'shanghai' },
+              { label: 'Beijing', value: 'beijing' },
+            ],
+          }],
+        }] : []),
+        ...(richtextCompound ? [{
+          key: 'body', label: 'Body', type: 'richtext' as const, description: 'Write the product body.', required: true,
+        }] : []),
+        ...(tagsCompound ? [{
+          key: 'tags', label: 'Tags', type: 'tags' as const, description: 'Choose product tags.', required: true,
+        }] : []),
+        ...(multiselectCompound ? [{
+          key: 'labels', label: 'Labels', type: 'multiselect' as const, description: 'Choose product labels.', required: true,
+          options: [
+            { label: 'Alpha', value: 'alpha' },
+            { label: 'Beta', value: 'beta' },
+            { label: 'Disabled', value: 'disabled', disabled: true },
+          ],
+        }] : []),
+        ...(imagesCompound ? [{
+          key: 'images', label: 'Images', type: 'images' as const, description: 'Choose product images.', required: true,
         }] : []),
         { key: 'name', label: 'Name', type: 'text', description: 'A name for the product.', required: true },
         { key: 'description', label: 'Description', type: 'textarea', description: 'A short product description.', required: true },
@@ -61,7 +145,13 @@
           id: 'product-1',
           name: current ? 'New record' : 'Old record',
           description: current ? 'New response' : 'Old response',
-          ...(compound ? { rows: [{ title: `Server row ${recordRevision}` }] } : {}),
+          ...(arrayCompound ? { rows: [{ title: `Server row ${recordRevision}` }] } : {}),
+          ...(daterangeCompound ? { period: { start: '2026-08-01', end: '2026-08-10' } } : {}),
+          ...(treeSelectCompound ? { department: 'leaf' } : {}),
+          ...(transferCompound ? { roles: ['admin'] } : {}),
+          ...(richtextCompound ? { body: '<p>Server body</p>' } : {}),
+          ...(tagsCompound ? { tags: ['server-tag'] } : {}),
+          ...(multiselectCompound ? { labels: ['alpha'] } : {}),
         };
         if (holdRead) {
           holdRead = false;

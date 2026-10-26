@@ -12,6 +12,7 @@
     "packages/create-svadmin/src/**/*.test.ts",
     "packages/directus/src/**/*.test.ts",
     "packages/devtools/src/**/*.test.ts",
+    "packages/editor/src/**/*.test.ts",
     "packages/drizzle/src/**",
     "packages/elysia/src/**/*.test.ts",
     "packages/firebase/src/**/*.test.ts",

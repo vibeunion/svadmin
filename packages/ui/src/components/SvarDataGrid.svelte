@@ -58,9 +58,15 @@
   let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey, height = 420, density = 'comfortable', rowHeight: rowHeightProp, headerHeight: headerHeightProp, freezeLeft = 0, freezeRight = 0, queryMode = 'local',
     sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit, selectable = false, selectedIds = [], onSelectionChange, onRecordsChange, cellContent,
     windowSource, loadChildren, hasChildrenKey = 'hasChildren', onLoadMore, hasMore = false, scopeKey = 0,
-    loading = false, error, disabled = false, locale = 'en-US', label = 'Data grid', emptyLabel = 'No records', loadingLabel = 'Loading',
-    disabledLabel = 'Grid is disabled', fallbackLabel = 'Static preview (up to 20 rows)',
+    loading = false, error, disabled = false, locale = 'en-US', label, emptyLabel, loadingLabel,
+    disabledLabel, fallbackLabel,
   }: SvarDataGridProps = $props();
+  const isZh = $derived(locale.startsWith('zh'));
+  const resolvedLabel = $derived(label ?? (isZh ? '数据表格' : 'Data grid'));
+  const resolvedEmptyLabel = $derived(emptyLabel ?? (isZh ? '暂无记录' : 'No records'));
+  const resolvedLoadingLabel = $derived(loadingLabel ?? (isZh ? '加载中...' : 'Loading'));
+  const resolvedDisabledLabel = $derived(disabledLabel ?? (isZh ? '表格已禁用' : 'Grid is disabled'));
+  const resolvedFallbackLabel = $derived(fallbackLabel ?? (isZh ? '静态预览（最多 20 行）' : 'Static preview (up to 20 rows)'));
   const treeKey = $derived(loadChildren ? childrenKey ?? 'children' : childrenKey);
   const rowHeight = $derived(rowHeightProp ?? (density === 'compact' ? 32 : 44));
   const headerHeight = $derived(headerHeightProp ?? (density === 'compact' ? 32 : 36));
@@ -117,7 +123,12 @@
         center: engineColumns.map(column => ({ ...column, hidden: freezeRight > 0 && rightIds.has(column.id) })),
         right: engineColumns.map(column => ({ ...column, hidden: !rightIds.has(column.id), width: column.width ?? 160, flexgrow: 0, resize: false })),
         rightWidth: engineColumns.slice(engineColumns.length - freezeRight).reduce((sum, column) => sum + (column.width ?? 160), 0) + 2 };
-    } catch (failure) { return { ok: false as const, message: failure instanceof Error ? failure.message : 'Invalid grid configuration' }; }
+    } catch {
+      return {
+        ok: false as const,
+        message: locale.startsWith('zh') ? '表格配置无效，请检查后重试' : 'The grid configuration is invalid; check it and retry',
+      };
+    }
   });
   const records = $derived.by(() => {
     if (!model.ok) return { ok: false as const, message: model.message };
@@ -126,7 +137,12 @@
       const rows = loadChildren && treeKey ? projectSvarLazyRows(value, model.columns, primaryKey, treeKey, hasChildrenKey, branches, opened)
         : projectSvarRows(value, model.columns, primaryKey, treeKey);
       return { ok: true as const, value, rows };
-    } catch (failure) { return { ok: false as const, message: failure instanceof Error ? failure.message : 'Invalid grid data' }; }
+    } catch {
+      return {
+        ok: false as const,
+        message: locale.startsWith('zh') ? '表格数据无效，请刷新后重试' : 'The grid data is invalid; refresh and retry',
+      };
+    }
   });
   const cellRecords = $derived.by(() => cellContent && records.ok
     ? svarRecordIndex(snapshotSvarRecords(records.value, primaryKey, treeKey), primaryKey, treeKey) : new Map<string, Record<string, unknown>>());
@@ -169,7 +185,7 @@
     if (!source || !current(owner)) return;
     let range: SvarRange;
     try { range = checkedSvarRange(event, windowTotal ?? source.total); }
-    catch { windowError = 'Invalid grid window'; return; }
+    catch { windowError = isZh ? '表格窗口无效' : 'Invalid grid window'; return; }
     // 布局测量也会发出新窗口，不能因此自动重试失败或移除用户的重试按钮。
     if (windowError && !force) { lastRange = range; return; }
     const key = `${range.start}:${range.end}`;
@@ -186,7 +202,7 @@
       if (!alive || dataOwner !== owner || desiredWindow !== key || failure instanceof SvarLoadCancelled) return;
       windowRows = []; windowLoading = false;
       if (!current(owner)) { desiredWindow = ''; return; }
-      windowError = locale.startsWith('zh') ? '窗口加载失败，请重试' : 'Window load failed; retry';
+      windowError = isZh ? '窗口加载失败，请重试' : 'Window load failed; retry';
     });
   }
   $effect(() => {
@@ -244,7 +260,9 @@
       server: () => queryMode === 'server', sorters: () => sorters, filters: () => filters,
       sort: next => onSortChange?.(next), filter: next => onFilterChange?.(next),
       editable: () => onCellEdit !== undefined && !pending, selectable: () => selectable && !pending,
-      selection: next => onSelectionChange?.(next), error: message => { if (active()) editFailure = message; },
+      selection: next => onSelectionChange?.(next), error: () => {
+        if (active()) editFailure = locale.startsWith('zh') ? '保存失败，请刷新确认后重试' : 'Save failed; refresh before retrying';
+      },
       edit(edit) {
         const write = onCellEdit;
         if (!write || pending || !active()) return;
@@ -292,13 +310,13 @@
 </script>
 
 <Theme fonts={false}>
-  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="group" aria-label={label} aria-busy={isLoading || pending || morePending} aria-disabled={disabled}>
+  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="group" aria-label={resolvedLabel} aria-busy={isLoading || pending || morePending} aria-disabled={disabled}>
     {#if !model.ok || !records.ok}<p role="alert">{!model.ok ? model.message : !records.ok ? records.message : ''}</p>
     {:else}
       {#if activeError}<p role="alert">{activeError}</p>
-      {:else if isLoading}<p role="status">{loadingLabel}</p>
-      {:else if disabled}<p role="status">{disabledLabel}</p>
-      {:else if records.rows.length === 0 && (!windowSource || (windowTotal ?? windowSource.total) === 0)}<p role="status">{emptyLabel}</p>{/if}
+      {:else if isLoading}<p role="status">{resolvedLoadingLabel}</p>
+      {:else if disabled}<p role="status">{resolvedDisabledLabel}</p>
+      {:else if records.rows.length === 0 && (!windowSource || (windowTotal ?? windowSource.total) === 0)}<p role="status">{resolvedEmptyLabel}</p>{/if}
       {#if windowError}<button type="button" disabled={disabled} onclick={retryWindow}>{locale.startsWith('zh') ? '重试窗口' : 'Retry window'}</button>{/if}
       {#if editFailure}<p role="alert">{editFailure}</p>{/if}
       {#if pending}<p role="status">{locale.startsWith('zh') ? '正在保存' : 'Saving'}</p>{/if}
@@ -306,19 +324,19 @@
       {#each [...branchErrors] as [key, failure] (key)}<p role="alert">{failure.message}: {failure.id} <button type="button" disabled={disabled} onclick={() => openBranch(key, true)}>{locale.startsWith('zh') ? '重试' : 'Retry children'}</button></p>{/each}
       {#if mounted}
         {#key dataOwner}<div class="grid-panes" inert={disabled}>
-          <div class="grid-viewport center-pane" data-svar-pane="center" style:height="{height}px" role="region" aria-label="Scrollable columns" onkeydowncapture={event => navigatePane(event, 0)}>
+          <div class="grid-viewport center-pane" data-svar-pane="center" style:height="{height}px" role="region" aria-label={isZh ? '可滚动列' : 'Scrollable columns'} onkeydowncapture={event => navigatePane(event, 0)}>
             <Grid columns={model.center} data={activeError || isLoading ? [] : records.rows} tree={treeKey !== undefined}
               split={{ left: freezeLeft }} sizes={{ rowHeight, headerHeight, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
               reorder={false} draggableRows={false} undo={false} {...queryProps} {...dynamicProps} init={api => init(api, 0)} />
           </div>
-          {#if freezeRight > 0}<div class="grid-viewport right-pane" data-svar-pane="right" style:height="{height}px" style:width="{model.rightWidth}px" role="region" aria-label="Frozen right columns" onkeydowncapture={event => navigatePane(event, 1)}>
+          {#if freezeRight > 0}<div class="grid-viewport right-pane" data-svar-pane="right" style:height="{height}px" style:width="{model.rightWidth}px" role="region" aria-label={isZh ? '右侧冻结列' : 'Frozen right columns'} onkeydowncapture={event => navigatePane(event, 1)}>
             <Grid columns={model.right} data={activeError || isLoading ? [] : rightRows} tree={treeKey !== undefined}
               split={{ left: 0 }} sizes={{ rowHeight, headerHeight, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
               reorder={false} draggableRows={false} undo={false} {...queryProps} {...dynamicProps} init={api => init(api, 1)} />
           </div>{/if}
         </div>{/key}
       {:else if !loading && !error}
-        <div class="static-preview"><table><caption>{fallbackLabel}</caption>
+        <div class="static-preview"><table><caption>{resolvedFallbackLabel}</caption>
           <thead><tr>{#each model.engineColumns as column, index (column.id)}<th scope="col">{model.columns[index]?.label}</th>{/each}</tr></thead>
           <tbody>{#each records.rows.slice(0, 20) as row (row.id)}<tr>{#each model.engineColumns as column (column.id)}<td>{row[column.id] ?? ''}</td>{/each}</tr>{/each}</tbody>
         </table></div>

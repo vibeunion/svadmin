@@ -1,0 +1,98 @@
+.workspace-tabs {
+  display: grid;
+  /* 隐式 grid 列会按 max-content/min-content 撑开，窄屏下导致整页横向溢出。 */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  min-width: 0;
+  color: var(--foreground);
+}
+
+/* ContentPageShell 等直接子项允许被压缩到容器宽度，而不是靠 overflow 裁剪。 */
+.workspace-tabs > * {
+  min-width: 0;
+}
+
+.workspace-tabs [data-svadmin-content-header] :is(h1, h2) {
+  overflow-wrap: break-word;
+}
+
+.workspace-tabs__note,
+.workspace-tabs__notice {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.workspace-tabs__notice {
+  color: var(--destructive);
+}
+
+.workspace-tabs__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.workspace-tabs__toolbar-label {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.workspace-tabs__add-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.workspace-tabs__empty {
+  border: 1px dashed var(--border);
+  border-radius: 0.5rem;
+  color: var(--muted-foreground);
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.workspace-tabs__empty p {
+  margin: 0;
+}
+
+.workspace-tabs__panes {
+  min-width: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+
+.workspace-tabs__pane {
+  min-width: 0;
+}
+
+.workspace-tabs__pane[hidden] {
+  display: none;
+}
+
+.workspace-tabs__scroll {
+  max-height: min(68vh, 56rem);
+  overflow: auto;
+  min-width: 0;
+  padding-inline-end: 0.25rem;
+}
+
+.workspace-tabs__editor {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.workspace-tabs__editor-status {
+  justify-self: start;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+}

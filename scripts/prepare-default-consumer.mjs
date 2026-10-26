@@ -19,7 +19,7 @@ console.info(`Consumer directory: ${project}`);
 run('bun', [join(repository, 'packages/create-svadmin/src/index.ts'), 'app',
   '--data-provider', 'simple-rest', '--auth-provider', 'none', '--no-install'], temporary);
 const fixture = join(repository, 'scripts/fixtures/default-consumer');
-renameSync(join(project, 'vite.config.ts'), join(project, 'vite.generated.config.ts'));
+renameSync(join(project, 'vite.config.ts'), join(project, 'vite.generated.config.js'));
 for (const file of ['BareApp.svelte', 'bare.ts']) copyFileSync(join(fixture, file), join(project, 'src', file));
 for (const file of ['bare.html', 'vite.config.ts']) copyFileSync(join(fixture, file), join(project, file));
 const manifestPath = join(project, 'package.json');

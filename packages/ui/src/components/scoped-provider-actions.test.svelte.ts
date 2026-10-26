@@ -354,6 +354,29 @@ describe('scoped provider actions', () => {
     expect(view.getByText('freshOnly')).not.toBeNull();
   });
 
+  it('hides InferencerPanel provider diagnostics and recovers on retry', async () => {
+    const getList = vi.fn<DataProvider['getList']>()
+      .mockRejectedValueOnce(new Error('PRIVATE_DIAGNOSTIC'))
+      .mockResolvedValueOnce({ data: [{ id: 'recovered', recoveredOnly: 'yes' }], total: 1 });
+    const provider = createDataProvider(getList);
+    const view = renderWithI18n(ScopedProviderActionsHost, {
+      consumer: 'inferencer',
+      dataProvider: provider,
+      resources: [createResource()],
+      tenant: { tenantId: 'tenant-a' },
+    });
+
+    await fireEvent.change(view.getByRole('combobox'), { target: { value: 'shared-resource' } });
+    await fireEvent.click(view.getByRole('button', { name: 'Infer Fields' }));
+    await waitFor(() => expect(view.getByText('Something went wrong')).not.toBeNull());
+    expect(view.baseElement.textContent).not.toContain('PRIVATE_DIAGNOSTIC');
+
+    await fireEvent.click(view.getByRole('button', { name: 'Infer Fields' }));
+    await waitFor(() => expect(view.getByText('recoveredOnly')).not.toBeNull());
+    expect(view.queryByText('Something went wrong')).toBeNull();
+    expect(getList).toHaveBeenCalledTimes(2);
+  });
+
   it('invalidates a pending RolesSettings mutation before provider B becomes interactive', async () => {
     const staleUpdate = createDeferred<{ success: boolean }>();
     const stalePermissions = vi.fn(async () => ({}));

@@ -8,6 +8,7 @@ import { HttpError } from './types';
 import type { QueryKey } from './query-keys';
 import { definedOptions } from './defined-options';
 import type { NotificationConfig } from './hook-utils.svelte';
+import { t } from './i18n.svelte';
 import { notifyWithProvider } from './notification.svelte';
 import { snapshotPlainData } from './plain-data';
 import { checkExact } from './schema-validation';
@@ -102,7 +103,7 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       const config = type === 'success' ? origin.successNotification : origin.errorNotification;
       if (config === false || !current(origin)) return;
       if (config !== undefined && typeof config !== 'function' && typeof config !== 'string') return;
-      const fallback = type === 'success' ? '' : 'Fetch failed: Resource query failed';
+      const fallback = type === 'success' ? '' : t('common.loadFailed', { message: t('common.error') });
       if (typeof config !== 'function' && !config && !fallback) return;
       const candidate = snapshotPlainData(typeof config === 'function'
         ? config(value, undefined, origin.resource) : { message: config || fallback });

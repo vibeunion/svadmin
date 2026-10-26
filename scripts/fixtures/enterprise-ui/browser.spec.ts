@@ -1,7 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page, type TestInfo } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
-import { requireValue } from '../../test-assertions';
 
 const screenshots = 'test-results/enterprise/screenshots';
 test('RolesSettings separates loading, failure and retry from actual permission grants', async ({ page }, testInfo) => {
@@ -447,10 +446,34 @@ test('AutoForm array error focus and correction stay within the submitted instan
   await page.goto('/?view=autoform&compound=array');
   const forms = page.getByTestId('autoform-fixture').locator('form');
   await expect(forms).toHaveCount(2);
+  const addDescriptionProof = async (add: Locator) => add.evaluate(element => {
+    const form = element.closest('form');
+    const ids = (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+    return ids.map(id => {
+      const node = element.ownerDocument.getElementById(id);
+      return {
+        id,
+        inForm: !!node && !!form?.contains(node),
+        text: node?.textContent?.trim() ?? '',
+      };
+    });
+  });
+  const addDescriptionIds: string[][] = [];
+  const addHelpIds: string[] = [];
   for (const form of await forms.all()) {
     await form.getByRole('button', { name: 'Save', exact: true }).click();
     const add = form.getByRole('button', { name: 'Add', exact: true });
     await expect(add).toBeFocused();
+    await expect(add).toHaveAttribute('aria-invalid', 'true');
+    await expect(add).toHaveAccessibleDescription('Add product rows. Add a row');
+    const addDescription = await addDescriptionProof(add);
+    expect(addDescription).toHaveLength(2);
+    expect(addDescription.every(entry => entry.inForm)).toBe(true);
+    const help = addDescription.find(entry => entry.text === 'Add product rows.');
+    expect(help).toBeDefined();
+    expect(addDescription.filter(entry => entry.text === 'Add a row')).toHaveLength(1);
+    addDescriptionIds.push(addDescription.map(entry => entry.id));
+    addHelpIds.push(help?.id ?? '');
     const summary = form.getByRole('region', { name: 'Please fix the following errors' });
     const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
     await page.keyboard.press(backward);
@@ -464,6 +487,8 @@ test('AutoForm array error focus and correction stay within the submitted instan
     await expect(form.getByRole('group', { name: 'Rows', exact: true }))
       .toHaveAccessibleDescription('Add product rows. Add a row');
   }
+  expect(addDescriptionIds).toHaveLength(2);
+  expect(addDescriptionIds[0].filter(id => addDescriptionIds[1].includes(id))).toEqual([]);
   await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
   const first = forms.nth(0);
   await first.getByRole('button', { name: 'Add', exact: true }).click();
@@ -479,15 +504,724 @@ test('AutoForm array error focus and correction stay within the submitted instan
   await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
     rows: [{ title: 'First row' }], name: 'Product with rows', description: 'Ready',
   });
+  const firstAdd = first.getByRole('button', { name: 'Add', exact: true });
+  await expect(firstAdd).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(firstAdd).toHaveAccessibleDescription('Add product rows.');
+  const correctedFirstDescription = await addDescriptionProof(firstAdd);
+  expect(correctedFirstDescription).toHaveLength(1);
+  expect(correctedFirstDescription[0]).toEqual({
+    id: addHelpIds[0], inForm: true, text: 'Add product rows.',
+  });
   await expect(first.getByRole('region', { name: 'Please fix the following errors' })).toHaveCount(0);
   await expect(first.getByRole('group', { name: 'Rows', exact: true }))
     .toHaveAccessibleDescription('Add product rows.');
+  const secondAdd = forms.nth(1).getByRole('button', { name: 'Add', exact: true });
+  await expect(secondAdd).toHaveAttribute('aria-invalid', 'true');
+  await expect(secondAdd).toHaveAccessibleDescription('Add product rows. Add a row');
+  const secondDescription = await addDescriptionProof(secondAdd);
+  expect(secondDescription.map(entry => entry.id).sort()).toEqual([...addDescriptionIds[1]].sort());
+  expect(secondDescription.every(entry => entry.inForm)).toBe(true);
+  expect(secondDescription.some(entry => entry.text === 'Add a row')).toBe(true);
   await expect(forms.nth(1).getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(3);
   await expect(forms.nth(1).getByRole('textbox', { name: /^Title/ })).toHaveCount(0);
   await page.getByTestId('switch-autoform-scope').click();
   await expect(forms.nth(0).getByRole('textbox', { name: /^Title/ })).toHaveCount(0);
   await expect(forms.nth(1).getByRole('textbox', { name: /^Title/ })).toHaveCount(0);
   await expect(forms.nth(0).getByRole('textbox', { name: /^Name/ })).toHaveValue('');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm daterange keeps preset focus, keyboard summary return and cross-instance help links', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=daterange');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const preset = form.getByRole('combobox', { name: 'Quick ranges', exact: true });
+    const start = form.locator('input[name="period.start"]');
+    const end = form.locator('input[name="period.end"]');
+    await expect(preset).toHaveAccessibleDescription('Choose a product period.');
+    await expect(start).toHaveAccessibleDescription('Choose a product period.');
+    await expect(end).toHaveAccessibleDescription('Choose a product period.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(preset).toBeFocused();
+    await expect(preset).toHaveAttribute('aria-invalid', 'true');
+    await expect(form.locator('[aria-invalid="true"]')).toHaveCount(5);
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    const periodError = summary.getByRole('button', { name: /^Period:/ });
+    await expect(periodError).toBeFocused();
+    const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(preset).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(periodError).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(preset).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(start).toBeFocused();
+    const links = await form.evaluate((element) => {
+      const controls = [
+        element.querySelector<HTMLElement>('select[aria-label="Quick ranges"]'),
+        element.querySelector<HTMLElement>('input[name="period.start"]'),
+        element.querySelector<HTMLElement>('input[name="period.end"]'),
+      ];
+      return controls.map(control => {
+        const tokens = (control?.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+        const resolved = tokens.map(id => {
+          const node = document.getElementById(id);
+          return {
+            id,
+            connected: node?.isConnected === true,
+            inForm: node !== null && element.contains(node),
+            text: node?.textContent ?? '',
+          };
+        });
+        return { tokens, resolved };
+      });
+    });
+    expect(links).toHaveLength(3);
+    for (const link of links) {
+      expect(link.tokens).toHaveLength(2);
+      expect(link.tokens).toEqual(links[0]?.tokens);
+      expect(link.resolved.every(node => node.connected && node.inForm)).toBe(true);
+      expect(link.resolved.map(node => node.text).join(' ')).toContain('Choose a product period.');
+    }
+    describedIds.push(links.flatMap(link => link.tokens));
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+  const first = forms.nth(0);
+  const firstPreset = first.getByRole('combobox', { name: 'Quick ranges', exact: true });
+  const firstStart = first.locator('input[name="period.start"]');
+  const firstEnd = first.locator('input[name="period.end"]');
+  await firstPreset.selectOption('0');
+  await expect(firstStart).toHaveValue('2026-09-01');
+  await expect(firstEnd).toHaveValue('2026-09-07');
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Period product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with a date range');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    period: { start: '2026-09-01', end: '2026-09-07' },
+    name: 'Period product',
+    description: 'Ready with a date range',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(first.getByRole('region', { name: 'Please fix the following errors' })).toHaveCount(0);
+  await expect(firstPreset).toHaveAccessibleDescription('Choose a product period.');
+  await expect(firstStart).toHaveAccessibleDescription('Choose a product period.');
+  await expect(firstEnd).toHaveAccessibleDescription('Choose a product period.');
+  const retained = await first.evaluate((element) => {
+    const controls = [
+      element.querySelector<HTMLElement>('select[aria-label="Quick ranges"]'),
+      element.querySelector<HTMLElement>('input[name="period.start"]'),
+      element.querySelector<HTMLElement>('input[name="period.end"]'),
+    ];
+    return controls.map(control => (control?.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).map(id => {
+      const node = document.getElementById(id);
+      return node !== null && element.contains(node) && node.isConnected;
+    }));
+  });
+  expect(retained.map(ids => ids.length)).toEqual([1, 1, 1]);
+  expect(retained.every(ids => ids.every(Boolean))).toBe(true);
+  const second = forms.nth(1);
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(5);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(3);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm tree-select keeps required trigger focus, popup IDREFs and keyboard leaf selection isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=tree-select');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const trigger = form.getByRole('button', { name: 'Department', exact: true });
+    const dialog = page.getByRole('dialog', { name: 'Department', exact: true });
+    await expect(trigger).toHaveAccessibleDescription('Choose a department.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute('data-invalid', 'true');
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Department:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Department:/ })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(trigger).toBeFocused();
+
+    await trigger.press('Enter');
+    await expect(dialog).toBeVisible();
+    const panelId = await trigger.getAttribute('aria-controls');
+    const triggerId = await trigger.getAttribute('id');
+    expect(panelId).toBeTruthy();
+    expect(triggerId).toBeTruthy();
+    await expect(dialog).toHaveAttribute('id', panelId ?? '');
+    await expect(dialog).toHaveAttribute('aria-labelledby', triggerId ?? '');
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('treeitem', { name: 'Leaf', exact: true })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+    await expect(dialog).toBeHidden();
+
+    const links = await trigger.evaluate((element) => {
+      const form = element.closest('form');
+      const tokens = (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+      return {
+        tokens,
+        resolved: tokens.map(id => {
+          const node = document.getElementById(id);
+          return {
+            id,
+            connected: node?.isConnected === true,
+            inForm: node !== null && form?.contains(node) === true,
+            text: node?.textContent ?? '',
+            role: node?.getAttribute('role'),
+          };
+        }),
+      };
+    });
+    expect(links.tokens).toHaveLength(2);
+    expect(links.resolved.every(node => node.connected && node.inForm)).toBe(true);
+    expect(links.resolved.map(node => node.text).join(' ')).toContain('Choose a department.');
+    const errorToken = links.resolved.find(node => node.role === 'alert')?.id;
+    expect(errorToken).toBeTruthy();
+    describedIds.push(links.tokens);
+
+    await trigger.press('Enter');
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('treeitem', { name: 'Leaf', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(trigger).toBeFocused();
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toContainText('Leaf');
+    await expect(trigger).not.toHaveAttribute('data-invalid', 'true');
+    await expect(summary.getByRole('button')).toHaveCount(2);
+    const retained = await trigger.evaluate((element) => {
+      const form = element.closest('form');
+      const tokens = (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+      return {
+        tokens,
+        resolved: tokens.map(id => {
+          const node = document.getElementById(id);
+          return {
+            connected: node?.isConnected === true,
+            inForm: node !== null && form?.contains(node) === true,
+            text: node?.textContent ?? '',
+          };
+        }),
+      };
+    });
+    expect(retained.tokens).toEqual(links.tokens.filter(id => id !== errorToken));
+    expect(retained.resolved.every(node => node.connected && node.inForm)).toBe(true);
+    expect(retained.resolved.map(node => node.text).join(' ')).toContain('Choose a department.');
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+
+  const first = forms.nth(0);
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Department product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with a department');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    department: 'leaf',
+    name: 'Department product',
+    description: 'Ready with a department',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(first.getByRole('region', { name: 'Please fix the following errors' })).toHaveCount(0);
+  await expect(first.getByRole('button', { name: 'Department', exact: true }))
+    .toHaveAccessibleDescription('Choose a department.');
+
+  const second = forms.nth(1);
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(2);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(2);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm cascader keeps required trigger focus, popup IDREFs and keyboard selection isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=cascader');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const trigger = form.getByRole('button', { name: 'Region', exact: true });
+    const dialog = page.getByRole('dialog', { name: 'Region', exact: true });
+    await expect(trigger).toHaveAccessibleDescription('Choose a region.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute('data-invalid', 'true');
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Region:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(trigger).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    const regionError = summary.getByRole('button', { name: /^Region:/ });
+    await expect(regionError).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(trigger).toBeFocused();
+
+    const links = await trigger.evaluate((element) => {
+      const form = element.closest('form');
+      const tokens = (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+      return {
+        tokens,
+        resolved: tokens.map(id => {
+          const node = document.getElementById(id);
+          return {
+            id,
+            connected: node?.isConnected === true,
+            inForm: node !== null && form?.contains(node) === true,
+            text: node?.textContent ?? '',
+            role: node?.getAttribute('role'),
+          };
+        }),
+      };
+    });
+    expect(links.tokens).toHaveLength(2);
+    expect(links.resolved.every(node => node.connected && node.inForm)).toBe(true);
+    expect(links.resolved.map(node => node.text).join(' ')).toContain('Choose a region.');
+    const errorToken = links.resolved.find(node => node.role === 'alert')?.id;
+    expect(errorToken).toBeTruthy();
+    describedIds.push(links.tokens);
+
+    await trigger.press('Enter');
+    await expect(dialog).toBeVisible();
+    const panelId = await trigger.getAttribute('aria-controls');
+    const triggerId = await trigger.getAttribute('id');
+    expect(panelId).toBeTruthy();
+    expect(triggerId).toBeTruthy();
+    await expect(dialog).toHaveAttribute('id', panelId ?? '');
+    await expect(dialog).toHaveAttribute('aria-labelledby', triggerId ?? '');
+    await expect(page.locator(`[id="${panelId}"]`)).toHaveCount(1);
+    await expect(page.locator(`[id="${triggerId}"]`)).toHaveCount(1);
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('button', { name: 'East', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(trigger).toContainText('East');
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+    await expect(dialog).toBeHidden();
+
+    await expect(summary.getByRole('button')).toHaveCount(2);
+    const retained = await trigger.evaluate((element) => {
+      const form = element.closest('form');
+      const tokens = (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+      return {
+        tokens,
+        resolved: tokens.map(id => {
+          const node = document.getElementById(id);
+          return {
+            connected: node?.isConnected === true,
+            inForm: node !== null && form?.contains(node) === true,
+            text: node?.textContent ?? '',
+          };
+        }),
+      };
+    });
+    expect(retained.tokens).toEqual(links.tokens.filter(id => id !== errorToken));
+    expect(retained.resolved.every(node => node.connected && node.inForm)).toBe(true);
+    expect(retained.resolved.map(node => node.text).join(' ')).toContain('Choose a region.');
+    await expect(trigger).not.toHaveAttribute('data-invalid', 'true');
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+
+  const first = forms.nth(0);
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Region product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with a region');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    region: ['east'],
+    name: 'Region product',
+    description: 'Ready with a region',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(first.getByRole('region', { name: 'Please fix the following errors' })).toHaveCount(0);
+  await expect(first.getByRole('button', { name: 'Region', exact: true }))
+    .toHaveAccessibleDescription('Choose a region.');
+
+  const second = forms.nth(1);
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(2);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(2);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm transfer keeps required checkbox focus, summary keyboard return and payload isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=transfer');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const group = form.getByRole('group', { name: /^Roles/ });
+    const firstCheckbox = group.getByRole('checkbox', { name: '源列表', exact: true });
+    await expect(group).toHaveAccessibleDescription('Assign product roles.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(group).toHaveAttribute('data-invalid', 'true');
+    await expect(firstCheckbox).toBeFocused();
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Roles:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(firstCheckbox).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Roles:/ })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(firstCheckbox).toBeFocused();
+
+    const refs = await group.evaluate((element) => {
+      const form = element.closest('form');
+      const resolve = (attribute: string) => (element.getAttribute(attribute) ?? '').split(/\s+/).filter(Boolean).map((id) => {
+        const node = document.getElementById(id);
+        return {
+          id,
+          connected: node?.isConnected === true,
+          inForm: node !== null && form?.contains(node) === true,
+          text: node?.textContent ?? '',
+          role: node?.getAttribute('role'),
+        };
+      });
+      return { label: resolve('aria-labelledby'), description: resolve('aria-describedby') };
+    });
+    expect(refs.label).toHaveLength(1);
+    expect(refs.label[0]?.connected && refs.label[0]?.inForm).toBe(true);
+    expect(refs.label[0]?.text).toContain('Roles');
+    expect(refs.description).toHaveLength(2);
+    expect(refs.description.every(node => node.connected && node.inForm)).toBe(true);
+    expect(refs.description.map(node => node.text).join(' ')).toContain('Assign product roles.');
+    expect(refs.description.find(node => node.role === 'alert')?.id).toBeTruthy();
+    describedIds.push(refs.description.map(node => node.id));
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+
+  const first = forms.nth(0);
+  const firstGroup = first.getByRole('group', { name: /^Roles/ });
+  const firstCheckbox = firstGroup.getByRole('checkbox', { name: '源列表', exact: true });
+  const firstSummary = first.getByRole('region', { name: 'Please fix the following errors' });
+  await firstSummary.getByRole('button', { name: /^Roles:/ }).click();
+  await expect(firstCheckbox).toBeFocused();
+  const administrator = firstGroup.getByRole('checkbox', { name: 'Administrator', exact: true });
+  const tabUntil = async (target: typeof administrator) => {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      if (await target.evaluate(node => node === document.activeElement)) return;
+      await page.keyboard.press(forward);
+    }
+    await expect(target).toBeFocused();
+  };
+  await tabUntil(administrator);
+  await expect(administrator).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(administrator).toBeChecked();
+  const moveRight = firstGroup.getByRole('button', { name: '转移所选项' });
+  await tabUntil(moveRight);
+  await expect(moveRight).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(moveRight).toBeDisabled();
+  await expect(first.locator('input[name="roles[]"]')).toHaveValue('admin');
+  await expect(firstSummary.getByRole('button')).toHaveCount(2);
+
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Transfer product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with a role');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    roles: ['admin'],
+    name: 'Transfer product',
+    description: 'Ready with a role',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(firstSummary).toHaveCount(0);
+  await expect(firstGroup).not.toHaveAttribute('data-invalid', 'true');
+  await expect(firstGroup).toHaveAccessibleDescription('Assign product roles.');
+  const retained = await firstGroup.evaluate((element) => {
+    const form = element.closest('form');
+    return (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).map((id) => {
+      const node = document.getElementById(id);
+      return {
+        connected: node?.isConnected === true,
+        inForm: node !== null && form?.contains(node) === true,
+        text: node?.textContent ?? '',
+        role: node?.getAttribute('role'),
+      };
+    });
+  });
+  expect(retained).toHaveLength(1);
+  expect(retained[0]?.connected && retained[0]?.inForm).toBe(true);
+  expect(retained[0]?.text).toContain('Assign product roles.');
+  expect(retained[0]?.role).not.toBe('alert');
+
+  const second = forms.nth(1);
+  const secondGroup = second.getByRole('group', { name: /^Roles/ });
+  await expect(secondGroup).toHaveAttribute('data-invalid', 'true');
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(2);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(3);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm richtext keeps contenteditable focus, summary keyboard return and HTML payload isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  const tiptapWarnings: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  // 仅在富文本场景收集 tiptap 告警（例如重复扩展名），保留控制台输出不做抑制。
+  page.on('console', (message) => {
+    const type = message.type();
+    if (type !== 'warning' && type !== 'error') return;
+    const text = message.text();
+    if (!/tiptap/i.test(text) && !/duplicate extension/i.test(text)) return;
+    tiptapWarnings.push(text);
+  });
+  await page.goto('/?view=autoform&compound=richtext');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const body = form.getByRole('textbox', { name: /^Body/ });
+    await expect(body).toHaveAttribute('contenteditable', 'true');
+    await expect(body).toHaveAccessibleDescription('Write the product body.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(body).toBeFocused();
+    await expect(body).toHaveAttribute('aria-invalid', 'true');
+    await expect(body).toHaveAttribute('aria-required', 'true');
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+
+    const toolbar = form.locator('.svadmin-editor-toolbar');
+    await expect(toolbar).toHaveCount(1);
+    const descriptionEntry = summary.getByRole('button', { name: /^Description:/ });
+    const nameEntry = summary.getByRole('button', { name: /^Name:/ });
+    const bodyEntry = summary.getByRole('button', { name: /^Body:/ });
+
+    // 只接受当前 form 内“富文本工具栏”或“当前错误摘要”中的焦点，其它落点视为越界。
+    const describeFocus = () => form.evaluate((element) => {
+      const active = document.activeElement as HTMLElement | null;
+      if (!active) return { kind: 'none' as const, label: '' };
+      const bar = element.querySelector('.svadmin-editor-toolbar');
+      if (bar && bar.contains(active) && active.closest('form') === element) {
+        return { kind: 'toolbar' as const, label: (active.getAttribute('aria-label') ?? active.getAttribute('title') ?? '').trim() };
+      }
+      const region = element.querySelector('[data-svadmin-error-summary]');
+      if (region && region.contains(active)) {
+        return { kind: 'summary' as const, label: (active.textContent ?? '').trim().split(':')[0]?.trim() ?? '' };
+      }
+      return { kind: 'outside' as const, label: active.tagName };
+    });
+    const isFocused = (target: typeof body) => target.evaluate(element => element === document.activeElement);
+    const walkTo = async (key: string, target: typeof body, label: string) => {
+      const stops: { kind: 'toolbar' | 'summary'; label: string }[] = [];
+      for (let step = 0; step < 40; step++) {
+        if (await isFocused(target)) return stops;
+        await page.keyboard.press(key);
+        if (await isFocused(target)) return stops;
+        const focus = await describeFocus();
+        if (focus.kind === 'outside' || focus.kind === 'none') {
+          throw new Error(`${label} keyboard walk left the current form toolbar/summary: ${JSON.stringify(focus)}`);
+        }
+        expect(focus.label.length).toBeGreaterThan(0);
+        stops.push(focus);
+      }
+      throw new Error(`${label} keyboard walk exceeded 40 bounded steps`);
+    };
+
+    const toolbarLabels = (stops: { kind: string; label: string }[]) =>
+      stops.filter(stop => stop.kind === 'toolbar').map(stop => stop.label);
+    const backwardStops = await walkTo(backward, descriptionEntry, 'Description summary');
+    const backwardToolbar = toolbarLabels(backwardStops);
+    // 正文之后必须先正向遍历真实工具栏，才能到达摘要，而不是一步跳到摘要。
+    expect(backwardStops.every(stop => stop.kind === 'toolbar')).toBe(true);
+    expect(backwardToolbar.length).toBeGreaterThan(1);
+    expect(new Set(backwardToolbar).size).toBe(backwardToolbar.length);
+    await expect(descriptionEntry).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(nameEntry).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(bodyEntry).toBeFocused();
+
+    // 正向路径：Body 摘要 -> Name -> Description -> 工具栏反向遍历 -> 正文。
+    const forwardStops = await walkTo(forward, body, 'Body editor');
+    expect(forwardStops.slice(0, 2)).toEqual([
+      { kind: 'summary', label: 'Name' },
+      { kind: 'summary', label: 'Description' },
+    ]);
+    const forwardToolbar = toolbarLabels(forwardStops);
+    expect(forwardToolbar).toEqual([...backwardToolbar].reverse());
+    expect(forwardToolbar.length).toBe(backwardToolbar.length);
+    await expect(body).toBeFocused();
+
+    const backwardAgain = await walkTo(backward, descriptionEntry, 'Description summary');
+    expect(backwardAgain).toEqual(backwardStops);
+    expect(toolbarLabels(backwardAgain)).toEqual(backwardToolbar);
+    await page.keyboard.press(backward);
+    await expect(nameEntry).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(bodyEntry).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(body).toBeFocused();
+
+    const links = await body.evaluate((element) => {
+      const form = element.closest('form');
+      const resolve = (attribute: string) => (element.getAttribute(attribute) ?? '').split(/\s+/).filter(Boolean).map((id) => {
+        const node = document.getElementById(id);
+        return {
+          id,
+          connected: node?.isConnected === true,
+          inForm: node !== null && form?.contains(node) === true,
+          text: node?.textContent ?? '',
+          role: node?.getAttribute('role'),
+        };
+      });
+      return {
+        contenteditable: element.getAttribute('contenteditable'),
+        invalid: element.getAttribute('aria-invalid'),
+        required: element.getAttribute('aria-required'),
+        label: resolve('aria-labelledby'),
+        description: resolve('aria-describedby'),
+      };
+    });
+    expect(links.contenteditable).toBe('true');
+    expect(links.invalid).toBe('true');
+    expect(links.required).toBe('true');
+    expect(links.label).toHaveLength(1);
+    expect(links.label[0]?.connected && links.label[0]?.inForm).toBe(true);
+    expect(links.label[0]?.text).toContain('Body');
+    expect(links.description).toHaveLength(2);
+    expect(links.description.every(node => node.connected && node.inForm)).toBe(true);
+    expect(links.description.map(node => node.text).join(' ')).toContain('Write the product body.');
+    expect(links.description.find(node => node.role === 'alert')?.id).toBeTruthy();
+    expect(new Set([...links.label, ...links.description].map(node => node.id)).size).toBe(3);
+    describedIds.push(links.description.map(node => node.id));
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+
+  const first = forms.nth(0);
+  const firstName = first.getByRole('textbox', { name: /^Name/ });
+  const firstDescription = first.getByRole('textbox', { name: /^Description/ });
+  const firstBody = first.getByRole('textbox', { name: /^Body/ });
+  await firstBody.click();
+  await firstBody.pressSequentially('Rich body text', { delay: 25 });
+  await expect(firstBody).toBeFocused();
+  await expect(firstBody).toContainText('Rich body text');
+  await firstName.fill('Rich product');
+  await firstDescription.fill('Ready with rich text');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    body: '<p>Rich body text</p>',
+    name: 'Rich product',
+    description: 'Ready with rich text',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(first.getByRole('region', { name: 'Please fix the following errors' })).toHaveCount(0);
+  await expect(firstBody).toHaveAccessibleDescription('Write the product body.');
+  const retained = await firstBody.evaluate((element) => {
+    const form = element.closest('form');
+    return (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).map((id) => {
+      const node = document.getElementById(id);
+      return {
+        id,
+        connected: node?.isConnected === true,
+        inForm: node !== null && form?.contains(node) === true,
+        text: node?.textContent ?? '',
+        role: node?.getAttribute('role'),
+      };
+    });
+  });
+  expect(retained).toHaveLength(1);
+  expect(retained[0]?.connected && retained[0]?.inForm).toBe(true);
+  expect(retained[0]?.text).toContain('Write the product body.');
+  expect(retained[0]?.role).not.toBe('alert');
+
+  const second = forms.nth(1);
+  const secondBody = second.getByRole('textbox', { name: /^Body/ });
+  await expect(secondBody).toHaveAttribute('aria-invalid', 'true');
+  await expect(secondBody).toHaveAttribute('aria-required', 'true');
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(3);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(3);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(tiptapWarnings).toEqual([]);
   expect(errors).toEqual([]);
 });
 
@@ -1096,18 +1830,32 @@ test('readonly state blocks editing and schema errors disable submission', async
   await expect(page.getByTestId('json-schema-form').getByRole('button', { name: 'Submit', exact: true })).toBeDisabled();
 });
 
-test('task details are keyboard reachable and row actions do not select the row', async ({ page }) => {
+// 真实 Tab 遍历：跳过可滚动容器等浏览器额外焦点停靠点，仍由键盘操作目标控件。
+// WebKit 在宿主未开启全键盘访问时用 Alt+Tab 遍历全部控件，属于 Safari 的正常键盘方式。
+async function tabToFocusedControl(page: Page, target: Locator, testInfo: TestInfo): Promise<void> {
+  const traversalKey = testInfo.project.name.startsWith('webkit') && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await page.keyboard.press(traversalKey);
+    if (await target.evaluate(element => element === document.activeElement)) return;
+  }
+  await expect(target).toBeFocused();
+}
+
+test('task details are keyboard reachable and row actions do not select the row', async ({ page }, testInfo) => {
   await page.goto('/');
   const task = page.getByRole('region', { name: 'Task list' });
   await expect(task).toBeVisible();
   const details = task.getByRole('button', { name: 'Details', exact: true });
+  const cancel = task.getByRole('button', { name: 'Cancel', exact: true });
+  await expect(details).toBeVisible();
+  await expect(cancel).toBeVisible();
   await page.getByTestId('task-focus-start').focus();
-  await page.keyboard.press('Tab');
-  await expect(task.getByRole('button', { name: 'Cancel', exact: true })).toBeFocused();
+  await tabToFocusedControl(page, cancel, testInfo);
+  await expect(cancel).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('task-cancellations')).toHaveText('1');
   await expect(page.getByTestId('task-selections')).toHaveText('0');
-  await page.keyboard.press('Tab');
+  await tabToFocusedControl(page, details, testInfo);
   await expect(details).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('selected-task')).toHaveText('task-1');
@@ -1131,9 +1879,10 @@ test('task title remains keyboard reachable with the actions column hidden', asy
   await page.goto('/');
   const task = page.getByRole('region', { name: 'Task list' });
   await task.getByRole('checkbox', { name: 'Show task actions' }).uncheck();
-  await page.getByTestId('task-focus-start').focus();
-  await page.keyboard.press('Tab');
   const title = task.getByRole('button', { name: 'Generate report', exact: true });
+  await expect(title).toBeVisible();
+  await page.getByTestId('task-focus-start').focus();
+  await tabToFocusedControl(page, title, testInfo);
   await expect(title).toBeFocused();
   await page.keyboard.press('Space');
   await expect(page.getByTestId('task-selections')).toHaveText('1');
@@ -1190,7 +1939,7 @@ test('task action failures are visible, sanitized, and retryable', async ({ page
   const cancel = task.getByRole('button', { name: 'Cancel', exact: true });
   const describedBy = await cancel.getAttribute('aria-describedby');
   expect(describedBy).toBeTruthy();
-  await expect(alert).toHaveAttribute('id', requireValue(describedBy));
+  await expect(alert).toHaveAttribute('id', describedBy!);
   await alert.scrollIntoViewIfNeeded();
   await expect(alert).toBeVisible();
   await task.screenshot({ path: `../../../output/playwright/task-list/${testInfo.project.name}-action-failed.png` });
@@ -1234,7 +1983,7 @@ test('task retry failures are visible, sanitized, and recoverable', async ({ pag
   await expect(task.getByTestId('task-form-submitted')).toHaveText('false');
   const describedBy = await retry.getAttribute('aria-describedby');
   expect(describedBy).toBeTruthy();
-  await expect(alert).toHaveAttribute('id', requireValue(describedBy));
+  await expect(alert).toHaveAttribute('id', describedBy!);
   await alert.scrollIntoViewIfNeeded();
   await expect(alert).toBeInViewport();
   const alertBounds = await alert.boundingBox();
@@ -1564,8 +2313,8 @@ for (const view of ['profile', 'security', 'mfa'] as const) {
         await expect(input).toBeVisible();
         const id = await input.getAttribute('id');
         expect(id).toBeTruthy();
-        expect(ids.has(requireValue(id))).toBe(false);
-        ids.add(requireValue(id));
+        expect(ids.has(id!)).toBe(false);
+        ids.add(id!);
         await instance.locator('label').filter({ hasText: new RegExp(`^${text}$`) }).click();
         await expect(input).toBeFocused();
       }
@@ -1642,3 +2391,468 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 108
     });
   }
 }
+
+test('AutoForm tags keeps draft focus, keyboard summary return and live help links isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=tags');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const resolveLinks = (form: ReturnType<typeof forms.nth>) => form.evaluate((element) => {
+    const control = element.querySelector<HTMLElement>('input[aria-label="Tags"]');
+    const tokens = (control?.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+    return {
+      tokens,
+      ariaInvalid: control?.getAttribute('aria-invalid'),
+      resolved: tokens.map(id => {
+        const node = document.getElementById(id);
+        return {
+          id,
+          connected: node?.isConnected === true,
+          inForm: node !== null && element.contains(node),
+          text: node?.textContent ?? '',
+        };
+      }),
+    };
+  });
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const tags = form.getByRole('textbox', { name: 'Tags', exact: true });
+    await expect(tags).toHaveAccessibleDescription('Choose product tags.');
+    const initial = await resolveLinks(form);
+    expect(initial.tokens).toHaveLength(1);
+    expect(initial.resolved[0]?.connected).toBe(true);
+    expect(initial.resolved[0]?.inForm).toBe(true);
+    expect(initial.resolved[0]?.text).toBe('Choose product tags.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(tags).toBeFocused();
+    await expect(tags).toHaveAttribute('aria-invalid', 'true');
+    await expect(form.locator('[aria-invalid="true"]')).toHaveCount(3);
+    await expect(tags).toHaveAccessibleDescription('Choose product tags. This field is required');
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    const tagEntry = summary.getByRole('button', { name: /^Tags:/ });
+    await expect(tagEntry).toHaveText('Tags: This field is required');
+    const invalid = await resolveLinks(form);
+    expect(invalid.tokens).toHaveLength(2);
+    expect(invalid.tokens[0]).toBe(initial.tokens[0]);
+    expect(invalid.tokens[1]).not.toBe(initial.tokens[0]);
+    expect(invalid.resolved.every(node => node.connected && node.inForm)).toBe(true);
+    expect(invalid.resolved[0]?.text).toBe('Choose product tags.');
+    expect(invalid.resolved[1]?.text).toBe('This field is required');
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(tagEntry).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(tags).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(tagEntry).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(tags).toBeFocused();
+    describedIds.push(invalid.tokens);
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+  const first = forms.nth(0);
+  const firstTags = first.getByRole('textbox', { name: 'Tags', exact: true });
+  await firstTags.pressSequentially('alpha', { delay: 25 });
+  await page.keyboard.press('Enter');
+  await firstTags.pressSequentially('beta', { delay: 25 });
+  await page.keyboard.press('Enter');
+  await expect(firstTags).toHaveValue('');
+  await expect(firstTags).toBeFocused();
+  await expect.poll(() => first.locator('input[name="tags[]"]').evaluateAll(nodes =>
+    nodes.map(node => (node as HTMLInputElement).value))).toEqual(['alpha', 'beta']);
+  await expect(firstTags).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(2);
+  await expect(firstTags).toHaveAccessibleDescription('Choose product tags.');
+  const corrected = await resolveLinks(first);
+  expect(corrected.tokens).toEqual([describedIds[0]?.[0]]);
+  expect(corrected.resolved.every(node => node.connected && node.inForm)).toBe(true);
+  const firstSummary = first.getByRole('region', { name: 'Please fix the following errors' });
+  await expect(firstSummary.getByRole('button')).toHaveCount(2);
+  await expect(firstSummary.getByRole('button', { name: /^Tags:/ })).toHaveCount(0);
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Tagged product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with tags');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    tags: ['alpha', 'beta'], name: 'Tagged product', description: 'Ready with tags',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(first.getByRole('region', { name: 'Please fix the following errors' })).toHaveCount(0);
+  const second = forms.nth(1);
+  await expect(second.getByRole('textbox', { name: 'Tags', exact: true })).toHaveAttribute('aria-invalid', 'true');
+  await expect(second.getByRole('textbox', { name: 'Tags', exact: true }))
+    .toHaveAccessibleDescription('Choose product tags. This field is required');
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(3);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' })
+    .getByRole('button', { name: /^Tags:/ })).toHaveText('Tags: This field is required');
+  await expect(second.locator('input[name="tags[]"]')).toHaveCount(0);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm multiselect keeps group IDREFs, checkbox focus and Space selection isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=multiselect');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const resolveRefs = (form: ReturnType<typeof forms.nth>) => form.evaluate((element) => {
+    const group = element.querySelector<HTMLElement>('[role="group"]');
+    const resolve = (node: Element | null | undefined, attribute: string) =>
+      (node?.getAttribute(attribute) ?? '').split(/\s+/).filter(Boolean).map((id) => {
+        const target = document.getElementById(id);
+        return {
+          id,
+          connected: target?.isConnected === true,
+          inForm: target !== null && element.contains(target),
+          text: target?.textContent ?? '',
+        };
+      });
+    const checkboxes = Array.from((group ?? element).querySelectorAll<HTMLElement>('[role="checkbox"]'));
+    return {
+      group: {
+        label: resolve(group, 'aria-labelledby'),
+        description: resolve(group, 'aria-describedby'),
+        invalid: group?.getAttribute('data-invalid'),
+      },
+      checkboxes: checkboxes.map(checkbox => ({
+        described: resolve(checkbox, 'aria-describedby'),
+        invalid: checkbox.getAttribute('aria-invalid'),
+        disabled: (checkbox as HTMLButtonElement).disabled,
+      })),
+    };
+  });
+  const describedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const group = form.getByRole('group', { name: /^Labels/ });
+    const alpha = group.getByRole('checkbox', { name: 'Alpha', exact: true });
+    const beta = group.getByRole('checkbox', { name: 'Beta', exact: true });
+    const disabledOption = group.getByRole('checkbox', { name: 'Disabled', exact: true });
+    await expect(group).toHaveAccessibleDescription('Choose product labels.');
+    await expect(alpha).not.toBeChecked();
+    await expect(beta).not.toBeChecked();
+    await expect(disabledOption).toBeDisabled();
+    await expect(disabledOption).not.toBeChecked();
+
+    const initial = await resolveRefs(form);
+    expect(initial.group.label).toHaveLength(1);
+    expect(initial.group.label[0]?.connected && initial.group.label[0]?.inForm).toBe(true);
+    expect(initial.group.label[0]?.text).toContain('Labels');
+    expect(initial.group.description).toHaveLength(1);
+    expect(initial.group.description[0]?.text).toBe('Choose product labels.');
+    expect(initial.group.invalid).toBeNull();
+    expect(initial.checkboxes).toHaveLength(3);
+    for (const checkbox of initial.checkboxes) {
+      expect(checkbox.described.map(node => node.id)).toEqual(initial.group.description.map(node => node.id));
+      expect(checkbox.described.every(node => node.connected && node.inForm)).toBe(true);
+      expect(checkbox.invalid).toBeNull();
+    }
+
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(alpha).toBeFocused();
+    await expect(group).toHaveAttribute('data-invalid', 'true');
+    await expect(alpha).toHaveAttribute('aria-invalid', 'true');
+    await expect(form.locator('[aria-invalid="true"]')).toHaveCount(5);
+    await expect(group).toHaveAccessibleDescription('Choose product labels. This field is required');
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    const labelsEntry = summary.getByRole('button', { name: /^Labels:/ });
+    await expect(labelsEntry).toHaveText('Labels: This field is required');
+    const invalid = await resolveRefs(form);
+    expect(invalid.group.description).toHaveLength(2);
+    expect(invalid.group.description[0]?.id).toBe(initial.group.description[0]?.id);
+    expect(invalid.group.description[1]?.id).not.toBe(initial.group.description[0]?.id);
+    expect(invalid.group.description.every(node => node.connected && node.inForm)).toBe(true);
+    expect(invalid.group.description[1]?.text).toBe('This field is required');
+    for (const checkbox of invalid.checkboxes) {
+      expect(checkbox.invalid).toBe('true');
+      expect(checkbox.described.map(node => node.id)).toEqual(invalid.group.description.map(node => node.id));
+      expect(checkbox.described.every(node => node.connected && node.inForm)).toBe(true);
+    }
+    expect(invalid.checkboxes[2]?.disabled).toBe(true);
+
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(labelsEntry).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(alpha).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(labelsEntry).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(alpha).toBeFocused();
+    describedIds.push(invalid.group.description.map(node => node.id));
+  }
+  expect(describedIds).toHaveLength(2);
+  expect(describedIds[0]?.some(id => describedIds[1]?.includes(id))).toBe(false);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('0');
+
+  const first = forms.nth(0);
+  const firstGroup = first.getByRole('group', { name: /^Labels/ });
+  const firstAlpha = firstGroup.getByRole('checkbox', { name: 'Alpha', exact: true });
+  const firstBeta = firstGroup.getByRole('checkbox', { name: 'Beta', exact: true });
+  const firstDisabled = firstGroup.getByRole('checkbox', { name: 'Disabled', exact: true });
+  const firstSummary = first.getByRole('region', { name: 'Please fix the following errors' });
+  await firstSummary.getByRole('button', { name: /^Labels:/ }).click();
+  await expect(firstAlpha).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(firstAlpha).toBeChecked();
+  await expect(firstBeta).not.toBeChecked();
+  await expect(firstDisabled).toBeDisabled();
+  await expect(firstDisabled).not.toBeChecked();
+  await expect(first.locator('input[name="labels[]"]')).toHaveCount(1);
+  await expect(first.locator('input[name="labels[]"]')).toHaveValue('alpha');
+  await expect(firstAlpha).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(2);
+  await expect(firstGroup).not.toHaveAttribute('data-invalid', 'true');
+  await expect(firstGroup).toHaveAccessibleDescription('Choose product labels.');
+  await expect(firstSummary.getByRole('button')).toHaveCount(2);
+  await expect(firstSummary.getByRole('button', { name: /^Labels:/ })).toHaveCount(0);
+  const corrected = await resolveRefs(first);
+  expect(corrected.group.description).toHaveLength(1);
+  expect(corrected.group.description[0]?.id).toBe(describedIds[0]?.[0]);
+  expect(corrected.group.description[0]?.text).toBe('Choose product labels.');
+  for (const checkbox of corrected.checkboxes) {
+    expect(checkbox.described.map(node => node.id)).toEqual([describedIds[0]?.[0]]);
+    expect(checkbox.described.every(node => node.connected && node.inForm)).toBe(true);
+    expect(checkbox.invalid).toBeNull();
+  }
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Labelled product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with labels');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    labels: ['alpha'], name: 'Labelled product', description: 'Ready with labels',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(firstSummary).toHaveCount(0);
+  const second = forms.nth(1);
+  const secondGroup = second.getByRole('group', { name: /^Labels/ });
+  await expect(secondGroup).toHaveAttribute('data-invalid', 'true');
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(5);
+  await expect(secondGroup.getByRole('checkbox', { name: 'Alpha', exact: true })).toHaveAttribute('aria-invalid', 'true');
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' }).getByRole('button')).toHaveCount(3);
+  await expect(second.getByRole('region', { name: 'Please fix the following errors' })
+    .getByRole('button', { name: /^Labels:/ })).toHaveText('Labels: This field is required');
+  await expect(second.locator('input[name="labels[]"]')).toHaveCount(0);
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});
+
+test('AutoForm images keeps URL and remove references, keyboard summary return and exact payload isolated', async ({ page, browserName }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?view=autoform&compound=images');
+  const fixture = page.getByTestId('autoform-fixture');
+  const forms = fixture.locator('form');
+  await expect(forms).toHaveCount(2);
+  const backward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Shift+Tab' : 'Shift+Tab';
+  const forward = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+  const inspect = (form: ReturnType<typeof forms.nth>) => form.evaluate((element) => {
+    const field = element.querySelector<HTMLElement>('[data-svadmin-field-key="images"]');
+    const resolve = (node: Element | null | undefined, attribute: string) =>
+      (node?.getAttribute(attribute) ?? '').split(/\s+/).filter(Boolean).map((id) => {
+        const target = document.getElementById(id);
+        return {
+          id,
+          connected: target?.isConnected === true,
+          inForm: target !== null && element.contains(target),
+          text: target?.textContent ?? '',
+        };
+      });
+    const inputs = Array.from(field?.querySelectorAll<HTMLInputElement>('input[type="text"]') ?? []);
+    const removes = Array.from(field?.querySelectorAll<HTMLButtonElement>('button[aria-label="Remove image"]') ?? []);
+    const add = Array.from(field?.querySelectorAll<HTMLButtonElement>('button') ?? [])
+      .find(button => button.textContent?.includes('Add image'));
+    return {
+      description: field?.querySelector('[data-svadmin-field-description]')?.textContent ?? '',
+      add: add ? {
+        invalid: add.getAttribute('aria-invalid'),
+        described: resolve(add, 'aria-describedby'),
+      } : null,
+      inputs: inputs.map(input => ({
+        value: input.value,
+        invalid: input.getAttribute('aria-invalid'),
+        described: resolve(input, 'aria-describedby'),
+      })),
+      removes: removes.map(remove => ({
+        label: remove.getAttribute('aria-label'),
+        described: resolve(remove, 'aria-describedby'),
+      })),
+      hidden: Array.from(field?.querySelectorAll<HTMLInputElement>('input[type="hidden"]') ?? []).map(input => input.value),
+    };
+  });
+  const probedIds: string[][] = [];
+  for (const form of await forms.all()) {
+    const field = form.locator('[data-svadmin-field-key="images"]');
+    await expect(field.locator('[data-svadmin-field-description]')).toHaveText('Choose product images.');
+    const add = form.getByRole('button', { name: 'Add image', exact: true });
+    await expect(add).toBeVisible();
+    await expect(field.locator('input[type="text"]')).toHaveCount(0);
+    await expect(field.locator('input[type="hidden"]')).toHaveCount(0);
+
+    await add.click();
+    await expect(field.locator('input[type="text"]')).toHaveCount(1);
+    await expect(field.locator('input[type="hidden"]')).toHaveCount(1);
+    await expect(field.locator('input[type="hidden"]')).toHaveValue('');
+    const probe = await inspect(form);
+    expect(probe.add?.invalid).toBeNull();
+    expect(probe.add?.described).toHaveLength(1);
+    expect(probe.add?.described[0]?.connected).toBe(true);
+    expect(probe.add?.described[0]?.inForm).toBe(true);
+    expect(probe.add?.described[0]?.text).toBe('Choose product images.');
+    expect(probe.inputs).toHaveLength(1);
+    expect(probe.inputs[0]?.value).toBe('');
+    expect(probe.inputs[0]?.invalid).toBeNull();
+    expect(probe.inputs[0]?.described).toHaveLength(1);
+    expect(probe.inputs[0]?.described[0]?.connected).toBe(true);
+    expect(probe.inputs[0]?.described[0]?.inForm).toBe(true);
+    expect(probe.inputs[0]?.described[0]?.text).toBe('Choose product images.');
+    expect(probe.removes).toHaveLength(1);
+    expect(probe.removes[0]?.label).toBe('Remove image');
+    expect(probe.removes[0]?.described).toHaveLength(1);
+    expect(probe.removes[0]?.described[0]?.connected).toBe(true);
+    expect(probe.removes[0]?.described[0]?.inForm).toBe(true);
+    expect(probe.removes[0]?.described[0]?.text).toBe('Choose product images.');
+    await field.locator('button[aria-label="Remove image"]').click();
+    await expect(field.locator('input[type="text"]')).toHaveCount(0);
+    await expect(field.locator('input[type="hidden"]')).toHaveCount(0);
+    probedIds.push([
+      ...(probe.add?.described.map(node => node.id) ?? []),
+      ...probe.inputs.flatMap(input => input.described.map(node => node.id)),
+      ...probe.removes.flatMap(remove => remove.described.map(node => node.id)),
+    ]);
+
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(add).toBeFocused();
+    await expect(form.locator('[aria-invalid="true"]')).toHaveCount(3);
+    await expect(field.locator('input[type="hidden"]')).toHaveCount(0);
+    // 空列表只有 Add 入口：保存后它必须精确关联说明和宿主错误节点。
+    const emptyInvalid = await inspect(form);
+    expect(emptyInvalid.add?.invalid).toBe('true');
+    expect(emptyInvalid.add?.described).toHaveLength(2);
+    expect(emptyInvalid.add?.described[0]?.text).toBe('Choose product images.');
+    expect(emptyInvalid.add?.described[1]?.text).toBe('Invalid format');
+    expect(emptyInvalid.add?.described.every(node => node.connected && node.inForm)).toBe(true);
+    const summary = form.getByRole('region', { name: 'Please fix the following errors' });
+    await expect(summary.getByRole('button')).toHaveCount(3);
+    const imagesEntry = summary.getByRole('button', { name: /^Images:/ });
+    await expect(imagesEntry).toHaveText('Images: Invalid format');
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(imagesEntry).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(forward);
+    await expect(add).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Description:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(summary.getByRole('button', { name: /^Name:/ })).toBeFocused();
+    await page.keyboard.press(backward);
+    await expect(imagesEntry).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(add).toBeFocused();
+  }
+  expect(probedIds).toHaveLength(2);
+  expect(probedIds[0]?.some(id => probedIds[1]?.includes(id))).toBe(false);
+
+  const first = forms.nth(0);
+  const firstField = first.locator('[data-svadmin-field-key="images"]');
+  const firstAdd = first.getByRole('button', { name: 'Add image', exact: true });
+  const urls = firstField.locator('input[type="text"]');
+  await firstAdd.click();
+  await expect(urls).toHaveCount(1);
+  await urls.nth(0).fill('https://example.com/old.jpg');
+  await firstAdd.click();
+  await expect(urls).toHaveCount(2);
+  await urls.nth(1).fill('https://example.com/new.jpg');
+  await expect(firstField.locator('input[type="hidden"]')).toHaveCount(2);
+  expect(await firstField.locator('input[type="hidden"]').evaluateAll(nodes =>
+    nodes.map(node => (node as HTMLInputElement).value))).toEqual([
+    'https://example.com/old.jpg',
+    'https://example.com/new.jpg',
+  ]);
+  const live = await inspect(first);
+  expect(live.add?.invalid).toBeNull();
+  expect(live.add?.described).toHaveLength(1);
+  expect(live.add?.described[0]?.text).toBe('Choose product images.');
+  expect(live.add?.described.every(node => node.connected && node.inForm)).toBe(true);
+  expect(live.inputs).toHaveLength(2);
+  for (const input of live.inputs) {
+    expect(input.invalid).toBeNull();
+    expect(input.described).toHaveLength(1);
+    expect(input.described.every(node => node.connected && node.inForm)).toBe(true);
+    expect(input.described[0]?.text).toBe('Choose product images.');
+  }
+  expect(live.removes).toHaveLength(2);
+  for (const remove of live.removes) {
+    expect(remove.label).toBe('Remove image');
+    expect(remove.described).toHaveLength(1);
+    expect(remove.described[0]?.text).toBe('Choose product images.');
+    expect(remove.described.every(node => node.connected && node.inForm)).toBe(true);
+  }
+  await firstField.locator('button[aria-label="Remove image"]').nth(0).click();
+  await expect(urls).toHaveCount(1);
+  await expect(urls.nth(0)).toHaveValue('https://example.com/new.jpg');
+  await expect(firstField.locator('input[type="hidden"]')).toHaveCount(1);
+  await expect(firstField.locator('input[type="hidden"]')).toHaveValue('https://example.com/new.jpg');
+  await expect(firstField.locator('[aria-invalid="true"]')).toHaveCount(0);
+  const firstSummary = first.getByRole('region', { name: 'Please fix the following errors' });
+  await expect(firstSummary.getByRole('button', { name: /^Images:/ })).toHaveCount(0);
+  await first.getByRole('textbox', { name: /^Name/ }).fill('Imaged product');
+  await first.getByRole('textbox', { name: /^Description/ }).fill('Ready with images');
+  await first.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  await expect.poll(async () => JSON.parse(await page.getByTestId('autoform-payload').innerText())).toEqual({
+    images: ['https://example.com/new.jpg'], name: 'Imaged product', description: 'Ready with images',
+  });
+  await expect(first.locator('[aria-invalid="true"]')).toHaveCount(0);
+  await expect(firstSummary).toHaveCount(0);
+
+  const second = forms.nth(1);
+  const secondField = second.locator('[data-svadmin-field-key="images"]');
+  await expect(secondField.locator('input[type="hidden"]')).toHaveCount(0);
+  await expect(second.locator('[aria-invalid="true"]')).toHaveCount(3);
+  const secondSummary = second.getByRole('region', { name: 'Please fix the following errors' });
+  await expect(secondSummary.getByRole('button')).toHaveCount(3);
+  await expect(secondSummary.getByRole('button', { name: /^Images:/ })).toHaveText('Images: Invalid format');
+  await expect(page.getByTestId('autoform-success-count')).toHaveText('1');
+  expect(errors).toEqual([]);
+});

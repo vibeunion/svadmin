@@ -2,6 +2,7 @@
   import type { DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
   import { defineResource } from '@svadmin/core';
   import { decodeBaseRecord } from '@svadmin/core/schema';
+  import { onMount } from 'svelte';
   import { Type } from 'typebox';
   import AdminApp from '../../../packages/ui/src/components/AdminApp.svelte';
   import AutoForm from '../../../packages/ui/src/components/AutoForm.svelte';
@@ -16,9 +17,13 @@
 
   let autoForm = $state<{ reset: () => void }>();
   let stepsForm = $state<{ reset: () => void }>();
+  // 测试 harness 通过公开 onNavigationGuardReady 捕获 guard；旧/新导航各自独立计数。
+  let navigationGuard = $state<((fn: () => void) => void) | undefined>();
   let resetCalls = $state(0);
   let writeCount = $state(0);
   let navigationCount = $state(0);
+  let staleNavigationCount = $state(0);
+  let freshNavigationCount = $state(0);
   let successCount = $state(0);
 
   const dataProvider: DataProvider = {
@@ -73,6 +78,14 @@
     resetCalls += 1;
     (kind === 'auto' ? autoForm : stepsForm)?.reset();
   }
+
+  // 模态打开时外部按钮不可点击，故提供明确的 test-only DOM event 宿主入口；
+  // 只调用真实 bind:this reset，不触碰组件内部状态。
+  onMount(() => {
+    const onHostReset = () => callReset();
+    window.addEventListener('svadmin:form-reset-call', onHostReset);
+    return () => window.removeEventListener('svadmin:form-reset-call', onHostReset);
+  });
 </script>
 
 {#snippet dashboard()}
@@ -85,6 +98,7 @@
       redirect={false}
       id={mode === 'show' ? 'record-1' : undefined}
       onSuccess={() => { successCount += 1; }}
+      onNavigationGuardReady={(guard) => { navigationGuard = guard; }}
     />
   {:else}
     <StepsForm
@@ -103,10 +117,22 @@
 <section data-testid="form-reset-fixture">
   <div class="fixture-actions">
     <button type="button" data-testid="call-reset" onclick={callReset}>Call host reset</button>
+    <button
+      type="button"
+      data-testid="trigger-stale-navigation"
+      onclick={() => navigationGuard?.(() => { staleNavigationCount += 1; })}
+    >Trigger stale navigation</button>
+    <button
+      type="button"
+      data-testid="trigger-fresh-navigation"
+      onclick={() => navigationGuard?.(() => { freshNavigationCount += 1; })}
+    >Trigger fresh navigation</button>
   </div>
   <output data-testid="reset-calls">{resetCalls}</output>
   <output data-testid="write-count">{writeCount}</output>
   <output data-testid="navigation-count">{navigationCount}</output>
+  <output data-testid="stale-navigation-count">{staleNavigationCount}</output>
+  <output data-testid="fresh-navigation-count">{freshNavigationCount}</output>
   <output data-testid="success-count">{successCount}</output>
   <div data-testid="product-form-host">
     <AdminApp

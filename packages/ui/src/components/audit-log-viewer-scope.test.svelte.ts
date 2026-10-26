@@ -1,8 +1,10 @@
 import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { resetContext, type AuthProvider } from '@svadmin/core';
+import { getToastQueue, resetToast } from '@svadmin/core/toast';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AuditLogViewerScopeHost from './audit-log-viewer-scope.test-host.svelte';
+import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 
 function createAuditAuthProvider(scope: string, total = 1) {
   const getAuditLogs = vi.fn(async (params?: { page?: number; pageSize?: number }) => ({
@@ -36,6 +38,7 @@ async function openFirstSnapshot(container: HTMLElement) {
 
 afterEach(() => {
   resetContext();
+  resetToast();
   vi.restoreAllMocks();
 });
 
@@ -57,6 +60,26 @@ describe('AuditLogViewer scope', () => {
 
     await waitFor(() => expect(view.getByText('scope-b user')).not.toBeNull());
     expect(view.queryByText(/scope-a-secret/)).toBeNull();
+  });
+
+  it('hides provider diagnostics behind generic feedback and recovers on retry', async () => {
+    const scopeA = createAuditAuthProvider('scope-a');
+    scopeA.getAuditLogs.mockRejectedValueOnce(new Error('PRIVATE_DIAGNOSTIC'));
+    const view = renderWithI18n(AuditLogViewerScopeHost, {
+      authProvider: scopeA.provider,
+      tenant: { tenantId: 'tenant-a' },
+    });
+
+    await waitFor(() => expect(view.getByText('Something went wrong')).not.toBeNull());
+    expect(view.baseElement.textContent).not.toContain('PRIVATE_DIAGNOSTIC');
+    expect(getToastQueue()).toHaveLength(1);
+    expect(JSON.stringify(getToastQueue())).not.toContain('PRIVATE_DIAGNOSTIC');
+    expect(getToastQueue()[0]).toMatchObject({ type: 'error', message: 'Something went wrong' });
+
+    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(view.getByText('scope-a user')).not.toBeNull());
+    expect(view.queryByText('Something went wrong')).toBeNull();
+    expect(scopeA.getAuditLogs).toHaveBeenCalledTimes(2);
   });
 
   it('keeps the open snapshot when only pagination changes', async () => {

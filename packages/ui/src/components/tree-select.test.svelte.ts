@@ -6,6 +6,7 @@ import TreeSelect, { type TreeSelectOption } from './TreeSelect.svelte';
 import TreeSelectBindOptionsHost from './tree-select-bind-options.test-host.svelte';
 
 import { requireValue } from '../../../../scripts/test-assertions';
+import { exactRoleName } from '../../test/accessible-name';
 const testOptions: TreeSelectOption[] = [
   {
     value: 'dept-1',
@@ -63,7 +64,7 @@ describe('TreeSelect component', () => {
       const trigger = view.getByRole('button', { name: 'Department field' });
       expect(trigger.hasAttribute('aria-label')).toBe(false);
       label.remove();
-      expect(view.getByRole('button', { name: '前端组' })).toBe(trigger);
+      expect(view.getByRole('button', { name: exactRoleName('前端组') })).toBe(trigger);
       await view.rerender({ ariaLabel: 'Departments' });
       expect(view.getByRole('button', { name: 'Departments' })).toBe(trigger);
     } finally {
@@ -1021,8 +1022,8 @@ describe('TreeSelect component', () => {
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
 
-    const parent = () => view.getByRole('treeitem', { name: 'Root' });
-    const child = () => view.getByRole('treeitem', { name: 'B' });
+    const parent = () => view.getByRole('treeitem', { name: exactRoleName('Root') });
+    const child = () => view.getByRole('treeitem', { name: exactRoleName('B') });
     expect(parent().getAttribute('aria-checked')).toBe('mixed');
 
     await fireEvent.click(parent());
@@ -1040,7 +1041,7 @@ describe('TreeSelect component', () => {
     await fireEvent.click(parent());
     expect(onchange).toHaveBeenLastCalledWith([]);
     expect(parent().getAttribute('aria-checked')).toBe('false');
-    expect(view.getByRole('treeitem', { name: 'Blocked' }).getAttribute('aria-disabled')).toBe('true');
+    expect(view.getByRole('treeitem', { name: exactRoleName('Blocked') }).getAttribute('aria-disabled')).toBe('true');
     expect(onchange).toHaveBeenCalledTimes(4);
   });
 
@@ -1060,13 +1061,13 @@ describe('TreeSelect component', () => {
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
 
-    const parent = () => view.getByRole('treeitem', { name: 'Root' });
+    const parent = () => view.getByRole('treeitem', { name: exactRoleName('Root') });
     expect(parent().getAttribute('aria-checked')).toBe('mixed');
 
     const tree = view.getByRole('tree');
     tree.scrollTop = 240 * 36;
     await fireEvent.scroll(tree);
-    const unmountedLeaf = view.getByRole('treeitem', { name: 'Leaf 247' });
+    const unmountedLeaf = view.getByRole('treeitem', { name: exactRoleName('Leaf 247') });
     expect(unmountedLeaf.getAttribute('aria-checked')).toBe('false');
     await fireEvent.click(unmountedLeaf);
     expect(onchange).toHaveBeenLastCalledWith(['selected', 'leaf-247']);
@@ -1083,7 +1084,7 @@ describe('TreeSelect component', () => {
     expect(parent().getAttribute('aria-checked')).toBe('true');
     tree.scrollTop = 250 * 36;
     await fireEvent.scroll(tree);
-    const blocked = view.getByRole('treeitem', { name: 'Blocked branch' });
+    const blocked = view.getByRole('treeitem', { name: exactRoleName('Blocked branch') });
     expect(blocked.getAttribute('aria-disabled')).toBe('true');
     expect(blocked.getAttribute('aria-checked')).toBe('false');
   });
@@ -1108,8 +1109,8 @@ describe('TreeSelect component', () => {
         multiple: true, value: ['kept'], loadChildren, onchange,
       });
       await fireEvent.click(requireValue(view.container.querySelector('button')));
-      const parent = () => view.getByRole('treeitem', { name: 'Root' });
-      const lazy = () => view.getByRole('treeitem', { name: 'Lazy' });
+      const parent = () => view.getByRole('treeitem', { name: exactRoleName('Root') });
+      const lazy = () => view.getByRole('treeitem', { name: exactRoleName('Lazy') });
       expect(parent().getAttribute('aria-checked')).toBe('mixed');
 
       await fireEvent.click(view.getByRole('button', { name: 'Lazy: Expand or collapse children' }));
@@ -1128,7 +1129,7 @@ describe('TreeSelect component', () => {
         await act(async () => { retry.resolve([{ value: 'loaded', label: 'Loaded' }]); await retry.promise; });
       }
 
-      const loaded = await view.findByRole('treeitem', { name: 'Loaded' });
+      const loaded = await view.findByRole('treeitem', { name: exactRoleName('Loaded') });
       expect(onchange).not.toHaveBeenCalled();
       expect(parent().getAttribute('aria-checked')).toBe('mixed');
       await fireEvent.click(loaded);
@@ -1235,7 +1236,7 @@ describe('TreeSelect component', () => {
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
     const activate = async (name: string) => {
-      const node = view.getByRole('treeitem', { name });
+      const node = view.getByRole('treeitem', { name: exactRoleName(name) });
       if (action === 'click') await fireEvent.click(node);
       else await fireEvent.keyDown(node, { key: action });
     };
@@ -1246,7 +1247,7 @@ describe('TreeSelect component', () => {
     if (search) {
       await fireEvent.input(view.getByRole('textbox'), { target: { value: '' } });
     }
-    const root = view.getByRole('treeitem', { name: 'Root' });
+    const root = view.getByRole('treeitem', { name: exactRoleName('Root') });
     if (root.getAttribute('aria-expanded') !== 'true') await fireEvent.keyDown(root, { key: 'ArrowRight' });
     await activate('Blocked leaf');
     expect(onchange).not.toHaveBeenCalled();
@@ -1282,8 +1283,8 @@ describe('TreeSelect component', () => {
       await fireEvent.click(requireValue(view.container.querySelector('button')));
       // 搜索只裁剪显示范围，祖先的 disabled 仍沿完整数据树传播。
       await fireEvent.input(view.getByRole('textbox'), { target: { value: 'Locked leaf' } });
-      expect(view.queryByRole('treeitem', { name: 'Locked' })).toBeTruthy();
-      const blocked = view.getByRole('treeitem', { name: 'Locked leaf' });
+      expect(view.queryByRole('treeitem', { name: exactRoleName('Locked') })).toBeTruthy();
+      const blocked = view.getByRole('treeitem', { name: exactRoleName('Locked leaf') });
       expect(blocked.getAttribute('aria-disabled')).toBe('true');
       await fireEvent.click(blocked);
       await fireEvent.keyDown(blocked, { key: 'Enter' });
@@ -1291,7 +1292,7 @@ describe('TreeSelect component', () => {
       expect(onchange).not.toHaveBeenCalled();
       // 同一搜索边界下未继承禁用的叶子仍可提交，证明拦截来自禁用传播。
       await fireEvent.input(view.getByRole('textbox'), { target: { value: 'Open leaf' } });
-      const allowed = view.getByRole('treeitem', { name: 'Open leaf' });
+      const allowed = view.getByRole('treeitem', { name: exactRoleName('Open leaf') });
       expect(allowed.getAttribute('aria-disabled')).toBeNull();
       await fireEvent.click(allowed);
       expect(onchange).toHaveBeenCalledExactlyOnceWith(multiple ? ['open-leaf'] : 'open-leaf');
@@ -1310,7 +1311,7 @@ describe('TreeSelect component', () => {
         multiple, onlyLeafSelectable: true, onchange,
       });
       await fireEvent.click(requireValue(view.container.querySelector('button')));
-      const parent = view.getByRole('treeitem', { name: 'Opaque branch' });
+      const parent = view.getByRole('treeitem', { name: exactRoleName('Opaque branch') });
       // 没有 loadChildren 时父项无法解析出叶子，只应保持不可选。
       await fireEvent.click(parent);
       await fireEvent.keyDown(parent, { key: 'Enter' });
@@ -1323,7 +1324,7 @@ describe('TreeSelect component', () => {
       expect(onchange).not.toHaveBeenCalled();
       expect(parent.getAttribute('aria-expanded')).toBe('false');
       expect(parent.getAttribute('aria-selected')).toBe('false');
-      await fireEvent.click(view.getByRole('treeitem', { name: 'Plain leaf' }));
+      await fireEvent.click(view.getByRole('treeitem', { name: exactRoleName('Plain leaf') }));
       expect(onchange).toHaveBeenCalledExactlyOnceWith(multiple ? ['plain-leaf'] : 'plain-leaf');
     },
   );
@@ -1340,7 +1341,7 @@ describe('TreeSelect component', () => {
         multiple, onchange,
       });
       await fireEvent.click(requireValue(view.container.querySelector('button')));
-      const parent = view.getByRole('treeitem', { name: 'Opaque branch' });
+      const parent = view.getByRole('treeitem', { name: exactRoleName('Opaque branch') });
       await fireEvent.click(view.getByRole('button', { name: 'Opaque branch: Expand or collapse children' }));
       const feedback = await view.findByRole('alert');
       expect(feedback.textContent).toContain('This node cannot be expanded right now.');
@@ -1364,7 +1365,7 @@ describe('TreeSelect component', () => {
         multiple: true, onlyLeafSelectable: true, onchange,
       });
       await fireEvent.click(requireValue(view.container.querySelector('button')));
-      await fireEvent.click(view.getByRole('treeitem', { name: 'Opaque branch' }));
+      await fireEvent.click(view.getByRole('treeitem', { name: exactRoleName('Opaque branch') }));
       expect(await view.findByRole('alert')).toBeTruthy();
 
       if (change === 'loader') await view.rerender({ loadChildren: loader });
@@ -1384,7 +1385,7 @@ describe('TreeSelect component', () => {
 
       if (change === 'loader') {
         await view.rerender({ disabled: false });
-        await fireEvent.click(view.getByRole('treeitem', { name: 'Opaque branch' }));
+        await fireEvent.click(view.getByRole('treeitem', { name: exactRoleName('Opaque branch') }));
         await view.findByRole('treeitem', { name: 'Child' });
         expect(loader).toHaveBeenCalledOnce();
         expect(onchange).not.toHaveBeenCalled();
@@ -1408,7 +1409,7 @@ describe('TreeSelect component', () => {
       options, multiple: true, onchange,
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
-    const parent = view.getByRole('treeitem', { name: 'Opaque branch' });
+    const parent = view.getByRole('treeitem', { name: exactRoleName('Opaque branch') });
     await fireEvent.click(parent);
     expect(await view.findByRole('alert')).toBeTruthy();
 
@@ -1421,7 +1422,7 @@ describe('TreeSelect component', () => {
     expect(onchange).not.toHaveBeenCalled();
 
     // 只有用户再次操作才提交原地补齐的子节点。
-    await fireEvent.click(view.getByRole('treeitem', { name: 'Opaque branch' }));
+    await fireEvent.click(view.getByRole('treeitem', { name: exactRoleName('Opaque branch') }));
     await waitFor(() => expect(onchange).toHaveBeenCalledExactlyOnceWith(['host-child']));
   });
 
@@ -1468,7 +1469,7 @@ describe('TreeSelect component', () => {
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
     if (search) await fireEvent.input(view.getByRole('textbox'), { target: { value: 'Opaque' } });
-    const parent = view.getByRole('treeitem', { name: 'Opaque branch' });
+    const parent = view.getByRole('treeitem', { name: exactRoleName('Opaque branch') });
     const expand = view.getByRole('button', { name: 'Opaque branch: Expand or collapse children' });
     await fireEvent.click(parent);
     await fireEvent.keyDown(parent, { key: 'Enter' });
@@ -1487,7 +1488,7 @@ describe('TreeSelect component', () => {
       multiple: true, onlyLeafSelectable: true, onchange,
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
-    const parent = view.getByRole('treeitem', { name: 'Opaque branch' });
+    const parent = view.getByRole('treeitem', { name: exactRoleName('Opaque branch') });
     await fireEvent.click(parent);
     await fireEvent.keyDown(parent, { key: 'Enter' });
     await fireEvent.click(view.getByRole('button', { name: 'Opaque branch: Expand or collapse children' }));
@@ -1577,7 +1578,7 @@ describe('TreeSelect component', () => {
       get disabled() { return disabled; },
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
-    const root = () => view.getByRole('treeitem', { name: 'Root' });
+    const root = () => view.getByRole('treeitem', { name: exactRoleName('Root') });
     // 首次加载失败后，禁用会清除错误；重试返回空结果使父项成为可提交叶子。
     await fireEvent.keyDown(root(), { key: 'Enter' });
     await act(async () => { pending.reject(new Error('PRIVATE_LEAF_EMPTY')); await pending.promise.catch(() => {}); });
@@ -1608,7 +1609,7 @@ describe('TreeSelect component', () => {
       get disabled() { return disabled; },
     });
     await fireEvent.click(requireValue(view.container.querySelector('button')));
-    const root = () => view.getByRole('treeitem', { name: 'Root' });
+    const root = () => view.getByRole('treeitem', { name: exactRoleName('Root') });
     await fireEvent.keyDown(root(), { key: 'Enter' });
     expect(root().getAttribute('aria-busy')).toBe('true');
     await act(() => { disabled = true; });

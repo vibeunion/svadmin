@@ -2,7 +2,14 @@ import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FieldDefinition } from '@svadmin/core';
 import Host from '../../test/fixtures/AutoFormFocusHarness.svelte';
+import Editor from '../../../editor/src/components/Editor.svelte';
 import { requireValue } from '../../../../scripts/test-assertions';
+
+vi.mock('../editor-config.svelte.js', () => ({
+  getRichTextEditor: () => Editor,
+}));
+vi.mock('@svadmin/editor/components/Editor.svelte', async () =>
+  import('../../../editor/src/components/Editor.svelte'));
 
 beforeEach(() => {
   Object.defineProperty(Element.prototype, 'animate', {
@@ -47,6 +54,81 @@ describe('AutoForm compound error focus', () => {
     await fireEvent.click(within(summary).getByRole('button', { name: /^First:/ }));
     expect(first.contains(document.activeElement)).toBe(true);
     expect(onCreate).not.toHaveBeenCalled();
+  });
+
+  it('prefers the rich text contenteditable over the toolbar select after validation and from the summary', async () => {
+    const onCreate = vi.fn();
+    const view = render(Host, { fields: [invalidField('richtext'), invalidField('text', 'second')], onCreate });
+    const summary = await submit(view);
+    const first = requireValue(view.container.querySelector<HTMLElement>('[data-svadmin-field-key="first"]'));
+    const toolbarSelect = requireValue(first.querySelector<HTMLSelectElement>('select[aria-label="Block type"]'));
+    const content = requireValue(
+      first.querySelector<HTMLElement>('[contenteditable="true"][role="textbox"]'),
+    );
+    await waitFor(() => expect(document.activeElement).toBe(content));
+    expect(document.activeElement).not.toBe(toolbarSelect);
+    const second = within(view.container).getByRole('textbox', { name: /^second/ });
+    second.focus();
+    await fireEvent.click(within(summary).getByRole('button', { name: /^First:/ }));
+    expect(document.activeElement).toBe(content);
+    expect(onCreate).not.toHaveBeenCalled();
+  });
+
+  it('keeps the first actionable control when a non-rich-text container has a later rich text subfield', async () => {
+    const onCreate = vi.fn();
+    const view = render(Host, { fields: [
+      {
+        key: 'first', label: 'First', type: 'array', required: true,
+        defaultValue: [{ title: '', body: '' }],
+        validate: () => 'Choose a value',
+        subFields: [
+          { key: 'title', label: 'Title', type: 'text' },
+          { key: 'body', label: 'Body', type: 'richtext' },
+        ],
+      },
+      invalidField('text', 'second'),
+    ], onCreate });
+    const summary = await submit(view);
+    const first = requireValue(view.container.querySelector<HTMLElement>('[data-svadmin-field-key="first"]'));
+    const add = within(first).getByRole('button', { name: 'Add' });
+    const content = requireValue(
+      first.querySelector<HTMLElement>('[contenteditable="true"][role="textbox"]'),
+    );
+    await waitFor(() => expect(document.activeElement).toBe(add));
+    expect(document.activeElement).not.toBe(content);
+    const second = within(view.container).getByRole('textbox', { name: /^second/ });
+    second.focus();
+    await fireEvent.click(within(summary).getByRole('button', { name: /^First:/ }));
+    expect(document.activeElement).toBe(add);
+    expect(onCreate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    'hidden', 'inert', 'aria-disabled', 'disabled fieldset', 'unfocusable',
+  ])('does not let an unavailable rich text body steal focus (%s)', async unavailable => {
+    const view = render(Host, { fields: [invalidField('richtext'), invalidField('text', 'second')] });
+    const first = requireValue(view.container.querySelector<HTMLElement>('[data-svadmin-field-key="first"]'));
+    const toolbarSelect = requireValue(first.querySelector<HTMLSelectElement>('select[aria-label="Block type"]'));
+    const content = requireValue(
+      first.querySelector<HTMLElement>('[contenteditable="true"][role="textbox"]'),
+    );
+    if (unavailable === 'disabled fieldset') {
+      const fieldset = document.createElement('fieldset');
+      fieldset.disabled = true;
+      content.parentElement?.insertBefore(fieldset, content);
+      fieldset.appendChild(content);
+    } else if (unavailable === 'unfocusable') {
+      content.focus = () => {};
+    } else {
+      content.setAttribute(unavailable, unavailable === 'aria-disabled' ? 'true' : '');
+    }
+    const summary = await submit(view);
+    await waitFor(() => expect(document.activeElement).toBe(toolbarSelect));
+    expect(document.activeElement).not.toBe(content);
+    const second = within(view.container).getByRole('textbox', { name: /^second/ });
+    second.focus();
+    await fireEvent.click(within(summary).getByRole('button', { name: /^First:/ }));
+    expect(document.activeElement).toBe(toolbarSelect);
   });
 
   it('uses displayed group order rather than definition order for automatic focus', async () => {

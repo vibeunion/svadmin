@@ -37,6 +37,7 @@ function remoteView(id = 'team-view'): SavedListView {
 function createModel(input: {
   provider?: SavedListViewProvider;
   explicitURL?: boolean;
+  initialStateOverridesSavedView?: boolean;
   allowDefault?: boolean;
   ready?: boolean;
 } = {}) {
@@ -55,6 +56,7 @@ function createModel(input: {
       isScopeLoaded: () => ready,
       readPreference: (_scope, key) => localStorage.getItem(key),
       hasExplicitURLState: input.explicitURL ?? false,
+      initialStateOverridesSavedView: input.initialStateOverridesSavedView ?? false,
       canApplyRemoteDefault: () => input.allowDefault ?? false,
       captureState,
       applyState,
@@ -79,6 +81,33 @@ function store(view: SavedListView, scope = scopeA): void {
   localStorage.setItem(activeSavedListViewStorageKey(scope), view.id);
 }
 
+function storeViews(views: SavedListView[], scope = scopeA): void {
+  localStorage.setItem(savedListViewsStorageKey(scope), serializeSavedListViews(views));
+  if (views[0]) localStorage.setItem(activeSavedListViewStorageKey(scope), views[0].id);
+}
+
+function staleLocalView(id: string, removed: string): SavedListView {
+  return {
+    id, name: id,
+    state: {
+      ...state(id),
+      columnVisibility: { id: false, [removed]: true },
+      columnOrder: ['email', removed, 'id'],
+    },
+  };
+}
+
+function staleRemoteView(id: string, removed: string): SavedListView {
+  return {
+    ...remoteView(id),
+    state: {
+      ...state(id),
+      columnVisibility: { [removed]: false },
+      columnOrder: ['email', removed],
+    },
+  };
+}
+
 afterEach(() => {
   for (const dispose of disposers.splice(0)) dispose();
   vi.restoreAllMocks();
@@ -92,6 +121,20 @@ describe('saved list view model', () => {
     expect(model.availableSavedViews).toEqual([view]);
     expect(model.initialSavedView).toEqual(explicitURL ? undefined : view);
     expect(model.activeSavedViewId).toBe(explicitURL ? undefined : view.id);
+  });
+
+  it('does not mark a persisted active view when an initial snapshot takes precedence', () => {
+    const view = { id: 'local', name: 'Local', state: state('stored') };
+    store(view);
+    const { model, applyState } = createModel({ initialStateOverridesSavedView: true });
+
+    expect(model.availableSavedViews).toEqual([view]);
+    expect(model.initialSavedView).toBeUndefined();
+    expect(model.activeSavedViewId).toBeUndefined();
+
+    model.applySavedView(view);
+    expect(model.activeSavedViewId).toBe(view.id);
+    expect(applyState).toHaveBeenCalledOnce();
   });
 
   it('saves, replaces by name, and deletes only within the current scope', () => {
@@ -313,5 +356,130 @@ describe('saved list view model', () => {
     expect(model.activeSavedViewId).toBe(view.id);
     model.markSavedViewDirty();
     expect(model.activeSavedViewId).toBeUndefined();
+  });
+
+  it('prunes stale columns in the applied payload without rewriting stored views', () => {
+    store(staleLocalView('stale', 'removed'));
+    const raw = localStorage.getItem(savedListViewsStorageKey(scopeA));
+    const { model, applyState } = createModel();
+
+    expect(model.availableSavedViews[0]?.state.columnVisibility).toEqual({ id: false });
+    expect(model.availableSavedViews[0]?.state.columnOrder).toEqual(['email', 'id']);
+    expect(model.staleSavedViewColumns).toEqual(['removed']);
+    expect(localStorage.getItem(savedListViewsStorageKey(scopeA))).toBe(raw);
+
+    model.applySavedView(requireValue(model.availableSavedViews[0]));
+    expect(applyState).toHaveBeenCalledWith({
+      search: 'stale', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: { id: false }, columnOrder: ['email', 'id'],
+    });
+    expect(JSON.stringify(applyState.mock.calls[0]?.[0])).not.toContain('removed');
+  });
+
+  it('keeps pruning notices for the legal "__proto__" view id through apply and delete', () => {
+    storeViews([staleLocalView('keep', 'removed-keep'), staleLocalView('__proto__', 'removed-proto')]);
+    const { model, applyState } = createModel();
+
+    expect(model.availableSavedViews.map(view => view.id)).toEqual(['keep', '__proto__']);
+    expect(model.staleSavedViewColumns).toEqual(['removed-keep', 'removed-proto']);
+
+    model.applySavedView(requireValue(model.availableSavedViews.find(view => view.id === '__proto__')));
+    expect(applyState).toHaveBeenCalledWith({
+      search: '__proto__', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: { id: false }, columnOrder: ['email', 'id'],
+    });
+    expect(JSON.stringify(applyState.mock.calls[0]?.[0])).not.toContain('removed-proto');
+
+    model.deleteSavedView('__proto__');
+    expect(model.availableSavedViews.map(view => view.id)).toEqual(['keep']);
+    expect(model.staleSavedViewColumns).toEqual(['removed-keep']);
+  });
+
+  it('dedupes local and remote views by identity without leaking hidden local stale columns', async () => {
+    store(staleLocalView('shared', 'removed-local'));
+    const list = vi.fn(async () => [staleRemoteView('shared', 'removed-remote')]);
+    const { model } = createModel({ provider: { list } });
+    await waitFor(() => expect(model.remoteViewsLoading).toBe(false));
+
+    expect(model.availableSavedViews).toHaveLength(1);
+    expect(model.availableSavedViews[0]?.source).toBe('team');
+    expect(model.staleSavedViewColumns).toEqual(['removed-remote']);
+  });
+
+  it('clears only the deleted or overwritten local view stale notice', () => {
+    storeViews([staleLocalView('keep', 'removed-b'), staleLocalView('gone', 'removed-a')]);
+    const { model } = createModel();
+    expect(model.staleSavedViewColumns).toEqual(['removed-b', 'removed-a']);
+
+    model.savedViewName = 'keep';
+    model.saveCurrentView();
+    expect(model.availableSavedViews).toHaveLength(2);
+    expect(model.staleSavedViewColumns).toEqual(['removed-a']);
+    const persisted = JSON.parse(localStorage.getItem(savedListViewsStorageKey(scopeA)) ?? '{}');
+    expect(persisted.views.find((view: { id: string }) => view.id === 'keep').state.columnOrder)
+      .toEqual(['id', 'email']);
+    expect(JSON.stringify(persisted)).not.toContain('removed-b');
+
+    model.deleteSavedView('gone');
+    expect(model.availableSavedViews).toHaveLength(1);
+    expect(model.staleSavedViewColumns).toEqual([]);
+  });
+
+  it('clears only the removed or overwritten remote view stale notice', async () => {
+    const keep = staleRemoteView('remote-keep', 'removed-b');
+    const gone = staleRemoteView('remote-gone', 'removed-a');
+    const list = vi.fn(async () => [keep, gone]);
+    const remove = vi.fn(async (_scope: ListPreferenceScope, input: { id: string; expectedVersion: number }) => (
+      { ok: true, id: input.id, version: input.expectedVersion + 1 }
+    ));
+    const save = vi.fn(async (_scope: ListPreferenceScope, mutation: {
+      id: string; name: string; state: SavedListViewState;
+    }) => ({
+      ok: true,
+      view: { ...remoteView(mutation.id), name: mutation.name, state: mutation.state, version: 2 },
+      version: 2,
+    }));
+    const { model, applyState } = createModel({ provider: { list, remove, save } });
+    await waitFor(() => expect(model.remoteViewsLoading).toBe(false));
+    expect(model.staleSavedViewColumns).toEqual(['removed-b', 'removed-a']);
+
+    model.applySavedView(requireValue(model.availableSavedViews.find(view => view.id === 'remote-keep')));
+    expect(applyState).toHaveBeenCalledWith({
+      search: 'remote-keep', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: ['email'],
+    });
+
+    model.savedViewSource = 'team';
+    model.savedViewName = 'remote-keep';
+    model.saveCurrentView();
+    await waitFor(() => expect(model.savedViewMutationPending).toBe(false));
+    expect(save).toHaveBeenCalledOnce();
+    expect(save.mock.calls[0]?.[1].state).toEqual({
+      search: 'current', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: ['id', 'email'],
+    });
+    expect(model.staleSavedViewColumns).toEqual(['removed-a']);
+
+    model.deleteSavedView('remote-gone');
+    await waitFor(() => expect(model.availableSavedViews).toHaveLength(1));
+    expect(model.staleSavedViewColumns).toEqual([]);
+  });
+
+  it('does not leak stale notices across scopes', async () => {
+    store(staleLocalView('stale-local', 'removed-local'));
+    const view = staleRemoteView('stale-remote', 'removed-remote');
+    const list = vi.fn(async (scope: ListPreferenceScope) => (
+      scope.tenantIdentity === 'a' ? [view] : []
+    ));
+    const { model, changeScope } = createModel({ provider: { list } });
+    await waitFor(() => expect(model.remoteViewsLoading).toBe(false));
+
+    expect(model.availableSavedViews[0]?.state.columnOrder).toEqual(['email']);
+    expect(model.staleSavedViewColumns).toEqual(['removed-local', 'removed-remote']);
+
+    changeScope(scopeB);
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(model.remoteViewsLoading).toBe(false));
+    expect(model.staleSavedViewColumns).toEqual([]);
   });
 });

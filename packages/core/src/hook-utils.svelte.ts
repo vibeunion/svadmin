@@ -132,6 +132,5 @@ export function fireErrorNotification(request: ErrorNotificationRequest): void {
     },provider);
     return;
   }
-  const errMsg=error instanceof Error? error.message:String(error??'');
-  notifyWithProvider({ type: 'error',message: config||`${defaultMessage}${errMsg? ': '+errMsg:''}` },provider);
+  notifyWithProvider({ type: 'error',message: config||defaultMessage },provider);
 }

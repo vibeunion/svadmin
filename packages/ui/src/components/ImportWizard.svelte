@@ -15,6 +15,9 @@
   import { Badge } from './ui/badge/index.js';
   import { Upload, ArrowRight, ArrowLeft, AlertCircle, Download, FileSpreadsheet, Loader2, RotateCw } from '@lucide/svelte';
 
+  /** 仅用于标记文件读取或 JSON 语法异常，避免把浏览器原始诊断展示给用户。 */
+  class ImportFileReadError extends Error {}
+
   interface Props {
     resourceName: string;
     open?: boolean;
@@ -152,13 +155,13 @@
         throw new Error(i18n.t('import.invalidLimits'));
       }
       if (file.size > maxBytes) throw new Error(i18n.t('import.limit'));
-      const text = await file.text();
+      const text = await readFileText(file);
       if (!current(origin, token)) return;
       if (text.length > maxBytes) throw new Error(i18n.t('import.limit'));
       const cleanText = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 
       if (file.name.toLowerCase().endsWith('.json')) {
-        const json: unknown = JSON.parse(cleanText);
+        const json: unknown = parseImportJson(cleanText);
         if (Array.isArray(json) && json.length > maxRows) throw new Error(i18n.t('import.limit'));
         if (!Array.isArray(json) || json.length === 0 || json.some((item) => (
           typeof item !== 'object' || item === null || Array.isArray(item)
@@ -209,8 +212,26 @@
       currentStep = 2;
     } catch (error) {
       if (!current(origin, token)) return;
-      fileError = error instanceof Error ? error.message : 'Unable to read the import file.';
+      fileError = error instanceof ImportFileReadError
+        ? i18n.t('import.fileReadFailed')
+        : error instanceof Error ? error.message : i18n.t('import.fileReadFailed');
       currentStep = 1;
+    }
+  }
+
+  async function readFileText(file: File): Promise<string> {
+    try {
+      return await file.text();
+    } catch {
+      throw new ImportFileReadError();
+    }
+  }
+
+  function parseImportJson(text: string): unknown {
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new ImportFileReadError();
     }
   }
 
@@ -429,12 +450,12 @@
       succeededCount = result.succeeded.length;
       failedRecords = result.errored.map(item => ({
         row: item.request as Record<string, unknown>,
-        error: item.error.message,
+        error: importFailureMessage(item.error, item.row),
       }));
       importResult = { succeeded: succeededCount, failed: failedRecords.length };
     } catch (error) {
       if (!current(origin, token)) return;
-      importError = error instanceof Error ? error.message : 'Import failed.';
+      importError = importFailureMessage(error);
       importResult = null;
     }
     if (importResult) {
@@ -455,6 +476,33 @@
       left.taskProvider === right.taskProvider && left.taskArtifactProvider === right.taskArtifactProvider &&
       left.taskName === right.taskName && left.retryTaskName === right.retryTaskName &&
       left.taskIdempotencyKey === right.taskIdempotencyKey;
+  }
+
+  /** Core 的 HttpError.message 只用于诊断；界面仅按安全 code 选择本地化文案。 */
+  function importFailureMessage(error: unknown, row?: number): string {
+    let code: unknown;
+    try {
+      if (typeof error === 'object' && error !== null) {
+        code = Object.getOwnPropertyDescriptor(error, 'code')?.value;
+      }
+    } catch { /* 错误对象属于不可信诊断来源。 */ }
+    if (code === 'IMPORT_LIMIT_EXCEEDED') return i18n.t('import.limit');
+    if (code === 'INVALID_RESOURCE_INPUT') {
+      const failedRow = row ?? failureRow(error);
+      if (failedRow !== undefined) return i18n.t('import.invalidRow', { row: failedRow });
+    }
+    return i18n.t('common.operationFailed', { defaultValue: 'Import failed' });
+  }
+
+  function failureRow(error: unknown): number | undefined {
+    try {
+      if (typeof error !== 'object' || error === null) return undefined;
+      const details: unknown = Object.getOwnPropertyDescriptor(error, 'details')?.value;
+      if (typeof details !== 'object' || details === null) return undefined;
+      const row: unknown = Object.getOwnPropertyDescriptor(details, 'row')?.value;
+      return typeof row === 'number' && Number.isSafeInteger(row) && row >= 1 && row <= maxRows
+        ? row : undefined;
+    } catch { return undefined; }
   }
 
   async function retryFailedRows(): Promise<void> {

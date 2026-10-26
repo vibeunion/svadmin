@@ -24,7 +24,7 @@
 <section aria-labelledby="svar-surface-{widgetId}" class="surface-data-grid">
   <h3 id="svar-surface-{widgetId}">{config.title}</h3>
   {#if !Grid || !Theme}
-    <p role="alert">{locale.startsWith('zh') ? '宿主尚未配置 SVAR 引擎' : 'The host has not configured the SVAR engine'}</p>
+    <p role="alert">{labels.tableEngineUnavailable}</p>
   {:else if data.status === 'error'}
     <p role="alert">{surfaceErrorMessage(data.error, labels, labels.tableUnavailable, labels.tableInvalidData)}</p>
   {:else if data.status === 'unbound' || (records && !records.ok)}

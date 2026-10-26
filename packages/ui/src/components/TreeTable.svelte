@@ -151,7 +151,12 @@
       && new Set(columns.map(column => column.key)).size === columns.length
       && (!ordering || (columns.some(column => column.key === ordering.key) && ['asc', 'desc'].includes(ordering.direction)));
   });
-  const displayError = $derived(error || (!fullIndex.valid || !index.valid || !columnsValid ? i18n.t('treeTable.invalidData') : ''));
+  const hasInvalidData = $derived(!fullIndex.valid || !index.valid || !columnsValid);
+  // 宿主传入的 error 可能包含 provider/internal diagnostic，只映射为稳定本地化文案；
+  // 本地数据/列校验失败优先保留更具体、可操作的 invalidData 说明。
+  const displayError = $derived(hasInvalidData
+    ? i18n.t('treeTable.invalidData')
+    : (error ? i18n.t('common.operationFailed') : ''));
   const available = $derived(!loading && !displayError);
   const selection = $derived(treeTableSelection(fullIndex.nodes, new Set(selectedKeys)));
   function isExpanded(id: TreeTableId): boolean {

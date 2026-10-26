@@ -1,8 +1,16 @@
 /** 嵌套表单的草稿与传输语义；不是替代服务端的 JSON Schema 校验器。 */
 export interface JsonSchemaFormSchema {
+  $schema?: string;
+  $id?: string;
+  $comment?: string;
+  $ref?: string;
+  $defs?: Record<string, JsonSchemaFormSchema>;
   type?: string | string[];
   const?: string | number | boolean | null;
   readOnly?: boolean;
+  writeOnly?: boolean;
+  deprecated?: boolean;
+  examples?: unknown[];
   minimum?: number;
   maximum?: number;
   exclusiveMinimum?: number;
@@ -13,13 +21,22 @@ export interface JsonSchemaFormSchema {
   minItems?: number;
   maxItems?: number;
   additionalProperties?: boolean;
+  pattern?: string;
   title?: string;
   description?: string;
   properties?: Record<string, JsonSchemaFormSchema>;
   items?: JsonSchemaFormSchema;
+  oneOf?: JsonSchemaFormSchema[];
+  discriminator?: { propertyName: string };
   enum?: Array<string | number | boolean | null>;
   default?: unknown;
   required?: string[];
+  visibleWhen?: {
+    path: readonly string[];
+    equals?: string | number | boolean | null;
+    notEquals?: string | number | boolean | null;
+    exists?: boolean;
+  };
 }
 
 export const SCHEMA_FORM_LIMITS = Object.freeze({ depth: 32, nodes: 10_000, characters: 1_048_576 });

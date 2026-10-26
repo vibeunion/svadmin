@@ -8,7 +8,7 @@
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
   import type { JsonObject } from '../types.js';
   import { surfaceMetric } from '../recipes.js';
-  import { resolveSurfaceMessages } from '../localization.js';
+  import { resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
   import { displayTableValue } from '../widget-data.js';
 
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
@@ -30,7 +30,7 @@
     {:else if data.status === 'empty'}
       <p role="status">{text.detailEmpty}</p>
     {:else if data.status === 'error'}
-      <p role="alert">{text.detailUnavailable}</p>
+      <p role="alert">{surfaceErrorMessage(data.error, text, text.detailUnavailable, text.detailInvalidData)}</p>
     {:else if record}
       <dl aria-label={p.title}>
         {#each p.fields as item, index (`${index}:${item.field}`)}

@@ -119,9 +119,10 @@
       const mergedChildren = children ? mergeLoadedChildren(children, path) : undefined;
       if (children === node.children && mergedChildren === children) return node;
       changed = true;
+      const { children: _nodeChildren, ...nodeWithoutChildren } = node;
       return {
-        ...node,
-        ...(mergedChildren ? { children: mergedChildren } : {}),
+        ...nodeWithoutChildren,
+        ...(mergedChildren !== undefined ? { children: mergedChildren } : {}),
         ...(applyLoaded && entry ? { hasChildren: entry.children.length > 0 } : {}),
       };
     });
@@ -437,8 +438,9 @@
   }
 
   $effect(() => {
-    // 打开和关闭都要开启新的焦点意图，关闭再重开时旧的完成不能抢焦点。
-    focusSeq += open ? 1 : 1;
+    // 打开/关闭都开启新的焦点意图，关闭再重开的旧完成不得抢焦点。
+    open;
+    focusSeq += 1;
   });
 </script>
 

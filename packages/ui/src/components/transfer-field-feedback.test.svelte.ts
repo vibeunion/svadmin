@@ -1,4 +1,4 @@
-import { fireEvent, render, within } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 import type { FieldDefinition } from '@svadmin/core';
 import { requireValue } from '../../../../scripts/test-assertions';
@@ -16,6 +16,27 @@ const items = [
   { key: 'admin', title: 'Administrator' },
   { key: 'viewer', title: 'Viewer' },
 ];
+
+// 真实宿主错误节点：IDREF 必须解析到页面内实际存在的节点，而不是只比较字符串。
+function createHostErrorNode(token: string, message: string): HTMLElement {
+  const node = document.createElement('p');
+  node.id = `transfer-host-error-${token}`;
+  node.textContent = message;
+  document.body.append(node);
+  return node;
+}
+
+function idrefTokens(target: Element): string[] {
+  return (target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+}
+
+function resolveIdrefs(target: Element): Element[] {
+  return idrefTokens(target).map(ref => {
+    const resolved = document.getElementById(ref);
+    if (!resolved) throw new Error(`IDREF "${ref}" does not resolve to a live node`);
+    return resolved;
+  });
+}
 
 describe('Transfer field feedback', () => {
   it('names each transfer group and keeps description/error references local', () => {
@@ -35,6 +56,85 @@ describe('Transfer field feedback', () => {
       expect(within(group).getByRole('checkbox', { name: '源列表' })).toBeTruthy();
     }
     expect(new Set(ids).size).toBe(2);
+  });
+
+  it('resolves transfer host error and description IDREFs without crossing instances', async () => {
+    const errorA = createHostErrorNode('a', 'Error A');
+    const errorB = createHostErrorNode('b', 'Error B');
+    const onchangeA = vi.fn();
+    const onchangeB = vi.fn();
+    const viewA = render(FieldRenderer, {
+      field, value: [], onchange: onchangeA, invalid: true, errorId: errorA.id,
+    });
+    const viewB = render(FieldRenderer, {
+      field: { ...field, description: 'Assign another role' },
+      value: [], onchange: onchangeB, invalid: true, errorId: errorB.id,
+    });
+    try {
+      const groupA = within(viewA.container).getByRole('group', { name: 'Roles' });
+      const groupB = within(viewB.container).getByRole('group', { name: 'Roles' });
+      const descriptionA = requireValue(viewA.container.querySelector('[data-svadmin-field-description]'));
+      const descriptionB = requireValue(viewB.container.querySelector('[data-svadmin-field-description]'));
+
+      expect(groupA.id).not.toBe(groupB.id);
+      expect(descriptionA.id).not.toBe(descriptionB.id);
+      expect(document.getElementById(errorA.id)).toBe(errorA);
+      expect(document.getElementById(errorB.id)).toBe(errorB);
+
+      const resolvedA = resolveIdrefs(groupA);
+      expect(idrefTokens(groupA)).toHaveLength(2);
+      expect(resolvedA).toContain(descriptionA);
+      expect(resolvedA).toContain(errorA);
+      expect(resolvedA).not.toContain(descriptionB);
+      expect(resolvedA).not.toContain(errorB);
+      expect(groupA.getAttribute('data-invalid')).toBe('true');
+
+      const resolvedB = resolveIdrefs(groupB);
+      expect(idrefTokens(groupB)).toHaveLength(2);
+      expect(resolvedB).toContain(descriptionB);
+      expect(resolvedB).toContain(errorB);
+      expect(resolvedB).not.toContain(descriptionA);
+      expect(resolvedB).not.toContain(errorA);
+      expect(groupB.getAttribute('data-invalid')).toBe('true');
+
+      const descriptionBId = descriptionB.id;
+      const tokensBeforeClear = idrefTokens(groupB);
+
+      // 两个实例都存活时先清理 A 的 errorId/invalid，A 必须收敛。
+      await viewA.rerender({ invalid: false, errorId: undefined });
+      await waitFor(() => {
+        expect(idrefTokens(groupA)).toEqual([descriptionA.id]);
+        expect(groupA.hasAttribute('data-invalid')).toBe(false);
+      });
+      expect(resolveIdrefs(groupA)).toEqual([descriptionA]);
+
+      // B 的真实 description/error 节点关联与 data-invalid 必须完全不变。
+      expect(resolveIdrefs(groupB)).toEqual([descriptionB, errorB]);
+      expect(idrefTokens(groupB)).toEqual(tokensBeforeClear);
+      expect(document.getElementById(descriptionBId)).toBe(descriptionB);
+      expect(document.getElementById(errorB.id)).toBe(errorB);
+      expect(groupB.getAttribute('data-invalid')).toBe('true');
+
+      // 再清理 A 的 description，B 仍然不受影响。
+      await viewA.rerender({ field: { ...field, description: '' } });
+      await waitFor(() => {
+        expect(viewA.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+        expect(groupA.hasAttribute('aria-describedby')).toBe(false);
+        expect(groupA.hasAttribute('data-invalid')).toBe(false);
+      });
+      expect(resolveIdrefs(groupB)).toEqual([descriptionB, errorB]);
+      expect(idrefTokens(groupB)).toEqual(tokensBeforeClear);
+      expect(document.getElementById(descriptionBId)).toBe(descriptionB);
+      expect(document.getElementById(errorB.id)).toBe(errorB);
+      expect(groupB.getAttribute('data-invalid')).toBe('true');
+      expect(onchangeA).not.toHaveBeenCalled();
+      expect(onchangeB).not.toHaveBeenCalled();
+    } finally {
+      viewA.unmount();
+      viewB.unmount();
+      errorA.remove();
+      errorB.remove();
+    }
   });
 
   it('preserves search and movement callbacks while feedback updates', async () => {

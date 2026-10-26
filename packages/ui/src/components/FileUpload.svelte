@@ -1,34 +1,19 @@
+<script module lang="ts">
+/* eslint-disable no-import-assign */
+  export type {
+    UploadItemStatus, UploadItem, UploadSession, UploadCancellation,
+    UploadHandler, UploadCancelHandler,
+  } from './file-upload-types.js';
+</script>
+
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
   import { X, Upload, RotateCw, Ban } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
   import { useTranslation } from '@svadmin/core/i18n';
-
-  export type UploadItemStatus = 'queued' | 'uploading' | 'success' | 'error' | 'cancelled';
-
-  export interface UploadItem {
-    id: string;
-    file: File;
-    status: UploadItemStatus;
-  progress: number;
-  url?: string;
-  error?: string;
-  uploadId?: string;
-  cleanupStatus?: 'pending' | 'success' | 'error';
-}
-
-export interface UploadSession {
-  signal: AbortSignal;
-  idempotencyKey: string;
-  setUploadId: (uploadId: string) => void;
-  onProgress: (progress: number) => void;
-}
-
-export interface UploadCancellation {
-  uploadId: string;
-  idempotencyKey: string;
-  reason: 'cancel' | 'remove' | 'replace' | 'scope-change' | 'unmount';
-}
+  import type {
+    UploadItem, UploadSession, UploadCancellation, UploadHandler, UploadCancelHandler,
+  } from './file-upload-types.js';
 
   interface Props {
     id?: string;
@@ -42,8 +27,8 @@ export interface UploadCancellation {
     ariaLabel?: string;
     invalid?: boolean;
     describedby?: string;
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string; uploadId?: string } | undefined> | Promise<void>;
-    cancelUpload?: (file: File, cancellation: UploadCancellation) => Promise<void>;
+    upload?: UploadHandler;
+    cancelUpload?: UploadCancelHandler;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
     class?: string;
@@ -461,15 +446,15 @@ export interface UploadCancellation {
             {#if item.status === 'uploading'}{item.progress}%{:else}{i18n.t(`upload.status.${item.status}`)}{/if}
           </span>
           {#if item.status === 'uploading'}
-            <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.cancel')} title={i18n.t('upload.cancel')} onclick={() => cancel(item.id)}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.cancel')} title={i18n.t('upload.cancel')} aria-describedby={describedby} aria-invalid={invalid || undefined} onclick={() => cancel(item.id)}>
               <Ban aria-hidden="true" />
             </Button>
           {:else if item.status === 'error' || item.status === 'cancelled'}
-            <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.retry')} title={i18n.t('upload.retry')} {disabled} onclick={() => retry(item)}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.retry')} title={i18n.t('upload.retry')} aria-describedby={describedby} aria-invalid={invalid || undefined} {disabled} onclick={() => retry(item)}>
               <RotateCw aria-hidden="true" />
             </Button>
           {/if}
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.remove')} title={i18n.t('upload.remove')} {disabled} onclick={() => remove(item.id)}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.remove')} title={i18n.t('upload.remove')} aria-describedby={describedby} aria-invalid={invalid || undefined} {disabled} onclick={() => remove(item.id)}>
             <X aria-hidden="true" />
           </Button>
           {#if item.status === 'error' || item.status === 'cancelled'}<span role="alert">{i18n.t(item.status === 'cancelled' ? 'upload.cancelled' : 'upload.failed')}</span>{/if}

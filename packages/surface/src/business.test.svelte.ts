@@ -77,4 +77,22 @@ describe('real read-only business widgets', () => {
       expect(detail.container.textContent).not.toContain('private-backend'); expect(activity.container.textContent).not.toContain('private-backend');
     });
   }
+  it('maps permission and invalid-data errors consistently across business widgets', () => {
+    for (const [code, detailLabel, activityLabel] of [
+      ['access_denied', '无权访问', '无权访问'],
+      ['provider_result_not_json', '记录数据无效', '动态数据无效'],
+    ] as const) {
+      const data: SurfaceWidgetDataState = {
+        status: 'error',
+        sourceId: 'x',
+        error: { sourceId: 'x', code, message: 'private-backend-diagnostic' },
+      };
+      const detail = render(ResourceDetailWidget, { props: { widgetId: `detail-${code}`, props: detailProps, data, locale: 'zh-CN' } });
+      const activity = render(ActivityFeedWidget, { props: { widgetId: `activity-${code}`, props: activityProps, data, locale: 'zh-CN' } });
+      expect(detail.container.textContent).toContain(detailLabel);
+      expect(activity.container.textContent).toContain(activityLabel);
+      expect(detail.container.textContent).not.toContain('private-backend-diagnostic');
+      expect(activity.container.textContent).not.toContain('private-backend-diagnostic');
+    }
+  });
 });

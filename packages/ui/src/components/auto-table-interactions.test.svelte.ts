@@ -1,8 +1,14 @@
 import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { resetToast, setAdminOptions } from '@svadmin/core';
+import { resetToast, setAdminOptions, type AuthProvider, type DataProvider } from '@svadmin/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import ts from 'typescript';
+import { svelte2tsx } from 'svelte2tsx';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import AutoTableInteractionsHarness from '../../test/fixtures/AutoTableInteractionsHarness.svelte';
+import AutoTableIdentityHydrationHost from '../../test/fixtures/AutoTableIdentityHydrationHost.svelte';
 import {
   activeSavedListViewStorageKey,
   columnOrderStorageKey,
@@ -11,9 +17,68 @@ import {
   legacyColumnOrderStorageKey,
   legacySavedListViewsStorageKey,
   savedListViewsStorageKey,
+  type ListPreferenceScope,
 } from './saved-list-views.js';
 
 const defaultScope = { resourceName: 'users', providerName: 'default' } as const;
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>(complete => { resolve = complete; });
+  return { promise, resolve };
+}
+
+function listProvider(): DataProvider {
+  return {
+    getApiUrl: () => 'https://example.test',
+    getList: async () => ({ data: [{ id: 'user-1', email: 'user@example.com' }], total: 1 }),
+    getOne: async ({ id }) => ({ data: { id, email: 'user@example.com' } }),
+    create: async () => ({ data: { id: 'user-1', email: 'user@example.com' } }),
+    update: async () => ({ data: { id: 'user-1', email: 'user@example.com' } }),
+    deleteOne: async ({ id }) => ({ data: { id, email: 'user@example.com' } }),
+  };
+}
+
+function strictSvelteDiagnostics(directory: string, sources: string[], components: string[]): string[] {
+  const virtual = new Map(components.map(name => {
+    const filename = resolve(directory, name);
+    return [`${filename}.tsx`, svelte2tsx(readFileSync(filename, 'utf8'), { filename, isTsFile: true, mode: 'ts' }).code];
+  }));
+  const options: ts.CompilerOptions = {
+    noEmit: true, strict: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
+    noPropertyAccessFromIndexSignature: true, noImplicitOverride: true, skipLibCheck: false, types: ['svelte', 'node'],
+    target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler, jsx: ts.JsxEmit.Preserve,
+    allowImportingTsExtensions: true,
+  };
+  const host = ts.createCompilerHost(options);
+  const read = host.readFile;
+  const exists = host.fileExists;
+  host.readFile = file => virtual.get(file) ?? read(file);
+  host.fileExists = file => virtual.has(file) || exists(file);
+  host.resolveModuleNames = (names, containingFile) => names.map(name => {
+    const candidate = resolve(dirname(containingFile), `${name}.tsx`);
+    if (virtual.has(candidate)) return { resolvedFileName: candidate, extension: ts.Extension.Tsx };
+    return ts.resolveModuleName(name, containingFile, options, host).resolvedModule;
+  });
+  const targets = [
+    ...sources.map(path => resolve(directory, path)),
+    ...components.map(name => `${resolve(directory, name)}.tsx`),
+  ];
+  const program = ts.createProgram({ rootNames: [...targets,
+    resolve(directory, '../../../../node_modules/svelte2tsx/svelte-shims-v4.d.ts'),
+    resolve(directory, '../../../../node_modules/svelte2tsx/svelte-jsx-v4.d.ts'),
+  ], options, host });
+  return targets.flatMap(file => {
+    const source = program.getSourceFile(file);
+    if (!source) throw new Error(`Missing compiler input ${file}`);
+    return [...program.getSyntacticDiagnostics(source), ...program.getSemanticDiagnostics(source)];
+  }).map(diagnostic => {
+    const line = diagnostic.file && diagnostic.start !== undefined
+      ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
+    return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
+  });
+}
 
 beforeEach(() => {
   setAdminOptions({ mutationMode: 'pessimistic' });
@@ -156,6 +221,465 @@ describe('AutoTable interactions', () => {
       });
     });
     expect(document.activeElement).toBe(searchInput);
+  });
+
+  it('applies an initial list snapshot and reports debounced state without repeated callbacks', async () => {
+    const onGetList = vi.fn();
+    const onListStateChange = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      onGetList,
+      onListStateChange,
+      locale: 'en',
+      syncWithLocation: false,
+      initialListState: {
+        search: 'Ada',
+        filters: [{ field: 'email', operator: 'contains', value: 'user' }],
+        sorters: [{ field: 'email', order: 'desc' }],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: [
+        { field: 'email', operator: 'contains', value: 'user' },
+        { field: 'email', operator: 'contains', value: 'Ada' },
+      ],
+      sorters: [{ field: 'email', order: 'desc' }],
+      pagination: expect.objectContaining({ current: 2, pageSize: 20 }),
+    })));
+    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    expect(search.value).toBe('Ada');
+    expect(view.getByText('Email: user')).toBeTruthy();
+    expect(onListStateChange).not.toHaveBeenCalled();
+
+    onListStateChange.mockClear();
+    await fireEvent.input(search, { target: { value: 'Bob' } });
+    await waitFor(() => expect(onListStateChange).toHaveBeenLastCalledWith(expect.objectContaining({
+      search: 'Bob',
+      pagination: { current: 1, pageSize: 20 },
+    })), { timeout: 1_500 });
+    const calls = onListStateChange.mock.calls.length;
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(onListStateChange).toHaveBeenCalledTimes(calls);
+  });
+
+  it('retires a mounted initial snapshot after a scope switch and does not revive it', async () => {
+    const initialListState = {
+      search: 'Ada',
+      filters: [{ field: 'email', operator: 'contains' as const, value: 'user' }],
+      sorters: [{ field: 'email', order: 'desc' as const }],
+      pagination: { current: 2, pageSize: 20 },
+    };
+    const onGetList = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      onGetList,
+      locale: 'en',
+      syncWithLocation: false,
+      providerName: 'analytics',
+      tenantIdentity: 'acme',
+      initialListState,
+    });
+
+    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    expect(search.value).toBe('Ada');
+    expect(await view.findByText('Email: user')).toBeTruthy();
+    await waitFor(() => expect(onGetList).toHaveBeenCalledWith(expect.objectContaining({
+      filters: expect.arrayContaining([expect.objectContaining({ value: 'user' })]),
+      sorters: [{ field: 'email', order: 'desc' }],
+      pagination: expect.objectContaining({ current: 2, pageSize: 20 }),
+    })));
+    const beforeSwitch = onGetList.mock.calls.length;
+
+    initialListState.search = 'mutated-after-mount';
+    initialListState.filters.push({ field: 'email', operator: 'contains', value: 'late' });
+    initialListState.pagination.current = 5;
+
+    await view.rerender({
+      onNavigate: vi.fn(),
+      onGetList,
+      locale: 'en',
+      syncWithLocation: false,
+      providerName: 'reporting',
+      tenantIdentity: 'omega',
+    });
+
+    await waitFor(() => expect(search.value).toBe(''));
+    expect(view.queryByText('Email: user')).toBeNull();
+    expect(view.queryByText('Email: late')).toBeNull();
+    // 新作用域不能先以旧快照发出首帧请求；每条新请求都必须是已清空的默认查询。
+    await waitFor(() => {
+      const calls = onGetList.mock.calls.slice(beforeSwitch);
+      expect(calls.length).toBeGreaterThan(0);
+      expect(calls.every(([params]) => JSON.stringify(params.filters ?? []).match(/user|mutated-after-mount/) === null))
+        .toBe(true);
+      expect(calls.every(([params]) => params.sorters?.length === 0)).toBe(true);
+      expect(calls.every(([params]) => params.pagination?.current === 1
+        && params.pagination?.pageSize === 10)).toBe(true);
+    });
+
+    await view.rerender({
+      onNavigate: vi.fn(),
+      onGetList,
+      locale: 'en',
+      syncWithLocation: false,
+      providerName: 'analytics',
+      tenantIdentity: 'acme',
+    });
+
+    await waitFor(() => expect(search.value).toBe(''));
+    expect(view.queryByText('Email: user')).toBeNull();
+    expect(view.queryByText('Email: late')).toBeNull();
+  });
+
+  it('keeps initial state ahead of a delayed remote default while allowing an explicit saved view', async () => {
+    const remote = deferred<unknown>();
+    const list = vi.fn(() => remote.promise);
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      locale: 'en',
+      syncWithLocation: false,
+      applyRemoteDefaultView: true,
+      savedViewProvider: { list },
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    expect(search.value).toBe('Initial');
+    remote.resolve([{
+      id: 'team-default',
+      name: 'Team default',
+      source: 'team',
+      version: 1,
+      default: true,
+      state: {
+        search: 'Remote',
+        filters: [],
+        sorters: [],
+        pagination: { current: 3, pageSize: 10 },
+        columnVisibility: {},
+        columnOrder: ['id', 'email'],
+      },
+    }]);
+
+    await fireEvent.click(await view.findByRole('button', { name: 'Views' }));
+    expect(await view.findByRole('option', { name: 'Team default' })).toBeTruthy();
+    expect(search.value).toBe('Initial');
+
+    await fireEvent.change(view.getByLabelText('Current unsaved view'), { target: { value: 'team-default' } });
+    await waitFor(() => expect(search.value).toBe('Remote'));
+  });
+
+  it('prefers initial list state over an existing personal saved view until the user selects it', async () => {
+    localStorage.setItem(savedListViewsStorageKey(defaultScope), JSON.stringify({
+      version: 1,
+      views: [{
+        id: 'personal',
+        name: 'Personal',
+        state: {
+          search: 'saved',
+          filters: [],
+          sorters: [],
+          pagination: { current: 4, pageSize: 10 },
+          columnVisibility: {},
+          columnOrder: ['id', 'email'],
+        },
+      }],
+    }));
+    localStorage.setItem(activeSavedListViewStorageKey(defaultScope), 'personal');
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      locale: 'en',
+      syncWithLocation: false,
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    expect(search.value).toBe('Initial');
+    await fireEvent.click(await view.findByRole('button', { name: 'Views' }));
+    // 初始快照优先时不能把持久化活动视图误标为当前视图，但保存视图本身必须仍可手动应用。
+    expect((view.getByLabelText('Current unsaved view') as HTMLSelectElement).value).toBe('');
+    await fireEvent.change(view.getByLabelText('Current unsaved view'), { target: { value: 'personal' } });
+    await waitFor(() => expect(search.value).toBe('saved'));
+    expect((view.getByLabelText('Current unsaved view') as HTMLSelectElement).value).toBe('personal');
+    expect(JSON.parse(localStorage.getItem(savedListViewsStorageKey(defaultScope)) ?? '{}').views)
+      .toHaveLength(1);
+  });
+
+  it('strictly types the saved view pagination captured from list state', () => {
+    const directory = dirname(fileURLToPath(import.meta.url));
+    const diagnostics = strictSvelteDiagnostics(directory,
+      ['list-state.svelte.ts', 'saved-list-views.svelte.ts', 'saved-list-views.ts'],
+      [
+        'AutoTable.svelte',
+        'DraggableHeader.svelte',
+        '../../test/fixtures/AutoTableIdentityHydrationHost.svelte',
+      ]);
+    // 完整纳入虚拟源与真实 TS 源后，目标集合上不允许存在任何诊断。
+    expect(diagnostics).toEqual([]);
+  }, 30_000);
+
+  it('allows a new scope to apply its own remote default after the old initial snapshot is retired', async () => {
+    const list = vi.fn(async (scope: ListPreferenceScope) => scope.tenantIdentity === 'omega'
+      ? [{
+        id: 'new-scope-default',
+        name: 'New scope default',
+        source: 'team',
+        version: 1,
+        default: true,
+        state: {
+          search: 'New scope default',
+          filters: [],
+          sorters: [],
+          pagination: { current: 2, pageSize: 10 },
+          columnVisibility: {},
+          columnOrder: ['id', 'email'],
+        },
+      }]
+      : []);
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      locale: 'en',
+      syncWithLocation: false,
+      providerName: 'analytics',
+      tenantIdentity: 'acme',
+      applyRemoteDefaultView: true,
+      savedViewProvider: { list },
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    expect(search.value).toBe('Initial');
+    await waitFor(() => expect(list).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'acme' })));
+
+    await view.rerender({
+      onNavigate: vi.fn(),
+      locale: 'en',
+      syncWithLocation: false,
+      providerName: 'reporting',
+      tenantIdentity: 'omega',
+      applyRemoteDefaultView: true,
+      savedViewProvider: { list },
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    await waitFor(() => expect(search.value).toBe('New scope default'));
+  });
+
+  it('does not let a tenant-scoped identity hydration replay an initial snapshot', async () => {
+    let identityId = 'alice';
+    const authProvider: AuthProvider = {
+      login: async () => ({ success: true }),
+      logout: async () => ({ success: true }),
+      check: async () => ({ authenticated: true }),
+      getIdentity: async () => ({ id: identityId }),
+    };
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      locale: 'en',
+      syncWithLocation: false,
+      tenantIdentity: 'acme',
+      authProvider,
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    expect(search.value).toBe('Initial');
+    await fireEvent.input(search, { target: { value: 'user-change' } });
+    await waitFor(() => expect(search.value).toBe('user-change'), { timeout: 1_500 });
+
+    identityId = 'bob';
+    await view.rerender({
+      onNavigate: vi.fn(),
+      locale: 'en',
+      syncWithLocation: false,
+      tenantIdentity: 'omega',
+      authProvider,
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+    });
+
+    await waitFor(() => expect(search.value).toBe(''), { timeout: 1_500 });
+  });
+
+  it('preserves debounced and controlled list state across the first identity hydration', async () => {
+    const pendingIdentity = deferred<{ id: string }>();
+    const getIdentity = vi.fn(() => pendingIdentity.promise);
+    const authProvider: AuthProvider = {
+      login: async () => ({ success: true }),
+      logout: async () => ({ success: true }),
+      check: async () => ({ authenticated: true }),
+      getIdentity,
+    };
+    const savedScope: ListPreferenceScope = {
+      resourceName: 'users', providerName: 'default', identityKey: 'id:alice',
+    };
+    localStorage.setItem(savedListViewsStorageKey(savedScope), JSON.stringify({
+      version: 1,
+      views: [{
+        id: 'personal',
+        name: 'Personal',
+        state: {
+          search: 'Saved',
+          filters: [],
+          sorters: [{ field: 'email', order: 'asc' }],
+          pagination: { current: 4, pageSize: 10 },
+          columnVisibility: {},
+          columnOrder: ['id', 'email'],
+        },
+      }],
+    }));
+    const onGetList = vi.fn();
+    const onListStateChange = vi.fn();
+    const initialListState = {
+      search: 'Initial',
+      filters: [],
+      sorters: [],
+      pagination: { current: 2, pageSize: 20 },
+    };
+    const dataProvider = listProvider();
+    const view = render(AutoTableIdentityHydrationHost, {
+      authProvider,
+      dataProvider,
+      initialListState,
+      pagination: { current: 2, pageSize: 20 },
+      sorters: [{ field: 'email', order: 'asc' as const }],
+      onGetList,
+      onListStateChange,
+    });
+
+    const search = await view.findByPlaceholderText(/Search|搜索/) as HTMLInputElement;
+    expect(search.value).toBe('Initial');
+    await fireEvent.input(search, { target: { value: 'user-change' } });
+    await waitFor(() => expect(onListStateChange).toHaveBeenLastCalledWith(expect.objectContaining({
+      search: 'user-change',
+    })), { timeout: 1_500 });
+
+    await view.rerender({
+      authProvider,
+      dataProvider,
+      initialListState,
+      pagination: { current: 3, pageSize: 20 },
+      sorters: [{ field: 'email', order: 'desc' as const }],
+      onGetList,
+      onListStateChange,
+    });
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: [expect.objectContaining({ value: 'user-change' })],
+      sorters: [{ field: 'email', order: 'desc' }],
+      pagination: expect.objectContaining({ current: 3, pageSize: 20 }),
+    })));
+    const beforeHydration = onGetList.mock.calls.length;
+
+    pendingIdentity.resolve({ id: 'alice' });
+    await new Promise(resolve => setTimeout(resolve, 50));
+    const hydrationCalls = onGetList.mock.calls.slice(beforeHydration);
+    expect(hydrationCalls.every(([params]) => JSON.stringify(params).includes('user-change'))).toBe(true);
+    expect(hydrationCalls.every(([params]) => !JSON.stringify(params).includes('Initial'))).toBe(true);
+    // 身份从不透明 pending 解析为同一 auth session 时复用了同一个 DOM 实例。
+    expect(view.getByPlaceholderText(/Search|搜索/)).toBe(search);
+    expect(search.value).toBe('user-change');
+
+    await fireEvent.click(await view.findByRole('button', { name: /Views|视图/ }));
+    const picker = await view.findByLabelText(/Current unsaved view|当前未保存视图/) as HTMLSelectElement;
+    expect(picker.value).toBe('');
+    await fireEvent.change(picker, { target: { value: 'personal' } });
+    await waitFor(() => expect(search.value).toBe('Saved'));
+    expect(onListStateChange).toHaveBeenLastCalledWith(expect.objectContaining({
+      search: 'Saved',
+      sorters: [{ field: 'email', order: 'desc' }],
+      pagination: expect.objectContaining({ current: 3, pageSize: 20 }),
+    }));
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: [expect.objectContaining({ value: 'Saved' })],
+      sorters: [{ field: 'email', order: 'desc' }],
+      pagination: expect.objectContaining({ current: 3, pageSize: 20 }),
+    })));
+  });
+
+  it('does not treat a new auth session as the first hydration of the old pending identity', async () => {
+    const pendingIdentity = deferred<{ id: string }>();
+    let identityRequest = 0;
+    const getIdentity = vi.fn(() => {
+      identityRequest += 1;
+      return identityRequest === 1 ? pendingIdentity.promise : Promise.resolve({ id: 'bob' });
+    });
+    const authProvider: AuthProvider = {
+      login: async () => ({ success: true }),
+      logout: async () => ({ success: true }),
+      check: async () => ({ authenticated: true }),
+      getIdentity,
+    };
+    let controls!: { login: () => Promise<unknown> };
+    const onGetList = vi.fn();
+    const onListStateChange = vi.fn();
+    const view = render(AutoTableIdentityHydrationHost, {
+      authProvider,
+      dataProvider: listProvider(),
+      initialListState: {
+        search: 'Initial',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 20 },
+      },
+      onGetList,
+      onListStateChange,
+      onReady: value => { controls = value; },
+    });
+
+    const search = await view.findByPlaceholderText(/Search|搜索/) as HTMLInputElement;
+    expect(search.value).toBe('Initial');
+    await fireEvent.input(search, { target: { value: 'old-session' } });
+    await waitFor(() => expect(onListStateChange).toHaveBeenLastCalledWith(expect.objectContaining({
+      search: 'old-session',
+    })), { timeout: 1_500 });
+    const beforeSessionChange = onGetList.mock.calls.length;
+    const beforeLoginRequests = getIdentity.mock.calls.length;
+
+    await controls.login();
+    await waitFor(() => expect(getIdentity.mock.calls.length).toBeGreaterThan(beforeLoginRequests));
+    await waitFor(() => expect(search.value).toBe(''));
+    await waitFor(() => {
+      const calls = onGetList.mock.calls.slice(beforeSessionChange);
+      expect(calls.length).toBeGreaterThan(0);
+      expect(calls.every(([params]) => !JSON.stringify(params).includes('old-session'))).toBe(true);
+    });
+
+    pendingIdentity.resolve({ id: 'alice' });
+    await pendingIdentity.promise;
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(view.getByPlaceholderText(/Search|搜索/)).toBe(search);
+    expect(search.value).toBe('');
   });
 
   it('restores URL filters, exposes them in the toolbar, and clears them together', async () => {

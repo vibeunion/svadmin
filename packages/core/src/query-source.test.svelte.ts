@@ -13,6 +13,7 @@ import { decodeListResult, decodeOneResult, decodeManyResult } from './record-de
 import { createSelectProjection } from './select-options';
 import { resetContext } from './context.svelte';
 import { consumeToastQueue, getToastQueue } from './toast.svelte';
+import { resetI18n, setLocale, t } from './i18n.svelte';
 import { captureAuthLiveScope, resetLogoutVersion } from './auth-hooks.svelte';
 import type { AuthErrorResult } from './auth-query-contract';
 import { HttpError, type AuthProvider, type AuthActionResult, type BaseRecord, type DataProvider,
@@ -122,6 +123,7 @@ afterEach(() => {
   for (const value of clients.splice(0)) value.clear();
   resetContext();
   resetLogoutVersion();
+  resetI18n();
   vi.restoreAllMocks();
 });
 
@@ -801,11 +803,22 @@ describe('ordinary query authentication ownership', () => {
     expect(getToastQueue()).toHaveLength(1);
     expect(getToastQueue()[0]).toMatchObject({
       type: 'error',
-      message: 'Fetch failed: Resource query failed',
+      message: t('common.loadFailed', { message: t('common.error') }),
       key: expect.stringMatching(/^svadmin-query-error:\d+$/),
     });
     expect(JSON.stringify(getToastQueue())).not.toContain('private-query-meta');
     expect(JSON.stringify(getToastQueue())).not.toContain('Private diagnostic');
+  });
+
+  it('localizes the default query error without exposing provider diagnostics', async () => {
+    setLocale('zh-CN');
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('PRIVATE_DIAGNOSTIC', 503));
+    mount('one', source, client(), { errorNotification: undefined });
+    await waitFor(() => expect(getToastQueue()).toHaveLength(1));
+    expect(getToastQueue()[0]?.message).toBe('加载失败: 出错了');
+    expect(JSON.stringify(getToastQueue())).not.toContain('PRIVATE_DIAGNOSTIC');
+    expect(JSON.stringify(getToastQueue())).not.toContain('Fetch failed');
   });
 
   it.each(['record', 'tenant', 'provider', 'session', 'client'] as const)(
@@ -846,7 +859,7 @@ describe('ordinary query authentication ownership', () => {
     const source = provider();
     source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
     const shared = client();
-    const message = 'Fetch failed: Resource query failed';
+    const message = t('common.loadFailed', { message: t('common.error') });
     const custom = mode === 'string' ? message : () => ({ message });
     const first = mount('one', source, shared, { errorNotification: undefined });
     const second = mount('one', source, shared, { errorNotification: custom });
@@ -868,7 +881,7 @@ describe('ordinary query authentication ownership', () => {
     await waitFor(() => expect(notification.open).toHaveBeenCalledTimes(2));
     const [first, second] = notification.open.mock.calls;
     expect(first).toEqual([{
-      type: 'error', message: 'Fetch failed: Resource query failed', key: expect.stringMatching(/^svadmin-query-error:\d+$/),
+      type: 'error', message: t('common.loadFailed', { message: t('common.error') }), key: expect.stringMatching(/^svadmin-query-error:\d+$/),
     }]);
     expect(second).toEqual(first);
     expect(getToastQueue()).toHaveLength(0);
@@ -900,7 +913,7 @@ describe('ordinary query authentication ownership', () => {
     if (channel === 'provider') {
       expect(notification.open).toHaveBeenCalledOnce();
       expect(notification.open).toHaveBeenCalledWith({
-        type: 'error', message: 'Fetch failed: Resource query failed',
+        type: 'error', message: t('common.loadFailed', { message: t('common.error') }),
         key: expect.stringMatching(/^svadmin-query-error:\d+$/),
       });
       expect(getToastQueue()).toHaveLength(0);

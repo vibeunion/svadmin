@@ -49,6 +49,10 @@ export interface EditorPresetOptions {
 export function fullPreset(options: EditorPresetOptions = {}): AnyExtension[] {
   const extensions: AnyExtension[] = [
     StarterKit.configure(definedOptions({
+      // StarterKit v3 默认自带 link/underline；预设会在下方注册已配置的变体，
+      // 这里必须关闭内置版本，避免重复注册同名扩展。
+      link: false,
+      underline: false,
       // Disable default code block in favor of CodeBlockLowlight
       codeBlock: options.codeHighlight ? false : undefined,
     })),
@@ -118,6 +122,9 @@ export function fullPreset(options: EditorPresetOptions = {}): AnyExtension[] {
 export function minimalPreset(options: EditorPresetOptions = {}): AnyExtension[] {
   const extensions: AnyExtension[] = [
     StarterKit.configure({
+      // 同上：关闭 StarterKit 内置 link/underline，只保留下方注册的配置版本。
+      link: false,
+      underline: false,
       heading: { levels: [1, 2, 3] },
       codeBlock: false,
     }),
@@ -149,6 +156,9 @@ export function minimalPreset(options: EditorPresetOptions = {}): AnyExtension[]
 export function prosePreset(options: EditorPresetOptions = {}): AnyExtension[] {
   const extensions: AnyExtension[] = [
     StarterKit.configure(definedOptions({
+      // 同上：关闭 StarterKit 内置 link/underline，避免与下方配置版本重复。
+      link: false,
+      underline: false,
       codeBlock: options.codeHighlight ? false : undefined,
     })),
     Underline,

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import JsonSchemaForm from './JsonSchemaForm.svelte';
 import LiteJsonSchemaForm from '../../../lite/src/components/LiteJsonSchemaForm.svelte';
 import { decodeSchemaFormArrayAction, decodeSchemaFormData, decodeSchemaFormSubmission, encodeSchemaFormArrayAction, schemaFormActionName, schemaFormFieldName, type SchemaFormSchema } from '../../../lite/src/schema-form-data';
@@ -10,6 +11,8 @@ import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 import { prepareSchemaFormValue, assertSchemaFormSchema } from '@svadmin/core/schema-form';
 import { readRecursiveSchemaForm } from './enterprise/recursive-schema-form.js';
+import { resolveSchemaFormReferences } from './enterprise/schema-form-references.js';
+import { Type } from 'typebox';
 
 import { requireValue } from '../../../../scripts/test-assertions';
 const schema = {
@@ -36,6 +39,65 @@ function optionValue(element: HTMLElement, index: number): string {
 }
 
 describe('JSON Schema forms enterprise value contract', () => {
+  it('renders TypeBox schemas and retains their numeric validation', async () => {
+    const onsubmit = vi.fn();
+    const schema = Type.Object({ amount: Type.Number({ minimum: 1, default: 2 }) });
+    const view = render(JsonSchemaForm, { schema, onsubmit });
+    const amount = view.getByRole('spinbutton');
+    const form = requireValue(view.container.querySelector('form'));
+    expect((amount as HTMLInputElement).value).toBe('2');
+    await fireEvent.input(amount, { target: { value: '0' } });
+    await fireEvent.submit(form);
+    expect(onsubmit).not.toHaveBeenCalled();
+    await fireEvent.input(amount, { target: { value: '3' } });
+    await fireEvent.submit(form);
+    expect(onsubmit).toHaveBeenCalledWith({ amount: 3 });
+  });
+
+  it('accepts known TypeBox symbol metadata on schema nodes without executing accessors', () => {
+    const kind = Symbol.for('TypeBox.Kind');
+    const schema = {
+      type: 'object',
+      [kind]: 'Object',
+      properties: { amount: { type: 'number', minimum: 1, [kind]: 'Number' } },
+    };
+    expect(resolveSchemaFormReferences(schema).issues).toEqual([]);
+    expect(Reflect.ownKeys(schema)).toContain(kind);
+    const getter = vi.fn(() => 'Object');
+    Object.defineProperty(schema, kind, { get: getter });
+    expect(resolveSchemaFormReferences(schema).issues).toContainEqual({ path: '', code: 'invalid-schema' });
+    expect(getter).not.toHaveBeenCalled();
+  });
+
+  it('rejects unknown schema symbols and known symbols embedded in default data', () => {
+    const symbolDefault = [1];
+    Object.defineProperty(symbolDefault, Symbol.for('TypeBox.Kind'), { value: 'Array' });
+    const unknownMetadata = { type: 'number' };
+    Object.defineProperty(unknownMetadata, '~unknown', { value: true });
+    for (const schema of [
+      { type: 'object', properties: {}, [Symbol('unknown')]: 'annotation' },
+      { type: 'object', properties: {}, default: { [Symbol.for('TypeBox.Kind')]: 'Object' } },
+      { type: 'object', properties: {}, default: symbolDefault },
+      unknownMetadata,
+    ]) {
+      expect(resolveSchemaFormReferences(schema).schema).toBeUndefined();
+      expect(resolveSchemaFormReferences(schema).issues.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('resolves TypeBox-annotated references without accepting sibling assertions', () => {
+    const kind = Symbol.for('TypeBox.Kind');
+    const schema = {
+      type: 'object',
+      properties: { amount: { $ref: '#/$defs/amount', [kind]: 'Ref' } },
+      $defs: { amount: { type: 'number', minimum: 1, [kind]: 'Number' } },
+    };
+    expect(resolveSchemaFormReferences(schema).issues).toEqual([]);
+    expect(resolveSchemaFormReferences({
+      ...schema,
+      properties: { amount: { ...schema.properties.amount, minimum: 0 } },
+    }).issues).toContainEqual({ path: '/amount', code: 'unsupported-schema' });
+  });
   it('preserves description associations when errors appear and clear', async () => {
     const view = render(JsonSchemaForm, {
       schema: { properties: { amount: { type: 'number', description: 'Enter a numeric amount' } } },
@@ -274,31 +336,507 @@ describe('JSON Schema forms enterprise value contract', () => {
   );
 
   const unsupportedSchemas = [
-    ['internal $ref', {
-      type: 'object',
-      properties: { field: { $ref: '#/$defs/name' } },
-      $defs: { name: { type: 'string' } },
-    }, '/field/$ref'],
-    ['oneOf', {
+    ['oneOf without discriminator', {
       properties: { choice: { oneOf: [{ type: 'string' }, { type: 'number' }] } },
-    }, '/choice/oneOf'],
+    }, '/choice/oneOf', 'oneOf-unsupported'],
     ['external reference', {
       properties: { field: { $ref: 'https://example.com/schema.json#/name' } },
-    }, '/field/$ref'],
+    }, '/field', 'ref-invalid'],
     ['unknown keyword', {
       properties: { field: { type: 'string', format: 'email' } },
-    }, '/field/format'],
+    }, '/field/format', 'unsupported-schema'],
   ] as const;
 
-  it.each(unsupportedSchemas)('rejects %s with a located issue instead of degrading the schema', (_label, definition, expectedPath) => {
+  it.each(unsupportedSchemas)('rejects %s with a located issue instead of degrading the schema', (_label, definition, expectedPath, expectedCode) => {
     const candidate = definition as unknown as SchemaFormSchema;
     expect(readRecursiveSchemaForm(definition).issues).toContainEqual({
       path: expectedPath,
-      code: 'unsupported-schema',
+      code: expectedCode,
     });
     expect(() => assertSchemaFormSchema(candidate)).toThrow('Invalid schema form configuration.');
     expect(() => prepareSchemaFormValue(candidate, {})).toThrow('Invalid schema form configuration.');
     expect(() => decodeSchemaFormData(candidate, new FormData())).toThrow();
+  });
+
+  it('opens internal $refs in the SPA form while Lite and core keep rejecting them', async () => {
+    const definition = {
+      type: 'object',
+      properties: { field: { $ref: '#/$defs/name' } },
+      $defs: { name: { type: 'string' } },
+    };
+    const candidate = definition as unknown as SchemaFormSchema;
+    expect(readRecursiveSchemaForm(definition).issues).toEqual([]);
+    expect(() => assertSchemaFormSchema(candidate)).toThrow('Invalid schema form configuration.');
+    expect(() => prepareSchemaFormValue(candidate, {})).toThrow('Invalid schema form configuration.');
+    expect(() => decodeSchemaFormData(candidate, new FormData())).toThrow();
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, { schema: candidate, value: { field: 'Ada' }, onsubmit });
+    expect(view.queryByRole('alert')).toBeNull();
+    expect((view.getByLabelText('field') as HTMLInputElement).value).toBe('Ada');
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ field: 'Ada' });
+
+    const lite = render(LiteJsonSchemaForm, { schema: candidate, value: {} });
+    expect(lite.getByRole('alert')).toBeTruthy();
+    expect(lite.container.querySelectorAll('input, select, textarea')).toHaveLength(0);
+  });
+
+  it('renders referenced nested objects, arrays and scalars from one resolved schema', () => {
+    const definition = {
+      type: 'object',
+      properties: {
+        label: { $ref: '#/$defs/label' },
+        profile: { $ref: '#/$defs/profile' },
+        rows: { $ref: '#/$defs/rows' },
+      },
+      $defs: {
+        label: { type: 'string', title: 'Label' },
+        profile: { type: 'object', title: 'Profile', properties: { owner: { type: 'string', title: 'Owner' } } },
+        rows: { type: 'array', title: 'Rows', items: { $ref: '#/$defs/row' } },
+        row: { type: 'object', title: 'Row', properties: { code: { type: 'string', title: 'Code' } } },
+      },
+    };
+    const view = render(JsonSchemaForm, { schema: definition, value: { rows: [{ code: 'A' }] } });
+    expect((view.getByLabelText('Label') as HTMLInputElement).value).toBe('');
+    expect((view.getByLabelText('Owner') as HTMLInputElement).value).toBe('');
+    expect((view.getByLabelText('Code') as HTMLInputElement).value).toBe('A');
+  });
+
+  it('expands internal references inside explicit oneOf branches before rendering', () => {
+    const definition = {
+      type: 'object',
+      properties: { choice: {
+        oneOf: [{ $ref: '#/$defs/text' }, { $ref: '#/$defs/count' }],
+        discriminator: { propertyName: 'kind' },
+      } },
+      $defs: {
+        text: { type: 'object', required: ['kind', 'text'], properties: { kind: { const: 'text' }, text: { type: 'string' } } },
+        count: { type: 'object', required: ['kind', 'count'], properties: { kind: { const: 'count' }, count: { type: 'number' } } },
+      },
+    };
+    expect(resolveSchemaFormReferences(definition).issues).toEqual([]);
+    const view = render(JsonSchemaForm, { schema: definition, value: { choice: { kind: 'count', count: 2 } } });
+    expect((view.getByLabelText(/^count/) as HTMLInputElement).value).toBe('2');
+    expect(view.queryByLabelText(/^text/)).toBeNull();
+  });
+
+  it('applies referenced target defaults and submits them', async () => {
+    const onsubmit = vi.fn();
+    const definition = {
+      type: 'object',
+      properties: {
+        amount: { $ref: '#/$defs/amount' },
+        profile: { $ref: '#/$defs/profile' },
+      },
+      $defs: {
+        amount: { type: 'number', default: 7 },
+        profile: { type: 'object', properties: { code: { type: 'string', default: 'A' } } },
+      },
+    };
+    const view = render(JsonSchemaForm, { schema: definition, value: {}, onsubmit });
+    expect((view.getByLabelText('amount') as HTMLInputElement).value).toBe('7');
+    expect((view.getByLabelText('code') as HTMLInputElement).value).toBe('A');
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ amount: 7, profile: { code: 'A' } });
+  });
+
+  it('rejects values that violate referenced target minimum and required constraints', async () => {
+    const onsubmit = vi.fn();
+    const definition = {
+      type: 'object',
+      properties: {
+        amount: { $ref: '#/$defs/amount' },
+        profile: { $ref: '#/$defs/profile' },
+      },
+      $defs: {
+        amount: { type: 'number', minimum: 5 },
+        profile: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } },
+      },
+    };
+    const view = render(JsonSchemaForm, { schema: definition, value: { amount: 1, profile: {} }, onsubmit });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(view.getByLabelText('amount').getAttribute('aria-invalid')).toBe('true');
+    expect(view.getByLabelText(/^name/).getAttribute('aria-invalid')).toBe('true');
+  });
+
+  const discriminatedOneOf = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      choice: {
+        oneOf: [
+          { type: 'object', additionalProperties: false, required: ['kind', 'text'], properties: {
+            kind: { const: 'text' }, text: { type: 'string', minLength: 2 },
+          } },
+          { type: 'object', additionalProperties: false, required: ['kind', 'count'], properties: {
+            kind: { const: 'count' }, count: { type: 'integer', minimum: 1 },
+          } },
+        ],
+        discriminator: { propertyName: 'kind' },
+      },
+    },
+  };
+
+  it('renders and submits only the explicitly selected discriminated oneOf branch', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: discriminatedOneOf,
+      value: { choice: { kind: 'text', text: 'ok' } },
+      onsubmit,
+    });
+    expect((view.getByLabelText(/^text/) as HTMLInputElement).value).toBe('ok');
+    expect(view.queryByLabelText(/^count/)).toBeNull();
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ choice: { kind: 'text', text: 'ok' } });
+  });
+
+  it('switches oneOf branches without submitting stale fields from the previous branch', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: discriminatedOneOf,
+      value: { choice: { kind: 'text', text: 'old' } },
+      onsubmit,
+    });
+    const selector = view.getByLabelText('kind') as HTMLSelectElement;
+    await fireEvent.change(selector, { target: { value: '1:0' } });
+    expect(view.queryByLabelText(/^text/)).toBeNull();
+    await fireEvent.input(view.getByLabelText(/^count/), { target: { value: '3' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ choice: { kind: 'count', count: 3 } });
+  });
+
+  it('blocks submission with a stable unselected-discriminator error', async () => {
+    const onsubmit = vi.fn();
+    const onvalidationerror = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: discriminatedOneOf,
+      value: { choice: {} },
+      onsubmit,
+      onvalidationerror,
+    });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).toHaveBeenCalledWith([{ path: '/choice/kind', code: 'oneOf-unselected' }]);
+    expect(view.getByLabelText('kind').getAttribute('aria-invalid')).toBe('true');
+    expect(view.getByRole('alert')).toBeTruthy();
+  });
+
+  it('fails closed on ambiguous oneOf selectors instead of choosing the first branch', () => {
+    const onschemaerror = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { properties: { choice: {
+        oneOf: [
+          { type: 'object', properties: { kind: { const: 'same' } } },
+          { type: 'object', properties: { kind: { const: 'same' } } },
+        ],
+        discriminator: { propertyName: 'kind' },
+      } } },
+      onschemaerror,
+    });
+    expect(view.getByRole('alert')).toBeTruthy();
+    expect(view.container.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    expect(onschemaerror).toHaveBeenCalledWith([{ path: '/choice/oneOf', code: 'oneOf-ambiguous' }]);
+  });
+
+  it('renders a root-level discriminator selector and submits only the selected branch', async () => {
+    const onsubmit = vi.fn();
+    const rootOneOf = {
+      type: 'object',
+      additionalProperties: false,
+      oneOf: [
+        { type: 'object', additionalProperties: false, required: ['kind', 'text'], properties: {
+          kind: { const: 'text' }, text: { type: 'string' },
+        } },
+        { type: 'object', additionalProperties: false, required: ['kind', 'count'], properties: {
+          kind: { const: 'count' }, count: { type: 'integer' },
+        } },
+      ],
+      discriminator: { propertyName: 'kind' },
+    };
+    const view = render(JsonSchemaForm, { schema: rootOneOf, value: { kind: 'text', text: 'ok' }, onsubmit });
+    const selector = view.getByLabelText('kind') as HTMLSelectElement;
+    expect(selector.value).toBe('0:0');
+    expect((view.getByLabelText(/^text/) as HTMLInputElement).value).toBe('ok');
+    await fireEvent.change(selector, { target: { value: '1:0' } });
+    expect(view.queryByLabelText(/^text/)).toBeNull();
+    await fireEvent.input(view.getByLabelText(/^count/), { target: { value: '2' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ kind: 'count', count: 2 });
+  });
+
+  it('blocks an unselected root-level oneOf at the discriminator pointer', async () => {
+    const onsubmit = vi.fn();
+    const onvalidationerror = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: {
+        oneOf: [
+          { type: 'object', properties: { kind: { const: 'text' }, text: { type: 'string' } } },
+          { type: 'object', properties: { kind: { const: 'count' }, count: { type: 'integer' } } },
+        ],
+        discriminator: { propertyName: 'kind' },
+      },
+      value: {},
+      onsubmit,
+      onvalidationerror,
+    });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).toHaveBeenCalledWith([{ path: '/kind', code: 'oneOf-unselected' }]);
+    expect(view.getByLabelText('kind').getAttribute('aria-invalid')).toBe('true');
+  });
+
+  const oneOfWithDefaults = {
+    type: 'object',
+    additionalProperties: false,
+    properties: { choice: {
+      oneOf: [
+        { type: 'object', additionalProperties: false, required: ['kind', 'text'], properties: {
+          kind: { const: 'text' },
+          text: { type: 'string', default: 'seed' },
+          profile: { type: 'object', properties: { code: { type: 'string', default: 'A' } } },
+        } },
+        { type: 'object', additionalProperties: false, required: ['kind', 'count'], properties: {
+          kind: { const: 'count' }, count: { type: 'integer', default: 5 },
+        } },
+      ],
+      discriminator: { propertyName: 'kind' },
+    } },
+  };
+
+  it('seeds defaults only after a branch is explicitly selected and never guesses an unselected branch', async () => {
+    const unselected = render(JsonSchemaForm, { schema: oneOfWithDefaults, value: { choice: {} } });
+    expect(unselected.queryByLabelText(/^text/)).toBeNull();
+    expect(unselected.queryByLabelText(/^count/)).toBeNull();
+    unselected.unmount();
+
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: oneOfWithDefaults,
+      value: { choice: { kind: 'text' } },
+      onsubmit,
+    });
+    expect((view.getByLabelText(/^text/) as HTMLInputElement).value).toBe('seed');
+    expect((view.getByLabelText('code') as HTMLInputElement).value).toBe('A');
+    await fireEvent.change(view.getByLabelText('kind'), { target: { value: '1:0' } });
+    const count = view.getByLabelText(/^count/) as HTMLInputElement;
+    expect(count.value).toBe('5');
+    expect(view.queryByLabelText(/^text/)).toBeNull();
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ choice: { kind: 'count', count: 5 } });
+  });
+
+  it('inherits branch and field readOnly into oneOf controls', () => {
+    const readonlyBranch = { properties: { choice: {
+      oneOf: [
+        { type: 'object', readOnly: true, required: ['kind', 'text'], properties: {
+          kind: { const: 'text' }, text: { type: 'string' },
+        } },
+        { type: 'object', required: ['kind', 'count'], properties: {
+          kind: { const: 'count' }, count: { type: 'integer' },
+        } },
+      ],
+      discriminator: { propertyName: 'kind' },
+    } } };
+    const branchView = render(JsonSchemaForm, {
+      schema: readonlyBranch,
+      value: { choice: { kind: 'text', text: 'fixed' } },
+    });
+    expect((branchView.getByLabelText('kind') as HTMLSelectElement).disabled).toBe(true);
+    expect((branchView.getByLabelText(/^text/) as HTMLInputElement).disabled).toBe(true);
+    branchView.unmount();
+
+    const readonlyField = { properties: { choice: {
+      oneOf: [
+        { type: 'object', required: ['kind', 'text'], properties: {
+          kind: { const: 'text' }, text: { type: 'string', readOnly: true },
+        } },
+        { type: 'object', required: ['kind', 'count'], properties: {
+          kind: { const: 'count' }, count: { type: 'integer' },
+        } },
+      ],
+      discriminator: { propertyName: 'kind' },
+    } } };
+    const fieldView = render(JsonSchemaForm, {
+      schema: readonlyField,
+      value: { choice: { kind: 'text', text: 'fixed' } },
+    });
+    expect((fieldView.getByLabelText('kind') as HTMLSelectElement).disabled).toBe(false);
+    expect((fieldView.getByLabelText(/^text/) as HTMLInputElement).disabled).toBe(true);
+  });
+
+  it('honors root readOnly before resolving a discriminated branch', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: {
+        type: 'object',
+        readOnly: true,
+        oneOf: [
+          { type: 'object', required: ['kind', 'name'], properties: {
+            kind: { const: 'text' }, name: { type: 'string' },
+          } },
+          { type: 'object', required: ['kind', 'count'], properties: {
+            kind: { const: 'count' }, count: { type: 'integer' },
+          } },
+        ],
+        discriminator: { propertyName: 'kind' },
+      },
+      value: { kind: 'text', name: 'fixed' },
+      onsubmit,
+    });
+    const selector = view.getByLabelText('kind') as HTMLSelectElement;
+    const name = view.getByLabelText(/^name/) as HTMLInputElement;
+    expect(selector.disabled).toBe(true);
+    expect(name.disabled).toBe(true);
+    await fireEvent.change(selector, { target: { value: '1:0' } });
+    await fireEvent.input(name, { target: { value: 'forged' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ kind: 'text', name: 'fixed' });
+    expect(view.queryByLabelText(/^count/)).toBeNull();
+  });
+
+  it('inherits array item branch readOnly without freezing editable siblings', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: {
+        type: 'object',
+        properties: {
+          rows: {
+            type: 'array',
+            default: [{ kind: 'locked', note: 'fixed' }],
+            items: {
+              oneOf: [
+                { type: 'object', readOnly: true, required: ['kind', 'note'], properties: {
+                  kind: { const: 'locked' }, note: { type: 'string' },
+                } },
+                { type: 'object', required: ['kind', 'amount'], properties: {
+                  kind: { const: 'open' }, amount: { type: 'number' },
+                } },
+              ],
+              discriminator: { propertyName: 'kind' },
+            },
+          },
+          title: { type: 'string', default: 'base' },
+        },
+      },
+      value: { rows: [{ kind: 'locked', note: 'fixed' }], title: 'base' },
+      onsubmit,
+    });
+    const note = view.getByLabelText(/^note/) as HTMLInputElement;
+    const title = view.getByLabelText(/^title/) as HTMLInputElement;
+    expect((view.getByLabelText('kind') as HTMLSelectElement).disabled).toBe(true);
+    expect(note.disabled).toBe(true);
+    expect(title.disabled).toBe(false);
+    await fireEvent.input(note, { target: { value: 'forged' } });
+    await fireEvent.input(title, { target: { value: 'edited' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({
+      rows: [{ kind: 'locked', note: 'fixed' }],
+      title: 'edited',
+    });
+  });
+
+  it('protects a readOnly discriminator selector without freezing editable fields', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { properties: { choice: {
+        oneOf: [
+          { type: 'object', required: ['kind', 'text'], properties: {
+            kind: { const: 'text', readOnly: true }, text: { type: 'string' },
+          } },
+          { type: 'object', required: ['kind', 'count'], properties: {
+            kind: { const: 'count', readOnly: true }, count: { type: 'integer' },
+          } },
+        ],
+        discriminator: { propertyName: 'kind' },
+      } } },
+      value: { choice: { kind: 'text', text: 'keep' } },
+      onsubmit,
+    });
+    const selector = view.getByLabelText('kind') as HTMLSelectElement;
+    const text = view.getByLabelText(/^text/) as HTMLInputElement;
+    expect(selector.disabled).toBe(true);
+    expect(text.disabled).toBe(false);
+    await fireEvent.change(selector, { target: { value: '1:0' } });
+    expect(view.queryByLabelText(/^count/)).toBeNull();
+    await fireEvent.input(text, { target: { value: 'edited' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ choice: { kind: 'text', text: 'edited' } });
+  });
+
+  it('drops old value errors when the schema is replaced', async () => {
+    const onsubmit = vi.fn();
+    const onvalidationerror = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { type: 'object', properties: { amount: { type: 'number', minimum: 5 } } },
+      value: { amount: 1 },
+      onsubmit,
+      onvalidationerror,
+    });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onvalidationerror).toHaveBeenCalledOnce();
+    expect(view.getByRole('alert').getAttribute('data-testid')).toBe('schema-form-errors');
+    await view.rerender({ schema: { type: 'object', properties: { name: { type: 'string', default: 'ready' } } }, value: {} });
+    expect(view.queryByRole('alert')).toBeNull();
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ name: 'ready' });
+  });
+
+  it('reports stable configuration issue codes and paths without using the value callback', async () => {
+    const onschemaerror = vi.fn();
+    const onvalidationerror = vi.fn();
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: {
+        type: 'object',
+        properties: { field: { $ref: '#/$defs/missing' } },
+        $defs: { known: { type: 'string' } },
+      },
+      value: {},
+      onsubmit,
+      onvalidationerror,
+      onschemaerror,
+    });
+    await tick();
+    expect(onschemaerror).toHaveBeenCalledExactlyOnceWith([{ path: '/field', code: 'ref-invalid' }]);
+    expect(onvalidationerror).not.toHaveBeenCalled();
+    expect(view.getByRole('alert').getAttribute('data-testid')).toBe('schema-form-errors');
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).not.toHaveBeenCalled();
+  });
+
+  it('reports ref-limit for an over-deep reference chain before rendering or submitting', async () => {
+    const definitions: Record<string, { type?: string; $ref?: string }> = {};
+    for (let index = 0; index < 40; index++) {
+      definitions[`n${index}`] = index === 39 ? { type: 'string' } : { $ref: `#/$defs/n${index + 1}` };
+    }
+    const onschemaerror = vi.fn();
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { type: 'object', properties: { field: { $ref: '#/$defs/n0' } }, $defs: definitions },
+      value: {},
+      onsubmit,
+      onschemaerror,
+    });
+    await tick();
+    expect(onschemaerror).toHaveBeenCalledExactlyOnceWith([{ path: '/field', code: 'ref-limit' }]);
+    expect(view.container.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+  });
+
+  it('accepts only host-injected external documents and submits against the expanded result', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { type: 'object', properties: { name: { $ref: 'urn:svadmin:test:name' } } },
+      referenceDocuments: { 'urn:svadmin:test:name': { type: 'string', minLength: 2 } },
+      value: { name: 'Ada' },
+      onsubmit,
+    });
+    expect(view.getByRole('textbox')).toBeTruthy();
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ name: 'Ada' });
   });
 
   it.each(unsupportedSchemas)('renders %s as a form-level error and never submits it', async (_label, definition) => {

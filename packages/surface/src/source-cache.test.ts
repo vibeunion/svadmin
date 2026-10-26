@@ -6,7 +6,7 @@ import {
   snapshotSurfaceSource,
 } from './source-cache.js';
 import type { SurfaceSourceRequest } from './source-cache.js';
-import type { SurfaceDataSource, SurfaceResourcePolicy, SurfaceSourceDataState } from './types.js';
+import type { SurfaceDataError, SurfaceDataSource, SurfaceResourcePolicy, SurfaceSourceDataState } from './types.js';
 
 const source: SurfaceDataSource = { id: 'products', type: 'resource-list', resource: 'products' };
 const policy: SurfaceResourcePolicy = {
@@ -28,11 +28,12 @@ function harness() {
   const states = new Map<string, SurfaceSourceDataState>();
   const writes: SurfaceSourceDataState[] = [];
   const errors: SurfaceSourceDataState[] = [];
+  const diagnostics: SurfaceDataError[] = [];
   const calls: string[] = [];
   const cache = createSurfaceSourceCache({
     set(id, state) { states.set(id, state); writes.push(state); },
     remove(id) { states.delete(id); },
-    onError(state) { errors.push(state); },
+    onError(state, diagnostic) { errors.push(state); if (diagnostic) diagnostics.push(diagnostic); },
   });
   function request(
     id: string,
@@ -42,7 +43,7 @@ function harness() {
   ): SurfaceSourceRequest {
     return { id, identity, isCurrent, async load() { calls.push(id); return load(); } };
   }
-  return { states, writes, errors, calls, cache, request };
+  return { states, writes, errors, diagnostics, calls, cache, request };
 }
 
 describe('Surface source snapshots', () => {
@@ -321,8 +322,26 @@ describe('Surface source cache', () => {
     await h.cache.reconcile([h.request('a', ['a'], async () => { throw new Error('Network'); })]);
     const state = h.states.get('a');
     assert.equal(state?.status, 'error');
-    if (state?.status === 'error') assert.equal(state.error.message, 'Network');
+    if (state?.status === 'error') assert.equal(state.error.message, 'Data provider request failed');
     assert.equal(h.errors.length, 1);
+    assert.deepEqual(h.diagnostics, [{ code: 'provider_failed', sourceId: 'a', message: 'Network' }]);
+  });
+
+  it('sanitizes an error state returned by a loader while preserving local validation text', async () => {
+    const h = harness();
+    await h.cache.reconcile([h.request('a', ['a'], async () => ({
+      status: 'error', sourceId: 'a',
+      error: { code: 'provider_failed', sourceId: 'a', message: 'Private diagnostic' },
+    }))]);
+    const sanitized = h.states.get('a');
+    assert.equal(sanitized?.status, 'error');
+    if (sanitized?.status === 'error') assert.equal(sanitized.error.message, 'Data provider request failed');
+    await h.cache.reconcile([h.request('a', ['a'], async () => ({
+      status: 'error', sourceId: 'a',
+      error: { code: 'provider_result_not_json', sourceId: 'a', message: 'List data must be an array' },
+    }))], 'a');
+    const invalidResult = h.states.get('a');
+    if (invalidResult?.status === 'error') assert.equal(invalidResult.error.message, 'List data must be an array');
   });
 
   it('passes an owner-scoped guard to pending authorization across identical refreshes', async () => {
