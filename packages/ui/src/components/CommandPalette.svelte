@@ -103,7 +103,7 @@
             {#if adminContext.accessControlProvider}
               <CanAccess resource={r.name} action="list">
                 <Command.Item
-                  value={r.name}
+                  value={`${r.name} ${r.label}`}
                   onSelect={() => act(() => navigation.list(r.name))}
                   class={itemClass}
                 >
@@ -113,7 +113,7 @@
               </CanAccess>
             {:else}
               <Command.Item
-                value={r.name}
+                value={`${r.name} ${r.label}`}
                 onSelect={() => act(() => navigation.list(r.name))}
                 class={itemClass}
               >
@@ -132,13 +132,13 @@
             {#if r.canCreate !== false}
               {#if adminContext.accessControlProvider}
                 <CanAccess resource={r.name} action="create">
-                  <Command.Item value={"create-" + r.name} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
+                  <Command.Item value={`${"create-" + r.name} ${r.label}`} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
                     <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />
                     {i18n.t('common.create')} {r.label}
                   </Command.Item>
                 </CanAccess>
               {:else}
-                <Command.Item value={"create-" + r.name} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
+                <Command.Item value={`${"create-" + r.name} ${r.label}`} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
                   <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />
                   {i18n.t('common.create')} {r.label}
                 </Command.Item>

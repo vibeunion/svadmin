@@ -81,6 +81,20 @@ describe('Layout auth scope', () => {
     view.unmount();
   });
 
+  it('opens the command palette when the shortcut key arrives from a non-Latin layout', async () => {
+    initRouter();
+    const view = render(LayoutAuthScopeHost, {
+      authProvider: undefined,
+      tenant: { tenantId: 'tenant-layout-shortcut-code' },
+    });
+
+    await waitFor(() => expect(view.getByTestId('layout-command-open').textContent).toBe('closed'));
+    await fireEvent.keyDown(window, { key: 'к', code: 'KeyK', ctrlKey: true });
+
+    await waitFor(() => expect(view.getByTestId('layout-command-open').textContent).toBe('open'));
+    view.unmount();
+  });
+
   it('only exposes Ask AI when an assistant snippet is injected', async () => {
     const withoutAssistant = render(LayoutAuthScopeHost, {
       authProvider: undefined,

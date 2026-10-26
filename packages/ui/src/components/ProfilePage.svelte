@@ -314,7 +314,7 @@
 
         <PasswordInput
           id={`${controlId}-new-password`}
-          label={i18n.t('auth.password')}
+          label={i18n.t('profile.newPassword')}
           bind:value={newPassword}
           autocomplete="new-password"
           showStrength

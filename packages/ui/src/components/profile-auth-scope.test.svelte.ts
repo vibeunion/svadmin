@@ -37,7 +37,7 @@ function passwordInputs(container: HTMLElement) {
   const profile = within(container);
   return {
     current: profile.getByLabelText('Current Password') as HTMLInputElement,
-    next: profile.getByLabelText('Password') as HTMLInputElement,
+    next: profile.getByLabelText('New Password') as HTMLInputElement,
     confirm: profile.getByLabelText('Confirm Password') as HTMLInputElement,
   };
 }

@@ -20,6 +20,11 @@
   const adminContext = captureAdminContext();
   const credentialProvider = $derived(adminContext.credentialProvider);
   const isZh = $derived(i18n.locale === 'zh-CN');
+  function permissionLabel(permission: string): string {
+    const key = `api.permission.${permission.toLowerCase()}`;
+    const translated = i18n.t(key);
+    return translated === key ? permission : translated;
+  }
 
   let keys = $state.raw<ApiCredentialSummary[]>([]);
   let webhooks = $state.raw<WebhookSummary[]>([]);
@@ -264,14 +269,14 @@
         <form onsubmit={handleGenerateKey} class="svadmin-u-b43b4c086d9a">
           <div class="svadmin-u-6f7e013d6499">
             <Label for={`${controlId}-api-key-name`}>{i18n.t('api.keyName')}</Label>
-            <Input id={`${controlId}-api-key-name`} placeholder="CI deployment token" bind:value={newKeyName} required disabled={!credentialProvider || submitting} />
+            <Input id={`${controlId}-api-key-name`} placeholder={i18n.t('api.keyNamePlaceholder')} bind:value={newKeyName} required disabled={!credentialProvider || submitting} />
           </div>
           <fieldset class="svadmin-u-6ed543e2fbbb" disabled={!credentialProvider || submitting}>
             <legend class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('api.permissions')}</legend>
             {#each Object.keys(newKeyPermissions) as permission (permission)}
               <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
                 <Checkbox id={`${controlId}-perm-${permission}`} bind:checked={newKeyPermissions[permission as keyof typeof newKeyPermissions]} />
-                <Label for={`${controlId}-perm-${permission}`} class="svadmin-u-34516836730d svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6">{permission}</Label>
+                <Label for={`${controlId}-perm-${permission}`} class="svadmin-u-34516836730d svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6">{permissionLabel(permission)}</Label>
               </div>
             {/each}
           </fieldset>

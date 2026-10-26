@@ -11,6 +11,7 @@
   import { Button } from '@svadmin/ui/components/ui/button/index.js';
   import type { ListStateSnapshot } from '@svadmin/ui';
   import WorkspaceResourceEditor from './WorkspaceResourceEditor.svelte';
+  import { demoRendering } from '../../resource-rendering';
   import {
     draftFieldKeys,
     MAX_TABS,
@@ -156,6 +157,7 @@
                 {#key `${tab.id}:${hydratedScope ?? 'pending'}`}
                   <AutoTable
                     resourceName={descriptor.resource}
+                    rendering={demoRendering(descriptor.resource)}
                     title={tab.title}
                     syncWithLocation={false}
                     selectable={false}

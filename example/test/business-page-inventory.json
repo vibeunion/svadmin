@@ -28,6 +28,10 @@
     "mode": "query-rendering"
   },
   {
+    "file": "features/dashboard/DashboardWorkspace.svelte",
+    "mode": "local-state"
+  },
+  {
     "file": "features/showcase/DesignPrinciplesPage.svelte",
     "mode": "static-showcase"
   },
@@ -90,5 +94,17 @@
   {
     "file": "workspace/WorkspaceRecordLinks.svelte",
     "mode": "workspace-helper"
+  },
+  {
+    "file": "features/workspace/WorkspaceResourceEditor.svelte",
+    "mode": "local-state"
+  },
+  {
+    "file": "features/workspace/WorkspaceTabsPage.svelte",
+    "mode": "local-state"
+  },
+  {
+    "file": "features/workspace/WorkspaceTabsView.svelte",
+    "mode": "delegated-rendering"
   }
 ]
