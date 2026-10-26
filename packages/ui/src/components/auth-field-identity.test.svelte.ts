@@ -6,6 +6,7 @@ import ProfileHost from './profile-auth-scope.test-host.svelte';
 import EnterpriseHost from './enterprise-providers.test-host.svelte';
 import MfaHost from './builtin-pm.test-host.svelte';
 import { requireValue } from '../../../../scripts/test-assertions';
+import { exactRoleName } from '../../test/accessible-name';
 
 const dataProvider: DataProvider = {
   getApiUrl: () => '/fixture',
@@ -53,15 +54,15 @@ describe('auth page field identity', () => {
     const second = render(ProfileHost, { authProvider: secondAuth, tenant: { tenantId: 'b' } });
     const a = within(first.container);
     const b = within(second.container);
-    await fireEvent.click(await a.findByRole('button', { name: 'Edit' }));
-    await fireEvent.click(await b.findByRole('button', { name: 'Edit' }));
+    await fireEvent.click(await a.findByRole('button', { name: exactRoleName('Edit') }));
+    await fireEvent.click(await b.findByRole('button', { name: exactRoleName('Edit') }));
     await checkLabels([first.container, second.container], 4);
     const name = b.getByLabelText('Name', { exact: true });
     const id = name.id;
     await fireEvent.input(name, { target: { value: 'Second name' } });
     expect(name.id).toBe(id);
     expect(a.getByLabelText('Name', { exact: true })).toHaveProperty('value', 'Ada');
-    await fireEvent.click(b.getByRole('button', { name: 'Save' }));
+    await fireEvent.click(b.getByRole('button', { name: exactRoleName('Save') }));
     await waitFor(() => expect(secondAuth.updateProfile).toHaveBeenCalledWith({ name: 'Second name' }));
     expect(firstAuth.updateProfile).not.toHaveBeenCalled();
   });
@@ -97,7 +98,7 @@ describe('auth page field identity', () => {
       await fireEvent.input(input, { target: { value } });
       expect(a.getByLabelText(requireValue(label), { exact: true })).toHaveProperty('value', '');
     }
-    await fireEvent.click(b.getByRole('button', { name: 'Update Password' }));
+    await fireEvent.click(b.getByRole('button', { name: exactRoleName('Update Password') }));
     await waitFor(() => expect(secondAuth.updatePassword).toHaveBeenCalledWith({
       currentPassword: 'old-password', password: 'New-password-123', confirmPassword: 'New-password-123',
     }));
@@ -111,15 +112,15 @@ describe('auth page field identity', () => {
     const second = render(MfaHost, { page: 'mfa', bundle: { dataProvider }, mfa: secondProvider });
     const a = within(first.container);
     const b = within(second.container);
-    await fireEvent.click(a.getByRole('button', { name: 'Two-Factor Authentication Setup' }));
-    await fireEvent.click(b.getByRole('button', { name: 'Two-Factor Authentication Setup' }));
+    await fireEvent.click(a.getByRole('button', { name: exactRoleName('Two-Factor Authentication Setup') }));
+    await fireEvent.click(b.getByRole('button', { name: exactRoleName('Two-Factor Authentication Setup') }));
     await a.findByLabelText('Enter Verification Code');
     const code = await b.findByLabelText('Enter Verification Code');
     await checkLabels([first.container, second.container], 1);
     expect(code.getAttribute('autocomplete')).toBe('one-time-code');
     await fireEvent.input(code, { target: { value: '123456' } });
     expect(a.getByLabelText('Enter Verification Code')).toHaveProperty('value', '');
-    await fireEvent.click(b.getByRole('button', { name: 'Confirm' }));
+    await fireEvent.click(b.getByRole('button', { name: exactRoleName('Confirm') }));
     await waitFor(() => expect(secondProvider.verify).toHaveBeenCalledExactlyOnceWith('123456'));
     expect(firstProvider.verify).not.toHaveBeenCalled();
   });

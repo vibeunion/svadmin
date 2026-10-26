@@ -1,8 +1,25 @@
 import type {
   SurfaceDataSource,
+  SurfaceDataError,
   SurfaceResourcePolicy,
   SurfaceSourceDataState,
 } from './types.js';
+
+type SurfaceDataDiagnostic = Extract<SurfaceSourceDataState, { status: 'error' }>['error'];
+
+function stableSourceState(state: SurfaceSourceDataState): SurfaceSourceDataState {
+  if (state.status !== 'error') return state;
+  const message = state.error.code === 'access_denied'
+    ? 'Access denied'
+    : state.error.code === 'access_check_failed'
+      ? 'Access check failed'
+      : state.error.code === 'provider_failed'
+        ? 'Data provider request failed'
+        : state.error.message;
+  return message === state.error.message
+    ? state
+    : { ...state, error: { ...state.error, message } };
+}
 
 /** Only query/projection inputs belong in this key, never widget or layout data. */
 export function snapshotSurfaceSource(source: SurfaceDataSource, policy: SurfaceResourcePolicy) {
@@ -53,7 +70,10 @@ export interface SurfaceSourceRequest {
   readonly id: string;
   /** Values compare by Object.is; provider and permission identities are not serialized. */
   readonly identity: readonly unknown[];
-  readonly load: (isCurrent: () => boolean) => Promise<SurfaceSourceDataState>;
+  readonly load: (
+    isCurrent: () => boolean,
+    reportDiagnostic?: (diagnostic: SurfaceDataDiagnostic) => void,
+  ) => Promise<SurfaceSourceDataState>;
   /** Also guards prop changes that happen before Svelte's next effect flush. */
   readonly isCurrent: () => boolean;
 }
@@ -70,7 +90,10 @@ interface SourceEntry {
 interface SourceCacheSink {
   readonly set: (sourceId: string, state: SurfaceSourceDataState) => void;
   readonly remove: (sourceId: string) => void;
-  readonly onError: (state: Extract<SurfaceSourceDataState, { status: 'error' }>) => void;
+  readonly onError: (
+    state: Extract<SurfaceSourceDataState, { status: 'error' }>,
+    diagnostic?: SurfaceDataError,
+  ) => void;
 }
 
 /** Per-renderer reconciliation, not a cross-user or cross-component data cache. */
@@ -103,20 +126,29 @@ export function createSurfaceSourceCache(sink: SourceCacheSink) {
     entry.pending = (async () => {
       if (!current()) { retire(); return; }
       let state: SurfaceSourceDataState;
+      let diagnostic: SurfaceDataDiagnostic | undefined;
+      const reportDiagnostic = (next: SurfaceDataDiagnostic) => {
+        diagnostic ??= next;
+      };
       try {
-        state = await request.load(current);
+        state = await request.load(current, reportDiagnostic);
       } catch (failure) {
+        const message = failure instanceof Error ? failure.message : 'Data provider request failed';
+        diagnostic = {
+          code: 'provider_failed', sourceId: request.id, message,
+        };
         state = {
           status: 'error', sourceId: request.id,
           error: {
             code: 'provider_failed', sourceId: request.id,
-            message: failure instanceof Error ? failure.message : 'Data provider request failed',
+            message: 'Data provider request failed',
           },
         };
       }
       if (!current()) { retire(); return; }
+      state = stableSourceState(state);
       sink.set(request.id, state);
-      if (state.status === 'error') sink.onError(state);
+      if (state.status === 'error') sink.onError(state, diagnostic);
     })();
     return entry.pending;
   }

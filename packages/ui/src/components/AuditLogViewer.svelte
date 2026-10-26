@@ -56,9 +56,9 @@
       if (currentId !== requestId) return;
       logs = result.data;
       total = result.total;
-    } catch (e) {
+    } catch {
       if (currentId !== requestId) return;
-      error = e instanceof Error ? e.message : String(e);
+      error = i18n.t('common.error') ?? 'Something went wrong';
       toast.error(error);
     } finally {
       if (currentId === requestId) loading = false;

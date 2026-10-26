@@ -63,14 +63,13 @@ describe('MediaThumbnail and ImageField components', () => {
   it('shows a semantic error fallback and does not expose preview', async () => {
     const view = render(MediaThumbnail, {
       src: 'https://example.com/missing.png',
-      errorLabel: 'Unavailable evidence',
     });
     const img = view.container.querySelector('img');
     if (!img) throw new Error('Expected a loading image thumbnail');
     await fireEvent.error(img);
 
     expect(view.container.querySelector('[data-media-state="error"]')).not.toBeNull();
-    expect(screen.getByText('Unavailable evidence')).toBeTruthy();
+    expect(screen.getByText('Something went wrong')).toBeTruthy();
     expect(view.container.querySelector('button')).toBeNull();
   });
 

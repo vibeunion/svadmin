@@ -210,8 +210,10 @@ describe('TreeTable Component', () => {
     const view = render(TreeTable, { data: treeData, columns, loading: true, onRetry });
     expect(view.getByRole('status').textContent).toBe('Loading...');
     expect(view.queryByText('Root Folder')).toBeNull();
-    await view.rerender({ loading: false, error: 'Unable to load' });
-    expect(view.getByRole('alert').textContent).toBe('Unable to load');
+    await view.rerender({ loading: false, error: 'PRIVATE_PROVIDER_DIAGNOSTIC: relation "tree_nodes" missing' });
+    expect(view.getByRole('alert').textContent).toBe('Operation failed');
+    expect(view.getByRole('alert').textContent).not.toContain('PRIVATE_PROVIDER_DIAGNOSTIC');
+    expect(view.container.textContent).not.toContain('PRIVATE_PROVIDER_DIAGNOSTIC');
     expect(view.queryByText('Root Folder')).toBeNull();
     await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
     expect(onRetry).toHaveBeenCalledOnce();

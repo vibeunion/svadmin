@@ -4,6 +4,7 @@ import { QueryClient } from '@tanstack/svelte-query';
 import { resetContext, type TaskProvider, type TaskRecord } from '@svadmin/core';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import Host from './task-action.test-host.svelte';
+import { exactRoleName } from '../../test/accessible-name';
 
 const clients: QueryClient[] = [];
 function mount(action: 'cancel' | 'retry', operation: TaskProvider['get'], reportErrors = true) {
@@ -201,13 +202,13 @@ describe('same-task retry and cancel coordination', () => {
         selectedTaskId: 'one',
       });
       const failedRow = app.view.getByRole('row', { name: /Action task/ });
-      await fireEvent.click(within(failedRow).getByRole('button', { name: 'Retry' }));
+      await fireEvent.click(within(failedRow).getByRole('button', { name: exactRoleName('Retry') }));
       expect(retry).toHaveBeenCalledExactlyOnceWith('one');
 
       await app.view.rerender({ tasks: [{ id: 'one', title: 'Action task', status: 'running' }] });
       const runningRow = app.view.getByRole('row', { name: /Action task/ });
-      expect(within(runningRow).queryByRole('button', { name: 'Retry' })).toBeNull();
-      const cancelButton = within(runningRow).getByRole('button', { name: 'Cancel' });
+      expect(within(runningRow).queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
+      const cancelButton = within(runningRow).getByRole('button', { name: exactRoleName('Cancel') });
       expect(cancelButton).toHaveProperty('disabled', true);
       await fireEvent.click(cancelButton);
       expect(cancel).not.toHaveBeenCalled();
@@ -231,7 +232,7 @@ describe('same-task retry and cancel coordination', () => {
       .mockImplementationOnce(() => first.promise)
       .mockImplementation(async (id: string) => ({ id, status: 'pending' }));
     const app = mountBoth(actionProvider({ retry }));
-    const retryButton = () => app.view.getByRole('button', { name: 'Retry' });
+    const retryButton = () => app.view.getByRole('button', { name: exactRoleName('Retry') });
 
     await fireEvent.click(retryButton());
     expect(retry).toHaveBeenCalledExactlyOnceWith('one');
@@ -260,7 +261,7 @@ describe('same-task retry and cancel coordination', () => {
     const cancel = vi.fn<NonNullable<TaskProvider['cancel']>>(async (id: string) => ({ id, status: 'cancelled' }));
     const provider = actionProvider({ retry, cancel });
     const app = mountBoth(provider);
-    await fireEvent.click(app.view.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(app.view.getByRole('button', { name: exactRoleName('Retry') }));
     expect(retry).toHaveBeenCalledOnce();
 
     app.view.unmount();
@@ -268,8 +269,8 @@ describe('same-task retry and cancel coordination', () => {
       provider, action: 'both', queryClient: app.queryClient,
       onSuccess: app.onSuccess, onError: undefined,
     });
-    const retryButton = remounted.getByRole('button', { name: 'Retry' });
-    const cancelButton = remounted.getByRole('button', { name: 'Cancel' });
+    const retryButton = remounted.getByRole('button', { name: exactRoleName('Retry') });
+    const cancelButton = remounted.getByRole('button', { name: exactRoleName('Cancel') });
     expect(retryButton).toHaveProperty('disabled', true);
     expect(cancelButton).toHaveProperty('disabled', true);
     await fireEvent.click(cancelButton);
@@ -288,8 +289,8 @@ describe('same-task retry and cancel coordination', () => {
       cancel: vi.fn(() => cancel.promise),
     };
     const app = mountBoth(actionProvider(operations));
-    const retryButton = app.view.getByRole('button', { name: 'Retry' });
-    const cancelButton = app.view.getByRole('button', { name: 'Cancel' });
+    const retryButton = app.view.getByRole('button', { name: exactRoleName('Retry') });
+    const cancelButton = app.view.getByRole('button', { name: exactRoleName('Cancel') });
     const firstButton = first === 'Retry' ? retryButton : cancelButton;
     const siblingButton = first === 'Retry' ? cancelButton : retryButton;
     const firstOperation = first === 'Retry' ? operations.retry : operations.cancel;
@@ -339,8 +340,8 @@ describe('same-task retry and cancel coordination', () => {
       .mockImplementationOnce(() => nextRetry.promise);
     const cancel = vi.fn<NonNullable<TaskProvider['cancel']>>(() => nextCancel.promise);
     const app = mountBoth(actionProvider({ retry, cancel }), { reportErrors: false });
-    const retryButton = app.view.getByRole('button', { name: 'Retry' });
-    const cancelButton = app.view.getByRole('button', { name: 'Cancel' });
+    const retryButton = app.view.getByRole('button', { name: exactRoleName('Retry') });
+    const cancelButton = app.view.getByRole('button', { name: exactRoleName('Cancel') });
 
     await fireEvent.click(retryButton);
     const alert = await app.view.findByRole('alert');
@@ -386,7 +387,7 @@ describe('same-task retry and cancel coordination', () => {
     const app = mountBoth(provider, { surface: 'list', tasks, onSelect, selectedTaskId: 'one' });
     const actionRow = app.view.getByRole('row', { name: /Action task/ });
 
-    await fireEvent.click(within(actionRow).getByRole('button', { name: label }));
+    await fireEvent.click(within(actionRow).getByRole('button', { name: exactRoleName(label) }));
     await waitFor(() => expect(label === 'Retry' ? provider.retry : provider.cancel).toHaveBeenCalledOnce());
     expect(label === 'Retry' ? provider.retry : provider.cancel).toHaveBeenCalledWith('two');
     expect(label === 'Retry' ? provider.cancel : provider.retry).not.toHaveBeenCalled();
@@ -405,7 +406,7 @@ describe('same-task retry and cancel coordination', () => {
       onSelect: vi.fn(),
     });
 
-    expect(app.view.queryByRole('button', { name: 'Retry' })).toBeNull();
-    expect(app.view.queryByRole('button', { name: 'Cancel' })).toBeNull();
+    expect(app.view.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
+    expect(app.view.queryByRole('button', { name: exactRoleName('Cancel') })).toBeNull();
   });
 });

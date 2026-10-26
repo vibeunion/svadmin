@@ -14,6 +14,7 @@ export interface SurfaceMessages {
   readonly tableNoRecords: string;
   readonly tableInvalidData: string;
   readonly tableUnavailable: string;
+  readonly tableEngineUnavailable: string;
   readonly detailLoading?: string;
   readonly detailEmpty?: string;
   readonly detailUnavailable?: string;
@@ -42,6 +43,7 @@ const englishMessages: Required<SurfaceMessages> = {
   tableNoRecords: 'No records',
   tableInvalidData: 'Table data is invalid',
   tableUnavailable: 'Table data is unavailable',
+  tableEngineUnavailable: 'The host has not configured the SVAR engine',
   detailLoading: 'Loading record',
   detailEmpty: 'No record',
   detailUnavailable: 'Record is unavailable',
@@ -70,6 +72,7 @@ const simplifiedChineseMessages: Required<SurfaceMessages> = {
   tableNoRecords: '暂无记录',
   tableInvalidData: '表格数据无效',
   tableUnavailable: '表格数据不可用',
+  tableEngineUnavailable: '宿主尚未配置 SVAR 引擎',
   detailLoading: '正在加载记录',
   detailEmpty: '暂无记录',
   detailUnavailable: '记录不可用',

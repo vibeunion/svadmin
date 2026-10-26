@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { checkError } from './hook-utils.svelte';
+import { checkError, fireErrorNotification } from './hook-utils.svelte';
 import { captureAdminContext, resetContext, setAuthProvider, setRouterProvider } from './context.svelte';
 import type { AuthProvider, AuthActionResult } from './types';
 import type { RouterProvider } from './router-provider';
@@ -26,6 +26,8 @@ import type { LiveHookTestState } from './live-hooks.test.types';
 import { readOwnedDataQuery, invalidateOwnedQueries } from './query-invalidation';
 import { useInvalidate } from './strict-hooks.svelte';
 import * as legacyHooks from './hooks.svelte';
+import { getToastQueue } from './toast.svelte';
+import { resetI18n, setLocale, t } from './i18n.svelte';
 
 function setup(onError: AuthProvider['onError']) {
   const provider: AuthProvider = {
@@ -50,7 +52,31 @@ afterEach(() => {
   resetContext();
   resetLogoutVersion();
   resetAdminOptions();
+  resetI18n();
   vi.restoreAllMocks();
+});
+
+describe('default error notifications', () => {
+  it('uses the stable localized message without appending provider diagnostics', () => {
+    setLocale('zh-CN');
+    fireErrorNotification({
+      config: undefined,
+      defaultMessage: t('common.operationFailed'),
+      error: new Error('PRIVATE_DIAGNOSTIC'),
+      resource: 'posts',
+    });
+    expect(getToastQueue()).toHaveLength(1);
+    expect(getToastQueue()[0]?.message).toBe('操作失败');
+    expect(JSON.stringify(getToastQueue())).not.toContain('PRIVATE_DIAGNOSTIC');
+  });
+
+  it('keeps explicit config callbacks diagnostic-capable', () => {
+    const error = new Error('PRIVATE_DIAGNOSTIC');
+    const config = vi.fn((value: unknown) => ({ message: value instanceof Error ? value.message : 'unexpected' }));
+    fireErrorNotification({ config, defaultMessage: 'fallback', error, resource: 'posts' });
+    expect(config).toHaveBeenCalledWith(error, undefined, 'posts');
+    expect(getToastQueue()[0]?.message).toBe('PRIVATE_DIAGNOSTIC');
+  });
 });
 
 describe('checkError', () => {

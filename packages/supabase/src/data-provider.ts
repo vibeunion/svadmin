@@ -63,6 +63,28 @@ export function createSupabaseDataProvider(
   if (typeof refineDataProvider !== 'function') throw new Error('[svadmin/supabase] Missing @refinedev/supabase data provider');
   const adapter = createRefineAdapter(refineDataProvider(client));
 
+  // PostgREST DELETE returns no representation unless `select` is chained. The
+  // core DataProvider contract requires a confirmed deleted record, so keep
+  // this path explicit instead of allowing the upstream adapter's undefined
+  // response to pass into the strict response decoder.
+  adapter.deleteOne = async ({ resource, id, meta }) => {
+    const targetSchema = optionalString(meta, 'schema') ?? defaultSchema;
+    const select = optionalString(meta, 'select') ?? '*';
+    const idColumn = optionalString(meta, 'idColumnName') ?? 'id';
+    const target = targetSchema ? callSdk(client, 'schema', [targetSchema]) : client;
+    const table = callSdk(target, 'from', [resource]);
+    const filtered = callSdk(callSdk(table, 'delete', []), 'eq', [idColumn, id]);
+    const data = await sdkData(
+      callSdk(filtered, 'select', [select]),
+      `Delete request "${resource}"`,
+      true,
+    );
+    if (!Array.isArray(data) || data.length !== 1 || !isObject(data[0])) {
+      return rejectProviderResponse(true);
+    }
+    return { data: data[0] };
+  };
+
   const executeCustom: NonNullable<DataTransport['custom']> = async ({
     url, method, payload, query, headers, filters, sorters, meta,
   }) => {

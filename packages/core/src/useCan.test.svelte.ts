@@ -100,11 +100,13 @@ describe('owned access queries', () => {
       'const allowed: boolean = result.allowed;',
       'const reason: string | undefined = result.reason;',
       'const loading: boolean = result.isLoading;',
+      'const permissionError: boolean = result.isError;',
     ];
     const invalid = [
       'result.allowed = true;',
       'result.reason = "forged";',
       'result.isLoading = false;',
+      'result.isError = true;',
       'useCan(() => ({ resource: "posts", action: "edit", id: true }));',
       'useCan(() => ({ resource: "posts", action: "edit", params: { id: true } }));',
       'useCan(() => ({ resource: 1, action: "edit" }));',
@@ -151,12 +153,29 @@ describe('owned access queries', () => {
     const app = mount({ can: () => pending.promise });
     expect(app.read().can.allowed).toBe(false);
     expect(app.read().can.reason).toBeUndefined();
+    expect(app.read().can.isError).toBe(false);
     await waitFor(() => expect(app.read().can.isLoading).toBe(true));
     pending.resolve({ can: true, reason: 'Allowed' });
     await waitFor(() => expect(app.read().can.allowed).toBe(true));
     expect(app.read().can.reason).toBe('Allowed');
+    expect(app.read().can.isError).toBe(false);
     expect(Object.isFrozen(app.read().can)).toBe(true);
     expect(Reflect.set(app.read().can, 'allowed', false)).toBe(false);
+  });
+
+  it('only flags a failed permission query, not a successful denial', async () => {
+    const denied = mount(policy({ can: false, reason: 'Denied' }));
+    await waitFor(() => expect(denied.read().can.reason).toBe('Denied'));
+    expect(denied.read().can.allowed).toBe(false);
+    expect(denied.read().can.isLoading).toBe(false);
+    expect(denied.read().can.isError).toBe(false);
+
+    const failed = mount({ can: vi.fn(async () => { throw new HttpError('private-token', 502); }) });
+    await waitFor(() => expect(failed.read().can.isError).toBe(true));
+    expect(failed.read().can.allowed).toBe(false);
+    expect(failed.read().can.isLoading).toBe(false);
+    expect(failed.read().can.reason).toBeUndefined();
+    expect(Reflect.set(failed.read().can, 'isError', false)).toBe(false);
   });
 
   it('deduplicates the same owner but isolates distinct authentication owners on a shared client', async () => {
@@ -246,6 +265,7 @@ describe('owned access queries', () => {
     expect(original.state.error).toMatchObject({ code: 'QUERY_SESSION_SUPERSEDED' });
     expect(app.read().can.allowed).toBe(false);
     expect(app.read().can.reason).toBe('New policy');
+    expect(app.read().can.isError).toBe(false);
     expect(owner.onError).not.toHaveBeenCalled();
   });
 
@@ -332,6 +352,7 @@ describe('owned access queries', () => {
     const owner = auth();
     const app = mount(null, { authProvider: owner });
     await waitFor(() => expect(app.read().can.allowed).toBe(true));
+    expect(app.read().can.isError).toBe(false);
     await app.read().logout.mutate();
     expect(app.read().can.allowed).toBe(false);
     await app.read().login.mutate({});

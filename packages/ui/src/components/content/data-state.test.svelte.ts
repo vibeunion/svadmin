@@ -48,6 +48,13 @@ describe('DataState contract', () => {
     expect(retries).toBe(1);
   });
 
+  it('uses a failure description instead of repeating the retry action by default', () => {
+    const view = render(DataState, { state: 'error' });
+
+    expect(view.getByText('Operation failed')).toBeTruthy();
+    expect(view.queryByRole('button')).toBeNull();
+  });
+
   it('keeps forbidden state actionable without pretending it is an error', () => {
     const view = render(DataState, {
       state: 'forbidden',

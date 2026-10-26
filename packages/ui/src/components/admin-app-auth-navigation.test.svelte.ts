@@ -115,6 +115,7 @@ describe('AdminApp authenticated navigation', () => {
         contract: defineResource('posts', { record: Type.Object({ id: Type.Number(), title: Type.String() }) }),
       }],
     });
+    await vi.dynamicImportSettled();
     expect(await view.findByText('Numeric record')).toBeTruthy();
     expect(getOne).toHaveBeenCalledWith(expect.objectContaining({ id: 3 }));
     expect(can).toHaveBeenCalledWith(expect.objectContaining({ action: 'show', params: { id: 3 } }));
@@ -136,11 +137,11 @@ describe('AdminApp authenticated navigation', () => {
   });
 
   it.each([
-    ['#/posts', 'list', undefined, 'list'],
-    ['#/posts/create', 'create', undefined, 'create'],
-    ['#/posts/edit/blocked', 'edit', 'blocked', 'edit'],
-    ['#/posts/show/blocked', 'show', 'blocked', 'show'],
-  ] as const)('does not mount the %s resource page when %s access is denied', async (hash, _label, id, action) => {
+    ['#/posts', 'list', undefined, 'list', 'You do not have permission to perform this action'],
+    ['#/posts/create', 'create', undefined, 'create', 'You do not have permission to perform this action'],
+    ['#/posts/edit/blocked', 'edit', 'blocked', 'edit', 'You do not have permission to perform this action'],
+    ['#/posts/show/blocked', 'show', 'blocked', 'show', 'You do not have permission to perform this action'],
+  ] as const)('does not mount the %s resource page when %s access is denied', async (hash, _label, id, action, message) => {
     window.location.hash = hash;
     const mounted = vi.fn();
     pageMountedListener = mounted;
@@ -156,7 +157,7 @@ describe('AdminApp authenticated navigation', () => {
       },
     });
 
-    expect(await view.findByText('Blocked by policy')).not.toBeNull();
+    expect(await view.findByText(message)).not.toBeNull();
     expect(view.queryByRole('region', { name: 'Posts page' })).toBeNull();
     expect(mounted).not.toHaveBeenCalled();
     expect(can).toHaveBeenCalledWith({
@@ -181,7 +182,7 @@ describe('AdminApp authenticated navigation', () => {
       resourcePages: { posts: { clone: TestPage } },
     });
 
-    expect(await view.findByText('You do not have permission to view this content.')).not.toBeNull();
+    expect(await view.findByText('You do not have permission to perform this action')).not.toBeNull();
     expect(mounted).not.toHaveBeenCalled();
     expect(can).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', action: 'create', params: { id: 'blocked' } }));
     expect(can).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', action: 'show', params: { id: 'blocked' } }));
@@ -197,7 +198,7 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    expect(await view.findByText('You do not have permission to view this content.')).not.toBeNull();
+    expect(await view.findByText('You do not have permission to perform this action')).not.toBeNull();
     expect(getOne).not.toHaveBeenCalled();
   });
 
@@ -223,10 +224,10 @@ describe('AdminApp authenticated navigation', () => {
   });
 
   it.each([
-    ['#/posts/create', { canCreate: false }, 'create'],
-    ['#/posts/edit/blocked', { canEdit: false }, 'edit'],
-    ['#/posts/show/blocked', { canShow: false }, 'show'],
-  ] as const)('honors resource-level flags on the %s deep link', async (hash, resourceFlags, page) => {
+    ['#/posts/create', { canCreate: false }, 'create', 'You do not have permission to perform this action'],
+    ['#/posts/edit/blocked', { canEdit: false }, 'edit', 'You do not have permission to perform this action'],
+    ['#/posts/show/blocked', { canShow: false }, 'show', 'You do not have permission to perform this action'],
+  ] as const)('honors resource-level flags on the %s deep link', async (hash, resourceFlags, page, message) => {
     window.location.hash = hash;
     const mounted = vi.fn();
     pageMountedListener = mounted;
@@ -239,7 +240,7 @@ describe('AdminApp authenticated navigation', () => {
       resourcePages: { posts: { [page]: TestPage } },
     });
 
-    expect(await view.findByText('You do not have permission to view this content.')).not.toBeNull();
+    expect(await view.findByText(message)).not.toBeNull();
     expect(mounted).not.toHaveBeenCalled();
   });
 

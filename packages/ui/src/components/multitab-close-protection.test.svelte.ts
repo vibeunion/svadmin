@@ -18,6 +18,12 @@ async function flushPending(): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
 }
 
+function tabAt(tabs: readonly WorkspaceTab[], index: number): WorkspaceTab {
+  const tab = tabs[index];
+  if (!tab) throw new Error(`Missing workspace tab ${index}`);
+  return tab;
+}
+
 function createTabs(): WorkspaceTab[] {
   return [
     { id: 'home', title: 'Home', path: '/home', pinned: true },
@@ -38,6 +44,16 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
     expect(tab.contains(close)).toBe(false);
     expect(close.parentElement).toBe(tab.parentElement);
+  });
+
+  it('marks the workspace tab list as horizontally oriented', () => {
+    const view = render(MultiTabKeepAlive, {
+      tabs: createTabs(),
+      activeTabId: 'draft',
+    });
+
+    const tabList = view.getByRole('tablist', { name: 'Workspace tabs' });
+    expect(tabList.getAttribute('aria-orientation')).toBe('horizontal');
   });
 
   it('names the close-all command and clears the bound active tab when nothing remains', async () => {
@@ -253,7 +269,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const oncloseall = vi.fn();
-    const onbeforeclose = vi.fn(() => pending.promise);
+    const onbeforeclose = vi.fn((_tab: WorkspaceTab) => pending.promise);
 
     const view = render(MultiTabKeepAlive, {
       tabs,
@@ -266,9 +282,9 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     await fireEvent.click(view.getByRole('button', { name: 'Close all tabs' }));
 
-    expect(onbeforeclose.mock.calls.filter(([tab]) => tab.id === 'draft')).toHaveLength(1);
+    expect(onbeforeclose.mock.calls.filter(([tab]) => tab?.id === 'draft')).toHaveLength(1);
     // 关闭操作锁生效，交叉的批量请求直接忽略。
-    expect(onbeforeclose.mock.calls.filter(([tab]) => tab.id === 'orders')).toHaveLength(0);
+    expect(onbeforeclose.mock.calls.filter(([tab]) => tab?.id === 'orders')).toHaveLength(0);
     pending.resolve(true);
 
     await waitFor(() => {
@@ -297,7 +313,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     await view.rerender({
-      tabs: [requireValue(tabs[0]), { id: 'draft', title: 'Invoice draft', path: '/invoices/other', dirty: true }, requireValue(tabs[2])],
+      tabs: [tabAt(tabs, 0), { id: 'draft', title: 'Invoice draft', path: '/invoices/other', dirty: true }, tabAt(tabs, 2)],
     });
     pending.resolve(true);
     await flushPending();
@@ -308,7 +324,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
   it('rechecks pinned state on the original tab after confirmation', async () => {
     const tabs = createTabs();
-    const dirtyTab = requireValue(tabs[1]);
+    const dirtyTab = requireValue(tabAt(tabs, 1));
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const onbeforeclose = vi.fn(() => pending.promise);
@@ -332,7 +348,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
   it('rechecks closable state on the original tab during close-all', async () => {
     const tabs = createTabs();
-    const dirtyTab = requireValue(tabs[1]);
+    const dirtyTab = requireValue(tabAt(tabs, 1));
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const onbeforeclose = vi.fn((tab: WorkspaceTab) =>
@@ -403,8 +419,8 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     });
     await view.rerender({
       tabs: [
-        requireValue(tabs[0]),
-        requireValue(tabs[1]),
+        tabAt(tabs, 0),
+        tabAt(tabs, 1),
         { id: 'orders', title: 'Orders', path: '/orders/reopened', closable: true },
       ],
     });
@@ -439,7 +455,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await waitFor(() => {
       expect(onbeforeclose).toHaveBeenCalledWith(expect.objectContaining({ id: 'draft' }));
     });
-    await view.rerender({ tabs: [requireValue(tabs[0]), requireValue(tabs[1])] });
+    await view.rerender({ tabs: [tabAt(tabs, 0), tabAt(tabs, 1)] });
     pending.resolve(true);
     await flushPending();
 
@@ -500,14 +516,14 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     await view.rerender({
       tabs: [
-        requireValue(tabs[0]),
+        tabAt(tabs, 0),
         Object.freeze({
           id: 'draft',
           title: 'Invoice draft',
           path: '/invoices/new',
           dirty: true,
         }),
-        requireValue(tabs[2]),
+        tabAt(tabs, 2),
       ],
     });
     pending.resolve(true);
@@ -585,7 +601,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
       expect(view.queryByRole('tab', { name: 'Invoice draft' })).toBeNull();
     });
     expect(tabs).toHaveLength(3);
-    expect(requireValue(tabs[1])?.id).toBe('draft');
+    expect(tabAt(tabs, 1)?.id).toBe('draft');
     expect(view.getByRole('button', { name: 'Close all tabs' })).toBeTruthy();
 
     await fireEvent.click(view.getByRole('button', { name: 'Close all tabs' }));
@@ -597,7 +613,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     expect(onclose).toHaveBeenCalledWith('orders');
     expect(onclose).not.toHaveBeenCalledWith('home');
     expect(tabs).toHaveLength(3);
-    expect(requireValue(tabs[1])?.id).toBe('draft');
+    expect(tabAt(tabs, 1)?.id).toBe('draft');
     expect(view.queryByRole('button', { name: 'Close all tabs' })).toBeNull();
   });
 
@@ -639,7 +655,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await waitFor(() => {
       expect(onbeforeclose).toHaveBeenCalledWith(expect.objectContaining({ id: 'draft' }));
     });
-    await view.rerender({ tabs: [requireValue(tabs[0]), requireValue(tabs[1])] });
+    await view.rerender({ tabs: [tabAt(tabs, 0), tabAt(tabs, 1)] });
     pending.resolve(true);
     await flushPending();
 
@@ -681,5 +697,112 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     expect(onbeforeclose).toHaveBeenCalledTimes(1);
     expect(onclose).not.toHaveBeenCalled();
     expect(oncloseall).not.toHaveBeenCalled();
+  });
+});
+
+describe('MultiTabKeepAlive tablist keyboard model', () => {
+  it('keeps one roving tab stop and falls back to the first tab without a match', () => {
+    const view = render(MultiTabKeepAlive, {
+      tabs: createTabs(),
+      activeTabId: 'draft',
+    });
+
+    expect(view.getByRole('tab', { name: 'Home' }).getAttribute('tabindex')).toBe('-1');
+    expect(view.getByRole('tab', { name: 'Invoice draft' }).getAttribute('tabindex')).toBe('0');
+    expect(view.getByRole('tab', { name: 'Orders' }).getAttribute('tabindex')).toBe('-1');
+
+    view.unmount();
+
+    const fallback = render(MultiTabKeepAlive, {
+      tabs: createTabs(),
+      activeTabId: 'missing',
+    });
+
+    expect(fallback.getByRole('tab', { name: 'Home' }).getAttribute('tabindex')).toBe('0');
+    expect(fallback.getByRole('tab', { name: 'Invoice draft' }).getAttribute('tabindex')).toBe('-1');
+    expect(fallback.getByRole('tab', { name: 'Orders' }).getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('does not throw for an empty tablist', () => {
+    const view = render(MultiTabKeepAlive, { tabs: [], activeTabId: '' });
+
+    expect(view.getByRole('tablist')).toBeTruthy();
+    expect(view.queryAllByRole('tab')).toHaveLength(0);
+  });
+
+  it('cycles focus and activation with ArrowRight and ArrowLeft', async () => {
+    const onselect = vi.fn();
+    const view = render(MultiTabKeepAlive, {
+      tabs: createTabs(),
+      activeTabId: 'home',
+      onselect,
+    });
+
+    const home = view.getByRole('tab', { name: 'Home' });
+    home.focus();
+
+    await fireEvent.keyDown(home, { key: 'ArrowRight' });
+    const draft = view.getByRole('tab', { name: 'Invoice draft' });
+    expect(document.activeElement).toBe(draft);
+    expect(draft.getAttribute('aria-selected')).toBe('true');
+    expect(draft.getAttribute('tabindex')).toBe('0');
+    expect(home.getAttribute('tabindex')).toBe('-1');
+    expect(onselect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft' }));
+
+    await fireEvent.keyDown(draft, { key: 'ArrowRight' });
+    const orders = view.getByRole('tab', { name: 'Orders' });
+    expect(document.activeElement).toBe(orders);
+    expect(orders.getAttribute('aria-selected')).toBe('true');
+
+    await fireEvent.keyDown(orders, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(home);
+    expect(home.getAttribute('aria-selected')).toBe('true');
+
+    await fireEvent.keyDown(home, { key: 'ArrowLeft' });
+    expect(document.activeElement).toBe(orders);
+    expect(orders.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('jumps to the first and last tab with Home and End and activates them', async () => {
+    const onselect = vi.fn();
+    const view = render(MultiTabKeepAlive, {
+      tabs: createTabs(),
+      activeTabId: 'draft',
+      onselect,
+    });
+
+    const draft = view.getByRole('tab', { name: 'Invoice draft' });
+    draft.focus();
+
+    await fireEvent.keyDown(draft, { key: 'End' });
+    const orders = view.getByRole('tab', { name: 'Orders' });
+    expect(document.activeElement).toBe(orders);
+    expect(orders.getAttribute('aria-selected')).toBe('true');
+    expect(onselect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'orders' }));
+
+    await fireEvent.keyDown(orders, { key: 'Home' });
+    const home = view.getByRole('tab', { name: 'Home' });
+    expect(document.activeElement).toBe(home);
+    expect(home.getAttribute('aria-selected')).toBe('true');
+    expect(onselect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'home' }));
+  });
+
+  it('preserves Enter and Space activation semantics', async () => {
+    const onselect = vi.fn();
+    const view = render(MultiTabKeepAlive, {
+      tabs: createTabs(),
+      activeTabId: 'home',
+      onselect,
+    });
+
+    const draft = view.getByRole('tab', { name: 'Invoice draft' });
+    await fireEvent.keyDown(draft, { key: 'Enter' });
+    expect(draft.getAttribute('aria-selected')).toBe('true');
+    expect(onselect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft' }));
+
+    const orders = view.getByRole('tab', { name: 'Orders' });
+    await fireEvent.keyDown(orders, { key: ' ' });
+    expect(orders.getAttribute('aria-selected')).toBe('true');
+    expect(onselect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'orders' }));
   });
 });

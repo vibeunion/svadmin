@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ApprovalActionCard from './ApprovalActionCard.svelte';
+import { exactRoleName } from '../../test/accessible-name';
 
 afterEach(cleanup);
 
@@ -75,24 +76,24 @@ describe('ApprovalActionCard Component', () => {
       const callback = vi.fn<(value?: string) => Promise<void>>().mockResolvedValue(undefined)
         .mockRejectedValueOnce(failure === 'non-error' ? 'PRIVATE_APPROVAL_DIAGNOSTIC' : new Error(failure === 'empty' ? '' : 'PRIVATE_APPROVAL_DIAGNOSTIC'));
       const view = render(ApprovalActionCard, { [key]: callback });
-      await fireEvent.click(view.getByRole('button', { name: action }));
+      await fireEvent.click(view.getByRole('button', { name: exactRoleName(action) }));
       const dialog = within(view.getByRole('dialog'));
       const field = dialog.getByLabelText(label);
       if (key !== 'onapprove') {
-        expect(dialog.getByRole('button', { name: confirm })).toHaveProperty('disabled', true);
+        expect(dialog.getByRole('button', { name: exactRoleName(confirm) })).toHaveProperty('disabled', true);
         expect(callback).not.toHaveBeenCalled();
       }
       await fireEvent.input(field, { target: { value: draft } });
-      await fireEvent.click(dialog.getByRole('button', { name: confirm }));
+      await fireEvent.click(dialog.getByRole('button', { name: exactRoleName(confirm) }));
       await waitFor(() => expect(dialog.getByRole('alert').textContent).toBe('Operation failed'));
       expect(document.body.textContent).not.toContain('PRIVATE_APPROVAL_DIAGNOSTIC');
       expect(field).toHaveProperty('value', draft);
-      expect(dialog.getByRole('button', { name: confirm })).toHaveProperty('disabled', false);
-      await fireEvent.click(dialog.getByRole('button', { name: confirm }));
+      expect(dialog.getByRole('button', { name: exactRoleName(confirm) })).toHaveProperty('disabled', false);
+      await fireEvent.click(dialog.getByRole('button', { name: exactRoleName(confirm) }));
       await waitFor(() => expect(view.queryByRole('dialog')).toBeNull());
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenNthCalledWith(2, draft);
-      await fireEvent.click(view.getByRole('button', { name: action }));
+      await fireEvent.click(view.getByRole('button', { name: exactRoleName(action) }));
       expect(view.getByLabelText(label)).toHaveProperty('value', '');
       expect(view.queryByRole('alert')).toBeNull();
     });

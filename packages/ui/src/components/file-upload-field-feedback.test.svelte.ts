@@ -1,9 +1,14 @@
-import { fireEvent, render, within } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 import type { FieldDefinition } from '@svadmin/core';
 import { requireValue } from '../../../../scripts/test-assertions';
 import FieldRenderer from './FieldRenderer.svelte';
 import FileUpload from './FileUpload.svelte';
+
+function resolveDescribedBy(element: Element): Element[] {
+  return (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)
+    .map(id => requireValue(document.getElementById(id)));
+}
 
 describe('FileUpload field feedback', () => {
   it('links both upload entry points to the owning field description and error', () => {
@@ -52,6 +57,81 @@ describe('FileUpload field feedback', () => {
     expect(dropzone.getAttribute('aria-label')).toBe('Evidence');
     expect(dropzone.hasAttribute('data-invalid')).toBe(false);
     expect(dropzone.hasAttribute('aria-describedby')).toBe(false);
+  });
+
+  it('resolves real description and error nodes per file field without leaking feedback', async () => {
+    const fieldA: FieldDefinition = {
+      key: 'attachmentA', label: 'Attachment A', type: 'file', description: 'A document',
+    };
+    const fieldB: FieldDefinition = {
+      key: 'attachmentB', label: 'Attachment B', type: 'file', description: 'B document',
+    };
+    const errorA = document.createElement('p');
+    errorA.id = 'file-error-a';
+    errorA.textContent = 'A is invalid';
+    const errorB = document.createElement('p');
+    errorB.id = 'file-error-b';
+    errorB.textContent = 'B is invalid';
+    document.body.append(errorA, errorB);
+    const onChangeA = vi.fn();
+    const onChangeB = vi.fn();
+    const viewA = render(FieldRenderer, {
+      field: fieldA, value: null, onchange: onChangeA, invalid: true, errorId: errorA.id,
+    });
+    const viewB = render(FieldRenderer, {
+      field: fieldB, value: null, onchange: onChangeB, invalid: true, errorId: errorB.id,
+    });
+    const resolve = (idref: string | null) =>
+      requireValue(idref).split(/\s+/).map(id => document.getElementById(id));
+    try {
+      const inputA = requireValue(viewA.container.querySelector('input[type="file"]'));
+      const dropzoneA = within(viewA.container).getByRole('button', { name: 'Attachment A' });
+      const descriptionA = requireValue(viewA.container.querySelector('[data-svadmin-field-description]'));
+      const inputB = requireValue(viewB.container.querySelector('input[type="file"]'));
+      const dropzoneB = within(viewB.container).getByRole('button', { name: 'Attachment B' });
+      const descriptionB = requireValue(viewB.container.querySelector('[data-svadmin-field-description]'));
+      expect(descriptionA.id).not.toBe(descriptionB.id);
+      for (const [entry, description, error] of [
+        [inputA, descriptionA, errorA], [dropzoneA, descriptionA, errorA],
+        [inputB, descriptionB, errorB], [dropzoneB, descriptionB, errorB],
+      ] as const) {
+        const refs = requireValue(entry.getAttribute('aria-describedby')).split(/\s+/);
+        expect(refs).toEqual([description.id, error.id]);
+        expect(resolve(entry.getAttribute('aria-describedby'))).toEqual([description, error]);
+      }
+      expect(inputA.getAttribute('aria-invalid')).toBe('true');
+      expect(dropzoneA.getAttribute('data-invalid')).toBe('true');
+      expect(inputB.getAttribute('aria-invalid')).toBe('true');
+      expect(dropzoneB.getAttribute('data-invalid')).toBe('true');
+
+      await viewA.rerender({ field: { ...fieldA, description: '' }, invalid: false, errorId: '' });
+
+      expect(viewA.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+      expect(document.getElementById(descriptionA.id)).toBeNull();
+      for (const entry of [inputA, dropzoneA]) {
+        expect(entry.hasAttribute('aria-describedby')).toBe(false);
+        expect(entry.hasAttribute('aria-invalid')).toBe(false);
+        expect(entry.hasAttribute('data-invalid')).toBe(false);
+      }
+      for (const entry of [inputB, dropzoneB]) {
+        const refs = requireValue(entry.getAttribute('aria-describedby')).split(/\s+/);
+        expect(refs).toEqual([descriptionB.id, errorB.id]);
+        expect(resolve(entry.getAttribute('aria-describedby'))).toEqual([descriptionB, errorB]);
+        expect(refs).not.toContain(descriptionA.id);
+      }
+      expect(viewB.container.querySelector('[data-svadmin-field-description]')).toBe(descriptionB);
+      expect(document.getElementById(descriptionB.id)).toBe(descriptionB);
+      expect(document.getElementById(errorB.id)).toBe(errorB);
+      expect(inputB.getAttribute('aria-invalid')).toBe('true');
+      expect(dropzoneB.getAttribute('data-invalid')).toBe('true');
+      expect(onChangeA).not.toHaveBeenCalled();
+      expect(onChangeB).not.toHaveBeenCalled();
+    } finally {
+      viewA.unmount();
+      viewB.unmount();
+      errorA.remove();
+      errorB.remove();
+    }
   });
 
   it.each(['click', 'Enter', ' '])('does not open the picker through %s when disabled', async (action) => {
@@ -125,5 +205,137 @@ describe('FileUpload field feedback', () => {
     await fireEvent.click(dropzone);
     expect(open).toHaveBeenCalledTimes(1);
     expect(dropzone.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('links queued cancel, retry and remove actions to the owning field feedback', async () => {
+    const fieldA: FieldDefinition = {
+      key: 'attachmentA', label: 'Attachment A', type: 'file', description: 'A document',
+    };
+    const fieldB: FieldDefinition = {
+      key: 'attachmentB', label: 'Attachment B', type: 'file', description: 'B document',
+    };
+    const errorA = document.createElement('p');
+    errorA.id = 'queued-file-error-a';
+    errorA.textContent = 'A is invalid';
+    const errorB = document.createElement('p');
+    errorB.id = 'queued-file-error-b';
+    errorB.textContent = 'B is invalid';
+    document.body.append(errorA, errorB);
+    let resolveA!: (value: undefined) => void;
+    let resolveB!: (value: undefined) => void;
+    const uploadA = () => new Promise<undefined>(resolve => { resolveA = resolve; });
+    const uploadB = () => new Promise<undefined>(resolve => { resolveB = resolve; });
+    const viewA = render(FieldRenderer, {
+      field: fieldA, value: null, onchange: () => {}, invalid: true, errorId: errorA.id, upload: uploadA,
+    });
+    const viewB = render(FieldRenderer, {
+      field: fieldB, value: null, onchange: () => {}, invalid: true, errorId: errorB.id, upload: uploadB,
+    });
+    try {
+      const inputA = requireValue(viewA.container.querySelector<HTMLInputElement>('input[type="file"]'));
+      const inputB = requireValue(viewB.container.querySelector<HTMLInputElement>('input[type="file"]'));
+      await fireEvent.change(inputA, { target: { files: [new File(['a'], 'a.pdf')] } });
+      await fireEvent.change(inputB, { target: { files: [new File(['b'], 'b.pdf')] } });
+
+      const descriptionA = requireValue(viewA.container.querySelector('[data-svadmin-field-description]'));
+      const descriptionB = requireValue(viewB.container.querySelector('[data-svadmin-field-description]'));
+      const feedbackA = [descriptionA, errorA];
+      const feedbackB = [descriptionB, errorB];
+      const cancelA = await within(viewA.container).findByRole('button', { name: 'Cancel upload' });
+      const cancelB = await within(viewB.container).findByRole('button', { name: 'Cancel upload' });
+      for (const [action, feedback] of [
+        [cancelA, feedbackA],
+        [within(viewA.container).getByRole('button', { name: 'Remove file' }), feedbackA],
+        [cancelB, feedbackB],
+        [within(viewB.container).getByRole('button', { name: 'Remove file' }), feedbackB],
+      ] as const) {
+        expect(resolveDescribedBy(action)).toEqual(feedback);
+        expect(action.getAttribute('aria-invalid')).toBe('true');
+      }
+      expect(resolveDescribedBy(cancelA)).not.toContain(descriptionB);
+      expect(resolveDescribedBy(cancelA)).not.toContain(errorB);
+
+      await fireEvent.click(cancelA);
+      const retryA = await within(viewA.container).findByRole('button', { name: 'Retry upload' });
+      expect(resolveDescribedBy(retryA)).toEqual(feedbackA);
+      expect(retryA.getAttribute('aria-invalid')).toBe('true');
+      expect(resolveDescribedBy(cancelB)).toEqual(feedbackB);
+
+      await viewA.rerender({ field: fieldA, value: null, invalid: false, errorId: undefined, upload: uploadA });
+      await waitFor(() => {
+        for (const action of [retryA, within(viewA.container).getByRole('button', { name: 'Remove file' })]) {
+          expect(action.getAttribute('aria-describedby')).toBe(descriptionA.id);
+          expect(action.hasAttribute('aria-invalid')).toBe(false);
+        }
+      });
+      expect(resolveDescribedBy(cancelB)).toEqual(feedbackB);
+      expect(cancelB.getAttribute('aria-invalid')).toBe('true');
+
+      await viewA.rerender({ field: { ...fieldA, description: '' }, value: null, invalid: false, upload: uploadA });
+      await waitFor(() => {
+        for (const action of [retryA, within(viewA.container).getByRole('button', { name: 'Remove file' })]) {
+          expect(action.hasAttribute('aria-describedby')).toBe(false);
+          expect(action.hasAttribute('aria-invalid')).toBe(false);
+        }
+      });
+      expect(viewA.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+      expect(resolveDescribedBy(cancelB)).toEqual(feedbackB);
+      expect(viewB.container.querySelector('[data-svadmin-field-description]')).toBe(descriptionB);
+    } finally {
+      viewA.unmount();
+      viewB.unmount();
+      resolveA(undefined);
+      resolveB(undefined);
+      errorA.remove();
+      errorB.remove();
+    }
+  });
+
+  it('links existing attachment removal to the owning field feedback', async () => {
+    const fieldA: FieldDefinition = {
+      key: 'attachmentA', label: 'Attachment A', type: 'file', description: 'A document',
+    };
+    const fieldB: FieldDefinition = {
+      key: 'attachmentB', label: 'Attachment B', type: 'file', description: 'B document',
+    };
+    const errorA = document.createElement('p');
+    errorA.id = 'existing-file-error-a';
+    const errorB = document.createElement('p');
+    errorB.id = 'existing-file-error-b';
+    document.body.append(errorA, errorB);
+    const upload = async () => undefined;
+    const viewA = render(FieldRenderer, {
+      field: fieldA, value: { url: '/existing-a.pdf' }, onchange: () => {},
+      invalid: true, errorId: errorA.id, upload,
+    });
+    const viewB = render(FieldRenderer, {
+      field: fieldB, value: { url: '/existing-b.pdf' }, onchange: () => {},
+      invalid: true, errorId: errorB.id, upload,
+    });
+    try {
+      const descriptionA = requireValue(viewA.container.querySelector('[data-svadmin-field-description]'));
+      const descriptionB = requireValue(viewB.container.querySelector('[data-svadmin-field-description]'));
+      const removeA = within(viewA.container).getByRole('button', { name: 'Remove /existing-a.pdf' });
+      const removeB = within(viewB.container).getByRole('button', { name: 'Remove /existing-b.pdf' });
+      expect(resolveDescribedBy(removeA)).toEqual([descriptionA, errorA]);
+      expect(resolveDescribedBy(removeB)).toEqual([descriptionB, errorB]);
+      expect(removeA.getAttribute('aria-invalid')).toBe('true');
+      expect(removeB.getAttribute('aria-invalid')).toBe('true');
+
+      await viewA.rerender({
+        field: fieldA, value: { url: '/existing-a.pdf' }, invalid: false, errorId: undefined, upload,
+      });
+      await waitFor(() => {
+        expect(removeA.getAttribute('aria-describedby')).toBe(descriptionA.id);
+        expect(removeA.hasAttribute('aria-invalid')).toBe(false);
+      });
+      expect(resolveDescribedBy(removeB)).toEqual([descriptionB, errorB]);
+      expect(removeB.getAttribute('aria-invalid')).toBe('true');
+    } finally {
+      viewA.unmount();
+      viewB.unmount();
+      errorA.remove();
+      errorB.remove();
+    }
   });
 });

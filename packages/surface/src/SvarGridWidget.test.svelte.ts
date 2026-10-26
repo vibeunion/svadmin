@@ -85,10 +85,9 @@ describe.each([
   });
 
   test('keeps missing engine configuration separate from data failures', () => {
-    render(SvarGridWidget, { props: { widgetId: 'products', props, data: failure('access_denied'), locale } });
-    expect(screen.getByRole('alert').textContent).toBe(locale === 'en'
-      ? 'The host has not configured the SVAR engine'
-      : '宿主尚未配置 SVAR 引擎');
+    const messages = resolveSurfaceMessages(locale, { tableEngineUnavailable: 'Configure the table engine first' });
+    render(SvarGridWidget, { props: { widgetId: 'products', props, data: failure('access_denied'), locale, messages } });
+    expect(screen.getByRole('alert').textContent).toBe(messages.tableEngineUnavailable);
     expect(document.body.innerHTML).not.toContain('PRIVATE grid diagnostic');
   });
 });

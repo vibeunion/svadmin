@@ -38,10 +38,11 @@
     defaultOptions: { queries: { retry: false } },
   });
   const tenant = { tenantId: 'tenant-reactive' };
+  const resources: ResourceDefinition[] = [];
 
   provideAdminContext(definedReactiveOptions({
     dataProvider,
-    resources: [] as ResourceDefinition[],
+    resources,
     get tenant() { return tenant; },
   }));
 </script>

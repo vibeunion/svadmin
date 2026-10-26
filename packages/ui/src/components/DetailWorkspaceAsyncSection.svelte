@@ -27,7 +27,7 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   let retryVersion = $state(0);
-  let phase = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
+  let sectionState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
   let data = $state.raw<T>();
 
   $effect(() => {
@@ -68,7 +68,7 @@
         return currentDataProvider === undefined;
       }
     };
-    phase = 'loading';
+    sectionState = 'loading';
     data = undefined;
     void (async () => {
       try {
@@ -79,9 +79,9 @@
         }, controller.signal));
         if (!isCurrentScope()) return;
         data = result;
-        phase = isEmpty?.(result) ? 'empty' : 'ready';
+        sectionState = isEmpty?.(result) ? 'empty' : 'ready';
       } catch {
-        if (isCurrentScope()) phase = 'error';
+        if (isCurrentScope()) sectionState = 'error';
       }
     })();
     return () => {
@@ -91,16 +91,16 @@
   });
 </script>
 
-{#if phase === 'loading'}
+{#if sectionState === 'loading'}
   <div role="status" aria-live="polite" data-svadmin-detail-section-loading>
     {i18n.t('detailWorkspace.loading')}
   </div>
-{:else if phase === 'error'}
+{:else if sectionState === 'error'}
   <div role="alert" data-svadmin-detail-section-error>
     <p>{errorTitle ?? i18n.t('common.operationFailed')}</p>
     <button type="button" onclick={() => retryVersion += 1}>{i18n.t('common.retry')}</button>
   </div>
-{:else if phase === 'empty'}
+{:else if sectionState === 'empty'}
   <DataState state="empty" title={emptyTitle ?? i18n.t('common.noData')} />
 {:else if data !== undefined}
   {@render render({ resourceName, recordId, data })}

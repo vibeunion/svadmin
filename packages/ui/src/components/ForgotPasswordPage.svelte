@@ -32,7 +32,7 @@
     if (result.success) {
       sent = true;
     } else {
-      error = result.error?.message ?? i18n.t('common.operationFailed');
+      error = i18n.t('common.operationFailed');
     }
   }
 </script>

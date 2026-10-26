@@ -240,11 +240,13 @@ describe('PM business acceptance', () => {
     const requests = vi.mocked(inMemoryDataProvider.getList);
     const before = requests.mock.calls.length;
     const failedRequests = () => requests.mock.calls.filter(([params]) => params.resource === resource && params.pagination?.pageSize !== 10).length;
-    expect(failedRequests()).toBe(1);
+    // DashboardWorkspace 会额外读取库存移动、销售订单和待办，不能算进页面分区的重试次数。
+    const workspaceFetch = resource === 'stock_movements' || resource === 'sales_orders' || resource === 'todos' ? 1 : 0;
+    expect(failedRequests()).toBe(1 + workspaceFetch);
 
     requireValue(target.querySelector<HTMLButtonElement>('[data-svadmin-data-state="error"] button')).click();
     await waitFor(() => {
-      expect(failedRequests()).toBe(2);
+      expect(failedRequests()).toBe(2 + workspaceFetch);
       expectFailure();
     });
     expect(requests.mock.calls.slice(before).map(([params]) => params.resource)).toEqual([resource]);
@@ -252,7 +254,7 @@ describe('PM business acceptance', () => {
     requests.mockImplementation(getList);
     requireValue(target.querySelector<HTMLButtonElement>('[data-svadmin-data-state="error"] button')).click();
     await waitFor(() => {
-      expect(failedRequests()).toBe(3);
+      expect(failedRequests()).toBe(3 + workspaceFetch);
       expect(target.textContent).not.toContain('Some data could not be updated');
     });
     expect(requests.mock.calls.slice(before).map(([params]) => params.resource)).toEqual([resource, resource]);

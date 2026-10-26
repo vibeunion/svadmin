@@ -6,13 +6,11 @@ export function withoutArrayFieldMetadata(value: unknown): unknown {
   const copies = new Map<object, object>();
   function copy(input: unknown): unknown {
     if (typeof input !== 'object' || input === null) return input;
-    const prototype: unknown = Object.getPrototypeOf(input);
+    const prototype = Object.getPrototypeOf(input) as object | null;
     if (!Array.isArray(input) && prototype !== Object.prototype && prototype !== null) return input;
     const previous = copies.get(input);
     if (previous) return previous;
-    const output: object = Array.isArray(input)
-      ? []
-      : Object.create(prototype === null ? null : Object.prototype);
+    const output: object = Array.isArray(input) ? [] : Object.create(prototype);
     copies.set(input, output);
     for (const key of Reflect.ownKeys(input)) {
       if (key === arrayFieldRowKey || key === arrayFieldOrderKey) continue;

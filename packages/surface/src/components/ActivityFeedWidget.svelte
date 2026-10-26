@@ -5,7 +5,7 @@
   import { asSurfaceActivities } from '../business-data.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
   import { surfaceMetric } from '../recipes.js';
-  import { formatSurfaceMessage, resolveSurfaceMessages } from '../localization.js';
+  import { formatSurfaceMessage, resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
 
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
   const baseProps = $derived(Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'appearance')));
@@ -23,7 +23,7 @@
   {:else if data.status === 'empty'}
     <p role="status">{text.activityEmpty}</p>
   {:else if data.status === 'error'}
-    <p role="alert">{text.activityUnavailable}</p>
+    <p role="alert">{surfaceErrorMessage(data.error, text, text.activityUnavailable, text.activityInvalidData)}</p>
   {:else if activities?.ok}
     <ActivityFeed activities={activities.value} allowComment={false} title={p.title} emptyLabel={text.activityEmpty}
       countLabel={formatSurfaceMessage(text.activityCount, { count: activities.value.length })} />

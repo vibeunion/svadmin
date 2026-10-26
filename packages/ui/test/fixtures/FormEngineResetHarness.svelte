@@ -15,6 +15,7 @@
     redirect?: 'list' | false;
   } = $props();
   let autoForm = $state<{ reset: () => void }>();
+  let navigationGuard: ((fn: () => void) => void) | undefined;
   let stepsForm = $state<{ reset: () => void }>();
   interface PendingWrite {
     action: 'create' | 'update';
@@ -27,6 +28,8 @@
   const writes: PendingWrite[] = [];
   let navigations: string[] = [];
   let successes = 0;
+  let dirty = false;
+  let dirtyNotifications: boolean[] = [];
 
   // 所有写入都由测试显式结算，便于制造 reset 前后的在途回执。
   function enqueueWrite(action: 'create' | 'update', variables: unknown, id?: string | number) {
@@ -73,6 +76,9 @@
   export function reset(): void {
     (kind === 'auto' ? autoForm : stepsForm)?.reset();
   }
+  export function guardedNavigation(action: () => void): void {
+    navigationGuard?.(action);
+  }
   export function pendingWriteCount(): number {
     return writes.filter(write => !write.settled).length;
   }
@@ -97,6 +103,12 @@
   export function successCount(): number {
     return successes;
   }
+  export function currentDirty(): boolean {
+    return dirty;
+  }
+  export function dirtyStates(): boolean[] {
+    return [...dirtyNotifications];
+  }
 </script>
 
 {#snippet dashboard()}
@@ -109,6 +121,8 @@
       {redirect}
       id={mode === 'create' ? undefined : 'record-1'}
       onSuccess={() => { successes += 1; }}
+      onNavigationGuardReady={(guard) => { navigationGuard = guard; }}
+      onDirtyChange={(next) => { dirty = next; dirtyNotifications = [...dirtyNotifications, next]; }}
     />
   {:else}
     <StepsForm

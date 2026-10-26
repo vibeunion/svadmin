@@ -6,12 +6,14 @@
 
   import { defineResource, syncGlobalPath } from '@svadmin/core';
   import { Type } from 'typebox';
-  import type { AccessControlProvider, AuditLogProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider, Sort } from '@svadmin/core';
+  import type { AccessControlProvider, AuditLogProvider, AuthProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider, Sort } from '@svadmin/core';
   import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import { Button } from '../../src/components/ui/button/index.js';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
+  import type { ListStateSnapshot } from '../../src/components/list-state.svelte.js';
+  import type { SavedListViewProvider } from '../../src/components/saved-list-views.js';
   import RecordDetailDrawer from '../../src/components/RecordDetailDrawer.svelte';
   import DetailExtensionProbe from '../../src/components/detail-contract.test-extension.svelte';
   import type { DetailWorkspaceScope, DetailWorkspaceSectionsConfig } from '../../src/components/detail-workspace.js';
@@ -52,6 +54,11 @@
     onNotify?: NotificationProvider['open'];
     auditProvider?: AuditLogProvider;
     detailWorkspace?: DetailWorkspaceSectionsConfig;
+    initialListState?: ListStateSnapshot;
+    onListStateChange?: (state: ListStateSnapshot) => void;
+    authProvider?: AuthProvider;
+    savedViewProvider?: SavedListViewProvider;
+    applyRemoteDefaultView?: boolean;
   }
 
   let {
@@ -90,6 +97,11 @@
     onNotify,
     auditProvider,
     detailWorkspace,
+    initialListState,
+    onListStateChange,
+    authProvider,
+    savedViewProvider,
+    applyRemoteDefaultView = false,
   }: Props = $props();
 
   const deletedIds = new SvelteSet<string>();
@@ -214,9 +226,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable {rendering} resourceName="users" {selectable} {allowSelectAllMatching} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {allowSelectAllMatching} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined, initialListState, onListStateChange, savedViewProvider, applyRemoteDefaultView })} />
   {:else}
-    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined, initialListState, onListStateChange, savedViewProvider, applyRemoteDefaultView })} />
   {/if}
 {/snippet}
 
@@ -226,6 +238,7 @@
   {routerProvider}
   {...definedOptions({ "accessControlProvider": accessControlProvider })}
   {...definedOptions({ "notificationProvider": notificationProvider, "auditLogProvider": auditProvider })}
+  {...definedOptions({ authProvider })}
   {locale}
   {...definedOptions({ "tenant": tenantIdentity === undefined ? undefined : { tenantId: tenantIdentity } })}
   {dashboard}

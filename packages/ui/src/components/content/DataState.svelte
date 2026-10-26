@@ -32,7 +32,7 @@
     loading: [i18n.t('common.loading'), i18n.t('common.loading')],
     empty: [i18n.t('empty.title'), i18n.t('empty.description')],
     'filtered-empty': [isZh ? '没有匹配结果' : 'No matching results', isZh ? '请调整或清除筛选条件。' : 'Adjust or clear your filters.'],
-    error: [i18n.t('common.error'), i18n.t('common.retry')],
+    error: [i18n.t('common.error'), i18n.t('common.operationFailed')],
     forbidden: [isZh ? '无权访问' : 'Access restricted', isZh ? '你没有查看此内容的权限。' : 'You do not have permission to view this content.'],
   } as const);
   const resolvedTitle = $derived(title ?? defaults[state][0]);

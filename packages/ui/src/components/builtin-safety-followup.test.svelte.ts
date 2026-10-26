@@ -7,6 +7,7 @@ import MemberHost from './builtin-pm.test-host.svelte';
 import SecurityLog from './account/SecurityLogPage.svelte';
 import TeamCrew from './network/TeamCrewTablePage.svelte';
 import { referenceDemoData } from '../reference-data.js';
+import { exactRoleName } from '../../test/accessible-name';
 
 const dataProvider = {
   getList: async () => ({ data: [], total: 0 }), getOne: async () => ({ data: { id: '1' } }),
@@ -75,11 +76,11 @@ describe('builtin safety follow-up', () => {
     fail(new Error('PRIVATE_READ_ERROR'));
     await screen.findByRole('alert');
     expect(screen.getAllByRole('alert')).toHaveLength(1);
-    expect(screen.getAllByRole('button', { name: 'Retry' })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: exactRoleName('Retry') })).toHaveLength(1);
     expect(screen.queryByText('No webhooks configured yet.')).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     expect(view.container.querySelectorAll('[data-svadmin-data-state="loading"]')).toHaveLength(1);
-    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+    expect(screen.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
     expect(screen.queryByRole('alert')).toBeNull();
     recover(outcome === 'empty' ? [] : [
       { id: 'recovered', name: 'Recovered webhook', url: 'https://example.com/recovered', eventType: 'resource.created' },
@@ -105,7 +106,7 @@ describe('builtin safety follow-up', () => {
     expect(view.container.innerHTML).not.toContain('PRIVATE_READ_ERROR');
     expect(screen.queryByText('No webhooks configured yet.')).toBeNull();
     expect(notificationProvider.open).not.toHaveBeenCalled();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     await screen.findByText('Order Events');
     expect(screen.queryByRole('alert')).toBeNull();
     expect(readKeys).toHaveBeenCalledTimes(2);
@@ -280,7 +281,7 @@ describe('builtin safety follow-up', () => {
     expect(screen.getByText('Two-factor authentication status is currently unavailable.')).toBeTruthy();
     expect(document.body.textContent).not.toContain('PRIVATE_MFA_READ');
     expect(readMfa).toHaveBeenCalledTimes(1);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     await waitFor(() => expect(screen.getByRole('switch')).toHaveProperty('disabled', false));
     expect(screen.getByRole('switch').getAttribute('aria-checked')).toBe('false');
     expect(screen.getByText('2FA is currently disabled. Protect your account by turning it on.')).toBeTruthy();
@@ -345,7 +346,7 @@ describe('builtin safety follow-up', () => {
     expect(view.container.innerHTML).not.toContain('PRIVATE_SESSION_READ');
     expect(screen.getByText('Two-factor authentication status is currently unavailable.')).toBeTruthy();
     expect((screen.getByRole('switch') as HTMLButtonElement).disabled).toBe(true);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     await screen.findByText(/macOS - Safari/);
     expect(screen.getByText('2FA is currently active. Verification codes will be required on new logins.')).toBeTruthy();
     expect((screen.getByRole('switch') as HTMLButtonElement).disabled).toBe(false);
@@ -466,7 +467,7 @@ describe('builtin safety follow-up', () => {
     }
     const form = requireValue(requireValue(fields[0]).closest('form'));
     await fireEvent.submit(form);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await fireEvent.click(screen.getByRole('button', { name: exactRoleName('Retry') }));
     expect(listSessions).toHaveBeenCalledTimes(2);
     await fireEvent.submit(form);
     expect(updatePassword).toHaveBeenCalledTimes(1);
@@ -648,7 +649,7 @@ describe('builtin safety follow-up', () => {
     const individual = screen.getByTitle('Sign out device');
     const bulk = screen.getByRole('button', { name: 'Sign Out Other Devices' });
     await fireEvent.click(first === 'individual' ? individual : bulk);
-    const confirmation = screen.getByRole('button', { name: 'Confirm' });
+    const confirmation = screen.getByRole('button', { name: exactRoleName('Confirm') });
     confirmation.click();
     (first === 'individual' ? bulk : individual).click();
     confirmation.click();
@@ -675,7 +676,7 @@ describe('builtin safety follow-up', () => {
     const button = screen.getByTitle('Sign out device');
 
     await fireEvent.click(button);
-    const confirmation = screen.getByRole('button', { name: 'Confirm' });
+    const confirmation = screen.getByRole('button', { name: exactRoleName('Confirm') });
     confirmation.click();
     button.click();
     confirmation.click();

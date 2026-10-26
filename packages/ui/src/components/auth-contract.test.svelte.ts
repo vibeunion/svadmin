@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetContext } from '@svadmin/core';
 import { resetAuditLogProvider, setAuditHandler } from '@svadmin/core/audit';
+import type { AuthProvider } from '@svadmin/core';
 import { createSupabaseAuthProvider, type SupabaseAuthClient } from '../../../supabase/src/auth-provider';
 import { createPocketBaseAuthProvider, type PocketBaseAuthClient } from '../../../pocketbase/src/auth-provider';
 import type { SupabaseAuthSession, SupabaseAuthUser } from '../../../supabase/src/auth-contract';
@@ -74,6 +75,16 @@ async function submit(container: HTMLElement): Promise<void> {
   await fireEvent.submit(form);
 }
 
+function failingAuthProvider(method: 'login' | 'register' | 'forgotPassword' | 'updatePassword'): AuthProvider {
+  return {
+    login: async () => ({ success: true }),
+    logout: async () => ({ success: true }),
+    check: async () => ({ authenticated: false }),
+    getIdentity: async () => null,
+    [method]: async () => ({ success: false, error: { message: `PRIVATE_${method.toUpperCase()}_DIAGNOSTIC` } }),
+  };
+}
+
 beforeEach(() => setAuditHandler(() => {}));
 afterEach(() => {
   cleanup();
@@ -109,6 +120,23 @@ it('submits the Supabase password update page with the validated confirmation fi
   await submit(view.container);
   await waitFor(() => expect(fixture.update).toHaveBeenCalledWith({ password: 'new-password' }));
   await waitFor(() => expect(view.queryByRole('alert')).toBeNull());
+});
+
+it.each([
+  ['login', 'login-identifier', 'login-password', undefined, 'Welcome Back'],
+  ['register', 'register-identifier', 'register-password', 'register-confirm', 'Create Account'],
+  ['forgotPassword', 'forgot-identifier', undefined, undefined, 'Forgot Password'],
+  ['updatePassword', undefined, 'new-password', 'confirm-password', 'Reset Password'],
+] as const)('does not expose provider diagnostics on the %s page', async (method, identifierId, passwordId, confirmId, label) => {
+  const screen = method === 'login' ? 'login' : method === 'register' ? 'register' : method === 'forgotPassword' ? 'forgot' : 'update';
+  const view = render(Host, { provider: failingAuthProvider(method), screen });
+  if (identifierId) await input(view.container, identifierId, 'admin@example.com');
+  if (passwordId) await input(view.container, passwordId, 'new-password');
+  if (confirmId) await input(view.container, confirmId, 'new-password');
+  await submit(view.container);
+  await waitFor(() => expect(view.getByRole('alert').textContent).toContain(method === 'login' ? 'Login failed' : 'Operation failed'));
+  expect(view.container.textContent).not.toContain(`PRIVATE_${method.toUpperCase()}_DIAGNOSTIC`);
+  expect(view.getByRole('heading', { name: label, level: 1 })).toBeTruthy();
 });
 
 it('supports login copy overrides and stable accessibility hooks', async () => {

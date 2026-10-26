@@ -608,6 +608,7 @@
         "typebox": "^1.3.34",
       },
       "devDependencies": {
+        "@refinedev/supabase": "6.0.2",
         "@supabase/supabase-js": "2.117.1",
         "@supacloud/js": "0.33.0",
         "@supacloud/js-034": "npm:@supacloud/js@0.34.0",
@@ -781,7 +782,7 @@
     "nanoid": "3.3.18",
     "postcss": "8.5.26",
     "postcss-selector-parser": "7.1.6",
-    "prosemirror-model": "1.25.11",
+    "prosemirror-model": "1.25.12",
     "prosemirror-view": "1.42.6",
     "qs": "6.16.0",
     "sharp": "0.35.5",
@@ -1330,6 +1331,8 @@
     "@refinedev/rest": ["@refinedev/rest@2.1.1", "https://registry.npmmirror.com/@refinedev/rest/-/rest-2.1.1.tgz", { "dependencies": { "deepmerge": "^4.3.1", "ky": "^1.10.0", "qs": "^6.10.1" }, "peerDependencies": { "@nestjsx/crud-request": "^5.0.0-alpha.3", "@refinedev/core": "^5.0.0" }, "optionalPeers": ["@nestjsx/crud-request"] }, "sha512-FvGanLHqzimqQ4Tmj++3qpipuhHnaOEjW2z2mOlzeBofjbjQhUSsKzy/SpxjNyIdP37PkA2q7zVid0wz3k42Bw=="],
 
     "@refinedev/simple-rest": ["@refinedev/simple-rest@6.0.1", "https://registry.npmmirror.com/@refinedev/simple-rest/-/simple-rest-6.0.1.tgz", { "dependencies": { "axios": "^1.11.0", "query-string": "^7.1.1" }, "peerDependencies": { "@refinedev/core": "^5.0.0" } }, "sha512-/xx/SiZ2aaA3KJO7PWFxWXvgG5n8roEay6BBdRHhwCMYFuHIOob82pl5KBGbRi+KLuFLUj+nSt9Q76D0uyIOlg=="],
+
+    "@refinedev/supabase": ["@refinedev/supabase@6.0.2", "https://registry.npmmirror.com/@refinedev/supabase/-/supabase-6.0.2.tgz", { "dependencies": { "@supabase/supabase-js": "^2.7.0" }, "peerDependencies": { "@refinedev/core": "^5.0.0" } }, "sha512-D3pPI8by8gNAOU9zyfC7a/r76ZSE1fkEJz0CXophwn1LU1/oOUsacoJz28kNsXUKiX6JB0FJiu83VNkr5a4t/Q=="],
 
     "@replit/codemirror-indentation-markers": ["@replit/codemirror-indentation-markers@6.5.3", "https://registry.npmmirror.com/@replit/codemirror-indentation-markers/-/codemirror-indentation-markers-6.5.3.tgz", { "peerDependencies": { "@codemirror/language": "^6.0.0", "@codemirror/state": "^6.0.0", "@codemirror/view": "^6.0.0" } }, "sha512-hL5Sfvw3C1vgg7GolLe/uxX5T3tmgOA3ZzqlMv47zjU1ON51pzNWiVbS22oh6crYhtVhv8b3gdXwoYp++2ilHw=="],
 
@@ -3117,7 +3120,7 @@
 
     "prosemirror-keymap": ["prosemirror-keymap@1.2.3", "https://registry.npmmirror.com/prosemirror-keymap/-/prosemirror-keymap-1.2.3.tgz", { "dependencies": { "prosemirror-state": "^1.0.0", "w3c-keyname": "^2.2.0" } }, "sha512-4HucRlpiLd1IPQQXNqeo81BGtkY8Ai5smHhKW9jjPKRc2wQIxksg7Hl1tTI2IfT2B/LgX6bfYvXxEpJl7aKYKw=="],
 
-    "prosemirror-model": ["prosemirror-model@1.25.11", "https://registry.npmmirror.com/prosemirror-model/-/prosemirror-model-1.25.11.tgz", { "dependencies": { "orderedmap": "^2.0.0" } }, "sha512-QWg9RhnpLlogAmp3p96uEFrE5txQpFynd4vhBAELkwgOCWQs/X0yCzB3/hrHqiPwf91RG5KyWq6553zs9JqIOQ=="],
+    "prosemirror-model": ["prosemirror-model@1.25.12", "https://registry.npmmirror.com/prosemirror-model/-/prosemirror-model-1.25.12.tgz", { "dependencies": { "orderedmap": "^2.0.0" } }, "sha512-Ue2gTmXMa7EhpLNhC7J+h4+ykD8ha12K6rrZFFKKJHBForfIStw5gJ6Zrf1mqqAa9NmpmEB4wp9bKmA4eUVjWg=="],
 
     "prosemirror-schema-list": ["prosemirror-schema-list@1.5.1", "https://registry.npmmirror.com/prosemirror-schema-list/-/prosemirror-schema-list-1.5.1.tgz", { "dependencies": { "prosemirror-model": "^1.0.0", "prosemirror-state": "^1.0.0", "prosemirror-transform": "^1.7.3" } }, "sha512-927lFx/uwyQaGwJxLWCZRkjXG0p48KpMj6ueoYiu4JX05GGuGcgzAy62dfiV8eFZftgyBUvLx76RsMe20fJl+Q=="],
 

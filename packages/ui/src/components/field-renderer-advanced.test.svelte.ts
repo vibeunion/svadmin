@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, within } from '@testing-library/svelte';
 import FieldRenderer from './FieldRenderer.svelte';
 import type { FieldDefinition } from '@svadmin/core';
 import { requireValue } from '../../../../scripts/test-assertions';
@@ -11,7 +11,7 @@ const heterogeneousAssociationCases = [
     key: 'permissions', label: 'Permissions', type: 'multiselect',
     options: [{ label: 'Read', value: 'read' }, { label: 'Write', value: 'write' }],
   }, ['read'], ['[data-svadmin-field] > [role="group"]', '[role="checkbox"]']],
-  ['images', { key: 'images', label: 'Images', type: 'images' }, ['a.png', 'b.png'], ['input[type="text"]']],
+  ['images', { key: 'images', label: 'Images', type: 'images' }, ['a.png', 'b.png'], ['input[type="text"]', 'button[aria-label="Remove image"]']],
   ['array', {
     key: 'items', label: 'Items', type: 'array',
     subFields: [{ key: 'sku', label: 'SKU', type: 'text' }],
@@ -199,6 +199,87 @@ describe('FieldRenderer advanced controls', () => {
       viewB.unmount();
       errorA.remove();
       errorB.remove();
+    }
+  });
+
+  it('associates live help/error nodes for images add and remove across instances and clears them', async () => {
+    const errorA = createHostErrorNode('images-empty-a', 'Host error A for images');
+    const errorB = createHostErrorNode('images-empty-b', 'Host error B for images');
+    const fieldA: FieldDefinition = { key: 'images', label: 'Images', type: 'images', description: 'Help A for images' };
+    const fieldB: FieldDefinition = { key: 'images', label: 'Images', type: 'images', description: 'Help B for images' };
+    const viewA = render(FieldRenderer, { field: fieldA, value: [], onchange: vi.fn(), invalid: true, errorId: errorA.id });
+    const viewB = render(FieldRenderer, { field: fieldB, value: ['a.png'], onchange: vi.fn(), invalid: true, errorId: errorB.id });
+    try {
+      const descriptionA = requireValue(viewA.container.querySelector('[data-svadmin-field-description]'));
+      const descriptionB = requireValue(viewB.container.querySelector('[data-svadmin-field-description]'));
+      // 空列表只有 Add 入口：它必须真的解析到本实例的 help/error，而不是空 IDREF 通过。
+      const addA = requireValue(within(viewA.container).getByRole('button', { name: 'Add image' }));
+      expect(viewA.container.querySelector('button[aria-label="Remove image"]')).toBeNull();
+      expectIsolatedAssociation([addA], descriptionA, errorA, [descriptionB, errorB]);
+
+      // 已有 URL 的实例：输入框和 Remove 都绑定自己的说明与错误节点。
+      const inputB = requireValue(viewB.container.querySelector('input[type="text"]'));
+      const removeB = requireValue(viewB.container.querySelector('button[aria-label="Remove image"]'));
+      expectIsolatedAssociation([inputB, removeB], descriptionB, errorB, [descriptionA, errorA]);
+
+      // 清理错误后，Add 与 Remove 仅剩说明关联；再清理说明后关联为空。
+      await viewA.rerender({ errorId: undefined, invalid: false });
+      expect(resolveIdrefs(addA)).toEqual([descriptionA]);
+      expect(addA.hasAttribute('aria-invalid')).toBe(false);
+      await viewA.rerender({ field: { key: 'images', label: 'Images', type: 'images' } });
+      expect(viewA.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+      expect(idrefTokens(addA)).toEqual([]);
+      expect(addA.hasAttribute('aria-invalid')).toBe(false);
+
+      await viewB.rerender({ errorId: undefined, invalid: false });
+      expect(resolveIdrefs(inputB)).toEqual([descriptionB]);
+      expect(resolveIdrefs(removeB)).toEqual([descriptionB]);
+      expect(inputB.hasAttribute('aria-invalid')).toBe(false);
+      expect(removeB.hasAttribute('aria-invalid')).toBe(false);
+      await viewB.rerender({ field: { key: 'images', label: 'Images', type: 'images' } });
+      expect(viewB.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+      expect(idrefTokens(inputB)).toEqual([]);
+      expect(idrefTokens(removeB)).toEqual([]);
+      expect(idrefTokens(addA)).toEqual([]);
+    } finally {
+      viewA.unmount();
+      viewB.unmount();
+      errorA.remove();
+      errorB.remove();
+    }
+  });
+
+  it('keeps images add/remove/edit disabled without onchange and preserves hidden values', async () => {
+    const form = document.createElement('form');
+    document.body.append(form);
+    const onchange = vi.fn();
+    const view = render(FieldRenderer, {
+      target: form,
+      props: { field: { key: 'images', label: 'Images', type: 'images' }, value: ['a.png'], onchange, disabled: true },
+    });
+    try {
+      const add = requireValue(within(view.container).getByRole('button', { name: 'Add image' }));
+      const remove = requireValue(within(view.container).getByRole('button', { name: 'Remove image' }));
+      const input = requireValue(view.container.querySelector('input[type="text"]'));
+      expect(add.hasAttribute('disabled')).toBe(true);
+      expect(remove.hasAttribute('disabled')).toBe(true);
+      expect(input.hasAttribute('disabled')).toBe(true);
+      expect(view.container.querySelector('input[type="hidden"]')?.hasAttribute('disabled')).toBe(true);
+      await fireEvent.click(add);
+      await fireEvent.click(remove);
+      await fireEvent.input(input, { target: { value: 'b.png' } });
+      expect(onchange).not.toHaveBeenCalled();
+
+      await view.rerender({ disabled: false });
+      await fireEvent.click(add);
+      expect(onchange).toHaveBeenLastCalledWith(['a.png', '']);
+      await fireEvent.input(input, { target: { value: 'b.png' } });
+      expect(onchange).toHaveBeenLastCalledWith(['b.png']);
+      await fireEvent.click(remove);
+      expect(onchange).toHaveBeenLastCalledWith([]);
+    } finally {
+      view.unmount();
+      form.remove();
     }
   });
 

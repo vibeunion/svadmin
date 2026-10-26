@@ -36,7 +36,7 @@
               <div class="svadmin-u-6f7e013d6499">
                 <Alert.Title>{i18n.t('common.error')}</Alert.Title>
                 <Alert.Description class="svadmin-u-fc7473ca09eb">
-                  {error instanceof Error ? error.message : String(error)}
+                  {i18n.t('error.internalServerErrorDescription')}
                 </Alert.Description>
               </div>
             </div>

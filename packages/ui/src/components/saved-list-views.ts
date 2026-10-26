@@ -39,6 +39,14 @@ export interface SavedListViewAccess {
   subjectIds: string[];
 }
 
+/** 解码时被裁剪的失效字段；只用于提示，不改变持久化数据。 */
+export interface SavedListViewDecodeReport {
+  /** 所有视图裁剪列的并集，供聚合提示使用。 */
+  prunedColumnIds: string[];
+  /** 按视图 id 记录各自被裁剪的列，删除或覆盖单个视图时可精确清除。 */
+  prunedColumnsByView: Record<string, string[]>;
+}
+
 export interface SavedListViewSubject {
   id: string;
   label: string;
@@ -146,24 +154,32 @@ function parseSorters(value: unknown[], allowedFieldIds: Set<string>): Sort[] | 
   return sorters;
 }
 
-function parseColumnVisibility(value: unknown, allowedColumnIds: Set<string>): Record<string, boolean> | undefined {
+function parseColumnVisibility(value: unknown, allowedColumnIds: Set<string>, pruned: Set<string>): Record<string, boolean> | undefined {
   if (!isRecord(value)) return undefined;
   const visibility: Record<string, boolean> = {};
   for (const [columnId, visible] of Object.entries(value)) {
-    if (!allowedColumnIds.has(columnId) || typeof visible !== 'boolean') continue;
+    if (!allowedColumnIds.has(columnId)) { pruned.add(columnId); continue; }
+    if (typeof visible !== 'boolean') continue;
     visibility[columnId] = visible;
   }
   return visibility;
 }
 
-function parseColumnOrder(value: unknown, allowedColumnIds: Set<string>): string[] | undefined {
+function parseColumnOrder(value: unknown, allowedColumnIds: Set<string>, pruned: Set<string>): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return [...new Set(value.filter((columnId): columnId is string => (
-    typeof columnId === 'string' && allowedColumnIds.has(columnId)
-  )))];
+  const order: string[] = [];
+  const seen = new Set<string>();
+  for (const columnId of value) {
+    if (typeof columnId !== 'string') continue;
+    if (!allowedColumnIds.has(columnId)) { pruned.add(columnId); continue; }
+    if (seen.has(columnId)) continue;
+    seen.add(columnId);
+    order.push(columnId);
+  }
+  return order;
 }
 
-function parseState(value: unknown, allowedColumnIds: Set<string>): SavedListViewState | undefined {
+function parseState(value: unknown, allowedColumnIds: Set<string>, pruned: Set<string>): SavedListViewState | undefined {
   if (!isRecord(value)) return undefined;
   if (typeof value['search'] !== 'string' || value['search'].length > 1_000) return undefined;
   if (!Array.isArray(value['filters']) || !Array.isArray(value['sorters'])) return undefined;
@@ -176,8 +192,8 @@ function parseState(value: unknown, allowedColumnIds: Set<string>): SavedListVie
   const filters = value['filters'].map((entry) => parseFilter(entry, allowedFieldIds, filterBudget));
   if (filters.some((entry) => entry === undefined)) return undefined;
   const sorters = parseSorters(value['sorters'], allowedFieldIds);
-  const columnVisibility = parseColumnVisibility(value['columnVisibility'], allowedColumnIds);
-  const columnOrder = parseColumnOrder(value['columnOrder'], allowedColumnIds);
+  const columnVisibility = parseColumnVisibility(value['columnVisibility'], allowedColumnIds, pruned);
+  const columnOrder = parseColumnOrder(value['columnOrder'], allowedColumnIds, pruned);
   if (!sorters || !columnVisibility || !columnOrder) return undefined;
 
   return {
@@ -242,6 +258,7 @@ export function decodeSavedListViewSubjects(value: unknown): SavedListViewSubjec
 
 export function readSavedListViews(
   raw: string | null, allowedColumnIds: Set<string>, source: SavedListView['source'] = 'local',
+  report?: SavedListViewDecodeReport,
 ): SavedListView[] {
   if (!raw) return [];
   try {
@@ -254,10 +271,22 @@ export function readSavedListViews(
       if (!isRecord(entry) || typeof entry['id'] !== 'string' || !entry['id'].trim() || entry['id'].length > 120) continue;
       if (seenIds.has(entry['id'])) continue;
       if (typeof entry['name'] !== 'string' || !entry['name'].trim() || entry['name'].length > 60) continue;
-      const state = parseState(entry['state'], allowedColumnIds);
+      const pruned = new Set<string>();
+      const state = parseState(entry['state'], allowedColumnIds, pruned);
       if (!state) continue;
       const access = entry['access'] === undefined ? undefined : parseAccess(entry['access']);
       if (entry['access'] !== undefined && !access) continue;
+      if (report) {
+        if (pruned.size > 0) {
+          // 视图 id 允许 "__proto__" 等特殊字符串，必须写为自身数据属性，避免触发原型 setter。
+          Object.defineProperty(report.prunedColumnsByView, entry['id'], {
+            value: [...pruned], enumerable: true, configurable: true, writable: true,
+          });
+        }
+        for (const columnId of pruned) {
+          if (!report.prunedColumnIds.includes(columnId)) report.prunedColumnIds.push(columnId);
+        }
+      }
       seenIds.add(entry['id']);
       views.push({
         id: entry['id'], name: entry['name'].trim(), state,
@@ -367,11 +396,12 @@ export function decodeSavedListViewRemoveResult(
 export function decodeRemoteSavedListViews(
   value: unknown, allowedColumnIds: Set<string>,
   writable = false,
+  report?: SavedListViewDecodeReport,
 ): SavedListView[] {
   try {
     const snapshot = snapshotPlainData(value);
     if (!Array.isArray(snapshot)) return [];
-    return readSavedListViews(JSON.stringify({ version: STORAGE_VERSION, views: snapshot }), allowedColumnIds, 'team')
+    return readSavedListViews(JSON.stringify({ version: STORAGE_VERSION, views: snapshot }), allowedColumnIds, 'team', report)
       .map(view => {
         const entry = snapshot.find(entry => isRecord(entry) && entry['id'] === view.id);
         return {

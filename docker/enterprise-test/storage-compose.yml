@@ -1,0 +1,43 @@
+# Disposable object storage and record-version API for local OrbStack acceptance.
+# Credentials come from the runner process and must not be committed.
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_PASSWORD: ${SVADMIN_STORAGE_DB_PASSWORD:?set SVADMIN_STORAGE_DB_PASSWORD}
+      POSTGRES_DB: storage
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d storage"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  storage:
+    image: public.ecr.aws/supabase/storage-api:v1.80.0
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_JWT_SECRET: ${SVADMIN_STORAGE_JWT_SECRET:?set SVADMIN_STORAGE_JWT_SECRET}
+      DATABASE_URL: "postgres://postgres:${SVADMIN_STORAGE_DB_PASSWORD}@db:5432/storage"
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: local-smoke
+      REGION: local
+      FILE_SIZE_LIMIT: "52428800"
+    ports:
+      - "127.0.0.1::5000"
+
+  versions:
+    image: postgrest/postgrest:v12.2.12
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: "postgresql://postgres:${SVADMIN_STORAGE_DB_PASSWORD}@db:5432/storage"
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web
+      PGRST_JWT_SECRET: ${SVADMIN_STORAGE_JWT_SECRET}
+      PGRST_JWT_AUD: authenticated
+    ports:
+      - "127.0.0.1::3000"

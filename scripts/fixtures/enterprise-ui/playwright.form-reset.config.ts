@@ -17,10 +17,10 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [
-    { name: 'chromium-desktop', use: { browserName: 'chromium', viewport: { width: 1440, height: 1000 } } },
-    { name: 'chromium-narrow', use: { browserName: 'chromium', viewport: { width: 390, height: 844 } } },
-  ],
+  projects: (['chromium', 'webkit', 'firefox'] as const).flatMap(browserName => [
+    { name: `${browserName}-desktop`, use: { browserName, viewport: { width: 1440, height: 1000 } } },
+    { name: `${browserName}-narrow`, use: { browserName, viewport: { width: 390, height: 844 } } },
+  ]),
   webServer: {
     command: 'node ../../../node_modules/vite/bin/vite.js --config vite.config.ts --host 127.0.0.1 --port 4194 --strictPort',
     url: baseURL,

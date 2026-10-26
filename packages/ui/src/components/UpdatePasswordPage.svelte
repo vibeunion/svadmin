@@ -30,7 +30,7 @@
 
     const result = await updatePw.mutate({ password, confirmPassword });
     if (!result.success) {
-      error = result.error?.message ?? i18n.t('common.operationFailed');
+      error = i18n.t('common.operationFailed');
     }
   }
 </script>

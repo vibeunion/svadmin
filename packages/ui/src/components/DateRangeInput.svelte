@@ -17,22 +17,22 @@
   interface Props {
     value?: DateRangeInputValue | null;
     mode?: DateTimeInputMode;
-    valueMode?: DateTimeValueMode | undefined;
-    timeZone?: string | undefined;
+    valueMode?: DateTimeValueMode;
+    timeZone?: string;
     disambiguation?: DateTimeDisambiguation;
-    min?: string | undefined;
-    max?: string | undefined;
-    step?: number | undefined;
-    disabledDate?: ((date: string) => boolean) | undefined;
-    presets?: DateRangePreset[] | undefined;
+    min?: string;
+    max?: string;
+    step?: number;
+    disabledDate?: (date: string) => boolean;
+    presets?: DateRangePreset[];
     startId?: string;
     endId?: string;
-    startName?: string | undefined;
-    endName?: string | undefined;
+    startName?: string;
+    endName?: string;
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
-    describedby?: string | undefined;
+    describedby?: string;
     startAriaLabel?: string;
     endAriaLabel?: string;
     class?: string;
@@ -112,7 +112,14 @@
 
 <div class={cn('svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-421ac2be5045', className)} data-date-range-input>
   {#if presets.length > 0}
-    <Select value="" {disabled} aria-label={i18n.t('dateInput.presets')} onchange={choosePreset}>
+    <Select
+      value=""
+      {disabled}
+      aria-label={i18n.t('dateInput.presets')}
+      aria-describedby={describedby}
+      aria-invalid={invalid || undefined}
+      onchange={choosePreset}
+    >
       <option value="">{i18n.t('dateInput.presets')}</option>
       {#each presets as preset, index (index)}
         <option value={String(index)} disabled={!presetAllowed(preset)}>{preset.label}</option>

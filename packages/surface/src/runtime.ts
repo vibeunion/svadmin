@@ -29,6 +29,8 @@ export interface LoadSurfaceSourceRequest {
   readonly resourcePolicy: SurfaceResourcePolicy;
   readonly provider: SurfaceDataProvider;
   readonly authorize: SurfaceAuthorizer;
+  /** Internal host hook for diagnostics; never used as user-visible state. */
+  readonly reportDiagnostic?: (diagnostic: SurfaceDataError) => void;
 }
 
 export type SurfaceLoadedSourceState = Extract<SurfaceWidgetDataState, { status: 'ready' | 'error' }>;
@@ -82,6 +84,16 @@ function projectRecords(records: readonly unknown[], readableFields: readonly st
 
 function sourceError(sourceId: string, code: SurfaceDataError['code'], message: string): SurfaceLoadedSourceState {
   return { status: 'error', sourceId, error: { code, sourceId, message } };
+}
+
+function reportedError(
+  request: LoadSurfaceSourceRequest,
+  code: SurfaceDataError['code'],
+  message: string,
+  diagnosticMessage: string,
+): SurfaceLoadedSourceState {
+  request.reportDiagnostic?.({ code, sourceId: request.source.id, message: diagnosticMessage });
+  return sourceError(request.source.id, code, message);
 }
 
 function listParams(source: ResourceListDataSource): GetListParams {
@@ -155,9 +167,11 @@ export async function loadSurfaceSource(request: LoadSurfaceSourceRequest): Prom
     accessDecision = await authorize(source.resource, action);
   } catch (accessFailure) {
     const message = accessFailure instanceof Error ? accessFailure.message : 'Access check failed';
-    return sourceError(source.id, 'access_check_failed', message);
+    return reportedError(request, 'access_check_failed', 'Access check failed', message);
   }
-  if (!accessDecision.can) return sourceError(source.id, 'access_denied', accessDecision.reason ?? 'Access denied');
+  if (!accessDecision.can) {
+    return reportedError(request, 'access_denied', 'Access denied', accessDecision.reason ?? 'Access denied');
+  }
 
   try {
     return source.type === 'resource-list'
@@ -165,6 +179,6 @@ export async function loadSurfaceSource(request: LoadSurfaceSourceRequest): Prom
       : await loadOneSource(source, resourcePolicy, provider);
   } catch (providerFailure) {
     const message = providerFailure instanceof Error ? providerFailure.message : 'Data provider request failed';
-    return sourceError(source.id, 'provider_failed', message);
+    return reportedError(request, 'provider_failed', 'Data provider request failed', message);
   }
 }

@@ -200,6 +200,33 @@ describe('contract-bound AutoTable', () => {
     expect(app.source.getList).not.toHaveBeenCalled();
     expect(app.view.queryByText('First')).toBeNull();
   });
+  it('shows a retryable permission error and keeps a successful denial distinct', async () => {
+    const source = provider();
+    let listAttempts = 0;
+    const permission: AccessControlProvider = {
+      can: async input => {
+        if (input.action === 'list') {
+          listAttempts += 1;
+          if (listAttempts === 1) throw new Error('PRIVATE_PERMISSION_FAILURE');
+        }
+        return { can: true };
+      },
+    };
+    const app = mount(source, permission);
+    const alert = await app.view.findByRole('alert');
+    expect(alert.textContent).toMatch(/permission check is unavailable|权限校验暂不可用/i);
+    expect(app.view.container.textContent).not.toContain('PRIVATE');
+    expect(source.getList).not.toHaveBeenCalled();
+    await fireEvent.click(app.view.getByRole('button', { name: /^retry$|^重试$/i }));
+    await ready(app);
+    expect(listAttempts).toBe(2);
+    expect(source.getList).toHaveBeenCalledTimes(1);
+
+    const denied = mount(provider(), access(false));
+    const deniedAlert = await denied.view.findByRole('alert');
+    expect(deniedAlert.textContent).toMatch(/do not have permission|无权执行此操作/i);
+    expect(denied.view.queryByRole('button', { name: /^retry$|^重试$/i })).toBeNull();
+  });
   it('discards selection and a confirmation when the tenant changes', async () => {
     const app = mount();
     await openBatch(app);

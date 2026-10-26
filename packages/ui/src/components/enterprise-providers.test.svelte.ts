@@ -14,6 +14,7 @@ import type {
 } from '@svadmin/core';
 import { resetContext } from '@svadmin/core';
 import EnterpriseProvidersTestHost from './enterprise-providers.test-host.svelte';
+import { exactRoleName } from '../../test/accessible-name';
 
 const dataProvider = {
   getList: async () => ({ data: [], total: 0 }),
@@ -379,7 +380,7 @@ describe('enterprise provider settings', () => {
     const name = screen.getByLabelText('Organization name');
     await fireEvent.input(timeout, { target: { value: '45' } });
     await fireEvent.input(name, { target: { value: 'Updated organization' } });
-    const [organizationSave, policySave] = screen.getAllByRole('button', { name: 'Save' });
+    const [organizationSave, policySave] = screen.getAllByRole('button', { name: exactRoleName('Save') });
     // 在 DOM 更新前重复分发事件，验证函数门禁而非仅验证 disabled。
     for (const button of [policySave, policySave, organizationSave, organizationSave]) {
       requireValue(button).dispatchEvent(new MouseEvent('click', { bubbles: true }));

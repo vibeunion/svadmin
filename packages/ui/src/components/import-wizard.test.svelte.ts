@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from 'typebox';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { defineResource, resetContext, snapshotImportArtifact, snapshotImportTaskResult, type DataProvider, type ResourceDefinition, type HttpError, type ImportArtifactProvider, type TaskProvider } from '@svadmin/core';
+import { defineResource, resetContext, snapshotImportArtifact, snapshotImportTaskResult, HttpError, type DataProvider, type ResourceDefinition, type ImportArtifactProvider, type TaskProvider } from '@svadmin/core';
 import ImportWizardHost from './import-wizard.test-host.svelte';
 import { definedOptions } from '@svadmin/core/options';
 import { parseImportRows, snapshotImportFile } from '../../../core/src/import-contract';
@@ -67,15 +67,17 @@ function mount(source = provider(), options: {
   onImportReady?: (driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void;
   dryRun?: boolean;
   onPreview?: (result: { totalRows: number; importableRows: number; failedRows: Array<{ row: number; error: string }> }) => void;
+  locale?: string;
 } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
+  const { locale, ...hostOptions } = options;
   const view = render(ImportWizardHost, {
     provider: source,
     resources,
     queryClient: client,
-    ...options,
-  });
+    ...hostOptions,
+  }, locale);
   return { client, source, view };
 }
 
@@ -735,6 +737,26 @@ describe('ImportWizard component workflow', () => {
     expect(app.source.create).not.toHaveBeenCalled();
   });
 
+  it('shows a generic recoverable message for malformed JSON syntax', async () => {
+    const app = mount();
+    const input = document.querySelector('input[type="file"]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('Expected file input');
+    const fragment = '{"title":"Private customer payload"';
+
+    await fireEvent.change(input, {
+      target: { files: [new File([fragment], 'posts.json', { type: 'application/json' })] },
+    });
+
+    await waitFor(() => expect(app.view.getByRole('alert').textContent)
+      .toContain('Unable to read or parse the import file'));
+    const alert = app.view.getByRole('alert').textContent ?? '';
+    expect(alert).not.toContain('Unexpected');
+    expect(alert).not.toContain('Private customer payload');
+    expect(app.view.queryByText(/Private customer payload/)).toBeNull();
+    expect(app.view.getByText(/Map Columns/i)).toBeTruthy();
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
   it('maps CSV fields and delegates writes to the core importer', async () => {
     const onSuccess = vi.fn();
     const app = mount(provider(), { onSuccess });
@@ -1096,5 +1118,47 @@ describe('ImportWizard onPreview-only workflow', () => {
     await waitFor(() => expect(onSuccess).toHaveBeenCalledWith({ succeeded: 2, failed: 0 }));
     expect(app.source.create).toHaveBeenCalledTimes(2);
     expect(app.view.queryByText(/Local validation passed/)).toBeNull();
+  });
+});
+
+describe('ImportWizard failure localization', () => {
+  it.each([
+    ['raw provider error', () => new Error('PRIVATE_DIAGNOSTIC')],
+    ['normalized HttpError', () => new HttpError('PRIVATE_DIAGNOSTIC', 500, undefined, { code: 'IMPORT_FAILED' })],
+  ])('does not surface %s diagnostics in zh failed-row reports', async (_label, failure) => {
+    const source = provider({ create: vi.fn(async () => { throw failure(); }) });
+    const onSuccess = vi.fn();
+    const app = mount(source, { onSuccess, locale: 'zh-CN' });
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /开始导入/ }));
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith({ succeeded: 0, failed: 1 }));
+    expect(app.view.container.textContent).not.toContain('PRIVATE_DIAGNOSTIC');
+    expect(app.view.container.textContent).not.toContain('Import failed');
+
+    const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:zh-errors');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    await fireEvent.click(app.view.getByRole('button', { name: /下载失败 CSV/ }));
+    const blob = createUrl.mock.calls[0]?.[0];
+    expect(blob).toBeInstanceOf(Blob);
+    if (!(blob instanceof Blob)) throw new Error('Expected failed CSV blob');
+    const csv = await blob.text();
+    expect(csv).toContain('操作失败');
+    expect(csv).not.toContain('PRIVATE_DIAGNOSTIC');
+    expect(csv).not.toContain('Import failed');
+  });
+
+  it('localizes a normalized core failure instead of rendering its message', async () => {
+    const app = mount(provider(), { locale: 'zh-CN' });
+
+    await selectFile(csvFile('title,quantity\nFirst,2\nSecond,3'));
+    await app.view.rerender({ maxRows: 1 });
+    await fireEvent.click(await app.view.findByRole('button', { name: /开始导入/ }));
+    await waitFor(() => expect(app.view.getByRole('alert').textContent).toContain('导入文件或记录数量超过限制'));
+    const alert = app.view.getByRole('alert').textContent ?? '';
+    expect(alert).not.toContain('Import exceeds');
+    expect(alert).not.toContain('Import failed');
+    expect(app.source.create).not.toHaveBeenCalled();
   });
 });

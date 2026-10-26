@@ -88,12 +88,12 @@ pi 自测原始结果：**18/18 passed，原始 exit code 0，duration 29.9s**�
 ## 5. 未验收边界与状态
 
 本证据只覆盖受控本地 Provider、受控 AccessControl stub 与本地浏览器，不证明真实服务端
-RBAC/租户、持久化、网络错误分类、幂等、读屏设备、发布包或部署。也不覆盖独立“编辑完整路由页面”。
+RBAC/租户、持久化、网络错误分类、幂等、读屏设备、发布包或部署。原始主流程段落不覆盖独立“编辑完整路由页面”，该范围已在第 6 节及其主线程补记中单独闭环。
 
 当前状态：**本地浏览器证据已复核。** pi 自测 18/18 passed、原始 exit code 0、
 duration 29.9s；主线程独立复核同一专属配置 18/18 passed、原始 exit code 0、
 duration 31.7s；两次独立运行分开记录，`git diff --check` 均为原始 exit code 0。
-真实 Provider/RBAC、服务端持久化、读屏与发布仍未验收；独立“编辑完整路由页面”已在第 6 节 follow-up 补充单文件 Chromium desktop 闭环，主线程复核仍待执行。
+真实 Provider/RBAC、服务端持久化、读屏与发布仍未验收；独立“编辑完整路由页面”已在第 6 节 follow-up 补充单文件 Chromium desktop 闭环，并已在第 6 节末由主线程独立复核。
 ## 主线程独立复核
 
 - 独立执行 `bunx playwright test --config scripts/fixtures/enterprise-ui/playwright.resource-workspace.config.ts`：18/18 passed、exit 0、31.7s，覆盖 Chromium/WebKit/Firefox × desktop/narrow。
@@ -103,7 +103,7 @@ duration 31.7s；两次独立运行分开记录，`git diff --check` 均为原�
 
 日期：2026-10-22。parent 为同一 B3-01 的“资源工作台原始查询/详情/编辑/恢复范围”，
 reason 为上一轮只覆盖 `QuickEditDrawer` 与路由导航日志，未验收真实完整编辑页。
-本轮仍由 pi 作为唯一 writer，主线程结果待其独立复核；未提交、推送、部署或发布。
+本轮仍由 pi 作为唯一 writer；当时主线程结果待独立复核，后续复核结果见本节末。未提交、推送、部署或发布。
 
 先核对现有契约：`useNavigation.edit` 通过 `sanitizeListQueryParams` 保留
 `page/pageSize/sort/order/q/filters`，`useContractForm` 保存后通过
@@ -143,7 +143,7 @@ pi 自测原始结果：**1/1 passed，原始 exit code 0，total duration 4.1s*
 日志造成的 Svelte effect 循环、完整 Edit 入口定位和 tenant meta 传参，均属夹具与用例自身。
 
 未验收边界：仍不证明真实 Provider/RBAC、服务端持久化、跨引擎、narrow、读屏或发布；
-主线程独立复核尚未执行。
+“主线程独立复核尚未执行”是本节历史记录，已由下方 2026-10-23 的主线程复核结果取代。
 
 ## 完整编辑页主线程独立复核（2026-10-23）
 

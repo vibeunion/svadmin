@@ -1,6 +1,7 @@
 <script lang="ts">
  
   import { captureAdminContext, inferResource } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
   import type { InferResult } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
@@ -14,6 +15,7 @@
   import { Wand2, Copy, Check, RefreshCw, Loader2, AlertCircle } from '@lucide/svelte';
 
   const adminContext = captureAdminContext();
+  const i18n = useTranslation();
   const resources = $derived(adminContext.resources);
 
   let selectedResource = $state('');
@@ -70,9 +72,9 @@
         resourceName,
         response.data as Record<string, unknown>[],
       );
-    } catch (e: unknown) {
+    } catch {
       if (epoch === inferenceEpoch) {
-        error = e instanceof Error ? e.message : 'Failed to fetch data for inference.';
+        error = i18n.t('common.error') ?? 'Something went wrong';
       }
     } finally {
       if (epoch === inferenceEpoch) loading = false;

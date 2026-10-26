@@ -13,6 +13,7 @@
   import MemberDirectoryFixture from './MemberDirectoryFixture.svelte';
   import ApprovalCenterFixture from './ApprovalCenterFixture.svelte';
   import AutoFormAccessibilityFixture from './AutoFormAccessibilityFixture.svelte';
+  import AutoFormUploadBrowserFixture from './AutoFormUploadBrowserFixture.svelte';
   import StepsFormAccessibilityFixture from './StepsFormAccessibilityFixture.svelte';
   import StepsFormLifecycleFixture from './StepsFormLifecycleFixture.svelte';
   import FormResetBrowserFixture from './FormResetBrowserFixture.svelte';
@@ -163,6 +164,8 @@
     <ApprovalCenterFixture />
   {:else if requestedView === 'autoform'}
     <AutoFormAccessibilityFixture />
+  {:else if requestedView === 'autoform-upload'}
+    <AutoFormUploadBrowserFixture />
   {:else if requestedView === 'stepsform'}
     {#each Array.from({ length: new URLSearchParams(window.location.search).get('instances') === '2' ? 2 : 1 }) as _, index (index)}
       <StepsFormAccessibilityFixture />

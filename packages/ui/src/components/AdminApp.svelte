@@ -1,9 +1,9 @@
 <script module lang="ts">
-  import type { Component as SvelteComponent } from 'svelte';
+  import type { Component as PageComponent } from 'svelte';
 
   export interface AdminPageRoute {
     readonly path: string;
-    readonly component: SvelteComponent<{ route: string; params: Record<string, string | undefined> }>;
+    readonly component: PageComponent<{ route: string; params: Record<string, string | undefined> }>;
     readonly title?: string;
   }
 
@@ -215,7 +215,7 @@
   // Default component registry
   const defaultComponents: ComponentRegistry = {
     Layout, Sidebar, Header,
-    LoginPage, AutoTable, AutoForm, ShowPage,
+    LoginPage, AutoTable, AutoForm: AutoForm as unknown as ComponentRegistry['AutoForm'], ShowPage,
     TaskQueueDrawer, ErrorPage,
     Button, Input, Badge, Skeleton,
   };

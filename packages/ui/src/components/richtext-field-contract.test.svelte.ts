@@ -6,8 +6,11 @@ import Editor from '../../../editor/src/components/Editor.svelte';
 import LazyEditor from '../../../../example/src/components/LazyRichTextEditor.svelte';
 import FieldRenderer from './FieldRenderer.svelte';
 import type { FieldDefinition } from '@svadmin/core';
-import { t } from '../../test/legacy-locale';
+import { useTranslation } from '@svadmin/core';
+
+const { t } = useTranslation();
 import { requireValue } from '../../../../scripts/test-assertions';
+import { exactRoleName } from '../../test/accessible-name';
 
 vi.mock('../editor-config.svelte.js', () => ({
   getRichTextEditor: () => Editor,
@@ -42,21 +45,15 @@ function pasteFile(file: File): ClipboardEvent {
 }
 
 async function openImageUpload(container: HTMLElement) {
-  await fireEvent.click(within(container).getByRole('button', { name: t('editor.image') }));
-  await fireEvent.click(within(container).getByRole('button', { name: 'Upload' }));
+  await fireEvent.click(within(container).getByRole('button', { name: exactRoleName(t('editor.image')) }));
+  await fireEvent.click(within(container).getByRole('button', { name: exactRoleName('Upload') }));
   return requireValue(container.querySelector<HTMLInputElement>('input[type="file"]'));
-}
-
-type UploadSlice = Parameters<NonNullable<NonNullable<TiptapEditor['options']['editorProps']>['handleDrop']>>[2];
-
-function emptySlice(instance: TiptapEditor): UploadSlice {
-  return instance.state.doc.slice(0, 0) as UploadSlice;
 }
 
 function uploadInEditor(instance: TiptapEditor, method: 'drop' | 'paste', file: File, position = 1) {
   const props = requireValue(instance.options.editorProps);
   if (!props.handleDrop || !props.handlePaste) throw new Error('Expected upload handlers');
-  const slice = emptySlice(instance);
+  const slice = instance.state.doc.slice(0, 0);
   if (method === 'paste') return props.handlePaste(instance.view, pasteFile(file), slice);
   vi.spyOn(instance.view, 'posAtCoords').mockReturnValue({ pos: position, inside: 0 });
   return props.handleDrop(instance.view, dragFile(file), slice, false);
@@ -249,7 +246,7 @@ describe('Registered rich text field contract', () => {
     const transfer = new DataTransfer();
     for (const name of ['first.png', 'second.png']) transfer.items.add(new File(['image'], name, { type: 'image/png' }));
     const props = requireValue(instance.options.editorProps);
-    const slice = emptySlice(instance);
+    const slice = instance.state.doc.slice(0, 0);
     await act(() => {
       if (method === 'drop') {
         vi.spyOn(instance.view, 'posAtCoords').mockReturnValue({ pos: 1, inside: 0 });
@@ -322,7 +319,7 @@ describe('Registered rich text field contract', () => {
       if (change === 'unmount') view.unmount();
       if (change === 'handler') await view.rerender({ onUpload: async () => 'https://example.test/new.png' });
       if (change === 'closed' || change === 'reopened') {
-        await fireEvent.click(within(view.container).getByRole('button', { name: t('editor.image') }));
+        await fireEvent.click(within(view.container).getByRole('button', { name: exactRoleName(t('editor.image')) }));
         if (change === 'reopened') await openImageUpload(view.container);
       }
       resolveUpload('https://example.test/late.png');
@@ -345,7 +342,7 @@ describe('Registered rich text field contract', () => {
     await fireEvent.change(input, { target: { files: [file] } });
     expect(input.disabled).toBe(true);
     for (const name of ['URL', 'Upload']) {
-      expect(within(view.container).getByRole('button', { name }).hasAttribute('disabled')).toBe(true);
+      expect(within(view.container).getByRole('button', { name: exactRoleName(name) }).hasAttribute('disabled')).toBe(true);
     }
     const zone = within(view.container).getByRole('button', { name: t('editor.image.upload') });
     expect(zone.getAttribute('aria-busy')).toBe('true');
@@ -415,7 +412,7 @@ describe('Registered rich text field contract', () => {
     expect(instance.getHTML()).toContain('https://example.test/first.png');
     expect(instance.getHTML()).not.toContain('second.png');
     expect(view.container.querySelector('input[type="file"]')).not.toBeNull();
-    await fireEvent.click(within(view.container).getByRole('button', { name: t('common.retry') }));
+    await fireEvent.click(within(view.container).getByRole('button', { name: exactRoleName(t('common.retry')) }));
     await waitFor(() => expect(view.container.querySelector('input[type="file"]')).toBeNull());
     expect(instance.getHTML()).toContain('https://example.test/second.png');
     expect(instance.getHTML()).toContain('https://example.test/third.png');
@@ -441,7 +438,7 @@ describe('Registered rich text field contract', () => {
     await fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(within(view.container).getByRole('alert').textContent).toContain(t('common.error')));
     expect(within(view.container).queryByText('private backend detail')).toBeNull();
-    await fireEvent.click(within(view.container).getByRole('button', { name: t('common.retry') }));
+    await fireEvent.click(within(view.container).getByRole('button', { name: exactRoleName(t('common.retry')) }));
     await waitFor(() => expect(instance.getHTML()).toContain('https://example.test/retry.png'));
     expect(upload).toHaveBeenCalledTimes(2);
   });
@@ -521,7 +518,7 @@ describe('Registered rich text field contract', () => {
       if (change === 'disabled') await view.rerender({ disabled: true });
       if (change === 'unmount') view.unmount();
       if (change === 'reopened') {
-        await fireEvent.click(within(view.container).getByRole('button', { name: t('editor.image') }));
+        await fireEvent.click(within(view.container).getByRole('button', { name: exactRoleName(t('editor.image')) }));
         await openImageUpload(view.container);
       }
       rejectUpload(new Error('obsolete failure'));
@@ -544,7 +541,7 @@ describe('Registered rich text field contract', () => {
     const input = await openImageUpload(view.container);
     const file = new File(['image'], 'retry.png', { type: 'image/png' });
     await fireEvent.change(input, { target: { files: [file] } });
-    const retry = within(view.container).getByRole('button', { name: t('common.retry') });
+    const retry = within(view.container).getByRole('button', { name: exactRoleName(t('common.retry')) });
     await fireEvent.click(retry);
     await fireEvent.click(retry);
     await fireEvent.change(input, { target: { files: [file] } });
@@ -577,6 +574,110 @@ describe('Registered rich text field contract', () => {
       ids.push(content.id);
     }
     expect(new Set(ids).size).toBe(2);
+  });
+
+  it('resolves each rich text editing area to its own description and host error without crossing instances', async () => {
+    const onchange = vi.fn();
+    const fieldA: FieldDefinition = {
+      key: 'bodyA', label: 'Body A', type: 'richtext', description: 'First help', required: true,
+    };
+    const fieldB: FieldDefinition = {
+      key: 'bodyB', label: 'Body B', type: 'richtext', description: 'Second help', required: true,
+    };
+    const errorIdA = 'host-body-error-a';
+    const errorIdB = 'host-body-error-b';
+    const hostErrors: HTMLElement[] = [];
+    const attachHostError = (id: string, text: string): HTMLElement => {
+      const error = document.createElement('p');
+      error.id = id;
+      error.textContent = text;
+      document.body.append(error);
+      hostErrors.push(error);
+      return error;
+    };
+
+    try {
+      const errorA = attachHostError(errorIdA, 'Error A');
+      const errorB = attachHostError(errorIdB, 'Error B');
+      const viewA = render(FieldRenderer, {
+        field: fieldA, value: '<p>Details A</p>', onchange, invalid: true, errorId: errorIdA,
+      });
+      const viewB = render(FieldRenderer, {
+        field: fieldB, value: '<p>Details B</p>', onchange, invalid: true, errorId: errorIdB,
+      });
+      const editorA = await activeEditor(viewA.container);
+      const editorB = await activeEditor(viewB.container);
+      const descriptionA = requireValue(
+        viewA.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+      );
+      const descriptionB = requireValue(
+        viewB.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+      );
+      expect(descriptionA.id).not.toBe(descriptionB.id);
+
+      const instances = [
+        { view: viewA, content: editorA.content, description: descriptionA, descriptionText: 'First help',
+          error: errorA, errorId: errorIdA, otherDescriptionId: descriptionB.id, otherErrorId: errorIdB },
+        { view: viewB, content: editorB.content, description: descriptionB, descriptionText: 'Second help',
+          error: errorB, errorId: errorIdB, otherDescriptionId: descriptionA.id, otherErrorId: errorIdA },
+      ] as const;
+
+      for (const instance of instances) {
+        const { view, content, description, error, errorId } = instance;
+        expect(content.getAttribute('contenteditable')).toBe('true');
+        const refs = requireValue(content.getAttribute('aria-describedby')).split(/\s+/);
+        expect(refs).toEqual([description.id, errorId]);
+        expect(refs).not.toContain(instance.otherDescriptionId);
+        expect(refs).not.toContain(instance.otherErrorId);
+        expect(document.getElementById(description.id)).toBe(description);
+        expect(document.getElementById(errorId)).toBe(error);
+        expect(document.getElementById(errorId)?.parentElement).toBe(document.body);
+        expect(description.textContent).toBe(instance.descriptionText);
+        expect(error.textContent).toBe(errorId === errorIdA ? 'Error A' : 'Error B');
+        expect(description.isConnected).toBe(true);
+        expect(error.isConnected).toBe(true);
+        expect(view.container.contains(description)).toBe(true);
+        expect(content.getAttribute('aria-invalid')).toBe('true');
+        expect(content.getAttribute('aria-required')).toBe('true');
+        expect(content.getAttribute('aria-multiline')).toBe('true');
+      }
+
+      const contentB = editorB.content;
+      const describedByB = requireValue(contentB.getAttribute('aria-describedby'));
+
+      await viewA.rerender({
+        field: { ...fieldA, description: '' }, value: '<p>Details A</p>',
+        invalid: false, errorId: undefined,
+      });
+
+      expect(viewA.container.querySelector('[data-svadmin-field-description]')).toBeNull();
+      expect(editorA.content.hasAttribute('aria-describedby')).toBe(false);
+      expect(editorA.content.hasAttribute('aria-invalid')).toBe(false);
+      expect(document.getElementById(errorIdA)).toBe(errorA);
+      expect(errorA.isConnected).toBe(true);
+
+      expect(editorB.content).toBe(contentB);
+      expect(editorB.content.getAttribute('aria-describedby')).toBe(describedByB);
+      expect(editorB.content.getAttribute('aria-invalid')).toBe('true');
+      expect(editorB.content.getAttribute('aria-required')).toBe('true');
+      expect(editorB.content.getAttribute('aria-multiline')).toBe('true');
+      const currentDescriptionB = requireValue(
+        viewB.container.querySelector<HTMLElement>('[data-svadmin-field-description]'),
+      );
+      expect(currentDescriptionB).toBe(descriptionB);
+      expect(currentDescriptionB.id).toBe(descriptionB.id);
+      expect(currentDescriptionB.textContent).toBe('Second help');
+      expect(currentDescriptionB.isConnected).toBe(true);
+      expect(document.getElementById(errorIdB)).toBe(errorB);
+      expect(errorB.id).toBe(errorIdB);
+      expect(errorB.textContent).toBe('Error B');
+      expect(errorB.isConnected).toBe(true);
+      expect(viewA.container.querySelector(`#${errorIdB}`)).toBeNull();
+      expect(viewB.container.querySelector(`#${errorIdA}`)).toBeNull();
+      expect(onchange).not.toHaveBeenCalled();
+    } finally {
+      for (const error of hostErrors) error.remove();
+    }
   });
 
   it('updates and removes feedback without recreating the editor or losing content and selection', async () => {
@@ -674,7 +775,7 @@ describe('Registered rich text field contract', () => {
     const file = new File(['image'], 'late.png', { type: 'image/png' });
     const editorProps = requireValue(instance.options.editorProps);
     if (!editorProps.handleDrop || !editorProps.handlePaste) throw new Error('Expected upload handlers');
-    const slice = emptySlice(instance);
+    const slice = instance.state.doc.slice(0, 0);
     vi.spyOn(instance.view, 'posAtCoords').mockReturnValue({ pos: 1, inside: 0 });
     const handled = method === 'drop'
       ? editorProps.handleDrop(instance.view, dragFile(file), slice, false)
@@ -706,7 +807,7 @@ describe('Registered rich text field contract', () => {
     const editorProps = requireValue(instance.options.editorProps);
     if (!editorProps.handleDrop) throw new Error('Expected drop handler');
     const event = dragFile(currentFile);
-    const slice = emptySlice(instance);
+    const slice = instance.state.doc.slice(0, 0);
     expect(editorProps.handleDrop(instance.view, event, slice, false)).toBe(false);
     expect(upload).not.toHaveBeenCalled();
     await view.rerender({ disabled: false });

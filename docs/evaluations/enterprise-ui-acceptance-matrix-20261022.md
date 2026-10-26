@@ -14,7 +14,7 @@
 
 本轮为 documentation-only，跳过 delegation gate；记录为 pi writer、主线程 reviewer。未修改生产代码、测试或依赖，未执行全仓扫描、测试、build、typecheck、提交或网络写入。
 
-> **当前状态索引（2026-10-23）**：原始 B1-01..B4-04 的未完成要求、分类与下一最高收益任务见 [enterprise-ui-remaining-20261023.md](enterprise-ui-remaining-20261023.md)。该清单已消除本地完整编辑、跨引擎、同时切换与逐段清空等过时状态；本文以下条目保留历史证据，不再作为当前缺口清单。
+> **当前状态索引（2026-10-24）**：阻塞解除与最新本地证据见 [enterprise-ui-closeout-20261024.md](enterprise-ui-closeout-20261024.md)。内部引用、显式 oneOf 与业务草稿接入已本地收口，真实服务验收仍为 PARTIAL。原始逐项范围见 [enterprise-ui-remaining-20261023.md](enterprise-ui-remaining-20261023.md)，其中旧待决策状态以最新收口记录为准；本文以下条目保留历史证据，不再作为当前缺口清单。
 
 本文保留 29 条原始批次编号，只作为文档证据索引，不把新增证据反推成原始要求，也不宣称总体完成。每条分别标注本地可做、需外部环境或产品决策；未执行项不作完成结论。
 
@@ -73,15 +73,16 @@
 
 ### B1-04 回归与兼容
 
-- 主线程最新复核（2026-10-23）：当前 dirty 工作区分别以独立进程运行 FilterBuilder `48/48`（13.02s）、JsonSchemaForm `61/61`（12.12s）、SpreadsheetView `122/122`（16.00s），均 exit 0；三项为各自单文件，不合并计数，仍有既有 source-map 警告。消费者 `example check` 独立复核 0 errors / 3 warnings、exit 0；`build:example` 10771 modules、4.45s、exit 0。下文“本轮未复跑”仅指此前 pi 修复回合，现已补主线程结果。仅解除定向回归与示例类型/构建门槛，不证明全仓兼容、registry 发布、真实服务、读屏或部署。
+- 主线程最新复核（2026-10-23）：当前 dirty 工作区分别以独立进程运行 FilterBuilder `52/52`、JsonSchemaForm `61/61`、SpreadsheetView `122/122`，均 exit 0；pi 以同一当前工作区独立复跑三文件亦为 `52/52`、`61/61`、`122/122`，合计 `235/235`，三项为各自单文件，不合并计数，仍有既有 source-map 警告。消费者 `example check` 独立复核 0 errors / 3 warnings、exit 0；`build:example` 当前构建 exit 0，并保留 Svelte 3 warnings、动态导入提示及大 chunk warnings。下文“本轮未复跑”仅指此前 pi 修复回合，现已补主线程结果。仅解除定向回归与示例类型/构建门槛，不证明全仓兼容、registry 发布、真实服务、读屏或部署。
+- 2026-10-23 分发审计补记：此前发现的源码/dist 不一致已通过 `bun run --cwd packages/ui build` 刷新；随后 `bun run build:packages` 的 12 个发布相关 workspace 包均 exit `0`。重建后 `@svadmin/ui` tarball 静态要求仍通过，记录为 `1023 tarball entries verified`，packed consumer 入口/类型导入、npm install、pnpm strict peer tree、Surface 两组兼容消费者和 packed doctor 阶段均通过。默认 `npmmirror` 因缺少 `@vibeunion/devtools-devframe@0.1.0` 曾返回 404；以 `npm_config_registry=https://registry.npmjs.org bun run pack:check` 重跑后 exit `0`。该结果证明 pack 门禁，不证明 registry 发布、生产部署或在线验收。详见 [enterprise-ui-pack-distribution-audit-20261023.md](../evidence/enterprise-ui-pack-distribution-audit-20261023.md)。
 
 - 原始要求：保留现有入口；增加正反向测试；记录验证证据及未通过项。
 - 直接证据：[enterprise-ui-correctness.md](enterprise-ui-correctness.md)、[ui-contract-type-recovery-20261021.md](../evidence/ui-contract-type-recovery-20261021.md)、[enterprise-consumer-build-20261022.md](../evidence/enterprise-consumer-build-20261022.md)、[enterprise-ui-plan.md](enterprise-ui-plan.md)。
-- 证据覆盖边界：2026-10-22 follow-up 已记录 `DashboardWorkspace.svelte` 消费者门槛修复：前轮 `example check` 出现 1 个 `requestContext` 的 `exactOptionalPropertyTypes` error；改用 `@svadmin/core/options` 的 `definedOptions` 省略 `undefined` 后，又暴露出同调用点 `title` 的同类 error，一并按最小消费者兼容处理，未放宽 `DashboardView` Props。当前 `bun run --cwd example check` 退出 0（0 errors / 3 个既有 warning），`build:example` 退出 0（10771 modules），`git diff --check` 退出 0。工作区为 dirty（HEAD `51ce56238061ede8a3ee3e882f6799a5d896440c` 加未提交 WIP，相关文件 untracked），不能把 HEAD 当作内容身份或发布基线。定向三文件测试的既有结果是 pi 自测，不是主线程独立复核；本轮未复跑。
-- 仍未证明的验收：全仓兼容、后续源码进入消费者、类型门槛之外的真实浏览器/Provider、发布包和部署。
-- 下一项可执行动作：保持本次三个文件的 WIP 边界，不把 HEAD 或 untracked 文件当作发布内容；如需闭环三文件测试，另行执行并区分 pi 与主线程结果。
+- 证据覆盖边界：2026-10-22 follow-up 已记录 `DashboardWorkspace.svelte` 消费者门槛修复：前轮 `example check` 出现 1 个 `requestContext` 的 `exactOptionalPropertyTypes` error；改用 `@svadmin/core/options` 的 `definedOptions` 省略 `undefined` 后，又暴露出同调用点 `title` 的同类 error，一并按最小消费者兼容处理，未放宽 `DashboardView` Props。当前 `bun run --cwd example check` 退出 0（0 errors / 3 个既有 warning），`build:example` 退出 0，`git diff --check` 退出 0。当前 dirty 工作区的三文件定向测试由主线程与 pi 分别复核为 `52/52`、`61/61`、`122/122`，合计 `235/235`。工作区为 dirty，不能把 HEAD 或 untracked 文件当作内容身份或发布基线。
+- 仍未证明的验收：全仓行为兼容（pack 检查不替代行为回归）、类型门槛之外的真实浏览器/Provider、registry 发布包和部署。
+- 下一项可执行动作：保留官方 registry 复跑命令作为发布环境证据；后续进入真实 registry 发布、部署和在线验收，不重复本地 pack 检查。
 - 外部依赖：发布授权；真实 Provider 不属于本条本地门槛。
-- 状态：消费者 `example check` 与 `build:example` 本轮已转绿并记录 HEAD + dirty 身份；全仓与外部验收仍未完成。
+- 状态：UI build、消费者 `example check`、`build:example` 与官方 registry 下完整 `pack:check` 已通过；registry 发布、真实 Provider/读屏、部署与在线验收仍未完成。
 
 ## 4. 批次二：基础组件与表单能力
 
@@ -173,6 +174,12 @@
 
 ### B2-08 Upload / Dropzone / FileList
 
+- 2026-10-24 AutoForm 集成增量：托管上传只写入 JSON 引用，保留 url/uploadId；
+  支持回显、移除、重试、并发队列聚合、离开保护与 reset/作用域隔离。
+  主线程逐文件通过 11/11、6/6、23/23、22/22、11/11、101/101，
+  上传浏览器三引擎两视口 18/18。证据见
+  [autoform-upload-integration-20261024.md](../evidence/autoform-upload-integration-20261024.md)。
+  真实上传服务及全仓类型门禁未验收，不以此关闭原始整项。
 - 原始要求：会话、进度、取消、重试、预览。
 - 直接证据：[file-upload-native-contract-20261021.md](../evidence/file-upload-native-contract-20261021.md)、[import-dropzone-cross-browser-20261022.md](../evidence/import-dropzone-cross-browser-20261022.md)、[file-list-cross-browser-20261022.md](../evidence/file-list-cross-browser-20261022.md)、[file-upload-failed-cleanup-20261022.md](../evidence/file-upload-failed-cleanup-20261022.md)、[file-list-preview-boundary-20261023.md](../evidence/file-list-preview-boundary-20261023.md)。
 - 证据覆盖边界：证据覆盖原生表单一致、非法文件、失败会话回收、行级下载/预览/移除、跨浏览器和迟到回执；不覆盖真实存储取消/清理幂等。预览渲染不在 FileList 内：组件只等待宿主 `onpreview` 回调，宿主预览器渲染失败只能通过该 Promise 拒绝进入行级恢复，本轮不以回调拒绝冒充真实渲染失败，也不新增预览引擎。
@@ -183,18 +190,60 @@
 
 ### B2-09 FormField / ErrorSummary
 
+- 文件动作键盘续接：真实 AutoForm 校验错误、真实按键遍历取消/重试/移除、
+  反馈描述解析、禁止在途提交、成功清错与精确载荷均已由主线程新增场景
+  **12/12**（三引擎两视口，23.5s）验证，目标 ESLint/diff 通过。
+  见 `../evidence/b2-09-file-action-browser-20261024.md`；不等同读屏或服务验收。
+- 2026-10-24 文件动作反馈续接：队列取消/重试/移除及既有附件移除透传所属字段
+  `aria-describedby`/`aria-invalid`。主线程真实 FieldRenderer 双实例单文件
+  **13/13**（9.83s），目标 ESLint/diff 通过。只证明活 IDREF、实例隔离与动态
+  清理，不证明键盘焦点、真实读屏或服务端错误映射；未重建分发包。
+  见 `../evidence/b2-09-composite-followup-20261024.md`。
+- 2026-10-26 完整 AutoForm 复验：主线程独立执行专属配置 **102/102 passed**、
+  exit `0`、2.2m，无 skip；Chromium/WebKit/Firefox 的 desktop/narrow 六个项目
+  各 17/17。覆盖 ArrayField、DateRangeInput、TreeSelect、Cascader、Transfer、
+  RichText、Tags、Multiselect、Images、错误摘要以及 provider/scope 切换后的迟到
+  响应与 dirty 草稿隔离。该结果收口本地跨浏览器矩阵，不替代真实读屏、上传服务、
+  服务端错误映射、Provider/RBAC 或发布验收。
+
+- 2026-10-24 空数组 Add 入口增量：pi 最小修复 `ArrayField` 的 Add 按钮帮助/错误
+  关联，复用既有 `describedby`/`invalid`，不新增行级错误协议。主线程审查并独立
+  复跑 `array-field-feedback.test.svelte.ts` **24/24**、exit 0、7.88s；覆盖真实
+  AutoForm 双实例保存失败焦点、活节点 IDREF 顺序/隔离、单实例新增行清错及另一
+  实例保持错误。定向 ESLint、diff 检查通过。浏览器续接复用既有 array 用例，
+  pi 验证 Chromium desktop；主线程增强断言并独立复跑三引擎两视口 **6/6**、
+  exit `0`、15.4s，直接验证 Add 描述、活 IDREF 无交集、修正后仅保留帮助
+  及另一实例保持错误。真实读屏仍未验收。
 - 原始要求：帮助/错误关联、焦点、统一布局。
 - 直接证据：[auto-form-error-summary-browser-20261022.md](../evidence/auto-form-error-summary-browser-20261022.md)、[auto-form-compound-focus-20261021.md](../evidence/auto-form-compound-focus-20261021.md)、[form-error-summary-contract-20261021.md](../evidence/form-error-summary-contract-20261021.md)、[form-field-description-20261021.md](../evidence/form-field-description-20261021.md)、[compound-field-native-contract-20261021.md](../evidence/compound-field-native-contract-20261021.md)、[form-field-generated-id-description-error-20261023.md](../evidence/form-field-generated-id-description-error-20261023.md)。
 - 证据覆盖边界：证据覆盖顶层首错顺序、实例 ID、帮助/错误关联、摘要跳转、复合字段原生提交，以及无宿主显式 `id` 时 `tags`/`rate`/`multiselect`/`images`/`array` 的说明+错误关联：本轮已改为真实宿主错误节点 + 同页两个同业务 key、不传显式 `id` 的实例，逐 IDREF 解析到活节点并断言不串实例，同时覆盖说明更新、先移除错误再移除说明的关联与 invalid 收敛（`multiselect` 同时覆盖分组与 checkbox）；`ArrayField` 行级分组、`Transfer`/`TreeSelect`/`Cascader`/`DateRangeInput`/富文本/文件上传的同类组合和真实读屏仍未覆盖。
-- 仍未证明的验收：全部复合控件帮助文本、完整 Tab 顺序、真实读屏、跨浏览器完整矩阵和发布。
-- 下一项可执行动作：本轮只读核对确认无生产缺口，未改 `FieldRenderer.svelte`；后续只在扩展 `ArrayField` 行级或其余复合控件组合时再开窄项；模块为 `packages/ui` FieldRenderer/ErrorSummary。
+- 仍未证明的验收：行级/子字段错误路径模型、真实读屏、真实服务错误映射、Provider/RBAC 和发布。
+- 下一项可执行动作：不重复当前 102/102 矩阵；后续仅在出现新的产品错误路径契约、真实服务或读屏验收输入时推进；模块为 `packages/ui` FieldRenderer/ErrorSummary。
 - 外部依赖：屏幕阅读器、发布授权。
 - 状态：本轮只读核对确认生产契约正确，未改组件；orchestration 为 managed、pi 唯一 writer、主线程独立审查。首版参数化用例只比较 `aria-describedby` 字符串、`errorId` 指向不存在节点，主线程复核 22/22（6.65s），但未验证同业务 key 多实例隔离与动态清除，故不充分。修正版 22/22、原始 exit code 0、6.54s，主线程独立复核 22/22、exit 0、6.55s，`git diff --check` exit 0。首轮 `array` 用例曾因选择器误命中行级分组失败 1 项，修正选择器后通过，未认定生产缺陷。真实读屏、完整 Tab 顺序、跨浏览器完整矩阵、发布与部署仍未验收。
 - 2026-10-23 ArrayField 独立复核：`array-field-feedback.test.svelte.ts` **23/23 passed**、exit `0`，`git diff --check` exit `0`。现有测试覆盖行身份/重排、嵌套数组原生提交、禁用态、动态增删和顶层反馈关联；未发现可不依赖错误数据模型或读屏工具而安全新增的生产契约。行级错误帮助链、完整复合控件矩阵、真实读屏与发布仍未验收。
+- 2026-10-24 DateRangeInput presets 反馈关联修复：`DateRangeInput.svelte` 的 presets 原生 `select` 补齐 `aria-describedby` 与 `aria-invalid`，避免同一字段的预设选择器缺失帮助/错误上下文；新增 FieldRenderer 双实例真实 IDREF、动态清理、值保持和 preset 回调回归。pi 报告单文件 48/48；主线程独立复跑最终 `auto-form-accessibility.test.svelte.ts` **48/48**、exit `0`、9.22s；本轮收尾再次复跑 **48/48**、exit `0`、10.30s。随后主线程重建 `packages/ui`，源码与 `dist/components/DateRangeInput.svelte` 逐字节一致；`example` check 为 0 errors / 3 个既有 warning，生产构建 exit `0`。中间 `date-time-input` 23/23 不对应最终测试改动，不列为最终验收。该窄修复不改变焦点策略、required 或日期值语义；完整 AutoForm 错误摘要聚焦、真实读屏、其余复合控件矩阵和 registry 发布仍未验收。本次未重跑 pack，历史 pack 不覆盖本次增量。
+
+- 2026-10-24 TreeSelect/Cascader 本地反馈增量：pi 执行、主线程审查，仅修改 `hierarchical-field-feedback.test.svelte.ts`。覆盖真实宿主错误节点、双实例 IDREF 隔离、清理 A 不影响 B、popup 引用和选择回调；主线程最终单文件 **24/24**、exit `0`、7.04s，ESLint 通过。未修改生产组件，不证明 AutoForm 服务端错误映射、完整 Tab、真实读屏或跨浏览器完整矩阵；其余复合控件与发布仍未验收。
+
+- 2026-10-24 Transfer 反馈增量：pi 修改 `transfer-field-feedback.test.svelte.ts`，主线程审查并独立复跑 **27/27**、exit `0`、6.98s；ESLint 与 diff 检查通过。真实宿主节点覆盖双实例 description/error IDREF 隔离、清理 A 不影响 B、data-invalid 收敛与无 onchange。未改生产组件，不证明读屏、完整 Tab、服务端错误映射或发布。
+- 2026-10-24 FileUpload 反馈增量：pi 修改 `file-upload-field-feedback.test.svelte.ts`，主线程审查并独立复跑 **11/11**、exit `0`、7.12s；ESLint 与 `git diff --check` 通过。真实宿主节点覆盖两个 file 实例的原生 input/dropzone 双入口 IDREF 解析、实例隔离、A 清理不影响 B 及 invalid 状态收敛。未改生产组件，不证明真实上传服务、读屏、完整 Tab、服务端错误映射或发布。
+- 2026-10-24 RichText 反馈增量：pi 修改 `richtext-field-contract.test.svelte.ts`，主线程独立复跑 **73/73**、exit `0`、11.34s，`git diff --check` 通过。覆盖两个实际编辑区的 description/error IDREF 解析与隔离、`aria-invalid`/`aria-required`/`aria-multiline` 和清理 A 不影响 B。该文件原有 `t` 导入的 ESLint 限制仍存在，本次未新增 lint 错误；未改生产组件，不证明真实编辑器/上传服务、读屏、完整 Tab 或发布验收。
+- 2026-10-24 DateRangeInput 浏览器增量：pi 修改既有 enterprise fixture 三个测试文件，主线程独立复跑 `--grep "AutoForm daterange"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、11.0s。覆盖 create 两实例首错聚焦 presets、摘要反向/正向 Tab、Enter 返回 presets、preset→start 真实 Tab、同表单活 IDREF、跨实例隔离、精确 payload 与清错后帮助保留。未假设原生 date 分段顺序；edit、时区/DST、禁用日期、真实读屏、服务端错误映射、发布和部署仍未验收。
+- 2026-10-24 TreeSelect 浏览器增量：pi 修改既有 enterprise fixture 三个测试文件，主线程独立复跑 `--grep "AutoForm tree-select"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、14.4s。覆盖 create 两实例首错 trigger 聚焦、摘要反向/正向 Tab、Enter/Escape/ArrowDown/Enter 真实键盘路径、popup `aria-controls`/`aria-labelledby`、活 IDREF 与隔离、精确 payload 和第二实例保留 invalid。trigger 既有 invalid 语义为 `data-invalid`；未改生产组件，不证明真实读屏、Provider、完整策略矩阵、发布和部署。
+- 2026-10-24 Transfer 浏览器增量：pi 修改既有 enterprise fixture 三个测试文件，主线程独立复跑 `--grep "AutoForm transfer"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、12.2s。覆盖两实例首个 checkbox 聚焦、摘要反向/正向 Tab、Enter 返回、真实 label/help/error IDREF、Space 选择、Tab/Enter 转移、精确 payload、帮助保留和第二实例 invalid 隔离。未改生产组件，不证明读屏、完整 Transfer 策略、Provider、发布和部署。
+- 2026-10-24 Cascader 浏览器增量：pi 修改既有 enterprise fixture 三个测试文件，主线程独立复跑 `--grep "AutoForm cascader"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、12.4s。覆盖两实例首错 trigger 聚焦、摘要正反向 Tab、Enter/Escape/ArrowDown/Enter 真实键盘路径、popup 引用、活 IDREF 与隔离、精确 path payload、帮助保留和第二实例 invalid。未改生产组件，不证明读屏、父子策略全矩阵、edit/懒加载、Provider、发布和部署。
+- 2026-10-24 RichText AutoForm 浏览器增量：pi 修改既有 enterprise fixture 三个测试文件，主线程独立复跑 `--grep "AutoForm richtext"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、24.9s。覆盖首错正文 `contenteditable` 聚焦、同表单工具栏真实反向/正向键盘遍历及互逆序、摘要 Enter 返回正文、双实例活 IDREF 隔离、清错后帮助保留和精确 HTML payload；测试主动断言无 Tiptap warning。未证明真实读屏、完整扩展策略、Provider、上传、发布或部署。
+- 2026-10-24 AutoForm 富文本焦点边界修复：`AutoForm.svelte` 仅对默认渲染顶层 `richtext` 优先正文；数组后置 richtext、自定义 renderer 与不可用正文均保持/回退原 DOM 顺序。主线程独立复跑 `auto-form-compound-focus.test.svelte.ts` **21/21**、exit `0`、7.78s；`packages/ui` build exit `0`，仅有既有 `import.meta.env` 打包提示。未因此扩大整体复合控件、读屏、Provider 或发布结论。
+- 2026-10-24 RichText 扩展与依赖修复：`StarterKit` 内置 `link`/`underline` 已关闭，新增真实 ProseMirror transaction 回归；编辑器扩展单测 **7/7**、构建、严格定向类型检查和 ESLint 通过。根 override 与 `bun.lock` 的 `prosemirror-model` 从 `1.25.11` 升至 `1.25.12`，冻结安装及单一解析入口验证通过；未改其它业务文件，未因此扩大读屏、Provider、上传或发布结论。
+- 2026-10-24 tags AutoForm 浏览器增量：pi 仅扩展既有 enterprise fixture 三个测试文件，未改生产代码；主线程独立复跑 `--grep "AutoForm tags"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、13.1s。覆盖草稿输入框首错聚焦、摘要反向/正向 Tab 与 Enter 返回、help/error 活 IDREF 和跨实例隔离、`alpha`/`beta` Enter 生成 `tags[]`、精确 payload、第一份清错第二份保持 invalid、`pageerror` 为空。全文件 `browser.spec.ts` lint 仍有旧区域 4 个 non-null assertion 错误，不归因本轮且不声称全文件通过；窄视口不是移动端/视觉验收，不证明读屏、真实 Provider、RBAC、发布或部署。
+- 2026-10-24 multiselect AutoForm 浏览器增量：仅追加既有 `browser.spec.ts` 末尾，未改生产代码，fixture/config 的 multiselect 分支已存在；主线程独立复跑 `--grep "AutoForm multiselect"`，Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、12.2s。覆盖双实例 Labels group/Alpha、Beta、Disabled 三 checkbox、首错聚焦 Alpha、Disabled 保持 disabled 未选、组与 checkbox 的 help/error 活 IDREF 同表单解析与跨实例隔离、摘要正反向 Tab/Enter、Space 选择 Alpha、单一 `labels[]=alpha`、精确 JSON payload、第一份清错提交而第二份保持 invalid、`pageerror` 为空。全文件 `browser.spec.ts` lint 仍有旧区域 4 个 non-null assertion 错误，不归因本场景且不声称全文件通过；窄视口不是移动端/视觉验收，不证明读屏、真实 Provider、RBAC、发布或部署。
+- 2026-10-24 images AutoForm 浏览器增量：pi 在扩展既有 enterprise fixture 三个测试文件的同时，补充 `FieldRenderer.svelte` 最小生产修复，为 images 的 add/update/remove 增加 `disabled` 守卫，并补齐 Add image、Remove image 与 URL input 的 help/error `aria-describedby` 及 `aria-invalid` 关联；主线程独立复跑 `field-renderer-advanced.test.svelte.ts` **24/24**、exit `0`，定向浏览器 `--grep "AutoForm images"` 为 Chromium/WebKit/Firefox × desktop/narrow **6/6**、exit `0`、13.6s。覆盖双实例空数组首错聚焦真实 `Add image`、摘要实际文案 `Images: Invalid format` 的正反向 Tab 与 Enter 返回、URL 输入与 `Add image`/`Remove image`、IDREF 不得为空且须解析到本表单活节点的双实例隔离、错误/说明动态清理、禁用态无 `onchange` 且恢复后 add/update/remove 回调、隐藏 `images[]` 与精确 payload、第一份清错第二份保持 invalid、`pageerror` 为空。旧 `browser.spec.ts` 仍有 4 个既有 non-null assertion lint 错误（旧区域，不归因本场景），不声称全文件 lint 通过；窄视口不是移动端/视觉验收，不证明真实图片上传/存储、Provider、RBAC、真实读屏、发布或部署。
 
 ### B2-10 表单引擎统一
 
-- 最新主线程浏览器复核：`playwright.form-reset.config.ts` 专属单文件 10/10 passed、exit 0、6.0s，diffcheck exit 0；与 pi 10/10、9.8s 独立记录。覆盖 Chromium desktop/narrow 的真实 AutoForm/StepsForm 宿主公共 reset 消费、基线与步骤恢复、校验清除、只读/拒绝可见状态保持，无写入/导航/成功回调。fixture 按钮不是产品按钮；不证明内部状态完全未变、在途响应隔离、Firefox/WebKit、真实后端或读屏。此项浏览器入口不再待主线程复核。
+- 当前主线程浏览器复核（2026-10-24）：`playwright.form-reset.config.ts` 已扩展为 Chromium/WebKit/Firefox × desktop/narrow，保留 5 个既有场景并新增 1 个关闭保护场景，共 **36 cases**；主线程独立运行 **36/36 passed、exit 0、27.5s**，pi 前一轮 36/36、27.8s 分开记录、不合并计数。新增场景以真实 dirty 输入打开公开 `alertdialog`，再通过明确 test-only DOM event 调用真实 `bind:this.reset()`（不 force click、不读 Svelte 内部），断言弹窗关闭、基线与描述恢复、旧导航 0、无 write/success；再次 dirty 后 Confirm 仅新导航 1、旧仍 0，并继续可编辑、`pageerror` 为空。旧/新导航独立计数。fixture 按钮不是产品按钮；narrow 只是既有布局回归，不是新增视觉/移动端验收；仍不证明真实服务、RBAC、读屏或发布。
+- 历史主线程浏览器复核（Chromium 两视口，保留为历史，不再作为当前跨引擎结论）：`playwright.form-reset.config.ts` 专属单文件 10/10 passed、exit 0、6.0s，diffcheck exit 0；与 pi 10/10、9.8s 独立记录。覆盖 Chromium desktop/narrow 的真实 AutoForm/StepsForm 宿主公共 reset 消费、基线与步骤恢复、校验清除、只读/拒绝可见状态保持，无写入/导航/成功回调。fixture 按钮不是产品按钮；不证明内部状态完全未变、在途响应隔离、Firefox/WebKit、真实后端或读屏。
 
 - 原始要求：AutoForm、分步、弹窗、抽屉、动态列表共享状态与校验。
 - 直接证据：[auto-form-error-summary-browser-20261022.md](../evidence/auto-form-error-summary-browser-20261022.md)、[steps-form-array-contract-20261022.md](../evidence/steps-form-array-contract-20261022.md)、[steps-form-error-focus-20261022.md](../evidence/steps-form-error-focus-20261022.md)、[steps-form-cancel-confirmation-20261022.md](../evidence/steps-form-cancel-confirmation-20261022.md)、[nested-array-native-contract-20261021.md](../evidence/nested-array-native-contract-20261021.md)、[form-engine-reset-lifecycle-20261023.md](../evidence/form-engine-reset-lifecycle-20261023.md)。
@@ -209,9 +258,9 @@
 
 - 原始要求：嵌套、数组、条件与外部引用的受控适配。
 - 直接证据：[schema-form-b2-11-browser-unsupported-20261023.md](../evidence/schema-form-b2-11-browser-unsupported-20261023.md)、[schema-form-b2-11-boundary-audit-20261023.md](../evidence/schema-form-b2-11-boundary-audit-20261023.md)、[schema-form-unsupported-schema-20261022.md](../evidence/schema-form-unsupported-schema-20261022.md)、[schema-form-description-association-20261022.md](../evidence/schema-form-description-association-20261022.md)、[schema-form-hidden-parse-errors-20261022.md](../evidence/schema-form-hidden-parse-errors-20261022.md)、[enterprise-ui-correctness.md](enterprise-ui-correctness.md)、[enterprise-ui-reconciliation.md](../architecture/enterprise-ui-reconciliation.md)。
-- 证据覆盖边界：证据覆盖受限递归 object/array/scalar、条件隐藏、数组行错误、浏览器条件路径，以及 `$ref`/`oneOf`/外部引用/未知关键字的显式拒绝（单文件 61/61，主线程独立复核通过）。2026-10-23 新增真实浏览器本地证据：四类 unsupported schema 在 chromium/webkit/firefox × desktop/narrow 下均显示表单级 alert、零可编辑字段、提交禁用；手动 `SubmitEvent` 与 `requestSubmit()` 均无业务回调；`external-ref` 经 `page.route` 计数为 0，未访问远端（24/24，待主线程复核）。显式拒绝只闭环安全边界，不替代 B2-11 的受控引用适配；明确不是完整 JSON Schema，也没有实现引用解析。问题路径来自内部模块 `readRecursiveSchemaForm(...).issues`，不是公开组件 API；UI 只显示表单级通用错误。
+- 证据覆盖边界：证据覆盖受限递归 object/array/scalar、条件隐藏、数组行错误、浏览器条件路径，以及 `$ref`/`oneOf`/外部引用/未知关键字的显式拒绝（单文件 61/61，主线程独立复核通过）。2026-10-23 新增真实浏览器本地证据：四类 unsupported schema 在 chromium/webkit/firefox × desktop/narrow 下均显示表单级 alert、零可编辑字段、提交禁用；手动 `SubmitEvent` 与 `requestSubmit()` 均无业务回调；`external-ref` 经 `page.route` 计数为 0，未访问远端（24/24，后续已由主线程独立复核）。显式拒绝只闭环安全边界，不替代 B2-11 的受控引用适配；明确不是完整 JSON Schema，也没有实现引用解析。问题路径来自内部模块 `readRecursiveSchemaForm(...).issues`，不是公开组件 API；UI 只显示表单级通用错误。
 - 仍未证明的验收：不支持关键字的读屏表现、服务端 TypeBox/授权、完整 Schema 能力、受控引用适配、新分发包和部署。
-- 下一项可执行动作：2026-10-23 已完成只读边界审计（`schema-form-b2-11-boundary-audit-20261023.md`）：仓库无 `$ref`/`oneOf`/外部引用的可执行产品契约（解析作用域、加载允许列表/超时/鉴权/SSRF 策略、分支选择 UI、公开错误 API 均缺失），当前受限子集无发现真实实现错误，故不改生产并保持显式拒绝。后续受控引用适配需产品/安全侧先给出契约；浏览器拒绝路径已补本地证据（`schema-form-b2-11-browser-unsupported-20261023.md`，24/24，待主线程复核），读屏复核仍为外部验证。
+- 下一项可执行动作：2026-10-23 已完成只读边界审计（`schema-form-b2-11-boundary-audit-20261023.md`）：仓库无 `$ref`/`oneOf`/外部引用的可执行产品契约（解析作用域、加载允许列表/超时/鉴权/SSRF 策略、分支选择 UI、公开错误 API 均缺失），当前受限子集无发现真实实现错误，故不改生产并保持显式拒绝。后续受控引用适配需产品/安全侧先给出契约；浏览器拒绝路径已有本地证据（`schema-form-b2-11-browser-unsupported-20261023.md`，24/24）并已由主线程独立复核，读屏复核仍为外部验证。
 - 外部依赖：服务端 Schema/授权、屏幕阅读器、发布授权。
 - 主线程复核更新：上述浏览器“待复核”状态已更新为已复核，24/24、exit 0、23.2s；Schema 单文件独立复跑 61/61、exit 0、10.75s，diffcheck exit 0。网络断言仅覆盖 fixture 指定域名及测试观察窗口，不代表网络安全认证。
 - 2026-10-23 主线程再次复跑：`playwright.schema-unsupported.config.ts` 三引擎双视口 **24/24 passed**、exit `0`、26.2s、单 worker；四类不支持 Schema 均保持零业务回调和提交关闭。该结果只强化显式拒绝安全边界，不改变受控引用适配仍需产品/安全契约的结论。
@@ -224,23 +273,24 @@
 
 - 完整编辑页主线程复核（2026-10-23）：独立执行 `playwright.resource-workspace-edit-route.config.ts`，Chromium desktop 1/1 passed、exit 0、4.2s。已检查真实 AdminApp 路由渲染 AutoTable/AutoForm（非 QuickEditDrawer），受控内存 RouterProvider 将搜索/第 2 页带入编辑记录 11，失败保留草稿和编辑页，重试成功后返回列表并显示服务端规范化值，精确断言两次 update 及恢复的 q/page。此处路由状态来自 fixture 内存，未验证浏览器地址栏、刷新/历史恢复、真实服务/RBAC、其他引擎或发布；不得称真实路由服务验收。
 
-- 主线程最新浏览器复核：独立运行 `bunx playwright test --config scripts/fixtures/enterprise-ui/playwright.resource-workspace.config.ts`，Chromium/WebKit/Firefox × desktop/narrow 共 18/18 passed、exit 0、31.7s；`git diff --check` exit 0。本轮未改组件、fixture 或 spec。既有“主线程结果待复核”现更新为已复核，但仍仅证明受控本地 Provider 的行为，不证明真实 Provider/RBAC、持久化或发布；独立完整编辑路由随后由第 6 节单文件浏览器闭环补充，主线程复核待执行。
+- 主线程最新浏览器复核：独立运行 `bunx playwright test --config scripts/fixtures/enterprise-ui/playwright.resource-workspace.config.ts`，Chromium/WebKit/Firefox × desktop/narrow 共 18/18 passed、exit 0、31.7s；`git diff --check` exit 0。本轮未改组件、fixture 或 spec。既有“主线程结果待复核”现更新为已复核，但仍仅证明受控本地 Provider 的行为，不证明真实 Provider/RBAC、持久化或发布；独立完整编辑路由随后由第 6 节单文件浏览器闭环补充，后续主线程复核结果见同条目下方的 2026-10-23 补记。
 
 - 原始要求：查询、选择、详情、编辑、恢复和权限成品封装。
 - 直接证据：[list-state-composition.md](../architecture/list-state-composition.md)、[svar-grid.md](svar-grid.md)、[infinite-list-recovery/README.md](../evidence/infinite-list-recovery/README.md)、[svar-resource-query-feedback-20261021.md](../evidence/svar-resource-query-feedback-20261021.md)、[resource-overview-sort/README.md](../evidence/resource-overview-sort/README.md)、[resource-workspace-audit-20261022.md](../evidence/resource-workspace-audit-20261022.md)。
 - 本轮执行证据：同一限定命令在 `packages/ui` 分轮记录，不合并历史次数。历史 **pi 自测**基线 32/32、原始 exit code 0、duration 23.86s；**主线程独立基线** 32/32、原始 exit code 0、duration 17.26s（新增用例之前，不能计作新增后复核）。初版新增 2 个行为用例后，**pi 自测** 34/34、原始 exit code 0、duration 11.61s；**主线程已独立复核初版** 34/34、原始 exit code 0、duration 11.95s。主线程审查修正加强后，**pi 自测**再跑同一文件 34/34、原始 exit code 0、duration 16.30s，并执行 `git diff --check` 得到原始 exit code 0；随后**主线程在最终加强版本后独立复核**同一文件 34/34、原始 exit code 0、duration 14.18s，并执行 `git diff --check` 得到原始 exit code 0。审查修正过程中曾出现一次中间态失败，该失败不计入最终结果，仅作为审查修正过程保留；最终加强版通过。未使用 `tail`。该文件通过 `resource-workspace.test-host.svelte` 直接挂载真实 `ResourceOperationsPage` → `AutoTable`，使用真实 `provideAdminContext`、`QueryClient` 和受控本地 `DataProvider`，是当前工作区的真实源码消费者，不是页面 mock。
 - 编辑提交闭环续轮证据：在同一真实消费者文件只新增 1 个快速编辑用例，复用真实 `QuickEditDrawer → AutoForm → useForm` 和受控 Provider。受控第 2 页 + 搜索 `needle` + 行选择后打开 `Quick edit`，初始列表为 `needle initial title`，首次 `update` 拒绝时抽屉保持且草稿 `needle draft title` 不丢失；显式再次保存成功后抽屉关闭，列表刷新为服务端规范化返回值 `needle normalized title`（与草稿不同），搜索、第 2 页分页和行选择保留且保存后重新查询当前选择仍可参与真实批量动作，刷新调用数增加；`update` 恰好 2 次，两次均精确断言 `{ resource: 'posts', id: 2, variables: { title: 'needle draft title' }, meta: { tenantId: 'first' } }`，创建/删除写入为 0。限定命令 **本版 pi 自测 35/35、原始 exit code 0、duration 12.90s**，`git diff --check` 原始 exit code 0；**本版主线程随后独立复核 35/35、原始 exit code 0、duration 13.50s**，`git diff --check` 原始 exit code 0，本版主线程复核已完成。初版记录单独保留：pi 自测 **35/35、原始 exit code 0、duration 28.40s**，主线程初版独立复核 **35/35、原始 exit code 0、duration 13.42s**，均为独立运行、不合并；历史 34/34 基线亦单独保留。新增前未再运行 34，调试中两次中间态失败仅来自新用例期望（搜索重置分页、`update` 携带 tenant meta），不计最终结果，未认定生产缺陷。详见 [resource-workspace-audit-20261022.md](../evidence/resource-workspace-audit-20261022.md) 第 8 节。
-- 完整编辑路由闭环续轮证据：补齐上一轮明确未验收的独立完整编辑页。新增 `ResourceWorkspaceEditRouteFixture.svelte` 直接挂载真实 `AdminApp`，从真实 `AutoTable` 的完整 `Edit` 按钮进入 `/:resource/edit/:id`，由真实 `AutoForm` 执行 `getOne`、提交失败保留草稿和显式重试，不手写假编辑页、不以 `QuickEditDrawer` 代替。按现有路由契约验证列表搜索 `needle` + 第 2 页进入编辑时 URL 保留 `q=needle&page=2`，首次 `update` 失败后草稿 `needle draft title` 保持且 `update` 为 1 次，重试成功后 `update` 恰好 2 次、列表显示服务端规范化值 `needle normalized title`，返回列表后路由恢复 `q=needle&page=2` 且重新查询仍为搜索后的第 2 页。专属配置仅 Chromium desktop 单文件：**pi 自测 1/1 passed、原始 exit code 0、total duration 4.1s**（test 3.4s），`git diff --check` 原始 exit code 0；**主线程独立复核待执行**。仍未证明真实 Provider/RBAC、服务端持久化、跨引擎、narrow、读屏或发布。详见 [resource-workspace-browser-20261022.md](../evidence/resource-workspace-browser-20261022.md) 第 6 节。
+- 完整编辑路由闭环续轮证据（历史记录）：补齐上一轮明确未验收的独立完整编辑页。新增 `ResourceWorkspaceEditRouteFixture.svelte` 直接挂载真实 `AdminApp`，从真实 `AutoTable` 的完整 `Edit` 按钮进入 `/:resource/edit/:id`，由真实 `AutoForm` 执行 `getOne`、提交失败保留草稿和显式重试，不手写假编辑页、不以 `QuickEditDrawer` 代替。按现有路由契约验证列表搜索 `needle` + 第 2 页进入编辑时 URL 保留 `q=needle&page=2`，首次 `update` 失败后草稿 `needle draft title` 保持且 `update` 为 1 次，重试成功后 `update` 恰好 2 次、列表显示服务端规范化值 `needle normalized title`，返回列表后路由恢复 `q=needle&page=2` 且重新查询仍为搜索后的第 2 页。专属配置仅 Chromium desktop 单文件：**pi 自测 1/1 passed、原始 exit code 0、total duration 4.1s**（test 3.4s），`git diff --check` 原始 exit code 0；当时记录为**主线程独立复核待执行**，后续已由本节下一条补记取代。仍未证明真实 Provider/RBAC、服务端持久化、跨引擎、narrow、读屏或发布。详见 [resource-workspace-browser-20261022.md](../evidence/resource-workspace-browser-20261022.md) 第 6 节。
 - 最新复核补记（2026-10-23）：完整编辑路由本线程独立复跑 **1/1 passed、exit 0、5.8s**；受控内存 Provider/Router 边界不变。资源工作台完整三引擎两视口初次复跑发现 **33 passed / 3 failed**，失败均为 narrow 对全屏 Drawer 的真实 overlay 指针点击被 dialog 覆盖；审查确认窄屏 `width: 100%` 本身没有可命中的遮罩区域，不以 `force` 规避。生产 `packages/ui/src/app.css` 已补 `.svadmin-sheet-panel { box-sizing: border-box; }`，修正 padding 的尺寸模型并由 pi 构建验证；测试在 narrow 分支改为直接触发 overlay handler，并保留 desktop 真实指针点击。最终专属配置本线程独立复跑 **36/36 passed、exit 0、约 1.1m**，三引擎 × desktop/narrow，每项目 6/6；这证明受控消费者的行为与布局边界，不证明真实服务、RBAC、读屏或发布。
 - 证据覆盖边界：该切片对查询（分页/排序/搜索透传、tenant/provider 切换后的迟到回执隔离）和选择（当前页、跨页已选、全部匹配及排除项、搜索与上下文变化清除）有直接断言；对列表读取权限拒绝有直接断言。加强后的新增用例：首次 `getList` 失败 → 显式 `Retry` → 记录出现并可选择 → 输入搜索 `needle`，等待 `getList` 精确收到 `filters: [{ field: 'title', operator: 'contains', value: 'needle' }]` → 打开真实 `RecordDetailDrawer`，断言 `getOne` 收到 `{ resource: 'posts', id: 7 }` → 从抽屉进入编辑，最终导航精确为 `{ to: '/posts/edit/7?q=needle', type: 'push' }`，查询未丢失，且创建/更新/删除写入均为 0；另一用例使用可观察 `vi.fn` 异步 `can`，等待 `show`/`edit` 授权完成，确认列表可读但详情/编辑被拒绝时不暴露详情/编辑按钮或行内 `More actions` 菜单中的 `Edit`/`Quick edit` 项、不调用 `getOne`、不写入。host 的 `go` 参数改为 `Parameters<RouterProvider['go']>[0]`，并按真实 pathname/query 回读以核对最终导航。详见 [resource-workspace-audit-20261022.md](../evidence/resource-workspace-audit-20261022.md) 的 follow-up contract 与 Gherkin。
 - 纠正旧产品假设：旧文档把“列表刷新失败”当作应强制关闭“已授权的独立详情”的结论没有确认依据。暂时列表刷新失败不等同撤销列表读取授权，也不等同于强制关闭已授权详情；失败关闭只适用于列表读取权限被拒绝，或详情/编辑本身未获授权。本轮按该权限边界与显式重试路径验收，不再沿用旧假设。
 - 独立组件证据说明：主线程已独立复核 `auto-table-interactions.test.svelte.ts` 48/48、原始 exit code 0、duration 15.14s，并确认 `git diff --check` exit 0；其中实际验证详情抽屉、完整详情/编辑导航与列表 query 恢复，但不是当前 `resource-workspace` 完整消费者流程，不能替代 34/34。
 - 本轮新增真实源码消费者浏览器证据：`ResourceWorkspaceFixture.svelte` 直接挂载真实 `ResourceOperationsPage → AutoTable → QuickEditDrawer`，受控本地 Provider 真实按 search/filter/pagination 筛选分页，本地内存 router 保留并回读查询；专属 Playwright 在 Chromium/WebKit/Firefox × desktop/narrow 共 **18/18 passed、原始 exit code 0、duration 29.9s**，`git diff --check` 原始 exit code 0。主线程随后独立复核同一专属 Playwright 配置，**18/18 passed、原始 exit code 0、duration 31.7s**，并独立执行 `git diff --check` 得到原始 exit code 0；两次为独立运行，分开记录、不合并次数或时长。覆盖：首次查询失败→键盘 Retry→搜索与真实分页→选择→详情→关闭后搜索/分页/选择保留；快速编辑首次 update 失败保留草稿、显式重试成功、列表刷新为规范化服务端值、`update` 恰好 2 次且逐次精确断言 resource/id/variables/tenant、失败时无敏感诊断，保存失败抽屉打开时 narrow 控件边界与页面横向溢出检查；列表允许但 show/edit 拒绝时不暴露 Detail/Edit 与 More actions 内 Edit/Quick edit，不读取详情、不写入。所有用例断言 `pageerror` 为空；截图在忽略目录 `output/playwright/resource-workspace-browser-20261022/`。详见 [resource-workspace-browser-20261022.md](../evidence/resource-workspace-browser-20261022.md)。
-- 仍未证明的验收：查询→选择→详情→编辑→提交→失败恢复→权限拒绝的单一真实消费者完整流程；独立“编辑完整路由页面”；真实 Provider、服务端 RBAC 与租户/字段授权；真实设备/读屏；发布包、消费者生产构建和部署。受控 AccessControl stub、受控 `getList` rejection 与受控 `update` 拒绝不外推为真实服务端错误分类、持久化或幂等。本地 Playwright 已覆盖三引擎 desktop/narrow 的受控浏览器路径，但仍不替代真实设备/读屏或真实后端。
-- 下一项可执行动作：快速编辑与三条浏览器流程已有本地直接证据，且浏览器 18/18 已由主线程独立复核，不再重复添加同类用例；历史 34/34、35/35 与浏览器 18/18 分开保留，不合并。独立“编辑完整路由页面”仍未验收，若继续本地验证需新任务合同并先核对已有路由编辑测试；真实 Provider/RBAC、真实服务持久化、读屏设备及发布授权仍为外部依赖。不得把 35/35 或 18/18 外推为真实 RBAC、独立编辑路由页、真实设备/读屏或发布完成。模块为 `packages/ui` ResourceWorkspace / ResourceOperationsPage / AutoTable / QuickEditDrawer。
+- 仍未证明的验收：查询→选择→详情→编辑→提交→失败恢复→权限拒绝的单一真实消费者完整流程；真实 Provider、服务端 RBAC 与租户/字段授权；真实设备/读屏；发布包、消费者生产构建和部署。独立“编辑完整路由页面”已有 Chromium desktop 1/1 的受控本地证据，但不证明真实服务、跨引擎、narrow、读屏或发布。受控 AccessControl stub、受控 `getList` rejection 与受控 `update` 拒绝不外推为真实服务端错误分类、持久化或幂等。本地 Playwright 已覆盖三引擎 desktop/narrow 的受控浏览器路径，但仍不替代真实设备/读屏或真实后端。
+- 下一项可执行动作：快速编辑、三条浏览器流程和独立完整编辑路由均已有本地直接证据，不再重复添加同类用例；历史 34/34、35/35、浏览器 18/18 与完整编辑路由 1/1 分开保留，不合并。真实 Provider/RBAC、真实服务持久化、读屏设备及发布授权仍为外部依赖。不得把这些受控本地结果外推为真实 RBAC、真实设备/读屏或发布完成。模块为 `packages/ui` ResourceWorkspace / ResourceOperationsPage / AutoTable / QuickEditDrawer。
 - 外部依赖：真实 Provider/RBAC、屏幕阅读器、发布授权。
 - 状态：历史 34/34 切片证据已由主线程独立复核（历史 pi 32/32 与主线程 32/32 分开保留；初版 pi 34/34、duration 11.61s，初版主线程 34/34、duration 11.95s；加强后 pi 34/34、duration 16.30s、`git diff --check` exit 0；最终加强版主线程 34/34、原始 exit code 0、duration 14.18s、`git diff --check` exit 0；中间态一次失败不计最终结果，仅作为审查修正过程保留）。编辑提交受控消费者证据已独立复核：本版 pi 自测 **35/35、原始 exit code 0、duration 12.90s**、`git diff --check` exit 0，本版主线程独立复核 **35/35、原始 exit code 0、duration 13.50s**、`git diff --check` exit 0，本版由待复核改为已复核；初版记录单独保留：pi 自测 **35/35、原始 exit code 0、duration 28.40s**，主线程初版独立复核 **35/35、原始 exit code 0、duration 13.42s**，均为独立运行、不合并；历史 34/34 基线单独保留，中间态失败不计入最终结果。快速编辑失败保留草稿、显式重试成功、列表服务端规范化值、刷新调用增加、保存后重新查询当前选择与搜索/分页/选择保持已有本地直接证据。新增真实源码消费者浏览器证据：pi 自测 **18/18 passed、原始 exit code 0、duration 29.9s**、`git diff --check` exit 0；主线程独立复核同一专属 Playwright 配置 **18/18 passed、原始 exit code 0、duration 31.7s**、`git diff --check` exit 0，两次独立运行分开记录，本地浏览器证据已复核。但真实 Provider/RBAC、服务端持久化、独立“编辑完整路由页面”、真实设备/读屏与发布仍未验收；局部证据不足；需外部验收。
 - 2026-10-23 主线程再复核：`playwright.resource-workspace.config.ts` 当前三引擎双视口矩阵 **36/36 passed**、exit `0`、约 1 分钟、单 worker；覆盖 QuickEdit 关闭/旧回执隔离、查询重试、搜索分页选择、失败重试规范化值和 show/edit fail-closed。仅更新本地受控消费者证据，不扩大为真实 Provider/RBAC、持久化、读屏或发布完成。
+- 口径更正：上方历史状态行中“独立编辑完整路由页面”仍未验收的表述仅对应主线程补记之前的时间点；该范围现已有 Chromium desktop **1/1 passed** 且已由主线程独立复核，当前不再列为本地待验收项。
 
 ### B3-02 共享视图
 
@@ -249,6 +299,17 @@
 - 证据覆盖边界：两个单测文件**分别独立运行**，不合并命令。`saved-list-views.test.ts` 在 `packages/ui` 以 `bunx vitest run --config ./vitest.config.ts src/components/saved-list-views.test.ts` 执行。**pi 自测**与**主线程独立复核**均得到 38/38 通过、原始 exit code 0；主线程另确认 `git diff --check` exit code 0。该文件覆盖系统/团队远端元数据（system source 解码为只读、`local` 远端 source 收敛为 `team`、显式 default 标记保留但不可写）、权限 metadata 与访问主体（access 编解码、畸形/越权 access 拒绝、不执行 getter、成员目录边界）、未知字段拒绝（未知列 id 裁剪、未知 filter/sorter 字段与畸形 JSON 失败关闭、receipt 中 extra/secret 字段与不可静默归一化的 state 拒绝）、provider/tenant/identity key 隔离（每个偏好 key 编入 resource/provider/tenant/identity，匿名与身份互不冲突，legacy 迁移仅限默认 provider 且无 tenant）、版本冲突与旧回执保护（版本化成功/`VERSION_CONFLICT` 回执、回执与请求 view/source/version 关联、过期或错配回执被拒绝、只读服务端元数据保留且返回分离视图）。本轮另单独以 `bunx vitest run --config ./vitest.config.ts src/components/saved-list-views-model.test.svelte.ts` 运行共享视图模型文件，**pi 自测**得到 23/23 通过、原始 exit code 0；**主线程独立复核**已独立执行同一命令，同样得到 23/23 通过、原始 exit code 0，并确认 `git diff --check` exit code 0，已查看模型实现与证据。该文件运行证据覆盖：本地恢复与显式 URL（不覆盖 URL 状态）、按名保存/替换与 scope 内删除、存储写入失败保留内存视图、租户切换不覆盖持久化视图、作用域未就绪不加载不保存、`tenant`/`provider`/`unmount` 后迟到列表结果隔离、远端默认视图在 `none`/`url`/`local`/`dirty`/`cleared` 下的应用优先级、远端保存失败/`VERSION_CONFLICT` 保留草稿、默认视图 opt-in 与唯一性、旧租户保存回执隔离、版本化保存/删除与默认视图变更重载、旧访问主体搜索隔离、应用视图为脱离快照且 dirty 清除 active id。38 与 23 是两次独立运行，不合并为一个命令，模型层 23/23 不证明真实后端。未知字段处理按现有拒绝/裁剪契约核对，不新造“删除未知字段”语义。
 - 本轮新增真实源码消费者浏览器证据：`SavedListViewsFixture.svelte` 直接 import `AutoTable.svelte`，使用真实 `provideAdminContext`、真实 `QueryClient` 和本地可控 `DataProvider`/`SavedListViewProvider`。专属 Playwright 在 Chromium/WebKit/Firefox × desktop/narrow 共 18 个用例中 **pi 自测** 18/18 通过、原始 exit code 0；`git diff --check` 原始 exit code 0。**主线程独立复核**已独立复跑同一专属 Playwright 命令，同样 18/18 passed、原始 exit code 0（Chromium/WebKit/Firefox × desktop/narrow），并独立执行 `git diff --check` 得到原始 exit code 0；主线程另抽查 `webkit-narrow` 失败弹层截图，确认表单、名称输入、保存与刷新/重试控件均在视口内且页面无横向溢出。两次为独立运行，分开记录。覆盖：个人视图保存后以独立预期断言本地持久化 state，改查询后通过原 UI 应用，完整 Provider 查询与刷新后恢复均按 `toEqual` 验证 `filters/sorters/pagination`；团队视图首次保存失败仅通用错误、草稿名保留、显式重试成功，每次 save 的 scope（resource/provider、无 tenant）与完整 mutation state 精确断言，首次失败与再次保存比较业务内容但不要求相同 `id`，保存请求总数 2 且无本地误报或重复 list；远端读取失败显式 Retry 恢复 team/system 视图、只读视图删除/默认入口禁用且远端写调用为 0。所有用例断言 `pageerror` 为空；narrow 除页面横向溢出外，还在失败/保存弹层展开时检查表单、名称、保存、刷新/重试控件边界；截图输出在忽略的 `output/playwright/saved-list-views-browser-20261022/`。首轮测试曾误把搜索折进 `state.filters`，已按真实契约修正为 `state.search` 独立、`state.filters` 为空，未伪称实现缺陷；该证据仍不证明真实服务端授权、持久化、读屏或发布。
 - 证据记录：[saved-list-views-audit-20261022.md](../evidence/saved-list-views-audit-20261022.md)、[saved-list-views-browser-20261022.md](../evidence/saved-list-views-browser-20261022.md)，其中区分 pi 自测与主线程独立复核。
+- 2026-10-24 失效列提示增量：pi 实施、主线程审查并独立复跑。按视图身份记录被裁剪列，
+  覆盖本地/远端应用载荷不含失效列、保存原文不被改写、同 ID 远端遮蔽本地提示、
+  删除/覆盖只清对应提示、作用域切换不泄漏；主线程审查另发现并由 pi 修复特殊
+  合法 ID `__proto__` 的自身属性写入问题，最终模型 **29/29**、解码 **38/38**，
+  均 exit `0`，定向 ESLint 与 `git diff --check` 通过。证据见
+  [saved-view-stale-fields-20261024.md](../evidence/saved-view-stale-fields-20261024.md)。
+  新增专属真实消费者矩阵由 pi 自测、主线程独立复核最终均 **18/18**（三引擎 × 两视口）、
+  exit `0`；覆盖 role=status 计数、真实查询载荷、删除/覆盖清理、键盘激活与窄屏边界。
+  新增真实按键遍历关键控件、反向遍历和 Escape 焦点恢复；
+  不证明所有中间 Tab 轨迹、真实读屏、双语言独立矩阵或真实后端。证据见
+  [saved-view-stale-fields-browser-20261024.md](../evidence/saved-view-stale-fields-browser-20261024.md)。
 - 仍未证明的验收：团队/系统作用域写入授权、失效字段裁剪与提示的真实行为、默认视图冲突、真实共享视图存储/服务、读屏、发布；`saved-list-views-model.test.svelte.ts` 的 23/23 已由 pi 自测与主线程独立复核分别确认，但仅覆盖模型层；新浏览器 18/18 已由 pi 自测与主线程独立复核分别确认，仍只是本地受控 Provider，不证明真实后端。
 - 下一项可执行动作：本地源码消费者浏览器证据已由 pi 与主线程分别复跑确认，不再重复添加同类用例；后续只在确认真实服务或读屏缺口时推进外部验收，不得把本地受控 Provider 外推为真实共享视图服务。
 - 外部依赖：真实视图存储/身份作用域、读屏工具、发布授权。
@@ -262,11 +323,11 @@
 
 - 原始要求：预校验、试运行、任务持久化、全量导出、失败报告。
 - 直接证据：[import-export-center-audit-20261022.md](../evidence/import-export-center-audit-20261022.md)、[import-export-center-browser-20261023.md](../evidence/import-export-center-browser-20261023.md)、[import-dropzone-contract-20261021.md](../evidence/import-dropzone-contract-20261021.md)、[import-dropzone-cross-browser-20261022.md](../evidence/import-dropzone-cross-browser-20261022.md)、[svar-grid.md](svar-grid.md)、[enterprise-consumer-build-20261022.md](../evidence/enterprise-consumer-build-20261022.md)、[import-wizard.test.svelte.ts](../../packages/ui/src/components/import-wizard.test.svelte.ts)、[export-contract.test.svelte.ts](../../packages/ui/src/components/export-contract.test.svelte.ts)、[ImportExportCenterFixture.svelte](../../scripts/fixtures/enterprise-ui/ImportExportCenterFixture.svelte)、[import-export-center.spec.ts](../../scripts/fixtures/enterprise-ui/import-export-center.spec.ts)、[playwright.import-export-center.config.ts](../../scripts/fixtures/enterprise-ui/playwright.import-export-center.config.ts)。
-- 证据覆盖边界：两个测试文件**分别独立运行**，不合并命令。`import-wizard.test.svelte.ts` 在 `packages/ui` 以 `bunx vitest run --config ./vitest.config.ts src/components/import-wizard.test.svelte.ts` 执行；历史基线 **pi 自测**与**主线程独立复核**均得到 70/70 通过、原始 exit code 0；本轮 dry-run 增补后 **pi 自测 74/74、原始 exit code 0**，待主线程独立复核；主线程此前另确认 `git diff --check` exit code 0。该文件运行证据覆盖：映射后逐行预校验与大小/行数/映射/权限拒绝；基于 `initialTaskId` 的服务端任务恢复、关闭重开恢复、取消、租户切换清除；任务幂等提交与 artifact 引用提交；服务端授权失败行引用重试、同一幂等键未确认重试、非法/越权 retry 回执拒绝；部分失败 CSV 报告与文件名清洗；权限/租户/provider/关闭/卸载后的迟到提交、迟到 artifact、迟到 retry 回执隔离。续轮单独以 `bunx vitest run --config ./vitest.config.ts src/components/export-contract.test.svelte.ts` 运行导出契约文件，**pi 自测**与**主线程独立复核**均得到 59/59 通过、原始 exit code 0；主线程另确认 `git diff --check` exit code 0，并核对了未授权按钮不 dispatch、任务恢复仅显式下载、invalid result fail-closed、scope change 迟到回执丢弃。该文件运行证据覆盖：逐页契约校验与后页非法不下载部分结果、`pageSize`/filter/format/limit 校验、零限制不取数；重复触发合并与首次 await 前捕获选项；资源/租户/provider/contract/metadata 变化或卸载后取消迟到下载与回调；错误脱敏与诊断 getter 不执行；任务化导出提交、幂等键与 query/format/limit 透传、mapped export 拒绝任务化；任务恢复与显式下载、非法/不安全下载地址失败关闭、恢复 artifact 在 tenant/provider/permission/key/filters/sorters/limit 变化后丢弃、未授权按钮不 dispatch。ImportDropzone 只覆盖选择/校验/失败重试，不等同导入导出中心；SVAR 已加载记录导出也不等同服务端全量导出；测试内 stub provider/下载 mock 不外推为真实服务。
+- 证据覆盖边界：两个测试文件**分别独立运行**，不合并命令。`import-wizard.test.svelte.ts` 在 `packages/ui` 以 `bunx vitest run --config ./vitest.config.ts src/components/import-wizard.test.svelte.ts` 执行；历史基线 **pi 自测**与**主线程独立复核**均得到 70/70 通过、原始 exit code 0；dry-run 增补后 pi 曾为 74/74，当前主线程按工作区最新版本独立复核 **83/83 passed、exit 0**；主线程另确认 `git diff --check` exit code 0。该文件运行证据覆盖：映射后逐行预校验与大小/行数/映射/权限拒绝；基于 `initialTaskId` 的服务端任务恢复、关闭重开恢复、取消、租户切换清除；任务幂等提交与 artifact 引用提交；服务端授权失败行引用重试、同一幂等键未确认重试、非法/越权 retry 回执拒绝；部分失败 CSV 报告与文件名清洗；权限/租户/provider/关闭/卸载后的迟到提交、迟到 artifact、迟到 retry 回执隔离。续轮单独以 `bunx vitest run --config ./vitest.config.ts src/components/export-contract.test.svelte.ts` 运行导出契约文件，**pi 自测**与**主线程独立复核**均得到 59/59 通过、原始 exit code 0；主线程另确认 `git diff --check` exit code 0，并核对了未授权按钮不 dispatch、任务恢复仅显式下载、invalid result fail-closed、scope change 迟到回执丢弃。该文件运行证据覆盖：逐页契约校验与后页非法不下载部分结果、`pageSize`/filter/format/limit 校验、零限制不取数；重复触发合并与首次 await 前捕获选项；资源/租户/provider/contract/metadata 变化或卸载后取消迟到下载与回调；错误脱敏与诊断 getter 不执行；任务化导出提交、幂等键与 query/format/limit 透传、mapped export 拒绝任务化；任务恢复与显式下载、非法/不安全下载地址失败关闭、恢复 artifact 在 tenant/provider/permission/key/filters/sorters/limit 变化后丢弃、未授权按钮不 dispatch。ImportDropzone 只覆盖选择/校验/失败重试，不等同导入导出中心；SVAR 已加载记录导出也不等同服务端全量导出；测试内 stub provider/下载 mock 不外推为真实服务。
 - 本轮新增真实源码消费者浏览器证据：`ImportExportCenterFixture.svelte` 直接挂载 `ImportWizard.svelte` 与 `ExportButton.svelte`，使用真实 `provideAdminContext`、真实 `QueryClientProvider`、受控本地 `DataProvider`/`TaskProvider` 和同源静态 artifact；专属 Playwright 只运行 `import-export-center.spec.ts`，**pi 自测 3/3 passed、原始 exit code 0、duration 3.7s**、`git diff --check` exit code 0，项目仅 `chromium-desktop`。覆盖：非法映射 CSV 在 `Start import` 前被逐行预校验阻断，`create` 调用 0 次；合法 3 行 CSV 产生 2 成功 1 失败，精确 `onSuccess` 计数、3 次 `create`、2 条成功写入，点击 `Download failed CSV` 捕获真实 download，文件名 `browser-import-import-errors.csv`，CSV 含 `_error_reason` 与失败值且不含 Provider 私有错误文本；`ExportButton` 通过 `initialTaskId` 恢复 completed 任务，不触发 `submit`（0 次），按钮变为显式 `Download` 后捕获真实 download，内容为受控同源 artifact 的 5 条记录。该轮记录时 API 尚无独立试运行/干跑入口，合法路径按现有实现为映射预校验后真实 `create` 写入，未虚构试运行；后续已新增本地 dry-run，见下条。任务恢复下载的 artifact 是本地静态文件，不是真实服务端全量导出。首轮一次失败来自 fixture 同时渲染导入模态框与导出按钮导致遮罩阻断点击，已用 `panel` 隔离修正，不是生产缺陷，未改生产组件。该浏览器证据仍不证明真实服务端持久化、授权/租户隔离、失败报告下载鉴权、服务端全量导出、大文件、跨引擎/narrow、读屏或发布。
-- 2026-10-23 跨引擎/narrow follow-up（pi 自测，待主线程复核）：只扩展专属配置为 Chromium/WebKit/Firefox × desktop/narrow 共 6 个项目，`workers: 1`，仍运行同一 3 个场景；未新增重复测试，fixture 与生产组件未改。spec 仅新增窄视口无横向溢出断言，保留导航前 `pageerror` 与 `afterEach` 零页面错误断言。先以 `--project=chromium-desktop` 确认 3/3 passed、exit 0、3.9s，再运行全矩阵 **18/18 passed、exit 0、18.1s**，每个项目 3/3；`results.json` 记录 `expected=18`、`unexpected=0`、`flaky=0`。仅证明本地受控 Provider/静态 artifact 在上述引擎与视口下的消费路径，不证明真实服务、读屏或发布。
+- 2026-10-23 跨引擎/narrow follow-up（pi 自测，后由主线程复核）：只扩展专属配置为 Chromium/WebKit/Firefox × desktop/narrow 共 6 个项目，`workers: 1`，仍运行同一 3 个场景；未新增重复测试，fixture 与生产组件未改。spec 仅新增窄视口无横向溢出断言，保留导航前 `pageerror` 与 `afterEach` 零页面错误断言。pi 先以 `--project=chromium-desktop` 确认 3/3 passed，再运行全矩阵 18/18 passed。随后主线程按当前配置（含 dry-run 与 preview-import）独立运行 **30/30 passed、exit 0、33.1s**，三引擎双视口每项目 5/5。仅证明本地受控 Provider/静态 artifact 在上述引擎与视口下的消费路径，不证明真实服务、读屏或发布。
 - 2026-10-23 主线程最新复核：同一配置当前包含 dry-run 与 preview-import 场景，独立运行 **30/30 passed**、exit `0`、38.7s；三引擎双视口每项目 5/5。该结果覆盖本地受控 ImportWizard/ExportButton 消费路径，不证明真实任务服务、持久化、全量导出、下载鉴权、读屏或发布。
-- 2026-10-23 B3-03 本地 dry-run 增量（pi 自测，待主线程独立复核）：`ImportWizard.svelte` 新增公开 `dryRun`/`onPreview`，只复用现有解析、映射与 `parseContractCreateInput` 逐行预校验，不调用 `DataProvider.create/createMany`；`dryRun=true` 时即使同时传入 `initialTaskId`/`taskName` 也不恢复任务 UI、不调用 `TaskProvider.get/submit/cancel`、不调用 artifact `upload`，模式切换会清理已恢复任务与提交尝试。新增 `ImportPreviewResult`/`ImportPreviewFailure` 并从 core/ui index 导出，失败原因沿用安全文本 `Invalid import input`。预览 summary 使用“本地校验通过/失败”而非 `can be imported`，hint 明确不保证服务端成功；`importableRows` 保留兼容但注释明确仅为本地 schema 校验通过；失败行用 i18n 渲染；观察者收到冻结隔离快照，同步抛错/异步拒绝均不外溢。普通 `Start Import` 恢复首错早停，只有预览聚合全部失败行。`bunx vitest run --config ./vitest.config.ts src/components/import-wizard.test.svelte.ts` 得 **83/83 passed、exit 0**（既有 74 个用例保留，新增 dry-run 任务隔离/观察者边界/预览清理与 onPreview-only 正式导入场景）；专属浏览器 `--project=chromium-desktop` **5/5 passed、exit 0**，完整配置 **30/30 passed、exit 0、29.8s、单 worker**（三引擎 × desktop/narrow，每个项目 5/5）。`panel=preview` 仍断言 dry-run 回调计数、零 `create`、零写入、无 `Start Import`；新增 `panel=preview-import` 真实操作证明预览→返回映射→改坏映射被 `Row 1` 阻断且零写入→修正映射后正式导入写入 2 行。`Back to import` 只表示返回映射，不等于正式导入；dry-run 是客户端预检，不是服务端试运行；不证明唯一性、真实授权/租户隔离或业务状态。
+- 2026-10-23 B3-03 本地 dry-run 增量（pi 自测，主线程随后独立复核）：`ImportWizard.svelte` 新增公开 `dryRun`/`onPreview`，只复用现有解析、映射与 `parseContractCreateInput` 逐行预校验，不调用 `DataProvider.create/createMany`；`dryRun=true` 时即使同时传入 `initialTaskId`/`taskName` 也不恢复任务 UI、不调用 `TaskProvider.get/submit/cancel`、不调用 artifact `upload`，模式切换会清理已恢复任务与提交尝试。新增 `ImportPreviewResult`/`ImportPreviewFailure` 并从 core/ui index 导出，失败原因沿用安全文本 `Invalid import input`。预览 summary 使用“本地校验通过/失败”而非 `can be imported`，hint 明确不保证服务端成功；`importableRows` 保留兼容但注释明确仅为本地 schema 校验通过；失败行用 i18n 渲染；观察者收到冻结隔离快照，同步抛错/异步拒绝均不外溢。普通 `Start Import` 恢复首错早停，只有预览聚合全部失败行。pi 曾运行 **74/74 passed**，当前主线程按最新工作区独立复核 **83/83 passed、exit 0**；专属浏览器 **30/30 passed、exit 0**（三引擎 × desktop/narrow，每个项目 5/5）。`panel=preview` 仍断言 dry-run 回调计数、零 `create`、零写入、无 `Start Import`；新增 `panel=preview-import` 真实操作证明预览→返回映射→改坏映射被 `Row 1` 阻断且零写入→修正映射后正式导入写入 2 行。`Back to import` 只表示返回映射，不等于正式导入；dry-run 是客户端预检，不是服务端试运行；不证明唯一性、真实授权/租户隔离或业务状态。
 - 2026-10-23 主线程最新复跑：同一 `playwright.import-export-center.config.ts` 已按当前 fixture 独立运行 **30/30 passed**、exit `0`、38.7s（Chromium/WebKit/Firefox × desktop/narrow，每项目 5/5），覆盖既有三场景与 dry-run/preview-import 两场景；该结果仅更新本地受控浏览器证据，不改变真实服务、任务持久化、下载鉴权、读屏与发布边界。
 - 仍未证明的验收：真实服务端任务持久化与进程重启恢复、服务端全量导出、失败报告下载鉴权、真实权限/租户隔离、大文件性能、读屏与发布。WebKit/Firefox 与 desktop/narrow 现已有本地受控浏览器证据（18/18），但不外推为真实服务或读屏验收；两文件仍是 stub/mock 本地单测证据，真实服务与发布均未验收。dry-run 本地入口已补齐，但仍是本地受控预检证据。
 - 下一项可执行动作：本地 Chromium desktop 与三引擎两视口真实浏览器消费路径已补齐（分别为 3/3、18/18），后续只在确认读屏或真实服务缺口时推进；不得把单测或本地受控浏览器路径外推为真实导入/导出服务、服务端全量导出或读屏验收，也不重复添加已存在的同场景用例。模块为 `packages/ui` ImportWizard/ExportContract。
@@ -310,7 +371,7 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 - 扩展生命周期 follow-up（本轮）：只改 `BoundRecordDetailDrawer.svelte`、`detail-contract.test.svelte.ts`、测试扩展探针/host 与本证据文档，未改扩展 API/布局/颜色，未提交、推送、部署。新增最窄真实消费者回归：同一 query cache 预缓存 A/B 两条记录，A 扩展打开局部操作后仅切换 `recordId` 到 B，不经过 loading 卸载。生产未改时红测 `1 failed | 45 passed`、原始 exit code 1、duration 16.17s，失败断言在 `detail-contract.test.svelte.ts:176`（期望 B 扩展 `idle`，实际复用 A 的 `active`）；最小修复后同一单文件绿测 `46 passed`、原始 exit code 0、duration 14.12s（pi 自测）；主线程已独立复核同一单文件 `46/46 passed`、原始 exit code 0、duration 9.69s（见上条），两次独立记录、不合并。新增断言另覆盖父记录授权拒绝时扩展不挂载、授权后撤销时扩展销毁并丢弃局部状态。该修复只用与字段区相同的 `${resourceName}:${recordId}` key 重置扩展组件生命周期，不证明活动、附件、关联、版本差异内容闭环、真实后端/RBAC、浏览器/读屏或发布。
 - 2026-10-23 主线程窄复核：`json-schema-form-enterprise.test.svelte.ts` **61/61**、`detail-workspace.test.svelte.ts` **9/9**、`version-diff-viewer.test.svelte.ts` **1/1** 均 exit `0`；仅确认当前受控本地契约保持通过，不改变 B2-11 外部引用适配和 B3-05 版本历史消费者缺失的结论。
 - 仍未证明的验收：详情工作台五区在新 provider 与 recordId 同时切换时的整体联动已补受控浏览器证据（本轮 follow-up：用户按钮同事件切 provider 配置对象身份+recordId，48/48，仍不证明真实服务端）；真实服务端延迟/取消语义下的详情对象切换；关联/附件/版本差异权限；版本差异空态、错误态与真实版本历史；真实审计/详情 Provider、RBAC、租户/字段授权；读屏；发布包、消费者生产构建和部署。受控浏览器 A→B 已覆盖五区联动清空、B 完成渲染、迟到 A 成功/失败隔离与关闭生命周期，但不得外推为真实后端或真实 RBAC 闭环；历史 `audit-log-viewer-scope` 的 2/2 与同 provider recordId A→B 窄用例仍不得外推为真实审计服务。
-- 下一项可执行动作：浏览器受控 A→B 五区联动缺口已补；版本差异缺的是真实版本历史与空态/错误/权限语义，先定位或实现“选中记录版本 → oldValue/newValue”真实消费者，再补最小用例；若继续本地验收，优先覆盖新 provider 与 recordId 同时切换的浏览器路径，以及真实服务端延迟/取消语义；运行前先核对已有断言，避免重复。不得把受控浏览器证据、审计窄用例、静态版本渲染或独立组件存在当作真实后端/RBAC 闭环。
+- 下一项可执行动作：浏览器受控 A→B 五区联动缺口已补。版本差异当前只有静态 `oldValue/newValue` 组件契约，尚未定位版本 ID、版本列表、选中动作或 `listVersions/getVersion` provider API；在产品/后端契约确认前不新增“选中记录版本”公共 API，也不重复静态渲染测试。契约到位后再补最小真实消费者与空态/错误/权限矩阵；不得把受控浏览器证据、审计窄用例或独立组件存在当作真实后端/RBAC 闭环。
 - 外部依赖：真实审计/详情 Provider、真实版本/附件/关联服务与权限、屏幕阅读器、发布授权。
 - 状态：浏览器受控 A→B 五区切换与关闭生命周期历史结果 `30/30、exit 0、26.5s`（5 场景）仅作修复前保留；A→B→A 关闭生命周期最终由 pi 自测与主线程独立复跑全矩阵各 `36/36 passed`、`exit 0`、duration 约 `1.0m` 覆盖，另有新增单 project 红测 `1 failed`、绿测 `1 passed`、`chromium-desktop` 全组 `6/6 passed`、`git diff --check` exit `0`。上述 `36/36` 与修复前 `30/30`、上轮 `24/24、38.2s`、pi 上轮 `24/24、43.8s` 分开记录、不合并；真实服务/RBAC 仍未验收。历史 `audit-log-viewer-scope` 两次独立记录（pi 2/2、exit 0、5.88s；主线程独立复核 2/2、exit 0、6.94s）仍不是记录 ID A→B 验证，且与本轮分开、单独保留。`scoped-async-consumers` 旧版（审查修正前，保留）pi 自测 10/10、exit 0、15.97s 与旧版主线程独立复核 10/10、exit 0、9.16s（另确认 `git diff --check` exit 0）为两次独立记录、不合并，支持同一 provider 记录 ID A→B 的旧审计不残留。审查修正后新版 pi 自测 11/11、exit 0（pi 未提供 duration，不记录），主线程独立复核 11/11、exit 0、9.36s（另确认 `git diff --check` exit 0），新增“A 已显示后仅切 recordId 到 B 立即清空、B 请求已发”的直接断言并保留迟到 A 不覆盖用例；新版（两次独立）与旧版及历史 2/2 分别独立记录、不合并。新 provider 与 recordId 同时切换的侧栏窄用例已补（pi 12/12、exit 0、9.36s）；完整五区联动、真实服务/RBAC、读屏与发布仍未验收（受控浏览器 A→B 五区联动已补）；版本差异仅完成组件级只读审计与单文件静态渲染运行（pi 自测 1/1、exit 0、14.78s；主线程独立复核 1/1、exit 0、15.91s；两次独立），空态/错误/权限/对象切换与消费者闭环未证明；其他测试未在 B3-05 专项重跑、不合并计数；本轮 follow-up 另以受控浏览器 `48/48`（8 场景 × 三引擎 × 两视口）覆盖“同一用户事件切换 provider 配置对象身份 + recordId”的五区清空/B 渲染/旧 provider 迟到隔离，该 `48/48` 与历史 `36/36`、`30/30`、`24/24` 分开记录、不合并，且仍不证明真实服务；局部证据仍不足；需外部验收。
 
@@ -348,6 +409,13 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 
 ### B3-08 任务与通知中心
 
+- 2026-10-24 最新跨引擎证据：主线程独立运行专属
+  `playwright.task-list.cross-browser.config.ts` **36/36，exit 0，30.0s** 和
+  `playwright.notifications.config.ts` **6/6，exit 0，9.9s**，覆盖三个引擎、
+  两个视口。初次任务 30/36 的六项失败来自固定 Tab 顺序假设；修正为有界真实
+  键盘遍历，保留焦点、动作和非提交断言，未改生产组件。下文 Chromium-only
+  与“跨浏览器矩阵待补”为阶段历史；真实服务、读屏、发布仍未验收。
+
 - 后续独立复核（2026-10-22）：主线程在最终修正版执行 `bunx vitest run src/components/task-action.test.svelte.ts`，**49/49 passed**、exit `0`、`7.58s`；`git diff --check` exit `0`。下文“主线程修正后结果未记录”描述的是 pi 交付时点，现已补齐，不合并两次运行。
 
 - 原始要求：刷新恢复、任务状态、重试和取消能力声明。
@@ -365,6 +433,91 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 
 ### B3-09 多标签工作区
 
+- 2026-10-24 导航依赖审查：字体延迟和 Firefox 系统代理路径已有受控/连接地址
+  证据，专属测试隔离外部字体并按引擎配置启动参数。主线程最终定向三引擎
+  **9/9**（50.9s），ESLint/diff 通过；未重跑全 78 条，历史偶发超时唯一根因
+  仍未完全确定。旧 context-proxy 配置的 **17/18** 不被后续通过掩盖；
+  见 `../evidence/workspace-navigation-readiness-20261024.md`。
+- 2026-10-24 最新 SPA 续接：菜单离开被 URL 同步阻止、SPA 最新滚动丢失均已修复。
+  新增真实菜单往返与资源清理断言在三引擎通过；全局监听重入不叠加、延迟布局
+  显式释放也已覆盖。主线程最终专属矩阵 **77/78**（7.7m），Firefox 一例
+  `reload` 等待超时，隔离复跑 **1/1**；根因未确认，不记录为一次 78/78。
+  目标严格类型 **0**，定向 ESLint/diff 通过，5187 登录/菜单 smoke 通过。
+  见 `../evidence/workspace-lifecycle-cross-browser-20261024.md`。
+  下文 SPA/跨引擎未覆盖说明保留作历史，不再作为当前缺口；
+  跨窗口、真实服务、读屏、发布与偶发刷新超时仍未验收。
+
+- **跨实例关闭清理当前复验（2026-10-24）**：主线程适配器单文件
+  **20/20**、严格类型 **0**、生产文件 lint/diff 通过；UI build 后真实 example
+  workspace **24/24（2.5m）**。删除失败会尝试写关闭信封；同 storage 对象共享
+  阻断只在新快照写入回读一致后退休。不同 wrapper 的持久化关闭信封、失败
+  recapture 和静默 no-op 均有单测。完全不可写时跨刷新删除仍不保证，
+  不能据此关闭生产存储、跨窗口和外部验收。
+- **滚动边界当前复验（2026-10-24）**：主线程独立 Chromium workspace
+  **24/24（2.4m）**、目标严格类型 **0**、定向 ESLint/diff 通过。
+  已覆盖受控晚显示、非活动标签恢复、真实水平 owner 刷新恢复、存储不可用的
+  会话内切换、取消后切换/刷新不复活旧位置、静止观察者/rAF 不空转。
+  测试专用生产包装已移除。真实慢 Provider、SPA 清理计数、跨引擎与跨窗口、
+  权限/生产存储/读屏/发布仍待验收；见
+  `../evidence/workspace-scroll-boundaries-20261024.md`。下方 16/16 等为历史阶段。
+- **2026-10-24 当前消费者补记**：真实 AutoForm 编辑标签和关闭保护已接入，
+  公开 `onDirtyChange` 与实际 guard 共用真实表单状态，覆盖非原生关系选择器、
+  取消保留、保存清 dirty、确认关闭清理、刷新不恢复草稿。主线程独立 reset
+  **13/13**、表单契约 **102/102**、UI build 后 workspace 浏览器 **16/16**
+  （1.1m，Chromium）、定向 ESLint/diff 通过。下方旧缺口及计数保留为历史；
+  当前仍缺完整滚动/跨窗口、真实身份/Provider/RBAC、读屏和发布。详见
+  `../evidence/workspace-tabs-consumer-20261024.md` 的“真实 dirty 回调修正”。
+
+- 当前状态补记（2026-10-24 收尾）：最终生产源码 UI 定向 build exit 0（仅既有
+  `import.meta.env` 打包警告）；build 结束后独立运行 workspace 专属 spec
+  **12/12 passed**、exit 0、约 1.2m，12 项实际执行无 skip，为本轮最新浏览器结果
+  （Chromium），与下文历史 12/12 分属不同批次，不合并计数。逐文件测试仍为
+  `auto-table-interactions` 59/59、`list-state` 20/20、`saved-list-views-model`
+  30/30，均 exit 0；8 个目标 Svelte/TS 定向 ESLint 与 `git diff --check` exit 0。
+  局部类型检查把虚拟源 `AutoTable`、`DraggableHeader`、
+  `AutoTableIdentityHydrationHost` 与真实源 `list-state.svelte.ts`、
+  `saved-list-views.svelte.ts`、`saved-list-views.ts` 一并纳入
+  strict/exactOptionalPropertyTypes/noUncheckedIndexedAccess/
+  noPropertyAccessFromIndexSignature、`skipLibCheck:false`，完整目标
+  syntactic + semantic 诊断总数 **0**；此前 AutoTable 的 6 个 TS7006 是前轮漏纳
+  `DraggableHeader` 虚拟源造成的类型丢失，不是基线错误。对应回归已去掉诊断
+  message 正则过滤，改为断言完整目标 diagnostics 为 `[]`。覆盖 scope 退休、
+  首帧请求隔离、首次身份延迟保留、新 session 隔离、受控分页排序、活动 saved
+  view 标记；真实 dirty 表单消费者已由后续 `AutoForm.onDirtyChange` 修正接入，
+  完整滚动边界、跨窗口、真实后端/RBAC/存储、读屏与发布仍未验收。下文的
+  12/12、9/9、8/8、7/7 等均为历史阶段记录，保留不累计。
+
+- 最新滚动刷新续接：example 显式注入 adapter sessionStorage，pagehide 采样
+  可见面板，跳过隐藏 DOM 的假 0，hydrate 后有界等待表格高度恢复滚动。
+  主线程最终专属 spec **9/9**、exit `0`、37.0s（8 desktop + 1 窄视口），
+  局部严格类型 0，定向 ESLint/diff 通过。直接证据为正常加载时活动标签的
+  纵向刷新恢复与关闭重开归零；水平/非活动/SPA 重返/慢数据/存储失败未验收。
+  查询/草稿恢复仍未完成；后面的 7/8 项为历史阶段结果，不累计。
+
+- 最终 example 增量：工作区局部 grid 收缩与标题换行修复后，主线程独立
+  专属 spec **8/8**、exit `0`、32.5s（7 desktop + 1 场景内设置 390x844）。
+  元素级边界与最终截图均已核对；仅 Chromium，不将其称为完整跨引擎矩阵。
+  下文 7/7 为增加局部布局用例前的阶段结果。
+
+- example 消费者续接（2026-10-24）：新增实际菜单 `/workspace`，复用现有 CRM
+  资源与 AutoTable，并保留每个已挂载实例的搜索/分页。主线程审查后 pi 修复
+  默认标签刷新复活、最后标签关闭 URL、隐藏前滚动采样与空态历史 URL；
+  主线程最终独立 `playwright.workspace-tabs.config.ts` **7/7**、exit `0`、
+  26.1s（Chromium desktop；其中滚动场景实际执行，未 skip）。
+  当前标签集合/活动标签按 example identity 显式 sessionStorage 保存，不等于
+  查询/滚动持久化或生产租户隔离。共享 QueryClient 不删除，避免误清其它消费者；
+  不声称缓存回收。修复 AdminApp `Component` 本地别名与声明生成旧类名冲突后，
+  example 使用正常包入口；UI build 通过，三个接入文件局部严格类型诊断为 0。
+  证据：[workspace-tabs-consumer-20261024.md](../evidence/workspace-tabs-consumer-20261024.md)。
+  本地真实草稿、离开工作区后的查询/滚动恢复、跨窗口、真实 Provider/存储、
+  读屏、性能与发布仍未验收。下文旧的“无消费者”描述保留为阶段历史。
+
+- 最新状态（2026-10-24）：已实现显式 `maxTabs`、逻辑 LRU、原子准入及受保护标签规则；
+  主线程淘汰单测 37/37、关闭保护 29/29、受控浏览器 24/24。下文“尚未实现淘汰”
+  为阶段历史，不再作为当前缺口；以 `b3-09-tab-eviction-decision-20261023.md`
+  的最终消费者验证和 `enterprise-ui-remaining-20261023.md` 为准。真实宿主、Provider、
+  生产存储、读屏及发布仍未验收。
+
 - 原始要求：路由/查询/草稿/滚动恢复、关闭保护与淘汰。
 - 直接证据：[multitab-close-protection-20261022.md](../evidence/multitab-close-protection-20261022.md)、[multitab-state-restore-20261022.md](../evidence/multitab-state-restore-20261022.md)、[multitab-state.spec.ts](../../scripts/fixtures/enterprise-ui/multitab-state.spec.ts)、[MultiTabStateBrowserFixture.svelte](../../scripts/fixtures/enterprise-ui/MultiTabStateBrowserFixture.svelte)；[MultiTabKeepAlive.svelte](../../packages/ui/src/components/MultiTabKeepAlive.svelte)、[workspace-tab-state.ts](../../packages/ui/src/components/workspace-tab-state.ts) 与 [multitab-gantt.test.svelte.ts](../../packages/ui/src/components/multitab-gantt.test.svelte.ts)、[multitab-close-protection.test.svelte.ts](../../packages/ui/src/components/multitab-close-protection.test.svelte.ts)、[workspace-tab-state.test.svelte.ts](../../packages/ui/src/components/workspace-tab-state.test.svelte.ts)。
 - 证据覆盖边界：既有断言只覆盖渲染、Space 激活和刷新。首轮真实组件关闭保护红测 **7 failed / 7**，修复后 **10/10**。第二轮主线程复核指出实例替换/固定/不可关闭/卸载与重复点击、批量交叉风险，新增 8 条 deferred 反例（**8 failed / 7 passed**），修复后 **15/15**。第三轮审查发现拒绝后无法重试、`Object.defineProperty` 变异调用方对象且指纹误删同内容冻结新实例、批量同时启动多个确认，新增 3 条反例（**3 failed**）后修复至 **18/18**。第四轮审查发现 `splice` 变异调用方数组、冻结数组抛错、`visibleTabs` 只覆盖列表、未删除的已允许 intent 留在 WeakMap、卸载后继续调用后续 guard；新增 4 条反例（冻结数组单关/全关、plain 数组最后关闭后按钮消失、目标消失取消后重新 guard、卸载后停止后续 guard），旧版下 **4 failed / 18 skipped**，最终修复后单文件 **22/22 passed**，`git diff --check` 通过。实现改为组件内统一关闭操作锁、对象引用捕获、批量顺序确认、最后一次 immutable filter 赋值；不改写调用方数组/对象，不再使用 WeakMap 授权缓存。第五轮新增显式 `WorkspaceTabState` 适配器与真实标签栏消费者宿主，先写红测（适配器模块未解析，**0 test / 1 failed**），实现后修正持久化损坏用例的读取方式，最终单文件 **6/6 passed**；覆盖切换保留查询/滚动、草稿关闭保护、版本化快照刷新恢复、租户/标签/path 隔离、损坏快照忽略、关闭清理与卸载 dispose。第六轮主线程复核不通过：持久化读取把 `draft: "true"`、对象 query、负/非有限 scroll 归一化为合法快照，clear 在 removeItem 抛错后同实例仍可回读，真实宿主未在初始挂载恢复也未在卸载前 capture。同一单文件新增 5 条反例后红测 **4 failed / 7 passed（11）**；修复为严格版本化信封和值类型校验、clear 失败 tombstone 与 `{ memoryCleared, storage }` 显式结果、宿主首次挂载恢复并在卸载前保存当前查询/滚动，最终 **11/11 passed**。适配器不接管路由，淘汰仍未实现。第七轮新增专属真实浏览器 fixture（直接挂载真实
@@ -376,12 +529,20 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 `output/playwright/multitab-state-browser-20261022/`；相关适配器单测复跑 **11/11**、
 `git diff --check` exit `0`。适配器单文件 pi 与主线程均为 **11/11**。该浏览器验收只覆盖
 本地受控 fixture，不是真实产品路由或后端完成。
-- 仍未证明的验收：真实产品路由接入、Provider/查询缓存协同、浏览器前进后退与跨标签页恢复、淘汰策略、内存/性能、跨浏览器、读屏和发布；持久化仅验证注入式 storage 契约，生产 storage 选型未定。
+- 仍未证明的验收：真实产品路由接入、Provider/查询缓存协同、浏览器前进后退与跨标签页恢复、淘汰策略、内存/性能、读屏和发布；持久化仅验证注入式 storage 契约，生产 storage 选型未定。三引擎 desktop/narrow 的受控 fixture 当前为 **12/12**（历史 6/6 保留，不冒充当前），不再把跨浏览器本地矩阵列为当前缺口。
 - 2026-10-23 主线程扩展跨引擎配置：同一受控 fixture 已从 Chromium desktop/narrow 扩展为 Chromium/WebKit/Firefox × desktop/narrow，主线程独立复跑 **6/6 passed**、exit `0`、13.4s；用于验证当前标签状态隔离、草稿关闭保护和快照清理，不扩大为真实路由、Provider、淘汰策略或读屏验收。
 - 2026-10-23 tab DOM 语义补记：当前 `MultiTabKeepAlive` 将关闭按钮置为 tab 的独立兄弟节点，并为 tab 增加显式 `aria-label`、关闭动作 `aria-describedby` 与 presentation 外层语义；主线程独立复跑关闭保护单测 **23/23**、浏览器矩阵 **6/6**（Chromium/WebKit/Firefox × desktop/narrow），均 exit `0`。仍不等于屏幕阅读器实机验收。
+- 2026-10-24 标签状态与键盘增量：managed，pi 为唯一 writer，主线程独立审查，未提交/发布/部署。`workspace-tab-state.ts` 在同 id 已有内存快照且 `path` 不匹配时直接返回 `undefined`，不再读旧 storage 覆盖内存，修复 storage.setItem 失败后旧 path restore 使新 path 草稿丢失。新增测试覆盖 `capture`/`markDraft` 独立接管、`false` 清草稿、旧 path 不可读，以及新适配器仍读旧 storage 的未解决风险；主线程最终单文件 **13/13 passed、exit 0、5.39s**。`MultiTabKeepAlive` 支持 ArrowLeft/ArrowRight 循环、Home/End、唯一 roving tabindex、active 无匹配时第一个可达、Enter/Space 保持激活，并为 tablist 增加 `aria-orientation="horizontal"` 静态语义，不改关闭保护/API/淘汰策略；主线程 `multitab-close-protection` 单文件 **29/29 passed、exit 0**（上一阶段 28/28 保留为历史）。新增真实键盘浏览器场景与两份 query 恢复；主线程 `playwright.multitab-state.config.ts` 为 Chromium/WebKit/Firefox × desktop/narrow **12/12 passed、exit 0、12.5s**，其中旧 6 场景 + 新增 6 场景，不能声称新增 12；该 12/12 仍是前一阶段键盘实现证据，未因本轮仅增加静态 aria 属性重复运行。两个生产模块 ESLint 通过，`git diff --check` 通过；`workspace-tab-state.test.svelte.ts` 仍有 3 个原有非空断言 lint 错误，`multitab-state.spec.ts` 仅旧 scroller 未使用 lint 错误（新 invoice 未使用已删除），不称全文件 lint 通过。历史 11/11、23/23、28/28、6/6 保留标历史，不冒充当前。未跑全仓测试；真实路由/Provider/生产 storage/淘汰策略/读屏/发布仍未验收，narrow 不是移动视觉验收，新适配器读取旧持久化数据的风险仍未解决，整体未完成。
 - 下一项可执行动作：先由产品确认 [B3-09 淘汰策略决策记录](enterprise-ui-remaining-20261023.md#b3-09-多标签工作区) 中的标签数量上限、LRU、固定/dirty 标签与存储边界，再补 `maxTabs`/LRU 窄用例；真实路由/Provider 接入需另立消费者任务，不能由适配器单测外推。
 - 外部依赖：真实路由/存储、性能环境、发布授权。
-- 状态：关闭保护与移除清理组件契约 pi 与主线程均为最终修正版 **22/22**；标签状态适配器单文件最终 **11/11**，`git diff --check` 通过；15/15、18/18、6/6 均为已修复的中间态；查询/滚动/草稿快照契约已由显式适配器覆盖，并新增 Chromium desktop/narrow 受控浏览器 fixture **2/2**（先红 **2 failed / 2**，截图已保存）；但 clear 的跨新实例持久化删除仍未保证，真实产品路由/Provider 接入、生产 storage 选型、淘汰策略和跨浏览器矩阵仍未验收，局部证据不足；需产品决策与外部验收。
+- 状态：历史 **22/22**、**11/11**、15/15、18/18、**28/28**、6/6 均为历史记录，保留标历史，不冒充当前。2026-10-24 当前：关闭保护单文件 **29/29**、标签状态适配器单文件 **13/13**、Chromium/WebKit/Firefox × desktop/narrow 受控浏览器 fixture **12/12**（旧 6 场景 + 新增 6 场景，属前一阶段键盘实现证据，未因静态 `aria-orientation` 重复运行）；生产组件 ESLint 与 `git diff --check` 通过。查询/滚动/草稿快照契约由显式适配器覆盖，并补齐键盘 roving tabindex 与双 query 恢复；但 clear 的跨新实例持久化删除仍未保证，新适配器读取旧持久化数据的风险仍未解决，真实产品路由/Provider 接入、生产 storage 选型、淘汰策略、内存/性能、读屏和发布仍未验收，局部证据不足；需产品决策与外部验收。
+
+> B3-09 文档状态补充（2026-10-24）：上方较早的阶段记录中“新适配器读取旧
+> 持久化数据的风险仍未解决”属于历史快照。当前 v1 已对未登录 fallback 保留
+> 旧键只读兼容，显式身份不回退旧匿名键，未知版本、损坏或关闭信封 fail closed，
+> 不做猜测迁移。最新定向证据见
+> [workspace-tab-storage-compatibility-20261024.md](../evidence/workspace-tab-storage-compatibility-20261024.md)；
+> 真实路由、生产 storage、性能、读屏和发布仍未验收。
 
 ### B3-10 仪表盘
 
@@ -450,6 +611,6 @@ Kanban 创建链路单文件由 pi 与本线程独立复跑最终 **36/36 passed
 1. **B3-01 资源数据工作台**（本地可复核）：新增的两个窄用例已由 pi 自测 34/34、原始 exit code 0 通过；主线程在最终加强版本后独立复核同一文件 34/34、原始 exit code 0、duration 14.18s，并确认 `git diff --check` exit 0。审查修正过程中曾出现一次中间态失败，不计入最终结果，仅作为审查修正过程保留；最终加强版通过。新增覆盖“首次列表失败→显式重试→选择→真实详情抽屉→编辑导航（资源 ID/查询正确、无写入）”与“列表可读但详情/编辑拒绝时不暴露入口、不读取详情、不写入”；编辑导航不等于编辑提交闭环。旧“列表刷新失败应强制关闭已授权独立详情”的未确认假设已在 [resource-workspace-audit-20261022.md](../evidence/resource-workspace-audit-20261022.md) 纠正；历史 pi 32/32 与主线程 32/32 分开保留，`auto-table-interactions` 48/48 不替代本消费者流程。续轮编辑提交受控消费者证据在本版补强后，pi 自测 35/35、原始 exit code 0、duration 12.90s，`git diff --check` exit 0；本版主线程随后独立复核 35/35、原始 exit code 0、duration 13.50s，`git diff --check` exit 0，本版由待复核改为已复核。本版新增断言服务端返回与草稿不同的规范化 title、失败后列表仍为初始 title 且草稿保留、成功后列表显示服务端规范化值、刷新调用数增加且筛选/分页不变、保存后重新查询当前选择并经真实 `Process selection` 验证 `onBatch` 为 `[2]`、保存期间无导航。初版记录单独保留：pi 自测 35/35、原始 exit code 0、duration 28.40s，主线程初版独立复核 35/35、原始 exit code 0、duration 13.42s，两次独立运行不合并。历史 34/34 基线单独保留。新增真实源码消费者浏览器证据：三引擎 desktop/narrow **18/18 passed、原始 exit code 0、duration 29.9s**、`git diff --check` exit 0；主线程随后已独立复跑当前配置 **36/36 passed**、exit `0`，不再是待复核状态。覆盖键盘 Retry、真实分页/搜索/选择、详情关闭保留查询、快速编辑失败草稿与精确 2 次 update、show/edit 拒绝 fail-closed；真实 Provider/RBAC、服务端持久化、真实设备/读屏及发布授权仍未验收；完整编辑路由已由新增真实 `AdminApp` 单文件浏览器闭环补充（Chromium desktop 1/1 passed、原始 exit code 0），浏览器本地路径已经执行，不归为必须等待外部。
 1. **B3-01 收口状态**：资源工作台消费者浏览器已由主线程独立复跑 **36/36 passed、exit 0**；完整编辑路由 **1/1 passed、exit 0**。窄屏全屏 Drawer 的 overlay 指针限制已明确记录，生产样式尺寸模型已修正，测试未使用 `force`；后续不再重复本地同场景矩阵，真实 Provider/RBAC、读屏和发布仍是外部验收。
 2. **B3-02 共享视图**（本地可复核，部分需外部环境）：`saved-list-views.test.ts`（38/38）与 `saved-list-views-model.test.svelte.ts`（23/23）均已由 pi 自测与主线程独立复核，exit 0，两文件分开运行；分别覆盖系统/团队 scope、权限 metadata、未知字段、版本 receipts 与远端保存/默认视图/旧响应隔离。真实源码消费者浏览器 18/18 已由 pi 自测与主线程独立复核分别确认（两次均 18/18 passed、exit 0；主线程另确认 `git diff --check` exit 0 并抽查 webkit-narrow 失败弹层截图控件在视口内、无横向溢出），新增完整 Provider 查询 `toEqual`、团队 scope/mutation state 精确断言、失败弹层展开截图与 narrow 控件边界检查；首轮测试误把搜索折进 `state.filters` 已修正为 `state.search` 独立、filters 为空，不是实现缺陷。后续只在确认真实服务或浏览器/读屏缺口时推进外部验收；不重复添加已存在用例，不猜造未知字段删除语义，不把模型层单测或本地受控 Provider 外推为真实后端。
-3. **B3-03 导入导出中心**（本地可复核，部分需外部环境）：`import-wizard.test.svelte.ts` 与 `export-contract.test.svelte.ts` 均已由 pi 自测与主线程独立复核（分别 70/70、59/59，exit 0），两文件分开运行；两者均为 stub/mock 本地证据。本轮新增 Chromium desktop 真实源码消费者浏览器证据 **3/3 passed、原始 exit code 0、duration 3.7s**、`git diff --check` exit 0，覆盖非法映射预校验阻断、合法导入部分失败真实失败 CSV download、ExportButton 任务恢复显式 artifact download；2026-10-23 跨引擎/narrow follow-up 由 pi 自测同一 3 场景在 Chromium/WebKit/Firefox × desktop/narrow 全矩阵 **18/18 passed、exit 0、18.1s、workers 1**，spec 仅新增窄视口无横向溢出断言，fixture 与生产组件未改，未新增重复测试。上述浏览器证据均待主线程复核，且不证明真实服务端持久化/全量导出、读屏或发布。不把 ImportDropzone 等同导入中心，不重复添加同场景用例。
+3. **B3-03 导入导出中心**（本地可复核，部分需外部环境）：`import-wizard.test.svelte.ts` 与 `export-contract.test.svelte.ts` 均已由 pi 自测与主线程独立复核（分别 70/70、59/59，exit 0），两文件分开运行；两者均为 stub/mock 本地证据。本轮新增真实源码消费者浏览器证据，Chromium desktop **3/3 passed**，后续 Chromium/WebKit/Firefox × desktop/narrow 全矩阵 **18/18 passed、exit 0**，并已由主线程独立复核当前专属矩阵 **30/30 passed、exit 0**；覆盖非法映射预校验阻断、合法导入部分失败真实失败 CSV download、ExportButton 任务恢复显式 artifact download 和窄屏无横向溢出。上述证据不证明真实服务端持久化/全量导出、读屏或发布。不把 ImportDropzone 等同导入中心，不重复添加同场景用例。
 
-已验收的 B1-02/B2-11 Schema 拒绝单文件 61/61 不再列为下一动作；显式拒绝只闭环安全边界，完整 Schema 受控引用适配仍属 B2-11 产品决策。B2-11 的不支持 Schema 浏览器拒绝路径已补本地三引擎两视口 24/24 证据，待主线程复核；读屏仍为外部依赖。B1-03 的完整公式引擎/完整 Excel 属 B4-02 按需扩展，B2-02 自绘日历不是原始明确要求，全量时区等无界要求也不作为无限补 case 依据。真实 Provider、RBAC/租户、屏幕阅读器、发布和部署继续列为外部依赖；总体完成度不作宣称。
+已验收的 B1-02/B2-11 Schema 拒绝单文件 61/61 不再列为下一动作；显式拒绝只闭环安全边界，完整 Schema 受控引用适配仍属 B2-11 产品决策。B2-11 的不支持 Schema 浏览器拒绝路径已有本地三引擎两视口 24/24 证据，并已由主线程独立复核；读屏仍为外部依赖。B1-03 的完整公式引擎/完整 Excel 属 B4-02 按需扩展，B2-02 自绘日历不是原始明确要求，全量时区等无界要求也不作为无限补 case 依据。真实 Provider、RBAC/租户、屏幕阅读器、发布和部署继续列为外部依赖；总体完成度不作宣称。

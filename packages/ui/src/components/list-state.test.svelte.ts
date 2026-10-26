@@ -2,6 +2,7 @@ import { flushSync } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { FieldDefinition, Filter, Pagination, Sort } from '@svadmin/core';
 import { createListState } from './list-state.svelte.js';
+import type { ListStateSnapshot } from './list-state.svelte.js';
 import type { SavedListViewState } from './saved-list-views.js';
 
 type Options = Parameters<typeof createListState>[0];
@@ -18,6 +19,15 @@ function savedState(): SavedListViewState {
     sorters: [{ field: 'email', order: 'desc' }],
     pagination: { current: 3, pageSize: 20 },
     columnVisibility: {}, columnOrder: [],
+  };
+}
+
+function initialState(): ListStateSnapshot {
+  return {
+    search: 'initial',
+    filters: [{ field: 'email', operator: 'contains', value: 'initial' }],
+    sorters: [{ field: 'name', order: 'asc' }],
+    pagination: { current: 2, pageSize: 25 },
   };
 }
 
@@ -86,6 +96,117 @@ describe('list state model', () => {
     }).model;
     expect(controlled.pagination).toEqual({ current: 2, pageSize: 5 });
     expect(controlled.sorters).toEqual([{ field: 'email', order: 'desc' }]);
+  });
+
+  it('places initial list state between URL and saved view state', () => {
+    const initial = initialState();
+    const saved = savedState();
+    expect(setup({ initialViewState: saved, initialListState: initial }).model.captureState())
+      .toEqual(initial);
+
+    const url = { page: 4, pageSize: 40, sortField: 'name', search: 'url', filters: [] };
+    expect(setup({
+      initialViewState: saved,
+      initialListState: initial,
+      initialURLState: url,
+    }).model.captureState()).toEqual({
+      search: 'url', filters: [], sorters: [{ field: 'name', order: 'asc' }],
+      pagination: { current: 4, pageSize: 40 },
+    });
+
+    expect(setup({
+      initialListState: initial,
+      initialURLState: url,
+      syncWithLocation: () => false,
+    }).model.captureState()).toEqual(initial);
+
+    const controlled = setup({
+      initialListState: initial,
+      initialURLState: url,
+      externalPagination: () => ({ current: 7, pageSize: 15 }),
+      externalSorters: () => [{ field: 'email', order: 'desc' }],
+    }).model;
+    expect(controlled.pagination).toEqual({ current: 7, pageSize: 15 });
+    expect(controlled.sorters).toEqual([{ field: 'email', order: 'desc' }]);
+  });
+
+  it('preserves the pagination mode across initialization and captured snapshots', () => {
+    const initial = {
+      ...initialState(),
+      pagination: { current: 2, pageSize: 25, mode: 'client' as const },
+    };
+    const { model } = setup({ initialListState: initial });
+    expect(model.pagination).toEqual({ current: 2, pageSize: 25, mode: 'client' });
+    expect(model.captureState().pagination).toEqual({ current: 2, pageSize: 25, mode: 'client' });
+    expect(model.queryPagination).toEqual({ current: 2, pageSize: 25, mode: 'client' });
+  });
+
+  it('does not overwrite controlled pagination or sorters when applying a saved state', () => {
+    const externalPagination = { current: 7, pageSize: 15, mode: 'server' as const };
+    const externalSorters = [{ field: 'email', order: 'desc' as const }];
+    const { model } = setup({
+      externalPagination: () => externalPagination,
+      externalSorters: () => externalSorters,
+    });
+    model.applyState({
+      ...initialState(),
+      pagination: { current: 3, pageSize: 40, mode: 'client' },
+      sorters: [{ field: 'name', order: 'desc' }],
+    });
+    expect(model.pagination).toEqual(externalPagination);
+    expect(model.sorters).toEqual(externalSorters);
+  });
+
+  it('reports applied snapshots after debounced search and does not loop on unchanged state', () => {
+    vi.useFakeTimers();
+    const initial = initialState();
+    const onStateChange = vi.fn<(state: ListStateSnapshot) => void>();
+    const { model } = setup({ initialListState: initial, onStateChange });
+    expect(onStateChange).not.toHaveBeenCalled();
+
+    model.scheduleSearch('Ada');
+    vi.advanceTimersByTime(299);
+    flushSync();
+    expect(onStateChange).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+    flushSync();
+    expect(onStateChange).toHaveBeenCalledTimes(1);
+    expect(onStateChange).toHaveBeenLastCalledWith({
+      ...initial,
+      search: 'Ada',
+      pagination: { current: 1, pageSize: 25 },
+    });
+
+    flushSync();
+    expect(onStateChange).toHaveBeenCalledTimes(1);
+
+    model.pagination = { ...model.pagination, current: 3 };
+    flushSync();
+    expect(onStateChange).toHaveBeenCalledTimes(2);
+    expect(onStateChange.mock.calls[1]?.[0].pagination.current).toBe(3);
+
+    const emitted = onStateChange.mock.calls[0]?.[0];
+    if (emitted) emitted.filters.length = 0;
+    expect(model.captureState().filters).toEqual(initial.filters);
+  });
+
+  it('reads current reactive host state inside the untracked state callback without resubscribing', () => {
+    let hostValue = $state('first');
+    const seen: string[] = [];
+    const { model } = setup({ onStateChange: () => { seen.push(hostValue); } });
+
+    hostValue = 'second';
+    flushSync();
+    expect(seen).toEqual([]);
+
+    model.pagination = { ...model.pagination, current: 2 };
+    flushSync();
+    expect(seen).toEqual(['second']);
+
+    hostValue = 'third';
+    flushSync();
+    expect(seen).toEqual(['second']);
   });
 
   it('debounces search and keeps generated search filters out of URL filters', () => {

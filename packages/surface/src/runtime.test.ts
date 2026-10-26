@@ -3,6 +3,7 @@ import type { BaseRecord, GetListParams, GetOneParams } from '@svadmin/core';
 import type {
   ResourceListDataSource,
   ResourceOneDataSource,
+  SurfaceDataError,
   SurfaceDataProvider,
   SurfaceResourcePolicy,
 } from './types.js';
@@ -82,19 +83,22 @@ describe('loadSurfaceSource', () => {
       getOne: providerCall,
     } as unknown as SurfaceDataProvider;
 
+    const diagnostics: SurfaceDataError[] = [];
     const state = await loadSurfaceSource({
       source: { id: 'products', type: 'resource-list', resource: 'products' },
       resourcePolicy: { readFields: ['id'] },
       provider,
       authorize: async () => ({ can: false, reason: 'Not allowed' }),
+      reportDiagnostic: diagnostic => diagnostics.push(diagnostic),
     });
 
     expect(providerCall).not.toHaveBeenCalled();
     expect(state).toEqual({
       status: 'error',
       sourceId: 'products',
-      error: { code: 'access_denied', sourceId: 'products', message: 'Not allowed' },
+      error: { code: 'access_denied', sourceId: 'products', message: 'Access denied' },
     });
+    expect(diagnostics).toEqual([{ code: 'access_denied', sourceId: 'products', message: 'Not allowed' }]);
   });
 
   test('calls only getOne and projects the selected record', async () => {
@@ -282,6 +286,7 @@ describe('loadSurfaceSource', () => {
     const providerCall = vi.fn();
     const provider = { getList: providerCall, getOne: providerCall } as unknown as SurfaceDataProvider;
 
+    const diagnostics: SurfaceDataError[] = [];
     const state = await loadSurfaceSource({
       source: { id: 'products', type: 'resource-list', resource: 'products' },
       resourcePolicy: { readFields: ['id'] },
@@ -289,13 +294,36 @@ describe('loadSurfaceSource', () => {
       authorize: async () => {
         throw new Error('Policy unavailable');
       },
+      reportDiagnostic: diagnostic => diagnostics.push(diagnostic),
     });
 
     expect(providerCall).not.toHaveBeenCalled();
     expect(state).toEqual({
       status: 'error',
       sourceId: 'products',
-      error: { code: 'access_check_failed', sourceId: 'products', message: 'Policy unavailable' },
+      error: { code: 'access_check_failed', sourceId: 'products', message: 'Access check failed' },
     });
+    expect(diagnostics).toEqual([{ code: 'access_check_failed', sourceId: 'products', message: 'Policy unavailable' }]);
+  });
+
+  test('reports provider diagnostics separately from the stable source state', async () => {
+    const diagnostics: SurfaceDataError[] = [];
+    const state = await loadSurfaceSource({
+      source: { id: 'products', type: 'resource-list', resource: 'products' },
+      resourcePolicy: { readFields: ['id'] },
+      provider: {
+        getList: async () => { throw new Error('Private provider diagnostic'); },
+        getOne: async () => ({ data: { id: 1 } }),
+      } as unknown as SurfaceDataProvider,
+      authorize: async () => ({ can: true }),
+      reportDiagnostic: diagnostic => diagnostics.push(diagnostic),
+    });
+
+    expect(state).toEqual({
+      status: 'error',
+      sourceId: 'products',
+      error: { code: 'provider_failed', sourceId: 'products', message: 'Data provider request failed' },
+    });
+    expect(diagnostics).toEqual([{ code: 'provider_failed', sourceId: 'products', message: 'Private provider diagnostic' }]);
   });
 });

@@ -2,12 +2,12 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient, QueryObserver } from '@tanstack/svelte-query';
-import { keys, parseQueryKey, resetContext, captureAuthSession, setAuditHandler, HttpError, type DataProvider, type GetOneResult,
+import { defineResource, keys, parseQueryKey, resetContext, captureAuthSession, setAuditHandler, HttpError, type DataProvider, type GetOneResult,
   type GetListResult, type ResourceDefinition, type RouterProvider, type AuthProvider, type AuditLogProvider, type LiveProvider } from '@svadmin/core';
 import { resetAuditLogProvider } from '../../../core/src/audit';
 import { resetToast } from '@svadmin/core/toast';
 import { definedOptions } from '@svadmin/core/options';
-import { defineResource, contractKey, formatContractRouteId } from '../../../core/src/resource-contract';
+import { contractKey, formatContractRouteId } from '../../../core/src/resource-contract';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
 import { existsSync, readFileSync } from 'node:fs';
@@ -130,6 +130,46 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+function strictSvelteDiagnostics(directory: string, sources: string[], components: string[],
+  roots = components): string[] {
+  const virtual = new Map(components.map(name => {
+    const filename = resolve(directory, name);
+    return [`${filename}.tsx`, svelte2tsx(readFileSync(filename, 'utf8'), { filename, isTsFile: true, mode: 'ts' }).code];
+  }));
+  const options: ts.CompilerOptions = {
+    noEmit: true, strict: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
+    noPropertyAccessFromIndexSignature: true, noImplicitOverride: true, skipLibCheck: false, types: ['svelte', 'node'],
+    target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler, jsx: ts.JsxEmit.Preserve,
+    allowImportingTsExtensions: true,
+  };
+  const host = ts.createCompilerHost(options);
+  const read = host.readFile;
+  const exists = host.fileExists;
+  host.readFile = file => virtual.get(file) ?? read(file);
+  host.fileExists = file => virtual.has(file) || exists(file);
+  host.resolveModuleNames = (names, containingFile) => names.map(name => {
+    const candidate = resolve(dirname(containingFile), `${name}.tsx`);
+    if (virtual.has(candidate)) return { resolvedFileName: candidate, extension: ts.Extension.Tsx };
+    return ts.resolveModuleName(name, containingFile, options, host).resolvedModule;
+  });
+  const targets = [...sources.map(path => resolve(directory, path)), ...roots.map(name => `${resolve(directory, name)}.tsx`)];
+  const program = ts.createProgram({ rootNames: [...targets,
+    resolve(directory, '../../../../node_modules/svelte2tsx/svelte-shims-v4.d.ts'),
+    resolve(directory, '../../../../node_modules/svelte2tsx/svelte-jsx-v4.d.ts'),
+  ], options, host });
+  const diagnostics = targets.flatMap(file => {
+    const source = program.getSourceFile(file);
+    if (!source) throw new Error(`Missing compiler input ${file}`);
+    return [...program.getSyntacticDiagnostics(source), ...program.getSemanticDiagnostics(source)];
+  });
+  return diagnostics.map(diagnostic => {
+    const line = diagnostic.file && diagnostic.start !== undefined
+      ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
+    return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
+  });
+}
+
 describe('contract-bound form', () => {
   it('does not expose an unchecked AutoForm implementation or retain its unsafe allowance', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
@@ -144,49 +184,24 @@ describe('contract-bound form', () => {
 
   it('strictly compiles the changed form, editor and positive/negative fixtures', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
-    const sources = [
+    expect(strictSvelteDiagnostics(directory, [
       '../../../core/src/contract-form.svelte.ts', '../../../core/src/resource-contract.ts',
       '../../../core/src/strict-hooks.svelte.ts', '../../../core/src/query-invalidation.ts',
       '../../../core/src/auth-hooks.svelte.ts', 'form-contract.test.svelte.ts',
       'form-contract.test.types.ts', 'form-contract.test.type-fixture.ts',
-    ].map(path => resolve(directory, path));
-    const virtual = new Map(['AutoForm.svelte', 'form-contract.test-probe.svelte', 'form-contract.test-host.svelte',
-      '../../test/fixtures/AutoFormAccessibilityHarness.svelte'].map(name => {
-      const filename = resolve(directory, name);
-      return [`${filename}.tsx`, svelte2tsx(readFileSync(filename, 'utf8'), { filename, isTsFile: true, mode: 'ts' }).code];
-    }));
-    const options: ts.CompilerOptions = {
-      noEmit: true, strict: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
-      noPropertyAccessFromIndexSignature: true, noImplicitOverride: true, skipLibCheck: false, types: ['svelte', 'node'],
-      target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext,
-      moduleResolution: ts.ModuleResolutionKind.Bundler, jsx: ts.JsxEmit.Preserve,
-      allowImportingTsExtensions: true,
-    };
-    const host = ts.createCompilerHost(options);
-    const read = host.readFile;
-    const exists = host.fileExists;
-    host.readFile = file => virtual.get(file) ?? read(file);
-    host.fileExists = file => virtual.has(file) || exists(file);
-    host.resolveModuleNames = (names, containingFile) => names.map(name => {
-      const candidate = resolve(dirname(containingFile), `${name}.tsx`);
-      if (virtual.has(candidate)) return { resolvedFileName: candidate, extension: ts.Extension.Tsx };
-      return ts.resolveModuleName(name, containingFile, options, host).resolvedModule;
-    });
-    const targets = [...sources, ...virtual.keys()];
-    const program = ts.createProgram({ rootNames: [...targets,
-      resolve(directory, '../../../../node_modules/svelte2tsx/svelte-shims-v4.d.ts'),
-      resolve(directory, '../../../../node_modules/svelte2tsx/svelte-jsx-v4.d.ts'),
-    ], options, host });
-    const diagnostics = targets.flatMap(file => {
-      const source = program.getSourceFile(file);
-      if (!source) throw new Error(`Missing compiler input ${file}`);
-      return [...program.getSyntacticDiagnostics(source), ...program.getSemanticDiagnostics(source)];
-    });
-    expect(diagnostics.map(diagnostic => {
-      const line = diagnostic.file && diagnostic.start !== undefined
-        ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
-      return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
-    })).toEqual([]);
+    ], ['AutoForm.svelte', 'form-contract.test-probe.svelte', 'form-contract.test-host.svelte',
+      '../../test/fixtures/AutoFormAccessibilityHarness.svelte'])).toEqual([]);
+  }, 30_000);
+
+  it('strictly compiles upload forwarding references, cancellation and formActions state', () => {
+    const directory = dirname(fileURLToPath(import.meta.url));
+    expect(strictSvelteDiagnostics(directory, [
+      'file-upload-types.ts', 'file-upload-reference.ts',
+    ], [
+      'form-contract.upload-type-fixture.svelte', 'AutoForm.svelte', 'FieldRenderer.svelte',
+      'FileUploadField.svelte', 'fields/ArrayField.svelte', 'FileUpload.svelte',
+    ], ['form-contract.upload-type-fixture.svelte', 'FileUploadField.svelte',
+      'fields/ArrayField.svelte', 'FileUpload.svelte'])).toEqual([]);
   }, 30_000);
 
   it('permits partial drafts but rejects invalid submission before writing', async () => {
@@ -1469,6 +1484,35 @@ describe('AutoForm contract consumer', () => {
     expect(await app.view.findByRole('textbox', { name: /^Title/ })).toBeDefined();
     await app.view.rerender({ resources: [{ ...postDefinition, canCreate: false }] });
     expect(app.view.queryByRole('button', { name: /^save$/i })).toBeNull();
+  });
+
+  it('shows permission unavailable with a retry after a failed permission query', async () => {
+    const app = mount(provider());
+    let attempts = 0;
+    await app.view.rerender({ permission: {
+      can: async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error('PRIVATE_PERMISSION_FAILURE');
+        return { can: true };
+      },
+    } });
+    const alert = await app.view.findByRole('alert');
+    expect(alert.textContent).toMatch(/permission check is unavailable|权限校验暂不可用/i);
+    expect(app.view.container.textContent).not.toContain('PRIVATE');
+    expect(app.view.queryByRole('textbox', { name: /^Title/ })).toBeNull();
+    await fireEvent.click(app.view.getByRole('button', { name: /^retry$|^重试$/i }));
+    expect(await app.view.findByRole('textbox', { name: /^Title/ })).toBeDefined();
+    expect(attempts).toBe(2);
+  });
+
+  it('distinguishes a successful denial from an unavailable permission query', async () => {
+    const app = mount(provider());
+    await app.view.rerender({ permission: { can: async () => ({ can: false }) } });
+    const alert = await app.view.findByRole('alert');
+    expect(alert.textContent).toMatch(/do not have permission|无权执行此操作/i);
+    expect(alert.textContent).not.toMatch(/unavailable|不可用/i);
+    expect(app.view.queryByRole('button', { name: /^retry$|^重试$/i })).toBeNull();
+    expect(app.view.queryByRole('textbox', { name: /^Title/ })).toBeNull();
   });
 
   it('offers an explicit retry after a failed read without rendering unchecked fields', async () => {

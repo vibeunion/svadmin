@@ -4,8 +4,10 @@
 
   import { definedOptions } from '@svadmin/core/options';
 
-  import { captureAdminContext, captureAuthSession, useResourceContract, getContractFormFields, deriveValidator, useNavigation, useCan, useForm } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, useResourceContract, getContractFormFields, deriveValidator, useNavigation, useCan, useForm, parseQueryKey } from '@svadmin/core';
+  import { useQueryClient } from '@tanstack/svelte-query';
   import { slide } from 'svelte/transition';
+  import { untrack } from 'svelte';
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -15,11 +17,13 @@
   import { Badge } from './ui/badge/index.js';
   import { Save, ArrowLeft, Loader2, AlertCircle } from '@lucide/svelte';
   import FieldRenderer from './FieldRenderer.svelte';
+  import type { UploadCancelHandler, UploadHandler } from './file-upload-types.js';
   import * as Alert from './ui/alert/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ErrorSummary from './ErrorSummary.svelte';
   import { withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
+  import { schemaFormSnapshot } from './json-schema-form-state.js';
   import { cn } from '../utils.js';
   import type { Snippet } from 'svelte';
 
@@ -33,13 +37,25 @@
     columns?: 1 | 2 | 3 | 4;
     showHeader?: boolean;
     fieldRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; onchange: (v: unknown) => void }]>;
-    formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
+    formActions?: Snippet<[{ isLoading: boolean; isDisabled: boolean; onSubmit: () => void }]>;
     headerContent?: Snippet;
     onSuccess?: () => void;
     redirect?: 'list' | false;
     onCancel?: () => void;
     onNavigationGuardReady?: (guard: (fn: () => void) => void) => void;
+    /**
+     * 可选：当当前表单作用域的真实未保存状态变化时通知宿主。
+     * 状态只由 `form.isTainted()` 与上传阻塞派生，不根据 DOM 事件或值比较猜测。
+     */
+    onDirtyChange?: (dirty: boolean) => void;
     showErrorSummary?: boolean;
+    /** 透传给 file 字段的异步上传；成功后字段值只保存 url/uploadId 引用。 */
+    upload?: UploadHandler;
+    cancelUpload?: UploadCancelHandler;
+    /** 宿主显式选择的草稿字段白名单；只包含当前可编辑表单内的字段。 */
+    draftFields?: readonly string[];
+    /** 仅在宿主显式订阅时输出可分离的字段草稿；不可恢复状态下输出 undefined。 */
+    onDraftChange?: (draft: Record<string, unknown> | undefined) => void;
   }
 
   let {
@@ -56,7 +72,12 @@
     redirect = 'list',
     onCancel,
     onNavigationGuardReady,
+    onDirtyChange,
     showErrorSummary = true,
+    upload,
+    cancelUpload,
+    draftFields,
+    onDraftChange,
   }: Props = $props();
   const navigation = useNavigation();
   const context = captureAdminContext();
@@ -78,6 +99,8 @@
   }));
   const permissionPending = $derived(mode === 'create' ? createPermission.isLoading
     : readPermission.isLoading || (mode === 'clone' && createPermission.isLoading));
+  const permissionError = $derived(mode === 'create' ? createPermission.isError
+    : readPermission.isError || (mode === 'clone' && createPermission.isError));
   const allowed = $derived(mode === 'create' ? resource.canCreate !== false && createPermission.allowed
     : mode === 'edit' ? resource.canEdit !== false && readPermission.allowed
     : mode === 'show' ? resource.canShow !== false && readPermission.allowed
@@ -136,6 +159,8 @@
       case 'select': return field.options?.[0]?.value ?? '';
       case 'relation': return field.multiple ? [] : null;
       case 'json': return {};
+      // 文件/引用的空值不是字符串；未上传时保持 undefined 不进入合同快照。
+      case 'file': return undefined;
       default: return '';
     }
   }
@@ -197,13 +222,135 @@
   });
   let mounted = true;
   const currentScope = (origin: typeof scope) => mounted && scope === origin && origin.session.isCurrent();
+
+  // ─── Host-owned draft contract ────────────────────────────────────
+  // 只复制纯 JSON 值；调用方永远拿不到 form.values 的内部引用。
+  // 复用既有有界纯 JSON 快照：不读 getter、不执行序列化钩子，并受深度/节点预算保护。
+  function collectDraftOutput(): Record<string, unknown> | undefined {
+    const fields = draftFields;
+    if (!fields || fields.length === 0) return undefined;
+    const allowlist = new Set(fields);
+    const draft: Record<string, unknown> = {};
+    for (const field of formFields) {
+      if (!allowlist.has(field.key)) continue;
+      if (!Object.prototype.hasOwnProperty.call(form.values, field.key)) continue;
+      const value = form.values[field.key];
+      if (value === undefined) continue;
+      try {
+        draft[field.key] = schemaFormSnapshot({ field: value })['field'];
+      } catch {
+        continue;
+      }
+    }
+    return draft;
+  }
+  function draftSignature(draft: Record<string, unknown> | undefined): string {
+    return draft === undefined ? 'undefined' : JSON.stringify(draft);
+  }
+
+  /**
+   * 宿主显式恢复入口。候选先整体做纯 JSON 快照，再检查白名单与真实可编辑字段；
+   * 全部通过后只调用一次 `form.setValues` 原子写入。业务必填/格式校验留到提交；
+   * 提交中、上传阻塞、只读、未授权、换作用域或已卸载时返回 false，异常不外抛。
+   */
+  export function restoreDraft(candidate: Record<string, unknown>): boolean {
+    try {
+      if (!mounted || !currentScope(scope) || !form.ready || !allowed || isReadonly
+        || form.submitting || uploadBlocked) return false;
+      const fields = draftFields;
+      if (!fields || fields.length === 0) return false;
+      let snapshot: Record<string, unknown>;
+      try {
+        snapshot = schemaFormSnapshot(candidate);
+      } catch {
+        return false;
+      }
+      const allowlist = new Set(fields);
+      const editable = new Set(formFields.map(field => field.key));
+      const values: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(snapshot)) {
+        if (!allowlist.has(key) || !editable.has(key)) return false;
+        values[key] = value;
+      }
+      if (Object.keys(values).length === 0) return false;
+      form.setValues(values, { taint: true });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  let lastDraftScope: typeof scope | undefined;
+  let lastDraftCallback: Props['onDraftChange'];
+  let lastDraftSignature: string | undefined;
+  $effect(() => {
+    const origin = scope;
+    const fields = draftFields;
+    const callback = onDraftChange;
+    const ready = form.ready;
+    const permitted = allowed;
+    const readonly = isReadonly;
+    const submitting = form.submitting;
+    const renderingOk = renderedDraft.ok;
+    if (!fields || fields.length === 0 || !callback) return;
+    if (!currentScope(origin)) return;
+    const usable = ready && permitted && !readonly && !submitting && renderingOk;
+    const output = usable ? collectDraftOutput() : undefined;
+    const signature = draftSignature(output);
+    if (lastDraftScope !== origin || lastDraftCallback !== callback) {
+      lastDraftScope = origin;
+      lastDraftCallback = callback;
+      lastDraftSignature = undefined;
+    }
+    if (lastDraftSignature === signature) return;
+    lastDraftSignature = signature;
+    untrack(() => callback(output));
+  });
+
   let submission: object | undefined;
+  interface UploadState { busy: boolean; unresolved: boolean }
+  // 按字段记录上传队列：busy 阻止提交并驱动 loading，unresolved 阻止提交。
+  let uploadStates = $state<Record<string, UploadState>>({});
+  const uploadPending = $derived(Object.values(uploadStates).some(state => state.busy));
+  const uploadBlocked = $derived(Object.values(uploadStates).some(state => state.busy || state.unresolved));
+  let lastDirty: boolean | undefined;
+  let lastDirtyScope: typeof scope | undefined;
+  $effect(() => {
+    const origin = scope;
+    const dirty = form.isTainted() || uploadBlocked;
+    if (!currentScope(origin)) return;
+    if (lastDirtyScope !== origin) {
+      lastDirtyScope = origin;
+      lastDirty = undefined;
+    }
+    if (lastDirty === dirty) return;
+    lastDirty = dirty;
+    untrack(() => onDirtyChange?.(dirty));
+  });
+  // 记录/provider/auth 作用域变化时，只重挂载文件字段并丢弃旧回执。
+  let resetEpoch = $state(0);
+  const fileScopeKey = $derived({ scope, resetEpoch, upload, cancelUpload });
+  $effect(() => {
+    void fileScopeKey;
+    uploadStates = {};
+  });
   $effect(() => {
     void scope;
     submission = undefined;
     submitError = null;
     confirmOpen = false;
     pendingNavigation = null;
+    uploadStates = {};
+  });
+  const setUploadState = $derived.by(() => {
+    const origin = scope;
+    const originFileScope = fileScopeKey;
+    return (fieldKey: string, state: UploadState) => {
+      if (!currentScope(origin) || fileScopeKey !== originFileScope) return;
+      const previous = uploadStates[fieldKey];
+      if (previous?.busy === state.busy && previous?.unresolved === state.unresolved) return;
+      uploadStates = { ...uploadStates, [fieldKey]: state };
+    };
   });
   $effect(() => () => { mounted = false; submission = undefined; });
 
@@ -214,6 +361,7 @@
   const focusableFieldSelector = [
     'input:not([type="hidden"])', 'textarea', 'select', 'button', '[tabindex]',
   ].join(', ');
+  const richTextFieldSelector = '[contenteditable="true"][role="textbox"]';
 
   function isActionableControl(element: HTMLElement): boolean {
     for (let parent = element.parentElement; parent; parent = parent.parentElement) {
@@ -227,7 +375,16 @@
       && !element.closest('[hidden], [inert], [aria-disabled="true"]');
   }
 
-  function focusFirstActionableControl(field: Element): boolean {
+  function focusFirstActionableControl(field: Element, definition?: FieldDefinition): boolean {
+    // 仅默认渲染的顶层 richtext 字段优先正文；数组等容器仍按 DOM 顺序，
+    // 自定义 fieldRenderer 也不替宿主猜测正文入口。
+    if (!fieldRenderer && definition?.type === 'richtext') {
+      const richText = field.querySelector<HTMLElement>(richTextFieldSelector);
+      if (richText && isActionableControl(richText)) {
+        richText.focus();
+        if (document.activeElement === richText) return true;
+      }
+    }
     const candidates = field.querySelectorAll<HTMLElement>(focusableFieldSelector);
     for (const candidate of candidates) {
       if (!isActionableControl(candidate)) continue;
@@ -242,7 +399,8 @@
     for (const field of formElement.querySelectorAll<HTMLElement>('[data-svadmin-form-field]')) {
       const key = field.getAttribute('data-svadmin-field-key');
       const error = key ? form.errors[key] : undefined;
-      if (typeof error === 'string' && error.length > 0 && focusFirstActionableControl(field)) return;
+      const definition = key ? formFields.find(fieldDefinition => fieldDefinition.key === key) : undefined;
+      if (typeof error === 'string' && error.length > 0 && focusFirstActionableControl(field, definition)) return;
     }
   }
 
@@ -250,13 +408,14 @@
     const field = formElement?.querySelector<HTMLElement>(
       `[data-svadmin-form-field][data-svadmin-field-key="${CSS.escape(fieldKey)}"]`,
     );
-    if (field) focusFirstActionableControl(field);
+    if (field) focusFirstActionableControl(field, formFields.find(definition => definition.key === fieldKey));
   }
 
   const handleSubmit = $derived.by(() => {
     const current = scope;
     return async () => {
-      if (!currentScope(current) || !allowed || isReadonly || !form.ready || form.submitting || submission) return;
+      if (!currentScope(current) || !allowed || isReadonly || !form.ready || form.submitting
+        || uploadBlocked || submission) return;
       const token = {};
       submission = token;
       submitError = null;
@@ -297,6 +456,16 @@
     const refetch = form.query.refetch;
     return () => { if (currentScope(origin)) void refetch().catch(() => {}); };
   });
+  const queryClient = useQueryClient();
+  function refreshPermission() {
+    const resource = resourceName;
+    void queryClient.invalidateQueries({
+      predicate: query => {
+        const parsed = parseQueryKey(query.queryKey);
+        return parsed?.kind === 'access' && parsed.resource === resource;
+      },
+    }).catch(() => {});
+  }
 
   // 显式 reset 入口：宿主通过 bind:this 调用，恢复 Core 初始草稿并清理本实例
   // 的提交令牌/提示；不触发导航，也不改变只读或未授权状态。
@@ -304,6 +473,13 @@
     if (!allowed || isReadonly) return;
     submission = undefined;
     submitError = null;
+    // reset 后基线不再 tainted，旧的关闭保护与其待执行导航必须一起退休，
+    // 否则后续确认会执行 reset 前捕获的导航。
+    confirmOpen = false;
+    pendingNavigation = null;
+    uploadStates = {};
+    // reset token 重挂载文件字段：旧 FileUpload 会按 unmount 回收在途上传。
+    resetEpoch += 1;
     form.reset();
   }
 
@@ -326,7 +502,7 @@
     return (fn: () => void) => {
       if (!currentScope(origin)) return;
       if (form.submitting) return;
-      if (form.isTainted()) {
+      if (form.isTainted() || uploadBlocked) {
         pendingNavigation = () => { if (currentScope(origin)) fn(); };
         confirmOpen = true;
       } else {
@@ -397,7 +573,14 @@
       </div>
     </div>
   {:else if !allowed}
-    <p role="alert">{i18n.t('common.operationFailed')}</p>
+    {#if permissionError}
+      <p role="alert">{i18n.t('common.permissionUnavailable')}</p>
+      <Button type="button" variant="outline" onclick={refreshPermission}>
+        {i18n.t('common.retry')}
+      </Button>
+    {:else}
+      <p role="alert">{i18n.t('common.permissionDenied')}</p>
+    {/if}
   {:else if !form.ready && form.error}
     <p role="alert">{i18n.t('common.operationFailed')}</p>
     <Button type="button" variant="outline" onclick={retry}>
@@ -447,6 +630,10 @@
                         invalid={!!form.errors[field.key]}
                         {...definedOptions({ "errorId": form.errors[field.key] ? fieldErrorId(field.key) : undefined })}
                         disabled={isReadonly}
+                        fileReferenceMode
+                        {fileScopeKey}
+                        {...definedOptions({ upload, cancelUpload })}
+                        onUploadStateChange={(state: UploadState) => setUploadState(field.key, state)}
                       />
                     {/if}
                     {#if form.errors[field.key]}
@@ -474,6 +661,10 @@
                     invalid={!!form.errors[field.key]}
                       {...definedOptions({ "errorId": form.errors[field.key] ? fieldErrorId(field.key) : undefined })}
                       disabled={isReadonly}
+                      fileReferenceMode
+                      {fileScopeKey}
+                      {...definedOptions({ upload, cancelUpload })}
+                      onUploadStateChange={(state: UploadState) => setUploadState(field.key, state)}
                     />
                   {/if}
                   {#if form.errors[field.key]}
@@ -488,9 +679,9 @@
 
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
         {#if formActions && !isReadonly}
-          {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
+          {@render formActions({ isLoading: form.submitting || uploadPending, isDisabled: form.submitting || uploadBlocked, onSubmit: handleSubmit })}
         {:else if !isReadonly}
-          <Button type="submit" size="default" disabled={form.submitting}>
+          <Button type="submit" size="default" disabled={form.submitting || uploadBlocked}>
             {#if form.submitting}
               <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" data-icon="inline-start" aria-hidden="true" />
             {:else}

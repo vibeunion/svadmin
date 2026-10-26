@@ -64,7 +64,13 @@ describe('business rendering migration inventory', () => {
         expect(inventory.some(page => page.mode !== 'workspace-helper' && source(`../src/${page.file}`).includes(helper))).toBe(true);
       } else {
         expect(['local-state', 'static-showcase']).toContain(entry.mode);
-        expect(['features/case/CaseWorkspacePage.svelte', 'features/showcase/DesignPrinciplesPage.svelte']).toContain(entry.file);
+        expect([
+          'features/case/CaseWorkspacePage.svelte',
+          'features/dashboard/DashboardWorkspace.svelte',
+          'features/showcase/DesignPrinciplesPage.svelte',
+          'features/workspace/WorkspaceResourceEditor.svelte',
+          'features/workspace/WorkspaceTabsPage.svelte',
+        ]).toContain(entry.file);
         expect(text).not.toMatch(/use(?:List|One|Many)\s*\(/);
       }
       assertRenderingChildren(text, ['AutoTable', 'AutoForm', 'ShowPage', 'ResourceOperationsPage']);

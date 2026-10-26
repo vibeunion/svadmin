@@ -1,5 +1,18 @@
 # B2-11 完整 Schema 表单边界审计（2026-10-23）
 
+## 最新续接证据（2026-10-24）
+
+- 内部 `#/$defs/<name>` 展开已进入实施契约，贯穿默认值、渲染、条件显示、
+  校验和提交；远程 URI、相对 URI、`oneOf` 仍 fail-closed。
+- 主线程独立验证：`recursive-schema-form.test.ts` **22/22**、
+  `json-schema-form-enterprise.test.svelte.ts` **69/69**；Schema 引用展开器及
+  企业测试定向 ESLint exit 0，`git diff --check` exit 0。
+- 兼容边界：允许已知 TypeBox Schema 元数据（包括 `TypeBox.Kind` Symbol
+  及受限非枚举元数据），不执行 getter；未知 Symbol、未知非枚举元数据、
+  默认值中的 Symbol 属性和 `$ref` sibling 继续拒绝。
+- 这只证明本地受控 Schema 子集和 TypeBox 输入边界，不证明远程 resolver、
+  服务端 TypeBox/RBAC、完整 JSON Schema、`oneOf` 分支选择、读屏实机或发布部署。
+
 ## 范围与动作
 
 审计矩阵 B2-11 的只读核对：确认当前受限 Schema 子集的真实能力，确认
@@ -82,7 +95,7 @@ bunx vitest run src/components/json-schema-form-enterprise.test.svelte.ts
 结果：`1 passed (1)`，`61 passed (61)`，退出码 0。存在既有 svelte2tsx source map
 缺失警告，未修改依赖。`git diff --check` 退出码 0。未运行浏览器用例。
 
-## 未覆盖与主线程待复核
+## 未覆盖与历史复核待办
 
 - B2-11 仍未完成：受控引用适配、`$ref`/`oneOf` 解析和外部引用加载均未实现，
   需要产品/安全侧先给出契约。
@@ -90,8 +103,9 @@ bunx vitest run src/components/json-schema-form-enterprise.test.svelte.ts
   Schema（`playwright.schema-form.config.ts` 只跑 conditional 用例），没有
   `$ref`/`oneOf` fixture。
 - 未验证服务端 TypeBox/业务授权、新分发包、消费者构建或部署。
-- 请主线程复核：本审计结论“无真实实现错误、拒绝即正确边界”是否接受；若接受，
-  B2-11 应保持“需外部产品决策/验收”，不以拒绝用例关闭。
+- 当时请主线程复核本审计结论“无真实实现错误、拒绝即正确边界”；该结论已由矩阵
+  B2-11 的主线程独立复核记录接受，B2-11 仍保持“需外部产品决策/验收”，不以拒绝
+  用例关闭。
 
 ## 本线程复核（2026-10-23）
 
@@ -114,3 +128,13 @@ bunx vitest run src/components/json-schema-form-enterprise.test.svelte.ts
 - 结论不变：没有无需产品/安全契约即可实施的 B2-11 生产修复。后续若要支持
   `$ref`/`oneOf`/外部引用，必须先确定解析作用域、远程加载允许列表、超时/大小、
   鉴权、SSRF/完整性策略、分支选择和公开错误契约。
+
+## pi 独立复核
+
+- pi 只读复核确认当前递归解析器对受限 `object`/`array`/标量子集、默认值、
+  校验和 JSON Pointer 错误路径保持 fail-closed，并拒绝 `$ref`、`oneOf`、
+  外部 URI、未知关键字、循环 Schema、访问器和非法数据。
+- pi 独立定向验证：递归解析器 **15/15**、`JsonSchemaForm` 企业测试
+  **61/61**、`git diff --check` 通过。
+- 该复核未修改生产代码、未提交、未部署；当前显式拒绝仍是正确安全边界，
+  不将 B2-11 受控引用适配标记为完成。

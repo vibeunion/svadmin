@@ -87,7 +87,7 @@
   const total = $derived(permission.allowed ? query.data?.total ?? 0 : 0);
   const pageCount = $derived(validPageSize ? Math.max(1, Math.ceil(total / effectivePageSize)) : 1);
   const queryIdentity = $derived(JSON.stringify([resourceName, dataScopeKey, queryPagination, rootFilters, sorters, loadingMode, lazyTree]));
-  const error = $derived(query.isError ? (query.error instanceof Error ? query.error.message : zh ? '数据加载失败' : 'Data request failed') : undefined);
+  const error = $derived(query.isError ? (zh ? '数据加载失败' : 'Data request failed') : undefined);
   let selectedIds = $state<SvarRecordId[]>([]);
   let busy = $state(false);
   let feedback = $state('');
@@ -298,7 +298,7 @@
   {#if !validLoading}<p role="alert">{zh ? '高级加载配置无效；窗口和无限加载仅支持平面资源，异步树必须声明父字段' : 'Invalid loading configuration: window/infinite modes require flat resources; lazy trees require a declared parent field'}</p>
   {:else if !validPageSize}<p role="alert">{zh ? '每页数量必须为 1–1000 的整数' : 'Page size must be an integer between 1 and 1000'}</p>
   {:else if permission.isLoading}<p role="status">{zh ? '正在检查权限' : 'Checking access'}</p>
-  {:else if !permission.allowed}<p role="alert">{permission.reason ?? (zh ? '没有读取权限' : 'Read access denied')}</p>
+  {:else if !permission.allowed}<p role="alert">{permission.isError ? i18n.t('common.permissionUnavailable') : i18n.t('common.permissionDenied')}</p>
   {:else}
     {#each [...reads.requests] as [id, request] (id)}<SvarResourceRead {request} />{/each}
     {#if savedViews}

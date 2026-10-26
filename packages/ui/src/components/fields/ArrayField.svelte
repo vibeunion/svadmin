@@ -5,11 +5,12 @@
   import { ArrowDown, ArrowUp, Plus, Trash2 } from '@lucide/svelte';
   import TooltipButton from '../TooltipButton.svelte';
   import FieldRenderer from '../FieldRenderer.svelte';
+  import type { UploadCancelHandler, UploadHandler } from '../file-upload-types.js';
   import { arrayFieldRowKey as editedRowKey, arrayFieldOrderKey as outputOrderKey } from './array-field-metadata.js';
 
   const i18n = useTranslation();
 
-  let { field, value, onchange, disabled = false, labelledby, describedby, invalid = false, nativeSubmit = true } = $props<{
+  interface Props {
     field: FieldDefinition;
     value: unknown;
     onchange: (val: unknown) => void;
@@ -18,7 +19,18 @@
     describedby?: string;
     invalid?: boolean;
     nativeSubmit?: boolean;
-  }>();
+    upload?: UploadHandler;
+    cancelUpload?: UploadCancelHandler;
+    onUploadStateChange?: (state: { busy: boolean; unresolved: boolean }) => void;
+    fileReferenceMode?: boolean;
+    fileScopeKey?: string | number | object;
+  }
+
+  let {
+    field, value, onchange, disabled = false, labelledby, describedby, invalid = false,
+    nativeSubmit = true, upload, cancelUpload, onUploadStateChange, fileReferenceMode = false,
+    fileScopeKey,
+  }: Props = $props();
 
   const instanceId = $props.id();
   const headingId = `${instanceId}-heading`;
@@ -29,6 +41,7 @@
   const pendingEdits = new Set<number>();
   let pendingItems: Record<string, unknown>[] = [];
   let pendingKeys: number[] = [];
+  const childUploadStates = new Map<string, { busy: boolean; unresolved: boolean }>();
   let outputSequence = 0;
   let nextKey = 0;
   function rememberOutput(items: Record<string, unknown>[], keys: number[]) {
@@ -101,6 +114,19 @@
     onchange(next);
   }
 
+  function reportChildUploadState(
+    key: string,
+    state: { busy: boolean; unresolved: boolean },
+  ): void {
+    if (!state.busy && !state.unresolved) childUploadStates.delete(key);
+    else childUploadStates.set(key, state);
+    const states = [...childUploadStates.values()];
+    onUploadStateChange?.({
+      busy: states.some(value => value.busy),
+      unresolved: states.some(value => value.unresolved),
+    });
+  }
+
   function handleRemove(index: number) {
     if (disabled) return;
     const next = arrayVal.filter((_, i) => i !== index);
@@ -152,7 +178,15 @@
         <span class="svadmin-u-811148b13d1e">*</span>
       {/if}
     </div>
-    <Button variant="outline" size="sm" type="button" disabled={disabled} onclick={handleAdd}>
+    <Button
+      variant="outline"
+      size="sm"
+      type="button"
+      disabled={disabled}
+      {...(describedby === undefined ? {} : { 'aria-describedby': describedby })}
+      {...(invalid ? { 'aria-invalid': true } : {})}
+      onclick={handleAdd}
+    >
       <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" /> {i18n.t('common.add') || 'Add'}
     </Button>
   </div>
@@ -195,6 +229,14 @@
               value={item[subField.key]}
               disabled={disabled}
               {nativeSubmit}
+              {fileReferenceMode}
+              {...(fileScopeKey === undefined ? {} : { fileScopeKey })}
+              {...(upload === undefined ? {} : { upload })}
+              {...(cancelUpload === undefined ? {} : { cancelUpload })}
+              {...(onUploadStateChange === undefined
+                ? {}
+                : { onUploadStateChange: (state: { busy: boolean; unresolved: boolean }) =>
+                  reportChildUploadState(`${row.key}:${subField.key}`, state) })}
               onchange={(val) => handleChange(i, subField.key, val)}
             />
           {/each}

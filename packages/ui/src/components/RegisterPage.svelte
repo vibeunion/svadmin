@@ -36,7 +36,7 @@
     if (result.success) {
       onSuccess?.();
     } else {
-      error = result.error?.message ?? i18n.t('common.operationFailed');
+      error = i18n.t('common.operationFailed');
     }
   }
 </script>
