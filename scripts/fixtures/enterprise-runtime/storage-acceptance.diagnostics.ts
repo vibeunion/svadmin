@@ -18,6 +18,11 @@ export type BrowserEngineName = 'chromium' | 'firefox' | 'webkit';
 
 const BROWSER_ENGINES: readonly BrowserEngineName[] = ['chromium', 'firefox', 'webkit'];
 const MAX_SAFE_LOCATIONS = 5;
+// 只接受验收真正会运行的 fixture 源码；日志里其它 basename（含伪造路径）一律丢弃。
+const SAFE_FIXTURE_SOURCES: ReadonlySet<string> = new Set([
+  'enterprise-runtime/storage-acceptance.test.ts',
+  'enterprise-runtime/browser/upload-browser-acceptance.ts',
+]);
 
 interface FailureRule {
   code: KnownFailureCode;
@@ -99,15 +104,16 @@ export function failedAcceptanceTests(output: string, testNames: readonly string
   return failed;
 }
 
-// 仅保留 fixture 源码 basename + 行列；绝对路径和 benchmark 临时路径都不输出。
+// 仅保留已知 fixture 源码 basename + 行列；绝对路径和 benchmark 临时路径都不输出。
 export function safeFixtureLocations(output: string): string[] {
   const locations: string[] = [];
-  const pattern = /scripts\/fixtures\/enterprise-(?:runtime|ui)\/([A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*\.(?:ts|tsx|js|svelte)):(\d+):(\d+)/g;
+  const pattern = /scripts\/fixtures\/(enterprise-(?:runtime|ui)\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*\.(?:ts|tsx|js|svelte)):(\d+):(\d+)/g;
   for (const match of output.matchAll(pattern)) {
     const relativePath = match[1];
     const line = match[2];
     const column = match[3];
     if (relativePath === undefined || line === undefined || column === undefined) continue;
+    if (!SAFE_FIXTURE_SOURCES.has(relativePath)) continue;
     const location = `${basename(relativePath)}:${line}:${column}`;
     if (!locations.includes(location)) locations.push(location);
     if (locations.length === MAX_SAFE_LOCATIONS) break;

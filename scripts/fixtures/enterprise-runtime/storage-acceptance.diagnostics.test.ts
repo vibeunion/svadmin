@@ -68,7 +68,27 @@ describe('storage acceptance safe diagnostics', () => {
       'Failed to resolve import "@svadmin/devtools-contract" from "packages/ui/src/devtools-bridge.ts"',
     )).toBe('vite-resolve-missing-devtools-contract-dist');
     expect(classifyFailure(`unexpected ${TOKEN} ${ARBITRARY_MESSAGE}`)).toBe('unknown-error');
-    expect(safeFixtureLocations(`at /tmp/foo/scripts/fixtures/enterprise-ui/browser.spec.ts:1:2 ${ARBITRARY_MESSAGE}`))
-      .toEqual(['browser.spec.ts:1:2']);
+  });
+
+  it('只保留已知 fixture 源码位置，伪造 basename 不出现在输出中', () => {
+    const output = [
+      `at /tmp/foo/scripts/fixtures/enterprise-runtime/password-secret.ts:1:2 ${ARBITRARY_MESSAGE}`,
+      'at scripts/fixtures/enterprise-runtime/browser/password-secret.ts:1:2',
+      'at scripts/fixtures/enterprise-ui/browser.spec.ts:1:2',
+      'at scripts/fixtures/enterprise-runtime/storage-acceptance.test.ts:920:3',
+      'at scripts/fixtures/enterprise-runtime/browser/upload-browser-acceptance.ts:1858:9',
+    ].join('\n');
+
+    const locations = safeFixtureLocations(output);
+    expect(locations).toEqual([
+      'storage-acceptance.test.ts:920:3',
+      'upload-browser-acceptance.ts:1858:9',
+    ]);
+    const rendered = formatSafeFailureDiagnostics({
+      tests: [], code: 'unknown-error', locations, engines: [],
+    }).join('\n');
+    expect(rendered).not.toContain('password-secret');
+    expect(rendered).not.toContain(TOKEN);
+    expect(rendered).not.toContain('hunter2');
   });
 });
