@@ -119,6 +119,31 @@ if (response.ok && response.value.action === 'propose') {
 
 Use the same task-scoped catalog for generation, validation and rendering. JSON Schema narrows generation but does not replace cross-source binding checks, field policy or server authorization. The schema is not claimed to match every vendor's restricted structured-output subset.
 
+### Inline chat answers
+
+A chat host can answer with prose plus one inline card instead of a JSON-only reply. Pass `{ presentation: 'chat' }`, then split the streamed answer with `splitSurfaceAgentText()`:
+
+```ts
+import {
+  SURFACE_AGENT_FENCE_TAG,
+  buildSurfaceAgentMessages,
+  parseSurfaceAgentResponse,
+  splitSurfaceAgentText,
+} from '@svadmin/surface';
+
+const messages = buildSurfaceAgentMessages(request, catalog, policy, { presentation: 'chat' });
+// 边生成边切分；未闭合的 surface 围栏返回 complete: false。
+for (const segment of splitSurfaceAgentText(streamedText, { streaming: true })) {
+  if (segment.kind === 'text') renderMarkdown(segment.text);
+  else if (segment.complete) {
+    const parsed = parseSurfaceAgentResponse(segment.json, catalog, policy);
+    if (parsed.ok && parsed.value.action === 'propose') renderPreview(parsed.value.spec);
+  }
+}
+```
+
+Only fences tagged `surface` (```` ```surface ````) are treated as proposals; every other fence stays in the prose, so ordinary JSON or shell snippets are never mistaken for a card. An unterminated fence becomes an incomplete segment only while `streaming` is true, which keeps partial JSON out of the renderer while the answer is still generating. Segmentation is presentation only: it does not validate, query data, render, or replace the host approval step.
+
 `buildSurfaceAgentPrompt()` and `parseSurfaceAgentProposal()` remain compatible with the legacy proposal-only `surface-agent/v1` envelope. The new message API uses `surface-agent/v2` with a structured `cannot-fulfill` alternative. `createSurfaceAgentStream()` buffers bounded text and validates at `finish()`; it does **not** render partial JSON or implement OpenUI Lang streaming.
 
 ## Revisioned edits and explicit preview

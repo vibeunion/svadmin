@@ -10,6 +10,7 @@ import {
   surfaceCannotFulfillSchema,
   surfaceSchemaToJson,
 } from './agent-contract.js';
+import { SURFACE_AGENT_FENCE_TAG } from './agent-text.js';
 import { validateSurfaceSpec, surfaceSchemaIssues } from './validation.js';
 import { parseSurfaceJson, surfaceWireError } from './wire.js';
 import type {
@@ -117,10 +118,26 @@ export function buildSurfaceAgentPrompt(request: string, catalog: SurfaceCatalog
   return boundedPrompt(`${request}\n\n[svadmin surface agent protocol]\nReturn only a human-reviewable fenced JSON proposal. ${safetyInstructions}\n${contractContext(catalog, policy)}\nOutput JSON Schema: ${JSON.stringify(schema)}\nIf the request cannot be represented safely, explain the limitation without inventing fields or capabilities. For machine-readable cannot-fulfill responses use the surface-agent/v2 message API.`);
 }
 
+/** 模型回答的呈现方式：纯 JSON 信封，或聊天正文加一个内联界面提案。 */
+export type SurfaceAgentPresentation = 'json' | 'chat';
+
+export interface SurfaceAgentMessageOptions {
+  /** 默认 `json`，保持既有调用方的行为不变。 */
+  readonly presentation?: SurfaceAgentPresentation;
+}
+
 /** 系统契约与用户需求分开传递；不绑定某个模型厂商或 CSS 编译器。 */
-export function buildSurfaceAgentMessages(request: string, catalog: SurfaceCatalog, policy: SurfacePolicy): readonly SurfaceAgentMessage[] {
+export function buildSurfaceAgentMessages(
+  request: string,
+  catalog: SurfaceCatalog,
+  policy: SurfacePolicy,
+  options: SurfaceAgentMessageOptions = {},
+): readonly SurfaceAgentMessage[] {
   validateRequest(request);
-  const content = boundedPrompt(`[svadmin surface agent protocol]\nReturn exactly one JSON object matching the output schema, without markdown or prose. ${safetyInstructions}\n${contractContext(catalog, policy)}\nOutput JSON Schema: ${JSON.stringify(createSurfaceAgentResponseSchema(catalog, policy))}\nIf the request cannot be represented, return action "cannot-fulfill" with a reason and a short message. Never invent capabilities or return an incomplete spec.`);
+  const schema = JSON.stringify(createSurfaceAgentResponseSchema(catalog, policy));
+  const content = options.presentation === 'chat'
+    ? boundedPrompt(`[svadmin surface agent protocol]\nAnswer the user in short prose first, then embed exactly one interface proposal in a \`\`\`${SURFACE_AGENT_FENCE_TAG} fenced block matching the output schema. Emit at most one such block, do not add other fenced blocks, and do not repeat the JSON outside the fence. ${safetyInstructions}\n${contractContext(catalog, policy)}\nOutput JSON Schema: ${schema}\nIf the request cannot be represented, answer in prose and omit the fenced block; never invent capabilities or return an incomplete spec.`)
+    : boundedPrompt(`[svadmin surface agent protocol]\nReturn exactly one JSON object matching the output schema, without markdown or prose. ${safetyInstructions}\n${contractContext(catalog, policy)}\nOutput JSON Schema: ${schema}\nIf the request cannot be represented, return action "cannot-fulfill" with a reason and a short message. Never invent capabilities or return an incomplete spec.`);
   return [{ role: 'system', content }, { role: 'user', content: request }];
 }
 
