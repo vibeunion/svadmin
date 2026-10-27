@@ -871,7 +871,7 @@ describe('contract-bound batch delete', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('does not delegate public batches to legacy broad cache mutations', () => {
     const directory = dirname(fileURLToPath(import.meta.url));

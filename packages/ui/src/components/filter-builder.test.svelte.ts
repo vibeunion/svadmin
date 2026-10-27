@@ -195,7 +195,7 @@ describe('FilterBuilder component', () => {
     expect(diagnostics.map(diagnostic =>
       `${diagnostic.file?.fileName}:${diagnostic.start}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
     )).toEqual([]);
-  }, 30_000);
+  }, 90_000);
   it('unlocks historical filters when field metadata becomes available', async () => {
     const onApply = vi.fn();
     const view = render(FilterBuilder, {

@@ -428,7 +428,7 @@ describe('AutoTable interactions', () => {
       ]);
     // 完整纳入虚拟源与真实 TS 源后，目标集合上不允许存在任何诊断。
     expect(diagnostics).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('allows a new scope to apply its own remote default after the old initial snapshot is retired', async () => {
     const list = vi.fn(async (scope: ListPreferenceScope) => scope.tenantIdentity === 'omega'

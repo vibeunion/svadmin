@@ -24,6 +24,19 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Happy DOM 21 aborts repeated requestAnimationFrame callbacks from the same stack, which
+// breaks bits-ui open/close transitions in a single test.
+const happyDOM = (window as unknown as { happyDOM?: { settings: { timer: { preventTimerLoops: boolean } } } }).happyDOM;
+if (happyDOM) happyDOM.settings.timer.preventTimerLoops = false;
+
+// Happy DOM 21 implements getAnimations() without a rendering clock, so bits-ui would wait
+// forever for close transitions. Keep the previous fallback used by the component tests.
+Object.defineProperty(Element.prototype, 'getAnimations', {
+  configurable: true,
+  writable: true,
+  value: undefined,
+});
+
 beforeEach(() => {
   testLocalStorage.clear();
 });

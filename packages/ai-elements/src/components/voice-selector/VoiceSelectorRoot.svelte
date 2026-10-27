@@ -108,6 +108,8 @@
   function createPreviewSession(text: string): VoicePreviewSession | null {
     if (typeof document === 'undefined') return null;
     const frame = document.createElement('iframe');
+    // srcdoc keeps an isolated about:blank window available before the frame is mounted.
+    frame.srcdoc = '<!doctype html><html><body></body></html>';
     frame.hidden = true;
     frame.tabIndex = -1;
     frame.setAttribute('aria-hidden', 'true');

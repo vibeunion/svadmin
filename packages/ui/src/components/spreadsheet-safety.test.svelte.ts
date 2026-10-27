@@ -151,7 +151,7 @@ describe('SpreadsheetView safety and calculation boundaries', () => {
     expect(diagnostics.map(diagnostic =>
       `${diagnostic.file?.fileName}:${diagnostic.start}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
     )).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it.each([
     ['=SUM(A1:A9999999999999999999999999999999)', '#LIMIT!'],

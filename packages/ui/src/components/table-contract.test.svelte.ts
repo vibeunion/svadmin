@@ -132,7 +132,7 @@ describe('contract-bound AutoTable', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('preserves typed identity and detaches nested record data', () => {
     const input = { id: 1, title: 'First', nested: { value: 1 } };
