@@ -81,7 +81,8 @@
   ]);
   // 复用 PR #428 的请求所有权与会话隔离实现，不维护第二套缓存。
   const sourceCache = createSurfaceSourceCache({
-    set: (id, state) => { sourceStates.set(id, presentSurfaceData(state)); },
+    // 缓存只保存原始 source 状态；本地化等呈现规则统一在渲染边界执行。
+    set: (id, state) => { sourceStates.set(id, state); },
     remove: (id) => { sourceStates.delete(id); },
     onError: (state, diagnostic) => { onError?.({ type: 'data', error: diagnostic ?? state.error }); },
   });
