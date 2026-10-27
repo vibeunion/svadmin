@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/flow",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Optional node-based canvas components for Svelte 5 admin applications",
   "type": "module",
   "sideEffects": [
@@ -54,7 +54,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/svelte": "^5.4.2",
     "@testing-library/user-event": "^14.6.6",
-    "happy-dom": "^20.11.12",
+    "happy-dom": "^21.0.4",
     "vitest": "^4.1.11"
   },
   "scripts": {

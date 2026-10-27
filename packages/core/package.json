@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/core",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "author": "zuohuadong",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "@types/bun": "^1.4.2",
     "@types/jsdom": "^30.0.0",
     "exceljs": "4.4.0",
-    "happy-dom": "^20.11.12",
+    "happy-dom": "^21.0.4",
     "jsdom": "^30.0.1",
     "vitest": "^4.1.11"
   },

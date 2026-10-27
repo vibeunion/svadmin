@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.16.0](https://github.com/vibeunion/svadmin/compare/surface-v0.15.1...surface-v0.16.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.53.0 <0.65.0 to >=0.53.0 <0.66.0
+    * @svadmin/ui bumped from >=0.73.0 <0.91.0 to >=0.73.0 <0.92.0
+
 ## [0.15.1](https://github.com/vibeunion/svadmin/compare/surface-v0.15.0...surface-v0.15.1) (2026-10-26)
 
 

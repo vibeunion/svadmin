@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.45.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.44.2...create-svadmin-v0.45.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.65.0
+
 ## [0.44.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.44.1...create-svadmin-v0.44.2) (2026-10-26)
 
 

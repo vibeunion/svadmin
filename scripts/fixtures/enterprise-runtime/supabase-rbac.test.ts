@@ -7,6 +7,7 @@ import { SignJWT } from 'jose';
 const apiUrl = process.env['SVADMIN_TEST_API_URL'] ?? 'http://127.0.0.1:15433';
 const jwtSecret = process.env['SVADMIN_TEST_JWT_SECRET'];
 const anonKey = process.env['SVADMIN_TEST_ANON_KEY'] ?? 'local-test-anon-key';
+const enabled = Boolean(jwtSecret);
 
 function requireEnv(name: string, value: string | undefined): string {
   if (!value) throw new Error(`${name} is required for the OrbStack integration test`);
@@ -53,7 +54,7 @@ async function barePostgrestFetch(input: RequestInfo | URL, init?: RequestInit):
 
 barePostgrestFetch.preconnect = fetch.preconnect;
 
-describe('OrbStack Supabase/PostgREST tenant boundary', () => {
+describe.skipIf(!enabled)('OrbStack Supabase/PostgREST tenant boundary', () => {
   it('reads and writes only the authenticated tenant records', async () => {
     const tenantA = await providerFor('tenant-a', 'alice');
     const tenantB = await providerFor('tenant-b', 'bob');

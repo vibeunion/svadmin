@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/ai-elements",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "Composable Svelte 5 AI interaction components for SVAdmin",
   "type": "module",
   "sideEffects": [
@@ -101,7 +101,7 @@
     "@testing-library/svelte": "^5.4.2",
     "@testing-library/user-event": "^14.6.6",
     "@types/bun": "^1.4.2",
-    "happy-dom": "^20.11.12",
+    "happy-dom": "^21.0.4",
     "vitest": "^4.1.11"
   },
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/ui",
-  "version": "0.90.0",
+  "version": "0.91.0",
   "description": "Pre-built admin UI components — AdminApp, AutoTable, AutoForm, Sidebar, Layout",
   "type": "module",
   "sideEffects": [
@@ -185,7 +185,7 @@
     "@testing-library/user-event": "^14.6.6",
     "@types/qrcode": "^1.5.6",
     "codemirror": "^6.0.2",
-    "happy-dom": "^20.11.12",
+    "happy-dom": "^21.0.4",
     "postcss": "^8.5.26",
     "postcss-selector-parser": "^7.1.6",
     "qrcode": "^1.5.4",

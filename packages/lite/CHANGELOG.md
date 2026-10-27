@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.16.7](https://github.com/vibeunion/svadmin/compare/lite-v0.16.6...lite-v0.16.7) (2026-10-27)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.65.0 to >=0.34.2 <0.66.0
+
 ## [0.16.6](https://github.com/vibeunion/svadmin/compare/lite-v0.16.5...lite-v0.16.6) (2026-10-26)
 
 

@@ -239,7 +239,7 @@ describe('form engine explicit reset', () => {
   it('AutoForm reset is a no-op when access control denies the form', async () => {
     const view = render(Host, { kind: 'auto', denied: true });
     const denied = await view.findByRole('alert');
-    expect(denied.textContent).toContain('Operation failed');
+    expect(denied.textContent).toContain('You do not have permission to perform this action');
 
     view.component.reset();
     await new Promise(resolve => setTimeout(resolve, 0));

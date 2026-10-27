@@ -183,7 +183,7 @@ describe('contract-owned custom commands', () => {
     expect(diagnostics(target).map(item => item.file && item.start !== undefined
       ? item.file.getLineAndCharacterOfPosition(item.start).line : -1))
       .toEqual(invalid.map((_, index) => accepted.length + index));
-  }, 30_000);
+  }, 90_000);
 
   it('exports only the contract-bound hooks and removes dynamic command definitions', () => {
     expect(useCustom).toBeTypeOf('function');

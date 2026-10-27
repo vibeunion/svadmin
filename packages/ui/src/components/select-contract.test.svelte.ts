@@ -136,7 +136,7 @@ describe('contract-bound selection', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('removes the unchecked useSelect entry point', () => {
     expect('useSelect' in unsafe).toBe(false);

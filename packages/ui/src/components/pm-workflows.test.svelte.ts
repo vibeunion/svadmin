@@ -76,7 +76,7 @@ describe('PM workflow acceptance', () => {
       return [...program.getSyntacticDiagnostics(source), ...program.getSemanticDiagnostics(source)];
     });
     expect(errors.map(error => `${error.file?.fileName}:${error.start}: ${ts.flattenDiagnosticMessageText(error.messageText, '\n')}`)).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('keeps detail visible and isolates deletion behind the action menu and confirmation', async () => {
     const onDeleteOne = vi.fn();

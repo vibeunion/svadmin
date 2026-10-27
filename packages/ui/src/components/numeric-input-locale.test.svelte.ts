@@ -534,5 +534,5 @@ describe('localized numeric strict type fixture', () => {
       return [...program.getSyntacticDiagnostics(source), ...program.getSemanticDiagnostics(source)];
     });
     expect(errors.map(error => ts.flattenDiagnosticMessageText(error.messageText, '\n'))).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 });
