@@ -1133,8 +1133,41 @@ async function assertWorkspaceControlStable(
   expect(box.y + box.height <= viewport.height).toBe(true);
   const hit = await locator.evaluate(element => {
     const rect = element.getBoundingClientRect();
-    const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    return target !== null && (target === element || element.contains(target));
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const target = document.elementFromPoint(x, y);
+    const ok = target !== null && (target === element || element.contains(target));
+    if (!ok) {
+      const describe = (node: Element): Record<string, unknown> => {
+        const el = node as HTMLElement;
+        const style = getComputedStyle(el);
+        const box = el.getBoundingClientRect();
+        return {
+          tag: el.tagName,
+          id: el.id,
+          role: el.getAttribute('role'),
+          slot: el.getAttribute('data-slot'),
+          cls: typeof el.className === 'string' ? el.className.slice(0, 160) : '',
+          text: (el.textContent ?? '').trim().slice(0, 120),
+          pe: style.pointerEvents,
+          vis: style.visibility,
+          op: style.opacity,
+          z: style.zIndex,
+          pos: style.position,
+          overflow: style.overflow,
+          box: [Math.round(box.x), Math.round(box.y), Math.round(box.width), Math.round(box.height)],
+        };
+      };
+      const diag = {
+        label,
+        point: [Math.round(x), Math.round(y)],
+        viewport: [window.innerWidth, window.innerHeight],
+        source: describe(element),
+        stack: document.elementsFromPoint(x, y).slice(0, 8).map(describe),
+      };
+      console.error('SVADMIN_HIT_DIAG:' + JSON.stringify(diag));
+    }
+    return ok;
   });
   expect(hit).toBe(true);
 }

@@ -351,6 +351,10 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;`, stackEnv);
     // 不打印原始测试日志：失败只报告固定阶段、退出码与汇总计数，避免 token/password 泄露。
     console.error(`Storage 验收失败：stage=test exit=${result.status ?? 'timeout/spawn'} ${countText}`);
     reportSafeTestFailures(output);
+    for (const line of output.split(/\r?\n/)) {
+      const index = line.indexOf('SVADMIN_HIT_DIAG:');
+      if (index >= 0) console.error(line.slice(index, index + 6000));
+    }
   } else if (!output.includes(marker)) {
     console.error(`Storage 验收失败：stage=marker exit=0 ${countText}（缺少完成标记）`);
   } else if (counts === null) {
