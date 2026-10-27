@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.11](https://github.com/vibeunion/svadmin/compare/sso-v0.13.10...sso-v0.13.11) (2026-10-27)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.0
+
 ## [0.13.10](https://github.com/vibeunion/svadmin/compare/sso-v0.13.9...sso-v0.13.10) (2026-10-27)
 
 

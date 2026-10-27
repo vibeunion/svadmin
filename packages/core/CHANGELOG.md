@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.66.0](https://github.com/vibeunion/svadmin/compare/core-v0.65.0...core-v0.66.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **enterprise:** harden UI feedback and add isolated service CI acceptance ([#549](https://github.com/vibeunion/svadmin/issues/549)) ([bda1fa2](https://github.com/vibeunion/svadmin/commit/bda1fa21a9162050b5d1742f2a82adc8d173a342))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** show one inline error for a failed form save ([873f099](https://github.com/vibeunion/svadmin/commit/873f099e5a5b015ca9fe02c16b710d716017bda4))
+* **ui:** show one inline error for a failed form save ([c3a6bb1](https://github.com/vibeunion/svadmin/commit/c3a6bb111d39e2d4127b70bfa8c6ccee56c99de9))
+
 ## [0.65.0](https://github.com/vibeunion/svadmin/compare/core-v0.64.0...core-v0.65.0) (2026-10-27)
 
 

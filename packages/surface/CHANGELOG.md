@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.17.0](https://github.com/vibeunion/svadmin/compare/surface-v0.16.0...surface-v0.17.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **enterprise:** harden UI feedback and add isolated service CI acceptance ([#549](https://github.com/vibeunion/svadmin/issues/549)) ([bda1fa2](https://github.com/vibeunion/svadmin/commit/bda1fa21a9162050b5d1742f2a82adc8d173a342))
+* **surface:** split chat replies into prose and inline surface proposals ([f0e88c4](https://github.com/vibeunion/svadmin/commit/f0e88c4f34fc579de6f2f3436c960dd96e98af17))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.53.0 <0.66.0 to >=0.66.0
+    * @svadmin/ui bumped from >=0.73.0 <0.92.0 to >=0.92.0
+
 ## [0.16.0](https://github.com/vibeunion/svadmin/compare/surface-v0.15.1...surface-v0.16.0) (2026-10-27)
 
 
