@@ -19,7 +19,7 @@ import { useTranslation } from './i18n.svelte';
 import { Type } from 'typebox';
 import { checkExact } from './schema-validation';
 import { auditWithProvider } from './audit';
-import { fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';
+import { fireSuccessNotification, fireErrorNotification, type NotificationConfig } from './hook-utils.svelte';
 import { captureAuthLiveScope, clearAuthQueries, handleAuthError } from './auth-hooks.svelte';
 import { getAdminOptions } from './options.svelte';
 
@@ -39,6 +39,8 @@ interface FormOptions<S extends ContractSchemas, A extends ContractFormAction> {
   validate?: (values: NoInfer<Draft<S, A>>) => Record<string, string> | null;
   onMutationSuccess?: (result: { data: NoInfer<ContractRecord<S>> }) => void | Promise<void>;
   onMutationError?: (error: HttpError) => void | Promise<void>;
+  /** 为 false 时不弹默认失败 toast。调用方已有表单内提示时使用。 */
+  errorNotification?: NotificationConfig;
   warnWhenUnsavedChanges?: boolean;
 }
 export type ContractFormOptions<S extends ContractSchemas, A extends ContractFormAction> =
@@ -477,7 +479,7 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
           () => targetCurrent(target) && latest === token,
           () => clearAuthQueries(client, target.authProvider), target.authScope,
           () => mounted && latest !== token); }, undefined);
-        if (current()) notify(() => fireErrorNotification({ config: undefined, defaultMessage: i18n.t('common.operationFailed'), error: copyFailure(failed.error),
+        if (current()) notify(() => fireErrorNotification({ config: options.errorNotification, defaultMessage: i18n.t('common.operationFailed'), error: copyFailure(failed.error),
           resource: target.contract.name, ...definedOptions({ provider: target.notificationProvider }) }), undefined);
         if (current()) notify(onError, copyFailure(failed.error));
         throw failed.error;
