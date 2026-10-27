@@ -1109,10 +1109,20 @@ async function waitForWorkspaceTitle(page: import('playwright').Page, title: str
 }
 
 async function waitForSettledAnimations(locator: Locator): Promise<void> {
-  await locator.evaluate(async element => {
-    await Promise.all(element.getAnimations({ subtree: true }).map(animation =>
-      animation.finished.catch(() => undefined)));
-  });
+  const deadline = Date.now() + WAIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    // Svelte transition 在 DOM 更新后的下一帧才挂载；先等两个渲染帧，避免在
+    // slide 高度仍为 0 时命中裁剪区域，再结算当前帧可见的全部动画。
+    const settled = await locator.evaluate(async element => {
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      const animations = element.getAnimations({ subtree: true });
+      if (animations.length === 0) return true;
+      await Promise.all(animations.map(animation => animation.finished.catch(() => undefined)));
+      return false;
+    });
+    if (settled) return;
+  }
+  throw new Error('Timed out waiting for animations to settle');
 }
 
 async function assertWorkspaceControlStable(
