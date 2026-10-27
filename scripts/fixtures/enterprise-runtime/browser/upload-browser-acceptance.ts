@@ -1165,7 +1165,7 @@ async function assertWorkspaceControlStable(
         source: describe(element),
         stack: document.elementsFromPoint(x, y).slice(0, 8).map(describe),
       };
-      console.error('SVADMIN_HIT_DIAG:' + JSON.stringify(diag));
+      throw new Error('SVADMIN_HIT_DIAG:' + JSON.stringify(diag));
     }
     return ok;
   });
