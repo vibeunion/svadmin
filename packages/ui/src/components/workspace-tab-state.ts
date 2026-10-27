@@ -36,7 +36,7 @@ export interface WorkspaceTabViewState {
   scrollLeft: number;
   draft: boolean;
   /** 仅当显式配置 userId、draftFields 和 storage 后才会持久化的草稿字段。 */
-  draftData?: WorkspaceDraftJsonObject;
+  draftData?: WorkspaceDraftJsonObject | undefined;
 }
 
 export interface WorkspaceTabStateStorage {

@@ -6,7 +6,9 @@ import Editor from '../../../editor/src/components/Editor.svelte';
 import LazyEditor from '../../../../example/src/components/LazyRichTextEditor.svelte';
 import FieldRenderer from './FieldRenderer.svelte';
 import type { FieldDefinition } from '@svadmin/core';
-import { t } from '@svadmin/core';
+import { useTranslation } from '@svadmin/core';
+
+const { t } = useTranslation();
 import { requireValue } from '../../../../scripts/test-assertions';
 import { exactRoleName } from '../../test/accessible-name';
 

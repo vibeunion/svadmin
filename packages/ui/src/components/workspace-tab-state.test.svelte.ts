@@ -55,12 +55,12 @@ describe('WorkspaceTabState adapter', () => {
     scroller.scrollTop = 140;
     await fireEvent.scroll(scroller);
 
-    expect(view.getByTestId('workspace-state').dataset.query).toBe('status=open');
+    expect(view.getByTestId('workspace-state').dataset['query']).toBe('status=open');
     expect(scroller.scrollTop).toBe(140);
 
     await fireEvent.click(view.getByRole('tab', { name: 'Mail' }));
     await waitFor(() => {
-      expect(view.getByTestId('workspace-state').dataset.activeTab).toBe('mail');
+      expect(view.getByTestId('workspace-state').dataset['activeTab']).toBe('mail');
       expect(input.value).toBe('');
     });
     expect(scroller.scrollTop).toBe(0);
@@ -69,7 +69,7 @@ describe('WorkspaceTabState adapter', () => {
     await fireEvent.click(view.getByRole('tab', { name: 'Orders' }));
 
     await waitFor(() => {
-      expect(view.getByTestId('workspace-state').dataset.activeTab).toBe('orders');
+      expect(view.getByTestId('workspace-state').dataset['activeTab']).toBe('orders');
       expect(input.value).toBe('status=open');
     });
     expect(scroller.scrollTop).toBe(140);
@@ -93,7 +93,7 @@ describe('WorkspaceTabState adapter', () => {
 
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     expect(view.getByRole('tab', { name: 'Invoice draft' })).toBeTruthy();
-    expect(view.getByTestId('workspace-state').dataset.tabCount).toBe('3');
+    expect(view.getByTestId('workspace-state').dataset['tabCount']).toBe('3');
 
     adapter.markDraft({ id: 'draft', path: '/invoices/new' }, false);
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
@@ -101,7 +101,7 @@ describe('WorkspaceTabState adapter', () => {
     await waitFor(() => {
       expect(view.queryByRole('tab', { name: 'Invoice draft' })).toBeNull();
     });
-    expect(view.getByTestId('workspace-state').dataset.tabCount).toBe('2');
+    expect(view.getByTestId('workspace-state').dataset['tabCount']).toBe('2');
   });
 
   it('restores a versioned snapshot after a refresh and keeps the draft marker', () => {
@@ -569,7 +569,7 @@ describe('WorkspaceTabState adapter', () => {
 
     const input = view.getByLabelText('Workspace query') as HTMLInputElement;
     expect(input.value).toBe('status=open');
-    expect(view.getByTestId('workspace-state').dataset.scrollTop).toBe('64');
+    expect(view.getByTestId('workspace-state').dataset['scrollTop']).toBe('64');
     await waitFor(() => {
       expect((view.getByTestId('workspace-scroll') as HTMLDivElement).scrollTop).toBe(64);
     });

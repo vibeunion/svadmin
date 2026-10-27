@@ -44,7 +44,7 @@ test('a failed primary resource query owns one inline error and recovers through
   });
   await page.goto('/advanced.html');
   await expect(page.getByRole('alert')).toHaveCount(1);
-  await expect(page.getByRole('alert')).toContainText('Resource query failed');
+  await expect(page.getByRole('alert')).toContainText('Data request failed');
   await expectSilent(page);
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect.poll(() => attempts).toBe(2);
@@ -197,7 +197,7 @@ test('lazy resource child failures stay on the branch and retry without a notifi
 test('permission revocation unmounts resource windows without further Provider reads', async ({ page }) => {
   const requests = await server(page); await open(page, 'resource-window'); await expect(page.getByText('Resource 0', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Deny list', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Fixture list access denied');
+  await expect(page.getByRole('alert')).toContainText('You do not have permission to perform this action');
   const count = requests.length;
   await expect(page.getByRole('gridcell')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Refresh', exact: true })).toBeDisabled();

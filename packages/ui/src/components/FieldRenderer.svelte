@@ -52,7 +52,7 @@
     onchange: (val: unknown) => void;
     disabled?: boolean;
     invalid?: boolean;
-    errorId?: string;
+    errorId?: string | undefined;
     id?: string;
     children?: Snippet;
     /** 嵌套数组的可序列化值由外层 JSON 提交；原始文件保留原生通道。 */

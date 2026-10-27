@@ -439,7 +439,7 @@
 
   $effect(() => {
     // 打开/关闭都开启新的焦点意图，关闭再重开的旧完成不得抢焦点。
-    open;
+    void open;
     focusSeq += 1;
   });
 </script>

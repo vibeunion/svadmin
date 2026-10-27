@@ -160,7 +160,7 @@ describe('AutoForm accessibility', () => {
     const feedbackOf = (descriptionId: string, errorId: string) => `${descriptionId} ${errorId}`;
 
     const hostErrors: HTMLParagraphElement[] = [];
-    const attachError = (view: ReturnType<typeof render>, id: string, text: string): void => {
+    const attachError = (view: { container: HTMLElement }, id: string, text: string): void => {
       const error = document.createElement('p');
       error.id = id;
       error.textContent = text;

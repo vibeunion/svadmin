@@ -67,6 +67,7 @@ describe('command execution boundary', () => {
       'const input = Type.Object({ year: Type.Number(), label: Type.Optional(Type.String()) });',
       'const output = Type.Object({ count: Type.Number() });',
       "const command = defineCommand('report', { url: '/report', method: 'get', input, output });",
+      "const safeCommand = defineCommand('report', { url: '/report', method: 'post', input, output, diagnostics: { safe: { ORDER_LOCKED: 'Order is locked' } } });",
       'const result: Promise<{ data: { count: number } }> = executeCommand(provider, command, { year: 2026 });',
       'const value: CommandInput<typeof input> = { year: 2026 };',
       'const data: CommandOutput<typeof output> = { count: 2 };',
@@ -87,6 +88,9 @@ describe('command execution boundary', () => {
       "defineCommand('unsafe', { url: '/report', method: 'get', input: Type.Object({ value: Type.Unknown() }), output });",
       "defineCommand('unsafe', { url: '/report', method: 'get', input: Type.Number(), output });",
       "defineCommand('unsafe', { url: '/report', method: 'trace', input, output });",
+      "defineCommand('unsafe', { url: '/report', method: 'get', input, output, diagnostics: 'safe' });",
+      "defineCommand('unsafe', { url: '/report', method: 'get', input, output, diagnostics: { safe: { ORDER_LOCKED: 'Order is locked' }, extra: {} } });",
+      "defineCommand('unsafe', { url: '/report', method: 'get', input, output, diagnostics: { safe: { ORDER_LOCKED: 'Order is locked' } }, extra: true });",
     ];
     const options: ts.CompilerOptions = {
       noEmit: true, strict: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
@@ -289,6 +293,133 @@ describe('command execution boundary', () => {
     expect(first.cause).toBeUndefined();
     expect(first.body).toBeUndefined();
     expect(first.errors).toBeUndefined();
+  });
+
+  test('does not expose safe-looking provider diagnostics without opt-in', async () => {
+    const { provider } = fixture();
+    const raw = new HttpError('Order is locked', 409, undefined, { code: 'ORDER_LOCKED' });
+    provider.custom = async () => { throw raw; };
+    const error = await failure(executeCommand(provider, contract('post'), input()));
+    expect(error).toMatchObject({
+      statusCode: 409, code: 'COMMAND_FAILED', message: 'Command execution failed',
+      details: { writeMayHaveSucceeded: true },
+    });
+    expect(error.body).toBeUndefined();
+    expect(error.cause).toBeUndefined();
+    expect(error.errors).toBeUndefined();
+  });
+
+  test('resolves declared codes to fixed command messages without provider text', async () => {
+    const { provider } = fixture();
+    const raw = new HttpError('Order token secret', 409, { field: ['secret'] }, {
+      code: 'ORDER_LOCKED', details: { secret: true }, body: { secret: 'secret' }, cause: new Error('secret'),
+    });
+    provider.custom = async () => { throw raw; };
+    const command = defineCommand('report', {
+      url: '/report', method: 'post', input: inputSchema, output: outputSchema,
+      diagnostics: { safe: { ORDER_LOCKED: '订单已锁定' } },
+    });
+    const error = await failure(executeCommand(provider, command, input()));
+    expect(error).toMatchObject({
+      statusCode: 409, code: 'ORDER_LOCKED', message: '订单已锁定',
+      details: { writeMayHaveSucceeded: true },
+    });
+    expect(error).not.toBe(raw);
+    expect(error.body).toBeUndefined();
+    expect(error.cause).toBeUndefined();
+    expect(error.errors).toBeUndefined();
+    expect(JSON.stringify(error)).not.toContain('secret');
+    expect(JSON.stringify(error)).not.toContain('Order token secret');
+  });
+
+  test.each([
+    ['undeclared code', { code: 'UNDECLARED_CODE', message: 'Order is locked' }],
+    ['lowercase code', { code: 'order_locked', message: 'Order is locked' }],
+    ['inherited code', Object.assign(Object.create({ code: 'ORDER_LOCKED' }), {})],
+    ['accessor code', { get code() { return 'ORDER_LOCKED'; } }],
+    ['throwing reflection', new Proxy({}, { getOwnPropertyDescriptor() { throw new Error('secret'); } })],
+  ])('falls back to COMMAND_FAILED for an unsafe or undeclared provider code: %s', async (_label, raw) => {
+    const { provider } = fixture();
+    provider.custom = async () => { throw raw; };
+    const command = defineCommand('report', {
+      url: '/report', method: 'post', input: inputSchema, output: outputSchema,
+      diagnostics: { safe: { ORDER_LOCKED: '订单已锁定' } },
+    });
+    const error = await failure(executeCommand(provider, command, input()));
+    expect(error).toMatchObject({
+      statusCode: 502, code: 'COMMAND_FAILED', message: 'Command execution failed',
+      details: { writeMayHaveSucceeded: true },
+    });
+    expect(JSON.stringify(error)).not.toContain('secret');
+  });
+
+  test('never reads provider message, body, cause, errors, details or stack', async () => {
+    const { provider } = fixture();
+    let reads = 0;
+    const trap = (value: unknown) => ({ get() { reads++; return value; }, enumerable: true });
+    const raw = Object.defineProperties({}, {
+      code: { value: 'ORDER_LOCKED', enumerable: true },
+      statusCode: { value: 409, enumerable: true },
+      message: trap('provider message'),
+      body: trap({ secret: 'body' }),
+      cause: trap(new Error('cause')),
+      errors: trap(['errors']),
+      details: trap({ secret: 'details' }),
+      stack: trap('stack'),
+    });
+    provider.custom = async () => { throw raw; };
+    const command = defineCommand('report', {
+      url: '/report', method: 'post', input: inputSchema, output: outputSchema,
+      diagnostics: { safe: { ORDER_LOCKED: '订单已锁定' } },
+    });
+    const error = await failure(executeCommand(provider, command, input()));
+    expect(error).toMatchObject({ statusCode: 409, code: 'ORDER_LOCKED', message: '订单已锁定' });
+    expect(reads).toBe(0);
+    expect(JSON.stringify(error)).not.toContain('provider message');
+  });
+
+  test('snapshots, sorts and freezes the declared diagnostic mapping', async () => {
+    const mapping: Record<string, string> = { Z_LOCKED: 'Z 已锁定', A_LOCKED: 'A 已锁定' };
+    const command = defineCommand('report', {
+      url: '/report', method: 'post', input: inputSchema, output: outputSchema,
+      diagnostics: { safe: mapping },
+    });
+    mapping['A_LOCKED'] = 'provider text';
+    mapping['NEW_CODE'] = 'provider text';
+    const definition = commandDefinition(command);
+    expect(definition.diagnostics).toEqual({ A_LOCKED: 'A 已锁定', Z_LOCKED: 'Z 已锁定' });
+    expect(Object.keys(definition.diagnostics ?? {})).toEqual(['A_LOCKED', 'Z_LOCKED']);
+    expect(Object.isFrozen(definition.diagnostics)).toBe(true);
+    expect(Reflect.set(definition.diagnostics ?? {}, 'A_LOCKED', 'provider text')).toBe(false);
+  });
+
+  test.each([
+    ['legacy string opt-in', 'safe'],
+    ['null diagnostics', null],
+    ['missing safe mapping', {}],
+    ['non-object safe mapping', { safe: null }],
+    ['array safe mapping', { safe: [] }],
+    ['empty safe mapping', { safe: {} }],
+    ['lowercase code', { safe: { order_locked: 'Order is locked' } }],
+    ['blank message', { safe: { ORDER_LOCKED: '   ' } }],
+    ['multiline message', { safe: { ORDER_LOCKED: 'Order\nlocked' } }],
+    ['non-string message', { safe: { ORDER_LOCKED: 1 } }],
+    ['extra top-level key', { safe: { ORDER_LOCKED: 'Order is locked' }, unsafe: {} }],
+    ['inherited mapping', Object.assign(Object.create({ safe: { ORDER_LOCKED: 'Order is locked' } }), {})],
+    ['symbol key', { safe: { ORDER_LOCKED: 'Order is locked', [Symbol('secret')]: 'secret' } }],
+  ])('rejects an invalid diagnostic mapping at registration: %s', (_label, diagnostics) => {
+    expect(() => register('report', {
+      url: '/report', method: 'post', input: inputSchema, output: outputSchema, diagnostics,
+    })).toThrow(HttpError);
+  });
+
+  test('rejects diagnostic mapping accessors without reading them', () => {
+    let reads = 0;
+    const diagnostics = { get safe() { reads++; return { ORDER_LOCKED: 'Order is locked' }; } };
+    expect(() => register('report', {
+      url: '/report', method: 'post', input: inputSchema, output: outputSchema, diagnostics,
+    })).toThrow(HttpError);
+    expect(reads).toBe(0);
   });
 
   test.each([200, 399, 600, 401.5, '401', NaN, Infinity, undefined])(

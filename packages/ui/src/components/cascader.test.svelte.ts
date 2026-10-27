@@ -3,6 +3,7 @@ import { act, render, fireEvent, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import Cascader, { type CascaderOption } from './Cascader.svelte';
 import { exactRoleName } from '../../test/accessible-name';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 const testOptions: CascaderOption[] = [
   {
@@ -40,12 +41,12 @@ describe('Cascader component', () => {
     const view = render(Cascader, { options: [
       { value: 'leaf', label: 'Leaf', isLeaf: true, children: [{ value: 'stale', label: 'Stale child' }] },
     ], value: ['leaf', 'stale'], onchange });
-    const trigger = view.container.querySelector('button')!;
+    const trigger = requireValue(view.container.querySelector('button'));
     expect(trigger.textContent).toContain('Leaf');
     expect(trigger.textContent).not.toContain('Stale child');
     await fireEvent.click(trigger);
     expect(view.queryByRole('button', { name: exactRoleName('Stale child') })).toBeNull();
-    const leaf = view.getAllByRole('button', { name: exactRoleName('Leaf') }).at(-1)!;
+    const leaf = requireValue(view.getAllByRole('button', { name: exactRoleName('Leaf') }).at(-1));
     leaf.focus();
     await fireEvent.keyDown(leaf, { key: 'ArrowRight' });
     expect(document.activeElement).toBe(leaf);
@@ -476,8 +477,8 @@ describe('Cascader async child loading', () => {
     await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(2));
     expect(pending.size).toBe(2);
 
-    pending.get('Shared 1')!([{ value: 'leaf1', label: 'Leaf 1' }]);
-    pending.get('Shared 2')!([{ value: 'leaf2', label: 'Leaf 2' }]);
+    requireValue(pending.get('Shared 1'))([{ value: 'leaf1', label: 'Leaf 1' }]);
+    requireValue(pending.get('Shared 2'))([{ value: 'leaf2', label: 'Leaf 2' }]);
     const leaf2 = await view.findByRole('button', { name: exactRoleName('Leaf 2') });
     expect(view.queryByRole('button', { name: exactRoleName('Leaf 1') })).toBeNull();
     await fireEvent.click(leaf2);
@@ -670,7 +671,7 @@ describe('Cascader async child loading', () => {
 
   it('does not let an earlier internal write hide a later host tree replacement', async () => {
     const pending: Array<(children: CascaderOption[]) => void> = [];
-    const loadChildren = vi.fn((node: CascaderOption) => new Promise<CascaderOption[]>(resolve => {
+    const loadChildren = vi.fn((_node: CascaderOption) => new Promise<CascaderOption[]>(resolve => {
       pending.push(resolve);
     }));
     const makeTree = (): CascaderOption[] => [
@@ -689,7 +690,7 @@ describe('Cascader async child loading', () => {
     // A 先成功，组件因此产生一次内部子级写回。
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Alpha') }));
     expect(loadChildren).toHaveBeenCalledTimes(1);
-    pending[0]([{ value: 'alpha-child', label: 'Alpha child' }]);
+    requireValue(pending[0])([{ value: 'alpha-child', label: 'Alpha child' }]);
     expect(await view.findByRole('button', { name: exactRoleName('Alpha child') })).toBeTruthy();
 
     // B 仍在途时宿主替换整棵树，即使值完全相同也必须让 B 的旧请求失效。
@@ -700,8 +701,8 @@ describe('Cascader async child loading', () => {
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Beta') }));
     await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(3));
 
-    pending[1]([{ value: 'stale-b', label: 'Stale B' }]);
-    pending[2]([{ value: 'fresh-b', label: 'Fresh B' }]);
+    requireValue(pending[1])([{ value: 'stale-b', label: 'Stale B' }]);
+    requireValue(pending[2])([{ value: 'fresh-b', label: 'Fresh B' }]);
     expect(await view.findByRole('button', { name: exactRoleName('Fresh B') })).toBeTruthy();
     expect(view.queryByRole('button', { name: exactRoleName('Stale B') })).toBeNull();
     expect(onchange).not.toHaveBeenCalled();
@@ -709,7 +710,7 @@ describe('Cascader async child loading', () => {
 
   it('keeps an old request invalid after a host replacement disables then re-enables the path', async () => {
     const pending: Array<(children: CascaderOption[]) => void> = [];
-    const loadChildren = vi.fn((node: CascaderOption) => new Promise<CascaderOption[]>(resolve => {
+    const loadChildren = vi.fn((_node: CascaderOption) => new Promise<CascaderOption[]>(resolve => {
       pending.push(resolve);
     }));
     const makeTree = (): CascaderOption[] => [
@@ -726,7 +727,7 @@ describe('Cascader async child loading', () => {
     });
     await fireEvent.click(view.getByRole('button', { name: 'Choose path' }));
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Alpha') }));
-    pending[0]([{ value: 'alpha-child', label: 'Alpha child' }]);
+    requireValue(pending[0])([{ value: 'alpha-child', label: 'Alpha child' }]);
     expect(await view.findByRole('button', { name: exactRoleName('Alpha child') })).toBeTruthy();
     expect(onchange).toHaveBeenCalledExactlyOnceWith(
       ['alpha'],
@@ -736,13 +737,13 @@ describe('Cascader async child loading', () => {
 
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Beta') }));
     const replaced = makeTree();
-    replaced[1].disabled = true;
+    requireValue(replaced[1]).disabled = true;
     await view.rerender({ options: replaced });
     // 残留的内部写回标记不能让这次宿主替换被误判为内部写回。
-    replaced[1].disabled = false;
+    requireValue(replaced[1]).disabled = false;
     await view.rerender({ options: replaced });
 
-    pending[1]([{ value: 'stale-b', label: 'Stale B' }]);
+    requireValue(pending[1])([{ value: 'stale-b', label: 'Stale B' }]);
     await waitFor(() => expect(view.queryByRole('status')).toBeNull());
     expect(view.queryByRole('button', { name: exactRoleName('Stale B') })).toBeNull();
     expect(onchange).not.toHaveBeenCalled();
@@ -936,7 +937,7 @@ describe('Cascader async child loading', () => {
     expect(await view.findByRole('button', { name: exactRoleName('Alpha leaf') })).toBeTruthy();
 
     // 真正的 $state 原地修改：已缓存的祖先不能继续提供旧的 disabled 快照。
-    await act(() => { options[0]!.disabled = true; });
+    await act(() => { requireValue(options[0]).disabled = true; });
 
     const child = view.getByRole('button', { name: exactRoleName('Alpha child') });
     const leaf = view.getByRole('button', { name: exactRoleName('Alpha leaf') });
@@ -975,7 +976,7 @@ describe('Cascader async child loading', () => {
     await fireEvent.click(await view.findByRole('button', { name: exactRoleName('Alpha child') }));
     expect(await view.findByRole('button', { name: exactRoleName('Alpha leaf') })).toBeTruthy();
 
-    await act(() => { options[0]!.isLeaf = true; });
+    await act(() => { requireValue(options[0]).isLeaf = true; });
 
     expect(view.queryByRole('button', { name: exactRoleName('Alpha child') })).toBeNull();
     expect(view.queryByRole('button', { name: exactRoleName('Alpha leaf') })).toBeNull();
@@ -1004,13 +1005,13 @@ describe('Cascader async child loading', () => {
     expect(await view.findByRole('button', { name: exactRoleName('Loaded child') })).toBeTruthy();
 
     await act(() => {
-      options[0]!.children = [{ value: 'host-child', label: 'Host child' }];
+      requireValue(options[0]).children = [{ value: 'host-child', label: 'Host child' }];
     });
     expect(await view.findByRole('button', { name: exactRoleName('Host child') })).toBeTruthy();
     expect(view.queryByRole('button', { name: exactRoleName('Loaded child') })).toBeNull();
 
     await act(() => {
-      options[0]!.children = [{ value: 'host-replaced', label: 'Host replaced' }];
+      requireValue(options[0]).children = [{ value: 'host-replaced', label: 'Host replaced' }];
     });
     expect(await view.findByRole('button', { name: exactRoleName('Host replaced') })).toBeTruthy();
     expect(view.queryByRole('button', { name: exactRoleName('Host child') })).toBeNull();
@@ -1043,7 +1044,7 @@ describe('Cascader async child loading', () => {
       await fireEvent.click(view.getByRole('button', { name: 'Choose path' }));
       await fireEvent.click(view.getByRole('button', { name: exactRoleName('Root') }));
       await fireEvent.click(view.getByRole('button', { name: exactRoleName('Alpha') }));
-      const alphaRequest = pending.find(request => request.node.value === 'alpha')!;
+      const alphaRequest = requireValue(pending.find(request => request.node.value === 'alpha'));
       await act(async () => {
         alphaRequest.resolve([{ value: 'alpha-child', label: 'Alpha child' }]);
         await alphaRequest.promise;
@@ -1051,8 +1052,9 @@ describe('Cascader async child loading', () => {
       expect(await view.findByRole('button', { name: exactRoleName('Alpha child') })).toBeTruthy();
 
       await fireEvent.click(view.getByRole('button', { name: exactRoleName('Beta') }));
-      const betaRequest = pending.find(request => request.node.value === 'beta')!;
-      const disabledTarget = target === 'self' ? options[0]!.children![1]! : options[0]!;
+      const betaRequest = requireValue(pending.find(request => request.node.value === 'beta'));
+      const root = requireValue(options[0]);
+      const disabledTarget = target === 'self' ? requireValue(requireValue(root.children)[1]) : root;
       await act(async () => {
         disabledTarget.disabled = true;
         await tick();
@@ -1069,7 +1071,7 @@ describe('Cascader async child loading', () => {
       // 旧请求已失效，重新激活才允许开始新的请求。
       await fireEvent.click(view.getByRole('button', { name: exactRoleName('Beta') }));
       await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(3));
-      const freshRequest = pending.at(-1)!;
+      const freshRequest = requireValue(pending.at(-1));
       await act(async () => {
         freshRequest.resolve([{ value: 'fresh-beta', label: 'Fresh beta' }]);
         await freshRequest.promise;

@@ -1,5 +1,10 @@
 # OrbStack Auth / 对象存储可行性验收（2026-10-26）
 
+> 历史可行性快照。本地 Auth 基础生命周期已按用户的 OrbStack 授权续接实施并通过
+> 真实 GoTrue 验证，见 `enterprise-orbstack-auth-smoke-20261026.md`。
+> 下文“不能验收/没有 HTTP smoke”描述的是当时环境，不再作为本地 Auth 的当前阻塞；
+> Storage、MFA 和生产服务契约仍不由该 smoke 证明。
+
 ## 结论
 
 当前仓库可以在本机 OrbStack 中继续验收 PostgreSQL、PostgREST、JWT claim

@@ -878,7 +878,7 @@ describe('ImportWizard dry-run preview', () => {
       dryRun: true,
       onPreview,
       resources: [{
-        ...resources[0]!,
+        ...requireValue(resources[0]),
         contract: leaky,
         fields: [
           { key: 'title', label: 'Title', type: 'text', required: true },
@@ -1021,7 +1021,7 @@ describe('ImportWizard dry-run preview', () => {
         if (result) {
           result.totalRows = 999;
           result.importableRows = 999;
-          result.failedRows[0]!.row = 999;
+          requireValue(result.failedRows[0]).row = 999;
         }
       } catch { /* frozen snapshots reject mutation */ }
     });

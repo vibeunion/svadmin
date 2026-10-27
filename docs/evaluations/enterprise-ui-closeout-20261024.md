@@ -824,3 +824,16 @@ pi 审计发现两个仍可到达用户界面的权限反馈路径直接渲染
   选择、恢复由业务宿主负责；SVAdmin 不提供版本服务/list/select/restore。因此
   版本服务不再作为 SVAdmin 待决策范围；真实记录服务、RBAC/租户、读屏实机、发布
   和部署仍未验收。详见 [版本范围契约](enterprise-b3-05-version-scope-contract-20261027.md)。
+
+## OrbStack 真实 Auth 续接验收（2026-10-26）
+
+- 用户授权本机 OrbStack 并明确继续后，已建立独立、可丢弃的 GoTrue + PostgreSQL
+  测试栈；此前“没有本地 Auth 配置”的阻塞不再适用于本地兼容性测试。
+- pi 产出初稿，主线程审查并修正初始化、连接搜索路径、测试入口隔离和凭据输出边界；
+  只读审查发现的当前 refresh token 重放与远程 URL 保护问题已修正。
+- 主线程真实服务复验 **1 pass / 22 assertions，exit 0**，覆盖注册、登录、身份读取、
+  登录及刷新后的 check、刷新、登出、当前 refresh token 撤销和错误密码拒绝。
+  runner 完成标记验证通过，临时项目清理成功；远程 URL 负例按预期拒绝。
+- 证据：`../evidence/enterprise-orbstack-auth-smoke-20261026.md`。
+  这仅关闭本地真实 Auth 基础生命周期验收，不关闭 MFA/AAL、OAuth/邮件、Storage、
+  业务 RBAC/租户、版本服务、实机读屏、发布部署或在线验收。总体仍为 `PARTIAL`。

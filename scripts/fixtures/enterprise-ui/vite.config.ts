@@ -5,6 +5,12 @@ import { fileURLToPath } from 'node:url';
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
   plugins: [svelte()],
+  resolve: {
+    alias: {
+      // The published editor entry points at dist, which this fixture does not build.
+      '@svadmin/editor': fileURLToPath(new URL('../../../packages/editor/src/index.ts', import.meta.url)),
+    },
+  },
   build: { outDir: '../../../.enterprise-ui-dist', emptyOutDir: true },
   preview: {
     host: '127.0.0.1', port: 4187, strictPort: true,

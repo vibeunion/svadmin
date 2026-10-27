@@ -192,8 +192,8 @@ describe('same-task retry and cancel coordination', () => {
     'keeps the TaskList Cancel action locked until the removed Retry request settles (%s)',
     async outcome => {
       const pending = deferred();
-      const retry = vi.fn<TaskProvider['retry']>(() => pending.promise);
-      const cancel = vi.fn<TaskProvider['cancel']>(async (id: string) => ({ id, status: 'cancelled' }));
+      const retry = vi.fn<NonNullable<TaskProvider['retry']>>(() => pending.promise);
+      const cancel = vi.fn<NonNullable<TaskProvider['cancel']>>(async (id: string) => ({ id, status: 'cancelled' }));
       const onSelect = vi.fn();
       const app = mountBoth(actionProvider({ retry, cancel }), {
         surface: 'list',
@@ -228,7 +228,7 @@ describe('same-task retry and cancel coordination', () => {
 
   it('keeps claims independent across provider, tenant and task changes', async () => {
     const first = deferred();
-    const retry = vi.fn<TaskProvider['retry']>()
+    const retry = vi.fn<NonNullable<TaskProvider['retry']>>()
       .mockImplementationOnce(() => first.promise)
       .mockImplementation(async (id: string) => ({ id, status: 'pending' }));
     const app = mountBoth(actionProvider({ retry }));
@@ -245,7 +245,7 @@ describe('same-task retry and cancel coordination', () => {
     await fireEvent.click(retryButton());
     expect(retry).toHaveBeenCalledTimes(3);
 
-    const otherRetry = vi.fn<TaskProvider['retry']>(async (id: string) => ({ id, status: 'pending' }));
+    const otherRetry = vi.fn<NonNullable<TaskProvider['retry']>>(async (id: string) => ({ id, status: 'pending' }));
     await app.view.rerender({ provider: actionProvider({ retry: otherRetry }) });
     expect(retryButton()).toHaveProperty('disabled', false);
     await fireEvent.click(retryButton());
@@ -257,8 +257,8 @@ describe('same-task retry and cancel coordination', () => {
 
   it('keeps the same task locked when its action component remounts', async () => {
     const pending = deferred();
-    const retry = vi.fn<TaskProvider['retry']>(() => pending.promise);
-    const cancel = vi.fn<TaskProvider['cancel']>(async (id: string) => ({ id, status: 'cancelled' }));
+    const retry = vi.fn<NonNullable<TaskProvider['retry']>>(() => pending.promise);
+    const cancel = vi.fn<NonNullable<TaskProvider['cancel']>>(async (id: string) => ({ id, status: 'cancelled' }));
     const provider = actionProvider({ retry, cancel });
     const app = mountBoth(provider);
     await fireEvent.click(app.view.getByRole('button', { name: exactRoleName('Retry') }));
@@ -335,10 +335,10 @@ describe('same-task retry and cancel coordination', () => {
   it('releases the sibling after failure and keeps explicit retry recovery', async () => {
     const nextRetry = deferred();
     const nextCancel = deferred();
-    const retry = vi.fn<TaskProvider['retry']>()
+    const retry = vi.fn<NonNullable<TaskProvider['retry']>>()
       .mockRejectedValueOnce(new Error('PRIVATE'))
       .mockImplementationOnce(() => nextRetry.promise);
-    const cancel = vi.fn<TaskProvider['cancel']>(() => nextCancel.promise);
+    const cancel = vi.fn<NonNullable<TaskProvider['cancel']>>(() => nextCancel.promise);
     const app = mountBoth(actionProvider({ retry, cancel }), { reportErrors: false });
     const retryButton = app.view.getByRole('button', { name: exactRoleName('Retry') });
     const cancelButton = app.view.getByRole('button', { name: exactRoleName('Cancel') });

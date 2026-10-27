@@ -41,8 +41,9 @@ function createTabs(): WorkspaceTab[] {
   ];
 }
 
-function tabNames(view: ReturnType<typeof render>): string[] {
-  return view.queryAllByRole('tab').map((tab) => tab.textContent?.trim() ?? '');
+function tabNames(view: { container: HTMLElement }): string[] {
+  return [...view.container.querySelectorAll<HTMLElement>('[role="tab"]')]
+    .map((tab) => tab.textContent?.trim() ?? '');
 }
 
 describe('MultiTabKeepAlive optional maxTabs admission', () => {
@@ -67,6 +68,7 @@ describe('MultiTabKeepAlive optional maxTabs admission', () => {
     });
 
     expect(result).toMatchObject({ status: 'opened' });
+    if (result.status === 'rejected') throw new Error(result.reason);
     expect(result.evictedTabIds).toEqual([]);
     expect(onclose).not.toHaveBeenCalled();
     expect(onTabLimitReached).not.toHaveBeenCalled();

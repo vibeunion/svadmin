@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import MultiTabKeepAlive, { type WorkspaceTab } from './MultiTabKeepAlive.svelte';
 import MultiTabCloseProtectionHost from './multitab-close-protection.test-host.svelte';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -15,6 +16,12 @@ function deferred<T>() {
 
 async function flushPending(): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
+}
+
+function tabAt(tabs: readonly WorkspaceTab[], index: number): WorkspaceTab {
+  const tab = tabs[index];
+  if (!tab) throw new Error(`Missing workspace tab ${index}`);
+  return tab;
 }
 
 function createTabs(): WorkspaceTab[] {
@@ -262,7 +269,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const oncloseall = vi.fn();
-    const onbeforeclose = vi.fn(() => pending.promise);
+    const onbeforeclose = vi.fn((_tab: WorkspaceTab) => pending.promise);
 
     const view = render(MultiTabKeepAlive, {
       tabs,
@@ -275,9 +282,9 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     await fireEvent.click(view.getByRole('button', { name: 'Close all tabs' }));
 
-    expect(onbeforeclose.mock.calls.filter(([tab]) => tab.id === 'draft')).toHaveLength(1);
+    expect(onbeforeclose.mock.calls.filter(([tab]) => tab?.id === 'draft')).toHaveLength(1);
     // 关闭操作锁生效，交叉的批量请求直接忽略。
-    expect(onbeforeclose.mock.calls.filter(([tab]) => tab.id === 'orders')).toHaveLength(0);
+    expect(onbeforeclose.mock.calls.filter(([tab]) => tab?.id === 'orders')).toHaveLength(0);
     pending.resolve(true);
 
     await waitFor(() => {
@@ -306,7 +313,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     await view.rerender({
-      tabs: [tabs[0], { id: 'draft', title: 'Invoice draft', path: '/invoices/other', dirty: true }, tabs[2]],
+      tabs: [tabAt(tabs, 0), { id: 'draft', title: 'Invoice draft', path: '/invoices/other', dirty: true }, tabAt(tabs, 2)],
     });
     pending.resolve(true);
     await flushPending();
@@ -317,7 +324,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
   it('rechecks pinned state on the original tab after confirmation', async () => {
     const tabs = createTabs();
-    const dirtyTab = tabs[1]!;
+    const dirtyTab = requireValue(tabAt(tabs, 1));
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const onbeforeclose = vi.fn(() => pending.promise);
@@ -341,7 +348,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
   it('rechecks closable state on the original tab during close-all', async () => {
     const tabs = createTabs();
-    const dirtyTab = tabs[1]!;
+    const dirtyTab = requireValue(tabAt(tabs, 1));
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const onbeforeclose = vi.fn((tab: WorkspaceTab) =>
@@ -412,8 +419,8 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     });
     await view.rerender({
       tabs: [
-        tabs[0],
-        tabs[1],
+        tabAt(tabs, 0),
+        tabAt(tabs, 1),
         { id: 'orders', title: 'Orders', path: '/orders/reopened', closable: true },
       ],
     });
@@ -448,7 +455,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await waitFor(() => {
       expect(onbeforeclose).toHaveBeenCalledWith(expect.objectContaining({ id: 'draft' }));
     });
-    await view.rerender({ tabs: [tabs[0], tabs[1]] });
+    await view.rerender({ tabs: [tabAt(tabs, 0), tabAt(tabs, 1)] });
     pending.resolve(true);
     await flushPending();
 
@@ -509,14 +516,14 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Close Invoice draft' }));
     await view.rerender({
       tabs: [
-        tabs[0],
+        tabAt(tabs, 0),
         Object.freeze({
           id: 'draft',
           title: 'Invoice draft',
           path: '/invoices/new',
           dirty: true,
         }),
-        tabs[2],
+        tabAt(tabs, 2),
       ],
     });
     pending.resolve(true);
@@ -594,7 +601,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
       expect(view.queryByRole('tab', { name: 'Invoice draft' })).toBeNull();
     });
     expect(tabs).toHaveLength(3);
-    expect(tabs[1]?.id).toBe('draft');
+    expect(tabAt(tabs, 1)?.id).toBe('draft');
     expect(view.getByRole('button', { name: 'Close all tabs' })).toBeTruthy();
 
     await fireEvent.click(view.getByRole('button', { name: 'Close all tabs' }));
@@ -606,7 +613,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     expect(onclose).toHaveBeenCalledWith('orders');
     expect(onclose).not.toHaveBeenCalledWith('home');
     expect(tabs).toHaveLength(3);
-    expect(tabs[1]?.id).toBe('draft');
+    expect(tabAt(tabs, 1)?.id).toBe('draft');
     expect(view.queryByRole('button', { name: 'Close all tabs' })).toBeNull();
   });
 
@@ -648,7 +655,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     await waitFor(() => {
       expect(onbeforeclose).toHaveBeenCalledWith(expect.objectContaining({ id: 'draft' }));
     });
-    await view.rerender({ tabs: [tabs[0], tabs[1]] });
+    await view.rerender({ tabs: [tabAt(tabs, 0), tabAt(tabs, 1)] });
     pending.resolve(true);
     await flushPending();
 

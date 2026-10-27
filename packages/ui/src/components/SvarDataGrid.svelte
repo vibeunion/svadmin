@@ -30,7 +30,7 @@
     filters?: readonly SvarTextFilter[];
     onSortChange?: (sorters: SvarSort[]) => void;
     onFilterChange?: (filters: SvarTextFilter[]) => void;
-    onCellEdit?: (edit: SvarCellEdit) => Promise<void>;
+    onCellEdit?: ((edit: SvarCellEdit) => Promise<void>) | undefined;
     selectable?: boolean;
     selectedIds?: readonly SvarRecordId[];
     onSelectionChange?: (ids: SvarRecordId[]) => void;
@@ -38,22 +38,22 @@
     cellContent?: Snippet<[SvarCellContent]>;
     /** 已加载记录的独立快照，含已加载后代，不包含尚未请求的行。 */
     onRecordsChange?: (records: readonly Record<string, unknown>[]) => void;
-    windowSource?: SvarWindowSource;
+    windowSource?: SvarWindowSource | undefined;
     loadChildren?: SvarChildrenLoader;
     hasChildrenKey?: string;
     onLoadMore?: (request: { signal: AbortSignal }) => Promise<void>;
     hasMore?: boolean;
     /** 查询、租户或会话切换必须改变此宿主版本；追加同一数据集则无需改变。 */
     scopeKey?: string | number;
-    loading?: boolean;
-    error?: string;
-    disabled?: boolean;
+    loading?: boolean | undefined;
+    error?: string | undefined;
+    disabled?: boolean | undefined;
     locale?: string;
-    label?: string;
-    emptyLabel?: string;
-    loadingLabel?: string;
-    disabledLabel?: string;
-    fallbackLabel?: string;
+    label?: string | undefined;
+    emptyLabel?: string | undefined;
+    loadingLabel?: string | undefined;
+    disabledLabel?: string | undefined;
+    fallbackLabel?: string | undefined;
   }
   let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey, height = 420, density = 'comfortable', rowHeight: rowHeightProp, headerHeight: headerHeightProp, freezeLeft = 0, freezeRight = 0, queryMode = 'local',
     sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit, selectable = false, selectedIds = [], onSelectionChange, onRecordsChange, cellContent,

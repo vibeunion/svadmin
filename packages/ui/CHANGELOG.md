@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.90.0](https://github.com/vibeunion/svadmin/compare/ui-v0.89.0...ui-v0.90.0) (2026-10-26)
+
+
+### 🚀 Features
+
+* **core:** add static safe command error diagnostics ([#537](https://github.com/vibeunion/svadmin/issues/537)) ([0c8e7c4](https://github.com/vibeunion/svadmin/commit/0c8e7c4a6a3477c0571053e684e05dc2cc3b4458))
+* **ui:** localize environment metadata and about-page resources ([#539](https://github.com/vibeunion/svadmin/issues/539)) ([42b4b8a](https://github.com/vibeunion/svadmin/commit/42b4b8a7a9575070d5f656c386995e8f6becffab))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** localize remaining labels and harden global shortcuts ([#538](https://github.com/vibeunion/svadmin/issues/538)) ([6557f2b](https://github.com/vibeunion/svadmin/commit/6557f2b86bbe003261b80df6bd8456c443dfb32e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.5
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.64.0
+
+## [0.89.0](https://github.com/vibeunion/svadmin/compare/ui-v0.88.1...ui-v0.89.0) (2026-10-23)
+
+
+### 🚀 Features
+
+* **ui:** record enterprise interaction contracts ([#541](https://github.com/vibeunion/svadmin/issues/541)) ([723001f](https://github.com/vibeunion/svadmin/commit/723001f73f75cbd3863c9c0a20388f8386454471))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** restore main lint and typecheck after enterprise contracts ([#543](https://github.com/vibeunion/svadmin/issues/543)) ([5bd3c70](https://github.com/vibeunion/svadmin/commit/5bd3c7040e98e270b74142d39a5f85f208f9aadf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.4
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.63.0
+
 ## [0.88.1](https://github.com/vibeunion/svadmin/compare/ui-v0.88.0...ui-v0.88.1) (2026-10-21)
 
 
