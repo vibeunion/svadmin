@@ -2,9 +2,10 @@
   import { requireValue } from '../../test-assertions';
   import { Type } from 'typebox';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
-  import { defineResource, provideAdminContext, type DataProvider } from '@svadmin/core';
+  import { defineResource, provideAdminContext, toast, type DataProvider } from '@svadmin/core';
   import AutoTable from '../../../packages/ui/src/components/AutoTable.svelte';
   import QuickEditDrawer from '../../../packages/ui/src/components/QuickEditDrawer.svelte';
+  import Toast from '../../../packages/ui/src/components/Toast.svelte';
   import { createResourceRendering } from '../../../packages/ui/src/rendering/index.js';
 
   type Row = { id: number; title: string; team: string };
@@ -83,6 +84,10 @@
     openId = undefined;
   }
 
+  function showDrawerToast() {
+    toast.warning('Drawer operation feedback', 60_000, { key: 'drawer-geometry' });
+  }
+
   // 旧回执只允许关闭它自己所属的记录/抽屉实例，不能影响宿主后来替换的新抽屉。
   function closeFromDrawer(recordId: number, session: number) {
     const decision = openId === recordId && openSession === session ? 'applied' : 'ignored';
@@ -136,6 +141,7 @@
     deleteOne: async ({ id }) => ({ data: { id: String(id) } }),
   };
 
+  // 不注入自定义 NotificationProvider：真实 update reject 必须走 Core 默认 toast 链。
   provideAdminContext({ dataProvider, resources });
 </script>
 
@@ -158,6 +164,7 @@
     </AutoTable>
 
     <div class="host-controls" data-testid="host-controls">
+      <button type="button" data-testid="show-drawer-toast" onclick={showDrawerToast}>Show drawer toast</button>
       <button type="button" data-testid="force-close-drawer" onclick={forceCloseDrawer}>Force close drawer</button>
       <button type="button" data-testid="resolve-pending-update" onclick={() => pendingUpdate?.resolve()}>Resolve pending update</button>
       <button type="button" data-testid="reject-pending-update" onclick={() => pendingUpdate?.reject()}>Reject pending update</button>
@@ -181,6 +188,7 @@
     <output hidden data-testid="quick-edit-records">{JSON.stringify(records)}</output>
     <output hidden data-testid="quick-edit-receipts">{JSON.stringify(receiptDecisions)}</output>
     <output hidden data-testid="quick-edit-host">{JSON.stringify({ openId: openId ?? null, openSession })}</output>
+    <Toast />
   </main>
 </QueryClientProvider>
 

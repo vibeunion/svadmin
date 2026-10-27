@@ -1,5 +1,73 @@
 # 企业级 UI 收口执行记录
 
+## 2026-10-27 B2-06 选择范围决策收口
+
+- 范围已确定：TreeSelect 多选保留纯叶子值级联，父项用于全选/取消全选和半选
+  展示；单选允许父值，`onlyLeafSelectable` 控制父项只展开；Cascader 始终使用
+  完整路径值，`changeOnSelect` 控制父路径是否提交。不新增 `strict`、父子混合值
+  模式或独立权限树模型；用户允许破坏性更新，但当前不需要。
+- 决策来源：用户 2026-10-27 接受主线程建议并明确“继续”；契约记录见
+  [enterprise-b2-06-selection-scope-contract-20261027.md](enterprise-b2-06-selection-scope-contract-20261027.md)。
+  该项从“产品待决策”改为“选择范围已确定”，本文下方 B2-06 历史审计记录保留为
+  历史，由本决策覆盖其当前结论，不重写历史计数。
+- 验收边界：本轮只更新文档，未改生产代码、测试或依赖，未运行测试或构建，未提交、
+  推送、部署。B4-01 至 B4-04 等按需领域能力仍独立评估；真实 Provider/权限、
+  读屏实机、完整 retry/empty/disabled 交叉矩阵、发布包消费、registry 发布和
+  生产部署仍未验收，整体继续为 **PARTIAL**。
+
+## 2026-10-27 B3-05 版本范围决策收口
+
+- 范围已确定：B3-05 保留宿主提供的 `oldValue/newValue` 差异展示；
+  版本列表、版本选择、恢复由业务宿主负责。SVAdmin 不提供版本服务、
+  版本列表、版本选择或恢复 API/UI，不新增默认版本 Provider、版本 schema 或恢复动作。
+- 决策来源：用户 2026-10-27 明确决策；契约记录见
+  [enterprise-b3-05-version-scope-contract-20261027.md](enterprise-b3-05-version-scope-contract-20261027.md)。
+  该项从“产品待决策”改为“范围已确定”，验收矩阵 B3-05 条目的历史阻塞记录保留为历史，
+  不再作为当前缺口清单。
+- 验收边界：本轮只更新文档，未改生产代码、测试或依赖，未提交、推送、部署。
+  仍需外部输入的是真实版本/记录服务、真实 RBAC/租户与字段授权、读屏实机、
+  发布授权和生产部署；这些限制不因范围决策而关闭。
+
+## ResourceFormBody 表单错误契约有界审查（2026-10-27）
+
+- 有界审查 `packages/surface/src/components/ResourceFormBody.svelte`，未改生产代码：
+  类型校验 `errors` 仅由 `action.inputSchema` + 用户输入经 `Value.Errors` 生成
+  实例路径与 TypeBox 提示，不含 Provider、传输、权限或宿主诊断原文，属于合法的
+  可操作输入提示，保留不移除。
+- Provider 提交失败：controller 只发布内部 `error` 字段，组件 DOM 固定渲染按
+  `locale` 派生的 `labels.error`，不展示原始异常；`labels` 为派生状态，切换
+  locale 会重新本地化失败文案。该路径无缓存旧语言文本。
+- 恢复保留输入：失败分支不清空组件 `value`、不改 `JsonSchemaForm` 绑定值，也不
+  丢弃 controller 的 `requestKey` 草稿；只有 scope 身份（scopeKey/surfaceId/
+  revision/enabled/transport）变化才清空草稿与错误，符合既有草稿边界。
+- 主线程独立运行直接回归 `form-scope.test.svelte.ts` **7/7，exit 0**；该文件覆盖
+  scope 变化清空、纯展示变化保留输入与实例身份；`git diff --check` exit 0。
+- 本轮未发现违反现有规范的本地缺口，因此不新增 followup，也不删除现有校验提示；
+  未运行全量测试、未改共享依赖、未提交/推送/发布/部署，整体保持 **PARTIAL**。
+- 下一项真实剩余要求：B3-05 版本范围已由用户于 2026-10-27 决策为“保留宿主
+  `oldValue/newValue` 差异展示；版本列表/选择/恢复归业务宿主；SVAdmin 不提供
+  版本服务/list/select/restore”，见本文顶部决策收口小节。真实 Provider/RBAC/租户、
+  服务端 Schema 一致性、读屏实机及发布部署授权仍属外部限制。
+
+## Surface 错误语言与绑定边界复核（2026-10-27）
+
+- SurfaceRenderer 将错误状态的本地化统一到呈现边界，覆盖缓存错误的语言切换
+  与渲染期缺失绑定；不重新请求、不重复权限检查，宿主诊断回调保持原始信息。
+- pi 与主线程分别运行单文件 **24/24**，目标 ESLint 与 diff check 均通过；
+  详见 [follow-up 契约](enterprise-surface-source-localization-contract-20261027.md)。
+- 本项不证明真实 Provider、RBAC、读屏、发布或部署，整体继续为 PARTIAL。
+
+## 自定义 Surface widget 源错误反馈收敛（2026-10-27）
+
+- `SurfaceRenderer` 对非 JSON 结果的可见错误状态使用稳定中英文数据无效文案，
+  避免自定义 widget 直接渲染内部字段诊断；宿主 `onError` 诊断能力保留。
+- pi 实施、主线程独立单文件回归 **21/21 passed、exit 0**；定向 ESLint 与
+  `git diff --check` 通过。详见
+  [源错误诊断证据](../evidence/enterprise-surface-source-error-diagnostic-20261027.md)。
+- Toast 默认错误链的三引擎两视口几何验收亦已由主线程独立 **30/30** 通过，
+  见 [Toast 几何证据](../evidence/enterprise-toast-drawer-geometry-20261026.md)。
+  两项均为本地限定范围证据，整体企业级目标继续为 PARTIAL。
+
 ## ImportWizard 归一化错误本地化（2026-10-24）
 
 - `ImportWizard` 不再直接展示 Core `HttpError.message`；失败行和失败 CSV 均按
@@ -158,7 +226,9 @@
 - pi 只读复核确认旧决策入口混淆了本地完成项和外部依赖；主线程已同步当前索引、
   标注历史快照并修正决策包中的草稿/Schema 当前边界。`git diff --check` 通过。
 - **仍为 PARTIAL**：真实服务验收任务 blocked；不是所有本地实现 blocked。
-  B2-06 新选择策略、B3-05 完整版本服务及 B4 仍需单独选定范围，不自动扩展。
+  B2-06 新选择策略及 B4 仍需单独选定范围，不自动扩展；B3-05 版本范围已于
+  2026-10-27 由用户决策为保留宿主 `oldValue/newValue` 展示，版本列表/选择/恢复
+  归业务宿主，SVAdmin 不提供版本服务/list/select/restore。
 
 ## B3-09 存储兼容审查收口（2026-10-24）
 
@@ -494,7 +564,7 @@ Scenario: 编辑回显
 
 | 项目 | 当前结论 | 证据 |
 | --- | --- | --- |
-| B3-05 版本历史 | 没有可安全臆造的本地修复。当前公开契约只有 `oldValue/newValue` 静态差异数据，没有版本 ID、版本列表、选中动作、Provider 回执或权限语义 | `docs/evaluations/enterprise-ui-acceptance-matrix-20261022.md` 的 B3-05 条目 |
+| B3-05 版本历史 | 2026-10-24 时没有可安全臆造的本地修复；2026-10-27 用户已决策保留宿主 `oldValue/newValue` 差异展示，版本列表/选择/恢复归业务宿主，SVAdmin 不提供版本服务/list/select/restore | `docs/evaluations/enterprise-ui-acceptance-matrix-20261022.md` 的 B3-05 条目；[版本范围契约](enterprise-b3-05-version-scope-contract-20261027.md) |
 | FileUpload / AutoForm | 本地闭环，无新增缺口。成功结果只写 JSON 引用；上传中的 `File` 不进入 AutoForm 草稿；失败、取消、替换、reset、作用域变化和迟到回执均有隔离 | `docs/evidence/autoform-upload-integration-20261024.md` |
 | Schema `$ref` / `oneOf` | 本地闭环范围为内部 `#/$defs/...`、有界展开和显式 discriminator；远程引用继续拒绝，不发起网络请求 | `docs/evaluations/schema-oneof-contract-20261024.md` |
 | 服务端 Schema | 仍需真实服务契约。客户端通过不等于服务端接受/拒绝结果一致，不能用本地 fixture 关闭此项 | `docs/evaluations/enterprise-ui-unblock-contract-20261024.md` |
@@ -750,5 +820,7 @@ pi 审计发现两个仍可到达用户界面的权限反馈路径直接渲染
 - 主线程独立验证：`version-diff-viewer.test.svelte.ts` **2/2，exit 0**；目标生产组件
   ESLint `--max-warnings 0` 与 `git diff --check` 均通过。详情 workspace 直接测试
   已在本线程复跑 **9/9**，其余历史测试 lint 问题未扩展到生产组件。
-- B3-05 的版本服务、版本列表/选择、版本级空态/错误/权限/冲突语义仍需产品和后端
-  契约；真实版本服务、RBAC/租户、读屏实机、发布和部署仍未验收。
+- 2026-10-27 用户已决策：B3-05 保留宿主 `oldValue/newValue` 差异展示；版本列表、
+  选择、恢复由业务宿主负责；SVAdmin 不提供版本服务/list/select/restore。因此
+  版本服务不再作为 SVAdmin 待决策范围；真实记录服务、RBAC/租户、读屏实机、发布
+  和部署仍未验收。详见 [版本范围契约](enterprise-b3-05-version-scope-contract-20261027.md)。

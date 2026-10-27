@@ -1,0 +1,107 @@
+# 用于本地 OrbStack 与 CI default Docker context 的 Storage 验收栈。
+# 凭据全部来自当前进程环境，不写入文件；runner 外层固定使用 --pull never，
+# CI 在独立步骤显式 pull 所需公开镜像，本地使用已有缓存。
+services:
+  storage-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: svadmin_storage
+      POSTGRES_PASSWORD: ${SVADMIN_STORAGE_DB_PASSWORD:?set SVADMIN_STORAGE_DB_PASSWORD}
+    volumes:
+      # 只预置 auth schema 与 RLS 辅助函数；storage schema、角色与表结构由镜像自带迁移负责。
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d svadmin_storage"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  auth-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: svadmin_auth
+      POSTGRES_PASSWORD: ${SVADMIN_AUTH_DB_PASSWORD:?set SVADMIN_AUTH_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d svadmin_auth"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  storage:
+    image: public.ecr.aws/supabase/storage-api:v1.80.0
+    depends_on:
+      storage-db:
+        condition: service_healthy
+    environment:
+      # 单租户 + 本地文件后端，避免依赖真实 S3。
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: "5000"
+      STORAGE_BACKEND: file
+      STORAGE_FILE_BACKEND_PATH: /var/lib/storage
+      DATABASE_URL: "postgres://postgres:${SVADMIN_STORAGE_DB_PASSWORD:?set SVADMIN_STORAGE_DB_PASSWORD}@storage-db:5432/svadmin_storage"
+      DB_INSTALL_ROLES: "true"
+      DB_ANON_ROLE: anon
+      DB_AUTHENTICATED_ROLE: authenticated
+      DB_SERVICE_ROLE: service_role
+      AUTH_JWT_SECRET: ${SVADMIN_STORAGE_JWT_SECRET:?set SVADMIN_STORAGE_JWT_SECRET}
+      AUTH_JWT_ALGORITHM: HS256
+      # 供 Storage 校验 anon/service 基础 JWT；普通用户身份不依赖这些键。
+      ANON_KEY: ${SVADMIN_STORAGE_ANON_KEY:?set SVADMIN_STORAGE_ANON_KEY}
+      SERVICE_KEY: ${SVADMIN_STORAGE_SERVICE_KEY:?set SVADMIN_STORAGE_SERVICE_KEY}
+      TENANT_ID: svadmin-storage-acceptance
+      FILE_SIZE_LIMIT: "52428800"
+      ENABLE_IMAGE_TRANSFORMATION: "false"
+      LOG_LEVEL: warn
+    ports:
+      # 随机高位端口，仅绑定回环地址。
+      - "127.0.0.1::5000"
+
+  auth:
+    image: public.ecr.aws/supabase/gotrue:v2.197.0
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: "9999"
+      API_EXTERNAL_URL: http://127.0.0.1:9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: "postgres://postgres:${SVADMIN_AUTH_DB_PASSWORD:?set SVADMIN_AUTH_DB_PASSWORD}@auth-db:5432/svadmin_auth?sslmode=disable&search_path=auth"
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_SITE_URL: http://127.0.0.1:9999
+      GOTRUE_JWT_ISSUER: http://127.0.0.1:9999
+      # 与 Storage 共享同一个临时 HS256 secret，使 GoTrue 会话可直接驱动 Storage RLS。
+      GOTRUE_JWT_SECRET: ${SVADMIN_STORAGE_JWT_SECRET:?set SVADMIN_STORAGE_JWT_SECRET}
+      GOTRUE_JWT_EXP: "3600"
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_SMS_AUTOCONFIRM: "false"
+      GOTRUE_SMTP_HOST: ""
+      GOTRUE_LOG_LEVEL: warn
+    ports:
+      # 随机高位端口，仅绑定回环地址。
+      - "127.0.0.1::9999"
+
+  postgrest:
+    # 与 docker/enterprise-test 相同版本；CI 在 runner 之前显式 pull，runner 仍使用 --pull never。
+    image: postgrest/postgrest:v12.2.12
+    depends_on:
+      storage-db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: "postgres://svadmin_acceptance_authenticator:${SVADMIN_STORAGE_ACCEPTANCE_DB_PASSWORD:?set SVADMIN_STORAGE_ACCEPTANCE_DB_PASSWORD}@storage-db:5432/svadmin_storage"
+      PGRST_DB_SCHEMA: enterprise_acceptance
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${SVADMIN_STORAGE_JWT_SECRET:?set SVADMIN_STORAGE_JWT_SECRET}
+      PGRST_JWT_AUD: authenticated
+      PGRST_SERVER_HOST: 0.0.0.0
+      PGRST_SERVER_PORT: "3000"
+      PGRST_LOG_LEVEL: error
+    ports:
+      # 随机高位端口，仅绑定回环地址。
+      - "127.0.0.1::3000"

@@ -1,0 +1,70 @@
+name: Enterprise services acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - 'scripts/fixtures/enterprise-runtime/**'
+      - 'scripts/fixtures/enterprise-ui/**'
+      - 'docker/enterprise-storage/**'
+      - '.github/workflows/enterprise-services.yml'
+      - 'bun.lock'
+      - 'package.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: enterprise-services-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  services:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Pull public service images on the default Docker context
+        run: |
+          set -euo pipefail
+          # 与 runner 一致：移除可能继承的远端 Docker 变量，固定 default context。
+          unset DOCKER_HOST DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH
+          # CI 独占允许在独立步骤拉取公开镜像；runner 仍固定使用 --pull never。
+          docker --context default pull postgres:18
+          docker --context default pull public.ecr.aws/supabase/storage-api:v1.80.0
+          docker --context default pull public.ecr.aws/supabase/gotrue:v2.197.0
+          docker --context default pull postgrest/postgrest:v12.2.12
+      - name: Install Playwright engines and system dependencies
+        run: bun run playwright install --with-deps chromium firefox webkit
+      - name: Run real 14-item acceptance on the default Docker context
+        env:
+          # 显式选择 CI 本地 Docker 引擎；runner 会移除继承的 DOCKER_HOST 等远端变量。
+          SVADMIN_STORAGE_DOCKER_CONTEXT: default
+        run: |
+          set -euo pipefail
+          mkdir -p test-results/enterprise-services
+          # 只保留脱敏后的 runner 日志；不上传浏览器 trace、服务原始日志或任何 secret。
+          bun scripts/fixtures/enterprise-runtime/storage-acceptance.run.ts 2>&1 \
+            | sed -E 's/eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/[redacted-jwt]/g' \
+            | tee test-results/enterprise-services/runner.log
+      - name: Record exact source SHA
+        if: always()
+        run: |
+          mkdir -p test-results/enterprise-services
+          git rev-parse HEAD > test-results/enterprise-services/commit.txt
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: enterprise-services-evidence
+          path: test-results/enterprise-services
+          retention-days: 7
+          if-no-files-found: error

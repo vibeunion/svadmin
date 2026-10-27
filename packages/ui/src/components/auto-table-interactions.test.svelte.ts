@@ -174,6 +174,68 @@ describe('AutoTable interactions', () => {
     expect(await view.findByPlaceholderText('Search...')).toBeTruthy();
   });
 
+  it('uses the neutral Chinese empty description without create permission', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      locale: 'zh-CN',
+      emptyData: true,
+      canCreate: false,
+      onNavigate: vi.fn(),
+    });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeTruthy();
+    });
+    const empty = view.container.querySelector('[data-svadmin-data-state="empty"]');
+    expect(empty?.textContent).toContain('暂无数据');
+    expect(empty?.textContent).not.toContain('创建第一条记录');
+  });
+
+  it('uses the neutral English empty description without create permission', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      locale: 'en',
+      emptyData: true,
+      canCreate: false,
+      onNavigate: vi.fn(),
+    });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeTruthy();
+    });
+    const empty = view.container.querySelector('[data-svadmin-data-state="empty"]');
+    expect(empty?.textContent).toContain('No data');
+    expect(empty?.textContent).not.toMatch(/create your first record/i);
+  });
+
+  it('keeps the Chinese create guidance when create permission exists', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      locale: 'zh-CN',
+      emptyData: true,
+      canCreate: true,
+      onNavigate: vi.fn(),
+    });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeTruthy();
+    });
+    expect(view.container.querySelector('[data-svadmin-data-state="empty"]')?.textContent)
+      .toContain('创建第一条记录');
+  });
+
+  it('keeps the English create guidance when create permission exists', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      locale: 'en',
+      emptyData: true,
+      canCreate: true,
+      onNavigate: vi.fn(),
+    });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeTruthy();
+    });
+    expect(view.container.querySelector('[data-svadmin-data-state="empty"]')?.textContent)
+      .toMatch(/create your first record/i);
+  });
+
   it('renders the base table primitives', async () => {
     const view = render(AutoTableInteractionsHarness, {
       onNavigate: vi.fn(),

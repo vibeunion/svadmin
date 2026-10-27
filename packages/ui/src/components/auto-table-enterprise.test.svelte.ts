@@ -156,6 +156,19 @@ describe('AutoTable enterprise enhancements', () => {
     expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeNull();
   });
 
+  it('keeps the filtered-empty description independent from neutral empty copy', async () => {
+    const view = render(AutoTableEnterpriseHarness, { viewMode: 'table', locale: 'en' });
+    const search = await view.findByPlaceholderText('Search...');
+    await fireEvent.input(search, { target: { value: 'missing-user' } });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy();
+    });
+    const filtered = view.container.querySelector('[data-svadmin-data-state="filtered-empty"]');
+    expect(filtered?.textContent).toContain('No records found matching your criteria.');
+    expect(filtered?.textContent).not.toContain('No data');
+  });
+
   it('ShowPage renders in grid layout with multi-column descriptions', async () => {
     const view = render(AutoTableEnterpriseHarness, {
       viewMode: 'show-page-grid',
