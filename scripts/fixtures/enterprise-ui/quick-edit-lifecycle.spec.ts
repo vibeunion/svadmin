@@ -307,7 +307,7 @@ test('QuickEditLifecycle keeps an active Toast clear of drawer actions and resto
   expect(errors).toEqual([]);
 });
 
-test('QuickEditLifecycle surfaces a failed update as an active error Toast clear of drawer actions and restores its corner after close', async ({ page }, testInfo) => {
+test('QuickEditLifecycle keeps a rejected update as one inline error and does not stack a toast', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/?view=quick-edit-lifecycle');
@@ -319,48 +319,33 @@ test('QuickEditLifecycle surfaces a failed update as an active error Toast clear
   await expect.poll(() => updateCount(page)).toBe(1);
   await expect(quickEdit.save).toBeDisabled();
 
-  // 真实 QuickEditDrawer 的 update reject 经 contract-form 既有错误反馈路径
-  // 走 Core 默认 toast 链；不是宿主按钮直接 toast，也不注入自定义 provider。
+  // 表单内已经有持久失败提示。真实 update reject 不能再走默认 toast，
+  // 否则同一句「操作失败」会在抽屉和左下角各出现一次，并可能叠成多条。
   await hostAction(page, 'reject-pending-update');
   await expect.poll(async () => readJson<UpdateSettlement[]>(page, 'quick-edit-update-settlements', [])).toEqual([
     { recordId: 1, session: 1, outcome: 'rejected' },
   ]);
 
-  const errorToast = page.locator('[data-sonner-toast][data-type="error"]').filter({ visible: true }).first();
-  await expect(errorToast).toBeVisible();
-  await expect(errorToast).toContainText(/(Operation failed|操作失败)/);
-  await expect(errorToast).not.toContainText('Drawer operation feedback');
-  await expect(page.locator('[data-sonner-toaster][data-y-position="bottom"][data-x-position="left"]')).toHaveCount(1);
-  await expectToastClearOfDrawerActions(errorToast, quickEdit, testInfo, 'update-rejected');
-
+  const alert = quickEdit.drawer.getByRole('alert');
+  await expect(alert).toHaveCount(1);
+  await expect(alert).toContainText(/(Operation failed|操作失败)/);
+  await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveCount(0);
+  await expect(quickEdit.title).toHaveValue('rejected lifecycle draft');
   expect(await page.locator('body').textContent()).not.toContain('PRIVATE_QUICK_EDIT_UPDATE_DIAGNOSTIC');
   await expect.poll(async () => readJson<Array<{ id: number; title: string }>>(page, 'quick-edit-records', [])).toEqual([
     { id: 1, title: 'Lifecycle item 1', team: 'platform' },
     { id: 2, title: 'Lifecycle item 2', team: 'operations' },
   ]);
   await expectNoHorizontalOverflow(page, testInfo);
+  await saveScreenshot(page, testInfo, 'inline-error-without-toast');
 
-  // 失败后草稿仍是 tainted，关闭需要既有确认路径；关闭后 error Toast 仍为 active。
   await quickEdit.close.click();
   const confirm = page.getByRole('alertdialog');
   await expect(confirm).toBeVisible();
   await confirm.getByRole('button', { name: /^(Confirm|确认)$/ }).click();
   await expect(confirm).toBeHidden();
   await expect(quickEdit.drawer).toBeHidden();
-  await expect(page.locator('[data-sonner-toaster][data-y-position="top"][data-x-position="right"]')).toHaveCount(1);
-  await expect(errorToast).toBeVisible();
-  await expect(errorToast).toContainText(/(Operation failed|操作失败)/);
-  await errorToast.evaluate(async element => {
-    await Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => undefined)));
-  });
-  const restoredBox = await boxOf(errorToast, 'restored error toast');
-  const viewport = page.viewportSize();
-  expect(viewport).not.toBeNull();
-  expect(restoredBox.x + restoredBox.width, `${testInfo.project.name} restored error toast right edge`)
-    .toBeLessThanOrEqual((viewport?.width ?? 0) + 1);
-  expect(restoredBox.y, `${testInfo.project.name} restored error toast top edge`).toBeLessThan((viewport?.height ?? 0) / 2);
+  await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveCount(0);
   await expectNoHorizontalOverflow(page, testInfo);
-  // 默认 error toast 只有 5s 生命周期；把截图延后到关闭后，避免挤占几何断言窗口。
-  await saveScreenshot(page, testInfo, 'error-toast-restored-top-right');
   expect(errors).toEqual([]);
 });
