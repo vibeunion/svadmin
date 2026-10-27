@@ -10,8 +10,10 @@ const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
 const maximumChunkBytes = 1_250_000;
 const maximumInitialBytes = 1_400_000;
-// Enterprise closeout measured 390055 gzip bytes on 2026-10-26.
-const maximumInitialGzipBytes = 390_100;
+// Enterprise closeout measured 390055 gzip bytes on 2026-10-26; PR549 CI first run
+// measured 390175 gzip bytes on 2026-10-27. The ~120-byte increase comes from Toast's
+// native Observer logic with no new imports.
+const maximumInitialGzipBytes = 390_200;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
