@@ -1131,7 +1131,7 @@ async function assertWorkspaceControlStable(
   expect(box.y >= 0).toBe(true);
   expect(box.x + box.width <= viewport.width).toBe(true);
   expect(box.y + box.height <= viewport.height).toBe(true);
-  const hit = await locator.evaluate(element => {
+  const hit = await locator.evaluate((element, engine) => {
     const rect = element.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
@@ -1139,36 +1139,28 @@ async function assertWorkspaceControlStable(
     const ok = target !== null && (target === element || element.contains(target));
     if (!ok) {
       const describe = (node: Element): Record<string, unknown> => {
-        const el = node as HTMLElement;
-        const style = getComputedStyle(el);
-        const box = el.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        const box = node.getBoundingClientRect();
         return {
-          tag: el.tagName,
-          id: el.id,
-          role: el.getAttribute('role'),
-          slot: el.getAttribute('data-slot'),
-          cls: typeof el.className === 'string' ? el.className.slice(0, 160) : '',
-          text: (el.textContent ?? '').trim().slice(0, 120),
-          pe: style.pointerEvents,
-          vis: style.visibility,
-          op: style.opacity,
-          z: style.zIndex,
-          pos: style.position,
-          overflow: style.overflow,
+          tag: node.tagName,
+          role: node.getAttribute('role'),
+          pointerEvents: style.pointerEvents,
+          visibility: style.visibility,
+          opacity: style.opacity,
+          zIndex: style.zIndex,
           box: [Math.round(box.x), Math.round(box.y), Math.round(box.width), Math.round(box.height)],
         };
       };
-      const diag = {
-        label,
+      throw new Error('SVADMIN_HIT_DIAG:' + JSON.stringify({
+        engine,
         point: [Math.round(x), Math.round(y)],
         viewport: [window.innerWidth, window.innerHeight],
         source: describe(element),
         stack: document.elementsFromPoint(x, y).slice(0, 8).map(describe),
-      };
-      throw new Error('SVADMIN_HIT_DIAG:' + JSON.stringify(diag));
+      }));
     }
     return ok;
-  });
+  }, label.slice(0, label.indexOf(' ') === -1 ? label.length : label.indexOf(' ')));
   expect(hit).toBe(true);
 }
 

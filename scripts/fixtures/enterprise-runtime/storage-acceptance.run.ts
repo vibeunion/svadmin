@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { SignJWT } from 'jose';
 import {
@@ -343,6 +343,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;`, stackEnv);
 
   // 不打印原始测试/服务日志：失败只固定报告阶段，成功只报告标记、退出码与计数。
   const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+  writeFileSync('/tmp/rawtest.log', output);
   const counts = parseTestCounts(output);
   const countText = counts === null
     ? 'pass=? fail=? skip=? todo=?'
