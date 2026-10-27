@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.21.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.20.0...supabase-v0.21.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **enterprise:** harden UI feedback and add isolated service CI acceptance ([#549](https://github.com/vibeunion/svadmin/issues/549)) ([bda1fa2](https://github.com/vibeunion/svadmin/commit/bda1fa21a9162050b5d1742f2a82adc8d173a342))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.11
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.0
+
 ## [0.20.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.19.6...supabase-v0.20.0) (2026-10-27)
 
 
