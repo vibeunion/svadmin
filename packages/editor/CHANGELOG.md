@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.0](https://github.com/vibeunion/svadmin/compare/editor-v0.6.1...editor-v0.7.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.65.0
+
 ## [0.6.1](https://github.com/vibeunion/svadmin/compare/editor-v0.6.0...editor-v0.6.1) (2026-10-26)
 
 

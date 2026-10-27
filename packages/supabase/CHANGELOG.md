@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.20.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.19.6...supabase-v0.20.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.10
+  * peerDependencies
+    * @svadmin/core bumped to 0.65.0
+
 ## [0.19.6](https://github.com/vibeunion/svadmin/compare/supabase-v0.19.5...supabase-v0.19.6) (2026-10-26)
 
 

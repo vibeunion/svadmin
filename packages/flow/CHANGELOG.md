@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/vibeunion/svadmin/compare/flow-v0.6.0...flow-v0.6.1) (2026-10-27)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+
 ## [0.6.0](https://github.com/vibeunion/svadmin/compare/flow-v0.5.0...flow-v0.6.0) (2026-10-05)
 
 

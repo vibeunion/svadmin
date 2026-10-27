@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.65.0](https://github.com/vibeunion/svadmin/compare/core-v0.64.0...core-v0.65.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** build devtools contract and drop duplicate core test types ([b2f1353](https://github.com/vibeunion/svadmin/commit/b2f1353e66d98828712772ad7815d19def0f9870))
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+
 ## [0.64.0](https://github.com/vibeunion/svadmin/compare/core-v0.63.0...core-v0.64.0) (2026-10-26)
 
 
