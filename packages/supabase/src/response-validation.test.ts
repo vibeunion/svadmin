@@ -1,14 +1,24 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
 import { createSupabaseRpc } from './rpc';
 
-mock.module('@refinedev/supabase', () => ({
-  dataProvider: () => ({
+function validRefineProvider() {
+  return {
     getList: async () => ({ data: [{ id: 1, title: 'Item 1' }], total: 1 }),
     getOne: async () => ({ data: { id: 1, title: 'Item 1' } }),
     create: async () => ({ data: { id: 2, title: 'New Item' } }),
     update: async () => ({ data: { id: 1, title: 'Updated' } }),
     deleteOne: async () => ({ data: { id: 1, title: 'Deleted' } }),
-  }),
+  };
+}
+
+let refineFactoryCalls: unknown[][] = [];
+let refineFactoryResult: unknown = validRefineProvider();
+
+mock.module('@refinedev/supabase', () => ({
+  dataProvider: (...args: unknown[]) => {
+    refineFactoryCalls.push(args);
+    return refineFactoryResult;
+  },
 }));
 
 const { createSupabaseDataProvider } = await import('./data-provider');
@@ -38,7 +48,11 @@ function fixture(response: unknown) {
 }
 
 let fetchDescriptor: PropertyDescriptor | undefined;
-beforeEach(() => { fetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch'); });
+beforeEach(() => {
+  fetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
+  refineFactoryCalls = [];
+  refineFactoryResult = validRefineProvider();
+});
 afterEach(() => {
   if (fetchDescriptor) Object.defineProperty(globalThis, 'fetch', fetchDescriptor);
   else Reflect.deleteProperty(globalThis, 'fetch');
@@ -50,6 +64,29 @@ describe('Supabase validated custom transport', () => {
     const provider = createSupabaseDataProvider({ rpc: 'not-callable' });
     if (!provider.custom) throw new Error('Expected custom transport');
     await expect(provider.custom({ url: 'rpc/work', method: 'post' })).rejects.toThrow('method rpc is unavailable');
+  });
+
+  test('passes the original client reference to the Refine factory once after input validation', async () => {
+    const client = {
+      from: () => ({}),
+      rpc: async () => ({ data: null, error: null }),
+    };
+    for (const invalid of [null, false, [], 'client']) {
+      expect(() => createSupabaseDataProvider(invalid)).toThrow('must be an object');
+    }
+    expect(refineFactoryCalls).toEqual([]);
+    const provider = createSupabaseDataProvider(client);
+    expect(refineFactoryCalls).toEqual([[client]]);
+    expect(refineFactoryCalls[0]?.[0]).toBe(client);
+    await expect(provider.getOne({ resource: 'posts', id: 1 })).resolves.toEqual({ data: { id: 1, title: 'Item 1' } });
+    expect(refineFactoryCalls).toEqual([[client]]);
+    refineFactoryCalls = [];
+    for (const invalidResult of [null, false, [], 'provider', {}]) {
+      refineFactoryResult = invalidResult;
+      expect(() => createSupabaseDataProvider(client)).toThrow('createRefineAdapter');
+      expect(refineFactoryCalls).toEqual([[client]]);
+      refineFactoryCalls = [];
+    }
   });
 
   test('does not admit malformed SDK envelopes as successful custom responses', async () => {

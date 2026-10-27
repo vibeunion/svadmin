@@ -150,6 +150,14 @@
 
 ### B2-06 Tree / TreeSelect / Cascader
 
+> **2026-10-27 产品范围决策已关闭**：TreeSelect 多选保留纯叶子值级联，父项用于
+> 全选/取消和半选展示；单选允许父值，`onlyLeafSelectable` 控制父项只展开；
+> Cascader 始终使用完整路径值，`changeOnSelect` 控制父路径是否提交。不新增
+> `strict`、父子混合值模式或独立权限树模型。旧“产品待决策”记录保留为历史，
+> 由 [B2-06 选择范围契约](./enterprise-b2-06-selection-scope-contract-20261027.md)
+> 覆盖当前结论；B4 按需范围仍独立评估。真实 Provider、读屏、发布和部署仍未
+> 验收，整体继续为 PARTIAL。
+
 - 原始要求：异步树、半选、父子策略、完整键盘路径。
 - 直接证据：[tree-select-keyboard-load-20261022.md](../evidence/tree-select-keyboard-load-20261022.md)、[tree-select-outside-focus-20261022.md](../evidence/tree-select-outside-focus-20261022.md)、[tree-select-leaf-only-20261022.md](../evidence/tree-select-leaf-only-20261022.md)、[cascader-async-loading-20261022.md](../evidence/cascader-async-loading-20261022.md)、[cascader-browser-followup-20261022.md](../evidence/cascader-browser-followup-20261022.md)、[tree-select-cascader-b2-06-cross-regression-20261023.md](../evidence/tree-select-cascader-b2-06-cross-regression-20261023.md)。
 - 证据覆盖边界：证据记录 TreeSelect 键盘/搜索/外部聚焦/onlyLeaf 和 Cascader 异步加载/Retry 焦点/跨浏览器；onlyLeaf 的 retry→empty→disabled 三态路径已补组件级与专属浏览器证据，确认无生产行为缺口；共享加载失效的旧/新响应排列仍只有组件证据。
@@ -174,6 +182,37 @@
 
 ### B2-08 Upload / Dropzone / FileList
 
+- 2026-10-26 浏览器数据库持久化续接：主线程独立复跑同一 OrbStack runner
+  **13/13，exit 0，零 skip/todo**。新增第 13 项在三引擎验证 AutoForm 上传后创建
+  真实 PostgreSQL 行、reload 后回显并更新、另一租户浏览器读取为空；独立会话
+  核对持久化引用与真实 Storage 对象 id/字节，精确临时资源清理为空。见
+  [AutoForm 持久化验收](../evidence/enterprise-autoform-postgrest-record-20261026.md)。
+  这是独立本地测试资源，不是生产业务模型；上传与保存不具备跨服务事务保证。
+  下条 11/11 的捕获 JSON 证据保留原范围，不回写为数据库持久化证据。
+- 2026-10-26 AutoForm 真实服务续接：pi 实施后由主线程审查修复测试页覆盖布局与
+  Vite 失败清理，再独立复跑 **11/11，exit 0，零 skip/todo**。新增第 11 项在
+  Chromium、Firefox、WebKit 内验证真实 AutoForm/FileUploadField 上传、精确
+  `attachment.uploadId` 提交、登出失败时 Save 禁用及重登重试保存；owner 与
+  service role 独立核对对象字节和 id，精确项目资源清理为空。见
+  [AutoForm 服务验收](../evidence/enterprise-autoform-upload-browser-20261026.md)。
+  提交仅由夹具捕获 JSON，不证明业务数据库持久化、生产 RBAC、读屏或发布；
+  下方 9/9、10/10 与受控上传记录继续保留各自历史范围。
+- 2026-10-26 真实组件浏览器续接：主线程独立复跑同一 OrbStack runner 最终
+  **10/10，exit 0，零 skip/todo**；其中 1 项测试包含 Chromium、Firefox、WebKit
+  三引擎真实 FileUpload 登录上传、登出失败、重新登录重试与非法类型拒绝流程，
+  不计为 30 项。owner/service role 独立读回对象，失败后对象不存在，最终对象
+  名单及 id 与 UI 引用一致；精确 project label 下容器/network/volume 清理为空。
+  见 [浏览器服务验收](../evidence/enterprise-upload-browser-20261026.md)。该增量关闭
+  所列真实组件本地链路子项；使用同源测试代理与小文件，不证明部署 CORS、浏览器
+  在途取消、大文件、AutoForm/FileUploadField 服务联调、生产策略、读屏或发布。
+- 2026-10-26 本地真实服务增量：隔离 OrbStack 中的 GoTrue 会话驱动 Storage 上传、
+  所有者访问、越权拒绝、签名读取、刷新/登出后上传边界及受控在途取消，主线程独立
+  runner 最终 **9/9，exit 0，零 skip**。取消用例的信号移除反例由 pi 验证失败，
+  恢复后通过；主线程另行复跑最终实现。详见
+  [联合验收](../evidence/enterprise-auth-storage-acceptance-20261026.md) 与
+  [在途取消](../evidence/enterprise-storage-cancellation-20261026.md)。这只关闭所列本地
+  服务子项，不证明生产租户策略、通用原子回滚、底层临时文件清理或真实组件端到端链路。
+  下列旧记录保留各自当时的证据边界，不再将“完全没有真实 Storage 证据”作为当前阻塞。
 - 2026-10-24 AutoForm 集成增量：托管上传只写入 JSON 引用，保留 url/uploadId；
   支持回显、移除、重试、并发队列聚合、离开保护与 reset/作用域隔离。
   主线程逐文件通过 11/11、6/6、23/23、22/22、11/11、101/101，
@@ -271,6 +310,45 @@
 
 ### B3-01 资源数据工作台
 
+- 2026-10-26 真实工作台服务流程续接：pi 实施、主线程审查修正并独立复验最终版本，
+  同一 OrbStack runner **14/14，exit 0，零 skip/todo**。第 14 项在三引擎使用真实
+  `ResourceOperationsPage → AutoTable → QuickEditDrawer → AutoForm`，验证搜索/稳定
+  分页/选择/详情、PostgreSQL 约束拒绝后保留草稿、修正保存与列表刷新，并核对查询和
+  选择保持、独立会话持久化读回及 B 租户空列表。完整请求/响应计数、解析错误收敛、
+  失败/空态稳定帧与精确临时资源清理均通过。见
+  [工作台真实服务验收](../evidence/enterprise-resource-workspace-service-20261026.md)。
+  关闭的是本地测试资源服务流程，不是生产 RBAC、字段权限、即时撤权、读屏或发布。
+  Toast 覆盖抽屉标题、禁止创建时空态仍建议创建曾另记待复核界面问题；旧 13/13 与
+  受控 Provider 历史证据保持各自边界，不重复计数。
+- 2026-10-27 界面观察收口：AutoTable 权限感知空态直接回归 63/63、筛选空态所在
+  文件 11/11、Toast 生命周期 8/8 已独立通过。Toast 默认错误链新增三引擎两视口
+  几何验收，主线程独立 **30/30、exit 0、1.4m**，证明当前短表单的通知与标题、
+  关闭、Save 不相交，关闭后恢复右上；无自定义通知 provider 或延长默认时长。
+  见 [Toast 几何证据](../evidence/enterprise-toast-drawer-geometry-20261026.md)。
+  该结果不外推多通知/长表单/软键盘/读屏，整体目标保持 PARTIAL。
+- 2026-10-26 浏览器 AutoForm 到真实数据库续接：pi 实施、主线程审查修正后独立
+  复跑同一 runner **13/13，exit 0，零 skip/todo**；第 13 项覆盖三引擎真实登录、
+  上传、创建、重新打开及真正 reload 回显、编辑保存和 B 租户真实 GET 空结果。
+  Node 独立会话读回 title/tenant/attachment，并核对 Storage 对象 id 与文件字节；
+  定向 TS/ESLint/Svelte/diff 通过，9 张桌面截图已检查，精确项目资源清理为空。
+  见 [AutoForm 持久化验收](../evidence/enterprise-autoform-postgrest-record-20261026.md)。
+  本次关闭的是本地测试资源表单持久化子项，不证明生产 RBAC、整个工作台查询/选择/
+  详情链路、跨服务事务、移动端、读屏或发布；下方 12/12 的 Node 服务证据保留。
+- 2026-10-26 Provider 类型边界续接：pi 最小修复第三方工厂动态调用，保留公开
+  `unknown` 与运行时校验；主线程独立直接单测 **12/12**、真实服务 runner
+  **12/12**、fixture 类型检查、单测严格编译、目标 lint/diff 均通过，临时资源清理
+  为空。下条记录中的 TS2345 为修复前历史，不再作为当前阻塞；详见同一
+  [PostgREST 租户验收](../evidence/enterprise-postgrest-tenant-acceptance-20261026.md)
+  末节。本地服务与定向类型门禁不替代整个工作台浏览器流程或生产验收。
+- 2026-10-26 真实认证到数据 Provider 服务增量：pi 实施、主线程审查修正并独立
+  复跑单一 OrbStack runner **12/12，exit 0，零 skip/todo**。新增第 12 项以真实
+  GoTrue 会话驱动当前工作区 `createSupabaseDataProvider`、PostgREST 与 PostgreSQL，
+  覆盖租户 CRUD 持久化读回、跨租户拒绝、行租户转移拒绝与 user_metadata 伪造拒绝；
+  精确项目资源清理为空。见
+  [PostgREST 租户验收](../evidence/enterprise-postgrest-tenant-acceptance-20261026.md)。
+  这是 Node 侧测试策略下的服务链路，不是资源工作台浏览器到业务数据库的闭环；
+  生产 RBAC、读屏、发布仍未证明。定向 TS 仍报 `data-provider.ts:64` TS2345，
+  未将运行时通过外推为类型门禁完成。
 - 完整编辑页主线程复核（2026-10-23）：独立执行 `playwright.resource-workspace-edit-route.config.ts`，Chromium desktop 1/1 passed、exit 0、4.2s。已检查真实 AdminApp 路由渲染 AutoTable/AutoForm（非 QuickEditDrawer），受控内存 RouterProvider 将搜索/第 2 页带入编辑记录 11，失败保留草稿和编辑页，重试成功后返回列表并显示服务端规范化值，精确断言两次 update 及恢复的 q/page。此处路由状态来自 fixture 内存，未验证浏览器地址栏、刷新/历史恢复、真实服务/RBAC、其他引擎或发布；不得称真实路由服务验收。
 
 - 主线程最新浏览器复核：独立运行 `bunx playwright test --config scripts/fixtures/enterprise-ui/playwright.resource-workspace.config.ts`，Chromium/WebKit/Firefox × desktop/narrow 共 18/18 passed、exit 0、31.7s；`git diff --check` exit 0。本轮未改组件、fixture 或 spec。既有“主线程结果待复核”现更新为已复核，但仍仅证明受控本地 Provider 的行为，不证明真实 Provider/RBAC、持久化或发布；独立完整编辑路由随后由第 6 节单文件浏览器闭环补充，后续主线程复核结果见同条目下方的 2026-10-23 补记。
@@ -355,6 +433,8 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 
 ### B3-05 详情工作台
 
+- 2026-10-27 范围决策（当前状态，优先于下文历史记录）：用户已明确 B3-05 保留宿主提供的 `oldValue/newValue` 差异展示；版本列表、版本选择、恢复由业务宿主负责。SVAdmin 不提供版本服务、版本列表、版本选择或恢复 API/UI。该项由“产品待决策”改为“范围已确定”，详见 [enterprise-b3-05-version-scope-contract-20261027.md](enterprise-b3-05-version-scope-contract-20261027.md)。真实版本服务、RBAC/租户、读屏实机、发布和部署仍属外部限制，不因本决策自动验收。
+
 - 当前主线程复核（2026-10-23）：`playwright.detail-workspace.config.ts` 独立全矩阵 48/48 passed、exit 0、41.3s；与 pi 48/48、41.7s 分开记录。新增两个场景已核对固定闭包身份、同事件替换整个详情区配置和记录路由、四异步区完整 scope/各一次调用、A 已显示后立即清空、A 在途迟到成功/失败不污染 B；关系区为真实 snippet。替换的是 `detailWorkspace` 配置中的 Provider，不是底层 DataProvider 或默认 AuditLogProvider。该本地同时切换缺口已验收，旧段落的同项“待覆盖”不再代表当前状态；版本历史选择、真实服务/RBAC、读屏与发布仍未完成。生产源码未改，`git diff --check` exit 0。
 
 - 当前审查补记：同时切换 Provider/recordId 的侧栏用例已补完整 A scope 和最终调用次数断言；补强版 pi 报告 12/12 通过（未提供耗时），主线程独立复跑 12/12、exit 0、8.57s。下文 pi 9.36s 是补强前运行，不归入补强版。A 在切换前已完成，因此此用例不证明同时切换时旧在途请求的迟到成功/失败隔离；五区同时切换仍是独立待验收项。
@@ -371,7 +451,7 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 - 扩展生命周期 follow-up（本轮）：只改 `BoundRecordDetailDrawer.svelte`、`detail-contract.test.svelte.ts`、测试扩展探针/host 与本证据文档，未改扩展 API/布局/颜色，未提交、推送、部署。新增最窄真实消费者回归：同一 query cache 预缓存 A/B 两条记录，A 扩展打开局部操作后仅切换 `recordId` 到 B，不经过 loading 卸载。生产未改时红测 `1 failed | 45 passed`、原始 exit code 1、duration 16.17s，失败断言在 `detail-contract.test.svelte.ts:176`（期望 B 扩展 `idle`，实际复用 A 的 `active`）；最小修复后同一单文件绿测 `46 passed`、原始 exit code 0、duration 14.12s（pi 自测）；主线程已独立复核同一单文件 `46/46 passed`、原始 exit code 0、duration 9.69s（见上条），两次独立记录、不合并。新增断言另覆盖父记录授权拒绝时扩展不挂载、授权后撤销时扩展销毁并丢弃局部状态。该修复只用与字段区相同的 `${resourceName}:${recordId}` key 重置扩展组件生命周期，不证明活动、附件、关联、版本差异内容闭环、真实后端/RBAC、浏览器/读屏或发布。
 - 2026-10-23 主线程窄复核：`json-schema-form-enterprise.test.svelte.ts` **61/61**、`detail-workspace.test.svelte.ts` **9/9**、`version-diff-viewer.test.svelte.ts` **1/1** 均 exit `0`；仅确认当前受控本地契约保持通过，不改变 B2-11 外部引用适配和 B3-05 版本历史消费者缺失的结论。
 - 仍未证明的验收：详情工作台五区在新 provider 与 recordId 同时切换时的整体联动已补受控浏览器证据（本轮 follow-up：用户按钮同事件切 provider 配置对象身份+recordId，48/48，仍不证明真实服务端）；真实服务端延迟/取消语义下的详情对象切换；关联/附件/版本差异权限；版本差异空态、错误态与真实版本历史；真实审计/详情 Provider、RBAC、租户/字段授权；读屏；发布包、消费者生产构建和部署。受控浏览器 A→B 已覆盖五区联动清空、B 完成渲染、迟到 A 成功/失败隔离与关闭生命周期，但不得外推为真实后端或真实 RBAC 闭环；历史 `audit-log-viewer-scope` 的 2/2 与同 provider recordId A→B 窄用例仍不得外推为真实审计服务。
-- 下一项可执行动作：浏览器受控 A→B 五区联动缺口已补。版本差异当前只有静态 `oldValue/newValue` 组件契约，尚未定位版本 ID、版本列表、选中动作或 `listVersions/getVersion` provider API；在产品/后端契约确认前不新增“选中记录版本”公共 API，也不重复静态渲染测试。契约到位后再补最小真实消费者与空态/错误/权限矩阵；不得把受控浏览器证据、审计窄用例或独立组件存在当作真实后端/RBAC 闭环。
+- 下一项可执行动作（2026-10-27 更新）：浏览器受控 A→B 五区联动缺口已补。版本差异保留宿主静态 `oldValue/newValue` 组件契约；用户已决策版本列表、版本选择、恢复归业务宿主，SVAdmin 不提供版本服务/list/select/restore。因此不再等待版本产品契约，也不新增“选中记录版本”公共 API、默认版本 Provider 或重复静态渲染测试。剩余动作只在获得真实记录/版本服务、RBAC 或读屏/发布授权后推进外部验收；不得把受控浏览器证据、审计窄用例或独立组件存在当作真实后端/RBAC 闭环。
 - 外部依赖：真实审计/详情 Provider、真实版本/附件/关联服务与权限、屏幕阅读器、发布授权。
 - 状态：浏览器受控 A→B 五区切换与关闭生命周期历史结果 `30/30、exit 0、26.5s`（5 场景）仅作修复前保留；A→B→A 关闭生命周期最终由 pi 自测与主线程独立复跑全矩阵各 `36/36 passed`、`exit 0`、duration 约 `1.0m` 覆盖，另有新增单 project 红测 `1 failed`、绿测 `1 passed`、`chromium-desktop` 全组 `6/6 passed`、`git diff --check` exit `0`。上述 `36/36` 与修复前 `30/30`、上轮 `24/24、38.2s`、pi 上轮 `24/24、43.8s` 分开记录、不合并；真实服务/RBAC 仍未验收。历史 `audit-log-viewer-scope` 两次独立记录（pi 2/2、exit 0、5.88s；主线程独立复核 2/2、exit 0、6.94s）仍不是记录 ID A→B 验证，且与本轮分开、单独保留。`scoped-async-consumers` 旧版（审查修正前，保留）pi 自测 10/10、exit 0、15.97s 与旧版主线程独立复核 10/10、exit 0、9.16s（另确认 `git diff --check` exit 0）为两次独立记录、不合并，支持同一 provider 记录 ID A→B 的旧审计不残留。审查修正后新版 pi 自测 11/11、exit 0（pi 未提供 duration，不记录），主线程独立复核 11/11、exit 0、9.36s（另确认 `git diff --check` exit 0），新增“A 已显示后仅切 recordId 到 B 立即清空、B 请求已发”的直接断言并保留迟到 A 不覆盖用例；新版（两次独立）与旧版及历史 2/2 分别独立记录、不合并。新 provider 与 recordId 同时切换的侧栏窄用例已补（pi 12/12、exit 0、9.36s）；完整五区联动、真实服务/RBAC、读屏与发布仍未验收（受控浏览器 A→B 五区联动已补）；版本差异仅完成组件级只读审计与单文件静态渲染运行（pi 自测 1/1、exit 0、14.78s；主线程独立复核 1/1、exit 0、15.91s；两次独立），空态/错误/权限/对象切换与消费者闭环未证明；其他测试未在 B3-05 专项重跑、不合并计数；本轮 follow-up 另以受控浏览器 `48/48`（8 场景 × 三引擎 × 两视口）覆盖“同一用户事件切换 provider 配置对象身份 + recordId”的五区清空/B 渲染/旧 provider 迟到隔离，该 `48/48` 与历史 `36/36`、`30/30`、`24/24` 分开记录、不合并，且仍不证明真实服务；局部证据仍不足；需外部验收。
 
@@ -384,7 +464,7 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 - 本轮 A→B→A 浏览器修复补记（详情工作台；pi 为唯一 writer，未提交/推送/部署）：上一轮 `closeDetail()` 只比较打开记录与当前记录，A→B→A 后两者相同但历史顶部仍为 B。仅修改 `AutoTable.svelte` 的详情关闭生命周期、`detail-workspace.spec.ts` 必要断言/类型与本证据文档、B3-05 条目。生产未改时单 project 红测 `--project=chromium-desktop -g "without returning to B"` → `1 failed`、原始 exit code `1`、duration `12.4s`，真实 route 仍为 B；最小修复记录详情路由是否在历史中切换过，关闭时仅在切换过时用既有 `writeURLState({ detailId: undefined })` 清空，否则保留原 `back()`。修复后同一单 project 绿测 `1 passed`、exit `0`、duration `2.6s`；`--project=chromium-desktop` 全组 `6/6 passed`、exit `0`、duration `8.2s`。最终全矩阵 pi 自测 **36/36 passed**（6 场景 × Chromium/WebKit/Firefox × desktop/narrow）、exit `0`、duration 约 `1.0m`；主线程独立复跑同一配置 **36/36 passed**、exit `0`、duration 约 `1.0m`，两次独立记录、不合并。`git diff --check` exit `0`。修复前 `30/30、26.5s` 仅作历史保留，不与 A→B→A `36/36` 合并。该证据使用受控 `RouterProvider`、受控内存 provider 与受控 `AccessControlProvider`，不证明真实后端、真实 RBAC、租户/字段授权、真实服务端延迟/取消、跨页面历史恢复、读屏、发布包或部署。详见 [detail-workspace-browser-20261022.md](../evidence/detail-workspace-browser-20261022.md)。
 - 本轮同事件切换 provider 配置对象 + recordId 浏览器补记（详情工作台；pi 为唯一 writer，主线程审查，未提交/推送/部署，既有脏改动保留）：补明确缺口——此前浏览器五区用例只切换 recordId，未在同一次用户事件更换整个 `detailWorkspace` provider 配置对象身份。仅修改 `DetailWorkspaceBrowserFixture.svelte`、`detail-workspace.spec.ts`、`detail-workspace-browser-20261022.md` 与本条目，未改生产代码、未新增版本 API。fixture 由 `createSections(provider)` 生成两套独立配置对象图，provider 闭包捕获固定 `A`/`B` 身份写入调用日志（不读取可变当前 label），relations snippet 拆为 A/B 两版并渲染 `detail-workspace-relations-provider`；新增抽屉内用户按钮 `detail-workspace-switch-provider-next` 在同一次 `onclick` 内切换 `activeProvider` 并调用真实 `router.go`。受控 deferred 控制面改为按 `provider`+`recordId`+`section` 区分 pending，新增 `settleFor(provider, recordId, outcome, sections?)`，保留原 `settle`/`pending` 兼容，原 6 场景未改写。新增两场景：①A 五区已显示→同事件切 B/record 2→B pending 时 A 五区立即清空→B 成功显示 `attachment-record-2-B.txt` 等，精确断言 A 只有 record 1 调用、B 只有 record 2 调用（各 1 次、完整 scope `{resourceName,recordId,meta:{recordId}}`）且最终次数不变；②A 仍在途→同事件切 B/record 2→B 显示→A 附件迟到成功、活动/审计/版本迟到失败，pending 同时含 `A:1:*` 与 `B:2:*`，B 内容不被覆盖、无错误态、无 `pageerror`、不泄露迟到诊断。运行：新场景 `--project=chromium-desktop` 首次 `1 passed | 1 failed`（场景二误把仍挂起的 A:1 排除在 pending 期望外，属断言修正，非生产问题），修正后同命令 `2 passed`、exit `0`、`3.2s`；同 project 全组 `8 passed`、exit `0`、`7.1s`；全矩阵（8 场景 × 三引擎 × 两视口）**48/48 passed**、exit `0`、duration `41.7s`（本轮独立结果，不与历史 `36/36`、`30/30`、`24/24` 合并）；截图 90 张；`git diff --check` exit `0`。该证据仍为受控内存 provider/受控 RouterProvider/受控权限，不证明真实服务端取消/延迟语义、真实后端、真实 RBAC、租户/字段授权、读屏、发布或部署。
 - 授权约定纠正（后续审查）：项目没有既有 `audit/read` 动作，不能把猜测当作产品授权规范。最终审计权限是父记录 `show`，默认审计读取只复用父记录 `show` 契约，未硬编码虚构的 `audit` 资源；独立审计授权仍由宿主/后端控制，本轮未完成独立审计 RBAC，不能据此声称独立审计授权已验收。`detail-workspace.test.svelte.ts` 已删除专门 `audit/read` 用例（父记录授权用例已覆盖，并在该用例中补充拒绝/撤销后默认审计 provider 不被调用的真实 `show` 检查）并撤除宿主 `auditReadAllowed` 模拟分支；当前单文件 pi 自测为 `8 passed`、exit `0`、duration `11.13s`，主线程随后独立复核同一单文件为 `8 passed`、exit `0`、duration `10.83s`，两次独立运行分开记录、不合并；`git diff --check` exit `0`。此前含该用例的 `9 passed`、exit `0`、duration `11.11s` 与更早的 `2 passed` 均为历史计数，不与当前 `8/8` 合并。独立审计 RBAC、真实 Provider、浏览器/读屏、发布仍未验收。
-- 版本选择契约只读审计（2026-10-23，阻塞记录）：只读核对 `VersionDiffViewer`、`DetailWorkspace` versions provider、记录版本 API 与既有 tests/docs。结论：不存在明确的“选中记录版本 → oldValue/newValue”公开契约。现有 `DetailWorkspaceVersionData { oldValue, newValue, ... }` 与 `versions` provider/snippet 只把当前 scope 的旧/新载荷交给真实 `VersionDiffViewer`；`DetailWorkspaceProvider` scope 仅有 `resourceName`/`recordId`/`meta`，没有版本 ID/版本列表/选中动作，`packages/core/src` 也未定位记录版本 read API 或 schema。既有 `detail-workspace.test.svelte.ts` 已覆盖 versions 的加载、记录 A→B、迟到失败与父记录 `show` 拒绝，但没有“选择历史版本”的输入，不能当作本契约证据。按约束未凭空新增版本 API、选择状态或后端 schema，也未新增重复通用异步/静态渲染测试；仅更新证据文档与本矩阵，运行 `git diff --check` 原始退出码 `0`。版本差异的服务端历史、版本选择、真实权限/空态语义仍阻塞，需真实版本服务或产品契约确认后另立任务；不得把受控 `DetailWorkspaceVersionData`、通用 async 状态或既有静态渲染外推为版本历史闭环。
+- 版本选择契约只读审计（2026-10-23，历史记录，2026-10-27 已由用户决策解除阻塞）：只读核对 `VersionDiffViewer`、`DetailWorkspace` versions provider、记录版本 API 与既有 tests/docs。结论：不存在明确的“选中记录版本 → oldValue/newValue”公开契约。现有 `DetailWorkspaceVersionData { oldValue, newValue, ... }` 与 `versions` provider/snippet 只把当前 scope 的旧/新载荷交给真实 `VersionDiffViewer`；`DetailWorkspaceProvider` scope 仅有 `resourceName`/`recordId`/`meta`，没有版本 ID/版本列表/选中动作，`packages/core/src` 也未定位记录版本 read API 或 schema。既有 `detail-workspace.test.svelte.ts` 已覆盖 versions 的加载、记录 A→B、迟到失败与父记录 `show` 拒绝，但没有“选择历史版本”的输入，不能当作本契约证据。按约束未凭空新增版本 API、选择状态或后端 schema，也未新增重复通用异步/静态渲染测试；仅更新证据文档与本矩阵，运行 `git diff --check` 原始退出码 `0`。2026-10-27 用户已决策：保留宿主 `oldValue/newValue` 差异展示；版本列表/选择/恢复由业务宿主负责；SVAdmin 不提供版本服务/list/select/restore。先前“需产品契约”的阻塞据此关闭，不得再把该范围当作待决策本地缺口或重复补本地 case。
 
 ### B3-06 权限与组织管理
 
@@ -432,6 +512,15 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 - 2026-10-23 通知设置浏览器补记：主线程独立运行 `playwright.notifications.config.ts`，桌面与窄屏 **2/2 passed**、exit `0`、4.6s；覆盖失败时单一错误归属与保存草稿保持。该结果仍是受控 fixture，不证明真实通知服务、持久化、RBAC、读屏或发布。
 
 ### B3-09 多标签工作区
+
+- **当前更正（2026-10-27，替代下方旧记录）**：显式 `maxTabs`、逻辑 `id+path`
+  LRU、固定/dirty/active/closable 保护已实现；`workspace-tab-state` 的 `clear()`
+  回读确认、失败关闭信封与同 storage 共享阻断已实现。完全不可写 storage 的跨新
+  运行时删除仍不保证，`storage: 'failed'` 必须由宿主处理；淘汰策略已确定，不再
+  等待产品选择。下方 2026-10-24 及更早的“待产品确认淘汰策略”“新适配器读取旧
+  持久化数据未解决”等记录均为历史，已被本段替代；历史 `13/13`、`81/81` 不冒充
+  当前计数。当前证据引 [closeout B3-09 三引擎复验](enterprise-ui-closeout-20261024.md#b3-09-三引擎生命周期矩阵复验2026-10-26)
+  与 [跨窗口/分发续接](enterprise-ui-closeout-20261024.md#本地分发与跨窗口续接复验2026-10-26)。
 
 - 2026-10-24 导航依赖审查：字体延迟和 Firefox 系统代理路径已有受控/连接地址
   证据，专属测试隔离外部字体并按引擎配置启动参数。主线程最终定向三引擎
@@ -533,9 +622,9 @@ ImportWizard dry-run 单文件已由 pi 与本线程分别复核为 **83/83、ex
 - 2026-10-23 主线程扩展跨引擎配置：同一受控 fixture 已从 Chromium desktop/narrow 扩展为 Chromium/WebKit/Firefox × desktop/narrow，主线程独立复跑 **6/6 passed**、exit `0`、13.4s；用于验证当前标签状态隔离、草稿关闭保护和快照清理，不扩大为真实路由、Provider、淘汰策略或读屏验收。
 - 2026-10-23 tab DOM 语义补记：当前 `MultiTabKeepAlive` 将关闭按钮置为 tab 的独立兄弟节点，并为 tab 增加显式 `aria-label`、关闭动作 `aria-describedby` 与 presentation 外层语义；主线程独立复跑关闭保护单测 **23/23**、浏览器矩阵 **6/6**（Chromium/WebKit/Firefox × desktop/narrow），均 exit `0`。仍不等于屏幕阅读器实机验收。
 - 2026-10-24 标签状态与键盘增量：managed，pi 为唯一 writer，主线程独立审查，未提交/发布/部署。`workspace-tab-state.ts` 在同 id 已有内存快照且 `path` 不匹配时直接返回 `undefined`，不再读旧 storage 覆盖内存，修复 storage.setItem 失败后旧 path restore 使新 path 草稿丢失。新增测试覆盖 `capture`/`markDraft` 独立接管、`false` 清草稿、旧 path 不可读，以及新适配器仍读旧 storage 的未解决风险；主线程最终单文件 **13/13 passed、exit 0、5.39s**。`MultiTabKeepAlive` 支持 ArrowLeft/ArrowRight 循环、Home/End、唯一 roving tabindex、active 无匹配时第一个可达、Enter/Space 保持激活，并为 tablist 增加 `aria-orientation="horizontal"` 静态语义，不改关闭保护/API/淘汰策略；主线程 `multitab-close-protection` 单文件 **29/29 passed、exit 0**（上一阶段 28/28 保留为历史）。新增真实键盘浏览器场景与两份 query 恢复；主线程 `playwright.multitab-state.config.ts` 为 Chromium/WebKit/Firefox × desktop/narrow **12/12 passed、exit 0、12.5s**，其中旧 6 场景 + 新增 6 场景，不能声称新增 12；该 12/12 仍是前一阶段键盘实现证据，未因本轮仅增加静态 aria 属性重复运行。两个生产模块 ESLint 通过，`git diff --check` 通过；`workspace-tab-state.test.svelte.ts` 仍有 3 个原有非空断言 lint 错误，`multitab-state.spec.ts` 仅旧 scroller 未使用 lint 错误（新 invoice 未使用已删除），不称全文件 lint 通过。历史 11/11、23/23、28/28、6/6 保留标历史，不冒充当前。未跑全仓测试；真实路由/Provider/生产 storage/淘汰策略/读屏/发布仍未验收，narrow 不是移动视觉验收，新适配器读取旧持久化数据的风险仍未解决，整体未完成。
-- 下一项可执行动作：先由产品确认 [B3-09 淘汰策略决策记录](enterprise-ui-remaining-20261023.md#b3-09-多标签工作区) 中的标签数量上限、LRU、固定/dirty 标签与存储边界，再补 `maxTabs`/LRU 窄用例；真实路由/Provider 接入需另立消费者任务，不能由适配器单测外推。
+- 下一项可执行动作（历史，已被本节顶部 2026-10-27 更正替代）：先由产品确认 [B3-09 淘汰策略决策记录](enterprise-ui-remaining-20261023.md#b3-09-多标签工作区) 中的标签数量上限、LRU、固定/dirty 标签与存储边界，再补 `maxTabs`/LRU 窄用例；真实路由/Provider 接入需另立消费者任务，不能由适配器单测外推。
 - 外部依赖：真实路由/存储、性能环境、发布授权。
-- 状态：历史 **22/22**、**11/11**、15/15、18/18、**28/28**、6/6 均为历史记录，保留标历史，不冒充当前。2026-10-24 当前：关闭保护单文件 **29/29**、标签状态适配器单文件 **13/13**、Chromium/WebKit/Firefox × desktop/narrow 受控浏览器 fixture **12/12**（旧 6 场景 + 新增 6 场景，属前一阶段键盘实现证据，未因静态 `aria-orientation` 重复运行）；生产组件 ESLint 与 `git diff --check` 通过。查询/滚动/草稿快照契约由显式适配器覆盖，并补齐键盘 roving tabindex 与双 query 恢复；但 clear 的跨新实例持久化删除仍未保证，新适配器读取旧持久化数据的风险仍未解决，真实产品路由/Provider 接入、生产 storage 选型、淘汰策略、内存/性能、读屏和发布仍未验收，局部证据不足；需产品决策与外部验收。
+- 状态（历史，已被本节顶部 2026-10-27 更正替代）：历史 **22/22**、**11/11**、15/15、18/18、**28/28**、6/6 均为历史记录，保留标历史，不冒充当前。2026-10-24 当前：关闭保护单文件 **29/29**、标签状态适配器单文件 **13/13**、Chromium/WebKit/Firefox × desktop/narrow 受控浏览器 fixture **12/12**（旧 6 场景 + 新增 6 场景，属前一阶段键盘实现证据，未因静态 `aria-orientation` 重复运行）；生产组件 ESLint 与 `git diff --check` 通过。查询/滚动/草稿快照契约由显式适配器覆盖，并补齐键盘 roving tabindex 与双 query 恢复；但 clear 的跨新实例持久化删除仍未保证，新适配器读取旧持久化数据的风险仍未解决，真实产品路由/Provider 接入、生产 storage 选型、淘汰策略、内存/性能、读屏和发布仍未验收，局部证据不足；需产品决策与外部验收。
 
 > B3-09 文档状态补充（2026-10-24）：上方较早的阶段记录中“新适配器读取旧
 > 持久化数据的风险仍未解决”属于历史快照。当前 v1 已对未登录 fallback 保留

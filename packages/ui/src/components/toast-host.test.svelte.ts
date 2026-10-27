@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { resetToast, toast } from '@svadmin/core/toast';
 import ToastHostHarness from './toast-host.test-harness.svelte';
@@ -22,6 +22,10 @@ describe('Toast host coordination', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    document.querySelectorAll('.svadmin-sheet-panel').forEach(panel => panel.remove());
+  });
+
   it('renders one global Toaster for two mounted hosts', async () => {
     render(ToastHostHarness);
 
@@ -32,6 +36,58 @@ describe('Toast host coordination', () => {
     const toaster = screen.getByTestId('sonner-toaster');
     expect(toaster.getAttribute('data-expand')).toBe('false');
     expect(toaster.getAttribute('data-visible-toasts')).toBe('3');
+  });
+
+  it('moves the active Toaster to bottom-left while a sheet drawer is open', async () => {
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+
+    expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('top-right');
+    const sheet = document.createElement('div');
+    sheet.className = 'svadmin-sheet-panel';
+    document.body.append(sheet);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('bottom-left');
+    });
+
+    sheet.remove();
+    await waitFor(() => {
+      expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('top-right');
+    });
+  });
+
+  it('starts at bottom-left when a sheet is already open before the Toast host mounts', async () => {
+    const sheet = document.createElement('div');
+    sheet.className = 'svadmin-sheet-panel';
+    document.body.append(sheet);
+
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+    expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('bottom-left');
+  });
+
+  it('stays at bottom-left while any sheet remains and restores after the last closes', async () => {
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+
+    const first = document.createElement('div');
+    first.className = 'svadmin-sheet-panel';
+    const second = document.createElement('div');
+    second.className = 'svadmin-sheet-panel';
+    document.body.append(first, second);
+    await waitFor(() => {
+      expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('bottom-left');
+    });
+
+    first.remove();
+    await waitFor(() => {
+      expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('bottom-left');
+    });
+    second.remove();
+    await waitFor(() => {
+      expect(screen.getByTestId('sonner-toaster').getAttribute('data-position')).toBe('top-right');
+    });
   });
 
   it('deduplicates a keyed event and forwards the key as the Sonner id', async () => {

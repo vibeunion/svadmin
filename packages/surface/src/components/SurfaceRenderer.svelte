@@ -11,7 +11,7 @@
   import type { SurfaceMessages } from '../localization.js';
   import type {
     SurfaceDataError, SurfaceDataProvider, SurfacePolicy,
-    SurfaceSourceDataState, SurfaceValidationIssue, JsonObject,
+    SurfaceSourceDataState, SurfaceValidationIssue, SurfaceWidgetDataState, JsonObject,
   } from '../types.js';
   import { validateSurfaceSpec } from '../validation.js';
   import { createSurfaceSourceCache, sameSourceIdentity, snapshotSurfaceSource } from '../source-cache.js';
@@ -55,6 +55,18 @@
   const i18n = useTranslation();
   const activeLocale = $derived(locale ?? i18n.locale);
   const activeMessages = $derived(resolveSurfaceMessages(activeLocale, messages));
+  // 统一呈现边界：错误状态只暴露本地化文案，宿主诊断仍留在 onError。
+  function presentSurfaceData(data: SurfaceWidgetDataState): SurfaceWidgetDataState {
+    if (data.status !== 'error') return data;
+    const message = data.error.code === 'access_denied'
+      ? activeMessages.accessDenied
+      : data.error.code === 'provider_result_not_json' || data.error.code === 'binding_pointer_not_found'
+        ? activeMessages.invalidData
+        : activeMessages.providerUnavailable;
+    return data.error.message === message
+      ? data
+      : { ...data, error: { ...data.error, message } };
+  }
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
   const sourceStates = new SvelteMap<string, SurfaceSourceDataState>();
@@ -69,18 +81,8 @@
   ]);
   // 复用 PR #428 的请求所有权与会话隔离实现，不维护第二套缓存。
   const sourceCache = createSurfaceSourceCache({
-    set: (id, state) => {
-      if (state.status !== 'error') {
-        sourceStates.set(id, state);
-        return;
-      }
-      const message = state.error.code === 'access_denied'
-        ? activeMessages.accessDenied
-        : state.error.code === 'provider_result_not_json' || state.error.code === 'binding_pointer_not_found'
-          ? state.error.message
-          : activeMessages.providerUnavailable;
-      sourceStates.set(id, { ...state, error: { ...state.error, message } });
-    },
+    // 缓存只保存原始 source 状态；本地化等呈现规则统一在渲染边界执行。
+    set: (id, state) => { sourceStates.set(id, state); },
     remove: (id) => { sourceStates.delete(id); },
     onError: (state, diagnostic) => { onError?.({ type: 'data', error: diagnostic ?? state.error }); },
   });
@@ -180,7 +182,7 @@
           <div class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12} {semantic ? appearanceClasses(widget.props) : ''}" data-testid="surface-widget-{widget.id}">
             {#if WidgetComponent}
               <WidgetComponent widgetId={widget.id} props={semantic ? withoutSurfaceAppearance(widget.props) : widget.props}
-                data={resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined)}
+                data={presentSurfaceData(resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined))}
                 locale={activeLocale} messages={activeMessages} />
             {/if}
           </div>

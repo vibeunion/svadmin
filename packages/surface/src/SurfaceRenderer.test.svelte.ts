@@ -12,7 +12,9 @@ import { resetI18n, setLocale } from '@svadmin/core/i18n';
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
 import SurfaceRenderer, { type SurfaceRendererError } from './components/SurfaceRenderer.svelte';
 import { DEFAULT_SURFACE_CATALOG_VERSION, defaultSurfaceCatalog } from './catalog.js';
+import type { SurfaceRenderCatalog } from './catalog.js';
 import type { SurfaceDataProvider, SurfacePolicy, SurfaceSpec } from './types.js';
+import DiagnosticEchoWidget from '../test/fixtures/DiagnosticEchoWidget.svelte';
 
 const policy = {
   resources: {
@@ -263,6 +265,136 @@ describe('SurfaceRenderer', () => {
     });
 
     expect((await screen.findByRole('alert')).textContent).toContain('Metric data is invalid');
+    expect(document.body.innerHTML).not.toContain('The validated binding pointer was not found');
+    // 绑定错误属于投影层，维持现有仅源加载错误触发 onError 的契约。
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    { locale: 'en', invalidData: 'Surface data is invalid' },
+    { locale: 'zh-CN', invalidData: 'Surface 数据无效' },
+  ])('normalizes provider result diagnostics before custom widgets can render them in $locale', async ({ locale, invalidData }) => {
+    const { provider } = createProvider();
+    provider.getList = async () => ({
+      data: [{ id: 1, name: 'Marker', stock: 1, PRIVATE_DIAGNOSTIC: () => 'private' }],
+      total: 1,
+    });
+    const diagnosticCatalog = {
+      ...defaultSurfaceCatalog,
+      widgets: defaultSurfaceCatalog.widgets.map((widget) => widget.type === 'metric'
+        ? { ...widget, component: DiagnosticEchoWidget }
+        : widget),
+    } satisfies SurfaceRenderCatalog;
+    const diagnosticSpec = {
+      ...spec,
+      surfaceId: 'source-diagnostic',
+      dataSources: [{ id: 'products', type: 'resource-list', resource: 'products' }],
+      widgets: [{
+        id: 'product-count', type: 'metric', props: { label: 'Products', format: 'number' },
+        binding: { sourceId: 'products', pointer: '/total' },
+      }],
+    } satisfies SurfaceSpec;
+    const diagnosticPolicy = {
+      resources: {
+        products: {
+          ...policy.resources.products,
+          readFields: [...policy.resources.products.readFields, 'PRIVATE_DIAGNOSTIC'],
+        },
+      },
+    } satisfies SurfacePolicy;
+
+    render(SurfaceRenderer, {
+      spec: diagnosticSpec, policy: diagnosticPolicy,
+      catalog: diagnosticCatalog, dataProvider: provider, locale,
+    });
+
+    await waitFor(() => expect(screen.getByTestId('diagnostic-message').textContent).toBe(invalidData));
+    expect(document.body.innerHTML).not.toContain('PRIVATE_DIAGNOSTIC');
+    expect(document.body.innerHTML).not.toContain('not JSON serializable');
+  });
+
+  test('relocalizes a cached source error without refetching or rechecking permissions', async () => {
+    const { provider } = createProvider();
+    provider.getList = async () => ({
+      data: [{ id: 1, name: 'Marker', stock: 1, PRIVATE_DIAGNOSTIC: () => 'private' }],
+      total: 1,
+    });
+    const getList = vi.spyOn(provider, 'getList');
+    const can = vi.fn(async () => ({ can: true }));
+    setAccessControlProvider({ can });
+    const onError = vi.fn<(error: SurfaceRendererError) => void>();
+    const diagnosticCatalog = {
+      ...defaultSurfaceCatalog,
+      widgets: defaultSurfaceCatalog.widgets.map((widget) => widget.type === 'metric'
+        ? { ...widget, component: DiagnosticEchoWidget }
+        : widget),
+    } satisfies SurfaceRenderCatalog;
+    const diagnosticSpec = {
+      ...spec,
+      surfaceId: 'source-relocalization',
+      dataSources: [{ id: 'products', type: 'resource-list', resource: 'products' }],
+      widgets: [{
+        id: 'product-count', type: 'metric', props: { label: 'Products', format: 'number' },
+        binding: { sourceId: 'products', pointer: '/total' },
+      }],
+    } satisfies SurfaceSpec;
+    const diagnosticPolicy = {
+      resources: {
+        products: {
+          ...policy.resources.products,
+          readFields: [...policy.resources.products.readFields, 'PRIVATE_DIAGNOSTIC'],
+        },
+      },
+    } satisfies SurfacePolicy;
+    const props = {
+      spec: diagnosticSpec, policy: diagnosticPolicy,
+      catalog: diagnosticCatalog, dataProvider: provider, locale: 'en', onError,
+    };
+
+    const view = render(SurfaceRenderer, props);
+    await waitFor(() => expect(screen.getByTestId('diagnostic-message').textContent).toBe('Surface data is invalid'));
+    expect(getList).toHaveBeenCalledTimes(1);
+    expect(can).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledTimes(1);
+
+    await view.rerender({ ...props, locale: 'zh-CN' });
+    await waitFor(() => expect(screen.getByTestId('diagnostic-message').textContent).toBe('Surface 数据无效'));
+    await view.rerender({ ...props, locale: 'zh-CN', messages: { invalidData: 'Data was rejected' } });
+    await waitFor(() => expect(screen.getByTestId('diagnostic-message').textContent).toBe('Data was rejected'));
+    expect(getList).toHaveBeenCalledTimes(1);
+    expect(can).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  test.each([
+    { locale: 'en', invalidData: 'Surface data is invalid' },
+    { locale: 'zh-CN', invalidData: 'Surface 数据无效' },
+  ])('localizes render-time binding diagnostics before custom widgets see them in $locale', async ({ locale, invalidData }) => {
+    const { provider } = createProvider();
+    const onError = vi.fn<(error: SurfaceRendererError) => void>();
+    const diagnosticCatalog = {
+      ...defaultSurfaceCatalog,
+      widgets: defaultSurfaceCatalog.widgets.map((widget) => widget.type === 'metric'
+        ? { ...widget, component: DiagnosticEchoWidget }
+        : widget),
+    } satisfies SurfaceRenderCatalog;
+    const detailSpec: SurfaceSpec = {
+      ...spec,
+      surfaceId: 'binding-diagnostic',
+      dataSources: [{ id: 'products', type: 'resource-one', resource: 'products', recordId: 1 }],
+      widgets: [{
+        id: 'product-count', type: 'metric', props: { label: 'Stock', format: 'number' },
+        binding: { sourceId: 'products', pointer: '/stock' },
+      }],
+    };
+
+    render(SurfaceRenderer, {
+      spec: detailSpec,
+      policy: { resources: { products: { ...policy.resources.products, allowGetOne: true } } },
+      catalog: diagnosticCatalog, dataProvider: provider, locale, onError,
+    });
+
+    await waitFor(() => expect(screen.getByTestId('diagnostic-message').textContent).toBe(invalidData));
     expect(document.body.innerHTML).not.toContain('The validated binding pointer was not found');
     // 绑定错误属于投影层，维持现有仅源加载错误触发 onError 的契约。
     expect(onError).not.toHaveBeenCalled();

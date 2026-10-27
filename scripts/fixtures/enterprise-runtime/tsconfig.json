@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "types": ["@types/bun"],
+    "paths": {
+      "@svadmin/core": ["../../../packages/core/src/index.ts"],
+      "@svadmin/core/schema": ["../../../packages/core/src/schema.ts"],
+      "@svadmin/core/options": ["../../../packages/core/src/defined-options.ts"],
+      "@svadmin/core/audit": ["../../../packages/core/src/audit.ts"],
+      "@svadmin/refine-adapter": ["../../../packages/refine-adapter/src/index.ts"]
+    }
+  },
+  "include": ["storage-acceptance.test.ts", "browser/upload-browser-acceptance.ts"]
+}

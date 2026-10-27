@@ -16,14 +16,25 @@
   import UndoableNotification from './UndoableNotification.svelte';
 
   let host = $state<ToastHostRegistration | null>(null);
+  let sheetOpen = $state(false);
   const isActiveHost = $derived(host?.isActive() ?? false);
   const theme = $derived(getResolvedTheme() === 'dark' ? 'dark' : 'light');
+  const toastPosition = $derived<'top-right' | 'bottom-left'>(sheetOpen ? 'bottom-left' : 'top-right');
 
   onMount(() => {
+    const syncSheetState = (): void => {
+      sheetOpen = document.querySelector('.svadmin-sheet-panel') !== null;
+    };
+    syncSheetState();
+    const sheetObserver = new MutationObserver(syncSheetState);
+    sheetObserver.observe(document.body, { childList: true, subtree: true });
     const registration = registerToastHost();
     host = registration;
 
-    return () => registration.unregister();
+    return () => {
+      sheetObserver.disconnect();
+      registration.unregister();
+    };
   });
 
   $effect(() => {
@@ -55,7 +66,7 @@
   });
 
   const toasterProps = $derived({
-    position: "top-right",
+    position: toastPosition,
     richColors: true,
     closeButton: true,
     expand: false,

@@ -61,7 +61,10 @@ export function createSupabaseDataProvider(
   inputObject(client, 'Supabase client');
   const defaultSchema = optionalString(options, 'schema');
   if (typeof refineDataProvider !== 'function') throw new Error('[svadmin/supabase] Missing @refinedev/supabase data provider');
-  const adapter = createRefineAdapter(refineDataProvider(client));
+  // 第三方工厂仍要求自身的 SupabaseClient 类型；公共边界保持 unknown，
+  // 交由适配器校验其动态返回结果。
+  const refineProvider: unknown = Reflect.apply(refineDataProvider, undefined, [client]);
+  const adapter = createRefineAdapter(refineProvider);
 
   // PostgREST DELETE returns no representation unless `select` is chained. The
   // core DataProvider contract requires a confirmed deleted record, so keep

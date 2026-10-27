@@ -3,10 +3,12 @@
     theme,
     expand,
     visibleToasts,
+    position,
   }: {
     theme?: string;
     expand?: boolean;
     visibleToasts?: number;
+    position?: string;
   } = $props();
 </script>
 
@@ -15,4 +17,5 @@
   data-theme={theme}
   data-expand={String(expand)}
   data-visible-toasts={visibleToasts}
+  data-position={position}
 ></div>

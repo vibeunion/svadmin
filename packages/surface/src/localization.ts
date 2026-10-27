@@ -4,6 +4,7 @@ export interface SurfaceMessages {
   readonly renderErrorTitle: string;
   readonly providerUnavailable: string;
   readonly accessDenied?: string;
+  readonly invalidData?: string;
   readonly metricNoData: string;
   readonly metricInvalidData: string;
   readonly chartLoading: string;
@@ -33,6 +34,7 @@ const englishMessages: Required<SurfaceMessages> = {
   renderErrorTitle: 'Surface could not be rendered',
   providerUnavailable: 'Data provider is unavailable',
   accessDenied: 'Access denied',
+  invalidData: 'Surface data is invalid',
   metricNoData: 'No data',
   metricInvalidData: 'Metric data is invalid',
   chartLoading: 'Loading {title}',
@@ -62,6 +64,7 @@ const simplifiedChineseMessages: Required<SurfaceMessages> = {
   renderErrorTitle: '无法渲染 Surface',
   providerUnavailable: '数据提供器不可用',
   accessDenied: '无权访问',
+  invalidData: 'Surface 数据无效',
   metricNoData: '暂无数据',
   metricInvalidData: '指标数据无效',
   chartLoading: '正在加载{title}',

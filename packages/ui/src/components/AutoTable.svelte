@@ -1148,7 +1148,12 @@
 
 {#snippet defaultEmptyState()}
   {@const hasCriteria = !!(searchText.trim() || appliedSearchText.trim() || activeFilterCount > 0)}
-  <DataState state={hasCriteria ? 'filtered-empty' : 'empty'} description={i18n.t(hasCriteria ? 'empty.description' : 'common.noDataHint')}>
+  <DataState
+    state={hasCriteria ? 'filtered-empty' : 'empty'}
+    description={i18n.t(hasCriteria
+      ? 'empty.description'
+      : canCreate ? 'common.noDataHint' : 'common.noData')}
+  >
     {#snippet action()}
       {#if hasCriteria}
         <Button variant="outline" size="sm" onclick={clearFilters}>

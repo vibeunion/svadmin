@@ -275,7 +275,7 @@ describe('form engine explicit reset', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Confirm' }));
     await waitFor(() => expect(freshNavigation).toHaveBeenCalledTimes(1));
     expect(staleNavigation).not.toHaveBeenCalled();
-    expect(view.queryByRole('alertdialog')).toBeNull();
+    await waitFor(() => expect(view.queryByRole('alertdialog')).toBeNull());
   });
 
   it('StepsForm reset is a no-op when access control denies the form', async () => {
