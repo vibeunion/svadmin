@@ -34,9 +34,10 @@ const composeArgs = [
 // 子进程环境显式移除 Docker 远端连接变量，只允许 --context 选中本地/CI 引擎。
 function composeEnv(extra: Record<string, string> | undefined): Record<string, string | undefined> {
   const env = { ...process.env, ...extra };
-  for (const name of ['DOCKER_HOST', 'DOCKER_CONTEXT', 'DOCKER_TLS_VERIFY', 'DOCKER_CERT_PATH']) {
-    delete env[name];
-  }
+  delete env['DOCKER_HOST'];
+  delete env['DOCKER_CONTEXT'];
+  delete env['DOCKER_TLS_VERIFY'];
+  delete env['DOCKER_CERT_PATH'];
   return { ...env, COMPOSE_DISABLE_ENV_FILE: '1' };
 }
 
