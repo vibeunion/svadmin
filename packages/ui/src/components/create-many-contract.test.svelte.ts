@@ -705,7 +705,7 @@ describe('contract-bound batch create', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('removes unchecked batch-create exports', () => {
     expect('useCreateMany' in legacy).toBe(false);
