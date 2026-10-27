@@ -1109,10 +1109,8 @@ async function waitForWorkspaceTitle(page: import('playwright').Page, title: str
 }
 
 async function waitForSettledAnimations(locator: Locator): Promise<void> {
-  await locator.evaluate(async element => {
-    await Promise.all(element.getAnimations({ subtree: true }).map(animation =>
-      animation.finished.catch(() => undefined)));
-  });
+  // 临时诊断：跳过动画结算，用于复现 transition 挂载前的命中竞态。
+  void locator;
 }
 
 async function assertWorkspaceControlStable(
