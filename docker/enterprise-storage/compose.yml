@@ -28,7 +28,8 @@ services:
       retries: 30
 
   storage:
-    image: public.ecr.aws/supabase/storage-api:v1.80.0
+    # 本地默认使用既有 ECR Public 镜像；CI 通过 SVADMIN_STORAGE_IMAGE 改用同 digest 的 Docker Hub 官方镜像。
+    image: ${SVADMIN_STORAGE_IMAGE:-public.ecr.aws/supabase/storage-api:v1.80.0}
     depends_on:
       storage-db:
         condition: service_healthy
@@ -57,7 +58,8 @@ services:
       - "127.0.0.1::5000"
 
   auth:
-    image: public.ecr.aws/supabase/gotrue:v2.197.0
+    # 本地默认使用既有 ECR Public 镜像；CI 通过 SVADMIN_GOTRUE_IMAGE 改用同 digest 的 Docker Hub 官方镜像。
+    image: ${SVADMIN_GOTRUE_IMAGE:-public.ecr.aws/supabase/gotrue:v2.197.0}
     depends_on:
       auth-db:
         condition: service_healthy
