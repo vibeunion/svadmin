@@ -2236,19 +2236,19 @@ test('Profile and MFA: profile failures preserve drafts and allow recovery', asy
   await expect(profile.getByText('Operation failed')).toHaveCount(0);
 
   await profile.getByLabel('Current Password').fill('old-password');
-  await profile.getByLabel('Password', { exact: true }).fill('New-password-123');
+  await profile.getByLabel('New Password', { exact: true }).fill('New-password-123');
   await profile.getByLabel('Confirm Password').fill('New-password-123');
   await controls.getByRole('button', { name: 'Fail next password', exact: true }).click();
   await profile.getByRole('button', { name: 'Update Password', exact: true }).click();
   await expect(profile.getByText('Operation failed')).toBeVisible();
   await expect(profile.getByLabel('Current Password')).toHaveValue('old-password');
-  await expect(profile.getByLabel('Password', { exact: true })).toHaveValue('New-password-123');
+  await expect(profile.getByLabel('New Password', { exact: true })).toHaveValue('New-password-123');
   await expect(profile.getByLabel('Confirm Password')).toHaveValue('New-password-123');
   await expect(page.locator('body')).not.toContainText('PRIVATE_PASSWORD_FIXTURE');
   await profile.screenshot({ path: `../../../output/playwright/profile-mfa/${testInfo.project.name}-password-failed.png` });
   await profile.getByRole('button', { name: 'Update Password', exact: true }).click();
   await expect(profile.getByLabel('Current Password')).toHaveValue('');
-  await expect(profile.getByLabel('Password', { exact: true })).toHaveValue('');
+  await expect(profile.getByLabel('New Password', { exact: true })).toHaveValue('');
   await expect(profile.getByLabel('Confirm Password')).toHaveValue('');
   await mkdir('../../../output/playwright/profile-mfa', { recursive: true });
   await profile.screenshot({ path: `../../../output/playwright/profile-mfa/${testInfo.project.name}-profile-recovered.png` });
@@ -2305,7 +2305,7 @@ for (const view of ['profile', 'security', 'mfa'] as const) {
       if (view === 'mfa') await instance.getByRole('button', { name: 'Two-Factor Authentication Setup', exact: true }).click();
     }
     const labels = view === 'profile'
-      ? ['Name', 'Current Password', 'Password', 'Confirm Password']
+      ? ['Name', 'Current Password', 'New Password', 'Confirm Password']
       : view === 'security' ? ['Current Password', 'New Password', 'Confirm Password'] : ['Enter Verification Code'];
     const ids = new Set<string>();
     for (const instance of await instances.all()) {
