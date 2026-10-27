@@ -1,7 +1,13 @@
 import { spawnSync } from 'node:child_process';
 import { randomBytes, randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { SignJWT } from 'jose';
+import {
+  acceptanceTestNames,
+  formatSafeFailureDiagnostics,
+  summarizeSafeFailures,
+} from './storage-acceptance.diagnostics';
 
 // 只操作本次随机项目；密钥仅存在于进程环境，不写 env 文件，也不落盘。
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -56,18 +62,37 @@ function compose(args: string[], options: { env?: Record<string, string>; timeou
   return result.stdout.trim();
 }
 
-// 浏览器场景的 main.ts 依赖 app.css，而 app.css 又引入被 gitignore 的 tailwind.generated.css。
-// 验收前只生成这一份最小 CSS，保证既有命令不依赖先前的手工产物；失败只报告固定阶段。
-function buildBrowserCss(): void {
-  const result = spawnSync('bun', ['run', '--cwd', 'packages/ui', 'build:tailwind'], {
+function runBrowserBuildStep(label: string, args: string[]): void {
+  const result = spawnSync('bun', args, {
     cwd: root,
     env: process.env,
     encoding: 'utf8',
-    timeout: 120_000,
+    timeout: 180_000,
     maxBuffer: 4 * 1024 * 1024,
   });
   if (result.error || result.status !== 0) {
-    throw new Error(`CSS build failed (${result.status ?? 'timeout/spawn'}).`);
+    throw new Error(`${label} build failed (${result.status ?? 'timeout/spawn'}).`);
+  }
+}
+
+// 浏览器 fixture 的 AdminApp 会经 Layout -> DevTools 导入 @svadmin/devtools，
+// 而该包 exports 指向 dist；CI 全新 checkout 没有共享缓存，必须先构建依赖包。
+// 同时生成 gitignore 的 tailwind CSS，避免依赖先前手工产物。
+function buildBrowserPrerequisites(): void {
+  runBrowserBuildStep('devtools-contract', ['run', '--cwd', 'packages/devtools-contract', 'build']);
+  runBrowserBuildStep('devtools', ['run', '--cwd', 'packages/devtools', 'build']);
+  runBrowserBuildStep('css', ['run', '--cwd', 'packages/ui', 'build:tailwind']);
+}
+
+// 只从 Bun 输出提取白名单测试名、固定分类、fixture basename 行列和 engine，
+// 不打印原始 output、message、DOM、response 或 trace。
+function reportSafeTestFailures(output: string): void {
+  try {
+    const source = readFileSync(new URL('./storage-acceptance.test.ts', import.meta.url), 'utf8');
+    const diagnostics = summarizeSafeFailures(output, acceptanceTestNames(source));
+    for (const line of formatSafeFailureDiagnostics(diagnostics)) console.error(line);
+  } catch {
+    console.error('Storage 验收失败诊断：code=unknown-error');
   }
 }
 
@@ -136,8 +161,8 @@ let stage = 'runner';
 // 清理需要的插值变量必须在 try 之外可见，保证异常路径也能 down -v。
 let stackEnv: Record<string, string> = fallbackEnv;
 try {
-  stage = 'css';
-  buildBrowserCss();
+  stage = 'browser-deps';
+  buildBrowserPrerequisites();
   stage = 'runner';
   console.info(`启动 Docker context ${dockerContext} 的 Storage 验收栈 ${project}`);
   const [anonKey, serviceKey] = await Promise.all([
@@ -325,12 +350,14 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;`, stackEnv);
   if (result.error || result.status !== 0) {
     // 不打印原始测试日志：失败只报告固定阶段、退出码与汇总计数，避免 token/password 泄露。
     console.error(`Storage 验收失败：stage=test exit=${result.status ?? 'timeout/spawn'} ${countText}`);
+    reportSafeTestFailures(output);
   } else if (!output.includes(marker)) {
     console.error(`Storage 验收失败：stage=marker exit=0 ${countText}（缺少完成标记）`);
   } else if (counts === null) {
     console.error(`Storage 验收失败：stage=counts exit=0 ${countText}（缺少可解析的测试计数）`);
   } else if (counts.pass !== expectedPass || counts.fail !== 0 || counts.skip !== 0 || counts.todo !== 0) {
     console.error(`Storage 验收失败：stage=counts exit=0 ${countText}（期望 pass=${expectedPass} fail=0 skip=0 todo=0）`);
+    reportSafeTestFailures(output);
   } else {
     console.info(`Storage 验收通过：marker=${marker} exit=0 ${countText}`);
     status = 0;
