@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from 'typebox';
 import { defineResource, resetContext, type DataProvider, type ResourceDefinition, type GetOneResult } from '@svadmin/core';
+import { getToastQueue, resetToast } from '@svadmin/core/toast';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import Host from '../../test/fixtures/QuickEditDrawerLifecycleHarness.svelte';
 
@@ -177,5 +178,24 @@ describe('QuickEditDrawer host lifecycle', () => {
     expect(within(second.dialog).queryByRole('alert')).toBeNull();
     expect(app.onClose).not.toHaveBeenCalled();
     expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows one inline failure and does not also enqueue an error toast', async () => {
+    resetToast();
+    const update = vi.fn<DataProvider['update']>(async () => {
+      throw new Error('PRIVATE_QUICK_EDIT_UPDATE_DIAGNOSTIC');
+    });
+    const app = mount(update);
+
+    const drawer = await drawerTitle(app.view, 'Record 1');
+    await fireEvent.input(drawer.input, { target: { value: 'Rejected draft' } });
+    await fireEvent.click(within(drawer.dialog).getByRole('button', { name: /Save/ }));
+
+    const alert = await within(drawer.dialog).findByRole('alert');
+    expect(alert.textContent).toContain('Operation failed');
+    expect(within(drawer.dialog).getAllByRole('alert')).toHaveLength(1);
+    expect(getToastQueue()).toEqual([]);
+    expect(drawer.dialog.textContent).not.toContain('PRIVATE_QUICK_EDIT_UPDATE_DIAGNOSTIC');
+    expect(drawer.input).toHaveProperty('value', 'Rejected draft');
   });
 });

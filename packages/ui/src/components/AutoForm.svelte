@@ -183,6 +183,8 @@
     get dataProviderName() { return binding.dataProviderName; },
     get redirect() { return redirect; },
     warnWhenUnsavedChanges: true,
+    // 失败已经显示在表单内，不再额外弹一条相同的 toast。
+    errorNotification: false,
     get validate() { return validator; },
     get onMutationSuccess() {
       const callback = onSuccess;
