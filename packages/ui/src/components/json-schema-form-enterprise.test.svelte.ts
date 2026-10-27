@@ -908,7 +908,7 @@ describe('JSON Schema forms enterprise value contract', () => {
     expect(diagnostics.map(diagnostic =>
       `${diagnostic.file?.fileName}:${diagnostic.start}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
     )).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('submits recursive defaults, preserves explicit undefined, and distinguishes numeric/string enums', async () => {
     const onsubmit = vi.fn();

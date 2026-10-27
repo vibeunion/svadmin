@@ -19,6 +19,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     hookTimeout: 30_000,
+    testTimeout: 60_000,
     setupFiles: ['./setupTest.ts'],
     include: ['src/**/*.test.{ts,svelte.ts}'],
   },

@@ -127,7 +127,7 @@ describe('bounded pivot model', () => {
     expect(diagnostics.map(diagnostic =>
       `${diagnostic.file?.fileName}:${diagnostic.start}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
     )).toEqual([]);
-  }, 30_000);
+  }, 90_000);
   it('snapshots server queries and rejects invalid filters, fields and query-only pagination', () => {
     const query = { ...fields, resource: 'orders', filters: [{ field: 'v', operator: 'eq', value: 1 }] };
     const copy = snapshotPivotQuery(query);

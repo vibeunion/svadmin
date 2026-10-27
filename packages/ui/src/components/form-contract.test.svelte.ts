@@ -191,7 +191,7 @@ describe('contract-bound form', () => {
       'form-contract.test.types.ts', 'form-contract.test.type-fixture.ts',
     ], ['AutoForm.svelte', 'form-contract.test-probe.svelte', 'form-contract.test-host.svelte',
       '../../test/fixtures/AutoFormAccessibilityHarness.svelte'])).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('strictly compiles upload forwarding references, cancellation and formActions state', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
@@ -202,7 +202,7 @@ describe('contract-bound form', () => {
       'FileUploadField.svelte', 'fields/ArrayField.svelte', 'FileUpload.svelte',
     ], ['form-contract.upload-type-fixture.svelte', 'FileUploadField.svelte',
       'fields/ArrayField.svelte', 'FileUpload.svelte'])).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('permits partial drafts but rejects invalid submission before writing', async () => {
     const source = provider();

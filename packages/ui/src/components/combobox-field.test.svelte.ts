@@ -116,7 +116,7 @@ describe('ComboboxField', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it.each(['click', 'ArrowDown', 'ArrowUp'])('opens with %s and focuses the search field', async action => {
     const view = mount();

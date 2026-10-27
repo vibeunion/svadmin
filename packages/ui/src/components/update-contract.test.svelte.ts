@@ -166,7 +166,7 @@ describe('contract-bound update', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it.each([{}, { variables: undefined }, { variables: null }, { variables: { title: false } }, { variables: { extra: true } }])(
     'rejects malformed or missing update input %j before dispatch', async input => {

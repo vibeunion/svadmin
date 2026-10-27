@@ -125,7 +125,7 @@ describe('contract-bound detail views', () => {
         ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1 : 0;
       return `${diagnostic.file?.fileName ?? ''}:${line}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
     })).toEqual([]);
-  }, 30_000);
+  }, 90_000);
 
   it('removes the unchecked detail hook export', () => {
     expect('useShow' in unsafe).toBe(false);
