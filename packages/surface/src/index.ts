@@ -37,6 +37,18 @@ export {
   parseSurfaceAgentResponse,
   createSurfaceAgentStream,
 } from './agent.js';
+export {
+  SURFACE_AGENT_FENCE_TAG,
+  splitSurfaceAgentText,
+} from './agent-text.js';
+export type {
+  SurfaceAgentTextSegment,
+  SurfaceAgentTextOptions,
+} from './agent-text.js';
+export type {
+  SurfaceAgentMessageOptions,
+  SurfaceAgentPresentation,
+} from './agent.js';
 export type {
   SurfaceAgentProposal,
   SurfaceAgentProposalV2,
