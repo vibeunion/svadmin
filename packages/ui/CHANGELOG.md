@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.91.0](https://github.com/vibeunion/svadmin/compare/ui-v0.90.0...ui-v0.91.0) (2026-10-27)
+
+
+### 🚀 Features
+
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** align regressions with permission and upload contracts ([eed9bf9](https://github.com/vibeunion/svadmin/commit/eed9bf9692c6ea3486b8f509aea7f10ab93f8003))
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+* **ui:** clear enterprise closeout type gates ([5d13e02](https://github.com/vibeunion/svadmin/commit/5d13e020f79fecb8792c77a51daa2544d040ca02))
+* **ui:** satisfy enterprise closeout lint ([583da4e](https://github.com/vibeunion/svadmin/commit/583da4ece0fc16eda4e4ae0e9b4b82534665de18))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.6
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.65.0
+
 ## [0.90.0](https://github.com/vibeunion/svadmin/compare/ui-v0.89.0...ui-v0.90.0) (2026-10-26)
 
 

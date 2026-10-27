@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.3](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.2...ai-elements-v0.12.3) (2026-10-27)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.65.0
+
 ## [0.12.2](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.1...ai-elements-v0.12.2) (2026-10-26)
 
 
