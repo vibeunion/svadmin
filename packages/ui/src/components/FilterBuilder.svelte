@@ -23,13 +23,15 @@
     fields?: FieldDefinition[];
     filters?: Filter[];
     logicalOperator?: 'and' | 'or';
+    /** 宿主服务端只支持部分操作符时，限制编辑器可选项；默认沿用字段全量操作符。 */
+    allowedOperators?: readonly CrudOperator[];
     disabled?: boolean;
     class?: string;
     onApply?: (filters: Filter[]) => void;
     onReset?: () => void;
     onInvalid?: (issues: FilterEditorIssue[]) => void;
   }
-  let { fields = [], filters = $bindable([]), logicalOperator = $bindable('and'), disabled = false,
+  let { fields = [], filters = $bindable([]), logicalOperator = $bindable('and'), allowedOperators = undefined, disabled = false,
     class: className, onApply, onReset, onInvalid }: Props = $props();
   const uid = $props.id();
   const i18n = useTranslation();
@@ -37,6 +39,16 @@
   const availableFields = $derived(fields.filter((field) => field.filterable !== false));
   // 金额、评分等数字字段沿用 core 的输入语义；树编译器统一按 number 验证。
   const editorFields = $derived(fields.map(field => isNumericField(field) ? { ...field, type: 'number' as const } : field));
+  function operatorsFor(field: FieldDefinition | undefined): CrudOperator[] {
+    const operators = filterOperators(field);
+    if (!allowedOperators) return operators;
+    const allowed = new Set(allowedOperators);
+    return operators.filter((operator) => allowed.has(operator));
+  }
+  function defaultOperator(field: FieldDefinition | undefined): CrudOperator {
+    const operators = operatorsFor(field);
+    return operators.includes('contains') ? 'contains' : (operators[0] ?? 'eq');
+  }
   let root = $state<FilterGroupNode>({ kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false });
   let loadIssues = $state<FilterEditorIssue[]>([]);
   let attempted = $state(false);
@@ -109,7 +121,7 @@
     const field = availableFields[0];
     if (!field) return;
     group.children = [...group.children, { kind: 'rule', id: `draft-${++nextId}`, field: field.key,
-      operator: filterOperators(editorFields.find(item => item.key === field.key)).includes('contains') ? 'contains' : 'eq', value: undefined }];
+      operator: defaultOperator(editorFields.find(item => item.key === field.key)), value: undefined }];
   }
 
   function appendGroup(group: FilterGroupNode): void {
@@ -149,7 +161,7 @@
   function changeField(rule: FilterRuleNode, key: string): void {
     if (disabled || rule.readonly) return;
     rule.field = key;
-    rule.operator = filterOperators(editorFields.find(field => field.key === key)).includes('contains') ? 'contains' : 'eq';
+    rule.operator = defaultOperator(editorFields.find(field => field.key === key));
     rule.value = undefined;
   }
 
@@ -203,7 +215,7 @@
         </div>
       {:else}
         {@const field = availableFields.find((item) => item.key === node.field)}
-        {@const allowed = filterOperators(editorFields.find(item => item.key === node.field))}
+        {@const allowed = operatorsFor(editorFields.find(item => item.key === node.field))}
         {@const collection = isCollectionOperator(node.operator)}
         {@const invalid = issues.some((issue) => issue.path === node.id)}
         {@const describedby = issues.flatMap((issue, index) => issue.path === node.id ? [`${uid}-issue-${index}`] : []).join(' ') || undefined}

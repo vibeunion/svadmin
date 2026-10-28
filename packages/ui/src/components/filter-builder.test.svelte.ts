@@ -647,3 +647,16 @@ describe('FilterBuilder component', () => {
     expect(isFilterCollectionValue(field, 'in', [0, 0])).toBe(true);
   });
 });
+
+  it('limits operator choices to the host allowlist', async () => {
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'title', label: '标题', type: 'text', filterable: true }],
+      allowedOperators: ['eq'],
+    });
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    const rule = within(view.getByTestId('filter-builder-rule'));
+    const operator = rule.getAllByRole('combobox')[1];
+    if (!(operator instanceof HTMLSelectElement)) throw new Error('Missing operator select');
+    expect([...operator.options].map((option) => option.value)).toEqual(['eq']);
+    expect(operator.value).toBe('eq');
+  });
