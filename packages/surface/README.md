@@ -146,6 +146,29 @@ Only fences tagged `surface` (```` ```surface ````) are treated as proposals; ev
 
 `buildSurfaceAgentPrompt()` and `parseSurfaceAgentProposal()` remain compatible with the legacy proposal-only `surface-agent/v1` envelope. The new message API uses `surface-agent/v2` with a structured `cannot-fulfill` alternative. `createSurfaceAgentStream()` buffers bounded text and validates at `finish()`; it does **not** render partial JSON or implement OpenUI Lang streaming.
 
+## Host-only record selection
+
+`SurfaceRenderer` stays read-only and executes nothing on its own. A host that wants a follow-up from a card registers `onInteraction`; only then does `resource-table` render a per-row select button:
+
+```svelte
+<SurfaceRenderer
+  {spec}
+  {policy}
+  {dataProvider}
+  onInteraction={(event) => {
+    if (event.type !== 'select-record') return;
+    // event.record only carries JSON-safe values from the widget's declared columns.
+    sendFollowUp(`继续分析 ${JSON.stringify(event.record)}`);
+  }}
+/>
+```
+
+An interaction event is presentation data, not an authorization record:
+
+- The library never executes the follow-up, and `SurfaceSpec` gains no action, URL, event handler, or mutation field.
+- `record` is a detached copy projected from the widget's declared columns; undeclared fields are dropped, and values that are not JSON-safe (for example `Date`, `NaN`, or functions) are omitted instead of converted.
+- When nothing survives projection, no event is emitted. `projectInteractionRecord()` is exported for hosts and custom catalog widgets that need the same rule.
+
 ## Revisioned edits and explicit preview
 
 `createSurfaceRevision()` creates a validated immutable snapshot. `buildSurfaceEditMessages()` describes the current revision, catalog and allowed operations. `applySurfaceEditProposal()` validates a complete `surface-edit/v1` transaction and returns a new candidate revision without mutating the old one. Operations cover title/layout, widget/source upsert/removal and complete widget reordering by stable ID. Stale `baseRevision`, unknown IDs, invalid props, denied fields and broken final references reject the whole transaction.

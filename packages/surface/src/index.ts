@@ -28,6 +28,8 @@ export type {
   SurfaceWidgetDefinition,
 } from './types.js';
 export { validateSurfaceSpec } from './validation.js';
+export { projectInteractionRecord } from './interactions.js';
+export type { SurfaceInteraction, SurfaceInteractionEvent } from './interactions.js';
 export type { SurfaceMessages } from './localization.js';
 export {
   SURFACE_AGENT_SCHEMA_VERSION,

@@ -15,6 +15,8 @@ export interface SurfaceWidgetRendererProps {
   readonly data: SurfaceWidgetDataState;
   readonly locale?: string;
   readonly messages?: SurfaceMessages;
+  /** 宿主注册后，组件才渲染可选择行；组件自行按声明列投影记录。 */
+  readonly onSelectRecord?: (record: JsonObject) => void;
 }
 export interface SurfaceWidgetRegistration extends SurfaceWidgetDefinition {
   readonly presentation?: 'surface-appearance/v1';
