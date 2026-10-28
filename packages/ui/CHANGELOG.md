@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.96.1](https://github.com/vibeunion/svadmin/compare/ui-v0.96.0...ui-v0.96.1) (2026-10-28)
+
+
+### 💅 Elegance & Refactoring
+
+* **ui:** extract reusable saved views menu ([#572](https://github.com/vibeunion/svadmin/issues/572)) ([9159199](https://github.com/vibeunion/svadmin/commit/915919912df5278df4cfc35adb65bea01833a9ee))
+
 ## [0.96.0](https://github.com/vibeunion/svadmin/compare/ui-v0.95.0...ui-v0.96.0) (2026-10-28)
 
 
