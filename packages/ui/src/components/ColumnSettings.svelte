@@ -66,15 +66,14 @@
         .filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === 'object')
         .filter((entry) => typeof entry['key'] === 'string')
         .map((entry) => [entry['key'] as string, entry]));
-      const next = columns.map((column) => {
+      const next = columns.map((column): ColumnItem => {
         const saved = stored.get(column.key);
         if (!saved) return column;
-        const fixed = saved['fixed'] === 'left' || saved['fixed'] === 'right' ? saved['fixed'] : undefined;
-        return {
-          ...column,
-          visible: column.required ? true : saved['visible'] !== false,
-          ...(fixed ? { fixed } : {}),
-        };
+        const savedFixed = saved['fixed'];
+        const fixed = savedFixed === 'left' ? 'left' : savedFixed === 'right' ? 'right' : undefined;
+        const visible = column.required === true || saved['visible'] !== false;
+        if (fixed === undefined) return { ...column, visible };
+        return { ...column, visible, fixed };
       });
       const order = parsed
         .map((entry) => (entry && typeof entry === 'object' ? (entry as Record<string, unknown>)['key'] : undefined))
@@ -135,9 +134,14 @@
   }
 
   function toggleFixed(key: string) {
-    columns = columns.map((column) => (column.key === key
-      ? { ...column, fixed: column.fixed ? undefined : 'left' }
-      : column));
+    columns = columns.map((column) => {
+      if (column.key !== key) return column;
+      if (column.fixed) {
+        const { fixed: _fixed, ...rest } = column;
+        return rest;
+      }
+      return { ...column, fixed: 'left' as const };
+    });
     savePreference(columns);
     onchange?.(columns);
   }
