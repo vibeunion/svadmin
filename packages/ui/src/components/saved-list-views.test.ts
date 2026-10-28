@@ -18,6 +18,7 @@ import {
   savedListViewsStorageKey,
   serializeSavedListViews,
   type SavedListView,
+  type SavedListViewState,
 } from './saved-list-views';
 
 const allowedColumns = new Set(['id', 'email', '_actions']);
@@ -139,6 +140,23 @@ describe('saved list views', () => {
         columnOrder: ['email', 'id'],
       },
     }]);
+  });
+
+  it('round-trips density without inventing a value for legacy views', () => {
+    const state: SavedListViewState = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 20 },
+      columnVisibility: {}, columnOrder: [], density: 'compact',
+    };
+    const view: SavedListView = { id: 'dense', name: 'Dense', state };
+    expect(readSavedListViews(serializeSavedListViews([view]), allowedColumns)[0]?.state.density).toBe('compact');
+    const legacyState: SavedListViewState = { ...state };
+    delete legacyState.density;
+    expect(readSavedListViews(serializeSavedListViews([{
+      ...view, state: legacyState,
+    }]), allowedColumns)[0]?.state.density).toBeUndefined();
+    expect(readSavedListViews(serializeSavedListViews([{
+      ...view, state: { ...state, density: 'dense' } as unknown as SavedListViewState,
+    }]), allowedColumns)).toEqual([]);
   });
 
   it('fails closed for malformed JSON and unknown filter or sorter fields', () => {
