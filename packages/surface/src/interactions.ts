@@ -1,4 +1,4 @@
-import { jsonValueIssue } from './json.js';
+import { isJsonValue, jsonValueIssue } from './json.js';
 import type { JsonObject, JsonValue } from './types.js';
 
 /**
@@ -20,6 +20,7 @@ export interface SurfaceInteractionEvent extends SurfaceInteraction {
 
 /**
  * 只投影声明过的列，并跳过无法安全序列化的值（如 Date、函数、循环引用）。
+ * 嵌套对象和数组会深拷贝，宿主后续修改不会写回渲染器缓存。
  * 返回 `null` 表示没有任何可交付字段，调用方不应发出事件。
  *
  * @param record 数据提供器返回的记录。
@@ -27,6 +28,21 @@ export interface SurfaceInteractionEvent extends SurfaceInteraction {
  * @returns 新的 JSON 对象，或 `null`。
  */
 const dangerousKeys = new Set(['__proto__', 'constructor', 'prototype']);
+
+function detachJsonValue(value: JsonValue): JsonValue {
+  if (typeof value !== 'object' || value === null) return value;
+  if (Array.isArray(value)) return value.map((item) => detachJsonValue(item));
+  const copy: Record<string, JsonValue> = {};
+  for (const key of Object.keys(value)) {
+    if (dangerousKeys.has(key)) continue;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !('value' in descriptor)) continue;
+    const nested: unknown = descriptor.value;
+    if (!isJsonValue(nested)) continue;
+    copy[key] = detachJsonValue(nested);
+  }
+  return copy;
+}
 
 export function projectInteractionRecord(
   record: JsonObject,
@@ -38,7 +54,7 @@ export function projectInteractionRecord(
     if (dangerousKeys.has(field) || !Object.hasOwn(record, field)) continue;
     const value = record[field];
     if (value === undefined || jsonValueIssue(value) !== null) continue;
-    projected[field] = value;
+    projected[field] = detachJsonValue(value);
     included += 1;
   }
   return included === 0 ? null : projected;

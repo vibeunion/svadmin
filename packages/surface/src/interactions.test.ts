@@ -33,4 +33,13 @@ describe('surface interaction record projection', () => {
     const record = JSON.parse('{"__proto__": {"polluted": true}, "id": 3}') as JsonObject;
     expect(projectInteractionRecord(record, ['__proto__', 'constructor', 'id'])).toEqual({ id: 3 });
   });
+
+  test('detaches nested objects and arrays from the source record', () => {
+    const nested = { sku: 'A-1', tags: ['ink'] };
+    const record: Record<string, unknown> = { id: 4, details: nested };
+    const projected = projectInteractionRecord(record as JsonObject, ['id', 'details']);
+    nested.sku = 'changed';
+    nested.tags.push('secret');
+    expect(projected).toEqual({ id: 4, details: { sku: 'A-1', tags: ['ink'] } });
+  });
 });
