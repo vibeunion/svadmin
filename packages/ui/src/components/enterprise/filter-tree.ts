@@ -4,7 +4,7 @@ export const FILTER_EDITOR_LIMITS = Object.freeze({ depth: 12, nodes: 256, value
 export interface FilterRuleNode { kind: 'rule'; id: string; field: string; operator: CrudOperator; value: unknown; readonly?: boolean }
 export interface FilterGroupNode { kind: 'group'; id: string; operator: 'and' | 'or'; children: FilterNode[]; wrapped?: boolean }
 export type FilterNode = FilterRuleNode | FilterGroupNode;
-export type FilterIssueCode = 'invalid-filter' | 'limit' | 'unknown-field' | 'operator' | 'value' | 'empty-group';
+export type FilterIssueCode = 'invalid-filter' | 'limit' | 'unknown-field' | 'operator' | 'logic' | 'value' | 'empty-group';
 export interface FilterEditorIssue { path: string; code: FilterIssueCode }
 export type FilterTreeRead = { ok: true; root: FilterGroupNode } | { ok: false; issues: FilterEditorIssue[] };
 export type FilterTreeCompile = { ok: true; filters: Filter[] } | { ok: false; issues: FilterEditorIssue[] };

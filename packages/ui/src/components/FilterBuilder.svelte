@@ -25,18 +25,29 @@
     logicalOperator?: 'and' | 'or';
     /** 宿主服务端只支持部分操作符时，限制编辑器可选项；默认沿用字段全量操作符。 */
     allowedOperators?: readonly CrudOperator[];
+    /** 宿主只支持单一组合逻辑时（如扁平 AND 查询），限制逻辑选择；默认 AND/OR 都可用。 */
+    allowedLogicalOperators?: readonly ('and' | 'or')[];
+    /** 宿主不支持嵌套条件组时关闭新增入口；已保存的嵌套组仍会按白名单校验。 */
+    allowGroups?: boolean;
     disabled?: boolean;
     class?: string;
     onApply?: (filters: Filter[]) => void;
     onReset?: () => void;
     onInvalid?: (issues: FilterEditorIssue[]) => void;
   }
-  let { fields = [], filters = $bindable([]), logicalOperator = $bindable('and'), allowedOperators = undefined, disabled = false,
+  let { fields = [], filters = $bindable([]), logicalOperator = $bindable('and'), allowedOperators = undefined,
+    allowedLogicalOperators = ['and', 'or'], allowGroups = true, disabled = false,
     class: className, onApply, onReset, onInvalid }: Props = $props();
   const uid = $props.id();
   const i18n = useTranslation();
   const chinese = $derived(i18n.locale.startsWith('zh'));
   const availableFields = $derived(fields.filter((field) => field.filterable !== false));
+  const logicalOperators = $derived<readonly ('and' | 'or')[]>(
+    allowedLogicalOperators.length > 0 ? allowedLogicalOperators : ['and'],
+  );
+  const activeLogicalOperator = $derived<'and' | 'or'>(
+    logicalOperators.includes(logicalOperator) ? logicalOperator : logicalOperators[0]!,
+  );
   // 金额、评分等数字字段沿用 core 的输入语义；树编译器统一按 number 验证。
   const editorFields = $derived(fields.map(field => isNumericField(field) ? { ...field, type: 'number' as const } : field));
   function operatorsFor(field: FieldDefinition | undefined): CrudOperator[] {
@@ -45,9 +56,10 @@
     const allowed = new Set(allowedOperators);
     return operators.filter((operator) => allowed.has(operator));
   }
-  function defaultOperator(field: FieldDefinition | undefined): CrudOperator {
+  function defaultOperator(field: FieldDefinition | undefined): CrudOperator | undefined {
     const operators = operatorsFor(field);
-    return operators.includes('contains') ? 'contains' : (operators[0] ?? 'eq');
+    if (operators.includes('contains')) return 'contains';
+    return operators[0];
   }
   let root = $state<FilterGroupNode>({ kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false });
   let loadIssues = $state<FilterEditorIssue[]>([]);
@@ -55,7 +67,7 @@
   let nextId = 0;
   let lastInputFilters: Filter[] | undefined;
   let preserved = $state.raw<ReadonlyMap<string, Filter>>(new Map());
-  const compilation = $derived(compileFilterTree({ ...root, operator: logicalOperator }, editorFields, preserved));
+  const compilation = $derived(compileFilterTree({ ...root, operator: activeLogicalOperator }, editorFields, preserved));
   const issues = $derived(loadIssues.length ? loadIssues : attempted && !compilation.ok ? compilation.issues : []);
   function countNodes(node: FilterNode): number { return 1 + (node.kind === 'group' ? node.children.reduce((sum, child) => sum + countNodes(child), 0) : 0); }
   const nodeCount = $derived(countNodes(root));
@@ -64,6 +76,19 @@
   function snapshotNode(node: FilterNode): Filter {
     return node.kind === 'group' ? { operator: node.operator, value: node.children.map(snapshotNode) }
       : { field: node.field, operator: node.operator, value: Array.isArray(node.value) ? [...node.value] : node.value };
+  }
+
+  function unsupportedLogic(node: FilterNode, top = false): FilterIssueCode | undefined {
+    if (node.kind === 'rule') return undefined;
+    if (!top && !allowGroups) return 'invalid-filter';
+    // 顶层扁平 filters 的 AND 是查询语义，不是用户选择的组合逻辑。
+    if (!(top && !node.wrapped) && !logicalOperators.includes(node.operator)) return 'logic';
+    for (const child of node.children) {
+      if (child.kind !== 'group') continue;
+      const issue = unsupportedLogic(child);
+      if (issue) return issue;
+    }
+    return undefined;
   }
 
   function cannotEdit(node: FilterRuleNode): boolean {
@@ -83,11 +108,16 @@
         lastInputFilters = input;
         const parsed = readFilterTree(input);
         const saved = new Map<string, Filter>();
-        if (parsed.ok) {
+        const logicIssue = parsed.ok ? unsupportedLogic(parsed.root, true) : undefined;
+        if (parsed.ok && !logicIssue) {
           root = parsed.root;
           remember(root, saved);
           loadIssues = [];
-          if (input.length) logicalOperator = root.operator;
+          if (input.length) logicalOperator = logicalOperators.includes(root.operator)
+            ? root.operator : logicalOperators[0]!;
+        } else if (parsed.ok) {
+          root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
+          loadIssues = [{ path: 'root', code: logicIssue! }];
         } else {
           root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
           loadIssues = parsed.issues;
@@ -111,6 +141,7 @@
       limit: ['条件数量或深度超过限制', 'Filter count or depth exceeds the limit'],
       'unknown-field': ['字段不可用于筛选', 'Field is unavailable for filtering'],
       operator: ['操作符不适用于此字段', 'Operator is not supported for this field'],
+      logic: ['组合逻辑不受支持，原条件未被修改', 'Unsupported group logic; the original query is unchanged'],
       value: ['请输入有效的类型化值', 'Enter a valid typed value'],
       'empty-group': ['条件组不能为空', 'A filter group cannot be empty'],
     };
@@ -120,12 +151,14 @@
     if (disabled || loadIssues.length || full) return;
     const field = availableFields[0];
     if (!field) return;
+    const operator = defaultOperator(editorFields.find(item => item.key === field.key));
+    if (!operator) return;
     group.children = [...group.children, { kind: 'rule', id: `draft-${++nextId}`, field: field.key,
-      operator: defaultOperator(editorFields.find(item => item.key === field.key)), value: undefined }];
+      operator, value: undefined }];
   }
 
   function appendGroup(group: FilterGroupNode): void {
-    if (disabled || loadIssues.length || full) return;
+    if (!allowGroups || disabled || loadIssues.length || full) return;
     group.children = [...group.children, { kind: 'group', id: `draft-${++nextId}`, operator: 'and', children: [] }];
   }
 
@@ -160,8 +193,10 @@
 
   function changeField(rule: FilterRuleNode, key: string): void {
     if (disabled || rule.readonly) return;
+    const operator = defaultOperator(editorFields.find(field => field.key === key));
+    if (!operator) return;
     rule.field = key;
-    rule.operator = defaultOperator(editorFields.find(field => field.key === key));
+    rule.operator = operator;
     rule.value = undefined;
   }
 
@@ -191,21 +226,25 @@
     <div class="group-actions">
       <label for={`${uid}-${group.id}-logic`}>{chinese ? '逻辑' : 'Logic'}</label>
       <Select id={`${uid}-${group.id}-logic`} aria-label={chinese ? '组合逻辑' : 'Group logic'}
-        value={top ? logicalOperator : group.operator}
+        value={top ? activeLogicalOperator : group.operator}
+        disabled={disabled || logicalOperators.length <= 1}
         onchange={(event: Event) => {
           const target = event.currentTarget;
           if (disabled || !(target instanceof HTMLSelectElement)) return;
           const next = target.value === 'or' ? 'or' : 'and';
+          if (!logicalOperators.includes(next)) return;
           if (top) logicalOperator = next; else group.operator = next;
         }}>
-        <option value="and">AND</option><option value="or">OR</option>
+        {#each logicalOperators as operator (operator)}<option value={operator}>{operator.toUpperCase()}</option>{/each}
       </Select>
       <Button type="button" size="sm" variant="outline" disabled={full || depth >= FILTER_EDITOR_LIMITS.depth || !availableFields.length}
         data-testid={top ? 'filter-builder-add-rule' : 'filter-group-add-rule'} onclick={() => appendRule(group)}>
         <Plus size={14} aria-hidden="true" />{i18n.t('common.addRule')}
       </Button>
-      <Button type="button" size="sm" variant="ghost" disabled={full || depth >= FILTER_EDITOR_LIMITS.depth - 1}
-        data-testid="filter-builder-add-group" onclick={() => appendGroup(group)}>{chinese ? '添加条件组' : 'Add group'}</Button>
+      {#if allowGroups}
+        <Button type="button" size="sm" variant="ghost" disabled={full || depth >= FILTER_EDITOR_LIMITS.depth - 1}
+          data-testid="filter-builder-add-group" onclick={() => appendGroup(group)}>{chinese ? '添加条件组' : 'Add group'}</Button>
+      {/if}
     </div>
     {#each group.children as node (node.id)}
       {#if node.kind === 'group'}
