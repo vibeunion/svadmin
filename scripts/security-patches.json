@@ -27,7 +27,7 @@
     "affectedRange": ">=4.2.0 <=4.3.1",
     "severity": "low",
     "patch": "patches/deepmerge@4.3.1.patch",
-    "sha256": "1e35cf248d18947f6b6537375a70140725eba6cf9dd064ea18679cc49d66940f",
+    "sha256": "81236fb058939396dfcfae0ca3c84333832fdd17a1363077b53c737901393d3c",
     "reason": "Reject prototype-bearing keys and define merged values as own properties.",
     "files": {
       "index.js": "4e2a66464366d4b02d8200a64c607658948dba06b96fc28cf8b2ed392dd3228f",
