@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.11](https://github.com/vibeunion/svadmin/compare/rest-v0.2.10...rest-v0.2.11) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.12
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.1
+
 ## [0.2.10](https://github.com/vibeunion/svadmin/compare/rest-v0.2.9...rest-v0.2.10) (2026-10-27)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.2](https://github.com/vibeunion/svadmin/compare/editor-v0.7.1...editor-v0.7.2) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.1
+
 ## [0.7.1](https://github.com/vibeunion/svadmin/compare/editor-v0.7.0...editor-v0.7.1) (2026-10-27)
 
 

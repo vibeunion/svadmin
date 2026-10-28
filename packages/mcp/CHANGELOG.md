@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.22](https://github.com/vibeunion/svadmin/compare/mcp-v0.4.21...mcp-v0.4.22) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.1
+
 ## [0.4.21](https://github.com/vibeunion/svadmin/compare/mcp-v0.4.20...mcp-v0.4.21) (2026-10-27)
 
 

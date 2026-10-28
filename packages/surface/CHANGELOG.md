@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.18.1](https://github.com/vibeunion/svadmin/compare/surface-v0.18.0...surface-v0.18.1) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.53.0 <0.67.0
+    * @svadmin/ui remains compatible with >=0.73.0 <0.93.0
+
 ## [0.18.0](https://github.com/vibeunion/svadmin/compare/surface-v0.17.0...surface-v0.18.0) (2026-10-28)
 
 

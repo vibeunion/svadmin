@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.92.1](https://github.com/vibeunion/svadmin/compare/ui-v0.92.0...ui-v0.92.1) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.8
+    * @svadmin/devtools-contract bumped to 0.3.1
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.1
+
 ## [0.92.0](https://github.com/vibeunion/svadmin/compare/ui-v0.91.0...ui-v0.92.0) (2026-10-27)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.16.9](https://github.com/vibeunion/svadmin/compare/lite-v0.16.8...lite-v0.16.9) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.67.0
+
 ## [0.16.8](https://github.com/vibeunion/svadmin/compare/lite-v0.16.7...lite-v0.16.8) (2026-10-27)
 
 
