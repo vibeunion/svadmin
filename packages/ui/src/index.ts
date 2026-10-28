@@ -129,7 +129,7 @@ export { default as FilterBuilder } from './components/FilterBuilder.svelte';
 export type { FilterRuleItem } from './components/FilterBuilder.svelte';
 export { default as Watermark } from './components/Watermark.svelte';
 export { default as ColumnSettings } from './components/ColumnSettings.svelte';
-export type { ColumnItem } from './components/ColumnSettings.svelte';
+export type { ColumnItem, ColumnPreset } from './components/ColumnSettings.svelte';
 export { default as UnsavedChangesPrompt } from './components/UnsavedChangesPrompt.svelte';
 export { default as ImportWizard } from './components/ImportWizard.svelte';
 export type { ImportPreviewFailure, ImportPreviewResult } from '@svadmin/core';

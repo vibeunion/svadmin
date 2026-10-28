@@ -3,7 +3,7 @@
   import { Button } from './ui/button/index.js';
   import { Checkbox } from './ui/checkbox/index.js';
   import * as Popover from './ui/popover/index.js';
-  import { SlidersHorizontal, RotateCcw, ArrowUp, ArrowDown, Search } from '@lucide/svelte';
+  import { SlidersHorizontal, RotateCcw, ArrowUp, ArrowDown, Search, Lock, Pin, PinOff } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   export interface ColumnItem {
@@ -11,12 +11,21 @@
     label: string;
     visible: boolean;
     fixed?: 'left' | 'right';
+    /** 业务必显列。隐藏、预设和已保存偏好都不能把它关掉。 */
+    required?: boolean;
+  }
+
+  export interface ColumnPreset {
+    id: string;
+    label: string;
+    visibleKeys: string[];
   }
 
   interface Props {
     columns: ColumnItem[];
     onchange?: (columns: ColumnItem[]) => void;
     onreset?: () => void;
+    presets?: ColumnPreset[];
     storageKey?: string;
     title?: string;
     triggerVariant?: 'outline' | 'ghost' | 'secondary';
@@ -28,6 +37,7 @@
     columns = $bindable([]),
     onchange,
     onreset,
+    presets = [],
     storageKey,
     title,
     triggerVariant = 'outline',
@@ -41,6 +51,44 @@
 
   // Snapshot initial configuration for reset
   let initialSnapshot = $state<ColumnItem[]>(JSON.parse(JSON.stringify(columns)));
+  let storageHydrated = false;
+
+  // storageKey 之前只写不读；挂载后按 key 合并可见性、固定位和顺序，未知列仍按新定义保留。
+  $effect(() => {
+    if (storageHydrated || !storageKey || typeof window === 'undefined') return;
+    storageHydrated = true;
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return;
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return;
+      const stored = new Map(parsed
+        .filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === 'object')
+        .filter((entry) => typeof entry['key'] === 'string')
+        .map((entry) => [entry['key'] as string, entry]));
+      const next = columns.map((column): ColumnItem => {
+        const saved = stored.get(column.key);
+        if (!saved) return column;
+        const savedFixed = saved['fixed'];
+        const fixed = savedFixed === 'left' ? 'left' : savedFixed === 'right' ? 'right' : undefined;
+        const visible = column.required === true || saved['visible'] !== false;
+        if (fixed === undefined) return { ...column, visible };
+        return { ...column, visible, fixed };
+      });
+      const order = parsed
+        .map((entry) => (entry && typeof entry === 'object' ? (entry as Record<string, unknown>)['key'] : undefined))
+        .filter((key): key is string => typeof key === 'string');
+      next.sort((left, right) => {
+        const leftIndex = order.indexOf(left.key);
+        const rightIndex = order.indexOf(right.key);
+        return (leftIndex < 0 ? Number.MAX_SAFE_INTEGER : leftIndex)
+          - (rightIndex < 0 ? Number.MAX_SAFE_INTEGER : rightIndex);
+      });
+      columns = next;
+    } catch {
+      // 存储损坏时保持调用方传入的资源默认列。
+    }
+  });
 
   const displayTitle = $derived(title ?? i18n.t('common.columnSettings', { defaultValue: 'Columns' }));
   const resetLabel = $derived(i18n.t('common.reset', { defaultValue: 'Reset' }));
@@ -65,13 +113,48 @@
   }
 
   function toggleColumn(key: string) {
+    const target = columns.find((column) => column.key === key);
+    if (!target || target.required) return;
+    if (target.visible && columns.filter((column) => column.visible).length <= 1) return;
     columns = columns.map((c) => (c.key === key ? { ...c, visible: !c.visible } : c));
     savePreference(columns);
     onchange?.(columns);
   }
 
   function toggleAll(checked: boolean) {
-    columns = columns.map((c) => ({ ...c, visible: checked }));
+    const hasRequired = columns.some((column) => column.required);
+    if (!checked && !hasRequired) {
+      // 至少保留一列，避免空表头无法自愈；保留第一列作为最小可见集。
+      columns = columns.map((column, index) => ({ ...column, visible: index === 0 }));
+    } else {
+      columns = columns.map((c) => (c.required ? { ...c, visible: true } : { ...c, visible: checked }));
+    }
+    savePreference(columns);
+    onchange?.(columns);
+  }
+
+  function toggleFixed(key: string) {
+    columns = columns.map((column) => {
+      if (column.key !== key) return column;
+      if (column.fixed) {
+        const { fixed: _fixed, ...rest } = column;
+        return rest;
+      }
+      return { ...column, fixed: 'left' as const };
+    });
+    savePreference(columns);
+    onchange?.(columns);
+  }
+
+  function applyPreset(preset: ColumnPreset) {
+    const visibleKeys = new Set(preset.visibleKeys);
+    columns = columns.map((column) => ({
+      ...column,
+      visible: column.required === true || visibleKeys.has(column.key),
+    }));
+    if (!columns.some((column) => column.visible) && columns[0]) {
+      columns = columns.map((column, index) => ({ ...column, visible: index === 0 }));
+    }
     savePreference(columns);
     onchange?.(columns);
   }
@@ -155,6 +238,20 @@
       </div>
     {/if}
 
+    {#if presets.length > 0}
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-359090c2d529">
+        {#each presets as preset (preset.id)}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            data-column-preset={preset.id}
+            onclick={() => applyPreset(preset)}
+          >{preset.label}</Button>
+        {/each}
+      </div>
+    {/if}
+
     <!-- Column list with ordering -->
     <div class="svadmin-u-50d0d216a2f8 svadmin-u-67d7e383dca6 svadmin-u-92bf82f493b1 svadmin-u-da7c36cd8867 svadmin-u-eda955402ba6">
       {#each filteredColumns as col (col.key)}
@@ -163,14 +260,32 @@
           <label class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-34516836730d svadmin-u-7f6912283f11 svadmin-u-f283ea9bea0e svadmin-u-36e579c0b41c svadmin-u-aa2c13a5e1b4">
             <Checkbox
               checked={col.visible}
+              disabled={col.required}
+              aria-disabled={col.required ? 'true' : undefined}
+              data-column-required={col.required ? col.key : undefined}
               onCheckedChange={() => toggleColumn(col.key)}
             />
             <span class="svadmin-u-f283ea9bea0e svadmin-u-d4108abe6359 {col.visible ? '' : 'svadmin-u-bfa603190748 line-through svadmin-u-f2868c227fcd'}">
               {col.label}
             </span>
+            {#if col.required}
+              <Lock class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" aria-label="Required column" data-column-required={col.key} />
+            {/if}
           </label>
 
-          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
+              aria-label={col.fixed ? 'Cancel fixed column' : 'Fix column left'}
+              aria-pressed={Boolean(col.fixed)}
+              data-column-fixed={col.fixed ?? 'none'}
+              onclick={() => toggleFixed(col.key)}
+            >
+              {#if col.fixed}<PinOff class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />{:else}<Pin class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />{/if}
+            </Button>
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024">
             <Button
               variant="ghost"
               size="icon"
@@ -191,6 +306,7 @@
             >
               <ArrowDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
             </Button>
+            </div>
           </div>
         </div>
       {/each}
