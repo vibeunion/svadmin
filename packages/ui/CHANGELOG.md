@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.95.0](https://github.com/vibeunion/svadmin/compare/ui-v0.94.0...ui-v0.95.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **ui:** surface disabled reasons in row actions ([#566](https://github.com/vibeunion/svadmin/issues/566)) ([bd09bd2](https://github.com/vibeunion/svadmin/commit/bd09bd24f0c2d3d8d540973d5def4975bf1d63b6))
+
 ## [0.94.0](https://github.com/vibeunion/svadmin/compare/ui-v0.93.0...ui-v0.94.0) (2026-10-28)
 
 
