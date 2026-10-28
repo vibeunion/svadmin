@@ -646,4 +646,67 @@ describe('FilterBuilder component', () => {
     expect(isFilterCollectionValue(field, 'in', [false])).toBe(false);
     expect(isFilterCollectionValue(field, 'in', [0, 0])).toBe(true);
   });
+
+  it('limits operator choices to the host allowlist', async () => {
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'title', label: '标题', type: 'text', filterable: true }],
+      allowedOperators: ['eq'],
+    });
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    const rule = within(view.getByTestId('filter-builder-rule'));
+    const operator = rule.getAllByRole('combobox')[1];
+    if (!(operator instanceof HTMLSelectElement)) throw new Error('Missing operator select');
+    expect([...operator.options].map((option) => option.value)).toEqual(['eq']);
+    expect(operator.value).toBe('eq');
+  });
+
+  it('does not invent an operator when the host allowlist matches nothing', async () => {
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'title', label: '标题', type: 'text', filterable: true }],
+      allowedOperators: [],
+    });
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    expect(view.queryByTestId('filter-builder-rule')).toBeNull();
+  });
+
+  it('locks logic and hides nested groups for flat AND hosts', async () => {
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'title', label: '标题', type: 'text', filterable: true }],
+      allowedLogicalOperators: ['and'],
+      allowGroups: false,
+    });
+    const root = within(view.getByTestId('filter-builder-root'));
+    const logic = root.getAllByRole('combobox')[0];
+    if (!(logic instanceof HTMLSelectElement)) throw new Error('Missing logic select');
+    expect([...logic.options].map((option) => option.value)).toEqual(['and']);
+    expect(logic.value).toBe('and');
+    expect(logic.disabled).toBe(true);
+    expect(root.queryByTestId('filter-builder-add-group')).toBeNull();
+  });
+
+  it('renders native date and datetime inputs for temporal fields', () => {
+    const view = render(FilterBuilder, {
+      fields: [
+        { key: 'day', label: '日期', type: 'date', filterable: true },
+        { key: 'at', label: '时间', type: 'datetime', filterable: true },
+      ],
+      filters: [
+        { field: 'day', operator: 'eq', value: '2026-10-28' },
+        { field: 'at', operator: 'eq', value: '2026-10-28T10:30' },
+      ],
+      allowedOperators: ['eq'],
+    });
+    expect(view.container.querySelector('input[type="date"]')).toBeTruthy();
+    expect(view.container.querySelector('input[type="datetime-local"]')).toBeTruthy();
+  });
+
+  it('rejects saved OR filters when the host only supports AND', () => {
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'title', label: '标题', type: 'text', filterable: true }],
+      filters: [{ operator: 'or', value: [{ field: 'title', operator: 'eq', value: 'x' }] }],
+      allowedLogicalOperators: ['and'],
+    });
+    expect(view.getByTestId('filter-builder-errors')).toBeTruthy();
+    expect(view.queryByTestId('filter-builder-root')).toBeNull();
+  });
 });
