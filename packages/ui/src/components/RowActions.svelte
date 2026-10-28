@@ -58,9 +58,9 @@
   let initialMenuFocus: 'first' | 'last' = 'first';
   let restoreFocusOnClose = false;
 
-  function resolvedVariant(action: RowActionItem): RowActionItem['variant'] {
+  function resolvedVariant(action: RowActionItem): Exclude<NonNullable<RowActionItem['variant']>, 'primary'> {
     if (action.variant === 'primary') return 'default';
-    return action.variant ?? (action.danger ? 'destructive' : 'ghost');
+    return (action.variant ?? (action.danger ? 'destructive' : 'ghost')) as Exclude<NonNullable<RowActionItem['variant']>, 'primary'>;
   }
 
   function actionTitle(action: RowActionItem): string {
@@ -157,7 +157,7 @@
         size="sm"
         href={action.href}
         disabled={action.disabled}
-        disabledReason={action.disabled ? action.disabledReason : undefined}
+        disabledReason={action.disabled ? (action.disabledReason ?? '') : ''}
         title={actionTitle(action)}
         class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
       >
@@ -173,7 +173,7 @@
         size="sm"
         onclick={action.onclick}
         disabled={action.disabled}
-        disabledReason={action.disabled ? action.disabledReason : undefined}
+        disabledReason={action.disabled ? (action.disabledReason ?? '') : ''}
         title={actionTitle(action)}
         class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
       >
@@ -203,7 +203,7 @@
               {...definedOptions({ "variant": resolvedVariant(action) })}
               size="sm"
               disabled={action.disabled}
-              disabledReason={action.disabled ? action.disabledReason : undefined}
+              disabledReason={action.disabled ? (action.disabledReason ?? '') : ''}
               onclick={(event) => handleOverflowAction(action, event)}
               role="menuitem"
               tabindex={-1}
