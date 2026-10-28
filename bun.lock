@@ -629,7 +629,7 @@
     },
     "packages/surface": {
       "name": "@svadmin/surface",
-      "version": "0.17.0",
+      "version": "0.18.0",
       "dependencies": {
         "typebox": "^1.3.34",
       },
