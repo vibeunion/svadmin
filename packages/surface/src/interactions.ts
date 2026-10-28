@@ -2,21 +2,30 @@ import { isJsonValue, jsonValueIssue } from './json.js';
 import type { JsonObject, JsonValue } from './types.js';
 
 /**
- * 用户在界面上主动触发的只读选择，不是 action、mutation 或授权凭据。
+ * 用户在界面上主动触发的只读交互，不是 action、mutation 或授权凭据。
  * 宿主自行决定是否把它变成后续操作（例如追加一条用户消息）。
  */
-export interface SurfaceInteraction {
-  readonly type: 'select-record';
-  /** 只包含声明列的 JSON 安全值；不完整，也不能当作授权记录。 */
-  readonly record: JsonObject;
-}
+export type SurfaceInteraction =
+  | {
+    readonly type: 'select-record';
+    /** 只包含声明列的 JSON 安全值；不完整，也不能当作授权记录。 */
+    readonly record: JsonObject;
+  }
+  | {
+    readonly type: 'submit-values';
+    /** 组件本地收集的字段值；宿主必须重新校验，不能当作已授权输入。 */
+    readonly values: JsonObject;
+  };
 
 /** 渲染器补齐作用域后交给宿主的事件；宿主不得把这些字段写回渲染器。 */
-export interface SurfaceInteractionEvent extends SurfaceInteraction {
+export type SurfaceInteractionEvent = SurfaceInteraction & {
   readonly surfaceId: string;
   readonly widgetId: string;
   readonly sourceId?: string;
-}
+};
+
+/** 组件一次回传的最大字符数；超过时失败关闭而不是截断。 */
+export const SURFACE_INTERACTION_MAX_CHARACTERS = 16_384;
 
 /**
  * 只投影声明过的列，并跳过无法安全序列化的值（如 Date、函数、循环引用）。
@@ -58,4 +67,24 @@ export function projectInteractionRecord(
     included += 1;
   }
   return included === 0 ? null : projected;
+}
+
+/**
+ * 校验并深拷贝组件提交的字段值。只接受 JSON 安全值；危险键（如 `__proto__`）、
+ * 非 JSON 值和超过字符上限的内容一律失败关闭，调用方不应发出事件。
+ *
+ * @param values 组件本地状态，例如表单字段。
+ * @returns 独立副本，或 `null`。
+ */
+export function projectInteractionValues(values: JsonObject): JsonObject | null {
+  if (jsonValueIssue(values) !== null) return null;
+  const detached = detachJsonValue(values);
+  if (detached === null || typeof detached !== 'object' || Array.isArray(detached)) return null;
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(detached);
+  } catch {
+    return null;
+  }
+  return serialized.length > SURFACE_INTERACTION_MAX_CHARACTERS ? null : (detached as JsonObject);
 }

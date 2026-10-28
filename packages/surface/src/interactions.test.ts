@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { projectInteractionRecord } from './interactions.js';
+import { projectInteractionRecord, projectInteractionValues, SURFACE_INTERACTION_MAX_CHARACTERS } from './interactions.js';
 import type { JsonObject } from './types.js';
 
 describe('surface interaction record projection', () => {
@@ -41,5 +41,28 @@ describe('surface interaction record projection', () => {
     nested.sku = 'changed';
     nested.tags.push('secret');
     expect(projected).toEqual({ id: 4, details: { sku: 'A-1', tags: ['ink'] } });
+  });
+});
+
+describe('surface interaction value projection', () => {
+  test('detaches component values', () => {
+    const values = JSON.parse('{"name":"Ada","meta":{"ok":true}}') as JsonObject;
+    const projected = projectInteractionValues(values);
+    expect(projected).toEqual({ name: 'Ada', meta: { ok: true } });
+    if (projected !== null) (projected as Record<string, unknown>)['name'] = 'Changed';
+    expect((values as Record<string, unknown>)['name']).toBe('Ada');
+  });
+
+  test('fails closed for dangerous keys instead of stripping them', () => {
+    const values = JSON.parse('{"name":"Ada","__proto__":{"polluted":true}}') as JsonObject;
+    expect(projectInteractionValues(values)).toBeNull();
+  });
+
+  test('fails closed for non-JSON and oversized values', () => {
+    expect(projectInteractionValues({ at: new Date() } as unknown as JsonObject)).toBeNull();
+    expect(projectInteractionValues({ big: 'x'.repeat(SURFACE_INTERACTION_MAX_CHARACTERS) })).toBeNull();
+    const circular: Record<string, unknown> = {};
+    circular['self'] = circular;
+    expect(projectInteractionValues(circular as unknown as JsonObject)).toBeNull();
   });
 });
