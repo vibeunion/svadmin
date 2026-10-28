@@ -18,14 +18,20 @@
 
 	import { setContext } from "svelte";
 
+	// 溢出菜单可以挂到 body。点击判断必须把这块节点算进去，否则捕获阶段会先把菜单卸掉。
+	const contentBridge: { node: HTMLElement | null } = { node: null };
+
 	function handleClickOutside(e: MouseEvent) {
-		if (ref && !ref.contains(e.target as Node)) {
-			open = false;
-			onOpenChange?.(false);
-		}
+		const target = e.target;
+		if (!(target instanceof Node)) return;
+		if (ref?.contains(target) || contentBridge.node?.contains(target)) return;
+		open = false;
+		onOpenChange?.(false);
 	}
 
 	setContext("svadmin-dropdown-open", () => open);
+	setContext("svadmin-dropdown-content", contentBridge);
+	setContext("svadmin-dropdown-root", () => ref);
 	setContext("svadmin-dropdown-toggle", () => {
 		open = !open;
 		onOpenChange?.(open);

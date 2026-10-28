@@ -78,8 +78,13 @@
     action.onclick?.(event);
   }
 
+  const menuOwner = `row-${Math.random().toString(36).slice(2, 10)}`;
+
   function menuElements(): HTMLElement[] {
-    return [...(ref?.querySelector('[data-slot="dropdown-menu-content"]')?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])]
+    const content = typeof document === 'undefined'
+      ? null
+      : document.querySelector<HTMLElement>(`[data-slot="dropdown-menu-content"][data-row-actions="${menuOwner}"]`);
+    return [...(content?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])]
       .filter((element) => !element.matches(':disabled, [aria-disabled="true"]'));
   }
 
@@ -123,12 +128,26 @@
 
   $effect(() => {
     if (overflowOpen) {
+      let menu: HTMLElement | null = null;
+      let cancelled = false;
+      const onMenuKeyDown = (event: KeyboardEvent) => {
+        manageMenuKeyboard(event as RowActionsKeyboardEvent);
+      };
       void tick().then(() => {
+        if (cancelled) return;
         menuWasOpen = true;
+        menu = typeof document === 'undefined'
+          ? null
+          : document.querySelector<HTMLElement>(`[data-slot="dropdown-menu-content"][data-row-actions="${menuOwner}"]`);
+        menu?.addEventListener('keydown', onMenuKeyDown);
         const elements = menuElements();
         elements[initialMenuFocus === 'last' ? elements.length - 1 : 0]?.focus();
         initialMenuFocus = 'first';
       });
+      return () => {
+        cancelled = true;
+        menu?.removeEventListener('keydown', onMenuKeyDown);
+      };
     } else if (menuWasOpen) {
       menuWasOpen = false;
       if (restoreFocusOnClose) {
@@ -195,7 +214,7 @@
           </Button>
         {/snippet}
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content align="end" class="svadmin-u-3143d72a3869" role="menu" aria-label={moreLabel}>
+      <DropdownMenu.Content portal align="end" data-row-actions={menuOwner} class="svadmin-u-3143d72a3869" role="menu" aria-label={moreLabel}>
         {#each overflowActions as action (action)}
           {#if action.href}
             <Button
