@@ -20,6 +20,23 @@
     }
   },
   {
+    "name": "deepmerge",
+    "version": "4.3.1",
+    "advisory": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+    "advisoryId": 1243505,
+    "affectedRange": ">=4.2.0 <=4.3.1",
+    "severity": "low",
+    "patch": "patches/deepmerge@4.3.1.patch",
+    "sha256": "1e35cf248d18947f6b6537375a70140725eba6cf9dd064ea18679cc49d66940f",
+    "reason": "Reject prototype-bearing keys and define merged values as own properties.",
+    "files": {
+      "index.js": "4e2a66464366d4b02d8200a64c607658948dba06b96fc28cf8b2ed392dd3228f",
+      "dist/cjs.js": "edffedf354318013b9726e2044bdbcce9e33e71f7e0bffde13dc7193375b2af7",
+      "dist/umd.js": "82a6b354a8e7d7f3468e93e2d71b72808c459370689052f30b847e3a54185c34"
+    },
+    "main": "dist/cjs.js"
+  },
+  {
     "name": "http-cache-semantics",
     "version": "4.2.0",
     "advisory": "https://github.com/advisories/GHSA-ch52-4w7c-c8xp",

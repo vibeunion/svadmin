@@ -58,7 +58,7 @@ export function verifyPatchIntegrity(root: string): void {
         const patch = patches.find(item => item.name === metadata['name']);
         if (patch) {
           assert.equal(metadata['version'], patch.version, `${path}: installed version mismatch`);
-          assert.equal(metadata['main'], 'index.js', `${path}: unexpected entry point`);
+          assert.equal(metadata['main'], patch.main ?? 'index.js', `${path}: unexpected entry point`);
           assert.equal(metadata['exports'], undefined, `${path}: unexpected exports`);
           for (const [file, expected] of Object.entries(patch.files)) {
             assert.equal(hash(join(path, file)), expected, `${path}/${file}: source hash mismatch`);

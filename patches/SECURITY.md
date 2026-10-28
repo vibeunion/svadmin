@@ -9,13 +9,16 @@ No product code, publication bypass, or repository-wide dependency upgrade is
 included.
 
 The original 19 audit findings are addressed by axios 1.20.0, devalue 5.9.4 and
-DOMPurify 3.4.16. Two upstream advisories remain version-matched because their
-maintainers have not published patched versions:
+DOMPurify 3.4.16. `qs` GHSA-6pq8-jhm2-2vcw is cleared by the `qs` 6.17.0 override;
+the comma-array fix landed in 6.16.1. deepmerge 4.3.1 still has no upstream
+release, so it is patched locally. braces remains patched even though the current
+registry response no longer reports it:
 
 | Dependency | Advisory | Local remediation |
 | --- | --- | --- |
 | braces 3.0.3 | GHSA-vfj7-8cjw-p6xm | Hard nesting limit of 128 for braces and parentheses; independent bounds in direct AST compile, expand and stringify walkers. |
 | http-cache-semantics 4.2.0 | GHSA-ch52-4w7c-c8xp | Security restrictions precede max-stale, stale-while-revalidate and stale-if-error reuse; fresh responses and permitted private/public caching remain supported. |
+| deepmerge 4.3.1 | GHSA-gcqx-w48m-w2h4 | `__proto__`, `constructor`, and `prototype` keys are dropped in both merge loops. Results are written with `Object.defineProperty`. Null and undefined targets still merge, and a throwing `in` check stays fail-open so normal keys are not rejected. |
 
 Use `bun install --frozen-lockfile` to apply the tracked Bun patches. Package
 versions remain truthful; no version spoofing or advisory ignore flags are used.
@@ -37,12 +40,12 @@ automatically protect downstream consumers' separate installations.
    private temporary snapshot containing byte-identical `package.json` and
    `bun.lock`. This preserves the full dependency graph without loading local
    application `.env` files. The snapshot is removed on success or failure.
-5. Prints every advisory. Only the two exact package/advisory ID/range/severity
-   tuples above can pass as **locally patched**, and only after steps 1-3 pass.
+5. Prints every advisory. Only an exact package/advisory ID/range/severity tuple
+   recorded above can pass as **locally patched**, and only after steps 1-3 pass.
    Any other advisory, source drift, malformed response, timeout, network error
    or inconsistent exit code fails the gate.
 
-Raw `bun audit` still reports the two upstream advisories and exits nonzero.
+Raw `bun audit` still reports deepmerge and http-cache-semantics and exits nonzero.
 Do not describe this as an upstream clean audit. The project gate reports
 verified local remediation, not zero upstream findings.
 

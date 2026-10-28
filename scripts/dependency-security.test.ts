@@ -65,6 +65,56 @@ test('braces preserves normal expansion, escaped literals and fallback protectio
   depthError(() => braces.expand(ast));
 });
 
+interface MergeRecord {
+  [key: string]: unknown;
+  isAdmin?: unknown;
+  safe?: unknown;
+  session?: MergeRecord;
+  count?: MergeRecord;
+  list?: MergeRecord[];
+  debug?: unknown;
+  verbose?: unknown;
+}
+interface Deepmerge {
+  (target: unknown, source: unknown): MergeRecord;
+}
+const deepmerge: Deepmerge = require('deepmerge');
+const poisoningPayload = (): MergeRecord => JSON.parse(
+  '{"__proto__":{"isAdmin":true},"constructor":{"prototype":{"isAdmin":true}},"prototype":{"isAdmin":true},"safe":{"value":1}}',
+);
+test('deepmerge rejects prototype-bearing keys without breaking ordinary or null targets', () => {
+  const nullTarget = deepmerge(Object.assign(Object.create(null), { debug: false }), poisoningPayload());
+  expect(nullTarget.isAdmin).toBeUndefined();
+  expect(nullTarget.debug).toBe(false);
+  expect(nullTarget.safe).toEqual({ value: 1 });
+  expect(Object.getPrototypeOf(nullTarget)).toBe(Object.prototype);
+  expect(Object.hasOwn(nullTarget, '__proto__')).toBe(false);
+  expect(Object.hasOwn(nullTarget, 'constructor')).toBe(false);
+  expect(Object.hasOwn(nullTarget, 'prototype')).toBe(false);
+
+  const placeholder = deepmerge({ session: null, count: 0 }, { session: poisoningPayload(), count: poisoningPayload() });
+  expect(placeholder.session?.isAdmin).toBeUndefined();
+  expect(placeholder.count?.isAdmin).toBeUndefined();
+  expect(Object.getPrototypeOf(placeholder.session)).toBe(Object.prototype);
+  expect(Object.getPrototypeOf(placeholder)).toBe(Object.prototype);
+
+  const ownProto = deepmerge(JSON.parse('{"__proto__":{"isAdmin":true},"debug":false}'), { verbose: true });
+  expect(ownProto.isAdmin).toBeUndefined();
+  expect(ownProto.debug).toBe(false);
+  expect(ownProto.verbose).toBe(true);
+  expect(Object.getPrototypeOf(ownProto)).toBe(Object.prototype);
+
+  const listed = deepmerge({ list: [] }, JSON.parse('{"list":[{"__proto__":{"isAdmin":true}}]}'));
+  expect(listed.list?.[0]?.isAdmin).toBeUndefined();
+  expect(Object.getPrototypeOf(listed.list?.[0])).toBe(Object.prototype);
+
+  expect(deepmerge(null, { a: 1, b: { c: 2 } })).toEqual({ a: 1, b: { c: 2 } });
+  expect(deepmerge(undefined, { a: 1 })).toEqual({ a: 1 });
+  expect(deepmerge({ a: { x: 1 }, list: [1] }, { a: { y: 2 }, list: [2] }))
+    .toEqual({ a: { x: 1, y: 2 }, list: [1, 2] });
+  expect(({} as MergeRecord).isAdmin).toBeUndefined();
+});
+
 interface Request { url: string; method: string; headers: Record<string, string> }
 interface CacheResult { response?: unknown; revalidation?: { synchronous: boolean } }
 interface Policy {
