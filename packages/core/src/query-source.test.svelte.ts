@@ -803,7 +803,7 @@ describe('ordinary query authentication ownership', () => {
     expect(getToastQueue()).toHaveLength(1);
     expect(getToastQueue()[0]).toMatchObject({
       type: 'error',
-      message: t('common.loadFailed', { message: t('common.error') }),
+      message: `${t('common.loadFailed', { message: t('common.error') })}: posts · QUERY_FAILED · HTTP 503`,
       key: expect.stringMatching(/^svadmin-query-error:\d+$/),
     });
     expect(JSON.stringify(getToastQueue())).not.toContain('private-query-meta');
@@ -816,7 +816,7 @@ describe('ordinary query authentication ownership', () => {
     source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('PRIVATE_DIAGNOSTIC', 503));
     mount('one', source, client(), { errorNotification: undefined });
     await waitFor(() => expect(getToastQueue()).toHaveLength(1));
-    expect(getToastQueue()[0]?.message).toBe('加载失败: 出错了');
+    expect(getToastQueue()[0]?.message).toBe('加载失败: 出错了: posts · QUERY_FAILED · HTTP 503');
     expect(JSON.stringify(getToastQueue())).not.toContain('PRIVATE_DIAGNOSTIC');
     expect(JSON.stringify(getToastQueue())).not.toContain('Fetch failed');
   });
@@ -866,8 +866,35 @@ describe('ordinary query authentication ownership', () => {
     const third = mount('one', source, shared, { errorNotification: custom });
     await waitFor(() => expect([first, second, third].every(app => app.read().query.isError)).toBe(true));
     expect(getToastQueue()).toHaveLength(3);
-    expect(getToastQueue().filter(item => item.key === undefined)).toHaveLength(2);
-    expect(getToastQueue().every(item => item.message === message)).toBe(true);
+    const customItems = getToastQueue().filter(item => item.key === undefined);
+    expect(customItems).toHaveLength(2);
+    expect(customItems.every(item => item.message === message)).toBe(true);
+    expect(getToastQueue().find(item => item.key !== undefined)?.message)
+      .toBe(`${message}: posts · QUERY_FAILED · HTTP 503`);
+  });
+
+  it('reports sanitized query failures to the console and keeps the description actionable', async () => {
+    setLocale('zh-CN');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const source = provider();
+      source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('PRIVATE_DIAGNOSTIC', 503));
+      mount('one', source, client(), { errorNotification: undefined });
+      await waitFor(() => expect(getToastQueue()).toHaveLength(1));
+      expect(getToastQueue()[0]).toMatchObject({
+        message: '加载失败: 出错了: posts · QUERY_FAILED · HTTP 503',
+        key: expect.stringMatching(/^svadmin-query-error:\d+$/),
+      });
+      expect(consoleError).toHaveBeenCalledOnce();
+      expect(consoleError).toHaveBeenCalledWith('[svadmin] Query failed', {
+        resource: 'posts', status: 503, code: 'QUERY_FAILED', message: 'Resource query failed',
+      });
+      const serialized = JSON.stringify(consoleError.mock.calls);
+      expect(serialized).not.toContain('PRIVATE_DIAGNOSTIC');
+      expect(serialized).not.toContain('private-query-meta');
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it('passes the same opaque default error key to a custom notification provider', async () => {
@@ -881,7 +908,10 @@ describe('ordinary query authentication ownership', () => {
     await waitFor(() => expect(notification.open).toHaveBeenCalledTimes(2));
     const [first, second] = notification.open.mock.calls;
     expect(first).toEqual([{
-      type: 'error', message: t('common.loadFailed', { message: t('common.error') }), key: expect.stringMatching(/^svadmin-query-error:\d+$/),
+      type: 'error',
+      message: t('common.loadFailed', { message: t('common.error') }),
+      description: 'posts · QUERY_FAILED · HTTP 503',
+      key: expect.stringMatching(/^svadmin-query-error:\d+$/),
     }]);
     expect(second).toEqual(first);
     expect(getToastQueue()).toHaveLength(0);
@@ -913,7 +943,9 @@ describe('ordinary query authentication ownership', () => {
     if (channel === 'provider') {
       expect(notification.open).toHaveBeenCalledOnce();
       expect(notification.open).toHaveBeenCalledWith({
-        type: 'error', message: t('common.loadFailed', { message: t('common.error') }),
+        type: 'error',
+        message: t('common.loadFailed', { message: t('common.error') }),
+        description: 'posts · QUERY_FAILED · HTTP 503',
         key: expect.stringMatching(/^svadmin-query-error:\d+$/),
       });
       expect(getToastQueue()).toHaveLength(0);
