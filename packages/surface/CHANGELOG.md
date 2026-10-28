@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.19.0](https://github.com/vibeunion/svadmin/compare/surface-v0.18.1...surface-v0.19.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **surface:** accept widget value submissions as host interactions ([923af25](https://github.com/vibeunion/svadmin/commit/923af251d5278f8e2e4452a2f22142ad09ea5f04))
+* **surface:** accept widget value submissions as host interactions ([2e27666](https://github.com/vibeunion/svadmin/commit/2e2766640621cb0990143cbd360cf4c7d2dc8bd3))
+
 ## [0.18.1](https://github.com/vibeunion/svadmin/compare/surface-v0.18.0...surface-v0.18.1) (2026-10-28)
 
 

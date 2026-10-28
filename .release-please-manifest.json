@@ -28,7 +28,7 @@
   "packages/lite": "0.16.9",
   "packages/mcp": "0.4.22",
   "packages/devtools-contract": "0.3.1",
-  "packages/surface": "0.18.1",
+  "packages/surface": "0.19.0",
   "packages/app": "0.2.11",
   "packages/devtools": "0.3.8",
   "packages/rest": "0.2.11"
