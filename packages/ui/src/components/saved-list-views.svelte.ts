@@ -419,6 +419,7 @@ export function createSavedListViews(options: SavedListViewsOptions) {
 
   return {
     initialSavedView,
+    get provider() { return savedViewProvider; },
     get availableSavedViews() { return availableSavedViews; },
     get activeSavedViewId() { return activeSavedViewId; },
     get activeSavedViewName() { return activeSavedViewName; },

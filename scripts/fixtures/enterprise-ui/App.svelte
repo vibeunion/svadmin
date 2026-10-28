@@ -34,6 +34,7 @@
   import RadioGroupFixture from './RadioGroupFixture.svelte';
   import SegmentedControlFixture from './SegmentedControlFixture.svelte';
   import SavedListViewsFixture from './SavedListViewsFixture.svelte';
+  import SavedViewsMenuEvidence from './SavedViewsMenuEvidence.svelte';
   import ResourceWorkspaceFixture from './ResourceWorkspaceFixture.svelte';
   import ResourceWorkspaceEditRouteFixture from './ResourceWorkspaceEditRouteFixture.svelte';
   import QuickEditLifecycleFixture from './QuickEditLifecycleFixture.svelte';
@@ -209,6 +210,8 @@
     <SegmentedControlFixture />
   {:else if requestedView === 'saved-list-views'}
     <SavedListViewsFixture />
+  {:else if requestedView === 'saved-views-menu'}
+    <SavedViewsMenuEvidence />
   {:else if requestedView === 'resource-workspace'}
     <ResourceWorkspaceFixture />
   {:else if requestedView === 'resource-workspace-edit-route'}

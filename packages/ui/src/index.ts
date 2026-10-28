@@ -16,6 +16,7 @@ export type { AdminPageRoute } from './components/AdminApp.svelte';
 
 // Admin components
 export { default as AutoTable } from './components/AutoTable.svelte';
+export { default as SavedViewsMenu } from './components/SavedViewsMenu.svelte';
 export { default as SegmentedControl } from './components/SegmentedControl.svelte';
 export type { SegmentedControlOption } from './components/SegmentedControl.svelte';
 export { default as RadioGroup } from './components/RadioGroup.svelte';
