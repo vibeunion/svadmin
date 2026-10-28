@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.66.2](https://github.com/vibeunion/svadmin/compare/core-v0.66.1...core-v0.66.2) (2026-10-28)
+
+
+### 🐛 Bug Fixes
+
+* **core:** keep sanitized query codes off the default toast ([7cbc1f9](https://github.com/vibeunion/svadmin/commit/7cbc1f9c7831b9864bca13e978b922f8945d0bcf))
+* **core:** report sanitized query failures ([3f5cf00](https://github.com/vibeunion/svadmin/commit/3f5cf00245bbf87fdd3506c37df9ec68a755756c))
+* **core:** report sanitized query failures ([1e45695](https://github.com/vibeunion/svadmin/commit/1e4569560609d9ec53905cd4e747a667417a0c2f))
+
 ## [0.66.1](https://github.com/vibeunion/svadmin/compare/core-v0.66.0...core-v0.66.1) (2026-10-28)
 
 
