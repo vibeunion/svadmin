@@ -11,6 +11,42 @@ const root = resolve(import.meta.dir, '..');
 const packageRoot = process.env['SVADMIN_SECURITY_PACKAGE_ROOT'] ?? root;
 const require = createRequire(join(packageRoot, 'package.json'));
 
+test('node-server static files cannot bypass path authentication through a second decode', async () => {
+  const { Hono }: typeof import('hono') = require('hono');
+  const { serveStatic }: typeof import('@hono/node-server/serve-static') = require('@hono/node-server/serve-static');
+  const directory = mkdtempSync(join(tmpdir(), 'svadmin-static-security-'));
+  try {
+    mkdirSync(join(directory, 'static/admin'), { recursive: true });
+    writeFileSync(join(directory, 'static/admin/secret.txt'), 'private content');
+    writeFileSync(join(directory, 'static/hello world.txt'), 'public content');
+    writeFileSync(join(directory, 'static/炎.txt'), 'public unicode');
+    const app = new Hono();
+    app.use('/static/admin/*', c => c.text('Unauthorized', 401));
+    app.use('/static/*', serveStatic({ root: directory }));
+
+    for (const path of ['/static/admin/secret.txt', '/static/%61dmin/secret.txt']) {
+      const response = await app.request(path);
+      expect(response.status).toBe(401);
+      expect(await response.text()).toBe('Unauthorized');
+    }
+    // 恶意编码在路由与静态文件解析之间不能被再次解码为受保护路径。
+    const bypass = await app.request('/static/%%36%31dmin/secret.txt');
+    expect(bypass.status).toBe(404);
+    expect(await bypass.text()).not.toContain('private content');
+
+    for (const [path, content] of [
+      ['/static/hello%20world.txt', 'public content'],
+      ['/static/%E7%82%8E.txt', 'public unicode'],
+    ] as const) {
+      const response = await app.request(path);
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe(content);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 interface Ast { type: string; value?: string; nodes?: Ast[]; depth?: number; invalid?: boolean }
 type BraceMethod = (input: string | Ast, options?: Record<string, unknown>) => unknown;
 interface Braces {
