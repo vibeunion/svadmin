@@ -77,6 +77,7 @@ interface MergeRecord {
 }
 interface Deepmerge {
   (target: unknown, source: unknown): MergeRecord;
+  all(values: readonly unknown[]): MergeRecord;
 }
 const deepmerge: Deepmerge = require('deepmerge');
 const poisoningPayload = (): MergeRecord => JSON.parse(
@@ -112,6 +113,7 @@ test('deepmerge rejects prototype-bearing keys without breaking ordinary or null
   expect(deepmerge(undefined, { a: 1 })).toEqual({ a: 1 });
   expect(deepmerge({ a: { x: 1 }, list: [1] }, { a: { y: 2 }, list: [2] }))
     .toEqual({ a: { x: 1, y: 2 }, list: [1, 2] });
+  expect(deepmerge.all([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
   expect(({} as MergeRecord).isAdmin).toBeUndefined();
 });
 
