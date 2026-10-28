@@ -13,8 +13,10 @@
     icon?: Component<{ class?: string }>;
     href?: string;
     onclick?: (e: MouseEvent) => void;
-    variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary';
+    variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary' | 'primary';
     disabled?: boolean;
+    /** 受控禁用原因；禁用项通过 tooltip/标题与菜单内说明呈现，不改变命令语义。 */
+    disabledReason?: string;
     title?: string;
     danger?: boolean;
     hidden?: boolean;
@@ -57,7 +59,13 @@
   let restoreFocusOnClose = false;
 
   function resolvedVariant(action: RowActionItem): RowActionItem['variant'] {
+    if (action.variant === 'primary') return 'default';
     return action.variant ?? (action.danger ? 'destructive' : 'ghost');
+  }
+
+  function actionTitle(action: RowActionItem): string {
+    const base = action.title || action.label;
+    return action.disabled && action.disabledReason ? `${base}：${action.disabledReason}` : base;
   }
 
   function handleOverflowAction(action: RowActionItem, event: MouseEvent): void {
@@ -149,7 +157,8 @@
         size="sm"
         href={action.href}
         disabled={action.disabled}
-        title={action.title || action.label}
+        disabledReason={action.disabled ? action.disabledReason : undefined}
+        title={actionTitle(action)}
         class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
       >
         {#if action.icon}
@@ -164,7 +173,8 @@
         size="sm"
         onclick={action.onclick}
         disabled={action.disabled}
-        title={action.title || action.label}
+        disabledReason={action.disabled ? action.disabledReason : undefined}
+        title={actionTitle(action)}
         class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
       >
         {#if action.icon}
@@ -193,9 +203,11 @@
               {...definedOptions({ "variant": resolvedVariant(action) })}
               size="sm"
               disabled={action.disabled}
+              disabledReason={action.disabled ? action.disabledReason : undefined}
               onclick={(event) => handleOverflowAction(action, event)}
               role="menuitem"
               tabindex={-1}
+              title={actionTitle(action)}
               class="svadmin-u-b8f0a08ece1e svadmin-u-6da6a3c3f741 svadmin-u-4b5cc19bfdfc svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6"
             >
               {#if action.icon}
@@ -211,12 +223,18 @@
               destructive={action.danger || action.variant === 'destructive'}
               role="menuitem"
               tabindex={-1}
+              title={actionTitle(action)}
             >
               {#if action.icon}
                 {@const Icon = action.icon}
                 <Icon class="svadmin-u-783b0d9d1e2c" />
               {/if}
-              {action.label}
+              <span class="row-action-label">
+                <span>{action.label}</span>
+                {#if action.disabled && action.disabledReason}
+                  <span class="row-action-reason">{action.disabledReason}</span>
+                {/if}
+              </span>
             </DropdownMenu.Item>
           {/if}
         {/each}
@@ -227,3 +245,9 @@
     </DropdownMenu.Root>
   {/if}
 </div>
+
+<style>
+  .row-action-label { display: inline-flex; flex-direction: column; align-items: flex-start; gap: .125rem; min-width: 0; }
+  .row-action-label > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+  .row-action-reason { font-size: .75em; line-height: 1.3; opacity: .72; white-space: normal; }
+</style>

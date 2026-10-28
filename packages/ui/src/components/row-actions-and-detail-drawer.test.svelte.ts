@@ -44,11 +44,12 @@ describe('RowActions and DetailDrawer', () => {
     await fireEvent.keyDown(trigger, { key: 'ArrowDown' });
     const menu = within(rowActions).getByRole('menu', { name: 'More actions' });
     const items = within(menu).getAllByRole('menuitem');
+    const enabledItems = items.filter((item) => !(item as HTMLElement).matches(':disabled, [aria-disabled="true"]'));
     await waitFor(() => expect(document.activeElement).toBe(items[0]));
 
     await fireEvent.keyDown(requireValue(items[0]), { key: 'End' });
-    expect(document.activeElement).toBe(items.at(-1));
-    await fireEvent.keyDown(items.at(-1) as HTMLElement, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(enabledItems.at(-1));
+    await fireEvent.keyDown(enabledItems.at(-1) as HTMLElement, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(items[0]);
     await fireEvent.keyDown(requireValue(items[0]), { key: 'Escape' });
 
