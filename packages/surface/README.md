@@ -146,9 +146,9 @@ Only fences tagged `surface` (```` ```surface ````) are treated as proposals; ev
 
 `buildSurfaceAgentPrompt()` and `parseSurfaceAgentProposal()` remain compatible with the legacy proposal-only `surface-agent/v1` envelope. The new message API uses `surface-agent/v2` with a structured `cannot-fulfill` alternative. `createSurfaceAgentStream()` buffers bounded text and validates at `finish()`; it does **not** render partial JSON or implement OpenUI Lang streaming.
 
-## Host-only record selection
+## Host-only interactions
 
-`SurfaceRenderer` stays read-only and executes nothing on its own. A host that wants a follow-up from a card registers `onInteraction`; only then does `resource-table` render a per-row select button:
+`SurfaceRenderer` stays read-only and executes nothing on its own. A host that wants a follow-up from a card registers `onInteraction`; only then do interactive widgets expose their affordances:
 
 ```svelte
 <SurfaceRenderer
@@ -156,18 +156,30 @@ Only fences tagged `surface` (```` ```surface ````) are treated as proposals; ev
   {policy}
   {dataProvider}
   onInteraction={(event) => {
-    if (event.type !== 'select-record') return;
-    // event.record only carries JSON-safe values from the widget's declared columns.
-    sendFollowUp(`继续分析 ${JSON.stringify(event.record)}`);
+    if (event.type === 'select-record') {
+      // event.record only carries JSON-safe values from the widget's declared columns.
+      sendFollowUp(`继续分析 ${JSON.stringify(event.record)}`);
+    } else {
+      // event.values are the widget's local field values, re-validated by the renderer.
+      sendFollowUp(`提交内容 ${JSON.stringify(event.values)}`);
+    }
   }}
 />
 ```
 
+Two event shapes exist, both scoped with `surfaceId`, `widgetId` and optional `sourceId`:
+
+| Event | Emitted by | Payload |
+| --- | --- | --- |
+| `select-record` | `resource-table` row select | `record`: detached copy projected from the widget's declared columns |
+| `submit-values` | widgets that call `onSubmitValues`, such as form widgets in a custom catalog | `values`: the widget's local values, re-validated and detached by the renderer |
+
 An interaction event is presentation data, not an authorization record:
 
 - The library never executes the follow-up, and `SurfaceSpec` gains no action, URL, event handler, or mutation field.
-- `record` is a detached copy projected from the widget's declared columns; undeclared fields are dropped, and values that are not JSON-safe (for example `Date`, `NaN`, or functions) are omitted instead of converted.
-- When nothing survives projection, no event is emitted. `projectInteractionRecord()` is exported for hosts and custom catalog widgets that need the same rule.
+- Undeclared record fields are dropped, and values that are not JSON-safe (for example `Date`, `NaN`, or functions) are omitted instead of converted.
+- Submitted values fail closed: dangerous keys such as `__proto__`, non-JSON values, and payloads above `SURFACE_INTERACTION_MAX_CHARACTERS` produce no event.
+- When nothing survives projection, no event is emitted. `projectInteractionRecord()` and `projectInteractionValues()` are exported for hosts and custom catalog widgets that need the same rules.
 
 ## Revisioned edits and explicit preview
 

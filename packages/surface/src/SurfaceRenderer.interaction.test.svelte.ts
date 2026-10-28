@@ -3,7 +3,9 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { BaseRecord, GetListParams, GetListResult, GetOneParams, GetOneResult } from '@svadmin/core';
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
 import { resetI18n } from '@svadmin/core/i18n';
-import { DEFAULT_SURFACE_CATALOG_VERSION, defaultSurfaceCatalog } from './catalog.js';
+import { Type } from 'typebox';
+import { DEFAULT_SURFACE_CATALOG_VERSION, defaultSurfaceCatalog, defineSurfaceCatalog } from './catalog.js';
+import SubmitValuesWidget from '../test/fixtures/SubmitValuesWidget.svelte';
 import SurfaceRenderer from './components/SurfaceRenderer.svelte';
 import type { SurfaceDataProvider, SurfacePolicy, SurfaceSpec } from './types.js';
 
@@ -49,6 +51,28 @@ function createProvider() {
   };
   return provider;
 }
+
+const submitCatalog = defineSurfaceCatalog({
+  version: 'submit/v1',
+  widgets: [
+    ...defaultSurfaceCatalog.widgets,
+    {
+      type: 'submit-test', dataKind: 'none', description: 'Emits submitted values',
+      propsSchema: Type.Object({ title: Type.String() }, { additionalProperties: false }),
+      component: SubmitValuesWidget,
+    },
+  ],
+});
+
+const submitSpec = {
+  schemaVersion: 'surface/v1',
+  catalogVersion: 'submit/v1',
+  surfaceId: 'submit-interaction',
+  title: 'Submit',
+  layout: { type: 'grid', columns: 12 },
+  dataSources: [],
+  widgets: [{ id: 'submit-widget', type: 'submit-test', props: { title: '提交' } }],
+} satisfies SurfaceSpec;
 
 afterEach(() => {
   resetAccessControlProvider();
@@ -98,6 +122,30 @@ describe('SurfaceRenderer interactions', () => {
     const buttons = await screen.findAllByRole('button', { name: /select/i });
     buttons[0]?.click();
     await waitFor(() => expect(screen.queryByRole('button', { name: /select/i })).not.toBeNull());
+    expect(onInteraction).not.toHaveBeenCalled();
+  });
+});
+
+describe('SurfaceRenderer submit-values interactions', () => {
+  test('re-emits projected component values with widget scope', async () => {
+    const onInteraction = vi.fn();
+    render(SurfaceRenderer, { spec: submitSpec, policy, catalog: submitCatalog, onInteraction });
+    const button = await screen.findByTestId('submit-values');
+    button.click();
+    await waitFor(() => expect(onInteraction).toHaveBeenCalledTimes(1));
+    expect(onInteraction).toHaveBeenCalledWith({
+      type: 'submit-values',
+      surfaceId: 'submit-interaction',
+      widgetId: 'submit-widget',
+      values: { name: 'Ada', days: 2, meta: { ok: true } },
+    });
+  });
+
+  test('does not emit when the host has not registered interactions', async () => {
+    const onInteraction = vi.fn();
+    render(SurfaceRenderer, { spec: submitSpec, policy, catalog: submitCatalog });
+    const button = await screen.findByTestId('submit-values');
+    button.click();
     expect(onInteraction).not.toHaveBeenCalled();
   });
 });

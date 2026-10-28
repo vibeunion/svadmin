@@ -5,7 +5,7 @@
   import { SvelteMap } from 'svelte/reactivity';
   import { resolveSurfaceSourceData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
-  import type { SurfaceInteractionEvent } from '../interactions.js';
+  import { projectInteractionValues, type SurfaceInteractionEvent } from '../interactions.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import { loadSurfaceSource } from '../runtime.js';
   import { resolveSurfaceMessages } from '../localization.js';
@@ -76,6 +76,17 @@
     if (!onInteraction) return;
     onInteraction({
       type: 'select-record', surfaceId, widgetId, record,
+      ...(sourceId === undefined ? {} : { sourceId }),
+    });
+  }
+
+  function valuesSubmitted(surfaceId: string, widgetId: string, sourceId: string | undefined, values: JsonObject): void {
+    if (!onInteraction) return;
+    // 组件值同样属于不可信输入：重新校验并深拷贝后才交给宿主。
+    const projected = projectInteractionValues(values);
+    if (projected === null) return;
+    onInteraction({
+      type: 'submit-values', surfaceId, widgetId, values: projected,
       ...(sourceId === undefined ? {} : { sourceId }),
     });
   }
@@ -197,6 +208,7 @@
                 locale={activeLocale} messages={activeMessages}
                 {...(onInteraction === undefined ? {} : {
                   onSelectRecord: (record: JsonObject) => recordSelected(validation.value.surfaceId, widget.id, widget.binding?.sourceId, record),
+                  onSubmitValues: (values: JsonObject) => valuesSubmitted(validation.value.surfaceId, widget.id, widget.binding?.sourceId, values),
                 })} />
             {/if}
           </div>
