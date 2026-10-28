@@ -65,6 +65,58 @@ test('braces preserves normal expansion, escaped literals and fallback protectio
   depthError(() => braces.expand(ast));
 });
 
+interface MergeRecord {
+  [key: string]: unknown;
+  isAdmin?: unknown;
+  safe?: unknown;
+  session?: MergeRecord;
+  count?: MergeRecord;
+  list?: MergeRecord[];
+  debug?: unknown;
+  verbose?: unknown;
+}
+interface Deepmerge {
+  (target: unknown, source: unknown): MergeRecord;
+  all(values: readonly unknown[]): MergeRecord;
+}
+const deepmerge: Deepmerge = require('deepmerge');
+const poisoningPayload = (): MergeRecord => JSON.parse(
+  '{"__proto__":{"isAdmin":true},"constructor":{"prototype":{"isAdmin":true}},"prototype":{"isAdmin":true},"safe":{"value":1}}',
+);
+test('deepmerge rejects prototype-bearing keys without breaking ordinary or null targets', () => {
+  const nullTarget = deepmerge(Object.assign(Object.create(null), { debug: false }), poisoningPayload());
+  expect(nullTarget.isAdmin).toBeUndefined();
+  expect(nullTarget.debug).toBe(false);
+  expect(nullTarget.safe).toEqual({ value: 1 });
+  expect(Object.getPrototypeOf(nullTarget)).toBe(Object.prototype);
+  expect(Object.hasOwn(nullTarget, '__proto__')).toBe(false);
+  expect(Object.hasOwn(nullTarget, 'constructor')).toBe(false);
+  expect(Object.hasOwn(nullTarget, 'prototype')).toBe(false);
+
+  const placeholder = deepmerge({ session: null, count: 0 }, { session: poisoningPayload(), count: poisoningPayload() });
+  expect(placeholder.session?.isAdmin).toBeUndefined();
+  expect(placeholder.count?.isAdmin).toBeUndefined();
+  expect(Object.getPrototypeOf(placeholder.session)).toBe(Object.prototype);
+  expect(Object.getPrototypeOf(placeholder)).toBe(Object.prototype);
+
+  const ownProto = deepmerge(JSON.parse('{"__proto__":{"isAdmin":true},"debug":false}'), { verbose: true });
+  expect(ownProto.isAdmin).toBeUndefined();
+  expect(ownProto.debug).toBe(false);
+  expect(ownProto.verbose).toBe(true);
+  expect(Object.getPrototypeOf(ownProto)).toBe(Object.prototype);
+
+  const listed = deepmerge({ list: [] }, JSON.parse('{"list":[{"__proto__":{"isAdmin":true}}]}'));
+  expect(listed.list?.[0]?.isAdmin).toBeUndefined();
+  expect(Object.getPrototypeOf(listed.list?.[0])).toBe(Object.prototype);
+
+  expect(deepmerge(null, { a: 1, b: { c: 2 } })).toEqual({ a: 1, b: { c: 2 } });
+  expect(deepmerge(undefined, { a: 1 })).toEqual({ a: 1 });
+  expect(deepmerge({ a: { x: 1 }, list: [1] }, { a: { y: 2 }, list: [2] }))
+    .toEqual({ a: { x: 1, y: 2 }, list: [1, 2] });
+  expect(deepmerge.all([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
+  expect(({} as MergeRecord).isAdmin).toBeUndefined();
+});
+
 interface Request { url: string; method: string; headers: Record<string, string> }
 interface CacheResult { response?: unknown; revalidation?: { synchronous: boolean } }
 interface Policy {
@@ -133,48 +185,6 @@ test('cache: private caches, explicit sharing and ordinary expiry keep working',
   expect(policy('max-age=0').satisfiesWithoutRevalidation(request('max-stale=9'))).toBe(false);
   expect(policy('max-age=0').satisfiesWithoutRevalidation(request('max-stale=11'))).toBe(true);
   expect(policy('max-age=0, stale-while-revalidate=10').useStaleWhileRevalidate()).toBe(false);
-});
-
-interface DeepMerge {
-  (target: unknown, source: unknown, options?: Record<string, unknown>): Record<string, unknown>;
-  all(values: readonly unknown[]): Record<string, unknown>;
-}
-const deepmerge: DeepMerge = require('deepmerge');
-const leaked = (): unknown => ({} as Record<string, unknown>)['polluted'];
-
-test('deepmerge: payload __proto__ keys cannot rewrite the returned prototype', () => {
-  const merged = deepmerge({}, JSON.parse('{"__proto__":{"polluted":true},"name":"source"}'));
-  expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
-  expect(leaked()).toBeUndefined();
-  expect(merged['name']).toBe('source');
-});
-
-test('deepmerge: target __proto__ keys are copied as own data, not as a prototype', () => {
-  const merged = deepmerge(JSON.parse('{"__proto__":{"polluted":true},"id":1}'), { name: 'patched' });
-  expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
-  expect(leaked()).toBeUndefined();
-  expect(merged['id']).toBe(1);
-  expect(merged['name']).toBe('patched');
-  expect(Object.hasOwn(merged, '__proto__')).toBe(true);
-  expect(merged['__proto__']).toEqual({ polluted: true });
-});
-
-test('deepmerge: nested constructor and prototype payloads stay inert', () => {
-  const merged = deepmerge({}, JSON.parse('{"constructor":{"prototype":{"polluted":true}},"safe":1}'));
-  expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
-  expect(leaked()).toBeUndefined();
-  expect(merged['safe']).toBe(1);
-  const nested = deepmerge(JSON.parse('{"nested":{"__proto__":{"polluted":true},"keep":1}}'), { nested: { added: 2 } });
-  expect(Object.getPrototypeOf(nested['nested'] as object)).toBe(Object.prototype);
-  expect(leaked()).toBeUndefined();
-});
-
-test('deepmerge: ordinary merging, nested objects, arrays and all() are unchanged', () => {
-  expect(deepmerge({ a: { b: 1 } }, { a: { c: 2 } })).toEqual({ a: { b: 1, c: 2 } });
-  expect(deepmerge({ a: [1] }, { a: [2] })).toEqual({ a: [1, 2] });
-  expect(deepmerge({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
-  expect(deepmerge.all([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
-  expect(deepmerge({ keep: 'yes' }, { value: null })).toEqual({ keep: 'yes', value: null });
 });
 
 const bracePatch = patches.find(patch => patch.name === 'braces');
