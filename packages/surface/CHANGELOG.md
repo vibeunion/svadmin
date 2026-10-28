@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.19.5](https://github.com/vibeunion/svadmin/compare/surface-v0.19.4...surface-v0.19.5) (2026-10-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/ui remains compatible with >=0.73.0 <0.97.0
+
 ## [0.19.4](https://github.com/vibeunion/svadmin/compare/surface-v0.19.3...surface-v0.19.4) (2026-10-28)
 
 
