@@ -11,12 +11,21 @@
     label: string;
     visible: boolean;
     fixed?: 'left' | 'right';
+    /** 业务必显列。隐藏、预设和已保存偏好都不能把它关掉。 */
+    required?: boolean;
+  }
+
+  export interface ColumnPreset {
+    id: string;
+    label: string;
+    visibleKeys: string[];
   }
 
   interface Props {
     columns: ColumnItem[];
     onchange?: (columns: ColumnItem[]) => void;
     onreset?: () => void;
+    presets?: ColumnPreset[];
     storageKey?: string;
     title?: string;
     triggerVariant?: 'outline' | 'ghost' | 'secondary';
@@ -260,7 +269,7 @@
             {/if}
           </label>
 
-          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e">
             <Button
               variant="ghost"
               size="icon"
@@ -272,6 +281,7 @@
             >
               {#if col.fixed}<PinOff class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />{:else}<Pin class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />{/if}
             </Button>
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024">
             <Button
               variant="ghost"
               size="icon"
@@ -292,6 +302,7 @@
             >
               <ArrowDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
             </Button>
+            </div>
           </div>
         </div>
       {/each}
