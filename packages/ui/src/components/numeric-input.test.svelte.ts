@@ -74,6 +74,46 @@ describe('enterprise numeric inputs', () => {
     expect(ceiling.container.querySelector('input')?.value).toBe('1.50000000000000000000');
   });
 
+  it('reads and writes minor currency units without exposing them in the display', async () => {
+    const onchange = vi.fn();
+    const view = render(MoneyInput, { value: 1250, minorUnits: true, currency: 'CNY', precision: 2, onchange });
+    const input = view.container.querySelector('input');
+    expect(input?.value).toBe('12.50');
+    expect(input?.getAttribute('step')).toBe('0.01');
+    expect(view.container.textContent).toContain('CNY');
+
+    if (!input) throw new Error('Expected a money input');
+    await fireEvent.input(input, { target: { value: '13.37' } });
+    expect(onchange).toHaveBeenLastCalledWith(1337);
+    await fireEvent.input(input, { target: { value: '' } });
+    expect(onchange).toHaveBeenLastCalledWith(null);
+    await fireEvent.input(input, { target: { value: '0' } });
+    expect(onchange).toHaveBeenLastCalledWith(0);
+  });
+
+  it('keeps minor-unit min, max and step in the stored unit', () => {
+    const view = render(MoneyInput, {
+      value: 1250, minorUnits: true, currency: 'CNY', precision: 2,
+      min: 100, max: 5000, step: 100,
+    });
+    const input = view.container.querySelector('input');
+    expect(input?.value).toBe('12.50');
+    expect(input?.getAttribute('min')).toBe('1');
+    expect(input?.getAttribute('max')).toBe('50');
+    expect(input?.getAttribute('step')).toBe('1');
+  });
+
+  it('keeps minor-unit display localized and rounds emitted values to whole minor units', async () => {
+    const onchange = vi.fn();
+    const view = render(MoneyInput, { value: 123450, minorUnits: true, currency: 'CNY', locale: 'en-US', precision: 2, onchange });
+    const input = view.container.querySelector('input');
+    expect(input?.value).toBe('1,234.50');
+
+    if (!input) throw new Error('Expected a money input');
+    await fireEvent.input(input, { target: { value: '1,234.51' } });
+    expect(onchange).toHaveBeenLastCalledWith(123451);
+  });
+
   it('derives the step from precision and percent scale', () => {
     const number = render(NumberInput, { value: 1, precision: 2 });
     expect(number.container.querySelector('input')?.getAttribute('step')).toBe('0.01');
