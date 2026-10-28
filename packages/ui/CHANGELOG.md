@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.96.0](https://github.com/vibeunion/svadmin/compare/ui-v0.95.0...ui-v0.96.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **ui:** persist table density in saved list views ([#570](https://github.com/vibeunion/svadmin/issues/570)) ([312774e](https://github.com/vibeunion/svadmin/commit/312774e669b99389a3fe25048ae74bd84c0a0b08))
+* **ui:** portal row action menus out of clipped rows ([#568](https://github.com/vibeunion/svadmin/issues/568)) ([f533d7b](https://github.com/vibeunion/svadmin/commit/f533d7b7f8c8c4fe17dec0858bbba9ad5360d6cd))
+
 ## [0.95.0](https://github.com/vibeunion/svadmin/compare/ui-v0.94.0...ui-v0.95.0) (2026-10-28)
 
 
