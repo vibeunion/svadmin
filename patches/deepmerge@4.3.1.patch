@@ -1,0 +1,47 @@
+diff --git a/dist/cjs.js b/dist/cjs.js
+index 7c36cbdd06..eef16283fc 100644
+--- a/dist/cjs.js
++++ b/dist/cjs.js
+@@ -76,25 +76,37 @@
+ 			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+ }
+ 
++// Only own data properties are safe here: assigning __proto__ invokes the
++// inherited setter and rewrites the returned object's prototype instead of
++// copying the key. defineProperty keeps the key as plain data.
++function defineDataSource(target, key, value) {
++	Object.defineProperty(target, key, {
++		value: value,
++		enumerable: true,
++		configurable: true,
++		writable: true
++	});
++}
++
+ function mergeObject(target, source, options) {
+ 	var destination = {};
+ 	if (options.isMergeableObject(target)) {
+ 		getKeys(target).forEach(function(key) {
+-			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
++			defineDataSource(destination, key, cloneUnlessOtherwiseSpecified(target[key], options));
+ 		});
+ 	}
+ 	getKeys(source).forEach(function(key) {
+ 		if (propertyIsUnsafe(target, key)) {
+-			return
++			return;
+ 		}
+ 
+ 		if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
+-			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
++			defineDataSource(destination, key, getMergeFunction(key, options)(target[key], source[key], options));
+ 		} else {
+-			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
++			defineDataSource(destination, key, cloneUnlessOtherwiseSpecified(source[key], options));
+ 		}
+ 	});
+-	return destination
++	return destination;
+ }
+ 
+ function deepmerge(target, source, options) {

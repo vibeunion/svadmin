@@ -135,6 +135,48 @@ test('cache: private caches, explicit sharing and ordinary expiry keep working',
   expect(policy('max-age=0, stale-while-revalidate=10').useStaleWhileRevalidate()).toBe(false);
 });
 
+interface DeepMerge {
+  (target: unknown, source: unknown, options?: Record<string, unknown>): Record<string, unknown>;
+  all(values: readonly unknown[]): Record<string, unknown>;
+}
+const deepmerge: DeepMerge = require('deepmerge');
+const leaked = (): unknown => ({} as Record<string, unknown>)['polluted'];
+
+test('deepmerge: payload __proto__ keys cannot rewrite the returned prototype', () => {
+  const merged = deepmerge({}, JSON.parse('{"__proto__":{"polluted":true},"name":"source"}'));
+  expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+  expect(leaked()).toBeUndefined();
+  expect(merged['name']).toBe('source');
+});
+
+test('deepmerge: target __proto__ keys are copied as own data, not as a prototype', () => {
+  const merged = deepmerge(JSON.parse('{"__proto__":{"polluted":true},"id":1}'), { name: 'patched' });
+  expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+  expect(leaked()).toBeUndefined();
+  expect(merged['id']).toBe(1);
+  expect(merged['name']).toBe('patched');
+  expect(Object.hasOwn(merged, '__proto__')).toBe(true);
+  expect(merged['__proto__']).toEqual({ polluted: true });
+});
+
+test('deepmerge: nested constructor and prototype payloads stay inert', () => {
+  const merged = deepmerge({}, JSON.parse('{"constructor":{"prototype":{"polluted":true}},"safe":1}'));
+  expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+  expect(leaked()).toBeUndefined();
+  expect(merged['safe']).toBe(1);
+  const nested = deepmerge(JSON.parse('{"nested":{"__proto__":{"polluted":true},"keep":1}}'), { nested: { added: 2 } });
+  expect(Object.getPrototypeOf(nested['nested'] as object)).toBe(Object.prototype);
+  expect(leaked()).toBeUndefined();
+});
+
+test('deepmerge: ordinary merging, nested objects, arrays and all() are unchanged', () => {
+  expect(deepmerge({ a: { b: 1 } }, { a: { c: 2 } })).toEqual({ a: { b: 1, c: 2 } });
+  expect(deepmerge({ a: [1] }, { a: [2] })).toEqual({ a: [1, 2] });
+  expect(deepmerge({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
+  expect(deepmerge.all([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
+  expect(deepmerge({ keep: 'yes' }, { value: null })).toEqual({ keep: 'yes', value: null });
+});
+
 const bracePatch = patches.find(patch => patch.name === 'braces');
 assert(bracePatch);
 const finding = (url = bracePatch.advisory) => ({

@@ -17,7 +17,8 @@
       "lib/parse.js": "92ec74b20a093c2280f4069022e98f85bddfd048f4c050d19fc82752a19d71ef",
       "lib/stringify.js": "dbd73f84befd4e180b323d64780c2661c00aa8e0afcde87d5bfdefc9f785b2a5",
       "lib/utils.js": "b5a7596aa67730412b3c029ef09e84e6b67b8e445cffd35d1d295549c89066c7"
-    }
+    },
+    "main": "index.js"
   },
   {
     "name": "http-cache-semantics",
@@ -31,6 +32,22 @@
     "reason": "Require validation before reusing security-restricted cache entries across all stale paths.",
     "files": {
       "index.js": "d440941d700777c2250ddcf73ce26b242a4a6722b91ee40adccb7c05d83d2323"
+    },
+    "main": "index.js"
+  },
+  {
+    "name": "deepmerge",
+    "version": "4.3.1",
+    "advisory": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+    "advisoryId": 1243505,
+    "affectedRange": ">=4.2.0 <=4.3.1",
+    "severity": "low",
+    "patch": "patches/deepmerge@4.3.1.patch",
+    "sha256": "f17ae7c7f8d38a4e60cbb17a7466c85d797c4e1ec17eee49438ee9edfa1c1daf",
+    "reason": "Merge __proto__ as an own data property so a merged record cannot rewrite the returned object prototype.",
+    "main": "dist/cjs.js",
+    "files": {
+      "dist/cjs.js": "705fa6cdfaa4179003e228fb92bb55b8621890da1948f27b6ce0179da9664804"
     }
   }
 ]
