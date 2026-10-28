@@ -20,6 +20,8 @@ export interface SavedListViewState {
   };
   columnVisibility: Record<string, boolean>;
   columnOrder: string[];
+  /** 表格密度；旧视图缺失时沿用宿主当前密度。 */
+  density?: 'compact' | 'comfortable';
 }
 
 export interface SavedListView {
@@ -195,6 +197,8 @@ function parseState(value: unknown, allowedColumnIds: Set<string>, pruned: Set<s
   const columnVisibility = parseColumnVisibility(value['columnVisibility'], allowedColumnIds, pruned);
   const columnOrder = parseColumnOrder(value['columnOrder'], allowedColumnIds, pruned);
   if (!sorters || !columnVisibility || !columnOrder) return undefined;
+  const density = value['density'] === undefined ? undefined : value['density'];
+  if (density !== undefined && density !== 'compact' && density !== 'comfortable') return undefined;
 
   return {
     search: value['search'],
@@ -206,6 +210,7 @@ function parseState(value: unknown, allowedColumnIds: Set<string>, pruned: Set<s
     },
     columnVisibility,
     columnOrder,
+    ...(density === undefined ? {} : { density }),
   };
 }
 
@@ -330,7 +335,8 @@ export function decodeSavedListViewMutationResult(
       if (candidate['access'] !== undefined && !access) return;
       const state = candidate['state'];
       if (!isRecord(state) || Object.keys(state).some(key =>
-        !['search', 'filters', 'sorters', 'pagination', 'columnVisibility', 'columnOrder'].includes(key))) return;
+        !['search', 'filters', 'sorters', 'pagination', 'columnVisibility', 'columnOrder', 'density'].includes(key))) return;
+      if (state['density'] !== undefined && state['density'] !== 'compact' && state['density'] !== 'comfortable') return;
       if (!isRecord(state['pagination']) || Object.keys(state['pagination']).some(key =>
         !['current', 'pageSize'].includes(key))) return;
       if (!isRecord(state['columnVisibility']) || Object.entries(state['columnVisibility'])

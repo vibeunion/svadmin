@@ -309,6 +309,8 @@
     accessDrafts, accessSubjects, accessSubjectsLoading, accessSubjectsFailed, accessSubjectQueries,
   } = savedViewModel;
   const initialViewState = savedViewModel.initialSavedView?.state;
+  // 活动视图可能在本作用域首次挂载前就已恢复；初始密度需与初始查询/列偏好一起水合。
+  if (initialViewState?.density) densityOverride = initialViewState.density;
 
   // The table can stay mounted while the surrounding tenant/provider changes.
   // Keep persistence effects paused until the new scope has been loaded.
@@ -544,7 +546,7 @@
 
   function getCurrentSavedViewState(): SavedListViewState {
     return captureSavedListViewState(
-      listState.captureState(), columnPreferences.captureState(), initPageSize,
+      listState.captureState(), columnPreferences.captureState(), initPageSize, densityOverride,
     );
   }
 
@@ -552,10 +554,12 @@
     listState.applyState(state);
     sortingAtom.set(listState.sorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
     columnPreferences.applyState(state);
+    densityOverride = state.density;
     selectionModel.reset();
   }
 
   function resetToDefaultListState(): void {
+    densityOverride = undefined;
     listState.resetToDefaults();
     if (!externalSorters) {
       sortingAtom.set(listState.sorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
