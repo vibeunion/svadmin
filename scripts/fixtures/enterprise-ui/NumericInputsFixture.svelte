@@ -27,6 +27,8 @@
   let overflowChanges = $state(0);
   let compositionValue = $state<number | null>(5);
   let compositionChanges = $state(0);
+  let minorAmount = $state<number | null>(1250);
+  let minorChanges = $state(0);
   const unsupportedLocale = 'fr-FR' as NumericInputLocale;
   let unsupportedValue = $state<number | null>(12.5);
   function localeChanged(): void {
@@ -48,6 +50,9 @@
   }
   function compositionChanged(): void {
     compositionChanges += 1;
+  }
+  function minorChanged(): void {
+    minorChanges += 1;
   }
   function setValues(): void {
     numberValue = 0;
@@ -129,5 +134,10 @@
       <output data-testid="composition-value">{String(compositionValue)}</output>
       <output data-testid="composition-changes">{compositionChanges}</output>
     </form>
+  </section>
+  <section data-testid="money-minor-fixture">
+    <label>Minor money <MoneyInput minorUnits locale="zh-CN" currency="CNY" precision={2} bind:value={minorAmount} onchange={minorChanged} /></label>
+    <output data-testid="minor-value">{String(minorAmount)}</output>
+    <output data-testid="minor-changes">{minorChanges}</output>
   </section>
 </main>

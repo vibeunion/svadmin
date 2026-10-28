@@ -11,9 +11,11 @@ type PercentProps = ComponentProps<typeof PercentInput>;
 const locale: NumericInputLocale = 'de-DE';
 const numberProps: NumberProps = { value: 1234.5, locale, precision: 2 };
 const moneyProps: MoneyProps = { value: 1234.5, currency: 'EUR', locale, precision: 2 };
+const minorMoneyProps: MoneyProps = { value: 123450, minorUnits: true, currency: 'EUR', locale, precision: 2 };
 const percentProps: PercentProps = { value: 0.25, locale, scale: '1', precision: 1 };
 void numberProps;
 void moneyProps;
+void minorMoneyProps;
 void percentProps;
 
 // The public locale prop is an explicit allowlist, not an unbounded Intl string.

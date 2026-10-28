@@ -1476,6 +1476,15 @@ SSR 页面应在服务端完成数据裁剪、权限过滤和树结构校验。
 `0..100%`；`scale: '100'` 表示绑定值本身使用百分数。`MoneyInput` 的
 `currency` 只负责输入上下文和展示标识，不改变金额的数值单位。
 
+需要按最小货币单位（如分）存储时传入 `minorUnits`；`value`、`min`、`max`
+和 `step` 都使用最小单位，显示按 `precision`（默认 2）缩放，写入值始终
+为整数最小单位：
+
+```svelte
+<MoneyInput bind:value={amountMinor} minorUnits currency="CNY" precision={2} />
+<!-- 1250 显示 12.50；输入 13.37 写回 1337 -->
+```
+
 需要区域小数/千分位时显式传入受支持的 `locale`（当前仅 `en-US`、`de-DE`、
 `zh-CN`）：
 
