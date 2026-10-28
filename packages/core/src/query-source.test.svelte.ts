@@ -803,7 +803,7 @@ describe('ordinary query authentication ownership', () => {
     expect(getToastQueue()).toHaveLength(1);
     expect(getToastQueue()[0]).toMatchObject({
       type: 'error',
-      message: `${t('common.loadFailed', { message: t('common.error') })}: posts · QUERY_FAILED · HTTP 503`,
+      message: t('common.loadFailed', { message: t('common.error') }),
       key: expect.stringMatching(/^svadmin-query-error:\d+$/),
     });
     expect(JSON.stringify(getToastQueue())).not.toContain('private-query-meta');
@@ -816,7 +816,8 @@ describe('ordinary query authentication ownership', () => {
     source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('PRIVATE_DIAGNOSTIC', 503));
     mount('one', source, client(), { errorNotification: undefined });
     await waitFor(() => expect(getToastQueue()).toHaveLength(1));
-    expect(getToastQueue()[0]?.message).toBe('加载失败: 出错了: posts · QUERY_FAILED · HTTP 503');
+    expect(getToastQueue()[0]?.message).toBe('加载失败: 出错了');
+    expect(JSON.stringify(getToastQueue())).not.toContain('QUERY_FAILED');
     expect(JSON.stringify(getToastQueue())).not.toContain('PRIVATE_DIAGNOSTIC');
     expect(JSON.stringify(getToastQueue())).not.toContain('Fetch failed');
   });
@@ -869,11 +870,11 @@ describe('ordinary query authentication ownership', () => {
     const customItems = getToastQueue().filter(item => item.key === undefined);
     expect(customItems).toHaveLength(2);
     expect(customItems.every(item => item.message === message)).toBe(true);
-    expect(getToastQueue().find(item => item.key !== undefined)?.message)
-      .toBe(`${message}: posts · QUERY_FAILED · HTTP 503`);
+    expect(getToastQueue().find(item => item.key !== undefined)?.message).toBe(message);
+    expect(JSON.stringify(getToastQueue())).not.toContain('QUERY_FAILED');
   });
 
-  it('reports sanitized query failures to the console and keeps the description actionable', async () => {
+  it('reports sanitized query failures to the console without putting codes in the default toast', async () => {
     setLocale('zh-CN');
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
@@ -882,10 +883,12 @@ describe('ordinary query authentication ownership', () => {
       mount('one', source, client(), { errorNotification: undefined });
       await waitFor(() => expect(getToastQueue()).toHaveLength(1));
       expect(getToastQueue()[0]).toMatchObject({
-        message: '加载失败: 出错了: posts · QUERY_FAILED · HTTP 503',
+        message: '加载失败: 出错了',
         key: expect.stringMatching(/^svadmin-query-error:\d+$/),
       });
       expect(consoleError).toHaveBeenCalledOnce();
+      expect(JSON.stringify(getToastQueue())).not.toContain('QUERY_FAILED');
+      expect(JSON.stringify(getToastQueue())).not.toContain('HTTP 503');
       expect(consoleError).toHaveBeenCalledWith('[svadmin] Query failed', {
         resource: 'posts', status: 503, code: 'QUERY_FAILED', message: 'Resource query failed',
       });

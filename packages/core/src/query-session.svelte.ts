@@ -32,7 +32,7 @@ function ownData(value: unknown, key: string): unknown {
   }
 }
 
-/** Safe, technical context for a default query notification. */
+/** 自定义通知提供方使用的安全技术上下文。内置 toast 会把 description 拼进主文案，因此不能传给它。 */
 function queryFailureDescription(resource: string, value: unknown): string {
   const status = ownData(value, 'statusCode');
   const code = ownData(value, 'code');
@@ -149,7 +149,7 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
         ? config(value, undefined, origin.resource)
         : {
           message: config || fallback,
-          ...(type === 'error' && !config
+          ...(type === 'error' && !config && origin.notification
             ? { description: queryFailureDescription(origin.resource, value) }
             : {}),
         });
