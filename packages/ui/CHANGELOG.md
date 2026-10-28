@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.0](https://github.com/vibeunion/svadmin/compare/ui-v0.93.0...ui-v0.94.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **ui:** constrain filter builder operators, logic and groups ([#564](https://github.com/vibeunion/svadmin/issues/564)) ([05447a3](https://github.com/vibeunion/svadmin/commit/05447a3c9d8d4946dcdb04bea4d911720d524faa))
+
 ## [0.93.0](https://github.com/vibeunion/svadmin/compare/ui-v0.92.1...ui-v0.93.0) (2026-10-28)
 
 
