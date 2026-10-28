@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.97.0](https://github.com/vibeunion/svadmin/compare/ui-v0.96.1...ui-v0.97.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **ui:** support minor units in money input ([#574](https://github.com/vibeunion/svadmin/issues/574)) ([e5e1624](https://github.com/vibeunion/svadmin/commit/e5e1624dc62faa470356b033533f6952301ac9c1))
+
 ## [0.96.1](https://github.com/vibeunion/svadmin/compare/ui-v0.96.0...ui-v0.96.1) (2026-10-28)
 
 
