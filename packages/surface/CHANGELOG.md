@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.0](https://github.com/vibeunion/svadmin/compare/surface-v0.17.0...surface-v0.18.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **surface:** emit host-only record selection interactions ([9231480](https://github.com/vibeunion/svadmin/commit/92314803c2a12e10ef4e49d73a5dd84bd753ad58))
+* **surface:** emit host-only record selection interactions ([d64fefd](https://github.com/vibeunion/svadmin/commit/d64fefd0d15e66b33e0badb90a0c7764622d42b8))
+
+
+### 🐛 Bug Fixes
+
+* **surface:** detach nested values in interaction records ([b6ed69f](https://github.com/vibeunion/svadmin/commit/b6ed69f24e757c0c35a08d166159404679e53058))
+
 ## [0.17.0](https://github.com/vibeunion/svadmin/compare/surface-v0.16.0...surface-v0.17.0) (2026-10-27)
 
 
