@@ -14,15 +14,27 @@
   import Table from '@svadmin/ui/components/ui/table/table.svelte';
   import { styledResourceTablePropsSchema as resourceTablePropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
+  import { projectInteractionRecord } from '../interactions.js';
   import { resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
   import { asRecordArray, displayTableValue } from '../widget-data.js';
+  import type { JsonObject } from '../types.js';
 
-  let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
+  let { props, data, locale = 'en-US', messages, onSelectRecord }: SurfaceWidgetRendererProps = $props();
   const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const tableProps = $derived(Value.Decode(resourceTablePropsSchema, props));
   const tableClasses = $derived(surfaceTable());
   const records = $derived(data.status === 'ready' ? asRecordArray(data.value) : null);
+  const fields = $derived(tableProps.columns.map((column) => column.field));
+  const selectable = $derived(onSelectRecord !== undefined);
+  const selectLabel = $derived(activeMessages.tableSelect ?? 'Select');
+
+  // 只有宿主注册交互时才发出事件；投影后没有任何可交付字段就保持静默。
+  function selectRecord(record: JsonObject): void {
+    if (!onSelectRecord) return;
+    const projected = projectInteractionRecord(record, fields);
+    if (projected !== null) onSelectRecord(projected);
+  }
 </script>
 
 <Card class={tableClasses?.root}>
@@ -44,6 +56,9 @@
               {#each tableProps.columns as column (column.field)}
                 <TableHead class={tableClasses?.head} scope="col">{column.label}</TableHead>
               {/each}
+              {#if selectable}
+                <TableHead class={tableClasses?.head} scope="col">{selectLabel}</TableHead>
+              {/if}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -56,6 +71,13 @@
                     messages: activeMessages,
                   })}</TableCell>
                 {/each}
+                {#if selectable}
+                  <TableCell class={tableClasses?.cell}>
+                    <button type="button" class="surface-record-select" aria-label="{tableProps.title}: {selectLabel} {index + 1}" onclick={() => selectRecord(record)}>
+                      {selectLabel}
+                    </button>
+                  </TableCell>
+                {/if}
               </TableRow>
             {/each}
           </TableBody>
@@ -68,6 +90,20 @@
 </Card>
 
 <style>
+  .surface-record-select {
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .surface-record-select:hover { background: var(--accent); }
+  .surface-record-select:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
   .table-state {
     display: grid;
     min-height: var(--svadmin-table-state-height, 8rem);

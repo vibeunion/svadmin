@@ -5,6 +5,7 @@
   import { SvelteMap } from 'svelte/reactivity';
   import { resolveSurfaceSourceData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
+  import type { SurfaceInteractionEvent } from '../interactions.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import { loadSurfaceSource } from '../runtime.js';
   import { resolveSurfaceMessages } from '../localization.js';
@@ -44,11 +45,13 @@
     readonly messages?: Partial<SurfaceMessages>;
     readonly class?: string;
     readonly onError?: (error: SurfaceRendererError) => void;
+    /** 宿主注册后，只读组件才发出选择事件；库本身不执行任何后续操作。 */
+    readonly onInteraction?: (event: SurfaceInteractionEvent) => void;
   }
 
   let {
     spec, policy, catalog = defaultSurfaceCatalog, dataProvider, scopeKey = '', dataScopeKey,
-    locale, messages, class: className = '', onError,
+    locale, messages, class: className = '', onError, onInteraction,
   }: SurfaceRendererProps = $props();
 
   const adminContext = captureAdminContext();
@@ -68,6 +71,14 @@
       : { ...data, error: { ...data.error, message } };
   }
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
+
+  function recordSelected(surfaceId: string, widgetId: string, sourceId: string | undefined, record: JsonObject): void {
+    if (!onInteraction) return;
+    onInteraction({
+      type: 'select-record', surfaceId, widgetId, record,
+      ...(sourceId === undefined ? {} : { sourceId }),
+    });
+  }
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
   const sourceStates = new SvelteMap<string, SurfaceSourceDataState>();
   let destroyed = false;
@@ -183,7 +194,10 @@
             {#if WidgetComponent}
               <WidgetComponent widgetId={widget.id} props={semantic ? withoutSurfaceAppearance(widget.props) : widget.props}
                 data={presentSurfaceData(resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined))}
-                locale={activeLocale} messages={activeMessages} />
+                locale={activeLocale} messages={activeMessages}
+                {...(onInteraction === undefined ? {} : {
+                  onSelectRecord: (record: JsonObject) => recordSelected(validation.value.surfaceId, widget.id, widget.binding?.sourceId, record),
+                })} />
             {/if}
           </div>
         {/each}
