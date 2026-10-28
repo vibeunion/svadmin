@@ -19,7 +19,47 @@ const notificationSchema = Type.Object({
 }, { additionalProperties: false });
 
 const queryErrorNotificationKeys = new WeakMap<object, string>();
+const reportedQueryFailures = new WeakMap<object, number>();
 let nextQueryErrorNotificationId = 0;
+
+function ownData(value: unknown, key: string): unknown {
+  try {
+    return typeof value === 'object' && value !== null
+      ? Object.getOwnPropertyDescriptor(value, key)?.value
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** 自定义通知提供方使用的安全技术上下文。内置 toast 会把 description 拼进主文案，因此不能传给它。 */
+function queryFailureDescription(resource: string, value: unknown): string {
+  const status = ownData(value, 'statusCode');
+  const code = ownData(value, 'code');
+  return [
+    resource,
+    typeof code === 'string' && code.length > 0 ? code : undefined,
+    typeof status === 'number' ? `HTTP ${status}` : undefined,
+  ].filter((part): part is string => typeof part === 'string').join(' · ');
+}
+
+/** Expose only the normalized failure fields; provider diagnostics stay private. */
+function reportQueryFailure(resource: string, value: unknown, updatedAt: number, query: object | undefined): void {
+  try {
+    if (query && reportedQueryFailures.get(query) === updatedAt) return;
+    if (query) reportedQueryFailures.set(query, updatedAt);
+    const status = ownData(value, 'statusCode');
+    const code = ownData(value, 'code');
+    console.error('[svadmin] Query failed', {
+      resource,
+      ...(typeof status === 'number' ? { status } : {}),
+      ...(typeof code === 'string' ? { code } : {}),
+      message: value instanceof Error ? value.message : 'Resource query failed',
+    });
+  } catch {
+    console.error('[svadmin] Query failed', { resource });
+  }
+}
 
 export interface QuerySessionOptions {
   queryKey: QueryKey;
@@ -106,7 +146,13 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       const fallback = type === 'success' ? '' : t('common.loadFailed', { message: t('common.error') });
       if (typeof config !== 'function' && !config && !fallback) return;
       const candidate = snapshotPlainData(typeof config === 'function'
-        ? config(value, undefined, origin.resource) : { message: config || fallback });
+        ? config(value, undefined, origin.resource)
+        : {
+          message: config || fallback,
+          ...(type === 'error' && !config && origin.notification
+            ? { description: queryFailureDescription(origin.resource, value) }
+            : {}),
+        });
       if (!checkExact(notificationSchema, candidate) || !current(origin) || origin.notification !== context.notificationProvider) return;
       let key = candidate.key;
       if (type === 'error' && !config) {
@@ -193,9 +239,12 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       } else if (result.isError && (lastError?.key !== key || result.errorUpdatedAt > lastError.at)) {
         lastError = { key, at: result.errorUpdatedAt };
         untrack(() => {
+          const failure = errorFor(origin, result.error);
+          const query = client.getQueryCache().find({ queryKey: origin.queryKey, exact: true });
+          reportQueryFailure(origin.resource, failure, result.errorUpdatedAt, query);
           void handleAuthError(querySessionError(result.error), context, () => targetCurrent(origin),
             () => clearAuthQueries(client, origin.provider), origin.auth).catch(() => {});
-          notify(origin, 'error', errorFor(origin, result.error));
+          notify(origin, 'error', failure);
         });
       }
     });
