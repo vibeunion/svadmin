@@ -684,6 +684,22 @@ describe('FilterBuilder component', () => {
     expect(root.queryByTestId('filter-builder-add-group')).toBeNull();
   });
 
+  it('renders native date and datetime inputs for temporal fields', () => {
+    const view = render(FilterBuilder, {
+      fields: [
+        { key: 'day', label: '日期', type: 'date', filterable: true },
+        { key: 'at', label: '时间', type: 'datetime', filterable: true },
+      ],
+      filters: [
+        { field: 'day', operator: 'eq', value: '2026-10-28' },
+        { field: 'at', operator: 'eq', value: '2026-10-28T10:30' },
+      ],
+      allowedOperators: ['eq'],
+    });
+    expect(view.container.querySelector('input[type="date"]')).toBeTruthy();
+    expect(view.container.querySelector('input[type="datetime-local"]')).toBeTruthy();
+  });
+
   it('rejects saved OR filters when the host only supports AND', () => {
     const view = render(FilterBuilder, {
       fields: [{ key: 'title', label: '标题', type: 'text', filterable: true }],

@@ -46,7 +46,7 @@
     allowedLogicalOperators.length > 0 ? allowedLogicalOperators : ['and'],
   );
   const activeLogicalOperator = $derived<'and' | 'or'>(
-    logicalOperators.includes(logicalOperator) ? logicalOperator : logicalOperators[0]!,
+    logicalOperators.includes(logicalOperator) ? logicalOperator : (logicalOperators[0] ?? 'and'),
   );
   // 金额、评分等数字字段沿用 core 的输入语义；树编译器统一按 number 验证。
   const editorFields = $derived(fields.map(field => isNumericField(field) ? { ...field, type: 'number' as const } : field));
@@ -114,11 +114,11 @@
           remember(root, saved);
           loadIssues = [];
           if (input.length) logicalOperator = logicalOperators.includes(root.operator)
-            ? root.operator : logicalOperators[0]!;
-        } else if (parsed.ok) {
+            ? root.operator : (logicalOperators[0] ?? 'and');
+        } else if (parsed.ok && logicIssue) {
           root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
-          loadIssues = [{ path: 'root', code: logicIssue! }];
-        } else {
+          loadIssues = [{ path: 'root', code: logicIssue }];
+        } else if (!parsed.ok) {
           root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
           loadIssues = parsed.issues;
         }
@@ -310,6 +310,10 @@
               </Select>
             {:else if !collection && isNumericField(field)}
               <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} aria-describedby={describedby} value={typeof node.value === 'number' ? node.value : undefined}
+                oninput={(event: Event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
+            {:else if !collection && (field?.type === 'date' || field?.type === 'time' || field?.type === 'datetime')}
+              <Input id={`${uid}-${node.id}-value`} type={field.type === 'datetime' ? 'datetime-local' : field.type}
+                aria-invalid={invalid} aria-describedby={describedby} value={valueText(node.value)}
                 oninput={(event: Event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {:else}
               <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} aria-describedby={describedby} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
