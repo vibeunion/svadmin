@@ -25,14 +25,30 @@ describe('RowActions and DetailDrawer', () => {
     expect(view.getByTestId('last-action').textContent).toBe('view');
 
     await fireEvent.click(within(rowActions).getByRole('button', { name: 'More actions' }));
-    const menu = within(rowActions).getByRole('menu', { name: 'More actions' });
+    const menu = view.getByRole('menu', { name: 'More actions' });
+    expect(menu.parentElement).toBe(document.body);
+    expect(rowActions.contains(menu)).toBe(false);
+    expect((menu as HTMLElement).style.position).toBe('fixed');
     const docsLink = within(menu).getByRole('menuitem', { name: 'Docs' });
     expect(docsLink.getAttribute('href')).toBe('/records/42');
     expect(docsLink.querySelector('button')).toBeNull();
 
-    await fireEvent.click(within(rowActions).getByRole('menuitem', { name: 'Delete' }));
+    await fireEvent.click(within(menu).getByRole('menuitem', { name: 'Delete' }));
     expect(view.getByTestId('last-action').textContent).toBe('delete');
-    expect(within(rowActions).queryByRole('menuitem', { name: 'Delete' })).toBeNull();
+    expect(view.queryByRole('menuitem', { name: 'Delete' })).toBeNull();
+  });
+
+  it('keeps the overflow menu outside a clipping ancestor', async () => {
+    const view = render(RowActionsDetailDrawerHarness);
+    const rowActions = view.getByTestId('row-actions');
+    const clip = rowActions.parentElement;
+    if (!clip) throw new Error('missing clip parent');
+    clip.style.overflow = 'hidden';
+    clip.style.height = '36px';
+    await fireEvent.click(within(rowActions).getByRole('button', { name: 'More actions' }));
+    const menu = view.getByRole('menu', { name: 'More actions' });
+    expect(clip.contains(menu)).toBe(false);
+    expect(menu.getAttribute('data-row-actions')).toBeTruthy();
   });
 
   it('supports menu keyboard navigation and restores trigger focus', async () => {
@@ -42,7 +58,8 @@ describe('RowActions and DetailDrawer', () => {
 
     trigger.focus();
     await fireEvent.keyDown(trigger, { key: 'ArrowDown' });
-    const menu = within(rowActions).getByRole('menu', { name: 'More actions' });
+    const menu = view.getByRole('menu', { name: 'More actions' });
+    expect(menu.parentElement).toBe(document.body);
     const items = within(menu).getAllByRole('menuitem');
     const enabledItems = items.filter((item) => !(item as HTMLElement).matches(':disabled, [aria-disabled="true"]'));
     await waitFor(() => expect(document.activeElement).toBe(items[0]));
