@@ -10,6 +10,7 @@
     { label: "View", onclick: () => { lastAction = "view"; } },
     { label: "Docs", href: "/records/42" },
     { label: "Delete", danger: true, onclick: () => { lastAction = "delete"; } },
+    { label: "Approve", disabled: true, disabledReason: "缺少签名，无法审批。" },
     { label: "Hidden", hidden: true },
   ];
 </script>

@@ -42,6 +42,7 @@
   import MultiTabStateBrowserFixture from './MultiTabStateBrowserFixture.svelte';
   import SchemaUnsupportedFixture from './SchemaUnsupportedFixture.svelte';
   import ModalDrawerFormFixture from './ModalDrawerFormFixture.svelte';
+  import RowActionsEvidence from './RowActionsEvidence.svelte';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import type { SchemaFormSchema } from '@svadmin/core/schema-form';
 
@@ -222,6 +223,8 @@
     <MultiTabStateBrowserFixture />
   {:else if requestedView === 'schema-unsupported'}
     <SchemaUnsupportedFixture />
+  {:else if requestedView === 'row-actions-evidence'}
+    <RowActionsEvidence />
   {:else if requestedView === 'modal-drawer-form'}
     <ModalDrawerFormFixture kind={new URLSearchParams(window.location.search).get('kind') === 'drawer' ? 'drawer' : 'modal'} />
   {:else}
