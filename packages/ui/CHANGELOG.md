@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.93.0](https://github.com/vibeunion/svadmin/compare/ui-v0.92.1...ui-v0.93.0) (2026-10-28)
+
+
+### 🚀 Features
+
+* **ui:** support required, presets and fixed columns in column settings ([ae30681](https://github.com/vibeunion/svadmin/commit/ae306812dc255f249edb9869d5b5c0c3bb38b22f))
+* **ui:** support required, presets and fixed columns in column settings ([386c3ec](https://github.com/vibeunion/svadmin/commit/386c3ec6be0bfd507b767f100b19d419aa9cb6d4))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep column pin controls visible and complete the settings contract ([c339496](https://github.com/vibeunion/svadmin/commit/c3394961082e6c6e91c36554c46a6de5430133ca))
+* **ui:** keep optional column pin values exact ([478f2de](https://github.com/vibeunion/svadmin/commit/478f2def8aaf3faaa2f7325322c1c6ba0b773840))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.9
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.6
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.2
+
 ## [0.92.1](https://github.com/vibeunion/svadmin/compare/ui-v0.92.0...ui-v0.92.1) (2026-10-28)
 
 
