@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/vibeunion/svadmin/compare/flow-v0.6.1...flow-v0.6.2) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
 ## [0.6.1](https://github.com/vibeunion/svadmin/compare/flow-v0.6.0...flow-v0.6.1) (2026-10-27)
 
 

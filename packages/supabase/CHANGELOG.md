@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.21.1](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.0...supabase-v0.21.1) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.12
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.1
+
 ## [0.21.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.20.0...supabase-v0.21.0) (2026-10-27)
 
 

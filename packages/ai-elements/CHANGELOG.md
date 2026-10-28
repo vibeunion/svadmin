@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.5](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.4...ai-elements-v0.12.5) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.1
+
 ## [0.12.4](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.3...ai-elements-v0.12.4) (2026-10-27)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.9](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.13.8...sveltekit-v0.13.9) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.32.2 <0.67.0 to >=0.66.1
+
 ## [0.13.8](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.13.7...sveltekit-v0.13.8) (2026-10-27)
 
 

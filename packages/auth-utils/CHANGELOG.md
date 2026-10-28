@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.9.0...auth-utils-v0.9.1) (2026-10-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+
 ## [0.9.0](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.8.1...auth-utils-v0.9.0) (2026-09-22)
 
 
