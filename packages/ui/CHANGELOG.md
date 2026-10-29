@@ -5,6 +5,7 @@
 
 ### 🚀 Features
 
+* **ui:** add copy button ([#590](https://github.com/vibeunion/svadmin/issues/590)) ([0520ad9](https://github.com/vibeunion/svadmin/commit/0520ad910b55b61011ce83681833b9aa85f63758))
 * **ui:** add generic data table shell ([#588](https://github.com/vibeunion/svadmin/issues/588)) ([ffe7d38](https://github.com/vibeunion/svadmin/commit/ffe7d387415c671446290e408a43dc7eb4bbf57c))
 * **ui:** add generic scrollable table ([#589](https://github.com/vibeunion/svadmin/issues/589)) ([8b3fe83](https://github.com/vibeunion/svadmin/commit/8b3fe839b01f02d7207670a5c70f73a4e27f8e01))
 * **ui:** complete shell presets, notifications and page templates ([6bf6539](https://github.com/vibeunion/svadmin/commit/6bf653918762afe199aa2568871f860cb64c3f62))
