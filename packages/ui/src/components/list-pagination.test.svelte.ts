@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import ListPagination from './ListPagination.svelte';
@@ -14,6 +17,13 @@ describe('listPaginationItems', () => {
 });
 
 describe('ListPagination', () => {
+  it('uses list-friendly spacing and wrapping defaults with CSS token overrides', () => {
+    const directory = dirname(fileURLToPath(import.meta.url));
+    const source = readFileSync(resolve(directory, 'ListPagination.svelte'), 'utf8');
+    expect(source).toContain('gap: var(--svadmin-list-pagination-gap, .5rem)');
+    expect(source).toContain('flex-wrap: var(--svadmin-list-pagination-wrap, wrap)');
+  });
+
   it('keeps the current page disabled and emits page changes', async () => {
     const onPageChange = vi.fn();
     render(ListPagination, {

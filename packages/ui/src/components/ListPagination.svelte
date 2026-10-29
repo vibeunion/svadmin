@@ -87,8 +87,8 @@
   .svadmin-list-pagination__info { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; font-size: .8125rem; color: var(--muted-foreground); }
   .svadmin-list-pagination__size { display: inline-flex; align-items: center; gap: .35rem; }
   .svadmin-list-pagination__size select { height: 2rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--background); color: inherit; padding: 0 .45rem; font: inherit; }
-  .svadmin-list-pagination__controls { display: flex; align-items: center; gap: .25rem; }
-  .svadmin-list-pagination__pages { display: flex; align-items: center; gap: .25rem; }
+  .svadmin-list-pagination__controls { display: flex; align-items: center; flex-wrap: var(--svadmin-list-pagination-wrap, wrap); gap: .25rem; }
+  .svadmin-list-pagination__pages { display: flex; align-items: center; gap: var(--svadmin-list-pagination-gap, .5rem); }
   .svadmin-list-pagination__control,
   .svadmin-list-pagination__page { min-width: 2.25rem; height: 2.25rem; padding: 0 .75rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--background); color: inherit; cursor: pointer; font-size: .8125rem; }
   .svadmin-list-pagination__page { padding: 0 .5rem; }
