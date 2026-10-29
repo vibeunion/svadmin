@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.66.3](https://github.com/vibeunion/svadmin/compare/core-v0.66.2...core-v0.66.3) (2026-10-29)
+
+
+### 🐛 Bug Fixes
+
+* **quality:** resolve findings and pin vendor patch integrity ([3e508cd](https://github.com/vibeunion/svadmin/commit/3e508cd9d029d1662bd46b6aec566a12e205f820))
+
 ## [0.66.2](https://github.com/vibeunion/svadmin/compare/core-v0.66.1...core-v0.66.2) (2026-10-28)
 
 

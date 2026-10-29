@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.10](https://github.com/vibeunion/svadmin/compare/devtools-v0.3.9...devtools-v0.3.10) (2026-10-29)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.3
+
 ## [0.3.9](https://github.com/vibeunion/svadmin/compare/devtools-v0.3.8...devtools-v0.3.9) (2026-10-28)
 
 
