@@ -138,6 +138,12 @@
     emptyState?: Snippet;
     /** Expandable row content */
     expandedRowRender?: Snippet<[{ record: Record<string, unknown> }]>;
+    /** 受控展开行 ID；提供后内部展开状态只读。 */
+    expandedRowKeys?: (string | number)[];
+    /** 非受控模式下的初始展开行 ID。 */
+    defaultExpandedRowKeys?: (string | number)[];
+    /** 展开状态变化回调，参数为记录 ID。 */
+    onExpandedRowsChange?: (keys: (string | number)[]) => void;
     /** Externally controlled pagination */
     pagination?: { current: number; pageSize: number };
     /** Externally controlled sorters */
@@ -184,6 +190,9 @@
     rowActions,
     emptyState,
     expandedRowRender,
+    expandedRowKeys,
+    defaultExpandedRowKeys,
+    onExpandedRowsChange,
     batchActions,
     summary,
     pagination: externalPagination,
@@ -492,7 +501,9 @@
   const selectedIds = $derived(selectionModel.selectedIds);
   const selectedCount = $derived(selectionModel.selectedCount);
   const { rowIsSelected } = selectionModel;
-  const expandedAtom = createAtom<ExpandedState>({});
+  const expandedAtom = createAtom<ExpandedState>(
+    Object.fromEntries((untrack(() => defaultExpandedRowKeys) ?? []).map((id) => [tableRowKey(id), true])),
+  );
   const features = tableFeatures({
     columnOrderingFeature,
     columnSizingFeature,
@@ -509,9 +520,23 @@
     return preferenceIdentityReady && loadedPreferenceScopeId === listPreferenceScopeId(listPreferenceScope);
   }
 
+  /** 受控时以外部 ID 为准；空数组同样表示受控且全部收起。 */
+  const controlledExpandedKeys = $derived(
+    expandedRowKeys ? new Set(expandedRowKeys.map((id) => tableRowKey(id))) : undefined,
+  );
+
   function rowIsExpanded(rowId: string): boolean {
+    if (controlledExpandedKeys) return controlledExpandedKeys.has(rowId);
     const expanded = tableExpanded.current;
     return expanded === true || expanded[rowId] === true;
+  }
+
+  function expandedRecordIds(): (string | number)[] {
+    if (expandedRowKeys !== undefined) return [...expandedRowKeys];
+    const current = tableExpanded.current;
+    const rows = table_getRowModel(tbl).flatRows;
+    if (current === true) return rows.map((row) => row.original.id);
+    return rows.filter((row) => current[row.id]).map((row) => row.original.id);
   }
 
   function rowIdValue(row: Row<TableFeatures, TableRecord>): string | number {
@@ -769,22 +794,16 @@
   });
 
   function toggleRowExpanded(rowId: string): void {
-    const current = tableExpanded.current;
-    if (current === true) {
-      expandedAtom.set(Object.fromEntries(
-        table_getRowModel(tbl).flatRows
-          .filter((row) => row.id !== rowId)
-          .map((row) => [row.id, true])
-      ));
-      return;
+    const row = table_getRowModel(tbl).flatRows.find((candidate) => candidate.id === rowId);
+    const recordId = row?.original.id;
+    if (recordId === undefined) return;
+    const nextIds = rowIsExpanded(rowId)
+      ? expandedRecordIds().filter((id) => tableRowKey(id) !== rowId)
+      : [...expandedRecordIds(), recordId];
+    if (expandedRowKeys === undefined) {
+      expandedAtom.set(Object.fromEntries(nextIds.map((id) => [tableRowKey(id), true])));
     }
-    if (current[rowId]) {
-      expandedAtom.set(Object.fromEntries(
-        Object.entries(current).filter(([id, isExpanded]) => id !== rowId && isExpanded)
-      ));
-      return;
-    }
-    expandedAtom.set({ ...current, [rowId]: true });
+    onExpandedRowsChange?.(nextIds);
   }
 
   const totalPages = $derived(canRead && pageRecords.ok && !query.isError

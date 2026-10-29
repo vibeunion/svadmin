@@ -1158,6 +1158,26 @@ describe('AutoTable interactions', () => {
     });
   });
 
+  it('supports controlled expanded rows and reports changes', async () => {
+    const onExpandedRowsChange = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      expandedRowKeys: ['user-1'],
+      onExpandedRowsChange,
+    });
+
+    expect(await view.findByText('已展开：user@example.com')).toBeTruthy();
+    await fireEvent.click(await view.findByRole('button', { name: '收起' }));
+    expect(onExpandedRowsChange).toHaveBeenCalledWith([]);
+    // 受控模式不自行改变展开状态，等待宿主回传新的 keys。
+    expect(view.getByText('已展开：user@example.com')).toBeTruthy();
+
+    await view.rerender({ onNavigate: vi.fn(), expandedRowKeys: [], onExpandedRowsChange });
+    await waitFor(() => {
+      expect(view.queryByText('已展开：user@example.com')).toBeNull();
+    });
+  });
+
   it('does not expose detail navigation for a resource that disables show actions', async () => {
     const onNavigate = vi.fn();
     const view = render(AutoTableInteractionsHarness, { onNavigate, canShow: false });

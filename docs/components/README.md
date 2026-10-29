@@ -14,7 +14,7 @@ Complete reference for all `@svadmin/ui` components.
 | [AutoTable](./auto-table.md) | Auto-generated CRUD table / 自动 CRUD 表格 | ✅ |
 | [AutoForm](./auto-form.md) | Auto-generated create/edit form / 自动表单 | ✅ |
 | [ShowPage](./show-page.md) | Record detail page / 记录详情页 | ✅ |
-| [Layout](./layout.md) | Sidebar + content layout / 侧边栏布局 | ✅ |
+| [Layout](./layout.md) | Sidebar, top, mixed and split navigation layouts / 侧边栏、顶部、混合与分栏布局 | ✅ |
 | [Header](./header.md) | Top navigation bar / 顶部导航栏 | ✅ |
 | [Sidebar](./sidebar.md) | Navigation sidebar / 导航侧边栏 | ✅ |
 | [PageHeader](./page-header.md) | Page title + breadcrumbs + actions / 页面标题 | ✅ |
@@ -26,6 +26,9 @@ Complete reference for all `@svadmin/ui` components.
 | [ErrorBoundary](./error-boundary.md) | Error catch boundary / 错误边界 | ✅ |
 | [FieldRenderer](./field-renderer.md) | Field value renderer / 字段值渲染器 | ✅ |
 | [Theming](./theming.md) | Dark mode + color themes / 暗色模式 + 多色主题 | ✅ |
+| Page templates | Workplace, monitor, analysis, list, form, detail, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
+| NotificationCenter | Header notification menu with unread state / 顶栏通知中心 | ✅ |
+| ThemeSettingsDrawer | Live shell and appearance preferences / 实时外观与外壳设置抽屉 | ✅ |
 
 ## Base UI Components / 基础 UI 组件
 
@@ -49,3 +52,11 @@ Complete reference for all `@svadmin/ui` components.
 | DropdownMenu | Dropdown menu / 下拉菜单 |
 | Sheet | Side panel / 侧边面板 |
 | Separator | Visual divider / 分隔线 |
+| Calendar | Month calendar with events / 带事件月历 |
+| Carousel | Accessible slide carousel / 可访问轮播 |
+| ImagePreview | Image gallery preview / 图片预览与切换 |
+| Anchor | Scroll-spy section navigation / 锚点导航 |
+| Affix | Sticky container / 固钉容器 |
+| Collapse | Controlled disclosure panels / 受控折叠面板 |
+| TypographyEllipsis | Multi-line clamp with expand / collapse / 多行截断与展开收起 |
+| CommentThread | Threaded comments / 评论线程 |

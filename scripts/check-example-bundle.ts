@@ -12,9 +12,10 @@ const maximumChunkBytes = 1_250_000;
 const maximumInitialBytes = 1_400_000;
 // Enterprise closeout measured 390055 gzip bytes on 2026-10-26; the released
 // enterprise feedback changes measured 390223 gzip bytes on 2026-10-27, and the
-// unified visual system measured 390547 gzip bytes on 2026-10-29. Keep a narrow
-// headroom for hashing and code-splitting variation between runners.
-const maximumInitialGzipBytes = 391_000;
+// unified visual system measured 390547 gzip bytes on 2026-10-29, and the shell
+// presets plus notification and appearance panels measured 399989 gzip bytes on
+// 2026-10-29. Keep a narrow headroom for runner variation.
+const maximumInitialGzipBytes = 401_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);

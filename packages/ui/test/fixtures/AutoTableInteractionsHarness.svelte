@@ -59,6 +59,9 @@
     authProvider?: AuthProvider;
     savedViewProvider?: SavedListViewProvider;
     applyRemoteDefaultView?: boolean;
+    expandedRowKeys?: (string | number)[];
+    defaultExpandedRowKeys?: (string | number)[];
+    onExpandedRowsChange?: (keys: (string | number)[]) => void;
   }
 
   let {
@@ -102,6 +105,9 @@
     authProvider,
     savedViewProvider,
     applyRemoteDefaultView = false,
+    expandedRowKeys,
+    defaultExpandedRowKeys,
+    onExpandedRowsChange,
   }: Props = $props();
 
   const deletedIds = new SvelteSet<string>();
@@ -226,9 +232,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable {rendering} resourceName="users" {selectable} {allowSelectAllMatching} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined, initialListState, onListStateChange, savedViewProvider, applyRemoteDefaultView })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {allowSelectAllMatching} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters, expandedRowKeys, defaultExpandedRowKeys, onExpandedRowsChange, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined, initialListState, onListStateChange, savedViewProvider, applyRemoteDefaultView })} />
   {:else}
-    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined, initialListState, onListStateChange, savedViewProvider, applyRemoteDefaultView })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters, expandedRowKeys, defaultExpandedRowKeys, onExpandedRowsChange, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined, initialListState, onListStateChange, savedViewProvider, applyRemoteDefaultView })} />
   {/if}
 {/snippet}
 
