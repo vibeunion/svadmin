@@ -81,5 +81,13 @@ permission recovery next to the data they affect.
 mode, content width, page transition, density and appearance preferences; page
 templates must not re-implement those behaviors.
 
-The example application exposes an interactive gallery at `/templates` so every
-template can be inspected with representative content.
+The example application exposes an interactive gallery at `/templates` and a
+direct route per composition (`/templates/workplace`, `/templates/monitor`,
+`/templates/analysis`, `/templates/search-table`, `/templates/card-list`,
+`/templates/group-form`, `/templates/step-form`, `/templates/advanced-form`,
+`/templates/basic-detail`, `/templates/advanced-detail`, `/templates/profile`,
+`/templates/result`, `/templates/exception`).
+
+The gallery is structure evidence, not a data-provider acceptance test. A real
+route must own loading, empty, filtered-empty, error and forbidden states inside
+the slot that owns its query.

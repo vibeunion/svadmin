@@ -255,3 +255,18 @@ second selector: two declarations create a competing density baseline, and
 - compact, default and rounded corner presets
 
 Preferences persist in `localStorage` under `svadmin-ui-preferences`; `resetUiPreferences()` restores the documented defaults. The settings are applied as data attributes and classes on the document root, so components keep using the same semantic tokens.
+
+## Component defaults / 组件默认值
+
+`ConfigProvider` supplies defaults for components that expose a compact size. An
+explicit component `size` always wins.
+
+```svelte
+<ConfigProvider componentSize="sm" density="compact" direction="rtl" locale="zh-CN">
+  <Button>Save</Button>
+  <Input aria-label="Name" />
+</ConfigProvider>
+```
+
+当前 `Button`、`Input`、`Select`、`Badge` 会消费 `componentSize` / `density`；
+其他组件可以继续显式传入自身尺寸。包装层使用 `display: contents`，不会改变页面布局。

@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ConfigProvider from './ConfigProvider.svelte';
+import ConfigProviderHost from './config-provider.test-host.svelte';
 import Countdown from './Countdown.svelte';
 import Grid from './Grid.svelte';
 import GridCell from './GridCell.svelte';
@@ -29,13 +30,16 @@ describe('foundation components', () => {
     expect(space.style.getPropertyValue('--svadmin-space-gap')).toBe('var(--svadmin-space-4)');
 
     const gridView = render(Grid, { props: { columns: 3, children: createRawSnippet(() => ({ render: () => '<span>A</span><span>B</span>' })) } });
-    expect((gridView.container.querySelector('.svadmin-grid') as HTMLElement).style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
+    const grid = gridView.container.querySelector('.svadmin-grid') as HTMLElement;
+    expect(grid.style.getPropertyValue('--svadmin-grid-columns')).toBe('repeat(3, minmax(0, 1fr))');
 
     const rowView = render(Row, { props: { children: createRawSnippet(() => ({ render: () => '<span>Cell</span>' })) } });
     expect(rowView.container.querySelector('.svadmin-row')).toBeTruthy();
     cleanup();
-    render(Col, { props: { span: 12, offset: 6, children: text('Half') } });
+    const col = render(Col, { props: { span: 12, offset: 6, md: 8, mdOffset: 2, children: text('Half') } });
     expect(screen.getByText('Half')).toBeTruthy();
+    expect((col.container.querySelector('.svadmin-col') as HTMLElement).style.getPropertyValue('--svadmin-col-md')).toBe('8');
+    expect((col.container.querySelector('.svadmin-col') as HTMLElement).style.getPropertyValue('--svadmin-col-md-start')).toBe('3');
     cleanup();
     render(GridCell, { props: { span: 2, children: text('Wide') } });
     expect(screen.getByText('Wide')).toBeTruthy();
@@ -58,11 +62,24 @@ describe('foundation components', () => {
     expect(screen.getAllByText('00:00:02').length).toBeGreaterThan(0);
     await vi.advanceTimersByTimeAsync(2000);
     expect(onfinish).toHaveBeenCalledTimes(1);
+    cleanup();
+    const countdown = render(Countdown, { props: { duration: 5 } });
+    expect(countdown.container.textContent).toContain('00:00:05');
+    await countdown.rerender({ duration: 3 });
+    expect(countdown.container.textContent).toContain('00:00:03');
+    cleanup();
 
     const progress = render(Progress, { props: { value: 40 } });
     const bar = progress.getByRole('progressbar');
     expect(bar.getAttribute('aria-valuenow')).toBe('40');
     expect(bar.getAttribute('aria-valuemax')).toBe('100');
+    cleanup();
+    const circle = render(Progress, { props: { value: 75, variant: 'circle', showInfo: true } });
+    expect(circle.getByRole('progressbar').getAttribute('data-status')).toBe('normal');
+    expect(circle.getByText('75%')).toBeTruthy();
+    cleanup();
+    render(Progress, { props: { indeterminate: true } });
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBeNull();
   });
 
   it('supports menu selection and nested expansion', async () => {
@@ -84,7 +101,40 @@ describe('foundation components', () => {
     expect(onselect).toHaveBeenCalledWith(expect.objectContaining({ id: 'weekly' }));
   });
 
-  it('renders provider attributes and a resize handle', () => {
+  it('moves menu focus with arrow, home and end keys', async () => {
+    render(Menu, {
+      props: {
+        items: [
+          { id: 'one', label: 'One' },
+          { id: 'two', label: 'Two' },
+          { id: 'three', label: 'Three' },
+        ],
+      },
+    });
+    const one = screen.getByRole('button', { name: 'One' });
+    const three = screen.getByRole('button', { name: 'Three' });
+    one.focus();
+    await fireEvent.keyDown(one, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Two' }));
+    await fireEvent.keyDown(screen.getByRole('button', { name: 'Two' }), { key: 'End' });
+    expect(document.activeElement).toBe(three);
+    await fireEvent.keyDown(three, { key: 'Home' });
+    expect(document.activeElement).toBe(one);
+  });
+
+  it('expands menu groups with arrows without selecting or navigating', async () => {
+    const onselect = vi.fn();
+    render(Menu, { props: { items: [{ id: 'reports', label: 'Reports', children: [{ id: 'weekly', label: 'Weekly' }] }], onselect } });
+    const parent = screen.getByRole('button', { name: 'Reports' });
+    parent.focus();
+    await fireEvent.keyDown(parent, { key: 'ArrowRight' });
+    expect(parent.getAttribute('aria-expanded')).toBe('true');
+    expect(onselect).not.toHaveBeenCalled();
+    await fireEvent.keyDown(parent, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Weekly' }));
+  });
+
+  it('propagates provider defaults to primitives and exposes resize semantics', () => {
     const view = render(ConfigProvider, { props: { density: 'compact', direction: 'rtl', locale: 'zh-CN', children: text('Content') } });
     const provider = view.container.querySelector('.svadmin-config-provider') as HTMLElement;
     expect(provider.getAttribute('data-svadmin-density')).toBe('compact');
@@ -92,8 +142,16 @@ describe('foundation components', () => {
     expect(provider.getAttribute('lang')).toBe('zh-CN');
 
     cleanup();
+    render(ConfigProviderHost);
+    expect(screen.getByRole('button', { name: 'Action' }).getAttribute('data-size')).toBe('sm');
+    expect(screen.getByRole('textbox', { name: 'Name' }).getAttribute('data-size')).toBe('compact');
+    expect(screen.getByText('Status').getAttribute('data-size')).toBe('compact');
+
+    cleanup();
     render(ResizeBox, { props: { width: 320, height: 200, children: text('Resizable') } });
-    expect(screen.getByRole('button', { name: /Resize panel/ })).toBeTruthy();
+    const handle = screen.getByRole('separator', { name: /Resize panel/ });
+    expect(handle.getAttribute('aria-valuenow')).toBe('320');
+    expect(handle.getAttribute('aria-valuemin')).toBe('120');
   });
 
   it('walks through tour steps and finishes', async () => {
@@ -113,5 +171,28 @@ describe('foundation components', () => {
     expect(screen.getByRole('heading', { name: 'Ready' })).toBeTruthy();
     await fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     expect(onfinish).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the vertical resize dimension and keeps its range updated', async () => {
+    const view = render(ResizeBox, { props: { direction: 'vertical', width: 320, height: 200, maxHeight: 250 } });
+    const handle = view.getByRole('separator');
+    const owner = view.container.querySelector('.svadmin-resize-box');
+    if (!(owner instanceof HTMLElement)) throw new Error('ResizeBox root is missing');
+    Object.defineProperties(owner, { offsetHeight: { value: 200 }, offsetWidth: { value: 320 } });
+    expect(handle.getAttribute('aria-valuenow')).toBe('200');
+    expect(handle.getAttribute('aria-valuemax')).toBe('250');
+    await fireEvent.keyDown(handle, { key: 'ArrowDown' });
+    expect(handle.getAttribute('aria-valuenow')).toBe('204');
+  });
+
+  it('traps the first forward and reverse tab from the tour panel', async () => {
+    render(Tour, { props: { open: true, steps: [{ title: 'Welcome' }], children: createRawSnippet(() => ({ render: () => '<div><input type="hidden"><input style="display:none"><button tabindex="-1">Excluded</button></div>' })) } });
+    const dialog = screen.getByRole('dialog');
+    dialog.focus();
+    await fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Done' }));
+    dialog.focus();
+    await fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(document.activeElement).toBe(dialog.querySelector('footer button'));
   });
 });

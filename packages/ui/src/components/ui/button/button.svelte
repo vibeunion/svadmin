@@ -24,12 +24,13 @@
 
 <script lang="ts">
 	import * as Tooltip from "../tooltip/index.js";
+	import { useComponentConfig } from "../../ConfigProvider.svelte";
 
 	const uid = $props.id();
 	let {
 		class: className,
 		variant = "default",
-		size = "default",
+		size: sizeProp,
 		ref = $bindable(null),
 		href = undefined,
 		type = "button",
@@ -42,6 +43,9 @@
 		"aria-describedby": ariaDescribedBy,
 		...restProps
 	}: ButtonProps = $props();
+
+	const config = useComponentConfig();
+	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "sm" : config.componentSize === "lg" ? "lg" : "default"));
 
 	const restriction = $derived((disabledReason ?? "").trim());
 	const isDisabled = $derived(Boolean(disabled || restriction));

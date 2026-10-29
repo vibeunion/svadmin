@@ -25,6 +25,8 @@
     onopenchange?: (keys: string[]) => void;
   }
 
+  let nav = $state<HTMLElement | null>(null);
+
   let {
     items,
     mode = 'vertical',
@@ -42,12 +44,25 @@
     return openKeys.includes(item.id);
   }
 
-  function toggle(item: MenuEntry): void {
+  function setOpen(item: MenuEntry, open: boolean): void {
     if (item.disabled) return;
-    if (!item.children?.length) return;
-    const next = isOpen(item) ? openKeys.filter((key) => key !== item.id) : [...openKeys, item.id];
+    if (!item.children?.length || isOpen(item) === open) return;
+    const next = open ? [...openKeys, item.id] : openKeys.filter((key) => key !== item.id);
     openKeys = next;
     onopenchange?.(next);
+  }
+
+  function toggle(item: MenuEntry): void {
+    setOpen(item, !isOpen(item));
+  }
+
+  function closeFlyout(event: PointerEvent | FocusEvent, item: MenuEntry): void {
+    if (!collapsed || !(event.currentTarget instanceof HTMLElement)) return;
+    const owner = event.currentTarget;
+    if (event.relatedTarget instanceof Node && owner.contains(event.relatedTarget)) return;
+    if (event.type === 'pointerleave' && owner.contains(document.activeElement)) return;
+    if (event.type === 'focusout' && owner.matches(':hover')) return;
+    setOpen(item, false);
   }
 
   function select(item: MenuEntry): void {
@@ -56,20 +71,81 @@
     onselect?.(item);
     if (item.children?.length) toggle(item);
   }
+
+  function links(): HTMLElement[] {
+    if (!nav) return [];
+    return [...nav.querySelectorAll<HTMLElement>('.svadmin-menu__link:not([disabled]):not([data-disabled="true"]):not([aria-disabled="true"])')]
+      .filter(link => {
+        for (let node: HTMLElement | null = link; node && node !== nav; node = node.parentElement) {
+          if (getComputedStyle(node).display === 'none') return false;
+        }
+        return true;
+      });
+  }
+
+  function onkeydown(event: KeyboardEvent, item: MenuEntry): void {
+    const items = links();
+    if (items.length === 0) return;
+    const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const delta = event.key === 'ArrowDown' ? 1 : -1;
+      const next = currentIndex < 0 ? 0 : (currentIndex + delta + items.length) % items.length;
+      items[next]?.focus();
+      return;
+    }
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      (event.key === 'Home' ? items[0] : items[items.length - 1])?.focus();
+      return;
+    }
+    if (event.key === 'ArrowRight' && document.activeElement instanceof HTMLElement) {
+      const expanded = document.activeElement.getAttribute('aria-expanded');
+      if (expanded === 'false') {
+        event.preventDefault();
+        setOpen(item, true);
+      } else if (expanded === 'true') {
+        const nested = document.activeElement.closest('li')?.querySelector<HTMLElement>(':scope > .svadmin-menu__list');
+        const child = nested?.querySelector<HTMLElement>('.svadmin-menu__link:not([disabled]):not([data-disabled="true"])');
+        if (child) {
+          event.preventDefault();
+          child.focus();
+        }
+      }
+      return;
+    }
+    if (event.key === 'ArrowLeft' && document.activeElement instanceof HTMLElement) {
+      const nested = document.activeElement.closest('.svadmin-menu__list[data-depth]:not([data-depth="0"])');
+      const parent = nested?.parentElement?.querySelector<HTMLElement>(':scope > .svadmin-menu__link');
+      if (parent) {
+        event.preventDefault();
+        parent.focus();
+      }
+    }
+  }
 </script>
 
 {#snippet renderItems(nodes: MenuEntry[], depth: number)}
   <ul class="svadmin-menu__list" data-depth={depth}>
     {#each nodes as item (item.id)}
-      <li class="svadmin-menu__item" data-open={isOpen(item) ? 'true' : undefined}>
+      <li
+        class="svadmin-menu__item"
+        data-open={isOpen(item) ? 'true' : undefined}
+        onpointerenter={() => { if (collapsed) setOpen(item, true); }}
+        onpointerleave={(event) => closeFlyout(event, item)}
+        onfocusin={() => { if (collapsed) setOpen(item, true); }}
+        onfocusout={(event) => closeFlyout(event, item)}
+      >
         {#if item.href && !item.children?.length}
           <a
             class="svadmin-menu__link"
             data-selected={selected === item.id ? 'true' : undefined}
             data-disabled={item.disabled ? 'true' : undefined}
             aria-current={selected === item.id ? 'page' : undefined}
+            aria-label={collapsed ? item.label : undefined}
             href={item.href}
             onclick={() => select(item)}
+            onkeydown={(event) => onkeydown(event, item)}
           >
             {#if icon}<span class="svadmin-menu__icon">{@render icon(item)}</span>{/if}
             <span class="svadmin-menu__label">{item.label}</span>
@@ -82,8 +158,10 @@
             data-selected={selected === item.id ? 'true' : undefined}
             data-disabled={item.disabled ? 'true' : undefined}
             aria-expanded={item.children?.length ? isOpen(item) : undefined}
+            aria-label={collapsed ? item.label : undefined}
             disabled={item.disabled}
             onclick={() => select(item)}
+            onkeydown={(event) => onkeydown(event, item)}
           >
             {#if icon}<span class="svadmin-menu__icon">{@render icon(item)}</span>{/if}
             <span class="svadmin-menu__label">{item.label}</span>
@@ -99,7 +177,7 @@
   </ul>
 {/snippet}
 
-<nav class={cn('svadmin-menu', className)} data-mode={mode} data-collapsed={collapsed ? 'true' : 'false'} aria-label={label}>
+<nav bind:this={nav} class={cn('svadmin-menu', className)} data-mode={mode} data-collapsed={collapsed ? 'true' : 'false'} aria-label={label}>
   {@render renderItems(items, 0)}
 </nav>
 
@@ -137,6 +215,26 @@
   .svadmin-menu[data-collapsed='true'] .svadmin-menu__badge,
   .svadmin-menu[data-collapsed='true'] .svadmin-menu__chevron { display: none; }
   .svadmin-menu[data-collapsed='true'] .svadmin-menu__link { justify-content: center; padding-inline: 0; }
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__item { position: relative; }
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__list[data-depth]:not([data-depth='0']) {
+    display: none;
+    position: absolute;
+    z-index: 30;
+    inset-block-start: 0;
+    inset-inline-start: 100%;
+    min-width: 12rem;
+    margin: 0;
+    padding: var(--svadmin-space-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--card);
+    box-shadow: var(--shadow-lg, 0 12px 30px color-mix(in srgb, var(--foreground) 16%, transparent));
+  }
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__item:hover > .svadmin-menu__list,
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__item:focus-within > .svadmin-menu__list { display: grid; }
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__list[data-depth]:not([data-depth='0']) .svadmin-menu__label,
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__list[data-depth]:not([data-depth='0']) .svadmin-menu__badge { display: inline; }
+  .svadmin-menu[data-collapsed='true'] .svadmin-menu__list[data-depth]:not([data-depth='0']) .svadmin-menu__link { justify-content: flex-start; padding-inline: var(--svadmin-space-3); }
   .svadmin-menu[data-mode='horizontal'] > .svadmin-menu__list { grid-auto-flow: column; grid-auto-columns: max-content; }
   .svadmin-menu[data-mode='horizontal'] .svadmin-menu__item { position: relative; }
   .svadmin-menu[data-mode='horizontal'] .svadmin-menu__list[data-depth]:not([data-depth='0']) {

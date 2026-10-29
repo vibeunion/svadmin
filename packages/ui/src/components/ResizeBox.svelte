@@ -32,6 +32,8 @@
   }: Props = $props();
 
   let element = $state<HTMLDivElement | null>(null);
+  const initialWidth = width;
+  const initialHeight = height;
   let dragging = $state(false);
   let start: { x: number; y: number; width: number; height: number } | null = null;
 
@@ -79,6 +81,11 @@
     resize(nextWidth, nextHeight);
   }
 
+  function reset(): void {
+    width = initialWidth;
+    height = initialHeight;
+  }
+
   onDestroy(stop);
 </script>
 
@@ -92,13 +99,21 @@
 >
   <div class="svadmin-resize-box__content">{@render children?.()}</div>
   {#if !disabled}
-    <button
-      type="button"
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+    <div
       class="svadmin-resize-box__handle"
-      aria-label={`${label}: use arrow keys to resize`}
+      role="separator"
+      tabindex="0"
+      aria-label={`${label}: use arrow keys to resize, double click to reset`}
+      aria-orientation={direction === 'vertical' ? 'horizontal' : 'vertical'}
+      aria-valuenow={direction === 'vertical' ? (height ?? element?.offsetHeight ?? minHeight) : (width ?? element?.offsetWidth ?? minWidth)}
+      aria-valuemin={direction === 'vertical' ? minHeight : minWidth}
+      aria-valuemax={direction === 'vertical' ? (maxHeight ?? undefined) : (maxWidth ?? undefined)}
       onpointerdown={startResize}
       onkeydown={onKeydown}
-    ></button>
+      ondblclick={reset}
+    ></div>
   {/if}
 </div>
 

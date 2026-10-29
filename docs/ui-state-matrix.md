@@ -131,3 +131,37 @@ Surface 包内定向测试验证分源重试和诊断回调；SVAR 的
 展示/解析与真实浏览器三引擎两视口证据见
 `docs/evidence/numeric-input-locale-20261023.md`。输入法组合输入、真实读屏和
 操作系统剪贴板仍不由上述用例外推为已支持。
+
+## Tour / Menu / Calendar / ResizeBox
+
+交互组件必须同时覆盖鼠标、键盘和焦点恢复；只验证“能点击”不算完成。
+
+| 组件 | 状态 | 键盘/焦点契约 | 恢复契约 |
+| --- | --- | --- | --- |
+| Tour | open / step change / finish / close | `Escape` 关闭，`ArrowLeft/Right` 切换步骤，`Tab` 在面板内循环 | 关闭后焦点回到打开前的元素，背景滚动恢复 |
+| Tour | target missing | 居中展示面板，不伪造高亮框 | 目标出现后重新测量，不改变当前步骤 |
+| Menu | expanded / collapsed | `ArrowUp/Down` 移动，`Home/End` 首尾，`ArrowRight` 展开，`ArrowLeft` 回到父级 | 折叠态子菜单在 hover/focus-within 时浮出 |
+| Menu | disabled | 跳过禁用项，不接收焦点 | 选中值不变 |
+| Calendar | month / year navigation | `ArrowLeft/Right` 日移动，`ArrowUp/Down` 周移动，`Home/End` 月首尾 | 年份切换保留选中日期，禁用日期不可选 |
+| ResizeBox | idle / dragging / keyboard / reset | `Arrow` 调整，`Shift+Arrow` 大步进，双击重置 | 暴露 `aria-valuenow/min/max`，禁用态不渲染手柄 |
+
+## Progress / NotificationHost / ConfigProvider
+
+| 组件 | 状态 | 视觉契约 | 交互契约 |
+| --- | --- | --- | --- |
+| Progress line | determinate / indeterminate / status | 语义色来自 token，不确定态不声明 `aria-valuenow` | 展示百分比由 `format` 或默认 `Math.round` 决定 |
+| Progress circle | determinate / indeterminate | SVG 圆环随 `size/strokeWidth` 缩放 | `showInfo` 时信息在圆环中心 |
+| NotificationHost | empty / open / success / warning / danger / info | 顶部右侧堆叠，移动端不超出视口 | `notification.close`、按 key 替换、超时自动关闭 |
+| ConfigProvider | default / compact / sm / rtl | 包装层不改变布局，仅提供配置上下文和 data 属性 | `Button`、`Input`、`Select`、`Badge` 消费默认尺寸；显式 size 覆盖默认值 |
+
+## Page templates
+
+模板是组合壳，不拥有查询。画廊路由 `/templates/{workplace|monitor|...}` 只提供结构示例；真实页面必须在插槽内部拥有 loading、empty、filtered-empty、error、forbidden 的恢复入口。
+
+| 状态 | 归属 | 契约 |
+| --- | --- | --- |
+| Loading | 持有查询的页面/插槽 | 骨架或状态占位，不渲染旧数据 |
+| Empty | 首次查询完成且无记录 | 使用 `DataState empty`，提供创建/导入入口 |
+| Filtered empty | 有筛选但无匹配 | 使用 `DataState filtered-empty`，提供清除筛选 |
+| Error | 查询失败 | 使用 `DataState error` 的 `retry`，不并列重复重试按钮 |
+| Forbidden | 权限拒绝 | 使用 `DataState forbidden`，不渲染旧内容 |

@@ -81,5 +81,4 @@ permission recovery next to the data they affect.
 mode, content width, page transition, density and appearance preferences; page
 templates must not re-implement those behaviors.
 
-The example application exposes an interactive gallery at `/templates` so every
-template can be inspected with representative content.
+The example application exposes an interactive gallery at `/templates` and direct routes such as `/templates/workplace`. The gallery is structure evidence, not a data-provider acceptance test.
