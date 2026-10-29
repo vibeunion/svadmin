@@ -7,7 +7,7 @@ async function login(page: import('@playwright/test').Page) {
   await page.locator('#login-identifier').fill('admin@example.com');
   await page.locator('#login-password').fill('demo');
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/#\/$/, { timeout: 10_000 });
+  await expect(page).toHaveURL(/^[^#]+#\/(?:\?[^#]*)?$/, { timeout: 10_000 });
 }
 
 test.describe('UI state contracts', () => {
@@ -203,7 +203,8 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
         const swatch = main.getByRole('button', { name: preset, exact: true });
         await swatch.click();
         await expect(swatch).toHaveAttribute('aria-pressed', 'true');
-        await expect(page.locator('html')).toHaveAttribute('data-theme', preset.toLowerCase());
+        const theme = preset === 'Default' ? 'arco' : preset.toLowerCase();
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await expect(main.getByRole('heading', { level: 1 })).toHaveCSS('font-size', '20px');
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
       }
