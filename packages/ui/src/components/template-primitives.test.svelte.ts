@@ -35,6 +35,29 @@ describe('template primitives', () => {
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
   });
 
+  it('supports borderless, left icon, lazyload, and destroy-on-hide', async () => {
+    const content = createRawSnippet(() => ({ render: () => '<span>Body</span>' }));
+    const view = render(Collapse, {
+      props: {
+        bordered: false,
+        expandIconPosition: 'left',
+        lazyload: true,
+        destroyOnHide: true,
+        items: [{ id: 'one', title: 'One', content }],
+      },
+    });
+    expect(view.container.querySelector('[data-bordered="false"]')).toBeTruthy();
+    expect(view.container.querySelector('[data-expand-icon-position="left"]')).toBeTruthy();
+    expect(screen.queryByText('Body')).toBeNull();
+
+    const trigger = screen.getByRole('button', { name: /One/ });
+    await fireEvent.click(trigger);
+    expect(await screen.findByText('Body')).toBeTruthy();
+
+    await fireEvent.click(trigger);
+    expect(screen.queryByText('Body')).toBeNull();
+  });
+
   it('renders an empty comment state and unread notification trigger', () => {
     render(CommentThread, { props: { comments: [] } });
     expect(screen.getByText('No comments yet')).toBeTruthy();
