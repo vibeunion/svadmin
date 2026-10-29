@@ -1,6 +1,10 @@
 <script lang="ts">
+  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
   import ScrollableTable from '../../../packages/ui/src/components/ScrollableTable.svelte';
   import * as Table from '../../../packages/ui/src/components/ui/table/index.js';
+
+  const locale = new URLSearchParams(window.location.search).get('locale') ?? 'zh-CN';
+  provideI18nScope(createI18nScope({ locale }));
 
   const params = new URLSearchParams(window.location.search);
   const native = params.has('native');

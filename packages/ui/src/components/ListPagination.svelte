@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { HTMLAttributes } from 'svelte/elements';
+  import { useTranslation } from '@svadmin/core/i18n';
+  import { listText } from './list-i18n.js';
   import { listPaginationItems } from './list-pagination.js';
 
   type Props = Omit<HTMLAttributes<HTMLDivElement>, 'class' | 'children'> & {
@@ -12,7 +14,7 @@
     pageSize?: number | undefined;
     pageSizeOptions?: readonly number[] | undefined;
     pageSizeLabel?: string | undefined;
-    showSummary?: boolean;
+    showSummary?: boolean | undefined;
     onPageChange: (page: number) => void;
     onPageSizeChange?: ((pageSize: number) => void) | undefined;
     class?: string | undefined;
@@ -27,7 +29,7 @@
     rangeEnd = 0,
     pageSize,
     pageSizeOptions = [10, 20, 50],
-    pageSizeLabel = '每页条数',
+    pageSizeLabel,
     showSummary = true,
     onPageChange,
     onPageSizeChange,
@@ -35,23 +37,25 @@
     ...restProps
   }: Props = $props();
 
+  const i18n = useTranslation();
+
   const items = $derived(listPaginationItems(page, totalPages));
   const paginated = $derived(totalPages > 1);
 </script>
 
 {#if paginated}
-  <div {...restProps} class={`svadmin-list-pagination ${className}`.trim()} role="navigation" aria-label={`${label}分页导航`}>
+  <div {...restProps} class={`svadmin-list-pagination ${className}`.trim()} role="navigation" aria-label={listText(i18n, 'listPagination.navigation', { label })}>
     {#if showSummary}
       <div class="svadmin-list-pagination__info">
-        <span>第 {rangeStart}–{rangeEnd} 条 / 共 {total} 条</span>
+        <span>{listText(i18n, 'listPagination.range', { start: rangeStart, end: rangeEnd, total })}</span>
         {#if onPageSizeChange && pageSize !== undefined}
-          <span class="svadmin-list-pagination__size">{pageSizeLabel}
+          <span class="svadmin-list-pagination__size">{pageSizeLabel ?? listText(i18n, 'listPagination.pageSizeLabel')}
             <select
-              aria-label={`${label}每页条数`}
+              aria-label={listText(i18n, 'listPagination.pageSizeAria', { label })}
               value={pageSize}
               onchange={(event) => onPageSizeChange?.(Number((event.currentTarget as HTMLSelectElement).value))}
             >
-              {#each pageSizeOptions as size (size)}<option value={size}>{size} 条</option>{/each}
+              {#each pageSizeOptions as size (size)}<option value={size}>{listText(i18n, 'listPagination.pageSizeOption', { size })}</option>{/each}
             </select>
           </span>
         {/if}
@@ -59,29 +63,29 @@
     {/if}
     <div class="svadmin-list-pagination__controls">
       <button type="button" class="svadmin-list-pagination__control" disabled={page <= 1}
-        title={page <= 1 ? '已经是第一页。' : '上一页'}
-        aria-label={`${label}上一页`} onclick={() => onPageChange(page - 1)}>上一页</button>
-      <div class="svadmin-list-pagination__pages" role="group" aria-label={`${label}页码列表`}>
+        title={listText(i18n, page <= 1 ? 'listPagination.firstPage' : 'listPagination.previous')}
+        aria-label={listText(i18n, 'listPagination.previousAria', { label })} onclick={() => onPageChange(page - 1)}>{listText(i18n, 'listPagination.previous')}</button>
+      <div class="svadmin-list-pagination__pages" role="group" aria-label={listText(i18n, 'listPagination.pageList', { label })}>
         {#each items as item, index (item === 'ellipsis' ? `ellipsis-${index}` : item)}
           {#if item === 'ellipsis'}
             <span class="svadmin-list-pagination__ellipsis" aria-hidden="true">…</span>
           {:else}
             <button type="button" class="svadmin-list-pagination__page"
               class:svadmin-list-pagination__page--active={item === page}
-              aria-label={`${label}第 ${item} 页`} aria-current={item === page ? 'page' : undefined}
-              title={item === page ? `当前第 ${item} 页` : `前往第 ${item} 页`}
+              aria-label={listText(i18n, 'listPagination.pageAria', { label, page: item })} aria-current={item === page ? 'page' : undefined}
+              title={listText(i18n, item === page ? 'listPagination.currentPage' : 'listPagination.goToPage', { page: item })}
               disabled={item === page}
               onclick={() => onPageChange(item)}>{item}</button>
           {/if}
         {/each}
       </div>
       <button type="button" class="svadmin-list-pagination__control" disabled={page >= totalPages}
-        title={page >= totalPages ? '已经是最后一页。' : '下一页'}
-        aria-label={`${label}下一页`} onclick={() => onPageChange(page + 1)}>下一页</button>
+        title={listText(i18n, page >= totalPages ? 'listPagination.lastPage' : 'listPagination.next')}
+        aria-label={listText(i18n, 'listPagination.nextAria', { label })} onclick={() => onPageChange(page + 1)}>{listText(i18n, 'listPagination.next')}</button>
     </div>
   </div>
 {:else if showSummary}
-  <p {...restProps} class={`svadmin-list-pagination__summary ${className}`.trim()}>共 {total} 条</p>
+  <p {...restProps} class={`svadmin-list-pagination__summary ${className}`.trim()}>{listText(i18n, 'common.total', { total })}</p>
 {/if}
 
 <style>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { Snippet } from 'svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
+  import { listText } from './list-i18n.js';
   import { cn } from '../utils.js';
 
   type ScrollMode = 'page' | 'contained';
@@ -21,6 +23,7 @@
     scrollMode = 'page',
     scrollbarPlacement = 'bottom',
   }: Props = $props();
+  const i18n = useTranslation();
   const id = $props.id();
   const scrollRegionId = `svadmin-scrollable-table-${id}`;
   let viewport = $state<HTMLDivElement | null>(null);
@@ -127,7 +130,7 @@
 {#snippet mirroredScrollbar(placement: ScrollbarPlacement)}
   <div
     class={cn('svadmin-scrollable-table__scrollbar', placement === 'top' && 'svadmin-scrollable-table__scrollbar--top')}
-    aria-label={placement === 'top' ? '列表上方横向滚动' : '列表横向滚动'}
+    aria-label={listText(i18n, placement === 'top' ? 'scrollableTable.topHorizontalScroll' : 'scrollableTable.horizontalScroll')}
     role="scrollbar"
     aria-controls={scrollRegionId}
     aria-orientation="horizontal"
