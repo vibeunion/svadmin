@@ -7,15 +7,20 @@
   import { cn } from '../utils.js';
 
   import * as Breadcrumb from './ui/breadcrumb/index.js';
+  import * as DropdownMenu from './ui/dropdown-menu/index.js';
 
   const i18n = useTranslation();
 
   const adminContext = captureAdminContext();
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
-  let { menu, class: className = 'svadmin-breadcrumbs--spaced' }: { menu?: MenuItem[]; class?: string } = $props();
+  let {
+    menu,
+    maxItems = 0,
+    class: className = 'svadmin-breadcrumbs--spaced',
+  }: { menu?: MenuItem[]; maxItems?: number; class?: string } = $props();
 
-  interface Crumb { label: string; href?: string; }
+  interface Crumb { label: string; href?: string; hidden?: boolean; children?: Crumb[]; }
 
   // 仅复用 AdminApp 明确支持的成员页别名，宿主精确菜单项始终优先。
   const memberAliases: Readonly<Record<string, string>> = {
@@ -94,18 +99,50 @@
 
     return result;
   });
+
+  const displayCrumbs = $derived.by<Crumb[]>(() => {
+    if (maxItems < 3 || crumbs.length <= maxItems) return crumbs;
+    const first = crumbs[0];
+    const last = crumbs[crumbs.length - 1];
+    if (!first || !last) return crumbs;
+    return [
+      first,
+      { label: '…', hidden: true, children: crumbs.slice(1, -1) },
+      last,
+    ];
+  });
 </script>
 
 {#if crumbs.length > 1}
   <Breadcrumb.Root class={cn('svadmin-breadcrumbs', className)}>
     <Breadcrumb.List>
-      {#each crumbs as crumb, i (`${crumb.label}-${i}`)}
+      {#each displayCrumbs as crumb, i (`${crumb.label}-${i}`)}
         {#if i > 0}
           <Breadcrumb.Separator />
         {/if}
         <Breadcrumb.Item>
           <span class="svadmin-breadcrumbs__item svadmin-page-enter" style="animation-duration: 0.2s;">
-          {#if i === crumbs.length - 1}
+          {#if crumb.hidden}
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger
+                class="svadmin-breadcrumbs__ellipsis"
+                aria-label="Show hidden breadcrumbs"
+              >
+                <Breadcrumb.Ellipsis />
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content align="start" class="min-w-40">
+                {#each crumb.children ?? [] as child (child.label)}
+                  <DropdownMenu.Item class="p-0">
+                    {#if child.href}
+                      <a class="block w-full px-2 py-1.5 text-sm" href={child.href}>{child.label}</a>
+                    {:else}
+                      <span class="block px-2 py-1.5 text-sm text-muted-foreground">{child.label}</span>
+                    {/if}
+                  </DropdownMenu.Item>
+                {/each}
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+          {:else if i === displayCrumbs.length - 1}
             <Breadcrumb.Page>{crumb.label}</Breadcrumb.Page>
           {:else if crumb.href}
             <Breadcrumb.Link href={crumb.href}>{crumb.label}</Breadcrumb.Link>

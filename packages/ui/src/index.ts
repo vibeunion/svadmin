@@ -130,6 +130,9 @@ export { default as CommandPalette } from './components/CommandPalette.svelte';
 export { default as StepsForm } from './components/StepsForm.svelte';
 // Advanced form and data controls
 export { default as DynamicFormList } from './components/DynamicFormList.svelte';
+export { default as Overflow } from './components/Overflow.svelte';
+export { default as EditableTabs } from './components/EditableTabs.svelte';
+export type { EditableTabItem } from './components/EditableTabs.svelte';
 export { default as TreeSelect } from './components/TreeSelect.svelte';
 export type { TreeSelectOption } from './components/TreeSelect.svelte';
 export { default as Cascader } from './components/Cascader.svelte';
