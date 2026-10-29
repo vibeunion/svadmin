@@ -63,4 +63,17 @@ describe('ListFooter', () => {
     expect(screen.getByRole('navigation', { name: '委托单分页导航' })).not.toBeNull();
     expect(screen.queryByText('第 1–50 条 / 共 5000 条')).toBeNull();
   });
+
+  it('can show the pagination range alongside truncation guidance', () => {
+    render(ListFooter, {
+      props: {
+        label: '委托单', total: 5000, loadedCount: 2500, maxRecords: 2500, truncated: true,
+        page: 1, totalPages: 50, rangeStart: 1, rangeEnd: 50, onPageChange: () => {},
+        showSummary: true,
+      },
+    });
+    expect(screen.getByText('共 2500 条')).not.toBeNull();
+    expect(screen.getByText('结果较多，仅加载前 2500 条，请用筛选收窄范围。')).not.toBeNull();
+    expect(screen.getByText('第 1–50 条 / 共 5000 条')).not.toBeNull();
+  });
 });

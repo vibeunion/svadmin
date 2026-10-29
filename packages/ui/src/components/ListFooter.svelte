@@ -12,6 +12,7 @@
     pageSize?: number | undefined;
     pageSizeOptions?: readonly number[] | undefined;
     pageSizeLabel?: string | undefined;
+    showSummary?: boolean | undefined;
     truncated?: boolean;
     maxRecords?: number | undefined;
     note?: string | undefined;
@@ -32,6 +33,7 @@
     pageSize,
     pageSizeOptions,
     pageSizeLabel,
+    showSummary = false,
     truncated = false,
     maxRecords = 1000,
     note = '',
@@ -65,7 +67,7 @@
     {pageSizeLabel}
     {onPageChange}
     {onPageSizeChange}
-    showSummary={false}
+    {showSummary}
   />
 </div>
 
