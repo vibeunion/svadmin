@@ -25,7 +25,7 @@
   {#if editUrl}
     <a
       href={editUrl}
-      style="font-size: 11px; color: #6366f1; text-decoration: none;"
+      style="font-size: 11px; color: #165DFF; text-decoration: none;"
       title="Edit {field.label}"
     >✎</a>
   {/if}

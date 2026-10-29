@@ -30,6 +30,7 @@
     rose: 'settings.accent.rose',
     orange: 'settings.accent.orange',
     violet: 'settings.accent.violet',
+    arco: 'settings.accent.arco',
     stripe: 'settings.accent.stripe',
   };
   function environmentLabel(value: string, labelKeys: Record<string, string>): string {

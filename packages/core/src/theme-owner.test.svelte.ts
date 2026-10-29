@@ -259,9 +259,9 @@ describe('theme owners', () => {
     unregisterThemeOwner(defaultOwner);
   });
 
-  it('uses Stripe as the color default while preserving persisted presets', () => {
-    expect(getColorTheme()).toBe('stripe');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('stripe');
+  it('uses the built-in color as the default while preserving persisted presets', () => {
+    expect(getColorTheme()).toBe('arco');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('arco');
 
     window.localStorage.setItem('svadmin-color-theme', 'blue');
     resetTheme();

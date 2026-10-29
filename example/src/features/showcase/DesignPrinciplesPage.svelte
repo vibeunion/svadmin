@@ -85,7 +85,7 @@ import { definedOptions } from '@svadmin/core/options';
     focusedDemoField = fieldKey;
     document.getElementById(fieldKey)?.focus();
   }
-  const successImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96"%3E%3Crect width="160" height="96" fill="%23eef0ff"/%3E%3Ccircle cx="42" cy="36" r="16" fill="%23635bff"/%3E%3Cpath d="M12 82 58 50l24 18 20-14 46 28H12Z" fill="%235147d9"/%3E%3C/svg%3E';
+  const successImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96"%3E%3Crect width="160" height="96" fill="%23E8F3FF"/%3E%3Ccircle cx="42" cy="36" r="16" fill="%23165DFF"/%3E%3Cpath d="M12 82 58 50l24 18 20-14 46 28H12Z" fill="%230E42D2"/%3E%3C/svg%3E';
   const enterpriseRequestContext = createEnterpriseRequestContext({
     tenantId: 'example-tenant',
     requestId: 'example-design-principles',
@@ -177,13 +177,13 @@ import { definedOptions } from '@svadmin/core/options';
   const referenceLayers = $derived([
     {
       title: isZh ? '视觉权威' : 'Visual authority',
-      label: 'Stripe + Corporate Clean',
-      detail: isZh ? 'Stripe 负责紫色主色、技术网格和精致反馈；企业简洁风负责中性表面、间距、焦点偏移和动效上限。' : 'Stripe owns the purple accent, technical grid, and precise feedback; Corporate Clean owns neutral surfaces, spacing, focus offsets, and the motion ceiling.',
+      label: 'svadmin',
+      detail: isZh ? '默认主色、中性画布、14px 正文和 2px/4px 圆角，以及列表、表单、详情和结果页分区。' : 'The default accent, neutral canvas, 14px type, and 2px/4px radius, plus list, form, detail, and result page anatomy.',
     },
     {
-      title: isZh ? '结构参考' : 'Structure references',
-      label: 'Fuse · Midone · Skote',
-      detail: isZh ? '只吸收导航、页面家族、工具栏、表格和表单的结构观察，不复制供应商品牌、CSS 或字体。' : 'Only navigation, page-family, toolbar, table, and form anatomy are observed; vendor branding, CSS, and fonts stay out.',
+      title: isZh ? '组件实现' : 'Component implementation',
+      label: 'shadcn-svelte',
+      detail: isZh ? '组件源码、语义变体和无障碍行为留在 shadcn-svelte。不另做一套色板。' : 'Component source, semantic variants, and accessibility stay in shadcn-svelte. Do not add a second palette.',
     },
     {
       title: isZh ? '产品契约' : 'Product contract',

@@ -52,15 +52,15 @@
     <tbody>
       {#each logs as log, _i (_i)}
         <tr>
-          <td style="font-family:monospace;font-size:12px;color:#64748b;">{formatDate(log.createdAt)}</td>
+          <td style="font-family:monospace;font-size:12px;color:#4E5969;">{formatDate(log.createdAt)}</td>
           <td>{log.userName ?? '—'}</td>
           <td><span class="lite-badge {actionClass(log.action)}">{log.action}</span></td>
-          <td style="color:#64748b;">{log.resource ?? '—'}</td>
-          <td style="font-family:monospace;font-size:12px;color:#64748b;">{log.ipAddress ?? '—'}</td>
+          <td style="color:#4E5969;">{log.resource ?? '—'}</td>
+          <td style="font-family:monospace;font-size:12px;color:#4E5969;">{log.ipAddress ?? '—'}</td>
         </tr>
       {:else}
         <tr>
-          <td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">No audit logs found.</td>
+          <td colspan="5" style="text-align:center;padding:24px;color:#86909C;">No audit logs found.</td>
         </tr>
       {/each}
     </tbody>
@@ -72,7 +72,7 @@
       {#if page > 1}
         <a href={`${basePath}page={page - 1}`} class="lite-btn lite-btn-sm">&laquo; Prev</a>
       {/if}
-      <span style="padding:0 12px;font-size:14px;color:#64748b;">Page {page} / {totalPages} ({total} total)</span>
+      <span style="padding:0 12px;font-size:14px;color:#4E5969;">Page {page} / {totalPages} ({total} total)</span>
       {#if page < totalPages}
         <a href={`${basePath}page={page + 1}`} class="lite-btn lite-btn-sm">Next &raquo;</a>
       {/if}
@@ -88,8 +88,8 @@
     font-size: 12px;
     font-weight: 600;
   }
-  .lite-badge-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-  .lite-badge-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-  .lite-badge-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-  .lite-badge-default { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+  .lite-badge-danger { background: #FFECE8; color: #dc2626; border: 1px solid #FDCDC5; }
+  .lite-badge-success { background: #f0fdf4; color: #009A29; border: 1px solid #bbf7d0; }
+  .lite-badge-warning { background: #FFF7E8; color: #D25F00; border: 1px solid #FFE4BA; }
+  .lite-badge-default { background: #F2F3F5; color: #4E5969; border: 1px solid #E5E6EB; }
 </style>

@@ -91,10 +91,6 @@
     place-items: center;
     padding: 2rem 1rem;
     background: var(--background);
-    background-image:
-      linear-gradient(to right, color-mix(in oklch, var(--primary) 4%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklch, var(--primary) 4%, transparent) 1px, transparent 1px);
-    background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);
     color: var(--foreground);
   }
 

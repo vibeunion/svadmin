@@ -71,7 +71,7 @@
 <style>
   .lite-editable-table-card {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     margin-bottom: 16px;

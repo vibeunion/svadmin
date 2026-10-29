@@ -47,7 +47,7 @@
 <style>
   .sv-lite-signature-card {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -56,19 +56,19 @@
   .sv-lite-sig-header {
     margin-bottom: 8px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-sig-sub {
-    color: #64748b;
+    color: #4E5969;
     font-size: 11px;
     margin-left: 6px;
   }
   .sv-lite-sig-preview {
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed #E5E6EB;
     border-radius: 4px;
     padding: 10px;
     text-align: center;
-    background-color: #f8fafc;
+    background-color: #F7F8FA;
     margin-bottom: 10px;
   }
   .sv-lite-sig-img {
@@ -77,12 +77,12 @@
     vertical-align: middle;
   }
   .sv-lite-sig-empty {
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed #E5E6EB;
     border-radius: 4px;
     padding: 24px;
     text-align: center;
-    color: #94a3b8;
-    background-color: #f8fafc;
+    color: #86909C;
+    background-color: #F7F8FA;
     margin-bottom: 10px;
   }
   .sv-lite-sig-file {
@@ -92,7 +92,7 @@
   .sv-lite-sig-btn {
     padding: 4px 10px;
     font-size: 11px;
-    background-color: #4f46e5;
+    background-color: #165DFF;
     color: #ffffff;
     border: none;
     border-radius: 3px;

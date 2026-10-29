@@ -121,7 +121,7 @@
 
 <style>
   .lite-dynamic-form-list {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 14px;
     background-color: #fafafa;
@@ -139,7 +139,7 @@
   }
   .lite-dynamic-item-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
     padding: 12px;
     margin-bottom: 10px;
@@ -149,7 +149,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
-    border-bottom: 1px dashed #e2e8f0;
+    border-bottom: 1px dashed #E5E6EB;
     padding-bottom: 6px;
   }
   .lite-dynamic-item-tools {
@@ -161,9 +161,9 @@
   .lite-empty-box {
     text-align: center;
     padding: 24px 12px;
-    color: #64748b;
+    color: #4E5969;
     background: #ffffff;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed #E5E6EB;
     border-radius: 4px;
   }
 </style>

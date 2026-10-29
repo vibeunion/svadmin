@@ -110,7 +110,7 @@ interface FieldDefinition {
 ## 主题配置
 
 使用 `themeConfig` 选择配色预设和布局风格。默认布局为 `default`；
-`clean-flat` 提供 Stripe 风格示例使用的克制、高对比后台布局。
+`clean-flat` 提供默认使用的克制、高对比后台布局。
 
 ```svelte
 <AdminApp
@@ -118,7 +118,7 @@ interface FieldDefinition {
   {resources}
   defaultTheme="system"
   themeConfig={{
-    colorPreset: 'stripe',
+    colorPreset: 'arco',
     layoutPreset: 'clean-flat',
   }}
 />
@@ -129,15 +129,16 @@ interface FieldDefinition {
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | 控制暗色模式添加 `.dark`，还是亮色模式添加 `.light` |
-| `colorPreset` | `ColorPreset \| string` | `'stripe'` | 内置或注册的配色预设；已持久化或显式选择的主题优先 |
+| `colorPreset` | `ColorPreset \| string` | `'arco'` | 内置或注册的配色预设；已持久化或显式选择的主题优先 |
 | `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | 应用外壳的布局风格 |
 | `cssOverrides` | `Record<string, string>` | — | 注入 `<html>` 的 CSS 变量 |
 | `disableColorScheme` | `boolean` | `false` | 跳过内置的 `color-scheme` 属性 |
 
-内置 8 套配色预设：
+内置 9 套配色预设，默认是内置配色：
 
 | 主题 | ID | 预览色 |
 |------|----|--------|
+| 默认 | `arco` | `#165DFF` |
 | Neutral | `neutral` | `#71717a` |
 | Indigo | `indigo` | `#4f46e5` |
 | Blue | `blue` | `#3b82f6` |

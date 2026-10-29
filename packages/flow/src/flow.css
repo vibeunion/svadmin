@@ -2,22 +2,22 @@
 
 .svadmin-flow-canvas {
   min-height: 24rem;
-  border: 1px solid var(--svadmin-flow-border, var(--border, #e6ebf1));
+  border: 1px solid var(--svadmin-flow-border, var(--border, #E5E6EB));
   border-radius: 0.5rem;
-  background: var(--svadmin-flow-canvas-background, var(--background, #f6f9fc));
+  background: var(--svadmin-flow-canvas-background, var(--background, #F7F8FA));
 }
 
 .svadmin-flow-canvas .svelte-flow__controls {
-  border: 1px solid var(--svadmin-flow-border, var(--border, #e6ebf1));
+  border: 1px solid var(--svadmin-flow-border, var(--border, #E5E6EB));
   border-radius: 0.375rem;
   overflow: hidden;
   box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
 }
 
 .svadmin-flow-canvas .svelte-flow__controls-button {
-  border-bottom-color: var(--svadmin-flow-border, var(--border, #e6ebf1));
+  border-bottom-color: var(--svadmin-flow-border, var(--border, #E5E6EB));
   background: var(--svadmin-flow-control-background, var(--card, #fff));
-  color: var(--svadmin-flow-control-foreground, var(--foreground, #0a2540));
+  color: var(--svadmin-flow-control-foreground, var(--foreground, #1D2129));
 }
 
 .svadmin-flow-palette {
@@ -30,20 +30,20 @@
   gap: 0.125rem;
   width: 100%;
   padding: 0.625rem 0.75rem;
-  border: 1px solid var(--svadmin-flow-border, var(--border, #e6ebf1));
+  border: 1px solid var(--svadmin-flow-border, var(--border, #E5E6EB));
   border-radius: 0.375rem;
   background: var(--svadmin-flow-palette-background, var(--card, #fff));
-  color: var(--svadmin-flow-palette-foreground, var(--foreground, #0a2540));
+  color: var(--svadmin-flow-palette-foreground, var(--foreground, #1D2129));
   text-align: start;
   cursor: grab;
 }
 
 .svadmin-flow-palette__item:hover:not(:disabled) {
-  border-color: var(--svadmin-flow-accent, var(--primary, #635bff));
+  border-color: var(--svadmin-flow-accent, var(--primary, #165DFF));
 }
 
 .svadmin-flow-palette__item:focus-visible {
-  outline: 2px solid var(--svadmin-flow-accent, var(--ring, #635bff));
+  outline: 2px solid var(--svadmin-flow-accent, var(--ring, #165DFF));
   outline-offset: 2px;
 }
 

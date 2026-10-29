@@ -71,7 +71,7 @@
         {/each}
         {#if mediaItems.length === 0}
           <tr>
-            <td colspan="5" style="text-align: center; color: #94a3b8; padding: 24px;">No media files available</td>
+            <td colspan="5" style="text-align: center; color: #86909C; padding: 24px;">No media files available</td>
           </tr>
         {/if}
       </tbody>
@@ -88,21 +88,21 @@
 <style>
   .lite-media-library-card {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 16px;
     margin-bottom: 16px;
   }
   .lite-media-header {
     padding-bottom: 10px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #E5E6EB;
     margin-bottom: 12px;
     font-size: 14px;
   }
   .lite-media-upload-row {
     margin-bottom: 12px;
     padding: 8px;
-    background: #f8fafc;
+    background: #F7F8FA;
     border-radius: 4px;
   }
   .lite-media-footer {

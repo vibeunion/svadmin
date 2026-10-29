@@ -3,10 +3,10 @@
 本目录是设计工具之外的可审计设计资产入口。代码、Token、组件契约和测试仍是事实来源；Penpot 是可同步的设计视图。
 
 视觉规范的唯一产品入口是仓库根目录 `DESIGN.md`。当前统一配置为
-**Stripe 风格 + 企业简洁风**：Stripe 负责主色、技术网格和精致反馈，企业
-简洁风负责中性表面、层级、间距和动效边界；Fuse、Midone、Skote 只负责导航、
-页面家族和组件解剖参考。设计资产、浏览器预览、example 与 create-svadmin
-模板都必须引用这套职责分工，不能各自维护第二套调色板或阴影。
+**视觉规范**：色板、字号、圆角、组件行为和列表/表单/详情/结果页
+分区；shadcn-svelte 负责组件实现。Fuse、Midone、Skote 只负责场景覆盖。
+设计资产、浏览器预览、example 与 create-svadmin 模板都必须引用这套分工，
+不能各自维护第二套调色板或阴影。
 
 运行时对应关系：`packages/ui/src/app.css` 是发布 CSS，
 `packages/core/src/theme.svelte.ts` 是主题 preset，`example/` 是完整工作台，

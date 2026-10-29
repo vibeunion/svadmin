@@ -147,7 +147,7 @@
   <Label {...definedOptions({ for: !children && (['array', 'transfer'].includes(field.type) || field.type === 'richtext' && getRichTextEditor()) ? undefined : labelTarget })} id={labelId} data-svadmin-field-label>
     {field.label}
     {#if field.required}
-      <span class="svadmin-u-811148b13d1e">*</span>
+      <span class="svadmin-u-811148b13d1e" data-svadmin-required>*</span>
     {/if}
   </Label>
   {#if field.description}

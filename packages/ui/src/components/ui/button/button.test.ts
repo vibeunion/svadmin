@@ -12,7 +12,7 @@ describe('buttonVariants', () => {
 	});
 
 	it('does not encode variant behavior in utility classes', () => {
-		for (const variant of ['default', 'outline', 'secondary', 'ghost', 'destructive', 'link'] as const) {
+		for (const variant of ['default', 'outline', 'secondary', 'ghost', 'destructive', 'link', 'dashed', 'text'] as const) {
 			expect(buttonVariants({ variant })).toContain(`svadmin-button--${variant}`);
 		}
 	});

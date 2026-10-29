@@ -64,7 +64,7 @@
 <style>
   .sv-lite-pdf-viewer {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -73,26 +73,26 @@
   .sv-lite-pdf-header {
     margin-bottom: 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
     padding-bottom: 8px;
-    border-bottom: 1px solid #cbd5e1;
+    border-bottom: 1px solid #E5E6EB;
   }
   .sv-lite-pdf-page {
-    color: #64748b;
+    color: #4E5969;
     font-size: 11px;
     margin-left: 8px;
   }
   .sv-lite-pdf-dl {
     float: right;
-    color: #4338ca;
+    color: #0E42D2;
     text-decoration: none;
     font-weight: 600;
   }
   .sv-lite-pdf-embed-wrapper {
     width: 100%;
     height: 600px;
-    background-color: #f8fafc;
-    border: 1px solid #cbd5e1;
+    background-color: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
   }
   .sv-lite-pdf-object {
@@ -102,12 +102,12 @@
   .sv-lite-pdf-fallback {
     padding: 20px;
     text-align: center;
-    color: #64748b;
+    color: #4E5969;
   }
   .sv-lite-pdf-placeholder {
     padding: 20px;
-    background-color: #f8fafc;
-    border: 1px solid #cbd5e1;
+    background-color: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
     text-align: center;
   }
@@ -115,7 +115,7 @@
     display: inline-block;
     width: 400px;
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     padding: 20px;
     text-align: left;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -123,13 +123,13 @@
   .sv-lite-stamps {
     margin-top: 15px;
     padding-top: 10px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #E5E6EB;
   }
   .sv-lite-stamp-badge {
     display: inline-block;
     padding: 2px 6px;
-    background-color: #dcfce7;
-    color: #166534;
+    background-color: #E8FFEA;
+    color: #009A29;
     border-radius: 3px;
     font-size: 10px;
     margin-left: 6px;

@@ -199,7 +199,7 @@
 
 {#if showBatch && records.length > 0}
   <div class="lite-batch-bar">
-    <span style="font-size: 13px; color: #64748b;">
+    <span style="font-size: 13px; color: #4E5969;">
       Select items above to perform batch actions
     </span>
     <button

@@ -99,7 +99,7 @@
 <style>
   .sv-lite-gantt-container {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -109,7 +109,7 @@
   .sv-lite-gantt-title {
     margin-bottom: 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-gantt-table {
     width: 100%;
@@ -117,7 +117,7 @@
     text-align: center;
   }
   .sv-lite-gantt-table th, .sv-lite-gantt-table td {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     padding: 6px;
   }
   .sv-lite-th-task, .sv-lite-td-task {
@@ -128,50 +128,50 @@
   .sv-lite-th-day {
     min-width: 28px;
     font-size: 10px;
-    background-color: #f8fafc;
-    color: #64748b;
+    background-color: #F7F8FA;
+    color: #4E5969;
   }
   .sv-lite-gantt-badge {
     display: inline-block;
     padding: 2px 6px;
     border-radius: 3px;
     font-size: 10px;
-    text-transform: uppercase;
+    text-transform: none;
   }
   .sv-lite-completed {
-    background-color: #dcfce7;
-    color: #166534;
+    background-color: #E8FFEA;
+    color: #009A29;
   }
   .sv-lite-delayed {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: #FFECE8;
+    color: #CB272D;
   }
   .sv-lite-in_progress {
-    background-color: #e0e7ff;
-    color: #3730a3;
+    background-color: #E8F3FF;
+    color: #0E42D2;
   }
   .sv-lite-planned {
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: #F2F3F5;
+    color: #4E5969;
   }
   .sv-lite-cell-active {
-    background-color: #818cf8;
+    background-color: #165DFF;
     color: #ffffff;
   }
   .sv-lite-bg-completed {
-    background-color: #4ade80;
+    background-color: #00B42A;
   }
   .sv-lite-bg-delayed {
-    background-color: #f87171;
+    background-color: #F53F3F;
   }
   .sv-lite-bg-in_progress {
-    background-color: #6366f1;
+    background-color: #165DFF;
   }
   .sv-lite-bg-planned {
-    background-color: #94a3b8;
+    background-color: #86909C;
   }
   .sv-lite-cell-progress {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: bold;
   }
 </style>

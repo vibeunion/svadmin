@@ -1,48 +1,48 @@
 ---
 version: "alpha"
 name: "svadmin Admin UI"
-description: "A restrained, precise Stripe-inspired product interface for repeated administrative work."
+description: "A neutral admin interface for repeated operational work, implemented with svadmin tokens and shadcn-svelte."
 colors:
-  background: "#f6f9fc"
-  foreground: "#0a2540"
-  surface: "#ffffff"
-  surface-subtle: "#f1f4f8"
-  muted-foreground: "#425466"
-  border: "#e6ebf1"
-  secondary: "#eef2f7"
-  accent: "#eef0ff"
-  accent-foreground: "#5147d9"
-  input: "#cbd5e1"
-  sidebar: "#ffffff"
-  sidebar-foreground: "#425466"
-  primary: "oklch(0.54 0.24 293)"
-  on-primary: "oklch(0.99 0 0)"
-  success: "oklch(0.55 0.16 151)"
-  warning: "oklch(0.7 0.15 75)"
-  danger: "oklch(0.58 0.22 27)"
+  background: "#F7F8FA"
+  foreground: "#1D2129"
+  surface: "#FFFFFF"
+  surface-subtle: "#F2F3F5"
+  muted-foreground: "#4E5969"
+  border: "#E5E6EB"
+  secondary: "#F2F3F5"
+  accent: "#E8F3FF"
+  accent-foreground: "#0E42D2"
+  input: "#E5E6EB"
+  sidebar: "#FFFFFF"
+  sidebar-foreground: "#4E5969"
+  primary: "#165DFF"
+  on-primary: "#FFFFFF"
+  success: "#00B42A"
+  warning: "#FF7D00"
+  danger: "#F53F3F"
 typography:
   body:
-    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    fontFamily: "\"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Helvetica, Arial, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.4
     letterSpacing: "0px"
   label:
-    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    fontFamily: "\"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Helvetica, Arial, sans-serif"
     fontSize: "0.8125rem"
     fontWeight: 500
     lineHeight: 1.35
     letterSpacing: "0px"
   heading:
-    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    fontFamily: "\"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Helvetica, Arial, sans-serif"
     fontSize: "1.25rem"
     fontWeight: 600
     lineHeight: 1.3
     letterSpacing: "0px"
 rounded:
-  sm: "4px"
-  md: "8px"
-  lg: "8px"
+  sm: "2px"
+  md: "4px"
+  lg: "4px"
 spacing:
   xs: "4px"
   sm: "8px"
@@ -97,14 +97,16 @@ components:
 
 ## Overview
 
-### Visual update: September 23, 2026
+### Visual update: October 29, 2026
 
-The current UI follows a Stripe-inspired and corporate-clean visual direction:
-neutral canvas, Stripe purple as the single action accent, hairline borders,
-layered but restrained shadows, a subtle technical grid on the work canvas, and
-short ease-out feedback for interactive controls. This supersedes the older
-capability-only reference limitation below.
+svadmin is the primary design system. The default canvas, type, radius,
+elevation, and action color follow The published light and dark ramps:
+page background `#F7F8FA`, ink `#1D2129`, hairline `#E5E6EB`, and a single
+primary action color `#165DFF`. The same page patterns cover list,
+grouped form, detail, and result pages. shadcn-svelte remains the component
+implementation. This supersedes the Stripe-inspired default below.
 Keep SVAdmin's own branding, semantic tokens, OpenUI contracts and Bits UI behavior.
+Do not install a second component runtime or a second component runtime.
 App chrome must use explicit anatomy hooks; never style every business `header`.
 Package utilities live in sublayers of `utilities`, so host-authored responsive
 utilities win regardless of lazy package stylesheet load order.
@@ -135,26 +137,65 @@ not become a mixed visual theme:
 
 | Reference | Adopted responsibility | Explicitly excluded |
 | --- | --- | --- |
-| Stripe style prompt | theme-menu chip `#635bff`, painted `--primary: oklch(0.54 0.24 293)`, technical grid, hairline borders, layered elevation, lift/depress feedback | Stripe brand assets, marketing gradients, oversized hero treatment |
-| Corporate-clean prompt | neutral enterprise surfaces, readable hierarchy, generous spacing, focus-ring offset, motion capped at 200ms | blue-only palette, rigid utility-class recipes, decorative cards |
-| Fuse / Midone / Skote | navigation anatomy, page-family coverage, toolbar/table/form composition, layout observations | vendor palette, logos, fonts, CSS, copied markup or component chrome |
-| svadmin | semantic tokens, component API, state ownership, accessibility, responsive contracts | no second visual authority |
+| svadmin | default palette, 14px type, 2px/4px radius, neutral surfaces, component behavior for table, form, descriptions, upload, and feedback | a second component runtime, theme packages, or stock illustrations |
+| page patterns | list, grouped form, detail, and result page anatomy | another shell, a dashboard card wall, or route-meta permissions |
+| shadcn/ui | source-owned components, semantic tokens, variants, and accessible composition | a second runtime or an unconstrained page skin |
+| Stripe style prompt | optional `stripe` accent preset only: chip `#635bff`, painted `oklch(0.54 0.24 293)` | default canvas, default primary, technical grid, Stripe brand assets |
+| Fuse / Midone / Skote | scenario coverage only | vendor palette, logos, fonts, CSS, copied markup or component chrome |
+| svadmin | semantic token names, component API, state ownership, accessibility, responsive contracts | a second visual authority |
 
-When references conflict, svadmin semantics and accessibility win first, the
-Stripe prompt controls the action accent and grid, and the corporate-clean
-prompt controls restraint, spacing, and motion limits. The result is one
-product language rather than a collage of template styles.
+When references conflict, svadmin accessibility and state contracts win first,
+then the default ramp and page patterns. Stripe is no longer the default visual.
+The result is one product language rather than a collage of template styles.
+
+## Component contract
+
+svadmin is the component specification. shadcn-svelte
+is the only implementation. Do not add a second component runtime. A specified component
+is either mapped below or implemented with the same tokens. A component the specification does
+not define still follows this contract: 32px controls, 2px control radius, 4px
+surfaces, one primary action color, semantic status colors, labels above fields,
+and one feedback surface per event.
+
+| Specified component | svadmin implementation |
+| --- | --- |
+| Button, Input, Select, Textarea, Checkbox, Switch, Radio, Slider | shadcn primitives, 32px size and 2px focus ring |
+| Tag, Badge | `Badge` light tag |
+| Table, Form, Descriptions, Upload, Steps | `AutoTable`, `AutoForm`, `DescriptionList`, `FileUpload`, `StepsForm` |
+| Link, Typography | `Link`, `Title`, `Text` |
+| Divider | `Divider` (`Separator`) |
+| Empty, Result, Spin, Skeleton | `EmptyState`, `Result`, `Spin`, `Skeleton` |
+| Message, Notification, Alert, Modal, Drawer, Popconfirm | `Toast`, `FeedbackNotice`, `Dialog`, `Sheet`, `Popconfirm` |
+| List, Tree, BackTop | `ItemList`, `Tree`, `BackTop` |
+| Date/Time, Cascader, TreeSelect, Transfer, Mentions, Upload | existing field components |
+
+Components outside that table, including workspace, approval, kanban,
+gantt, audit, and resource pages, are not a second design system. They use the
+same semantic tokens, control height, radius, status colors, and field error
+placement. They do not introduce a new palette, a technical grid, a solid
+default badge, or a success banner plus a success toast.
+
+Detail rules for every component:
+
+- Default control height is 32px. Small is 28px. Large is 36px.
+- Controls use a 2px radius. Bounded surfaces use 4px.
+- Focus is a 2px primary-tinted ring on the control, not on the surrounding card.
+- Table head and row are 40px. The head uses the canvas color and secondary text.
+- A required mark is `danger`. The error sits directly under its field.
+- Status is never color alone. Extra components use `success`, `warning`, and
+  `danger` tokens only for status.
 
 ### Runtime integration map
 
 The same contract is used at every delivery surface:
 
 - `packages/ui/src/app.css` owns published semantic tokens and the
-  `clean-flat + stripe` refinement; host applications consume this stylesheet.
-- `packages/core/src/theme.svelte.ts` owns the `stripe` color preset and mode
-  attributes; it must stay aligned with the CSS fallback values.
+  `clean-flat + arco` refinement; host applications consume this stylesheet.
+- `packages/core/src/theme.svelte.ts` owns the `arco` color preset and mode
+  attributes; it must stay aligned with the CSS fallback values. `stripe`
+  remains an optional preset.
 - `AdminApp` supplies `clean-flat` as a fallback layout without taking over an
-  explicit theme owner. Core supplies the default Stripe color and preserves
+  explicit theme owner. Core supplies the default color and preserves
   saved user selections; `layoutPreset: 'default'` remains an explicit opt-out.
 - `example/src/App.svelte` consumes these defaults without repeating theme
   configuration. A bare `AdminApp` renders `ResourceOverview` on its home route.
@@ -164,17 +205,16 @@ The same contract is used at every delivery surface:
 - `packages/create-svadmin/template` starts new projects with the same theme
   and guidance document, so generated apps do not drift from the example.
 - `design/admin-ui/preview` renders the published package CSS and uses the same
-  Stripe preset for component and state review.
+  default preset for component and state review.
 - `packages/flow` resolves explicit flow overrides first, then host semantic
-  tokens, then standalone Stripe-compatible fallback colors.
+  tokens, then standalone fallback colors.
 - `packages/editor`, `packages/surface`, and `packages/ai-elements` consume
   complete CSS color tokens, not HSL channel tuples. Independent stylesheets
   use motion-token fallbacks so they also work without the full UI package.
-- `packages/lite` mirrors the palette with literal colors. Its legacy-browser
+- `packages/lite` mirrors the default palette with literal colors. Its legacy-browser
   contract deliberately excludes custom properties and modern selectors;
   visual alignment must not remove that compatibility. Its literal accent
-  remains the preset chip `#635bff`, not the oklch `--primary` used by
-  `@svadmin/ui`.
+  is the same `#165DFF` primary used by `@svadmin/ui`.
 
 Theme refinements must preserve component geometry, invalid and selected states.
 Focus belongs to the active control, not every enclosing card. Search icons and
@@ -239,38 +279,37 @@ status and feedback. Consumer themes may replace the primary hue while keeping
 the neutral hierarchy and contrast relationships intact.
 
 **The Token Source Rule.** Frontmatter neutrals are the light values of
-`.layout-clean-flat[data-theme="stripe"]` in `packages/ui/src/app.css`. The
-painted action color is `--primary: oklch(0.54 0.24 293)` from `:root` and
-`[data-theme="stripe"]`, matching `builtinPresets.stripe.light` in
+`.layout-clean-flat[data-theme="arco"]` in `packages/ui/src/app.css`. The
+painted action color is `--primary: #165DFF` from `:root` and
+`[data-theme="arco"]`, matching `builtinPresets.arco.light` in
 `packages/core/src/theme.svelte.ts`. The preset menu chip
-`builtinPresets.stripe.color` is `#635bff`. It identifies the preset. It is
-not a second primary, and it must not be copied onto buttons, rings, or links.
+`builtinPresets.arco.color` is the same `#165DFF`. It is not a second primary.
 
-Canvas neutrals in that same stripe block are `#f6f9fc`, `#0a2540`,
-`#ffffff`, `#f1f4f8`, `#425466`, and `#e6ebf1`. Success, warning, and danger
-stay on the semantic tokens and are not overridden by the stripe block:
-`--success: oklch(0.55 0.16 151)`, `--warning: oklch(0.7 0.15 75)`,
-`--destructive: oklch(0.58 0.22 27)`. `:root` oklch neutrals are the fallback
-before the stripe layout block applies. Do not mix those fallback neutrals
-with the stripe hex canvas.
+Canvas neutrals in that block are `#F7F8FA`, `#1D2129`, `#FFFFFF`,
+`#F2F3F5`, `#4E5969`, and `#E5E6EB`. Success, warning, and danger stay on the
+semantic tokens: `--success: #00B42A`, `--warning: #FF7D00`,
+`--destructive: #F53F3F`. Do not mix the optional Stripe canvas into the
+default theme.
 
-Dark mode for the same preset replaces the canvas, not the accent family:
+Dark mode for the default preset replaces the canvas and lifts the accent to
+The dark primary:
 
 | Token | Dark value |
 | --- | --- |
-| background | `#0f172a` |
-| foreground | `#f1f5f9` |
-| card / popover | `#111c2e` |
-| muted | `#18263b` |
-| muted-foreground | `#9aa9bd` |
-| border | `#26364c` |
-| sidebar | `#101b2d` |
-| primary | `oklch(0.72 0.19 293)` |
-| on-primary | `oklch(0.16 0.02 270)` |
+| background | `#17171A` |
+| foreground | `#E6E6E6` |
+| card / popover | `#232324` |
+| muted | `#2A2A2B` |
+| muted-foreground | `#B3B3B3` |
+| border | `#484849` |
+| sidebar | `#17171A` |
+| primary | `#3C7EFF` |
+| on-primary | `#FFFFFF` |
 
 Named color themes (`neutral`, `indigo`, `blue`, `green`, `rose`, `orange`,
 `violet`, `stripe`) replace primary, ring, sidebar-primary, and chart-1 only.
-They do not rebuild the neutral ramp.
+They do not rebuild the neutral ramp. `arco` is the default preset id and paints
+the full ramp above.
 
 The grid is a low-contrast canvas texture only; buttons and data
 surfaces remain solid, and gradients are not used to communicate status. The
@@ -438,13 +477,17 @@ These are the published shells. Compose them. Do not redraw them as generic card
 
 | Shell | Contract | Chrome |
 | --- | --- | --- |
-| `Layout` | `data-svadmin-layout`, `data-svadmin-main`, `data-svadmin-sidebar`, `data-svadmin-topbar` | Sidebar and topbar are flat hairline regions. Stripe removes their shadows. Active sidebar items use a 9% primary wash and a 4px bar. |
+| `Layout` | `data-svadmin-layout`, `data-svadmin-main`, `data-svadmin-sidebar`, `data-svadmin-topbar` | Sidebar and topbar are flat hairline regions. The default canvas removes their shadows. Active sidebar items use a 9% primary wash and a 4px bar. |
 | `Sidebar` | `data-svadmin-sidebar`, `.sidebar-menu-item` | System sans at 13px / 500. Section labels are not uppercase. |
 | `AutoTable` | `data-svadmin-table-head`, `data-svadmin-table-row`, `data-svadmin-datatable` | The table is not wrapped in a card. Header labels are 12px / 600, sentence case, `letter-spacing: 0`. Numbers use `tabular-nums`. |
 | `PageToolbar` | `data-svadmin-table-toolbar` | A hairline row (`border-bottom`), transparent, no radius and no surface shadow. |
-| `AutoForm` | `data-svadmin-form-row`, `data-svadmin-form-actions`, `data-svadmin-field-label` | Rows are separated by a hairline. Under the stripe preset, save actions are a footer rule, not a floating card. |
+| `AutoForm` | `data-svadmin-form-row`, `data-svadmin-form-actions`, `data-svadmin-field-label` | Rows are separated by a hairline. Under the default preset, save actions are a footer rule, not a floating card. |
 | `ConfigurationPage`, `SettingsGroup`, `SettingsFieldRow` | `data-svadmin-settings-group` | Unframed. The group header is a bottom border, title at 16px / 600, description in muted text. One page `h1`; nested groups use `h3`. |
 | `MetricBlock` | `data-svadmin-metric-card` | This is the bounded card: 8px radius, hairline border, surface shadow. Do not put it inside another card. |
+| `ApprovalCenter`, `ApprovalActionCard` | `data-svadmin-approval-center`, `.svadmin-approval-card` | Flat 4px surface, no shadow. The selected row uses an 8% primary wash. Approve uses the primary action color; reject stays danger. |
+| `KanbanBoard`, `GanttChart` | `.svadmin-kanban`, `.svadmin-gantt` | The same 4px bordered surface. Columns use the muted fill; cards and bars have no shadow. Status text is 12px and sentence case. |
+| `WorkspaceLayout` | `data-svadmin-workspace-layout` | 16px rhythm between the primary work and the secondary rail. It does not introduce another palette. |
+| `ResourceOperationsPage`, `ResourceOverviewCard` | `data-svadmin-resource-operations`, `.svadmin-resource-overview-card` | The page title is 20px. The hero is an unframed hairline, and nested cards stay flat 4px surfaces. |
 | `AuthPageShell`, `LoginPage` | `data-svadmin-auth-page`, `data-svadmin-demo-credentials` | One auth surface. The title stays at 20px / 600. Demo credentials are a divided note inside that surface, not nested tiles. |
 
 `FilterToolbar` (`data-svadmin-filter-toolbar`) owns search and advanced filters.
@@ -476,21 +519,20 @@ Transitions provide clear state confirmation without delaying user action:
 
 The reference stack is layered. It is not a visual mixture:
 
-- **svadmin owns its visual principles:** hierarchy, restraint, neutral surfaces,
-  typography, spacing, and interaction tone.
+- **svadmin is the primary reference:** palette, type, radius, component
+  behavior, and page anatomy for list, form, detail, and result.
+- **svadmin owns implementation:** semantic token names, component API, state
+  ownership, accessibility, and responsive contracts.
+- **shadcn/ui is the composition layer:** accessible primitives, source-owned
+  components, semantic variants, and AI-readable assembly. It does not supply
+  a second palette.
 - **Refine is an application-model reference:** resource routing, CRUD flows,
   provider state, access control, and mutation ownership.
-- **Ant Design is a behavior reference:** field validation, alerts, messages,
-  notifications, results, empty states, loading, and data-heavy tasks.
-- **shadcn/ui is a composition reference:** accessible primitives, source-owned
-  components, semantic tokens, variants, and AI-readable assembly patterns.
-- **Carbon and PatternFly are enterprise-pattern references:** notification
-  lifecycle, inline versus global feedback, empty/error states, and operational
-  page composition.
+- **Stripe is an optional accent preset:** not the default canvas or primary.
 - **Metronic is a coverage reference:** page families and missing scenarios only.
 
-Never copy a reference library's palette, radius, elevation, marketing layout,
-or component chrome without an explicit svadmin design decision.
+Never copy a reference library's runtime, marketing layout, or component chrome.
+The published ramp is the explicit palette decision.
 
 ### Page hierarchy and information budget
 
@@ -557,7 +599,7 @@ Breakpoints already in the shell, not a new layout system:
 - Sidebar content offset switches at `768px`. Below that, the sidebar does not
   reserve the 252px or 70px desktop margin.
 - Filter toolbars become a horizontal row at `640px`.
-- Stripe content padding tightens at `48rem`.
+- Content padding tightens at `48rem`.
 - Auth credential columns stack at `40rem`.
 - Coarse-pointer targets stay at least 44px. Fine-pointer tables may be denser.
 
@@ -567,26 +609,23 @@ Breakpoints already in the shell, not a new layout system:
 - Do show loading, empty, error, permission, progress, and mutation feedback.
 - Do preserve visible keyboard focus and at least 44px coarse-pointer targets.
 - Do remove, downgrade, or relocate feedback as soon as its state is resolved.
-- Do use the system sans already set on `body` and the stripe layout rule:
-  `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`.
+- Do use the system stack already set on the default layout:
+  `"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif`.
 - Don't copy Metronic colors, decorative treatment, or template branding.
 - Don't repeat a success fact across Toast, title, description, banner, badge,
   and table data.
 - Don't use persistent success banners for routine mutations.
 - Don't set `font-family` to Inter, or to any single downloaded face, as the
   product font. A system stack is the contract.
-- Don't paint marketing gradients, mesh backgrounds, glass, or a purple hero.
-  The only canvas texture is the 40px technical grid at 2% primary on
-  `[data-svadmin-main]` and 4% on the auth page.
+- Don't paint marketing gradients, mesh backgrounds, glass, a technical grid, or a purple hero.
+  The canvas is flat.
 - Don't put muted gray type on a saturated fill. Solid status fills use their
   foreground token. The tinted `.svadmin-product-status` badge mixes the status
   color into `--foreground` and keeps a neutral card base.
 - Don't use cards inside cards, uppercase tracked labels, bounce easing, or
   make every section a floating card.
 - Don't use decorative gradients, glow, glassmorphism, negative letter spacing,
-  or blanket `!important` overrides as the default product language. A subtle
-  two-line grid is allowed on the work canvas because it is part of the current
-  Stripe-inspired reference direction.
+  or blanket `!important` overrides as the default product language.
 
 ## Agent prompt guide
 
@@ -598,12 +637,12 @@ matrix. Use semantic tokens (`--background`, `--foreground`, `--card`,
 `--primary`, `--border`, `--muted-foreground`, `--success`, `--warning`,
 `--destructive`). Do not introduce a parallel palette.
 
-Quick light reference for the default stripe + clean-flat preset:
+Quick light reference for the default clean-flat preset:
 
-- Canvas `#f6f9fc`, ink `#0a2540`, surface `#ffffff`, hairline `#e6ebf1`.
-- Action `oklch(0.54 0.24 293)` on `oklch(0.99 0 0)`. Chip only: `#635bff`.
-- Body 14px / 400 / 1.5. Page title 20px / 600 / 1.3. Labels 13px / 500.
-- Radius 8px on controls and bounded surfaces. Spacing 4 / 8 / 16 / 24 / 32.
+- Canvas `#F7F8FA`, ink `#1D2129`, surface `#FFFFFF`, hairline `#E5E6EB`.
+- Action `#165DFF` on `#FFFFFF`. Dark action `#3C7EFF`.
+- Body 14px / 400 / 1.4. Page title 20px / 600 / 1.3. Labels 13px / 500.
+- Radius 2px on small controls and 4px on fields and surfaces. Spacing 4 / 8 / 16 / 24 / 32.
 - Focus: 2px solid `--ring`, offset `--svadmin-focus-offset` (2px).
 
 Reject the result when the first viewport has nested cards, a gradient hero,
@@ -612,6 +651,8 @@ in a banner and the data below it.
 
 Do not add `npx impeccable detect` to CI. The UI workflow already builds
 packages and checks browser contracts. A default detector run flags intentional
-admin choices (the Stripe accent, the technical grid, compact tables) and would
+admin choices (the optional Stripe accent and compact tables) and would
 need a large ignore list. Use that detector locally only as a hint, and keep
 this file as the authority when a finding conflicts with the tokens above.
+The default visual system remains the primary reference; do not treat a mismatch with page patterns
+shell, illustrations, or card wall as a defect.

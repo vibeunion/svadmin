@@ -8,11 +8,11 @@ surfaces, precise hierarchy, restrained depth, and compact controls support
 repeated operational work. These seven principles turn that direction into
 reviewable product decisions.
 
-The visual authority is the shared **Stripe-inspired + corporate-clean**
-profile: Stripe supplies the controlled purple accent, technical grid, and
-layered feedback; corporate-clean supplies neutral surfaces, spacing, focus
-offsets, and a 200ms motion ceiling. Fuse, Midone, and Skote are anatomy and
-coverage references only. See the repository `DESIGN.md` for the complete
+The visual authority is **svadmin**. It uses one primary action
+color `#165DFF`, neutral canvas, 14px type, 2px/4px radius, and component
+behavior. List, form, detail, and result pages share one page anatomy.
+shadcn-svelte implements the components. Stripe remains an optional accent
+preset, not the default. See the repository `DESIGN.md` for the complete
 responsibility matrix.
 
 ## 1. Clear by default

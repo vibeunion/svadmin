@@ -15,7 +15,7 @@
 
 <div
   role="alert"
-  style="padding: 12px 16px; background: #fefce8; border: 1px solid #fde68a; color: #713f12; border-radius: 6px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;"
+  style="padding: 12px 16px; background: #FFF7E8; border: 1px solid #FFE4BA; color: #713f12; border-radius: 6px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;"
 >
   <span>{message}</span>
   <a

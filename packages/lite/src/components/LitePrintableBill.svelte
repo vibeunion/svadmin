@@ -36,11 +36,11 @@
   <div class="lite-bill-header">
     <div style="float: left;">
       <h3 style="margin: 0;">{title}</h3>
-      <span style="color: #64748b; font-size: 11px;">No: {billNumber}</span>
+      <span style="color: #4E5969; font-size: 11px;">No: {billNumber}</span>
     </div>
     <div style="float: right; text-align: right;">
       <strong>{companyName}</strong>
-      <div style="color: #64748b; font-size: 11px;">Date: {date}</div>
+      <div style="color: #4E5969; font-size: 11px;">Date: {date}</div>
     </div>
     <div style="clear: both;"></div>
   </div>
@@ -74,7 +74,7 @@
     <tfoot>
       <tr>
         <td colspan="4" style="text-align: right; font-weight: bold;">Grand Total:</td>
-        <td style="text-align: right; font-weight: bold; color: #2563eb;">¥{total.toFixed(2)}</td>
+        <td style="text-align: right; font-weight: bold; color: #165DFF;">¥{total.toFixed(2)}</td>
       </tr>
     </tfoot>
   </table>
@@ -89,18 +89,18 @@
 <style>
   .lite-bill-card {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 20px;
     margin-bottom: 16px;
   }
   .lite-bill-header {
-    border-bottom: 2px solid #3b82f6;
+    border-bottom: 2px solid #165DFF;
     padding-bottom: 12px;
     margin-bottom: 12px;
   }
   .lite-bill-customer {
-    background: #f8fafc;
+    background: #F7F8FA;
     padding: 8px 12px;
     border-radius: 4px;
     margin-bottom: 16px;
@@ -112,8 +112,8 @@
   }
   .lite-bill-notes {
     font-size: 12px;
-    color: #64748b;
-    border-top: 1px solid #e2e8f0;
+    color: #4E5969;
+    border-top: 1px solid #E5E6EB;
     padding-top: 8px;
   }
 </style>

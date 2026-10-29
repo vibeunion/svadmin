@@ -114,8 +114,7 @@ interface FieldDefinition {
 ## Theme Configuration
 
 Use `themeConfig` to select the color preset and layout style. The default
-layout is `default`; `clean-flat` enables the restrained, high-contrast panel
-layout used by the Stripe-inspired example.
+layout is `default`; `clean-flat` enables the default admin canvas.
 
 ```svelte
 <AdminApp
@@ -123,7 +122,7 @@ layout used by the Stripe-inspired example.
   {resources}
   defaultTheme="system"
   themeConfig={{
-    colorPreset: 'stripe',
+    colorPreset: 'arco',
     layoutPreset: 'clean-flat',
   }}
 />
@@ -134,15 +133,16 @@ layout used by the Stripe-inspired example.
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Controls whether dark mode adds `.dark` or light mode adds `.light` |
-| `colorPreset` | `ColorPreset \| string` | `'stripe'` | Built-in or registered color preset; persisted or explicit selections still take precedence |
+| `colorPreset` | `ColorPreset \| string` | `'arco'` | Built-in or registered color preset; persisted or explicit selections still take precedence |
 | `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout treatment for the application shell |
 | `cssOverrides` | `Record<string, string>` | — | CSS variables injected on `<html>` |
 | `disableColorScheme` | `boolean` | `false` | Skip the built-in `color-scheme` attribute |
 
-Eight color presets are built in:
+Nine color presets are built in. The built-in preset is the default:
 
 | Theme | ID | Preview color |
 |-------|----|---------------|
+| Default | `arco` | `#165DFF` |
 | Neutral | `neutral` | `#71717a` |
 | Indigo | `indigo` | `#4f46e5` |
 | Blue | `blue` | `#3b82f6` |

@@ -49,13 +49,13 @@
   }
   .sv-lite-sync-offline {
     background-color: #fef3c7;
-    border: 1px solid #fde68a;
-    color: #92400e;
+    border: 1px solid #FFE4BA;
+    color: #D25F00;
   }
   .sv-lite-sync-online {
-    background-color: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    color: #334155;
+    background-color: #F2F3F5;
+    border: 1px solid #E5E6EB;
+    color: #1D2129;
   }
   .sv-lite-sync-title {
     display: inline-block;
@@ -66,7 +66,7 @@
   .sv-lite-sync-btn {
     padding: 3px 8px;
     font-size: 11px;
-    background-color: #4f46e5;
+    background-color: #165DFF;
     color: #ffffff;
     border: none;
     border-radius: 3px;

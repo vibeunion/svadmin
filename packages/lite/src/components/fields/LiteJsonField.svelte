@@ -23,7 +23,7 @@
 </script>
 
 {#if mode === 'show'}
-  <pre style="padding: 12px; background: #1e293b; color: #f8fafc; border-radius: 4px; overflow-x: auto; font-size: 13px;">{getJsonString(value)}</pre>
+  <pre style="padding: 12px; background: #1D2129; color: #F7F8FA; border-radius: 4px; overflow-x: auto; font-size: 13px;">{getJsonString(value)}</pre>
 {:else}
   <div>
     <textarea

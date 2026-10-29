@@ -62,7 +62,7 @@
 <style>
   .sv-lite-annotation-box {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -71,17 +71,17 @@
   .sv-lite-anno-header {
     margin-bottom: 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-anno-count {
-    color: #64748b;
+    color: #4E5969;
     font-size: 11px;
     margin-left: 6px;
   }
   .sv-lite-anno-preview {
     text-align: center;
-    background-color: #f8fafc;
-    border: 1px solid #cbd5e1;
+    background-color: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
     padding: 8px;
     margin-bottom: 10px;
@@ -94,12 +94,12 @@
   .sv-lite-anno-list {
     margin-bottom: 10px;
     padding: 8px;
-    background-color: #f8fafc;
+    background-color: #F7F8FA;
     border-radius: 4px;
   }
   .sv-lite-list-title {
     font-weight: 600;
-    color: #475569;
+    color: #4E5969;
     margin-bottom: 6px;
   }
   .sv-lite-anno-item {
@@ -108,19 +108,19 @@
   .sv-lite-anno-badge {
     display: inline-block;
     padding: 1px 5px;
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: #FFECE8;
+    color: #CB272D;
     border-radius: 3px;
     font-size: 10px;
-    text-transform: uppercase;
+    text-transform: none;
     margin-right: 6px;
   }
   .sv-lite-anno-text {
-    color: #334155;
+    color: #1D2129;
   }
   .sv-lite-anno-upload {
     padding-top: 8px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #E5E6EB;
   }
   .sv-lite-file-input {
     font-size: 11px;
@@ -129,7 +129,7 @@
   .sv-lite-upload-btn {
     padding: 4px 10px;
     font-size: 11px;
-    background-color: #4f46e5;
+    background-color: #165DFF;
     color: #ffffff;
     border: none;
     border-radius: 3px;

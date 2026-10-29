@@ -42,10 +42,10 @@ path. A non-`ready` state must not keep showing stale business content as curren
 | Reference | Borrow only | Do not copy |
 | --- | --- | --- |
 | Refine | Resource CRUD, routing, data, and mutation ownership | Its page skin |
-| Ant Design | Validation, feedback, empty/loading states, and dense-data behavior | Default blue, radius, or component chrome |
-| shadcn/ui | Readable source, composition, and semantic variants | A second runtime or unconstrained page assembly |
-| Carbon / PatternFly | Enterprise notifications, permissions, empty/error states, and operational layouts | Brand tokens |
-| Fuse / Midone / Skote / Metronic | Navigation, page families, and scenario coverage | Template cards, gradients, fonts, logos, or CSS |
+| svadmin | Default palette, type, radius, and component behavior | a second component runtime, stock illustrations, or theme packages |
+| page patterns | List, grouped form, detail, and result page anatomy | another shell, a dashboard card wall, or route permissions |
+| shadcn/ui | Readable source, composition, and semantic variants | A second runtime, second palette, or unconstrained page assembly |
+| Fuse / Midone / Skote / Metronic | Scenario coverage only | Template cards, gradients, fonts, logos, or CSS |
 
 References answer what problems to cover. They do not override svadmin's own
 colors, permissions, or accessibility decisions.

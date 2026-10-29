@@ -42,7 +42,7 @@
       {/each}
       {#if items.length === 0}
         <tr>
-          <td colspan={columns.length} style="text-align: center; color: #94a3b8; padding: 24px;">
+          <td colspan={columns.length} style="text-align: center; color: #86909C; padding: 24px;">
             No records to display
           </td>
         </tr>

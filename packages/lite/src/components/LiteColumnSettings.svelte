@@ -52,13 +52,13 @@
   .lite-column-settings {
     margin-bottom: 12px;
     padding: 8px 12px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
+    background: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
   }
   .lite-column-settings-title {
     font-size: 12px;
-    color: #475569;
+    color: #4E5969;
     margin-bottom: 6px;
   }
   .lite-column-options {

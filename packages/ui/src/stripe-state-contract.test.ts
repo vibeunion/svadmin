@@ -7,9 +7,9 @@ import postcss from 'postcss';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(resolve(currentDir, 'app.css'), 'utf8');
 const root = postcss.parse(css);
-const stripe = '.layout-clean-flat[data-theme="stripe"]';
+const stripe = '.layout-clean-flat[data-theme="arco"]';
 
-describe('Stripe state ownership', () => {
+describe('Arco state ownership', () => {
   it('uses shared duration and easing tokens for component transitions', () => {
     root.walkDecls(/^transition(?:-duration|-timing-function)?$/, (decl) => {
       expect(decl.value).not.toMatch(/\b(?:120|140|150|160|180|200|250|300)ms\b/);

@@ -14,9 +14,9 @@
   let { message, type = 'info', dismissUrl }: Props = $props();
 
   const colors: Record<NonNullable<Props['type']>, { bg: string; border: string; text: string }> = {
-    success: { bg: '#ecfdf5', border: '#a7f3d0', text: '#065f46' },
-    error: { bg: '#fef2f2', border: '#fecaca', text: '#991b1b' },
-    warning: { bg: '#fffbeb', border: '#fed7aa', text: '#92400e' },
+    success: { bg: '#E8FFEA', border: '#E8FFEA', text: '#009A29' },
+    error: { bg: '#FFECE8', border: '#FDCDC5', text: '#CB272D' },
+    warning: { bg: '#FFF7E8', border: '#fed7aa', text: '#D25F00' },
     info: { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
   };
 

@@ -18,9 +18,9 @@
 
 <tr>
   {#each fields as field, _i (_i)}
-    <th style="padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; color: #475569; white-space: nowrap;">
+    <th style="padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; color: #4E5969; white-space: nowrap;">
       {#if currentSort === field.key}
-        <a href="?sort={field.key}&order={currentOrder === 'asc' ? 'desc' : 'asc'}" style="color: #0f172a; text-decoration: none;">
+        <a href="?sort={field.key}&order={currentOrder === 'asc' ? 'desc' : 'asc'}" style="color: #1D2129; text-decoration: none;">
           {field.label} {currentOrder === 'asc' ? '↑' : '↓'}
         </a>
       {:else}

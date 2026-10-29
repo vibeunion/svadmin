@@ -94,10 +94,12 @@ describe('@svadmin/ui native stylesheet contract', () => {
     const css = readRepositoryFile('packages/ui/src/app.css');
     expect(css).toContain('--primary: oklch(0.54 0.24 293);');
     expect(css).toContain('--ring: oklch(0.54 0.24 293);');
-    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("? stored as ColorTheme:'stripe'");
+    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("? stored as ColorTheme:'arco'");
+    expect(css).toContain('.layout-clean-flat[data-theme="arco"]');
+    expect(css).toContain('--primary: #165DFF;');
     expect(css).toContain('.layout-clean-flat[data-theme="stripe"]');
     expect(css).toContain('--svadmin-grid-size: 40px;');
-    expect(css).toContain('background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);');
+    expect(css).not.toContain('background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);');
     expect(css).toContain('--svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02);');
     expect(css).toContain('inset 0 1px 0 rgb(255 255 255 / 0.2)');
     expect(css).toContain('transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);');
@@ -111,8 +113,8 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(css).not.toContain('border-radius: 0.875rem');
     expect(css).not.toContain('text-transform: uppercase');
     expect(css).toContain('.layout-clean-flat [data-svadmin-auth-page] > main > div > section > header h1 {\n  color: var(--foreground);\n  font-size: 1.25rem;');
-    const toolbar = css.slice(css.indexOf('.layout-clean-flat[data-theme="stripe"] [data-svadmin-table-toolbar]'));
-    expect(toolbar.startsWith('.layout-clean-flat[data-theme="stripe"] [data-svadmin-table-toolbar]')).toBe(true);
+    const toolbar = css.slice(css.indexOf('.layout-clean-flat[data-theme="arco"] [data-svadmin-table-toolbar]'));
+    expect(toolbar.startsWith('.layout-clean-flat[data-theme="arco"] [data-svadmin-table-toolbar]')).toBe(true);
     expect(toolbar.slice(0, 280)).toContain('box-shadow: none;');
     expect(toolbar.slice(0, 280)).not.toContain('var(--svadmin-surface-shadow)');
   });

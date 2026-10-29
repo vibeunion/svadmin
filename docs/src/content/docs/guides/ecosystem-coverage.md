@@ -1,9 +1,9 @@
 ---
 title: Ecosystem coverage
-description: Ant Design recommended libraries mapped to svadmin and the Svelte ecosystem
+description: external UI kits recommended libraries mapped to svadmin and the Svelte ecosystem
 ---
 
-Ant Design publishes a [recommended library list](https://ant-design.antgroup.com/docs/react/recommendation-cn)
+external UI kits publishes a [recommended library list](https://ant.design)
 for the React ecosystem. This page maps every category to a svadmin package,
 a Svelte-ecosystem alternative, or an explicit gap. A category is only marked
 covered when the capability ships first-party or is provided by the framework
@@ -11,9 +11,9 @@ runtime itself.
 
 Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 delegated to a Svelte ecosystem package · ❌ first-party gap · ➖ not a fit for admin software.
 
-| Category | Ant Design pick | svadmin surface | Svelte ecosystem | Status |
+| Category | external UI kits pick | svadmin surface | Svelte ecosystem | Status |
 | --- | --- | --- | --- | --- |
-| Charts | Ant Design Charts / AntV | `BarChart`, `LineChart`, `PieChart`, `AreaChart`, `ScatterChart` | LayerChart, svelte-echarts | 🔶 basic charts; statistical charts use LayerChart |
+| Charts | chart libraries | `BarChart`, `LineChart`, `PieChart`, `AreaChart`, `ScatterChart` | LayerChart, svelte-echarts | 🔶 basic charts; statistical charts use LayerChart |
 | Flow diagrams | reactflow | `@svadmin/flow` (xyflow/svelte) | @xyflow/svelte | ✅ |
 | Hooks library | ahooks | `@svadmin/core` data/auth hooks + `@svadmin/ui` runes hooks: `useMediaQuery`, `useDeviceDetect`, `useClipboard`, `useLocalStorage`, `useDebouncedValue`, `useInterval`, `useEventListener`, `useOnClickOutside`, `useWindowSize` | runed | ✅ |
 | Forms | ProForm / Formily / react-hook-form / Formik | `AutoForm`, `JsonSchemaForm`, `StepForm`, `ModalForm`, `DrawerForm`, field components | sveltekit-superforms | ✅ |
@@ -40,7 +40,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | Context menu | react-contexify | `context-menu` primitive | bits-ui | ✅ |
 | Emoji | emoji-picker-react, emoji-mart | — | emoji-mart (framework-agnostic) | ➖ |
 | Split panes | react-split-pane, react-resizable-panels | `SplitPaneLayout`, `WorkspaceSplitPane` | paneforge | ✅ |
-| Image cropping | antd-img-crop, react-image-crop | `ImageCropper`, `MediaLibraryModal` | — | ✅ |
+| Image cropping | image crop utilities | `ImageCropper`, `MediaLibraryModal` | — | ✅ |
 | Keyword highlight | react-highlight-words | `HighlightText` | — | ✅ |
 | Text carousel | react-text-loop, react-fast-marquee | `Marquee` | — | ✅ |
 | Animation | motion, Ant Motion, react-spring | Svelte transitions + `tweened` / `spring` | Svelte runtime, motion-svelte | 🔶 framework-provided |
@@ -49,8 +49,8 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | Device detection | react-device-detect | `useDeviceDetect` | — | ✅ |
 | App framework | umi, remix, refine | svadmin itself, `@svadmin/refine-adapter` | SvelteKit | ✅ |
 | Phone input | react-phone-number-input | `PhoneField` (display), `PhoneInput` (input) | svelte-tel-input | ✅ |
-| AI chat | Ant Design X | `@svadmin/ai-elements` | — | ✅ |
-| CLI | Ant Design CLI | `create-svadmin`, `agmesh` | — | ✅ |
+| AI chat | external AI workspace patterns | `@svadmin/ai-elements` | — | ✅ |
+| CLI | admin CLIs | `create-svadmin`, `agmesh` | — | ✅ |
 | PDF | react-pdf, @react-pdf/renderer | `PdfDocumentViewer` | pdfjs-dist, svelte-pdf | ✅ |
 | Gestures | use-gesture | `useSwipe` (pointer-based) | svelte-gestures | ✅ simple swipes; complex gestures via svelte-gestures |
 

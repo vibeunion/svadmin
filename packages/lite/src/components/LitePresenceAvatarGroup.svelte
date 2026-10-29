@@ -24,7 +24,7 @@
     </span>
   {/each}
   {#if users.length === 0}
-    <span style="color: #94a3b8; font-size: 11px;">No active viewers</span>
+    <span style="color: #86909C; font-size: 11px;">No active viewers</span>
   {/if}
 </div>
 
@@ -36,15 +36,15 @@
     margin-bottom: 8px;
   }
   .lite-presence-label {
-    color: #64748b;
+    color: #4E5969;
     margin-right: 6px;
     font-weight: 500;
   }
   .lite-presence-badge {
     display: inline-block;
     padding: 2px 6px;
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
+    background: #F2F3F5;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
     margin-right: 4px;
     font-size: 11px;

@@ -65,7 +65,7 @@
                 {#if prefix[col.key]}{prefix[col.key]}{/if}{calculate(col.key, aggType)}{#if suffix[col.key]}{suffix[col.key]}{/if}
               </span>
             {:else}
-              <span style="color: #94a3b8;">—</span>
+              <span style="color: #86909C;">—</span>
             {/if}
           </td>
         {/each}
@@ -78,8 +78,8 @@
   .lite-table-summary-container {
     width: 100%;
     overflow-x: auto;
-    background: #f8fafc;
-    border-top: 2px solid #cbd5e1;
+    background: #F7F8FA;
+    border-top: 2px solid #E5E6EB;
   }
   .lite-summary-table {
     width: 100%;
@@ -88,6 +88,6 @@
   .lite-summary-table td {
     padding: 8px 12px;
     font-size: 12px;
-    color: #1e293b;
+    color: #1D2129;
   }
 </style>

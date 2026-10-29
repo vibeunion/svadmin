@@ -6,7 +6,7 @@ import { definedOptions } from './defined-options';
 //   - 'dark-first': adds 'light' class for light mode (dark-first)
 
 export type ThemeMode='light'|'dark'|'system';
-export type ColorTheme='blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
+export type ColorTheme='arco'|'blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
 
 /** Controls how the theme class is applied to <html> */
 export type ThemeStrategy='standard'|'dark-first';
@@ -190,6 +190,29 @@ export const builtinPresets: Record<string,ColorPreset>=$state({
       '--chart-1': 'oklch(0.65 0.25 293)',
     },
   },
+  arco: {
+    name: 'arco',
+    label: 'Default',
+    color: '#165DFF',
+    light: {
+      '--primary': '#165DFF',
+      '--primary-foreground': '#FFFFFF',
+      '--ring': '#165DFF',
+      '--sidebar-primary': '#165DFF',
+      '--sidebar-primary-foreground': '#FFFFFF',
+      '--sidebar-ring': '#165DFF',
+      '--chart-1': '#165DFF',
+    },
+    dark: {
+      '--primary': '#3C7EFF',
+      '--primary-foreground': '#FFFFFF',
+      '--ring': '#3C7EFF',
+      '--sidebar-primary': '#3C7EFF',
+      '--sidebar-primary-foreground': '#FFFFFF',
+      '--sidebar-ring': '#3C7EFF',
+      '--chart-1': '#3C7EFF',
+    },
+  },
   stripe: {
     name: 'stripe',
     label: 'Stripe',
@@ -325,8 +348,8 @@ function readStoredTheme(): ThemeMode|undefined {
 
 function readStoredColorTheme(): ColorTheme {
   const stored=getStorage()?.getItem(COLOR_STORAGE_KEY);
-  // Stripe is the product default; an existing persisted preset remains authoritative.
-  return stored&&builtinPresets[stored]? stored as ColorTheme:'stripe';
+  // The built-in preset is the product default; an existing persisted preset remains authoritative.
+  return stored&&builtinPresets[stored]? stored as ColorTheme:'arco';
 }
 
 function persistSelection(key: string,value: string): void {

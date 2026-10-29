@@ -1,7 +1,7 @@
 /**
- * Ant Design X-inspired interaction capabilities for the SVAdmin AI workspace.
+ * Interaction capabilities for the SVAdmin AI workspace.
  *
- * This is a product-boundary contract, not a claim of React API compatibility.
+ * This is a product-boundary contract, not a claim of another runtime.
  */
 export type AIWorkspaceCapabilityStage = 'stable' | 'experimental' | 'planned';
 

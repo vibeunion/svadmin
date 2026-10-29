@@ -88,7 +88,7 @@
   }
 </script>
 
-<div role="region" aria-label={ariaLabel ?? i18n.t('gantt.title')} aria-busy={loading} class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
+<div role="region" aria-label={ariaLabel ?? i18n.t('gantt.title')} aria-busy={loading} class={cn('svadmin-gantt svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
   <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
     <div class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
       {i18n.t('gantt.title')} <span class="svadmin-u-bfa603190748 svadmin-u-8ecebc9f80e6">({i18n.t('gantt.summary', { tasks: tasks.length, days: totalDays })})</span>
@@ -108,7 +108,7 @@
   <div class="svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff" style="overflow-x: auto;">
     <div class="svadmin-u-c05fcc7c4caa">
       <!-- Timeline Header -->
-      <div class="svadmin-u-60fbb7713999 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
+      <div class="svadmin-gantt__head svadmin-u-60fbb7713999 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
         <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-2eba0d65d059 svadmin-u-012fbd121f37">{i18n.t('gantt.task')}</div>
         <div class="svadmin-u-36e579c0b41c svadmin-u-60fbb7713999">
           {#each days as day (day)}
@@ -143,7 +143,7 @@
             <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-012fbd121f37">
               <div class="svadmin-u-f283ea9bea0e svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{task.title}</div>
               {#if task.status}
-                <Badge variant="outline" class={cn('svadmin-u-e09880869d1f svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6 uppercase', getStatusBadgeVariant(task.status))}>
+                <Badge variant="outline" class={cn('svadmin-u-e09880869d1f svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6', getStatusBadgeVariant(task.status))}>
                   {i18n.t(`gantt.${task.status}`)}
                 </Badge>
               {/if}
@@ -166,7 +166,7 @@
               {:else}
               <div
                 class={cn(
-                  'svadmin-u-d89972fe17d6 svadmin-u-f6fe902450dc svadmin-u-421ac2be5045 svadmin-u-cef5b893cf23 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d5eab218aa34 svadmin-u-1dc571a3609f svadmin-u-2689f3958069 svadmin-u-2cd02d11d1af svadmin-u-0fe7d7d814d0 group svadmin-u-7703298183eb',
+                  'svadmin-gantt__bar svadmin-u-d89972fe17d6 svadmin-u-f6fe902450dc svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d5eab218aa34 svadmin-u-1dc571a3609f svadmin-u-2689f3958069 svadmin-u-2cd02d11d1af svadmin-u-0fe7d7d814d0 group svadmin-u-7703298183eb',
                   getBarColor(task.status)
                 )}
                 style={`margin-left: ${leftPct}%; width: ${widthPct}%; flex-shrink: 0;`}

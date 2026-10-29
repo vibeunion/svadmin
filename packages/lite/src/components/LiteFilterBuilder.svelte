@@ -204,15 +204,15 @@
 </div>
 
 <style>
-  .lite-filter-builder { border: 1px solid #cbd5e1; border-radius: 6px; padding: 14px; background: #f8fafc; margin-bottom: 16px; }
+  .lite-filter-builder { border: 1px solid #E5E6EB; border-radius: 6px; padding: 14px; background: #F7F8FA; margin-bottom: 16px; }
   .lite-filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .lite-filter-group { border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px; margin-bottom: 8px; background: #fff; }
-  .lite-filter-row { display: flex; align-items: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 8px; background: #fff; }
+  .lite-filter-group { border: 1px solid #E5E6EB; border-radius: 4px; padding: 10px; margin-bottom: 8px; background: #fff; }
+  .lite-filter-row { display: flex; align-items: center; padding: 8px; border: 1px solid #E5E6EB; border-radius: 4px; margin-bottom: 8px; background: #fff; }
   .lite-filter-row > * { min-width: 120px; flex: 1; }
   .lite-filter-row > * + * { margin-left: 8px; }
   .lite-filter-row .lite-btn { flex: 0 0 auto; }
   .lite-filter-values { display: flex; flex-wrap: wrap; min-width: 0; }
   .lite-filter-values > * { width: 160px; max-width: 100%; box-sizing: border-box; margin: 0 8px 8px 0; }
-  .lite-hint { color: #64748b; font-size: 12px; }
+  .lite-hint { color: #4E5969; font-size: 12px; }
   .lite-btn { margin-right: 6px; }
 </style>

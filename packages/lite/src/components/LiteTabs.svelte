@@ -30,7 +30,7 @@
   .lite-tabs {
     display: flex;
     flex-wrap: wrap;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #E5E6EB;
     margin-bottom: 24px;
     padding-bottom: 0;
   }
@@ -39,19 +39,19 @@
     margin-right: 4px;
     font-size: 14px;
     font-weight: 500;
-    color: #64748b;
+    color: #4E5969;
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
     text-decoration: none;
     transition: color 0.15s ease, border-color 0.15s ease;
   }
   .lite-tab:hover {
-    color: #0f172a;
+    color: #1D2129;
     text-decoration: none;
   }
   .lite-tab.active {
-    color: #4f46e5;
-    border-bottom-color: #4f46e5;
+    color: #165DFF;
+    border-bottom-color: #165DFF;
     font-weight: 600;
   }
 </style>

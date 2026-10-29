@@ -59,10 +59,10 @@
     <div class="lite-stack-lg">
       {#each showFields as field, _i (_i)}
         <div>
-          <div style="display: block; font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 8px;">
+          <div style="display: block; font-size: 13px; font-weight: 500; color: #4E5969; margin-bottom: 8px;">
             {field.label}
           </div>
-          <div style="color: #0f172a; font-size: 14px;">
+          <div style="color: #1D2129; font-size: 14px;">
             <LiteShowField {field} value={record[field.key]} {basePath} />
           </div>
         </div>

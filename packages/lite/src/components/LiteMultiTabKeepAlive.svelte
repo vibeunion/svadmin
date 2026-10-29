@@ -40,8 +40,8 @@
 <style>
   .sv-lite-tab-bar {
     display: block;
-    background-color: #f1f5f9;
-    border-bottom: 1px solid #cbd5e1;
+    background-color: #F2F3F5;
+    border-bottom: 1px solid #E5E6EB;
     padding: 4px 8px 0 8px;
     font-size: 12px;
   }
@@ -53,18 +53,18 @@
     display: inline-block;
     padding: 6px 12px;
     margin-right: 4px;
-    background-color: #e2e8f0;
-    color: #475569;
+    background-color: #E5E6EB;
+    color: #4E5969;
     text-decoration: none;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-bottom: none;
     font-weight: 500;
   }
   .sv-lite-tab-active {
     background-color: #ffffff;
-    color: #0f172a;
+    color: #1D2129;
     font-weight: 600;
     border-bottom: 1px solid #ffffff;
     margin-bottom: -1px;

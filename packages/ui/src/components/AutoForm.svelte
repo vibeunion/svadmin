@@ -639,7 +639,7 @@
                       />
                     {/if}
                     {#if form.errors[field.key]}
-                      <p id={fieldErrorId(field.key)} class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6" role="alert" aria-live="polite">{form.errors[field.key]}</p>
+                      <p id={fieldErrorId(field.key)} data-svadmin-field-error class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6" role="alert" aria-live="polite">{form.errors[field.key]}</p>
                     {/if}
                   </div>
                 {/each}
@@ -670,7 +670,7 @@
                     />
                   {/if}
                   {#if form.errors[field.key]}
-                    <p id={fieldErrorId(field.key)} class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6" role="alert" aria-live="polite">{form.errors[field.key]}</p>
+                    <p id={fieldErrorId(field.key)} data-svadmin-field-error class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6" role="alert" aria-live="polite">{form.errors[field.key]}</p>
                   {/if}
                 </div>
               {/each}

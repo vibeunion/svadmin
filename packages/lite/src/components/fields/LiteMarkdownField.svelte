@@ -13,7 +13,7 @@
 </script>
 
 {#if mode === 'show'}
-  <pre style="white-space: pre-wrap; padding: 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px;">{String(value ?? '—')}</pre>
+  <pre style="white-space: pre-wrap; padding: 12px; background: #F7F8FA; border: 1px solid #e5e7eb; border-radius: 4px;">{String(value ?? '—')}</pre>
 {:else}
   <div>
     <textarea

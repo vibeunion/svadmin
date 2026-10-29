@@ -25,11 +25,11 @@
 
 <div class="lite-empty-state lite-card" style="text-align:center;padding:48px 24px;">
   {#if icon}
-    <div style="font-size:32px;color:#94a3b8;margin-bottom:16px;">{icon}</div>
+    <div style="font-size:32px;color:#86909C;margin-bottom:16px;">{icon}</div>
   {/if}
-  <h3 style="font-size:16px;font-weight:600;color:#0f172a;margin:0 0 8px 0;">{title}</h3>
+  <h3 style="font-size:16px;font-weight:600;color:#1D2129;margin:0 0 8px 0;">{title}</h3>
   {#if description}
-    <p style="font-size:14px;color:#64748b;margin:0 0 24px 0;">{description}</p>
+    <p style="font-size:14px;color:#4E5969;margin:0 0 24px 0;">{description}</p>
   {/if}
   {#if actionLabel && actionUrl}
     <a href={actionUrl} class="lite-btn lite-btn-primary">

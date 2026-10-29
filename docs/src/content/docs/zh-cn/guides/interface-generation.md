@@ -3,9 +3,9 @@ title: 界面生成规范
 description: 信息预算、反馈归属、页面状态与 AI 验收规则
 ---
 
-svadmin 遵循**自身的 Admin UI 设计原则**。外部设计系统只补齐特定行为与场景，
-不能混合成一套新的视觉主题。运行时视觉采用 Stripe 风格与企业简洁风；完整的
-优先级矩阵见仓库的 `DESIGN.md`。
+svadmin 遵循**自身的 Admin UI 设计原则**。运行时视觉以 svadmin 自己的规范为准，
+由 shadcn-svelte 实现。外部系统不再叠加第二套色板。完整优先级矩阵见仓库的
+`DESIGN.md`。
 
 先阅读七条[设计原则](/zh-cn/guides/design-principles/)，再使用本文确定状态归属
 和 AI 验收细节。
@@ -14,18 +14,19 @@ svadmin 遵循**自身的 Admin UI 设计原则**。外部设计系统只补齐�
 
 | 参考对象 | 参考内容 | 不复制的内容 |
 | --- | --- | --- |
-| svadmin 设计原则 | 层级、克制、中性表面、精确的产品语气 | 外部品牌视觉身份 |
-| Stripe 风格提示词 | 受控紫色主色、技术网格、分层阴影、上浮/按压反馈 | Stripe 品牌素材与营销渐变 |
-| 企业简洁风提示词 | 中性企业表面、间距、焦点偏移、不超过 200ms 的动效 | 纯蓝配色或复制 utility 规则 |
+| svadmin 设计原则 | 层级、克制、状态归属、可访问性 | 第二套色板 |
+| svadmin | 默认色板、字号、圆角和组件行为 | 另一套组件运行时或插画 |
+| 页面分区 | 列表、分组表单、详情和结果页结构 | 另一套外壳、卡片墙或路由权限 |
+| Stripe 风格提示词 | 仅可选强调色预设 | 默认画布或默认主色 |
 | Fuse / Midone / Skote | 导航解剖、页面家族、工具栏/表格/表单组合 | 供应商 CSS、字体、Logo、配色和标记 |
 | [Refine](https://refine.dev/docs/) | Resource、CRUD 流程、Provider 状态、变更归属 | React 实现与 UI 主题 |
-| [Ant Design](https://ant.design/components/overview/) | 反馈选择、表单、结果页、空/加载状态、数据密度 | 蓝色主题、圆角、阴影、组件外观 |
+| [external UI kits](https://ant.design) | 反馈选择、表单、结果页、空/加载状态、数据密度 | 蓝色主题、圆角、阴影、组件外观 |
 | [shadcn/ui](https://ui.shadcn.com/docs) | 可访问组合、语义变体、源码归属组件 | React API 与默认样式 |
 | [Carbon](https://carbondesignsystem.com/) / [PatternFly](https://www.patternfly.org/components/) | 企业通知生命周期、错误/空状态、运营页面布局 | 品牌 token 与视觉身份 |
 | [Metronic](https://keenthemes.com/metronic/tailwind/demo1/) | 页面家族覆盖与缺失场景 | 视觉风格、装饰、排版 |
 
-Refine + Ant Design 适合作为**行为参考实现**：Refine 管理资源与变更状态，
-Ant Design 提供成熟的反馈和数据模式。svadmin 应在 Svelte 中复现契约，
+Refine + external UI kits 适合作为**行为参考实现**：Refine 管理资源与变更状态，
+external UI kits 提供成熟的反馈和数据模式。svadmin 应在 Svelte 中复现契约，
 而不是复刻界面。
 
 ## 页面信息预算

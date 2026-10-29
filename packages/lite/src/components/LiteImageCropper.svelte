@@ -48,7 +48,7 @@
 <style>
   .lite-cropper-card {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 16px;
     margin-bottom: 16px;
@@ -56,13 +56,13 @@
   }
   .lite-cropper-header {
     padding-bottom: 8px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #E5E6EB;
     margin-bottom: 12px;
     font-size: 13px;
   }
   .lite-cropper-preview {
     text-align: center;
-    background: #f1f5f9;
+    background: #F2F3F5;
     padding: 12px;
     border-radius: 4px;
     margin-bottom: 12px;
