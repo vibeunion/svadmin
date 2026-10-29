@@ -196,7 +196,7 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",
+    "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/stamp-build-version.mjs && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",
     "shadcn": "shadcn-svelte --help",
     "shadcn:add": "shadcn-svelte add --cwd shadcn --no-deps-install",
     "test": "vitest run --config ./vitest.config.ts",

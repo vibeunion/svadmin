@@ -127,10 +127,16 @@ const expectations: PackageExpectation[] = [
       'dist/components/AdminApp.svelte.d.ts',
       'dist/components/LazyPage.svelte',
       'dist/components/LazyPage.svelte.d.ts',
+      'dist/components/AboutSettings.svelte',
       'dist/app.css',
       'dist/app.theme.css',
     ],
     contentAssertions: [
+      {
+        path: 'dist/components/AboutSettings.svelte',
+        includes: ['const buildVersion = ', 'const version = $derived(suppliedVersion ?? ('],
+        excludes: ['__SVADMIN_VERSION__'],
+      },
       {
         path: 'dist/app.theme.css',
         includes: ['.svadmin-button', '--color-primary'],
