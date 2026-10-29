@@ -50,11 +50,11 @@
     synchronizing = false;
   }
 
-  function syncViewport(event: Event): void {
+  function syncViewport(): void {
     const horizontalViewport = resolveHorizontalViewport();
-    if (synchronizing || !horizontalViewport) return;
+    if (synchronizing || !horizontalViewport || !mirror) return;
     synchronizing = true;
-    horizontalViewport.scrollLeft = (event.currentTarget as HTMLDivElement).scrollLeft;
+    horizontalViewport.scrollLeft = mirror.scrollLeft;
     mirrorScrollLeft = horizontalViewport.scrollLeft;
     synchronizing = false;
   }
@@ -72,27 +72,52 @@
     else return;
     event.preventDefault();
     mirror.scrollLeft = Math.max(0, Math.min(nextScrollLeft, maxScrollLeft));
-    syncViewport({ currentTarget: mirror } as unknown as Event);
+    syncViewport();
   }
 
   function resolveHorizontalViewport(): HTMLElement | null {
     if (!viewport) return null;
-    return viewport.querySelector<HTMLElement>(':scope > [data-slot="table-container"]') || viewport;
+    return viewport;
   }
+
+  // 滚动条重新挂载或尺寸改变后，保持其位置与真实视口一致。
+  $effect(() => {
+    if (mirror) mirror.scrollLeft = mirrorScrollLeft;
+  });
 
   onMount(() => {
     if (!viewport) return;
     const horizontalViewport = resolveHorizontalViewport();
     if (!horizontalViewport) return;
     const resizeObserver = new ResizeObserver(refreshOverflow);
-    const mutationObserver = new MutationObserver(refreshOverflow);
+    let observedTable: HTMLElement | null = null;
+    const observeTable = (): void => {
+      const table = viewport?.querySelector<HTMLElement>(
+        ':scope > table, :scope > [data-slot="table-container"] > table',
+      ) ?? null;
+      if (table === observedTable) {
+        refreshOverflow();
+        return;
+      }
+      if (observedTable) resizeObserver.unobserve(observedTable);
+      observedTable = table;
+      if (observedTable) resizeObserver.observe(observedTable);
+      refreshOverflow();
+    };
+    const mutationObserver = new MutationObserver(observeTable);
     viewport.addEventListener('scroll', syncMirror, true);
     resizeObserver.observe(horizontalViewport);
-    if (horizontalViewport.firstElementChild) resizeObserver.observe(horizontalViewport.firstElementChild);
-    mutationObserver.observe(viewport, { childList: true, subtree: true, characterData: true });
-    refreshOverflow();
+    mutationObserver.observe(viewport, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'style'],
+    });
+    observeTable();
     return () => {
       viewport?.removeEventListener('scroll', syncMirror, true);
+      if (observedTable) resizeObserver.unobserve(observedTable);
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
@@ -134,14 +159,17 @@
 {/if}
 
 <style>
-  .svadmin-scrollable-table,
-  .svadmin-scrollable-table :global([data-slot='table-container']) {
+  .svadmin-scrollable-table {
     width: 100%;
     min-width: 0;
+    overflow-x: auto;
     scrollbar-width: none;
   }
-  .svadmin-scrollable-table::-webkit-scrollbar,
-  .svadmin-scrollable-table :global([data-slot='table-container'])::-webkit-scrollbar {
+  /* 外层统一负责两轴滚动，避免内层滚动容器阻断表头吸顶。 */
+  .svadmin-scrollable-table > :global([data-slot='table-container']) {
+    overflow: visible;
+  }
+  .svadmin-scrollable-table::-webkit-scrollbar {
     display: none;
   }
   .svadmin-scrollable-table--contained {
@@ -170,7 +198,7 @@
     overflow-y: hidden;
     border-block: 1px solid var(--border);
     background: var(--card, var(--background));
-    box-shadow: 0 0.45rem 0.7rem -0.7rem rgb(15 23 42 / 0.45);
+    box-shadow: 0 0.45rem 0.7rem -0.7rem color-mix(in srgb, var(--foreground) 45%, transparent);
   }
   .svadmin-scrollable-table__scrollbar--top {
     top: 0.5rem;
