@@ -27,7 +27,7 @@ Complete reference for all `@svadmin/ui` components.
 | [FieldRenderer](./field-renderer.md) | Field value renderer / 字段值渲染器 | ✅ |
 | [Theming](./theming.md) | Dark mode + color themes / 暗色模式 + 多色主题 | ✅ |
 | [Page templates](./templates.md) | Workplace, monitor, analysis, list, form, detail, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
-| NotificationCenter | Header notification menu with unread state / 顶栏通知中心 | ✅ |
+| NotificationCenter | Header notification menu with unread state and category filters / 顶栏通知中心（含分类筛选） | ✅ |
 | NotificationHost | Imperative notification stack / 命令式通知栈 | ✅ |
 | ThemeSettingsDrawer | Live shell and appearance preferences / 实时外观与外壳设置抽屉 | ✅ |
 
@@ -48,7 +48,9 @@ Complete reference for all `@svadmin/ui` components.
 | Card | Content card / 卡片 |
 | Dialog | Modal dialog / 对话框 |
 | Table | Data table / 数据表格 |
-| Tabs | Tab navigation / 标签页 |
+| GroupedTable | Multi-level table headers / 多级表头数据表格 |
+| Tabs | Tab navigation with variants, orientation and scroll / 标签页（风格、方向与滚动） |
+| EditableTabs | Tabs with add and close actions / 可增删标签页 |
 | Tooltip | Hover tooltip / 悬浮提示 |
 | DropdownMenu | Dropdown menu / 下拉菜单 |
 | Sheet | Side panel / 侧边面板 |
@@ -60,6 +62,7 @@ Complete reference for all `@svadmin/ui` components.
 | Affix | Sticky container / 固钉容器 |
 | Collapse | Controlled disclosure panels / 受控折叠面板 |
 | TypographyEllipsis | Multi-line clamp with expand / collapse / 多行截断与展开收起 |
+| TypographyText | Semantic text with copy and inline editing / 语义文本、复制与内联编辑 |
 | CommentThread | Threaded comments / 评论线程 |
 | Space | Flex spacing primitive / 弹性间距 |
 | Grid / GridCell | Responsive CSS grid / 响应式网格 |
@@ -73,3 +76,18 @@ Complete reference for all `@svadmin/ui` components.
 | ConfigProvider | Component size, density, direction and locale defaults / 组件尺寸、密度、方向与语言默认值 |
 | Progress | Determinate progress bar / 进度条 |
 | Popover | Anchored popover primitive / 浮层 |
+| Overflow | Visible slice with dropdown remainder / 自适应溢出列表 |
+
+## Data Visualization / 数据可视化
+
+| Component | Description / 描述 |
+|-----------|-------------------|
+| BarChart / LineChart / AreaChart | Cartesian series with axes / 坐标轴序列图 |
+| PieChart | Pie and donut charts / 饼图与环形图 |
+| ScatterChart | Point distribution / 散点图 |
+| RadarChart | Multi-indicator series / 多指标雷达图 |
+| GaugeChart | Range and progress gauge / 仪表盘 |
+| FunnelChart | Stage conversion / 漏斗图 |
+| HeatmapChart | Matrix intensity / 热力图 |
+| WaterfallChart | Increase, decrease and total steps / 瀑布图 |
+| RoseChart | Radial value encoding / 玫瑰图 |

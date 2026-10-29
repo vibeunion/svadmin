@@ -1,5 +1,4 @@
 <script lang="ts" generics="T">
-  import type { Snippet } from 'svelte';
   import * as Table from './ui/table/index.js';
   import type { TableColumn } from './grouped-table.js';
   import { cn } from '../utils.js';

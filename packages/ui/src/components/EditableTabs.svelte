@@ -22,7 +22,7 @@
     panel?: Snippet<[string]>;
     extra?: Snippet;
     class?: string;
-    onadd?: () => EditableTabItem | void;
+    onadd?: () => EditableTabItem | undefined;
     onremove?: (value: string) => void;
     onitemschange?: (items: EditableTabItem[]) => void;
   }
