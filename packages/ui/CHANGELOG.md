@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.100.0](https://github.com/vibeunion/svadmin/compare/ui-v0.99.0...ui-v0.100.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** add generic list pagination and footer ([#584](https://github.com/vibeunion/svadmin/issues/584)) ([8a05617](https://github.com/vibeunion/svadmin/commit/8a0561797187378ced6dba58cc18874a94b08aa5))
+* **ui:** add status badge support to detail drawer ([#585](https://github.com/vibeunion/svadmin/issues/585)) ([1a24da6](https://github.com/vibeunion/svadmin/commit/1a24da69a2e558dd514b913559543fbdb2928666))
+
 ## [0.99.0](https://github.com/vibeunion/svadmin/compare/ui-v0.98.0...ui-v0.99.0) (2026-10-29)
 
 
