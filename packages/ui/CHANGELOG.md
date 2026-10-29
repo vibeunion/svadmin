@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.104.0](https://github.com/vibeunion/svadmin/compare/ui-v0.103.0...ui-v0.104.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **core:** close Refine parity gaps ([968ea7b](https://github.com/vibeunion/svadmin/commit/968ea7b67903ce0427dd6bdfc6a1a2e70b9f5b13))
+* **ui:** close parity gaps in interactions, templates and feedback ([5af82ac](https://github.com/vibeunion/svadmin/commit/5af82ac620fde76fcaaacc9d9a2a657cb54c3da4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.4.0
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.0
+
 ## [0.103.0](https://github.com/vibeunion/svadmin/compare/ui-v0.102.0...ui-v0.103.0) (2026-10-29)
 
 
