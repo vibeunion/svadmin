@@ -4,11 +4,12 @@ import { join } from 'node:path';
 import { stableScreenshot } from '../scripts/stable-screenshot.mjs';
 
 async function openOffice(page: Page, query = '') {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/login');
   await page.locator('#login-identifier').fill('admin@example.com');
   await page.locator('#login-password').fill('demo');
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/#\/$/);
+  await expect(page).toHaveURL(/#\/(?:\?.*)?$/);
   await page.goto(`/${query}#/health_office`);
   const office = page.locator('[data-office-workspace]');
   // Vite 首次转换懒加载工作区可能超过默认 5 秒；只扩大首次加载等待，
