@@ -10,7 +10,7 @@
   const rangeEnd = Math.min(page * pageSize, total);
 </script>
 
-<main class="evidence-shell">
+<main class="evidence-shell" class:evidence-shell--narrow={new URLSearchParams(window.location.search).has('narrow')}>
   <h1>List footer and pagination</h1>
   <p class="evidence-copy">A generic desktop list footer with loaded-count guidance and controlled page navigation.</p>
   <section class="evidence-panel">
@@ -52,4 +52,5 @@
   .evidence-copy { margin: 0; color: #475569; }
   .evidence-panel { display: grid; gap: 20px; padding: 24px; border: 1px solid #cbd5e1; border-radius: 12px; background: white; }
   .evidence-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .evidence-shell--narrow :global(.svadmin-list-footer) { width: 240px; max-width: 100%; }
 </style>

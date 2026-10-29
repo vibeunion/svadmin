@@ -22,6 +22,7 @@ describe('ListPagination', () => {
     const source = readFileSync(resolve(directory, 'ListPagination.svelte'), 'utf8');
     expect(source).toContain('gap: var(--svadmin-list-pagination-gap, .5rem)');
     expect(source).toContain('flex-wrap: var(--svadmin-list-pagination-wrap, wrap)');
+    expect(source).toContain('min-width: 0; gap: var(--svadmin-list-pagination-gap, .5rem)');
   });
 
   it('keeps the current page disabled and emits page changes', async () => {
