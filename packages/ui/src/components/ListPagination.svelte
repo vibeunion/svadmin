@@ -81,7 +81,7 @@
     </div>
   </div>
 {:else if showSummary}
-  <p class={`svadmin-list-pagination__summary ${className}`.trim()}>共 {total} 条</p>
+  <p {...restProps} class={`svadmin-list-pagination__summary ${className}`.trim()}>共 {total} 条</p>
 {/if}
 
 <style>

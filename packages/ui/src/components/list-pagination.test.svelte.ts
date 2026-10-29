@@ -49,6 +49,19 @@ describe('ListPagination', () => {
     expect(navigation.id).toBe('order-progress-pagination');
   });
 
+  it('forwards root attributes to the single-page summary too', () => {
+    const onPageChange = vi.fn();
+    render(ListPagination, {
+      props: {
+        page: 1, totalPages: 1, total: 8, label: '记录', onPageChange,
+        'data-section': 'records-summary', id: 'records-summary-pagination',
+      },
+    });
+    const summary = screen.getByText('共 8 条');
+    expect(summary.getAttribute('data-section')).toBe('records-summary');
+    expect(summary.id).toBe('records-summary-pagination');
+  });
+
   it('offers page-size changes when a handler is supplied', async () => {
     const onPageChange = vi.fn();
     const onPageSizeChange = vi.fn();
