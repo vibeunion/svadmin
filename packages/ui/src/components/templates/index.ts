@@ -1,0 +1,16 @@
+export { default as TemplatePageShell } from './TemplatePageShell.svelte';
+export { default as WorkplaceTemplate } from './WorkplaceTemplate.svelte';
+export { default as MonitorTemplate } from './MonitorTemplate.svelte';
+export { default as AnalysisTemplate } from './AnalysisTemplate.svelte';
+export { default as SearchTableTemplate } from './SearchTableTemplate.svelte';
+export { default as CardListTemplate } from './CardListTemplate.svelte';
+export { default as GroupFormTemplate } from './GroupFormTemplate.svelte';
+export { default as AdvancedFormTemplate } from './AdvancedFormTemplate.svelte';
+export { default as StepFormTemplate } from './StepFormTemplate.svelte';
+export { default as BasicDetailTemplate } from './BasicDetailTemplate.svelte';
+export { default as AdvancedDetailTemplate } from './AdvancedDetailTemplate.svelte';
+export { default as ResultTemplate } from './ResultTemplate.svelte';
+export { default as ExceptionTemplate } from './ExceptionTemplate.svelte';
+export { default as ProfileTemplate } from './ProfileTemplate.svelte';
+export { default as BasicProfileTemplate } from './ProfileTemplate.svelte';
+export { default as AdvancedProfileTemplate } from './ProfileTemplate.svelte';

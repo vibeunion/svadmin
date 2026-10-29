@@ -19,6 +19,7 @@ export { default as AutoTable } from './components/AutoTable.svelte';
 export { default as SavedViewsMenu } from './components/SavedViewsMenu.svelte';
 export { default as ListPagination } from './components/ListPagination.svelte';
 export { default as ListFooter } from './components/ListFooter.svelte';
+export { default as ScrollableTable } from './components/ScrollableTable.svelte';
 export { default as CopyButton } from './components/CopyButton.svelte';
 export { listPaginationItems } from './components/list-pagination.js';
 export type { ListPaginationItem } from './components/list-pagination.js';
@@ -541,3 +542,30 @@ export { default as AppFooter } from './components/AppFooter.svelte';
 export type { FooterLink, FooterColumn } from './components/AppFooter.svelte';
 export { default as ResizableGrid } from './components/ResizableGrid.svelte';
 export type { GridItem } from './components/ResizableGrid.svelte';
+
+// Shell preferences, navigation utilities and page templates
+export {
+  uiPreferences,
+  applyUiPreferences,
+  getUiPreferences,
+  resetUiPreferences,
+  updateUiPreferences,
+} from './ui-preferences.svelte.js';
+export type { NavigationMode, NavigationTheme, ContentWidth, MotionPreference, UiPreferences } from './ui-preferences.svelte.js';
+export { default as ViewModeToggle } from './components/ViewModeToggle.svelte';
+export { default as NotificationCenter } from './components/NotificationCenter.svelte';
+export type { NotificationItem } from './components/NotificationCenter.svelte';
+export { default as ThemeSettingsDrawer } from './components/ThemeSettingsDrawer.svelte';
+export { default as Calendar } from './components/Calendar.svelte';
+export type { CalendarEvent } from './components/Calendar.svelte';
+export { default as Carousel } from './components/Carousel.svelte';
+export { default as ImagePreview } from './components/ImagePreview.svelte';
+export type { PreviewImage } from './components/ImagePreview.svelte';
+export { default as Anchor } from './components/Anchor.svelte';
+export type { AnchorItem } from './components/Anchor.svelte';
+export { default as Affix } from './components/Affix.svelte';
+export { default as Collapse } from './components/Collapse.svelte';
+export type { CollapseItem } from './components/Collapse.svelte';
+export { default as CommentThread } from './components/CommentThread.svelte';
+export type { CommentItem } from './components/CommentThread.svelte';
+export * from './components/templates/index.js';

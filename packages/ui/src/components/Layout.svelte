@@ -28,6 +28,8 @@
   import { getComponentRegistry } from '../component-registry.svelte.js';
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
+  import { uiPreferences } from '../ui-preferences.svelte.js';
+  import type { NotificationItem } from './NotificationCenter.svelte';
 
   const i18n = useTranslation();
 
@@ -42,6 +44,11 @@
     siteUrl?: string;
     routeMode?: 'hash' | 'path' | 'auto';
     aiAssistant?: Snippet<[LayoutAIAssistantProps]>;
+    notifications?: NotificationItem[];
+    notificationUnreadCount?: number;
+    onnotificationread?: (item: NotificationItem) => void | Promise<void>;
+    onnotificationreadall?: () => void | Promise<void>;
+    onnotificationopen?: (item: NotificationItem) => void | Promise<void>;
     class?: string;
   }
 
@@ -52,6 +59,11 @@
     siteUrl,
     routeMode = 'auto',
     aiAssistant,
+    notifications,
+    notificationUnreadCount,
+    onnotificationread,
+    onnotificationreadall,
+    onnotificationopen,
     class: className = '',
   }: Props = $props();
   const layoutId = $props.id();
@@ -59,6 +71,10 @@
   const mainContentId = `${layoutScope}-main`;
   const chatScope = `${layoutScope}-chat`;
   const adminContext = captureAdminContext();
+  const navigation = $derived(uiPreferences.navigation);
+  const showSidebar = $derived(navigation !== 'top');
+  const showTopNavigation = $derived(navigation === 'top' || navigation === 'mix');
+  const topLevelMenu = $derived((menu ?? []).filter((item) => !item.meta?.hidden));
 
   const auth = $derived(adminContext.authProvider);
   let loading = $state(true);
@@ -202,6 +218,8 @@
     data-svadmin-layout-scope={layoutScope}
     data-svadmin-layout
     data-svadmin-layout-state="ready"
+    data-svadmin-navigation={navigation}
+    data-svadmin-content-width={uiPreferences.contentWidth}
     aria-busy="false"
     class={cn('svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1 svadmin-u-e6f9e383a762', className)}
     in:fade={{ duration: 200, delay: 50 }}
@@ -216,9 +234,11 @@
     </button>
 
     <!-- Desktop sidebar -->
-    <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
-      <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
-    </div>
+    {#if showSidebar}
+      <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
+        <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
+      </div>
+    {/if}
 
     <!-- Mobile sidebar via Sheet -->
     <Sheet.Root
@@ -247,6 +267,11 @@
         {...definedOptions({ "menu": menu })}
         showSearch={true}
         showThemeToggle={true}
+        notificationItems={notifications ?? []}
+        {...(notificationUnreadCount === undefined ? {} : { notificationUnreadCount })}
+        {...(onnotificationread ? { onnotificationread } : {})}
+        {...(onnotificationreadall ? { onnotificationreadall } : {})}
+        {...(onnotificationopen ? { onnotificationopen } : {})}
         onSearchClick={() => { commandOpen = true; }}
       >
         {#snippet children()}
@@ -272,15 +297,32 @@
         {/snippet}
       </Header>
 
+      {#if showTopNavigation}
+        <nav class="svadmin-top-navigation" aria-label={title}>
+          {#each topLevelMenu as item (item.name)}
+            {@const active = item.href ? getPath().startsWith(item.href) : false}
+            <a class="svadmin-top-navigation__item" class:is-active={active} href={item.href ?? '#'}>
+              {item.label ?? i18n.t(`menu.${item.name}`)}
+            </a>
+          {/each}
+        </nav>
+      {/if}
+
       <!-- Content area: responsive padding + centered max-width container
            so wide screens don't stretch content indefinitely (avoids sparse layouts) -->
       <main id={mainContentId} tabindex="-1" data-svadmin-main data-svadmin-layout-content class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-2859c861d7de svadmin-u-f0faeb26d656 svadmin-u-c9b99cd93450 svadmin-u-cc06a6575385 svadmin-u-daf5dc5fac2b svadmin-u-e86fadb84483">
         <div class="svadmin-u-0e12dc7de920 svadmin-u-6da6a3c3f741 svadmin-u-9e3dc30c26a3">
           {#key getPath()}
             <!-- 路由切换立即释放旧页面，避免退出期间继续读取已失效的路由派生状态。 -->
-            <div in:fly={{ x: 20, duration: 150 }}>
-              {@render children()}
-            </div>
+            {#if uiPreferences.pageTransition && uiPreferences.motion !== 'reduced'}
+              <div in:fly={{ x: 20, duration: 150 }}>
+                {@render children()}
+              </div>
+            {:else}
+              <div>
+                {@render children()}
+              </div>
+            {/if}
           {/key}
         </div>
       </main>
@@ -297,3 +339,41 @@
   />
   <KeyboardShortcuts bind:open={shortcutsOpen} />
 {/if}
+
+<style>
+  .svadmin-top-navigation {
+    display: flex;
+    align-items: center;
+    gap: var(--svadmin-space-1);
+    min-width: 0;
+    padding: var(--svadmin-space-2) var(--svadmin-space-5);
+    overflow-x: auto;
+    border-block-end: 1px solid var(--border);
+    background: var(--background);
+  }
+  .svadmin-top-navigation__item {
+    flex: 0 0 auto;
+    padding: var(--svadmin-space-2) var(--svadmin-space-3);
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-label);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .svadmin-top-navigation__item:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+  .svadmin-top-navigation__item.is-active {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font-weight: 600;
+  }
+  :global([data-svadmin-layout][data-svadmin-content-width='fluid']) :global([data-svadmin-main] > div) {
+    max-width: none;
+  }
+  :global([data-svadmin-layout][data-svadmin-content-width='wide']) :global([data-svadmin-main] > div) {
+    max-width: 92rem;
+  }
+</style>

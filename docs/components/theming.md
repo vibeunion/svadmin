@@ -241,3 +241,17 @@ second selector: two declarations create a competing density baseline, and
   --svadmin-section-gap: var(--svadmin-space-6);
 }
 ```
+
+
+### Runtime shell preferences
+
+`ThemeSettingsDrawer` and the exported `uiPreferences` store add runtime shell controls without a second theme system:
+
+- navigation mode: sidebar, top bar, mixed, split sidebar
+- navigation theme: light, dark, follow page theme
+- content width: fixed, fluid, wide
+- compact density and color-safe mode
+- page transitions and reduced motion
+- compact, default and rounded corner presets
+
+Preferences persist in `localStorage` under `svadmin-ui-preferences`; `resetUiPreferences()` restores the documented defaults. The settings are applied as data attributes and classes on the document root, so components keep using the same semantic tokens.

@@ -37,6 +37,7 @@
   import SavedViewsMenuEvidence from './SavedViewsMenuEvidence.svelte';
   import DetailDrawerStatusEvidence from './DetailDrawerStatusEvidence.svelte';
   import ListPaginationEvidence from './ListPaginationEvidence.svelte';
+  import ScrollableTableEvidence from './ScrollableTableEvidence.svelte';
   import CopyButtonEvidence from './CopyButtonEvidence.svelte';
   import ResourceWorkspaceFixture from './ResourceWorkspaceFixture.svelte';
   import ResourceWorkspaceEditRouteFixture from './ResourceWorkspaceEditRouteFixture.svelte';
@@ -219,6 +220,8 @@
     <DetailDrawerStatusEvidence />
   {:else if requestedView === 'list-pagination'}
     <ListPaginationEvidence />
+  {:else if requestedView === 'scrollable-table'}
+    <ScrollableTableEvidence />
   {:else if requestedView === 'copy-button'}
     <CopyButtonEvidence />
   {:else if requestedView === 'resource-workspace'}
