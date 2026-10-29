@@ -495,6 +495,21 @@
         "@svadmin/core",
       ],
     },
+    "packages/parse": {
+      "name": "@svadmin/parse",
+      "version": "0.1.0",
+      "dependencies": {
+        "@svadmin/refine-adapter": "workspace:*",
+      },
+      "peerDependencies": {
+        "@refinedev/parse": "^2.0.0",
+        "@svadmin/core": "workspace:*",
+      },
+      "optionalPeers": [
+        "@refinedev/parse",
+        "@svadmin/core",
+      ],
+    },
     "packages/pocketbase": {
       "name": "@svadmin/pocketbase",
       "version": "0.13.13",
@@ -597,6 +612,21 @@
       },
       "optionalPeers": [
         "@refinedev/strapi-v4",
+        "@svadmin/core",
+      ],
+    },
+    "packages/strapi-graphql": {
+      "name": "@svadmin/strapi-graphql",
+      "version": "0.1.0",
+      "dependencies": {
+        "@svadmin/refine-adapter": "workspace:*",
+      },
+      "peerDependencies": {
+        "@refinedev/strapi-graphql": "^7.0.0",
+        "@svadmin/core": "workspace:*",
+      },
+      "optionalPeers": [
+        "@refinedev/strapi-graphql",
         "@svadmin/core",
       ],
     },
@@ -766,7 +796,7 @@
     "brace-expansion": "5.0.12",
     "braces": "3.0.3",
     "browserslist": "4.28.7",
-    "decode-uri-component": "0.5.0",
+    "decode-uri-component": "0.5.1",
     "deepmerge": "4.3.1",
     "devalue": "5.9.4",
     "dompurify": "3.4.17",
@@ -1084,7 +1114,7 @@
 
     "@happy-dom/global-registrator": ["@happy-dom/global-registrator@20.11.12", "https://registry.npmmirror.com/@happy-dom/global-registrator/-/global-registrator-20.11.12.tgz", { "dependencies": { "@types/node": ">=20.0.0", "happy-dom": "^20.11.12" } }, "sha512-Oj9ubX+6/k8D+QSs+SKga0ECVAk8XB2dvbQ1pj54fQSC78EPjEoOQ3aMFFPaI5z4EcvwixVOMaaHf8rxcpAX4Q=="],
 
-    "@hono/node-server": ["@hono/node-server@2.1.3", "", { "peerDependencies": { "hono": "^4" } }, "sha512-TA//nWMqPhbfdfneACk6t5a9eqbS9lABEPyKn0/xZTah3H3U2XaVg85rJFl0/Fyit0I552YDHgXGVSf3GwqbUw=="],
+    "@hono/node-server": ["@hono/node-server@2.1.3", "https://registry.npmmirror.com/@hono/node-server/-/node-server-2.1.3.tgz", { "peerDependencies": { "hono": "^4" } }, "sha512-TA//nWMqPhbfdfneACk6t5a9eqbS9lABEPyKn0/xZTah3H3U2XaVg85rJFl0/Fyit0I552YDHgXGVSf3GwqbUw=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.2", "https://registry.npmmirror.com/@humanfs/core/-/core-0.19.2.tgz", { "dependencies": { "@humanfs/types": "^0.15.0" } }, "sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA=="],
 
@@ -1488,6 +1518,8 @@
 
     "@svadmin/nestjsx-crud": ["@svadmin/nestjsx-crud@workspace:packages/nestjsx-crud"],
 
+    "@svadmin/parse": ["@svadmin/parse@workspace:packages/parse"],
+
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
@@ -1501,6 +1533,8 @@
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 
     "@svadmin/strapi": ["@svadmin/strapi@workspace:packages/strapi"],
+
+    "@svadmin/strapi-graphql": ["@svadmin/strapi-graphql@workspace:packages/strapi-graphql"],
 
     "@svadmin/supabase": ["@svadmin/supabase@workspace:packages/supabase"],
 
@@ -2232,7 +2266,7 @@
 
     "decode-named-character-reference": ["decode-named-character-reference@1.3.0", "https://registry.npmmirror.com/decode-named-character-reference/-/decode-named-character-reference-1.3.0.tgz", { "dependencies": { "character-entities": "^2.0.0" } }, "sha512-GtpQYB283KrPp6nRw50q3U9/VfOutZOe103qlN7BPP6Ad27xYnOIWv4lPzo8HCAL+mMZofJ9KEy30fq6MfaK6Q=="],
 
-    "decode-uri-component": ["decode-uri-component@0.5.0", "https://registry.npmmirror.com/decode-uri-component/-/decode-uri-component-0.5.0.tgz", {}, "sha512-1BiQVoK8C9gUbQU6NzAtO/tkz2qOFpEObMWpcFvhx4fYnj4Oc5yzaJN/LD36ihkVUdXyh5ZekzX+yM+ty/SrPg=="],
+    "decode-uri-component": ["decode-uri-component@0.5.1", "https://registry.npmmirror.com/decode-uri-component/-/decode-uri-component-0.5.1.tgz", {}, "sha512-vWHQkXgg2cE3BB4rR0c+PYw9BCQzLoNIRMI7AunIkZst74tw/vpPp7VLoYtsR/cy1f55g3XDWUslfeCZjiZJyA=="],
 
     "dedent-js": ["dedent-js@1.0.1", "https://registry.npmmirror.com/dedent-js/-/dedent-js-1.0.1.tgz", {}, "sha512-OUepMozQULMLUmhxS95Vudo0jb0UchLimi3+pQ2plj61Fcy8axbP9hbiD4Sz6DPqn6XG3kfmziVfQ1rSys5AJQ=="],
 
