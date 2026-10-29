@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.0](https://github.com/vibeunion/svadmin/compare/core-v0.68.0...core-v0.69.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **core:** close Refine parity gaps ([968ea7b](https://github.com/vibeunion/svadmin/commit/968ea7b67903ce0427dd6bdfc6a1a2e70b9f5b13))
+
 ## [0.68.0](https://github.com/vibeunion/svadmin/compare/core-v0.67.0...core-v0.68.0) (2026-10-29)
 
 
