@@ -4,21 +4,21 @@
   interface Props {
     label: string;
     total: number;
-    loadedCount?: number;
+    loadedCount?: number | undefined;
     page: number;
     totalPages: number;
-    rangeStart?: number;
-    rangeEnd?: number;
-    pageSize?: number;
-    pageSizeOptions?: readonly number[];
-    pageSizeLabel?: string;
+    rangeStart?: number | undefined;
+    rangeEnd?: number | undefined;
+    pageSize?: number | undefined;
+    pageSizeOptions?: readonly number[] | undefined;
+    pageSizeLabel?: string | undefined;
     truncated?: boolean;
-    maxRecords?: number;
-    note?: string;
-    sectionId?: string;
+    maxRecords?: number | undefined;
+    note?: string | undefined;
+    sectionId?: string | undefined;
     onPageChange: (page: number) => void;
-    onPageSizeChange?: (pageSize: number) => void;
-    class?: string;
+    onPageSizeChange?: ((pageSize: number) => void) | undefined;
+    class?: string | undefined;
   }
 
   let {

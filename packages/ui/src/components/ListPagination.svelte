@@ -6,15 +6,15 @@
     totalPages: number;
     total: number;
     label: string;
-    rangeStart?: number;
-    rangeEnd?: number;
-    pageSize?: number;
-    pageSizeOptions?: readonly number[];
-    pageSizeLabel?: string;
+    rangeStart?: number | undefined;
+    rangeEnd?: number | undefined;
+    pageSize?: number | undefined;
+    pageSizeOptions?: readonly number[] | undefined;
+    pageSizeLabel?: string | undefined;
     showSummary?: boolean;
     onPageChange: (page: number) => void;
-    onPageSizeChange?: (pageSize: number) => void;
-    class?: string;
+    onPageSizeChange?: ((pageSize: number) => void) | undefined;
+    class?: string | undefined;
   }
 
   let {
