@@ -332,6 +332,7 @@ export { Separator, Separator as Divider } from './components/ui/separator/index
 export { default as Link } from './components/Link.svelte';
 export { default as Title } from './components/Typography.svelte';
 export { default as Text } from './components/Text.svelte';
+export { default as TypographyEllipsis } from './components/TypographyEllipsis.svelte';
 export { default as Spin } from './components/Spin.svelte';
 export { default as Result } from './components/Result.svelte';
 export { default as Popconfirm } from './components/Popconfirm.svelte';

@@ -181,6 +181,15 @@ export const designSystemComponents = [
 		sizes: ["default", "compact"],
 	},
 	{
+		id: "ui.typography-ellipsis",
+		name: "TypographyEllipsis",
+		codePath: "packages/ui/src/components/TypographyEllipsis.svelte",
+		codeExport: "TypographyEllipsis",
+		states: ["closed", "open", "focus"],
+		themes: ["light", "dark"],
+		sizes: ["default", "compact"],
+	},
+	{
 		id: "ui.comment-thread",
 		name: "CommentThread",
 		codePath: "packages/ui/src/components/CommentThread.svelte",

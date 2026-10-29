@@ -58,4 +58,5 @@ Complete reference for all `@svadmin/ui` components.
 | Anchor | Scroll-spy section navigation / 锚点导航 |
 | Affix | Sticky container / 固钉容器 |
 | Collapse | Controlled disclosure panels / 受控折叠面板 |
+| TypographyEllipsis | Multi-line clamp with expand / collapse / 多行截断与展开收起 |
 | CommentThread | Threaded comments / 评论线程 |
