@@ -39,6 +39,7 @@
   import ListPaginationEvidence from './ListPaginationEvidence.svelte';
   import DataTableShellEvidence from './DataTableShellEvidence.svelte';
   import ScrollableTableEvidence from './ScrollableTableEvidence.svelte';
+  import CopyButtonEvidence from './CopyButtonEvidence.svelte';
   import ResourceWorkspaceFixture from './ResourceWorkspaceFixture.svelte';
   import ResourceWorkspaceEditRouteFixture from './ResourceWorkspaceEditRouteFixture.svelte';
   import QuickEditLifecycleFixture from './QuickEditLifecycleFixture.svelte';
@@ -224,6 +225,8 @@
     <DataTableShellEvidence />
   {:else if requestedView === 'scrollable-table'}
     <ScrollableTableEvidence />
+  {:else if requestedView === 'copy-button'}
+    <CopyButtonEvidence />
   {:else if requestedView === 'resource-workspace'}
     <ResourceWorkspaceFixture />
   {:else if requestedView === 'resource-workspace-edit-route'}
