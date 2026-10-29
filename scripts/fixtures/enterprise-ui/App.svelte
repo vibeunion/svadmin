@@ -44,6 +44,7 @@
   import SchemaUnsupportedFixture from './SchemaUnsupportedFixture.svelte';
   import ModalDrawerFormFixture from './ModalDrawerFormFixture.svelte';
   import RowActionsEvidence from './RowActionsEvidence.svelte';
+  import ButtonTitleFallbackEvidence from './ButtonTitleFallbackEvidence.svelte';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import type { SchemaFormSchema } from '@svadmin/core/schema-form';
 
@@ -212,6 +213,8 @@
     <SavedListViewsFixture />
   {:else if requestedView === 'saved-views-menu'}
     <SavedViewsMenuEvidence />
+  {:else if requestedView === 'button-title-fallback'}
+    <ButtonTitleFallbackEvidence />
   {:else if requestedView === 'resource-workspace'}
     <ResourceWorkspaceFixture />
   {:else if requestedView === 'resource-workspace-edit-route'}

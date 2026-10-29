@@ -33,6 +33,7 @@
 		ref = $bindable(null),
 		href = undefined,
 		type = "button",
+		title = undefined,
 		disabled,
 		disabledReason = "",
 		disabledReasonDisplay = "tooltip",
@@ -43,7 +44,10 @@
 		...restProps
 	}: ButtonProps = $props();
 
-	const restriction = $derived((disabledReason ?? "").trim());
+	const explicitReason = $derived((disabledReason ?? "").trim());
+	// FA compatibility: disabled controls often carry the human explanation in title.
+	const titleFallback = $derived(disabled ? (title ?? "").trim() : "");
+	const restriction = $derived(explicitReason || titleFallback);
 	const isDisabled = $derived(Boolean(disabled || restriction));
 	const restrictionId = `svadmin-button-restriction-${uid}`;
 	const describedBy = $derived(
@@ -68,6 +72,7 @@
 			data-variant={variant}
 			data-size={size}
 			class={cn(resolveButtonVariants({ variant, size }), className)}
+			title={title}
 			href={isDisabled ? undefined : href}
 			aria-disabled={isDisabled ? true : undefined}
 			role={isDisabled ? "link" : undefined}
@@ -93,6 +98,7 @@
 			data-size={size}
 			class={cn(resolveButtonVariants({ variant, size }), className)}
 			{type}
+			{title}
 			disabled={isDisabled}
 			aria-describedby={describedBy}
 			{...restProps}

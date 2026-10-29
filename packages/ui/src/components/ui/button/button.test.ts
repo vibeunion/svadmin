@@ -137,6 +137,34 @@ describe('disabledReason', () => {
 		expect((await screen.findByRole('tooltip')).textContent?.trim()).toBe('Frozen');
 	});
 
+	it('falls back to title for a disabled control without an explicit reason', async () => {
+		render(ButtonDisabledReasonHarness, {
+			props: { disabled: true, title: 'Choose a customer before creating the order', ariaLabel: 'Create order' },
+		});
+		const button = screen.getByRole('button', { name: 'Create order' });
+		expect(button.hasAttribute('disabled')).toBe(true);
+		expect(button.getAttribute('title')).toBe('Choose a customer before creating the order');
+		const wrapper = button.closest<HTMLElement>('[data-slot="button-restriction"]');
+		expect(wrapper?.getAttribute('data-disabled-reason')).toBe('Choose a customer before creating the order');
+		await fireEvent.pointerEnter(wrapper as HTMLElement, { pointerType: 'mouse' });
+		expect((await screen.findByRole('tooltip')).textContent?.trim()).toBe('Choose a customer before creating the order');
+	});
+
+	it('keeps an explicit disabledReason ahead of the title fallback', () => {
+		render(ButtonDisabledReasonHarness, {
+			props: { disabled: true, title: 'Generic title', disabledReason: 'Required field', ariaLabel: 'Create order' },
+		});
+		expect(document.querySelector('[data-slot="button-restriction"]')?.getAttribute('data-disabled-reason')).toBe('Required field');
+	});
+
+	it('does not turn a title into a visible restriction for an enabled control', () => {
+		render(ButtonDisabledReasonHarness, { props: { title: 'Only a native hint', ariaLabel: 'Create order' } });
+		const button = screen.getByRole('button', { name: 'Create order' });
+		expect(button.hasAttribute('disabled')).toBe(false);
+		expect(button.getAttribute('title')).toBe('Only a native hint');
+		expect(button.closest('[data-slot="button-restriction"]')).toBeNull();
+	});
+
 	it('leaves an empty reason enabled and does not wrap or leak the prop', () => {
 		render(ButtonDisabledReasonHarness, { props: { disabledReason: '   ' } });
 		const button = screen.getByRole('button', { name: 'Command action' });

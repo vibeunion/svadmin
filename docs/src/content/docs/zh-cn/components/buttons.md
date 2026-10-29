@@ -24,8 +24,9 @@ svadmin 包含 10 个与数据 Hook 和路由集成的操作按钮。
 
 ### 关键操作的禁用原因
 
-基础 `Button` 的 `disabledReason` 非空时会禁用按钮或链接。默认通过 Tooltip
-说明原因；对于审批、提交等必须提前可见的阻塞，使用 `disabledReasonDisplay="inline"`，
+基础 `Button` 的 `disabledReason` 非空时会禁用按钮或链接。若未显式传
+`disabledReason`，禁用态会回退到 `title` 作为说明；未禁用时 `title` 仅保留原生提示。
+默认通过 Tooltip 说明原因；对于审批、提交等必须提前可见的阻塞，使用 `disabledReasonDisplay="inline"`，
 把原因直接展示在按钮下方，无需悬停。两种模式都通过 `aria-describedby` 关联说明，
 Tooltip 模式外层可聚焦；inline 模式不增加无动作的 Tab 停靠点。
 链接禁用时不会导航或调用点击回调。
@@ -39,6 +40,7 @@ Tooltip 模式外层可聚焦；inline 模式不增加无动作的 Tab 停靠点
 ```
 
 条件满足后必须将原因置空，不要传入常量原因再仅切换 `disabled`。
+优先使用 `disabledReason` 承载业务门禁；`title` 兜底用于渐进迁移的旧调用点。
 组件不推断业务门禁，不会自动生成“缺什么”的文案。错误恢复动作和跨字段阻塞
 应由业务流程的 `FeedbackNotice` 承载，避免在每个按钮下重复整页告警。
 

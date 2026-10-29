@@ -25,6 +25,8 @@ svadmin includes 10 action buttons that integrate with data hooks and routing.
 ### Visible reasons for blocked actions
 
 The base `Button` disables its button or link whenever `disabledReason` is nonempty.
+When no explicit `disabledReason` is supplied, a disabled control falls back to `title`
+for its explanation; on an enabled control `title` remains a native hint only.
 The default `disabledReasonDisplay="tooltip"` preserves existing behavior. Use
 `disabledReasonDisplay="inline"` for critical prerequisites that must be visible
 without hovering, such as missing approval comments. The description stays linked
@@ -40,7 +42,8 @@ adds no inactive Tab stop. Restricted links cannot navigate or invoke their clic
 ```
 
 Clear the reason when the condition is resolved. Do not pass a constant reason and
-only toggle `disabled`. Business rules and recovery actions remain owned by the
+only toggle `disabled`. Prefer `disabledReason` for business gates; the `title`
+fallback exists for incremental migration of older call sites. Business rules and recovery actions remain owned by the
 application; use `FeedbackNotice` for a shared workflow blocker instead of repeating
 the same notice below every action.
 
