@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+* **ui:** localize list pagination and scrollable table feedback ([#596](https://github.com/vibeunion/svadmin/issues/596)) ([75aa447](https://github.com/vibeunion/svadmin/commit/75aa4471d8bb3e7abc7f845d65d30d7ef0bebd6c))
 * **ui:** align list pagination spacing and wrapping ([#594](https://github.com/vibeunion/svadmin/issues/594)) ([fe96b5a](https://github.com/vibeunion/svadmin/commit/fe96b5a5e63ff23ab6ccbb5112f3ca8412086057))
 * **ui:** register image preview media ownership ([1795a86](https://github.com/vibeunion/svadmin/commit/1795a86fcd9a7ff933faca648187924aae046d40))
 
