@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.0](https://github.com/vibeunion/svadmin/compare/core-v0.67.0...core-v0.68.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** complete templates and rewrite legacy utility sources ([953f242](https://github.com/vibeunion/svadmin/commit/953f2425273aeda0a2432e48075d8230136e30b5))
+
 ## [0.67.0](https://github.com/vibeunion/svadmin/compare/core-v0.66.3...core-v0.67.0) (2026-10-29)
 
 
