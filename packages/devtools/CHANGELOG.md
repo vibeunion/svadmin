@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/vibeunion/svadmin/compare/devtools-v0.3.12...devtools-v0.4.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **core:** close Refine parity gaps ([968ea7b](https://github.com/vibeunion/svadmin/commit/968ea7b67903ce0427dd6bdfc6a1a2e70b9f5b13))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.0
+
 ## [0.3.12](https://github.com/vibeunion/svadmin/compare/devtools-v0.3.11...devtools-v0.3.12) (2026-10-29)
 
 
