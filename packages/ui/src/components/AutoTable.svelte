@@ -1532,7 +1532,7 @@
     {:else}
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->
-        <div class="hidden md:block">
+        <div class="svadmin-auto-table__desktop">
         <Table.Root density={currentDensity}>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
@@ -1720,7 +1720,7 @@
         </div>
 
         <!-- Mobile Card View (visible only on small screens) -->
-        <div class="md:hidden space-y-3 p-2">
+        <div class="svadmin-auto-table__mobile space-y-3 p-2">
           {#each tableView.rows as row, _i (_i)}
             {@const record = copyTableRecord(row.original)}
             {@const id = rowIdValue(row)}
@@ -1889,3 +1889,24 @@
     <QuickEditDrawer rendering={activeRendering} {resourceName} recordId={quickEditId} onClose={() => quickEditId = undefined} />
   {/key}
 {/if}
+
+<style>
+  /* 表格布局独立于通用 utility 层，避免其他包的 .hidden 覆盖断点。 */
+  .svadmin-auto-table__desktop {
+    display: none;
+  }
+
+  .svadmin-auto-table__mobile {
+    display: block;
+  }
+
+  @media (min-width: 48rem) {
+    .svadmin-auto-table__desktop {
+      display: block;
+    }
+
+    .svadmin-auto-table__mobile {
+      display: none;
+    }
+  }
+</style>

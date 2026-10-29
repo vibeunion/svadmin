@@ -8,6 +8,11 @@
 * **ui:** complete templates and rewrite legacy utility sources ([953f242](https://github.com/vibeunion/svadmin/commit/953f2425273aeda0a2432e48075d8230136e30b5))
 
 
+### 🐛 Bug Fixes
+
+* **ui:** keep AutoTable desktop rows and mobile cards visible at their intended breakpoints when AI styles are loaded.
+
+
 ### Dependencies
 
 * The following workspace dependencies were updated
