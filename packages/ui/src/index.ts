@@ -130,6 +130,8 @@ export { default as CommandPalette } from './components/CommandPalette.svelte';
 export { default as StepsForm } from './components/StepsForm.svelte';
 // Advanced form and data controls
 export { default as DynamicFormList } from './components/DynamicFormList.svelte';
+export { default as GroupedTable } from './components/GroupedTable.svelte';
+export type { TableColumn } from './components/grouped-table.js';
 export { default as Overflow } from './components/Overflow.svelte';
 export { default as EditableTabs } from './components/EditableTabs.svelte';
 export type { EditableTabItem } from './components/EditableTabs.svelte';
@@ -351,6 +353,8 @@ export { default as Link } from './components/Link.svelte';
 export { default as Title } from './components/Typography.svelte';
 export { default as Text } from './components/Text.svelte';
 export { default as TypographyEllipsis } from './components/TypographyEllipsis.svelte';
+export { default as TypographyText } from './components/TypographyText.svelte';
+export type { TypographyType } from './components/TypographyText.svelte';
 export { default as Spin } from './components/Spin.svelte';
 export { default as Result } from './components/Result.svelte';
 export { default as Popconfirm } from './components/Popconfirm.svelte';
