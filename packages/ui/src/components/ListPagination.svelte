@@ -15,6 +15,8 @@
     pageSizeOptions?: readonly number[] | undefined;
     pageSizeLabel?: string | undefined;
     showSummary?: boolean | undefined;
+    simple?: boolean | undefined;
+    showJumper?: boolean | undefined;
     onPageChange: (page: number) => void;
     onPageSizeChange?: ((pageSize: number) => void) | undefined;
     class?: string | undefined;
@@ -31,6 +33,8 @@
     pageSizeOptions = [10, 20, 50],
     pageSizeLabel,
     showSummary = true,
+    simple = false,
+    showJumper = false,
     onPageChange,
     onPageSizeChange,
     class: className = '',
@@ -41,6 +45,15 @@
 
   const items = $derived(listPaginationItems(page, totalPages));
   const paginated = $derived(totalPages > 1);
+
+  function jump(event: Event): void {
+    const input = event.currentTarget as HTMLInputElement;
+    const next = Number(input.value);
+    if (!Number.isFinite(next)) { input.value = String(page); return; }
+    const clamped = Math.max(1, Math.min(totalPages, Math.trunc(next)));
+    input.value = String(clamped);
+    if (clamped !== page) onPageChange(clamped);
+  }
 </script>
 
 {#if paginated}
@@ -65,20 +78,32 @@
       <button type="button" class="svadmin-list-pagination__control" disabled={page <= 1}
         title={listText(i18n, page <= 1 ? 'listPagination.firstPage' : 'listPagination.previous')}
         aria-label={listText(i18n, 'listPagination.previousAria', { label })} onclick={() => onPageChange(page - 1)}>{listText(i18n, 'listPagination.previous')}</button>
-      <div class="svadmin-list-pagination__pages" role="group" aria-label={listText(i18n, 'listPagination.pageList', { label })}>
-        {#each items as item, index (item === 'ellipsis' ? `ellipsis-${index}` : item)}
-          {#if item === 'ellipsis'}
-            <span class="svadmin-list-pagination__ellipsis" aria-hidden="true">…</span>
-          {:else}
-            <button type="button" class="svadmin-list-pagination__page"
-              class:svadmin-list-pagination__page--active={item === page}
-              aria-label={listText(i18n, 'listPagination.pageAria', { label, page: item })} aria-current={item === page ? 'page' : undefined}
-              title={listText(i18n, item === page ? 'listPagination.currentPage' : 'listPagination.goToPage', { page: item })}
-              disabled={item === page}
-              onclick={() => onPageChange(item)}>{item}</button>
-          {/if}
-        {/each}
-      </div>
+      {#if simple}
+        <span class="svadmin-list-pagination__simple">{listText(i18n, 'listPagination.simplePage', { page, total: totalPages })}</span>
+      {:else}
+        <div class="svadmin-list-pagination__pages" role="group" aria-label={listText(i18n, 'listPagination.pageList', { label })}>
+          {#each items as item, index (item === 'ellipsis' ? `ellipsis-${index}` : item)}
+            {#if item === 'ellipsis'}
+              <span class="svadmin-list-pagination__ellipsis" aria-hidden="true">…</span>
+            {:else}
+              <button type="button" class="svadmin-list-pagination__page"
+                class:svadmin-list-pagination__page--active={item === page}
+                aria-label={listText(i18n, 'listPagination.pageAria', { label, page: item })} aria-current={item === page ? 'page' : undefined}
+                title={listText(i18n, item === page ? 'listPagination.currentPage' : 'listPagination.goToPage', { page: item })}
+                disabled={item === page}
+                onclick={() => onPageChange(item)}>{item}</button>
+            {/if}
+          {/each}
+        </div>
+        {#if showJumper}
+          <label class="svadmin-list-pagination__jumper">
+            <span>{listText(i18n, 'listPagination.jumpTo')}</span>
+            <input type="number" min="1" max={totalPages} value={page}
+              aria-label={listText(i18n, 'listPagination.jumpToAria', { label })}
+              onchange={jump} onkeydown={(event) => { if (event.key === 'Enter') jump(event); }} />
+          </label>
+        {/if}
+      {/if}
       <button type="button" class="svadmin-list-pagination__control" disabled={page >= totalPages}
         title={listText(i18n, page >= totalPages ? 'listPagination.lastPage' : 'listPagination.next')}
         aria-label={listText(i18n, 'listPagination.nextAria', { label })} onclick={() => onPageChange(page + 1)}>{listText(i18n, 'listPagination.next')}</button>
@@ -105,5 +130,8 @@
   .svadmin-list-pagination__control:disabled,
   .svadmin-list-pagination__page:disabled { opacity: .55; cursor: not-allowed; }
   .svadmin-list-pagination__ellipsis { min-width: 1.5rem; text-align: center; color: var(--muted-foreground); }
+  .svadmin-list-pagination__simple { min-width: 6rem; color: var(--muted-foreground); font-size: .8125rem; text-align: center; }
+  .svadmin-list-pagination__jumper { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted-foreground); font-size: .8125rem; }
+  .svadmin-list-pagination__jumper input { width: 3.5rem; height: 2.25rem; padding: 0 .4rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--background); color: var(--foreground); font: inherit; }
   .svadmin-list-pagination__summary { margin: 0; font-size: .8125rem; color: var(--muted-foreground); }
 </style>
