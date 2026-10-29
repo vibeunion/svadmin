@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.102.0](https://github.com/vibeunion/svadmin/compare/ui-v0.101.0...ui-v0.102.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** align expansion primitives with Arco ([d5c1a8f](https://github.com/vibeunion/svadmin/commit/d5c1a8f289df642ad88848ce7fc44ab37810529d))
+* **ui:** expose list footer range summary ([#593](https://github.com/vibeunion/svadmin/issues/593)) ([c019c88](https://github.com/vibeunion/svadmin/commit/c019c88fb226b0e014330b25b0ae1760f132baa0))
+* **ui:** forward list pagination DOM attributes ([#592](https://github.com/vibeunion/svadmin/issues/592)) ([b7f26ef](https://github.com/vibeunion/svadmin/commit/b7f26efd96bfdc39582125634509ac4d9ae1ccfc))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** localize list pagination and scrollable table feedback ([#596](https://github.com/vibeunion/svadmin/issues/596)) ([75aa447](https://github.com/vibeunion/svadmin/commit/75aa4471d8bb3e7abc7f845d65d30d7ef0bebd6c))
+* **ui:** align list pagination spacing and wrapping ([#594](https://github.com/vibeunion/svadmin/issues/594)) ([fe96b5a](https://github.com/vibeunion/svadmin/commit/fe96b5a5e63ff23ab6ccbb5112f3ca8412086057))
+* **ui:** register image preview media ownership ([1795a86](https://github.com/vibeunion/svadmin/commit/1795a86fcd9a7ff933faca648187924aae046d40))
+
 ## [0.101.0](https://github.com/vibeunion/svadmin/compare/ui-v0.100.0...ui-v0.101.0) (2026-10-29)
 
 
