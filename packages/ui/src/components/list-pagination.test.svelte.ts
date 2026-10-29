@@ -36,6 +36,32 @@ describe('ListPagination', () => {
     expect(screen.queryByText('共 8 条')).toBeNull();
   });
 
+  it('forwards data attributes and id to the navigation root', () => {
+    const onPageChange = vi.fn();
+    render(ListPagination, {
+      props: {
+        page: 2, totalPages: 4, total: 80, rangeStart: 21, rangeEnd: 40,
+        label: '委托单', onPageChange, 'data-section': 'order-progress', id: 'order-progress-pagination',
+      },
+    });
+    const navigation = screen.getByRole('navigation', { name: '委托单分页导航' });
+    expect(navigation.getAttribute('data-section')).toBe('order-progress');
+    expect(navigation.id).toBe('order-progress-pagination');
+  });
+
+  it('forwards root attributes to the single-page summary too', () => {
+    const onPageChange = vi.fn();
+    render(ListPagination, {
+      props: {
+        page: 1, totalPages: 1, total: 8, label: '记录', onPageChange,
+        'data-section': 'records-summary', id: 'records-summary-pagination',
+      },
+    });
+    const summary = screen.getByText('共 8 条');
+    expect(summary.getAttribute('data-section')).toBe('records-summary');
+    expect(summary.id).toBe('records-summary-pagination');
+  });
+
   it('offers page-size changes when a handler is supplied', async () => {
     const onPageChange = vi.fn();
     const onPageSizeChange = vi.fn();
