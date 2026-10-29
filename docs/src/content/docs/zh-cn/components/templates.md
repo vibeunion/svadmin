@@ -77,4 +77,12 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 `AdminApp` 负责把模板放入统一外壳。导航模式、内容宽度、页面动效、密度和外观
 偏好由外壳管理，页面模板不要重复实现。
 
-示例应用提供 `/templates` 交互式页面，可以用真实内容查看全部模板。
+示例应用提供 `/templates` 交互式页面，以及每类模板的独立路由：
+`/templates/workplace`、`/templates/monitor`、`/templates/analysis`、
+`/templates/search-table`、`/templates/card-list`、`/templates/group-form`、
+`/templates/step-form`、`/templates/advanced-form`、`/templates/basic-detail`、
+`/templates/advanced-detail`、`/templates/profile`、`/templates/result`、
+`/templates/exception`。
+
+画廊只证明结构组合，不替代数据 Provider 验收。真实路由必须在拥有查询的插槽内
+处理 loading、empty、filtered-empty、error 和 forbidden。

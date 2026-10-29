@@ -32,7 +32,13 @@
     { id: 'result', label: 'Result' },
     { id: 'exception', label: 'Exception' },
   ];
-  let active = $state('workplace');
+  const routeTemplate = (typeof window === 'undefined' ? '' : window.location.hash.split('?')[0]?.split('/').filter(Boolean).pop()) ?? '';
+  let active = $state<string>(navItems.some((item) => item.id === routeTemplate) ? routeTemplate : 'workplace');
+
+  function selectTemplate(id: string): void {
+    active = id;
+    if (typeof window !== 'undefined') window.location.hash = `#/templates/${id}`;
+  }
 
   const activities = [
     { id: 'a1', title: 'Quarterly plan approved', time: '09:20', tone: 'success' as const },
@@ -74,7 +80,7 @@
 <div class="svadmin-template-gallery">
   <aside class="svadmin-template-gallery__nav" aria-label="Template navigation">
     <p class="svadmin-template-gallery__eyebrow">Page templates</p>
-    <Menu items={navItems} bind:selected={active} onselect={(item) => (active = item.id)} />
+    <Menu items={navItems} bind:selected={active} onselect={(item) => selectTemplate(item.id)} />
   </aside>
 
   <main class="svadmin-template-gallery__main">

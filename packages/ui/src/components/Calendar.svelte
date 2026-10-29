@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+  import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
 
@@ -78,6 +78,25 @@
     viewMonth = next.getMonth();
   }
 
+  function moveYear(delta: number): void {
+    viewYear += delta;
+  }
+
+  function onGridKeydown(event: KeyboardEvent): void {
+    if (!(event.currentTarget instanceof HTMLElement) || !(event.target instanceof HTMLElement)) return;
+    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
+    const index = buttons.indexOf(event.target as HTMLButtonElement);
+    if (index < 0) return;
+    const delta = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : event.key === 'ArrowUp' ? -7 : event.key === 'ArrowDown' ? 7 : 0;
+    if (delta !== 0) {
+      event.preventDefault();
+      buttons[Math.max(0, Math.min(index + delta, buttons.length - 1))]?.focus();
+    } else if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      buttons[event.key === 'Home' ? 0 : buttons.length - 1]?.focus();
+    }
+  }
+
   function select(iso: string, isDisabled: boolean): void {
     if (isDisabled) return;
     onchange?.(iso);
@@ -88,14 +107,17 @@
   <header class="svadmin-calendar__header">
     <strong>{title}</strong>
     <div class="svadmin-calendar__nav">
+      <Button variant="outline" size="icon-sm" aria-label="Previous year" onclick={() => moveYear(-1)}><ChevronsLeft size={16} /></Button>
       <Button variant="outline" size="icon-sm" aria-label="Previous month" onclick={() => move(-1)}><ChevronLeft size={16} /></Button>
       <Button variant="outline" size="icon-sm" aria-label="Next month" onclick={() => move(1)}><ChevronRight size={16} /></Button>
+      <Button variant="outline" size="icon-sm" aria-label="Next year" onclick={() => moveYear(1)}><ChevronsRight size={16} /></Button>
     </div>
   </header>
   <div class="svadmin-calendar__weekdays" aria-hidden="true">
     {#each weekdays as weekday (weekday)}<span>{weekday}</span>{/each}
   </div>
-  <div class="svadmin-calendar__grid">
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+  <div class="svadmin-calendar__grid" role="group" aria-label="Calendar dates" onkeydown={onGridKeydown}>
     {#each days as day (day.iso)}
       <button
         type="button"

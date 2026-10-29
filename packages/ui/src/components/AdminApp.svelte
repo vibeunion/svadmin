@@ -78,6 +78,7 @@
   import AutoForm from './LazyAutoForm.svelte';
   import ShowPage from './LazyShowPage.svelte';
   import Toast from './Toast.svelte';
+  import NotificationHost from './NotificationHost.svelte';
   import LoginPage from './LoginPage.svelte';
   import RegisterPage from './RegisterPage.svelte';
   import ForgotPasswordPage from './ForgotPasswordPage.svelte';
@@ -723,4 +724,5 @@
     </div>
   {/if}
   <Toast />
+  <NotificationHost />
 </QueryClientProvider>

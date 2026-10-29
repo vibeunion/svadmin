@@ -7,19 +7,23 @@
 <script lang="ts">
 	import type { HTMLAnchorAttributes } from "svelte/elements";
 	import { cn, type WithElementRef } from "../../../utils.js";
+	import { useComponentConfig } from "../../ConfigProvider.svelte";
 
 	let {
 		ref = $bindable(null),
 		href,
 		class: className,
 		variant = "default",
-		size = "default",
+		size: sizeProp,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
 		variant?: BadgeVariantValue;
 		size?: "default" | "compact";
 	} = $props();
+
+	const config = useComponentConfig();
+	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
 </script>
 
 <svelte:element

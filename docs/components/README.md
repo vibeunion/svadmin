@@ -28,6 +28,7 @@ Complete reference for all `@svadmin/ui` components.
 | [Theming](./theming.md) | Dark mode + color themes / 暗色模式 + 多色主题 | ✅ |
 | [Page templates](./templates.md) | Workplace, monitor, analysis, list, form, detail, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
 | NotificationCenter | Header notification menu with unread state / 顶栏通知中心 | ✅ |
+| NotificationHost | Imperative notification stack / 命令式通知栈 | ✅ |
 | ThemeSettingsDrawer | Live shell and appearance preferences / 实时外观与外壳设置抽屉 | ✅ |
 
 ## Base UI Components / 基础 UI 组件
@@ -69,6 +70,6 @@ Complete reference for all `@svadmin/ui` components.
 | ResizeBox | Pointer and keyboard resizable container / 可调整容器 |
 | Tour | Guided step overlay / 引导式步骤 |
 | Menu | Recursive navigation menu / 递归导航菜单 |
-| ConfigProvider | Component config context / 组件配置上下文 |
+| ConfigProvider | Component size, density, direction and locale defaults / 组件尺寸、密度、方向与语言默认值 |
 | Progress | Determinate progress bar / 进度条 |
 | Popover | Anchored popover primitive / 浮层 |
