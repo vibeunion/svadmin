@@ -19,6 +19,7 @@ export { default as AutoTable } from './components/AutoTable.svelte';
 export { default as SavedViewsMenu } from './components/SavedViewsMenu.svelte';
 export { default as ListPagination } from './components/ListPagination.svelte';
 export { default as ListFooter } from './components/ListFooter.svelte';
+export { default as ScrollableTable } from './components/ScrollableTable.svelte';
 export { listPaginationItems } from './components/list-pagination.js';
 export type { ListPaginationItem } from './components/list-pagination.js';
 export { default as SegmentedControl } from './components/SegmentedControl.svelte';
