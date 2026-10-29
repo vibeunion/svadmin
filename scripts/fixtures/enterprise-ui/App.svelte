@@ -36,6 +36,7 @@
   import SavedListViewsFixture from './SavedListViewsFixture.svelte';
   import SavedViewsMenuEvidence from './SavedViewsMenuEvidence.svelte';
   import DetailDrawerStatusEvidence from './DetailDrawerStatusEvidence.svelte';
+  import ListPaginationEvidence from './ListPaginationEvidence.svelte';
   import ResourceWorkspaceFixture from './ResourceWorkspaceFixture.svelte';
   import ResourceWorkspaceEditRouteFixture from './ResourceWorkspaceEditRouteFixture.svelte';
   import QuickEditLifecycleFixture from './QuickEditLifecycleFixture.svelte';
@@ -215,6 +216,8 @@
     <SavedViewsMenuEvidence />
   {:else if requestedView === 'detail-drawer-status'}
     <DetailDrawerStatusEvidence />
+  {:else if requestedView === 'list-pagination'}
+    <ListPaginationEvidence />
   {:else if requestedView === 'resource-workspace'}
     <ResourceWorkspaceFixture />
   {:else if requestedView === 'resource-workspace-edit-route'}
