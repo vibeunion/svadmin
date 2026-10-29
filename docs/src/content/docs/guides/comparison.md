@@ -120,7 +120,7 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 ## When to Choose Refine
 
 - **You're on React** — Refine's ecosystem is mature and React-focused
-- **You need UI kit flexibility** — Refine supports Ant Design, Material UI, Chakra, Mantine
+- **You need UI kit flexibility** — Refine supports external UI kits, Material UI, Chakra, Mantine
 - **You need the largest community** — More third-party integrations and tutorials
 
 ## When to Choose React Admin

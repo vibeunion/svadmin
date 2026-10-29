@@ -49,7 +49,7 @@
       {#each showFields as field, _i (_i)}
         {@const value = record[field.key]}
         <tr>
-          <td style="width:200px;font-weight:600;color:#64748b;vertical-align:top;">
+          <td style="width:200px;font-weight:600;color:#4E5969;vertical-align:top;">
             {field.label}
           </td>
           <td>

@@ -113,7 +113,7 @@
 </script>
 
 <svelte:head><title>svadmin · {viewLabel(view)}</title></svelte:head>
-<div class:dark={theme === 'dark'} class="svadmin-theme layout-clean-flat kit-root" data-theme="stripe" data-theme-mode={theme}>
+<div class:dark={theme === 'dark'} class="svadmin-theme layout-clean-flat kit-root" data-theme="arco" data-theme-mode={theme}>
   <a class="kit-skip" href="#kit-main">{tx('跳到样例内容', 'Skip to preview')}</a>
   <header class="kit-controls" aria-label={tx('设计预览控制', 'Preview controls')}>
     <div class="kit-brand"><strong>svadmin</strong><span>Admin UI · v0.1</span></div>

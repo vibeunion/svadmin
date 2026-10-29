@@ -120,7 +120,7 @@ svadmin 是编译时 admin 框架 — 无虚拟 DOM、无运行时 diff，直接
 ## 什么时候选 Refine
 
 - **你在用 React** — Refine 的生态成熟且专注 React
-- **你需要 UI 套件灵活性** — Refine 支持 Ant Design、Material UI、Chakra、Mantine
+- **你需要 UI 套件灵活性** — Refine 支持 external UI kits、Material UI、Chakra、Mantine
 - **你需要最大的社区** — 更多第三方集成和教程
 
 ## 什么时候选 React Admin

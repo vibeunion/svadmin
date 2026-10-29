@@ -11,8 +11,9 @@ describe('Admin UI design principles contract', () => {
     expect(read('DESIGN.md')).toContain('Clear by default');
     expect(read('DESIGN.md')).toContain('Accessible by construction');
     expect(read('DESIGN.md')).toContain('AI-ready and auditable');
+    expect(read('DESIGN.md')).toContain('#165DFF');
+    expect(read('DESIGN.md')).toContain('#00B42A');
     expect(read('DESIGN.md')).toContain('oklch(0.54 0.24 293)');
-    expect(read('DESIGN.md')).toContain('oklch(0.55 0.16 151)');
     expect(read('DESIGN.md')).not.toContain('oklch(0.51 0.16 151)');
     expect(read('DESIGN.md')).toContain("Don't set `font-family` to Inter");
     expect(read('DESIGN.md')).toContain('data-svadmin-demo-credentials');
@@ -50,13 +51,14 @@ describe('Admin UI design principles contract', () => {
 
   it('keeps the reference stack and runtime entry points aligned', () => {
     const design = read('DESIGN.md');
-    for (const reference of ['Stripe style prompt', 'Corporate-clean prompt', 'Fuse / Midone / Skote', 'Runtime integration map']) {
+    for (const reference of ['svadmin', 'page patterns', 'shadcn/ui', 'Stripe style prompt', 'Runtime integration map']) {
       expect(design).toContain(reference);
     }
     expect(read('packages/ui/src/default-theme.ts')).toContain("config?.layoutPreset ?? 'clean-flat'");
     expect(read('example/src/App.svelte')).not.toContain('themeConfig=');
     expect(read('packages/create-svadmin/template/src/App.svelte')).not.toContain('themeConfig=');
-    expect(read('design/admin-ui/preview/Preview.svelte')).toContain('data-theme="stripe"');
-    expect(read('design/admin-ui/preview/preview.css')).toContain('var(--svadmin-grid-size, 40px)');
+    expect(read('design/admin-ui/preview/Preview.svelte')).toContain('data-theme="arco"');
+    expect(read('design/admin-ui/preview/preview.css')).not.toContain('var(--svadmin-grid-size, 40px)');
+    expect(read('design/admin-ui/preview/preview.css')).toContain('background: var(--background)');
   });
 });

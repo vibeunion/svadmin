@@ -130,7 +130,7 @@
         placeholder={i18n.t('common.startDate')}
         {...field?.required ? { required: true } : {}}
       />
-      <span style="margin: 0 8px; color: #64748b;">{separator}</span>
+      <span style="margin: 0 8px; color: #4E5969;">{separator}</span>
       <input
         type="date"
         lang={i18n.locale}

@@ -83,7 +83,7 @@
   .lite-step-form-card {
     padding: 16px;
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
   }
@@ -91,7 +91,7 @@
     display: flex;
     align-items: center;
     padding-bottom: 12px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #E5E6EB;
     margin-bottom: 16px;
     overflow-x: auto;
   }
@@ -99,14 +99,14 @@
     display: flex;
     align-items: center;
     font-size: 12px;
-    color: #64748b;
+    color: #4E5969;
   }
   .lite-step-item.lite-step-current {
-    color: #3b82f6;
+    color: #165DFF;
     font-weight: bold;
   }
   .lite-step-item.lite-step-completed {
-    color: #10b981;
+    color: #00B42A;
   }
   .lite-step-circle {
     display: inline-block;
@@ -115,21 +115,21 @@
     line-height: 20px;
     text-align: center;
     border-radius: 50%;
-    background: #f1f5f9;
+    background: #F2F3F5;
     margin-right: 6px;
     font-size: 11px;
   }
   .lite-step-current .lite-step-circle {
-    background: #3b82f6;
+    background: #165DFF;
     color: #ffffff;
   }
   .lite-step-completed .lite-step-circle {
-    background: #10b981;
+    background: #00B42A;
     color: #ffffff;
   }
   .lite-step-arrow {
     margin: 0 10px;
-    color: #cbd5e1;
+    color: #E5E6EB;
   }
   .lite-step-content {
     min-height: 100px;
@@ -139,6 +139,6 @@
     display: flex;
     align-items: center;
     padding-top: 12px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #E5E6EB;
   }
 </style>

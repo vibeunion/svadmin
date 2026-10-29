@@ -17,15 +17,15 @@
 </script>
 
 <div class="lite-card" style="margin-bottom: 16px;">
-  <div class="lite-inline-md" style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; color: #0f172a; align-items: center;">
-    <span style="color: #f59e0b;">✦</span>
+  <div class="lite-inline-md" style="padding: 12px 16px; border-bottom: 1px solid #E5E6EB; font-weight: 600; font-size: 14px; color: #1D2129; align-items: center;">
+    <span style="color: #FF7D00;">✦</span>
     {title}
   </div>
-  <div style="padding: 16px; font-size: 14px; color: #334155; line-height: 1.6;">
+  <div style="padding: 16px; font-size: 14px; color: #1D2129; line-height: 1.6;">
     {#if displayContent}
       <p style="white-space: pre-wrap; margin: 0;">{displayContent}</p>
     {:else}
-      <p style="color: #94a3b8; font-style: italic;">No insights available. AI analysis requires JavaScript.</p>
+      <p style="color: #86909C; font-style: italic;">No insights available. AI analysis requires JavaScript.</p>
     {/if}
   </div>
 </div>

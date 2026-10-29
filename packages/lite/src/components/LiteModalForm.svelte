@@ -52,24 +52,24 @@
   .lite-modal-card {
     padding: 16px;
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
   }
   .lite-modal-header {
     padding-bottom: 10px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #E5E6EB;
     margin-bottom: 12px;
   }
   .lite-modal-title {
     margin: 0;
     font-size: 14px;
-    color: #1e293b;
+    color: #1D2129;
   }
   .lite-modal-desc {
     margin: 4px 0 0 0;
     font-size: 12px;
-    color: #64748b;
+    color: #4E5969;
   }
   .lite-modal-body {
     margin-bottom: 16px;
@@ -79,6 +79,6 @@
     display: flex;
     justify-content: flex-end;
     padding-top: 12px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #E5E6EB;
   }
 </style>

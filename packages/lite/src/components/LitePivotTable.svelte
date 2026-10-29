@@ -142,7 +142,7 @@
 <style>
   .sv-lite-pivot-container {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -152,10 +152,10 @@
   .sv-lite-pivot-header {
     margin-bottom: 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-pivot-sub {
-    color: #64748b;
+    color: #4E5969;
     font-size: 11px;
     margin-left: 8px;
   }
@@ -165,29 +165,29 @@
     text-align: right;
   }
   .sv-lite-pivot-table th, .sv-lite-pivot-table td {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     padding: 6px 10px;
   }
   .sv-lite-pivot-table thead {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: #F7F8FA;
+    color: #4E5969;
   }
   .sv-lite-th-dim, .sv-lite-td-dim {
     text-align: left;
-    background-color: #f8fafc;
+    background-color: #F7F8FA;
     font-weight: 600;
   }
   .sv-lite-th-total, .sv-lite-td-rowtotal {
-    background-color: #f1f5f9;
+    background-color: #F2F3F5;
     font-weight: 600;
   }
   .sv-lite-pivot-table tfoot {
-    background-color: #f1f5f9;
+    background-color: #F2F3F5;
     font-weight: bold;
-    border-top: 2px solid #cbd5e1;
+    border-top: 2px solid #E5E6EB;
   }
   .sv-lite-td-grandtotal {
-    color: #4338ca;
+    color: #0E42D2;
     font-weight: bold;
   }
 </style>

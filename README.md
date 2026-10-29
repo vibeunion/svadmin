@@ -24,8 +24,8 @@
 - 🌍 **i18n** — Built-in zh-CN/en with browser auto-detection, one-click locale toggle
 - 🔐 **Auth & RBAC** — AuthProvider + permission system with resource-level access control
 - 🌓 **Dark Mode** — Light / Dark / System with one-click toggle, persisted to localStorage
-- 🎨 **Multi-Color Themes** — 8 color palettes (Neutral, Indigo, Blue, Green, Rose, Orange, Violet, Stripe) with sidebar picker
-- 🎨 **Stripe-inspired UI** — Neutral canvases, crisp surfaces, and consistent interaction feedback
+- 🎨 **Multi-Color Themes** — 9 color palettes. The built-in preset is the default; Neutral, Indigo, Blue, Green, Rose, Orange, Violet, and Stripe remain optional
+- 🎨 **Unified UI** — Neutral surfaces and one primary action, implemented with shadcn-svelte
 - 📡 **Real-time** — LiveProvider interface with WebSocket & SSE built-in providers
 - 🔀 **RouterProvider** — Pluggable routing with hash and history router providers
 - 📋 **Audit Logging** — Pluggable audit handler for tracking admin operations
@@ -48,8 +48,8 @@
 - 🌍 **国际化** — 内置中英文，浏览器自动检测，侧边栏一键切换语言
 - 🔐 **认证与权限** — AuthProvider + 资源级权限控制
 - 🌓 **暗色模式** — 亮色 / 暗色 / 跟随系统，一键切换，持久化到 localStorage
-- 🎨 **多色主题** — 8 种配色方案（Neutral、Indigo、Blue、Green、Rose、Orange、Violet、Stripe），侧边栏选色器切换
-- 🎨 **Stripe 风格 UI** — 中性画布、清晰表面、细边框和一致的交互反馈
+- 🎨 **多色主题** — 9 种配色。默认使用内置配色；Neutral、Indigo、Blue、Green、Rose、Orange、Violet、Stripe 仍可选用
+- 🎨 **统一界面** — 中性色和单一主色，由 shadcn-svelte 实现
 - 📡 **实时订阅** — LiveProvider 接口，内置 WebSocket 及 SSE 实现，自动重连
 - 🔀 **RouterProvider** — 可插拔路由，内置 Hash 和 History 路由
 - 📋 **审计日志** — 可插拔的审计处理器
@@ -363,20 +363,20 @@ getResolvedTheme(); // resolved to 'light' or 'dark'
 
 ## 🎨 Color Themes / 多色主题
 
-Switch between 8 color palettes via sidebar picker or programmatically:
+Switch between 9 color palettes via sidebar picker or programmatically. The built-in preset is the default:
 
-通过侧边栏选色器或编程式切换 8 种配色：
+通过侧边栏选色器或编程式切换 9 种配色，默认是内置配色：
 
 ```typescript
 import { getColorTheme, setColorTheme, getColorThemes } from "@svadmin/core";
 import type { ColorTheme } from "@svadmin/core";
 
-setColorTheme("rose"); // 'neutral' | 'indigo' | 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'stripe'
+setColorTheme("rose"); // 'arco' | 'neutral' | 'indigo' | 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'stripe'
 getColorTheme(); // current color theme
 console.log(getColorThemes()); // [{ id: 'neutral', label: 'Neutral', color: '#71717a' }, ...]
 ```
 
-Available themes / 可用主题: `stripe` (default), `neutral`, `indigo`, `blue`, `green`, `rose`, `orange`, `violet`
+Available themes / 可用主题: `arco` (default), `neutral`, `indigo`, `blue`, `green`, `rose`, `orange`, `violet`, `stripe`
 
 ## 🏷️ Resource Type Registry / 资源类型注册表
 

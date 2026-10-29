@@ -133,7 +133,7 @@
 <style>
   .sv-lite-sheet-container {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -143,7 +143,7 @@
   .sv-lite-sheet-header {
     margin-bottom: 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-sheet-table {
     width: 100%;
@@ -151,22 +151,22 @@
     font-family: monospace;
   }
   .sv-lite-sheet-table th, .sv-lite-sheet-table td {
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     padding: 2px;
   }
   .sv-lite-sheet-th-num, .sv-lite-sheet-td-num {
-    background-color: #f1f5f9;
+    background-color: #F2F3F5;
     text-align: center;
     width: 32px;
-    color: #64748b;
+    color: #4E5969;
     font-weight: bold;
     font-size: 10px;
   }
   .sv-lite-sheet-th {
-    background-color: #f8fafc;
+    background-color: #F7F8FA;
     text-align: center;
     font-weight: 600;
-    color: #1e293b;
+    color: #1D2129;
     min-width: 80px;
   }
   .sv-lite-cell-input {
@@ -184,7 +184,7 @@
   }
   .sv-lite-sheet-save {
     padding: 5px 12px;
-    background-color: #4f46e5;
+    background-color: #165DFF;
     color: #ffffff;
     border: none;
     border-radius: 3px;

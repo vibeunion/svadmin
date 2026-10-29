@@ -111,13 +111,13 @@
           {@const section = resourceSection(resource)}
           {#if section && (i === 0 || section !== resourceSection(resources[i-1]))}
             <tr>
-              <td colspan={actions.length + 1} style="background:#f1f5f9;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:#475569;">
+              <td colspan={actions.length + 1} style="background:#F2F3F5;font-weight:700;font-size:12px;text-transform:none;letter-spacing:0;color:#4E5969;">
                 {section}
               </td>
             </tr>
           {/if}
           <tr>
-            <td><strong>{resourceLabel(resource)}</strong><br/><small style="color:#94a3b8;">{resourceCode(resource)}</small></td>
+            <td><strong>{resourceLabel(resource)}</strong><br/><small style="color:#86909C;">{resourceCode(resource)}</small></td>
             {#each actions as action, _i (_i)}
               <td style="text-align:center;">
                 <input
@@ -133,7 +133,7 @@
         {/each}
         {#if resources.length === 0}
           <tr>
-            <td colspan={actions.length + 1} style="text-align:center;padding:24px;color:#94a3b8;">
+            <td colspan={actions.length + 1} style="text-align:center;padding:24px;color:#86909C;">
               No resources configured.
             </td>
           </tr>
@@ -154,14 +154,14 @@
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 16px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #E5E6EB;
     padding-bottom: 0;
   }
   .lite-role-tab {
     padding: 8px 16px;
     margin-right: 4px;
     text-decoration: none;
-    color: #64748b;
+    color: #4E5969;
     font-size: 14px;
     font-weight: 500;
     border-bottom: 2px solid transparent;
@@ -169,12 +169,12 @@
     transition: color 0.15s ease, border-color 0.15s ease;
   }
   .lite-role-tab:hover {
-    color: #0f172a;
+    color: #1D2129;
     text-decoration: none;
   }
   .lite-role-tab.active {
-    color: #4f46e5;
-    border-bottom-color: #4f46e5;
+    color: #165DFF;
+    border-bottom-color: #165DFF;
     font-weight: 600;
   }
 </style>

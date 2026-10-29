@@ -102,7 +102,7 @@
 <style>
   .sv-lite-decision-container {
     display: block;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 12px;
     background-color: #ffffff;
@@ -112,11 +112,11 @@
   .sv-lite-decision-header {
     margin-bottom: 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-hit-policy {
     font-size: 10px;
-    color: #64748b;
+    color: #4E5969;
     margin-left: 6px;
   }
   .sv-lite-decision-table {
@@ -125,42 +125,42 @@
     font-family: monospace;
   }
   .sv-lite-decision-table th, .sv-lite-decision-table td {
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     padding: 4px 6px;
   }
   .sv-lite-th-idx, .sv-lite-td-idx {
-    background-color: #f1f5f9;
+    background-color: #F2F3F5;
     text-align: center;
     width: 28px;
     font-size: 10px;
   }
   .sv-lite-th-cond {
-    background-color: #e0e7ff;
-    color: #3730a3;
+    background-color: #E8F3FF;
+    color: #0E42D2;
     text-align: center;
     font-weight: bold;
   }
   .sv-lite-th-act {
-    background-color: #dcfce7;
-    color: #166534;
+    background-color: #E8FFEA;
+    color: #009A29;
     text-align: center;
     font-weight: bold;
   }
   .sv-lite-th-sub {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: #F7F8FA;
+    color: #4E5969;
     font-weight: 600;
   }
   .sv-lite-rule-input {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     padding: 3px;
     font-size: 11px;
     box-sizing: border-box;
   }
   .sv-lite-act-input {
     font-weight: bold;
-    color: #4338ca;
+    color: #0E42D2;
   }
   .sv-lite-decision-actions {
     margin-top: 10px;
@@ -168,7 +168,7 @@
   }
   .sv-lite-save-btn {
     padding: 5px 12px;
-    background-color: #4f46e5;
+    background-color: #165DFF;
     color: #ffffff;
     border: none;
     border-radius: 3px;

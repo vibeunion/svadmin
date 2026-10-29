@@ -129,7 +129,7 @@
   }
   .lite-transfer-panel {
     flex: 1;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     background: #ffffff;
     min-height: 180px;
@@ -142,8 +142,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: #F7F8FA;
+    border-bottom: 1px solid #E5E6EB;
     font-size: 13px;
   }
   .lite-transfer-body {
@@ -160,7 +160,7 @@
     font-size: 13px;
   }
   .lite-transfer-item:hover {
-    background: #f1f5f9;
+    background: #F2F3F5;
   }
   .lite-transfer-item input {
     margin-right: 8px;
@@ -179,7 +179,7 @@
   .lite-transfer-empty {
     text-align: center;
     padding: 30px 10px;
-    color: #94a3b8;
+    color: #86909C;
     font-size: 12px;
   }
 </style>

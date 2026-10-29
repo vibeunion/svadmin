@@ -16,8 +16,8 @@
     {@render children()}
   {/if}
 {:else}
-  <div style="padding: 40px; text-align: center; color: #475569;">
+  <div style="padding: 40px; text-align: center; color: #4E5969;">
     <h2>Authentication Required</h2>
-    <p>Please <a href={loginUrl} style="color: #2563eb;">login here</a> to access this page.</p>
+    <p>Please <a href={loginUrl} style="color: #165DFF;">login here</a> to access this page.</p>
   </div>
 {/if}

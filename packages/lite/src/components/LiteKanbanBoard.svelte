@@ -128,8 +128,8 @@
     vertical-align: top;
     width: 260px;
     margin-right: 12px;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 10px;
     white-space: normal;
@@ -138,60 +138,60 @@
   .sv-lite-column-header {
     font-weight: bold;
     padding-bottom: 8px;
-    border-bottom: 1px solid #cbd5e1;
-    color: #1e293b;
+    border-bottom: 1px solid #E5E6EB;
+    color: #1D2129;
     margin-bottom: 8px;
   }
   .sv-lite-column-count {
-    color: #64748b;
+    color: #4E5969;
     font-weight: normal;
     font-size: 11px;
     margin-left: 4px;
   }
   .sv-lite-kanban-card {
     background-color: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
     padding: 8px;
     margin-bottom: 8px;
   }
   .sv-lite-card-title {
     font-weight: 600;
-    color: #0f172a;
+    color: #1D2129;
     margin-bottom: 4px;
   }
   .sv-lite-card-desc {
-    color: #64748b;
+    color: #4E5969;
     font-size: 11px;
     margin-bottom: 6px;
   }
   .sv-lite-card-meta {
     padding-top: 4px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #F2F3F5;
   }
   .sv-lite-priority-badge {
     display: inline-block;
     padding: 1px 4px;
     font-size: 10px;
     border-radius: 2px;
-    text-transform: uppercase;
+    text-transform: none;
     margin-right: 4px;
   }
   .sv-lite-urgent, .sv-lite-high {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: #FFECE8;
+    color: #CB272D;
   }
   .sv-lite-medium {
-    background-color: #e0e7ff;
-    color: #3730a3;
+    background-color: #E8F3FF;
+    color: #0E42D2;
   }
   .sv-lite-low {
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: #F2F3F5;
+    color: #4E5969;
   }
   .sv-lite-tag-badge {
     display: inline-block;
-    color: #64748b;
+    color: #4E5969;
     font-size: 10px;
     margin-right: 4px;
   }
@@ -202,13 +202,13 @@
     width: 170px;
     padding: 4px 6px;
     font-size: 11px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 3px;
   }
   .sv-lite-card-btn {
     padding: 4px 8px;
     font-size: 11px;
-    background-color: #4f46e5;
+    background-color: #165DFF;
     color: #ffffff;
     border: none;
     border-radius: 3px;

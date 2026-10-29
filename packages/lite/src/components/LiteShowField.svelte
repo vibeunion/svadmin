@@ -63,7 +63,7 @@
   <span>••••••••</span>
 {:else if field.type === "color" && value}
   <span style="display:inline-flex;align-items:center;">
-    <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:{toSafeText(value)};border:1px solid #cbd5e1;margin-right:6px;"></span>
+    <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:{toSafeText(value)};border:1px solid #E5E6EB;margin-right:6px;"></span>
     <span class="lite-font-mono">{toSafeText(value)}</span>
   </span>
 {:else if field.type === "url" && value}
@@ -87,7 +87,7 @@
     <span class="lite-badge">{tag}</span>
   {/each}
 {:else if field.type === "json" && value}
-  <pre style="margin:0;font-size:12px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;overflow-x:auto;">{typeof value === "string" ? value : JSON.stringify(value, null, 2)}</pre>
+  <pre style="margin:0;font-size:12px;background:#F7F8FA;padding:12px;border-radius:6px;border:1px solid #E5E6EB;overflow-x:auto;">{typeof value === "string" ? value : JSON.stringify(value, null, 2)}</pre>
 {:else if field.type === "select" && field.options}
   <span class={getStatusBadgeClass(value)}>{formatValue(value, field)}</span>
 {:else if field.type === "relation" && field.resource && value != null}

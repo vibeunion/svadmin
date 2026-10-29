@@ -246,7 +246,7 @@
 
 {#if moveError}<div role="alert"><span>{moveError}</span>{#if failedMove}<Button type="button" variant="ghost" size="sm" disabled={busy} onclick={retryFailedMove}>{i18n.t('common.retry')}</Button>{/if}</div>{/if}
 <div role="region" aria-label={ariaLabel ?? i18n.t('kanban.label')} aria-busy={loading || busy}
-  class={cn('svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-1384f66f41d0 svadmin-u-9fcd8a13827e svadmin-u-359090c2d529 svadmin-u-7f6912283f11', className)}>
+  class={cn('svadmin-kanban svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-1384f66f41d0 svadmin-u-9fcd8a13827e svadmin-u-359090c2d529 svadmin-u-7f6912283f11', className)}>
   {#if loading}
     <div role="status">{i18n.t('common.loading')}</div>
   {:else if displayError}
@@ -262,7 +262,7 @@
     <div
       role="region"
       aria-label={col.title}
-      class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-92e13d146fd7 svadmin-u-012fbd121f37 svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-22bb278694b4 svadmin-u-7f351d50b6e6 svadmin-u-cef5b893cf23 svadmin-u-a4805b5f5b63"
+      class="svadmin-kanban__column svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-92e13d146fd7 svadmin-u-012fbd121f37 svadmin-u-ca6bcd4b6f3f svadmin-u-a4805b5f5b63"
       ondragover={handleDragOver}
       ondrop={(event) => { event.preventDefault(); handleDrop(col.id); }}
     >
@@ -270,7 +270,7 @@
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-eb6e8b881acd svadmin-u-65fdbade2025 svadmin-u-591f378e24a1">
         <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
           <span>{col.title}</span>
-          <span class="svadmin-u-60fbb7713999 svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-0e65706bcccd svadmin-u-bfa603190748">
+          <span class="svadmin-kanban__count svadmin-u-60fbb7713999 svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-0e65706bcccd svadmin-u-bfa603190748">
             {colCards.length}
           </span>
         </div>
@@ -303,7 +303,7 @@
             aria-busy={busy && movingCardId === card.id}
             draggable={canDragCard(card)}
             class={cn(
-              'group svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-77a2a20e90d4 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-cd0ad9a56558 svadmin-u-eb6e8b881acd svadmin-u-cef5b893cf23 svadmin-u-0fe7d7d814d0 svadmin-u-8d08385288a6 svadmin-u-d9bff91ef7ee svadmin-u-512e82e6a68f svadmin-u-ab1dd417ce7d svadmin-u-2eba0d65d059',
+              'svadmin-kanban__card group svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-77a2a20e90d4 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-cd0ad9a56558 svadmin-u-eb6e8b881acd svadmin-u-0fe7d7d814d0 svadmin-u-8d08385288a6 svadmin-u-d9bff91ef7ee svadmin-u-512e82e6a68f svadmin-u-ab1dd417ce7d svadmin-u-2eba0d65d059',
               draggedCardId === card.id ? 'svadmin-u-2a2db4667b27 svadmin-u-16b1efa5875e svadmin-u-2691847b25ed' : ''
             )}
             ondragstart={(e) => handleDragStart(e, card.id)}
@@ -327,7 +327,7 @@
             <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-58284b4ea568 svadmin-u-6b7d6e21ccbd svadmin-u-b950dda299d3 svadmin-u-6ee2d41e2d2d svadmin-u-1dc571a3609f">
               <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
                 {#if card.priority}
-                  <Badge variant="outline" class={cn('svadmin-u-e09880869d1f svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6 uppercase svadmin-u-0e65706bcccd svadmin-u-2689f3958069', getPriorityClass(card.priority))}>
+                  <Badge variant="outline" class={cn('svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6 svadmin-u-0e65706bcccd svadmin-u-2689f3958069', getPriorityClass(card.priority))}>
                     {card.priority}
                   </Badge>
                 {/if}
@@ -372,7 +372,7 @@
         {/each}
 
         {#if addingColumnId === col.id}
-          <div class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-f5583b2907be svadmin-u-cd0ad9a56558 svadmin-u-9fe52d5d506c svadmin-u-6f7e013d6499 svadmin-u-cef5b893cf23">
+          <div class="svadmin-kanban__composer svadmin-u-ca6bcd4b6f3f svadmin-u-f5583b2907be svadmin-u-cd0ad9a56558 svadmin-u-9fe52d5d506c svadmin-u-6f7e013d6499">
             <textarea
               bind:value={newCardTitle}
               aria-label={i18n.t('kanban.cardTitle')}

@@ -45,14 +45,14 @@
 
 <div class="lite-chat-dialog lite-card" style="display:flex;flex-direction:column;height:560px;padding:0;overflow:hidden;max-width:400px;margin:0 auto;">
   <!-- Header -->
-  <div style="background:#0f172a;color:#fff;padding:14px 16px;font-weight:600;flex-shrink:0;display:flex;align-items:center;border-top-left-radius:8px;border-top-right-radius:8px;">
+  <div style="background:#1D2129;color:#fff;padding:14px 16px;font-weight:600;flex-shrink:0;display:flex;align-items:center;border-top-left-radius:8px;border-top-right-radius:8px;">
     {title}
   </div>
 
   <!-- Message History -->
-  <div class="lite-chat-history" style="flex:1;overflow-y:auto;padding:16px;background:#f8fafc;">
+  <div class="lite-chat-history" style="flex:1;overflow-y:auto;padding:16px;background:#F7F8FA;">
     {#if messages.length === 0}
-      <div style="text-align:center;color:#64748b;margin-top:60px;font-size:14px;">
+      <div style="text-align:center;color:#4E5969;margin-top:60px;font-size:14px;">
         How can I help you today?
       </div>
     {/if}
@@ -70,12 +70,12 @@
             font-size:14px;
             line-height:1.5;
             {msg.role === 'user'
-              ? 'background:#4f46e5;color:#fff;border-bottom-right-radius:2px;'
-              : 'background:#e2e8f0;color:#0f172a;border-bottom-left-radius:2px;'}"
+              ? 'background:#165DFF;color:#fff;border-bottom-right-radius:2px;'
+              : 'background:#E5E6EB;color:#1D2129;border-bottom-left-radius:2px;'}"
           >
             <div style="white-space:pre-wrap;word-break:break-word;">{messageText(msg)}</div>
           </div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">
+          <div style="font-size:11px;color:#86909C;margin-top:4px;">
             {msg.role === 'user' ? 'You' : 'Assistant'} · {formatDate(msg.createdAt)}
           </div>
         </div>
@@ -84,7 +84,7 @@
 
     {#if isLoading}
       <div id="latest-msg" style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:16px;">
-        <div style="background:#e2e8f0;color:#64748b;padding:10px 14px;border-radius:12px;border-bottom-left-radius:2px;font-size:13px;font-style:italic;">
+        <div style="background:#E5E6EB;color:#4E5969;padding:10px 14px;border-radius:12px;border-bottom-left-radius:2px;font-size:13px;font-style:italic;">
           Thinking...
         </div>
       </div>
@@ -92,7 +92,7 @@
   </div>
 
   <!-- Input Form -->
-  <form method="POST" action={actionRoute} style="display:flex;padding:12px;background:#fff;border-top:1px solid #e2e8f0;align-items:stretch;margin:0;flex-shrink:0;">
+  <form method="POST" action={actionRoute} style="display:flex;padding:12px;background:#fff;border-top:1px solid #E5E6EB;align-items:stretch;margin:0;flex-shrink:0;">
     <textarea
       name="message"
       class="lite-input"

@@ -23,6 +23,8 @@ const buttonRecipeStyles = tv({
       ghost: "svadmin-button--ghost",
       destructive: "svadmin-button--destructive",
       link: "svadmin-button--link",
+      dashed: "svadmin-button--dashed",
+      text: "svadmin-button--text",
     },
     size: {
       default: "svadmin-button-size--default",
@@ -159,11 +161,11 @@ const productToolbarRecipeStyles = tv({
 
 const productWorkspaceRecipeStyles = tv({
   slots: {
-    root: "flex min-w-0 flex-col gap-6",
+    root: "flex min-w-0 flex-col gap-4",
     summary: "min-w-0",
-    columns: "grid min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,var(--workspace-secondary-width,22rem))]",
+    columns: "grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,var(--workspace-secondary-width,22rem))]",
     primary: "min-w-0 lg:order-1",
-    secondary: "flex min-w-0 flex-col gap-6 lg:order-2",
+    secondary: "flex min-w-0 flex-col gap-4 lg:order-2",
   },
   variants: { hasSecondary: { true: {}, false: { columns: "lg:grid-cols-1" } } },
   defaultVariants: { hasSecondary: false },

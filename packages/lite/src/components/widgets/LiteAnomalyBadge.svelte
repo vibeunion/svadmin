@@ -32,12 +32,12 @@
 </script>
 
 {#if !isAnomaly}
-  <span style="font-size: 14px; color: #64748b;">{formatter(value)}</span>
+  <span style="font-size: 14px; color: #4E5969;">{formatter(value)}</span>
 {:else}
   <span
     title="Baseline: {formatter(baseline)} ({diff > 0 ? '+' : '-'}{percentLabel})"
     class="lite-badge"
-    style="background: {isGood ? '#ecfdf5' : '#fef2f2'}; color: {isGood ? '#065f46' : '#991b1b'}; border: 1px solid {isGood ? '#a7f3d0' : '#fecaca'};"
+    style="background: {isGood ? '#E8FFEA' : '#FFECE8'}; color: {isGood ? '#009A29' : '#CB272D'}; border: 1px solid {isGood ? '#E8FFEA' : '#FDCDC5'};"
   >
     {arrow} {formatter(value)}
   </span>

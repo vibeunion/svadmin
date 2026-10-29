@@ -80,10 +80,10 @@
       {/each}
     {/if}
     {#if userName}
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;">
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;border-top:1px solid #1D2129;font-size:12px;color:#86909C;">
         {userName}
         <form method="POST" action={`${basePath}/login?/logout`} style="display:inline;margin-left:8px;">
-          <button type="submit" class="lite-btn lite-btn-sm" style="color:#94a3b8;border-color:#475569;background:transparent;">Logout</button>
+          <button type="submit" class="lite-btn lite-btn-sm" style="color:#86909C;border-color:#4E5969;background:transparent;">Logout</button>
         </form>
       </div>
     {/if}

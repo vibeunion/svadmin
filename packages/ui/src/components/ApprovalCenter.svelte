@@ -329,10 +329,10 @@
   .svadmin-approval-center__header, .svadmin-approval-center__footer { justify-content: space-between; }
   .svadmin-approval-center__toolbar { flex-wrap: wrap; }
   .svadmin-approval-center__search { display: flex; align-items: center; gap: 0.5rem; min-width: min(100%, 20rem); }
-  .svadmin-approval-center__body { display: grid; grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1.6fr); border: 1px solid var(--border); }
+  .svadmin-approval-center__body { display: grid; grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1.6fr); border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
   .svadmin-approval-center__list { border-inline-end: 1px solid var(--border); }
-  .svadmin-approval-center__list button { display: grid; gap: 0.25rem; width: 100%; padding: 0.75rem; text-align: start; border-block-end: 1px solid var(--border); }
-  .svadmin-approval-center__list button.selected { background: var(--muted); }
+  .svadmin-approval-center__list button { display: grid; gap: 0.25rem; width: 100%; min-height: var(--svadmin-table-head-h); padding: 0.75rem; text-align: start; border: 0; border-block-end: 1px solid var(--border); background: transparent; color: var(--foreground); }
+  .svadmin-approval-center__list button.selected { background: color-mix(in srgb, var(--primary) 8%, var(--card)); color: var(--primary); }
   .svadmin-approval-center__list span { color: var(--muted-foreground); font-size: 0.875rem; }
   .svadmin-approval-center__detail { display: grid; gap: 0.75rem; padding: 1rem; min-width: 0; }
   .svadmin-approval-center__detail ol, .svadmin-approval-center__detail ul { margin: 0; padding-inline-start: 1.25rem; }

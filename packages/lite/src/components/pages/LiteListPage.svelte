@@ -78,7 +78,7 @@
   </div>
 
   <div class="lite-card" style="margin-bottom: 20px;">
-    <div style="padding: 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <div style="padding: 16px; border-bottom: 1px solid #E5E6EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
       <form method="GET" class="lite-filter-bar" style="margin: 0;">
         <input
           type="text"
@@ -127,7 +127,7 @@
         {/if}
       </form>
 
-      <span style="font-size: 13px; color: #64748b;">
+      <span style="font-size: 13px; color: #4E5969;">
         {t("common.total") || "Total"}: <strong>{total}</strong>
       </span>
     </div>

@@ -201,14 +201,14 @@
 </div>
 
 <style>
-  .lite-schema-form-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
-  .lite-schema-form-header { padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 14px; }
-  .lite-schema-fieldset { border: 1px solid #e2e8f0; border-radius: 4px; padding: 12px; margin: 0 0 12px; }
+  .lite-schema-form-card { background: #fff; border: 1px solid #E5E6EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+  .lite-schema-form-header { padding-bottom: 8px; border-bottom: 1px solid #E5E6EB; margin-bottom: 12px; font-size: 14px; }
+  .lite-schema-fieldset { border: 1px solid #E5E6EB; border-radius: 4px; padding: 12px; margin: 0 0 12px; }
   .lite-schema-field { margin-bottom: 12px; }
   .lite-schema-fieldset > .lite-schema-field:last-child { margin-bottom: 0; }
-  .lite-schema-footer { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid #e2e8f0; }
-  .lite-label { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; }
-  .lite-schema-description, .lite-hint { font-size: 12px; color: #64748b; }
+  .lite-schema-footer { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid #E5E6EB; }
+  .lite-label { display: block; font-size: 12px; color: #4E5969; margin-bottom: 4px; }
+  .lite-schema-description, .lite-hint { font-size: 12px; color: #4E5969; }
   .lite-input, .lite-select { width: 100%; }
   .lite-btn { margin-right: 6px; }
 </style>

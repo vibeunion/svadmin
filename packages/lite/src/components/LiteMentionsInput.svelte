@@ -61,24 +61,24 @@
   .sv-lite-textarea {
     width: 100%;
     padding: 8px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
     font-size: 12px;
     font-family: inherit;
     box-sizing: border-box;
     background-color: #ffffff;
-    color: #0f172a;
+    color: #1D2129;
   }
   .sv-lite-mentions-hints {
     margin-top: 6px;
     padding: 4px 6px;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 4px;
   }
   .sv-lite-hints-title {
     font-weight: 600;
-    color: #64748b;
+    color: #4E5969;
     margin-right: 6px;
   }
   .sv-lite-mention-badge {
@@ -86,13 +86,13 @@
     padding: 2px 6px;
     margin-right: 4px;
     margin-bottom: 2px;
-    background-color: #e0e7ff;
-    color: #4338ca;
+    background-color: #E8F3FF;
+    color: #0E42D2;
     border-radius: 3px;
     font-size: 11px;
   }
   .sv-lite-tag {
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: #F2F3F5;
+    color: #4E5969;
   }
 </style>

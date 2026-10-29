@@ -1,17 +1,17 @@
 ---
 title: 生态覆盖对照
-description: Ant Design 推荐库在 svadmin 与 Svelte 生态中的对应关系
+description: external UI kits 推荐库在 svadmin 与 Svelte 生态中的对应关系
 ---
 
-Ant Design 为 React 生态维护了一份[推荐库清单](https://ant-design.antgroup.com/docs/react/recommendation-cn)。
+external UI kits 为 React 生态维护了一份[推荐库清单](https://ant.design)。
 本页把每个分类映射到 svadmin 包、Svelte 生态替代品，或明确标注为缺口。
 只有能力由一方包交付或由框架运行时提供时，才标记为已覆盖。
 
 状态图例：✅ 一方实现 · 🔶 部分覆盖或框架提供 · 🧩 交由 Svelte 生态包 · ❌ 一方缺口 · ➖ 不适合后台场景。
 
-| 分类 | Ant Design 推荐 | svadmin 实现 | Svelte 生态 | 状态 |
+| 分类 | external UI kits 推荐 | svadmin 实现 | Svelte 生态 | 状态 |
 | --- | --- | --- | --- | --- |
-| 可视化图表 | Ant Design Charts / AntV | `BarChart`、`LineChart`、`PieChart`、`AreaChart`、`ScatterChart` | LayerChart、svelte-echarts | 🔶 基础图表；统计图表用 LayerChart |
+| 可视化图表 | chart libraries | `BarChart`、`LineChart`、`PieChart`、`AreaChart`、`ScatterChart` | LayerChart、svelte-echarts | 🔶 基础图表；统计图表用 LayerChart |
 | 流图 | reactflow | `@svadmin/flow`（xyflow/svelte） | @xyflow/svelte | ✅ |
 | Hooks 库 | ahooks | `@svadmin/core` 数据/认证 hooks + `@svadmin/ui` runes hooks：`useMediaQuery`、`useDeviceDetect`、`useClipboard`、`useLocalStorage`、`useDebouncedValue`、`useInterval`、`useEventListener`、`useOnClickOutside`、`useWindowSize` | runed | ✅ |
 | 表单 | ProForm / Formily / react-hook-form / Formik | `AutoForm`、`JsonSchemaForm`、`StepForm`、`ModalForm`、`DrawerForm` 与字段组件 | sveltekit-superforms | ✅ |
@@ -38,7 +38,7 @@ Ant Design 为 React 生态维护了一份[推荐库清单](https://ant-design.a
 | 右键菜单 | react-contexify | `context-menu` 原语 | bits-ui | ✅ |
 | Emoji | emoji-picker-react、emoji-mart | — | emoji-mart（框架无关） | ➖ |
 | 分割面板 | react-split-pane、react-resizable-panels | `SplitPaneLayout`、`WorkspaceSplitPane` | paneforge | ✅ |
-| 图片裁切 | antd-img-crop、react-image-crop | `ImageCropper`、`MediaLibraryModal` | — | ✅ |
+| 图片裁切 | 图片裁切工具 | `ImageCropper`、`MediaLibraryModal` | — | ✅ |
 | 关键字高亮 | react-highlight-words | `HighlightText` | — | ✅ |
 | 文字轮播 | react-text-loop、react-fast-marquee | `Marquee` | — | ✅ |
 | 动画 | motion、Ant Motion、react-spring | Svelte 过渡 + `tweened` / `spring` | Svelte 运行时、motion-svelte | 🔶 框架提供 |
@@ -47,8 +47,8 @@ Ant Design 为 React 生态维护了一份[推荐库清单](https://ant-design.a
 | 移动端探测 | react-device-detect | `useDeviceDetect` | — | ✅ |
 | 应用程序框架 | umi、remix、refine | svadmin 自身、`@svadmin/refine-adapter` | SvelteKit | ✅ |
 | 电话输入 | react-phone-number-input | `PhoneField`（展示）、`PhoneInput`（输入） | svelte-tel-input | ✅ |
-| AI 对话应用 | Ant Design X | `@svadmin/ai-elements` | — | ✅ |
-| 命令行工具 | Ant Design CLI | `create-svadmin`、`agmesh` | — | ✅ |
+| AI 对话应用 | external AI workspace patterns | `@svadmin/ai-elements` | — | ✅ |
+| 命令行工具 | admin CLIs | `create-svadmin`、`agmesh` | — | ✅ |
 | PDF | react-pdf、@react-pdf/renderer | `PdfDocumentViewer` | pdfjs-dist、svelte-pdf | ✅ |
 | 手势库 | use-gesture | `useSwipe`（基于 pointer） | svelte-gestures | ✅ 简单 swipe；复杂手势用 svelte-gestures |
 

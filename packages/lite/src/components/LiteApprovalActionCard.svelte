@@ -19,7 +19,7 @@
 <div class="lite-approval-card lite-form-group">
   <div class="lite-approval-header">
     <strong>{title}</strong>
-    <span class="lite-badge lite-badge-{status}">{status.toUpperCase()}</span>
+    <span class="lite-badge lite-badge-{status}">{status}</span>
   </div>
 
   {#if children}
@@ -49,8 +49,8 @@
 <style>
   .lite-approval-card {
     padding: 12px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
+    background: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
   }
@@ -63,7 +63,7 @@
   }
   .lite-approval-body {
     font-size: 12px;
-    color: #475569;
+    color: #4E5969;
     margin-bottom: 12px;
   }
   .lite-approval-field {

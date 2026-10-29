@@ -199,7 +199,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     for (const mode of ['light', 'dark'] as const) {
       await main.getByRole('button', { name: mode === 'light' ? /^(Light|浅色)$/ : /^(Dark|深色)$/ }).click();
       await expect(page.locator('html')).toHaveAttribute('data-theme-mode', mode);
-      for (const preset of ['Neutral', 'Indigo', 'Blue', 'Green', 'Rose', 'Orange', 'Violet', 'Stripe']) {
+      for (const preset of ['Default', 'Neutral', 'Indigo', 'Blue', 'Green', 'Rose', 'Orange', 'Violet', 'Stripe']) {
         const swatch = main.getByRole('button', { name: preset, exact: true });
         await swatch.click();
         await expect(swatch).toHaveAttribute('aria-pressed', 'true');

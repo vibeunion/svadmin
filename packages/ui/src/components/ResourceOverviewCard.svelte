@@ -43,7 +43,7 @@
     border-radius: var(--radius);
     background: var(--card);
     color: var(--card-foreground);
-    box-shadow: var(--shadow-surface);
+    box-shadow: none;
   }
   h2 { margin: 0; font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
   .svadmin-resource-overview-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }

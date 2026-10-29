@@ -34,7 +34,7 @@
   .lite-split-layout {
     display: flex;
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
     min-height: 300px;
@@ -56,7 +56,7 @@
     overflow-y: auto;
   }
   .lite-split-divider {
-    background: #e2e8f0;
+    background: #E5E6EB;
     width: 2px;
   }
   .lite-split-vertical .lite-split-divider {

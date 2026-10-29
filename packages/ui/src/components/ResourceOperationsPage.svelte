@@ -94,7 +94,7 @@
 <div class="svadmin-u-b3542e058833" data-svadmin-resource-operations={resourceName} data-svadmin-workspace-style={workspaceStyle} data-svadmin-layout-identity={workspaceStyle}>
   <header class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-0c3bc98565dd svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-09c1ba5f3e1a svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93" data-svadmin-ops-hero>
     <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-60541e1e26f8 svadmin-u-1004c0c3954c">
-      {#if Icon}<span class="svadmin-u-60fbb7713999 svadmin-u-665f07fe73cc svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-20aaf08a7ed1"><Icon class="svadmin-u-f7b5fa971871" /></span>{/if}
+      {#if Icon}<span class="svadmin-resource-hero__mark svadmin-u-60fbb7713999 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-20aaf08a7ed1"><Icon class="svadmin-u-f7b5fa971871" /></span>{/if}
       <div class="svadmin-u-7e0b7cdf1a94"><Badge variant="outline">{eyebrow}</Badge><h1 class="svadmin-u-50d0d216a2f8 svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{title}</h1><p class="svadmin-u-b6b02c0ebef6 svadmin-u-fa3f7111e53b svadmin-u-fc7473ca09eb svadmin-u-18550d5945ae svadmin-u-bfa603190748">{description}</p></div>
     </div>
     {#if showCreate}

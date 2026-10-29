@@ -95,10 +95,10 @@
   }
 </script>
 
-<section class="space-y-4 rounded-xl border border-border/60 bg-muted/10 p-4 sm:p-6" data-declarative-surface-example>
+<section class="space-y-4 rounded-sm border border-border bg-card p-4 sm:p-6" data-declarative-surface-example>
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.14em] text-primary">@svadmin/surface</p>
+      <p class="text-xs font-semibold text-primary">@svadmin/surface</p>
       <p class="mt-1 text-sm text-muted-foreground">
         {isZh ? '固定 JSON 协议、字段策略与可信组件目录。' : 'A fixed JSON contract, field policy, and trusted component catalog.'}
       </p>

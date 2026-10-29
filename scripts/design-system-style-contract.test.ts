@@ -22,7 +22,7 @@ describe('cross-package design system', () => {
       values.push(decl.value);
       expect(decl.value).not.toMatch(/var\(|color-mix\(|oklch\(/);
     });
-    for (const color of ['#635bff', '#0a2540', '#f6f9fc', '#e6ebf1']) {
+    for (const color of ['#165DFF', '#1D2129', '#F7F8FA', '#E5E6EB']) {
       expect(values.join(' ')).toContain(color);
     }
     expect(values.join(' ')).not.toMatch(/#4f46e5|#0f172a|#f8fafc/);
@@ -33,8 +33,8 @@ describe('cross-package design system', () => {
     postcss.parse(read('packages/lite/src/lite.css')).walkRules('a', (rule) => {
       rule.walkDecls('color', (decl) => { linkColor = decl.value; });
     });
-    expect(linkColor).toMatch(/^#[\da-f]{6}$/);
-    for (const background of ['#f6f9fc', '#f1f4f8', '#ffffff']) {
+    expect(linkColor).toMatch(/^#[\da-f]{6}$/i);
+    for (const background of ['#F7F8FA', '#F2F3F5', '#FFFFFF']) {
       expect((luminance(background) + 0.05) / (luminance(linkColor) + 0.05)).toBeGreaterThanOrEqual(4.5);
     }
   });
@@ -50,9 +50,9 @@ describe('cross-package design system', () => {
 
   it('retains Flow overrides before host semantics and standalone fallbacks', () => {
     const css = read('packages/flow/src/flow.css');
-    expect(css).toContain('var(--svadmin-flow-accent, var(--primary, #635bff))');
+    expect(css).toContain('var(--svadmin-flow-accent, var(--primary, #165DFF))');
     expect(css).toContain('var(--svadmin-flow-control-background, var(--card, #fff))');
-    expect(css).toContain('var(--svadmin-flow-border, var(--border, #e6ebf1))');
+    expect(css).toContain('var(--svadmin-flow-border, var(--border, #E5E6EB))');
     expect(css).toContain('text-align: start;');
   });
 

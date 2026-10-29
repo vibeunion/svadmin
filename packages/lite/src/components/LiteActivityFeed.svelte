@@ -61,14 +61,14 @@
 <style>
   .lite-activity-card {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     padding: 16px;
     margin-bottom: 16px;
   }
   .lite-activity-header {
     padding-bottom: 8px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #E5E6EB;
     margin-bottom: 12px;
     font-size: 13px;
   }
@@ -79,20 +79,20 @@
   }
   .lite-activity-item {
     padding: 8px 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #F2F3F5;
     font-size: 12px;
   }
   .lite-activity-time {
-    color: #94a3b8;
+    color: #86909C;
     margin-left: 8px;
     font-size: 11px;
   }
   .lite-activity-comment {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #F7F8FA;
+    border: 1px solid #E5E6EB;
     padding: 6px 10px;
     border-radius: 4px;
     margin-top: 4px;
-    color: #475569;
+    color: #4E5969;
   }
 </style>

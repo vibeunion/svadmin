@@ -51,9 +51,9 @@
     aria-describedby={description ? descriptionId : undefined}
     tabindex="-1"
   >
-    <div id={titleId} style="font-weight:600;margin-bottom:8px;color:#0f172a;">{title}</div>
+    <div id={titleId} style="font-weight:600;margin-bottom:8px;color:#1D2129;">{title}</div>
     {#if description}
-      <div id={descriptionId} style="font-size:12px;color:#64748b;margin-bottom:16px;">{description}</div>
+      <div id={descriptionId} style="font-size:12px;color:#4E5969;margin-bottom:16px;">{description}</div>
     {/if}
     <form method="POST" {action} class="lite-inline-actions lite-justify-end">
       {#each Object.entries(hiddenInputs) as [key, val] (key)}

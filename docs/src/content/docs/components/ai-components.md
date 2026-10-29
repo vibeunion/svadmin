@@ -135,9 +135,9 @@ default, so undeclared fields are rejected without requiring callers to repeat
 <ChatDialog {componentRegistry} />
 ```
 
-## Ant Design X-inspired boundary
+## AI workspace boundary
 
-SVAdmin uses Ant Design X as an interaction and product-model reference for
+SVAdmin uses external AI workspace patterns as an interaction and product-model reference for
 enterprise AI workspaces, not as a React dependency or a promise of API or
 pixel-level compatibility. The mapped core loop is:
 

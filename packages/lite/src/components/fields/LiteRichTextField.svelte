@@ -16,16 +16,16 @@
 
 {#if mode === 'show'}
   <!-- Lite mode intentionally renders rich content as text to keep SSR output safe without a sanitizer dependency. -->
-  <div style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 6px; max-height: 500px; overflow-y: auto; background: #fff; white-space: pre-wrap;" class="prose">
+  <div style="padding: 16px; border: 1px solid #E5E6EB; border-radius: 6px; max-height: 500px; overflow-y: auto; background: #fff; white-space: pre-wrap;" class="prose">
     {displayValue}
   </div>
 {:else}
   <div class="lite-markdown-editor">
-    <div class="lite-inline-lg lite-flex-wrap" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-bottom: none; border-radius: 6px 6px 0 0; background: #f8fafc; color: #64748b; font-size: 12px; font-weight: 500;">
+    <div class="lite-inline-lg lite-flex-wrap" style="padding: 8px 12px; border: 1px solid #E5E6EB; border-bottom: none; border-radius: 6px 6px 0 0; background: #F7F8FA; color: #4E5969; font-size: 12px; font-weight: 500;">
       <span>Markdown is supported</span>
-      <span style="color: #94a3b8;">**bold**</span>
-      <span style="color: #94a3b8; font-style: italic;">*italic*</span>
-      <span style="color: #94a3b8;"># heading</span>
+      <span style="color: #86909C;">**bold**</span>
+      <span style="color: #86909C; font-style: italic;">*italic*</span>
+      <span style="color: #86909C;"># heading</span>
     </div>
     <textarea
       name={field.key}

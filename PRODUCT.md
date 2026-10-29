@@ -16,11 +16,12 @@ repeatable. It is not a marketing page.
 
 ## Positioning
 
-The visual language is Stripe-inspired admin: a neutral canvas, one action
-accent, hairline structure, and a system sans. It is not the Stripe marketing
-site, and it does not adopt a purple-gradient or Inter-only aesthetic. shadcn-svelte
-and Bits UI remain the component behavior. Named color themes swap the accent.
-They do not replace the neutral system.
+The visual language is svadmin: neutral canvas `#F7F8FA`, one primary
+action accent, hairline structure, 14px type, and 2px/4px radius. It is not the
+marketing site, and it does not adopt gradients, a technical grid, or an
+Inter-only aesthetic. shadcn-svelte and Bits UI remain the component
+implementation. Named color themes swap the accent. They do not replace the
+neutral system.
 
 ## Capabilities and constraints
 

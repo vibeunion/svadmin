@@ -52,7 +52,7 @@
             <tbody>
               {#each Object.entries(activeItem) as [k, v] (k)}
                 <tr>
-                  <th style="width: 30%; text-align: left; background: #f8fafc;">{k}</th>
+                  <th style="width: 30%; text-align: left; background: #F7F8FA;">{k}</th>
                   <td>{typeof v === 'object' ? JSON.stringify(v) : String(v ?? '—')}</td>
                 </tr>
               {/each}
@@ -61,7 +61,7 @@
         </div>
       {/if}
     {:else}
-      <div style="color: #94a3b8; padding: 24px; text-align: center;">
+      <div style="color: #86909C; padding: 24px; text-align: center;">
         Select an item to view details
       </div>
     {/if}
@@ -72,19 +72,19 @@
   .lite-master-detail-card {
     display: flex;
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
     min-height: 320px;
   }
   .lite-master-list {
     flex: 0 0 240px;
-    border-right: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border-right: 1px solid #E5E6EB;
+    background: #F7F8FA;
   }
   .lite-master-header {
     padding: 10px 12px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #E5E6EB;
     font-size: 12px;
   }
   .lite-master-items {
@@ -93,16 +93,16 @@
     margin: 0;
   }
   .lite-master-item {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #F2F3F5;
   }
   .lite-master-item-active {
-    background: #e0e7ff;
+    background: #E8F3FF;
     font-weight: bold;
   }
   .lite-master-link {
     display: block;
     padding: 8px 12px;
-    color: #1e293b;
+    color: #1D2129;
     text-decoration: none;
     font-size: 12px;
   }

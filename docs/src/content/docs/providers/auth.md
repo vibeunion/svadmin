@@ -59,7 +59,7 @@ the backend must enforce those separately.
 
 ## Auth Pages
 
-Built-in auth pages use the shared Stripe-inspired shell and semantic tokens:
+Built-in auth pages use the shared product shell and semantic tokens:
 - `LoginPage` — Email/password login
 - `RegisterPage` — User registration
 - `ForgotPasswordPage` — Password reset request

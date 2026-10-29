@@ -17,7 +17,7 @@ body { margin: 0; }
 .kit-nav button:hover { background: var(--muted); }
 .kit-nav button[aria-current='page'] { background: var(--accent); color: var(--accent-foreground); font-weight: 600; }
 .kit-nav-note { white-space: pre-line; margin: 32px 12px; color: var(--muted-foreground); font-size: 12px; }
-.kit-workspace { min-width: 0; background: var(--background); background-image: linear-gradient(to right, color-mix(in lch, var(--primary) 4%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in lch, var(--primary) 4%, transparent) 1px, transparent 1px); background-size: var(--svadmin-grid-size, 40px) var(--svadmin-grid-size, 40px); }
+.kit-workspace { min-width: 0; background: var(--background); }
 .kit-scenario { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; min-height: 60px; padding: 12px 32px; border-bottom: 1px solid var(--border); }
 .kit-scenario > span { font-size: 12px; margin-inline-start: auto; }
 .kit-check { font-size: 12px; }

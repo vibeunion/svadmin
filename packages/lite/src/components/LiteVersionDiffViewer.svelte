@@ -55,7 +55,7 @@
           <td>
             <strong>{fieldLabels[key] || key}</strong>
             {#if status !== 'unchanged'}
-              <span class="lite-badge lite-badge-{status}">[{status.toUpperCase()}]</span>
+              <span class="lite-badge lite-badge-{status}">[{status}]</span>
             {/if}
           </td>
           <td class="lite-diff-old">
@@ -83,14 +83,14 @@
 <style>
   .lite-diff-viewer {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
   }
   .lite-diff-header {
     padding: 10px 12px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: #F7F8FA;
+    border-bottom: 1px solid #E5E6EB;
     font-size: 13px;
   }
   .lite-diff-table {
@@ -99,31 +99,31 @@
     font-size: 12px;
   }
   .lite-diff-table th {
-    background: #f1f5f9;
+    background: #F2F3F5;
     padding: 8px 12px;
     text-align: left;
   }
   .lite-diff-table td {
     padding: 8px 12px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #E5E6EB;
   }
   .lite-diff-added {
-    background: #ecfdf5;
+    background: #E8FFEA;
   }
   .lite-diff-removed {
-    background: #fef2f2;
+    background: #FFECE8;
   }
   .lite-diff-modified {
-    background: #fffbeb;
+    background: #FFF7E8;
   }
   .lite-diff-old del {
-    color: #ef4444;
+    color: #F53F3F;
   }
   .lite-diff-new ins {
-    color: #10b981;
+    color: #00B42A;
     text-decoration: none;
   }
   .lite-diff-new strong {
-    color: #f59e0b;
+    color: #FF7D00;
   }
 </style>

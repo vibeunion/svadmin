@@ -51,14 +51,14 @@
 <style>
   .lite-import-wizard {
     padding: 12px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
+    background: #F7F8FA;
+    border: 1px solid #E5E6EB;
     border-radius: 6px;
     margin-bottom: 16px;
   }
   .lite-import-title {
     font-size: 13px;
-    color: #334155;
+    color: #1D2129;
     margin-bottom: 8px;
   }
   .lite-file-row {
@@ -67,13 +67,13 @@
   .lite-label {
     display: block;
     font-size: 12px;
-    color: #475569;
+    color: #4E5969;
     margin-bottom: 4px;
   }
   .lite-field-mapping-hints {
     margin-bottom: 12px;
     font-size: 11px;
-    color: #64748b;
+    color: #4E5969;
   }
   .lite-hint-title {
     display: block;
@@ -86,8 +86,8 @@
   }
   .lite-badge {
     display: inline-block;
-    background: #e2e8f0;
-    color: #334155;
+    background: #E5E6EB;
+    color: #1D2129;
     padding: 2px 6px;
     border-radius: 3px;
     margin-right: 6px;
