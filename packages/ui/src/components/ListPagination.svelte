@@ -1,7 +1,8 @@
 <script lang="ts">
+  import type { HTMLAttributes } from 'svelte/elements';
   import { listPaginationItems } from './list-pagination.js';
 
-  interface Props {
+  type Props = Omit<HTMLAttributes<HTMLDivElement>, 'class' | 'children'> & {
     page: number;
     totalPages: number;
     total: number;
@@ -15,7 +16,7 @@
     onPageChange: (page: number) => void;
     onPageSizeChange?: ((pageSize: number) => void) | undefined;
     class?: string | undefined;
-  }
+  };
 
   let {
     page,
@@ -31,6 +32,7 @@
     onPageChange,
     onPageSizeChange,
     class: className = '',
+    ...restProps
   }: Props = $props();
 
   const items = $derived(listPaginationItems(page, totalPages));
@@ -38,7 +40,7 @@
 </script>
 
 {#if paginated}
-  <div class={`svadmin-list-pagination ${className}`.trim()} role="navigation" aria-label={`${label}分页导航`}>
+  <div {...restProps} class={`svadmin-list-pagination ${className}`.trim()} role="navigation" aria-label={`${label}分页导航`}>
     {#if showSummary}
       <div class="svadmin-list-pagination__info">
         <span>第 {rangeStart}–{rangeEnd} 条 / 共 {total} 条</span>
@@ -79,7 +81,7 @@
     </div>
   </div>
 {:else if showSummary}
-  <p class={`svadmin-list-pagination__summary ${className}`.trim()}>共 {total} 条</p>
+  <p {...restProps} class={`svadmin-list-pagination__summary ${className}`.trim()}>共 {total} 条</p>
 {/if}
 
 <style>

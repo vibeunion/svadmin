@@ -71,7 +71,7 @@
   .svadmin-image-preview__trigger:hover .svadmin-image-preview__overlay, .svadmin-image-preview__trigger:focus-visible .svadmin-image-preview__overlay { opacity: 1; }
   .svadmin-image-preview { width: min(64rem, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); overflow: auto; }
   .svadmin-image-preview__title { padding-inline-end: var(--svadmin-space-6); font-size: var(--svadmin-text-body); }
-  .svadmin-image-preview__stage { position: relative; display: grid; place-items: center; min-height: 12rem; background: var(--muted); border-radius: var(--radius-md); }
+  .svadmin-image-preview__stage { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; max-height: 70vh; background: var(--muted); border-radius: var(--radius-md); }
   .svadmin-image-preview__stage img { max-width: 100%; max-height: 70vh; object-fit: contain; }
   .svadmin-image-preview__prev { position: absolute; inset-inline-start: var(--svadmin-space-2); }
   .svadmin-image-preview__next { position: absolute; inset-inline-end: var(--svadmin-space-2); }
