@@ -35,7 +35,7 @@ export {
   decodeSavedListViewAccess,
 } from './components/saved-list-views.js';
 export type {
-  SavedListView, SavedListViewState, SavedListViewProvider, SavedListViewMutation,
+  SavedListView, SavedListViewState, SavedListViewColumnPinning, SavedListViewProvider, SavedListViewMutation,
   SavedListViewMutationSuccess, SavedListViewMutationConflict, SavedListViewRemoveSuccess,
   ListPreferenceScope,
   SavedListViewAccess, SavedListViewAccessMode,

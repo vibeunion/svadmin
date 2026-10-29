@@ -10,6 +10,11 @@ const CRUD_OPERATORS = new Set([
   'in', 'nin', 'null', 'nnull', 'between', 'nbetween',
 ]);
 
+export interface SavedListViewColumnPinning {
+  left: string[];
+  right: string[];
+}
+
 export interface SavedListViewState {
   search: string;
   filters: Filter[];
@@ -22,6 +27,8 @@ export interface SavedListViewState {
   columnOrder: string[];
   /** 表格密度；旧视图缺失时沿用宿主当前密度。 */
   density?: 'compact' | 'comfortable';
+  /** 冻结列；旧视图缺失时沿用宿主当前冻结列。 */
+  columnPinning?: SavedListViewColumnPinning;
 }
 
 export interface SavedListView {
@@ -181,6 +188,35 @@ function parseColumnOrder(value: unknown, allowedColumnIds: Set<string>, pruned:
   return order;
 }
 
+function parseColumnPinning(
+  value: unknown,
+  allowedColumnIds: Set<string>,
+  pruned: Set<string>,
+): SavedListViewColumnPinning | undefined | null {
+  if (value === undefined) return undefined;
+  if (!isRecord(value) || Object.keys(value).some(key => key !== 'left' && key !== 'right')) return null;
+  const parseSide = (side: unknown): string[] | null => {
+    if (side === undefined) return [];
+    if (!Array.isArray(side)) return null;
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const columnId of side) {
+      if (typeof columnId !== 'string') return null;
+      if (!allowedColumnIds.has(columnId)) { pruned.add(columnId); continue; }
+      if (seen.has(columnId)) continue;
+      seen.add(columnId);
+      ids.push(columnId);
+    }
+    return ids;
+  };
+  const left = parseSide(value['left']);
+  const right = parseSide(value['right']);
+  if (!left || !right) return null;
+  const rightIds = new Set(right);
+  if (left.some(columnId => rightIds.has(columnId))) return null;
+  return { left, right };
+}
+
 function parseState(value: unknown, allowedColumnIds: Set<string>, pruned: Set<string>): SavedListViewState | undefined {
   if (!isRecord(value)) return undefined;
   if (typeof value['search'] !== 'string' || value['search'].length > 1_000) return undefined;
@@ -199,6 +235,8 @@ function parseState(value: unknown, allowedColumnIds: Set<string>, pruned: Set<s
   if (!sorters || !columnVisibility || !columnOrder) return undefined;
   const density = value['density'] === undefined ? undefined : value['density'];
   if (density !== undefined && density !== 'compact' && density !== 'comfortable') return undefined;
+  const columnPinning = parseColumnPinning(value['columnPinning'], allowedColumnIds, pruned);
+  if (columnPinning === null) return undefined;
 
   return {
     search: value['search'],
@@ -211,6 +249,7 @@ function parseState(value: unknown, allowedColumnIds: Set<string>, pruned: Set<s
     columnVisibility,
     columnOrder,
     ...(density === undefined ? {} : { density }),
+    ...(columnPinning === undefined ? {} : { columnPinning }),
   };
 }
 
@@ -335,8 +374,22 @@ export function decodeSavedListViewMutationResult(
       if (candidate['access'] !== undefined && !access) return;
       const state = candidate['state'];
       if (!isRecord(state) || Object.keys(state).some(key =>
-        !['search', 'filters', 'sorters', 'pagination', 'columnVisibility', 'columnOrder', 'density'].includes(key))) return;
+        !['search', 'filters', 'sorters', 'pagination', 'columnVisibility', 'columnOrder', 'density', 'columnPinning'].includes(key))) return;
       if (state['density'] !== undefined && state['density'] !== 'compact' && state['density'] !== 'comfortable') return;
+      if (state['columnPinning'] !== undefined) {
+        const pinning = state['columnPinning'];
+        if (!isRecord(pinning) || Object.keys(pinning).some(key => key !== 'left' && key !== 'right')) return;
+        const exactSide = (side: unknown): string[] | undefined => {
+          if (!Array.isArray(side) || side.some(id => typeof id !== 'string' || !allowedColumnIds.has(id))
+            || new Set(side).size !== side.length) return;
+          return side as string[];
+        };
+        const left = exactSide(pinning['left']);
+        const right = exactSide(pinning['right']);
+        if (!left || !right) return;
+        const rightIds = new Set(right);
+        if (left.some(id => rightIds.has(id))) return;
+      }
       if (!isRecord(state['pagination']) || Object.keys(state['pagination']).some(key =>
         !['current', 'pageSize'].includes(key))) return;
       if (!isRecord(state['columnVisibility']) || Object.entries(state['columnVisibility'])

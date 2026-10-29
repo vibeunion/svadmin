@@ -55,6 +55,7 @@ export function captureSavedListViewState(
   columns: Pick<SavedListViewState, 'columnVisibility' | 'columnOrder'>,
   fallbackPageSize: number,
   density?: SavedListViewState['density'],
+  columnPinning?: SavedListViewState['columnPinning'],
 ): SavedListViewState {
   return {
     search: snapshot.search,
@@ -67,6 +68,9 @@ export function captureSavedListViewState(
     columnVisibility: { ...columns.columnVisibility },
     columnOrder: [...columns.columnOrder],
     ...(density === undefined ? {} : { density }),
+    ...(columnPinning === undefined ? {} : {
+      columnPinning: { left: [...columnPinning.left], right: [...columnPinning.right] },
+    }),
   };
 }
 
