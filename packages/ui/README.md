@@ -53,7 +53,7 @@ Use the business page layer as the default customer API:
 - `PagePattern` for custom list, form, detail, workspace, and dashboard pages.
 - `AppShellPage` for hosts that bring their own router: sidebar, topbar, primary
   region, optional secondary column and footer, with no data or router coupling.
-- `FilterToolbar`, `AutoTable`, `SavedViewsMenu`, `ListPagination`, `ListFooter`, `ScrollableTable`, `AutoForm`, `DetailDrawer`,
+- `FilterToolbar`, `AutoTable`, `SavedViewsMenu`, `ListPagination`, `ListFooter`, `DataTableShell`, `ScrollableTable`, `AutoForm`, `DetailDrawer`,
   `RowActions`, and `DataState` for the recurring work patterns inside those
   pages.
 
