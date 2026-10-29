@@ -138,5 +138,5 @@
   }
   .svadmin-copy-button:disabled { opacity: 0.5; cursor: not-allowed; }
   .svadmin-copy-button[data-state='copied'] { color: var(--primary); }
-  .svadmin-copy-button[data-state='error'] { color: var(--destructive, #dc2626); }
+  .svadmin-copy-button[data-state='error'] { color: var(--destructive); }
 </style>
