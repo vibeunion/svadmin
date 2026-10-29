@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.21.3](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.2...supabase-v0.21.3) (2026-10-29)
+
+
+### 🐛 Bug Fixes
+
+* **quality:** resolve findings and pin vendor patch integrity ([3e508cd](https://github.com/vibeunion/svadmin/commit/3e508cd9d029d1662bd46b6aec566a12e205f820))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.14
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.3
+
 ## [0.21.2](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.1...supabase-v0.21.2) (2026-10-28)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.7](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.6...ai-elements-v0.12.7) (2026-10-29)
+
+
+### 🐛 Bug Fixes
+
+* **quality:** resolve findings and pin vendor patch integrity ([3e508cd](https://github.com/vibeunion/svadmin/commit/3e508cd9d029d1662bd46b6aec566a12e205f820))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.3
+
 ## [0.12.6](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.5...ai-elements-v0.12.6) (2026-10-28)
 
 

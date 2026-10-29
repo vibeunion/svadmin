@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.45.9](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.45.8...create-svadmin-v0.45.9) (2026-10-29)
+
+
+### 🐛 Bug Fixes
+
+* **quality:** resolve findings and pin vendor patch integrity ([3e508cd](https://github.com/vibeunion/svadmin/commit/3e508cd9d029d1662bd46b6aec566a12e205f820))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.66.3
+
 ## [0.45.8](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.45.7...create-svadmin-v0.45.8) (2026-10-28)
 
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.98.0](https://github.com/vibeunion/svadmin/compare/ui-v0.97.0...ui-v0.98.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** persist column pinning in saved list views ([#579](https://github.com/vibeunion/svadmin/issues/579)) ([2de576a](https://github.com/vibeunion/svadmin/commit/2de576a678504144d4e86b3210f59030c6aa30f7))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** stamp package version in published AboutSettings ([#576](https://github.com/vibeunion/svadmin/issues/576)) ([e6675c9](https://github.com/vibeunion/svadmin/commit/e6675c90ec2ba952037512ba4c9b350fe5e28d99))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.10
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.7
+  * peerDependencies
+    * @svadmin/core bumped to 0.66.3
+
 ## [0.97.0](https://github.com/vibeunion/svadmin/compare/ui-v0.96.1...ui-v0.97.0) (2026-10-28)
 
 
