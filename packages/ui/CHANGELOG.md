@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.103.0](https://github.com/vibeunion/svadmin/compare/ui-v0.102.0...ui-v0.103.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** complete templates and rewrite legacy utility sources ([953f242](https://github.com/vibeunion/svadmin/commit/953f2425273aeda0a2432e48075d8230136e30b5))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep AutoTable desktop rows and mobile cards visible at their intended breakpoints when AI styles are loaded.
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.12
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.68.0
+
 ## [0.102.0](https://github.com/vibeunion/svadmin/compare/ui-v0.101.0...ui-v0.102.0) (2026-10-29)
 
 

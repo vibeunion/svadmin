@@ -75,6 +75,28 @@ for (const resource of Object.keys(demoSchemas)) {
   });
 }
 
+test('native product table and cards switch exclusively at the desktop breakpoint', async ({ page }) => {
+  await login(page);
+  await page.goto('/#/products');
+  await openRecords(page);
+  const boundary = page.locator('[data-svadmin-rendering-kind="table"]');
+  const desktop = boundary.locator('table');
+  const cards = boundary.locator('.svadmin-auto-table__mobile');
+
+  // 同时加载 UI 与 AI 样式后，断点两侧始终只有一种记录视图可见。
+  for (const width of [767, 768, 1280, 767]) {
+    await page.setViewportSize({ width, height: 900 });
+    if (width >= 768) {
+      await expect(desktop.locator('tbody tr').first()).toBeVisible();
+      await expect(cards).toBeHidden();
+    } else {
+      await expect(desktop).toBeHidden();
+      await expect(cards).toBeVisible();
+      await expect(cards.getByRole('checkbox').first()).toBeVisible();
+    }
+  }
+});
+
 test('native product inline editing remains usable through the rendering boundary', async ({ page }) => {
   await login(page);
   await page.goto('/#/products');
@@ -114,6 +136,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 108
       return opacity;
     })).toBe(1);
     await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    await boundary.locator('table').scrollIntoViewIfNeeded();
     const screenshot = await stableScreenshot(() => page.screenshot({ fullPage: false, animations: 'disabled', caret: 'hide' }));
     await writeFile(join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), screenshot);
     await testInfo.attach('typed-rendering-screen', { path: join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), contentType: 'image/png' });
