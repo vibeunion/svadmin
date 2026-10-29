@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import postcss from 'postcss';
+import {
+  productComponentSizeMigration,
+  productDarkTokenMigration,
+  productLightTokenMigration,
+} from './ui-browser-product-migration.mjs';
 
 // 独立记录历史基线到升级后目标的累计差异；禁止从候选 CSS 或计算样式生成期望。
 export const lightTokenMigration = Object.freeze({
@@ -60,11 +65,13 @@ export const bodyStyleMigration = Object.freeze({
 // 已合并的尺寸基线；常量独立于候选 CSS，null 表示历史规则没有该声明。
 export const tableSizeMigration = Object.freeze({
   '.svadmin-table-head': Object.freeze({
-    height: Object.freeze(['2.25rem', '2.75rem']),
+    height: Object.freeze(['2.25rem', '2.5rem']),
+    background: Object.freeze([null, 'var(--background)']),
+    color: Object.freeze(['var(--foreground)', 'var(--muted-foreground)']),
     'font-size': Object.freeze([null, '0.75rem']),
   }),
   '.svadmin-table-cell': Object.freeze({
-    height: Object.freeze([null, '3rem']),
+    height: Object.freeze([null, '2.5rem']),
     'font-size': Object.freeze([null, '0.8125rem']),
   }),
 });
@@ -97,8 +104,8 @@ function isRootRule(rule) {
   return rule.parent?.type === 'root';
 }
 
-function migrateTableSizes(root) {
-  for (const [selector, declarations] of Object.entries(tableSizeMigration)) {
+function migrateComponentDeclarations(root, migrations) {
+  for (const [selector, declarations] of Object.entries(migrations)) {
     const rules = [];
     root.walkRules(selector, rule => {
       const layer = rule.parent;
@@ -126,7 +133,10 @@ export function createMigrationReference(baselineCss) {
   replaceDeclarations(root, ':root', lightTokenMigration, isBaseToken);
   replaceDeclarations(root, ':root', stripeLightTokenMigration, isBaseToken);
   replaceDeclarations(root, '.dark', stripeDarkTokenMigration, isBaseToken);
+  replaceDeclarations(root, ':root', productLightTokenMigration, isBaseToken);
+  replaceDeclarations(root, '.dark', productDarkTokenMigration, isBaseToken);
   replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
-  migrateTableSizes(root);
+  migrateComponentDeclarations(root, tableSizeMigration);
+  migrateComponentDeclarations(root, productComponentSizeMigration);
   return root.toString();
 }
