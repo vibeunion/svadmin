@@ -289,7 +289,19 @@ export { default as DraggableGrid } from "./components/DraggableGrid.svelte";
 export type { GridModule } from "./types.js";
 
 // Dashboard Charts (zero-dependency SVG)
-export { BarChart, LineChart, PieChart, AreaChart, ScatterChart } from './components/charts/index.js';
+export {
+  BarChart,
+  LineChart,
+  PieChart,
+  AreaChart,
+  ScatterChart,
+  RadarChart,
+  GaugeChart,
+  FunnelChart,
+  HeatmapChart,
+  WaterfallChart,
+  RoseChart,
+} from './components/charts/index.js';
 // Field display components
 export { default as NumberField } from './components/fields/NumberField.svelte';
 export { default as DateField } from './components/fields/DateField.svelte';

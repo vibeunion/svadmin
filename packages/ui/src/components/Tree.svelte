@@ -83,7 +83,10 @@
     return loaded[node.id] ?? node.children;
   }
 
-  const effectiveNodes = $derived(nodes.map((node) => ({ ...node, children: childrenOf(node) })));
+  const effectiveNodes = $derived(nodes.map((node): TreeNode => {
+    const children = childrenOf(node);
+    return children === undefined ? { ...node } : { ...node, children };
+  }));
 
   const index = $derived.by(() => {
     const map = new Map<string, { node: TreeNode; parentId?: string; depth: number }>();
