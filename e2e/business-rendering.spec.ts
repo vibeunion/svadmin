@@ -136,6 +136,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 108
       return opacity;
     })).toBe(1);
     await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    await boundary.locator('table').scrollIntoViewIfNeeded();
     const screenshot = await stableScreenshot(() => page.screenshot({ fullPage: false, animations: 'disabled', caret: 'hide' }));
     await writeFile(join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), screenshot);
     await testInfo.attach('typed-rendering-screen', { path: join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), contentType: 'image/png' });
