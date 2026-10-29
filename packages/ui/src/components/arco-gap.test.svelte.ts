@@ -10,7 +10,7 @@ afterEach(() => cleanup());
 
 describe('Arco gap components', () => {
   it('renders a link, result, list, tree and spin with Arco roles', () => {
-    render(Link, { href: '/docs', children: undefined });
+    render(Link, { href: '/docs' });
     render(Result, { status: 'success', title: '提交成功', subtitle: '可以返回列表' });
     render(ItemList, { items: [{ id: '1', title: '第一条', description: '说明' }] });
     render(Tree, { nodes: [{ id: 'root', label: '根节点', children: [{ id: 'leaf', label: '叶子' }] }] });

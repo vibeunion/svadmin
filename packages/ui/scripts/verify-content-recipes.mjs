@@ -21,7 +21,7 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const names = ['ContentPageShell', 'ContentPageHeader', 'MetricBlock'];
 const report = {
   baseline, head: git('rev-parse', 'HEAD'), baselineSources: {}, candidateSources: {}, css: {},
-  comparison: 'Exact geometry/styles and PNG versus historical components with explicit Tailwind migration corrections: 24px header gap, wrapping breadcrumbs, 1.5 caption/body leading, 65ch description measure, semantic clean-flat metric surfaces and four trend colors. Original historical PNGs are retained.',
+  comparison: 'Exact geometry/styles and PNG versus historical components with explicit Tailwind migration corrections: 24px header gap, wrapping breadcrumbs, 1.5 caption and 1.4 body leading, 65ch description measure, semantic clean-flat metric surfaces and four trend colors. Original historical PNGs are retained.',
   cases: [], errors: [],
 };
 let server;
@@ -125,7 +125,7 @@ try {
           throw new Error('Missing historical header eyebrow or description');
         }
         eyebrow.style.lineHeight = '1.5';
-        description.style.lineHeight = '1.5';
+        description.style.lineHeight = '1.4';
         description.style.maxWidth = '65ch';
       }
       if (stage.closest('.layout-clean-flat')) {
