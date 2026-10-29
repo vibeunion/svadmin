@@ -177,4 +177,3 @@ throw new HttpError('验证失败', 422, {
 - `syncWithLocation` 把打开状态写入当前路由查询参数，刷新和前进/后退可恢复；`param` 可改参数名
 
 路由驱动的编辑页继续使用 `<AutoForm mode="edit" id={...}>`，记录身份已经在路由中。
-
