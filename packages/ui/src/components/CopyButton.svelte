@@ -6,7 +6,7 @@
   interface Props {
     value?: string | number | null | undefined;
     /** Human-readable name used in the accessible label and feedback. */
-    description?: string;
+    description?: string | undefined;
     label?: string | undefined;
     copiedLabel?: string | undefined;
     errorLabel?: string | undefined;
@@ -15,7 +15,7 @@
     errorTitle?: string | undefined;
     disabled?: boolean;
     /** How long the copied/error state stays visible. */
-    resetDelayMs?: number;
+    resetDelayMs?: number | undefined;
     oncopy?: ((value: string) => void) | undefined;
     class?: string | undefined;
   }
@@ -79,13 +79,19 @@
       await writeText.call(globalThis.navigator.clipboard, target);
       if (destroyed) return;
       copied = true;
-      oncopy?.(target);
     } catch {
       if (!destroyed) error = errorLabel;
     } finally {
       if (!destroyed) {
         copying = false;
         scheduleReset();
+      }
+    }
+    if (copied && !destroyed) {
+      try {
+        oncopy?.(target);
+      } catch {
+        // 宿主通知失败不改变已经成功完成的剪贴板操作。
       }
     }
   }

@@ -30,6 +30,17 @@ describe('CopyButton', () => {
     expect(screen.getByRole('status').textContent).toBe('已复制完整编号');
   });
 
+  it('keeps successful clipboard feedback when the host callback throws', async () => {
+    writeText.mockResolvedValue(undefined);
+    const oncopy = vi.fn(() => { throw new Error('Host callback failed'); });
+    render(CopyButton, { props: { value: 'FA-2026-005', oncopy } });
+    const button = screen.getByRole('button', { name: '复制内容' });
+    await fireEvent.click(button);
+    expect(oncopy).toHaveBeenCalledWith('FA-2026-005');
+    expect(button.getAttribute('data-state')).toBe('copied');
+    expect(screen.getByRole('status').textContent).toBe('已复制内容');
+  });
+
   it('keeps the accessible label stable while exposing the failure state', async () => {
     writeText.mockRejectedValue(new Error('denied'));
     render(CopyButton, { props: { value: 'FA-2026-002', description: '完整编号' } });
