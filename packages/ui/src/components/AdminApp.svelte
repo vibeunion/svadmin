@@ -100,6 +100,7 @@
   import type { MfaEnrollmentProvider } from './TwoFactorAuthPage.svelte';
   import type { NotificationPreferencesProvider } from './NotificationsSettings.svelte';
   import type { MemberDirectoryProvider } from './account/MemberDirectory.svelte';
+  import type { NotificationItem } from './NotificationCenter.svelte';
 
   interface Props {
     mfaEnrollmentProvider?: MfaEnrollmentProvider;
@@ -139,6 +140,12 @@
     dashboard?: Snippet;
     /** Optional AI assistant rendered by Layout. Keep AI UI in @svadmin/ai-elements. */
     aiAssistant?: Snippet<[LayoutAIAssistantProps]>;
+    /** Header notification items. Omit to render an empty built-in center. */
+    notifications?: NotificationItem[];
+    notificationUnreadCount?: number;
+    onnotificationread?: (item: NotificationItem) => void | Promise<void>;
+    onnotificationreadall?: () => void | Promise<void>;
+    onnotificationopen?: (item: NotificationItem) => void | Promise<void>;
     loginPage?: Snippet;
     /** Prefill and display credentials on the default login page, useful for demos/examples. */
     loginDefaults?: {
@@ -200,6 +207,11 @@
     themeConfig: userThemeConfig,
     dashboard,
     aiAssistant,
+    notifications,
+    notificationUnreadCount,
+    onnotificationread,
+    onnotificationreadall,
+    onnotificationopen,
     loginPage,
     loginDefaults,
     components: userComponents,
@@ -600,7 +612,7 @@
       <ErrorComp status={standaloneErrorStatus} />
     </SystemPageShell>
   {:else if isAuthenticated || !resolvedAuthProvider}
-    <Layout {title} {...definedOptions({ "menu": menu })} {...definedOptions({ "siteUrl": siteUrl })} routeMode={resolvedRouteMode} {...definedOptions({ "aiAssistant": aiAssistant })}>
+    <Layout {title} {...definedOptions({ "menu": menu })} {...definedOptions({ "siteUrl": siteUrl })} {...definedOptions({ "notifications": notifications, "notificationUnreadCount": notificationUnreadCount, "onnotificationread": onnotificationread, "onnotificationreadall": onnotificationreadall, "onnotificationopen": onnotificationopen })} routeMode={resolvedRouteMode} {...definedOptions({ "aiAssistant": aiAssistant })}>
       <div class="svadmin-u-d89972fe17d6 svadmin-u-8a7a926578c8" aria-busy={authRechecking}>
         {#if authRechecking}
           <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-236812d64c82 svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-d542b60b5312" role="status" aria-live="polite">

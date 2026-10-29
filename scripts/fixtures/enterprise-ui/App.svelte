@@ -38,6 +38,7 @@
   import DetailDrawerStatusEvidence from './DetailDrawerStatusEvidence.svelte';
   import ListPaginationEvidence from './ListPaginationEvidence.svelte';
   import DataTableShellEvidence from './DataTableShellEvidence.svelte';
+  import ScrollableTableEvidence from './ScrollableTableEvidence.svelte';
   import ResourceWorkspaceFixture from './ResourceWorkspaceFixture.svelte';
   import ResourceWorkspaceEditRouteFixture from './ResourceWorkspaceEditRouteFixture.svelte';
   import QuickEditLifecycleFixture from './QuickEditLifecycleFixture.svelte';
@@ -221,6 +222,8 @@
     <ListPaginationEvidence />
   {:else if requestedView === 'data-table-shell'}
     <DataTableShellEvidence />
+  {:else if requestedView === 'scrollable-table'}
+    <ScrollableTableEvidence />
   {:else if requestedView === 'resource-workspace'}
     <ResourceWorkspaceFixture />
   {:else if requestedView === 'resource-workspace-edit-route'}

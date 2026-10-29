@@ -4,6 +4,8 @@
   import TooltipButton from './TooltipButton.svelte';
   import { getResolvedTheme, toggleTheme, type MenuItem } from '@svadmin/core';
   import Breadcrumbs from './Breadcrumbs.svelte';
+  import NotificationCenter, { type NotificationItem } from './NotificationCenter.svelte';
+  import ThemeSettingsDrawer from './ThemeSettingsDrawer.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { getComponentRegistry } from '../component-registry.svelte.js';
@@ -12,6 +14,13 @@
 
   let {
     showThemeToggle = false,
+    showThemeSettings = true,
+    showNotifications = true,
+    notificationItems = [],
+    notificationUnreadCount,
+    onnotificationread,
+    onnotificationreadall,
+    onnotificationopen,
     showBreadcrumbs = true,
     showSearch = true,
     onSearchClick,
@@ -22,6 +31,13 @@
     menu,
   } = $props<{
     showThemeToggle?: boolean;
+    showThemeSettings?: boolean;
+    showNotifications?: boolean;
+    notificationItems?: NotificationItem[];
+    notificationUnreadCount?: number;
+    onnotificationread?: (item: NotificationItem) => void | Promise<void>;
+    onnotificationreadall?: () => void | Promise<void>;
+    onnotificationopen?: (item: NotificationItem) => void | Promise<void>;
     showBreadcrumbs?: boolean;
     showSearch?: boolean;
     onSearchClick?: () => void;
@@ -65,6 +81,18 @@
 
     {#if CustomNotificationPanel}
       <CustomNotificationPanel />
+    {:else if showNotifications}
+      <NotificationCenter
+        items={notificationItems}
+        unreadCount={notificationUnreadCount}
+        onread={onnotificationread}
+        onreadall={onnotificationreadall}
+        onopen={onnotificationopen}
+      />
+    {/if}
+
+    {#if showThemeSettings}
+      <ThemeSettingsDrawer />
     {/if}
 
     {#if showSearch && onSearchClick}
