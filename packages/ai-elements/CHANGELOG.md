@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.7...ai-elements-v0.13.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** unify the default visual system ([#580](https://github.com/vibeunion/svadmin/issues/580)) ([2d4b645](https://github.com/vibeunion/svadmin/commit/2d4b6450e46b6ff8e370c11974c41a2c09be7046))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.67.0
+
 ## [0.12.7](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.12.6...ai-elements-v0.12.7) (2026-10-29)
 
 
