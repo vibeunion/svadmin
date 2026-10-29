@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.17.0](https://github.com/vibeunion/svadmin/compare/lite-v0.16.11...lite-v0.17.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** unify the default visual system ([#580](https://github.com/vibeunion/svadmin/issues/580)) ([2d4b645](https://github.com/vibeunion/svadmin/commit/2d4b6450e46b6ff8e370c11974c41a2c09be7046))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.67.0 to >=0.34.2 <0.68.0
+
 ## [0.16.11](https://github.com/vibeunion/svadmin/compare/lite-v0.16.10...lite-v0.16.11) (2026-10-29)
 
 
