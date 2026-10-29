@@ -26,7 +26,7 @@ Complete reference for all `@svadmin/ui` components.
 | [ErrorBoundary](./error-boundary.md) | Error catch boundary / 错误边界 | ✅ |
 | [FieldRenderer](./field-renderer.md) | Field value renderer / 字段值渲染器 | ✅ |
 | [Theming](./theming.md) | Dark mode + color themes / 暗色模式 + 多色主题 | ✅ |
-| Page templates | Workplace, monitor, analysis, list, form, detail, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
+| [Page templates](./templates.md) | Workplace, monitor, analysis, list, form, detail, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
 | NotificationCenter | Header notification menu with unread state / 顶栏通知中心 | ✅ |
 | ThemeSettingsDrawer | Live shell and appearance preferences / 实时外观与外壳设置抽屉 | ✅ |
 
@@ -60,3 +60,15 @@ Complete reference for all `@svadmin/ui` components.
 | Collapse | Controlled disclosure panels / 受控折叠面板 |
 | TypographyEllipsis | Multi-line clamp with expand / collapse / 多行截断与展开收起 |
 | CommentThread | Threaded comments / 评论线程 |
+| Space | Flex spacing primitive / 弹性间距 |
+| Grid / GridCell | Responsive CSS grid / 响应式网格 |
+| Row / Col | 24-column layout / 24 栅格 |
+| Timeline | Generic activity timeline / 通用时间线 |
+| Statistic | Formatted metric display / 指标展示 |
+| Countdown | Countdown display / 倒计时 |
+| ResizeBox | Pointer and keyboard resizable container / 可调整容器 |
+| Tour | Guided step overlay / 引导式步骤 |
+| Menu | Recursive navigation menu / 递归导航菜单 |
+| ConfigProvider | Component config context / 组件配置上下文 |
+| Progress | Determinate progress bar / 进度条 |
+| Popover | Anchored popover primitive / 浮层 |

@@ -48,7 +48,7 @@
   const showDelete = $derived(canDelete ?? resource.canDelete !== false);
 </script>
 
-<div class="svadmin-u-b3542e058833 {className}" data-svadmin-crud-page="edit" data-svadmin-resource={resourceName} data-svadmin-record-id={id}>
+<div class="space-y-6 {className}" data-svadmin-crud-page="edit" data-svadmin-resource={resourceName} data-svadmin-record-id={id}>
   <div data-svadmin-crud-page-header>
     <PageHeader
       title={pageTitle}

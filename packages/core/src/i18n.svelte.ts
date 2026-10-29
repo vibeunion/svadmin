@@ -1850,9 +1850,10 @@ const baseLocales: Record<string, Record<string, string>> = {
 let locales = $state(structuredClone(baseLocales));
 const initialLocales = structuredClone(baseLocales);
 
-/** Detect best locale from browser language */
+/** Detect best locale from browser language; server rendering always starts in English. */
 function detectLocale(): string {
-  if (typeof navigator === 'undefined') return 'en';
+  // Node 22+ exposes a global navigator, so gate SSR on the browser window instead.
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return 'en';
   const browserLang = navigator.language || navigator.languages?.[0] || 'zh-CN';
   if (locales[browserLang]) return browserLang;
   const [prefix = browserLang] = browserLang.split('-');

@@ -125,7 +125,7 @@
 
 {#if !hidden}
   {#if confirming && confirmationScope === scope && session.isCurrent()}
-    <div class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
+    <div class="inline-flex items-center gap-1">
       <Button type="button" variant="destructive" size="sm" disabled={pending || !allowed} onclick={confirmDelete}>
         {i18n.t('common.confirm')}
       </Button>
@@ -138,15 +138,15 @@
       type="button"
       variant="ghost"
       size={hideText ? 'icon' : 'sm'}
-      class="svadmin-u-811148b13d1e svadmin-u-51e95020d6f2 {className}"
+      class="text-destructive hover:text-destructive {className}"
       aria-label={hideText ? displayText : undefined}
       disabled={pending || !allowed}
       aria-busy={pending}
       onclick={beginConfirmation}
     >
-      <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      <Trash2 class="h-4 w-4" />
       {#if !hideText}
-        <span class="svadmin-u-f58b02572ab2">
+        <span class="ml-1">
           {#if children}
             {@render children()}
           {:else}

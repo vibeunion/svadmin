@@ -389,9 +389,9 @@
   });
 </script>
 
-<div class={cn('svadmin-u-6da6a3c3f741 svadmin-u-6f7e013d6499', className)}>
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-660d2effb880 svadmin-u-359090c2d529">
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+<div class={cn('w-full space-y-2', className)}>
+  <div class="flex items-center justify-between px-1 py-1 text-xs">
+    <div class="flex items-center gap-2">
       {#if filterable}
         <Input
           bind:value={filterText}
@@ -400,7 +400,7 @@
           aria-label={filterPlaceholder ?? i18n.t('common.search')}
         />
       {/if}
-      <Button type="button" disabled={!available || disabled || filterText.trim().length > 0} variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" onclick={expandAll}>
+      <Button type="button" disabled={!available || disabled || filterText.trim().length > 0} variant="ghost" size="sm" class="h-6 px-2 text-xs" onclick={expandAll}>
         {i18n.t('treeTable.expandAll')}
       </Button>
       {#if normalizedPageSize > 0}
@@ -412,12 +412,12 @@
           title={i18n.t('treeTable.nextPage')} aria-label={i18n.t('treeTable.nextPage')}
           onclick={() => setPage(normalizedPage + 1)}><ChevronRight aria-hidden="true" /></Button>
       {/if}
-      <Button type="button" disabled={!available || disabled || filterText.trim().length > 0} variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-bfa603190748" onclick={collapseAll}>
+      <Button type="button" disabled={!available || disabled || filterText.trim().length > 0} variant="ghost" size="sm" class="h-6 px-2 text-xs text-muted-foreground" onclick={collapseAll}>
         {i18n.t('treeTable.collapseAll')}
       </Button>
     </div>
     {#if selectable && selectedKeys.length > 0}
-      <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">
+      <span class="text-xs text-muted-foreground">
         {i18n.t('common.selectedCount', { count: String(selectedKeys.length) })}
       </span>
     {/if}
@@ -434,20 +434,20 @@
   <div bind:this={viewport} data-testid="tree-table-viewport" class:tree-table-virtual={virtualized}
     onscroll={event => { scrollTop = event.currentTarget.scrollTop; }}
     style={virtualized ? `height: ${normalizedHeight}px; overflow: auto; --tree-row-height: ${normalizedRowHeight}px;` : 'overflow-x: auto;'}
-    class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-c9ed8c5f79ae svadmin-u-2cd02d11d1af svadmin-u-cd0ad9a56558">
+    class="rounded-lg border border-border/80 overflow-hidden bg-card">
     <!-- 原生表格保留列布局，treegrid 为可聚焦的层级行提供交互语义。 -->
     <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
     <table bind:this={tableRoot} role="treegrid" aria-label={ariaLabel ?? i18n.t('treeTable.label')}
       aria-rowcount={flattenedRows.length + 1} aria-colcount={cellCount}
       aria-multiselectable={selectable ? 'true' : undefined} aria-disabled={disabled}
-      class="svadmin-u-6da6a3c3f741 svadmin-u-2eba0d65d059 svadmin-u-359090c2d529 svadmin-u-4583f90cd9bd">
-      <thead class="svadmin-u-358af0b65a31 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
+      class="w-full text-left text-xs border-collapse">
+      <thead class="bg-muted/50 border-b border-border/60 font-semibold text-muted-foreground">
         <tr>
           {#if selectable}
-            <th class="svadmin-u-2bbcfc3b5179 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-ca6bf63030aa"></th>
+            <th class="w-8 px-3 py-2 text-center"></th>
           {/if}
           {#each columns as col (col.key)}
-            <th class="svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b" style={col.width ? `width: ${col.width}` : ''}
+            <th class="px-3 py-2" style={col.width ? `width: ${col.width}` : ''}
               aria-sort={sort?.key === col.key ? (sort.direction === 'asc' ? 'ascending' : 'descending') : col.sortable ? 'none' : undefined}>
               {#if col.sortable}
                 <button class="tree-sort" type="button" disabled={!available || disabled} onclick={() => cycleSort(col)}
@@ -464,11 +464,11 @@
             </th>
           {/each}
           {#if rowActions}
-            <th class="svadmin-u-ed831a4dff32 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-308fc069e46e">{i18n.t('common.actions')}</th>
+            <th class="w-20 px-3 py-2 text-right">{i18n.t('common.actions')}</th>
           {/if}
         </tr>
       </thead>
-      <tbody class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258">
+      <tbody class="divide-y divide-border/40">
         {#if virtualized && windowStart > 0}
           <tr aria-hidden="true" class="tree-spacer"><td colspan={cellCount}
             style={`height: ${windowStart * normalizedRowHeight}px;`}></td></tr>
@@ -485,9 +485,9 @@
             aria-disabled={disabled || row.disabled ? 'true' : undefined}
             aria-selected={selectable ? isSelected : undefined} data-tree-key={nodeKey(row.id)}
             onfocus={() => { focusedKey = row.id; }} onkeydown={event => handleKeydown(event, row)}
-            class="svadmin-u-12251b8f1749 svadmin-u-ceb69a6b0e5f {isSelected ? 'svadmin-u-989c466fdbe7' : ''}">
+            class="hover:bg-muted/30 transition-colors {isSelected ? 'bg-primary/5' : ''}">
             {#if selectable}
-              <td class="svadmin-u-2bbcfc3b5179 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-ca6bf63030aa">
+              <td class="w-8 px-3 py-2 text-center">
                 <div class="tree-cell">
                 <Checkbox
                   checked={isSelected}
@@ -502,40 +502,40 @@
 
             {#each columns as col, colIdx (col.key)}
               {@const val = row.record[col.key]}
-              <td class="svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b">
+              <td class="px-3 py-2">
                 <div class="tree-cell">
                 {#if colIdx === 0}
                   <!-- Primary tree node column with indent -->
                   <div
-                    class="tree-node-content svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568"
+                    class="tree-node-content flex items-center gap-1.5"
                     style="padding-left: {row.level * 20}px;"
                   >
                     {#if row.hasChildren}
                       <button
                         type="button"
                         disabled={disabled || filterText.trim().length > 0}
-                        class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-07389a777c1f svadmin-u-8e551981c8d7 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-ceb69a6b0e5f"
+                        class="h-5 w-5 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                         onclick={() => toggleExpand(row.id)}
                         aria-label={`${String(val ?? row.id)}: ${i18n.t(row.isExpanded ? 'treeTable.collapse' : 'treeTable.expand')}`}
                       >
                         {#if childLoadingKeys.has(row.id)}
-                          <RotateCw class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" aria-label={i18n.t('common.loading')} />
+                          <RotateCw class="h-3.5 w-3.5" aria-label={i18n.t('common.loading')} />
                         {:else if row.isExpanded}
-                          <ChevronDown class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+                          <ChevronDown class="h-3.5 w-3.5" />
                         {:else}
-                          <ChevronRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+                          <ChevronRight class="h-3.5 w-3.5" />
                         {/if}
                       </button>
-                      <Folder class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-96747a728556 svadmin-u-012fbd121f37" />
+                      <Folder class="h-3.5 w-3.5 text-primary/70 shrink-0" />
                     {:else}
-                      <span class="svadmin-u-72470489ff4e svadmin-u-bb0c4bfc52bd"></span>
-                      <File class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-3a33f11548cd svadmin-u-012fbd121f37" />
+                      <span class="w-5 inline-block"></span>
+                      <File class="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                     {/if}
 
                     {#if customCell}
                       {@render customCell({ column: col, record: row.record, value: val })}
                     {:else}
-                      <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-f283ea9bea0e">{val ?? '—'}</span>
+                      <span class="font-medium text-foreground truncate">{val ?? '—'}</span>
                     {/if}
                   </div>
                   {#if childErrors.has(row.id)}
@@ -552,14 +552,14 @@
                 {:else if customCell}
                   {@render customCell({ column: col, record: row.record, value: val })}
                 {:else}
-                  <span class="svadmin-u-d4108abe6359 svadmin-u-f283ea9bea0e">{val ?? '—'}</span>
+                  <span class="text-foreground truncate">{val ?? '—'}</span>
                 {/if}
                 </div>
               </td>
             {/each}
 
             {#if rowActions}
-              <td class="svadmin-u-ed831a4dff32 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-308fc069e46e">
+              <td class="w-20 px-3 py-2 text-right">
                 <div class="tree-cell">
                 {@render rowActions({ record: row.record, id: row.id })}
                 </div>
@@ -568,7 +568,7 @@
           </tr>
         {:else}
           <tr>
-            <td colspan={columns.length + (selectable ? 1 : 0) + (rowActions ? 1 : 0)} class="svadmin-u-a1f611f027dd svadmin-u-ca6bf63030aa svadmin-u-bfa603190748">
+            <td colspan={columns.length + (selectable ? 1 : 0) + (rowActions ? 1 : 0)} class="py-8 text-center text-muted-foreground">
               {i18n.t('common.noData')}
             </td>
           </tr>

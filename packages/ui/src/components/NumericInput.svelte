@@ -299,9 +299,9 @@
   }
 </script>
 
-<div class={cn('svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc', className)} data-numeric-input={mode}>
+<div class={cn('flex items-center justify-between', className)} data-numeric-input={mode}>
   {#if mode === 'currency' && currency}
-    <span class="svadmin-u-bfa603190748 svadmin-u-012fbd121f37" aria-hidden="true">{currency}</span>
+    <span class="text-muted-foreground shrink-0" aria-hidden="true">{currency}</span>
   {/if}
   {#if localeRequested}
     {#if name}
@@ -357,6 +357,6 @@
     />
   {/if}
   {#if mode === 'percent'}
-    <span class="svadmin-u-bfa603190748 svadmin-u-012fbd121f37" aria-hidden="true">%</span>
+    <span class="text-muted-foreground shrink-0" aria-hidden="true">%</span>
   {/if}
 </div>

@@ -140,18 +140,18 @@
 </script>
 
 <div
-  class="svadmin-u-5a2508227c6a"
+  class="space-y-1.5"
   data-svadmin-field
   data-svadmin-field-key={field.key}
 >
   <Label {...definedOptions({ for: !children && (['array', 'transfer'].includes(field.type) || field.type === 'richtext' && getRichTextEditor()) ? undefined : labelTarget })} id={labelId} data-svadmin-field-label>
     {field.label}
     {#if field.required}
-      <span class="svadmin-u-811148b13d1e" data-svadmin-required>*</span>
+      <span class="text-destructive" data-svadmin-required>*</span>
     {/if}
   </Label>
   {#if field.description}
-    <p id={descriptionId} data-svadmin-field-description class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{field.description}</p>
+    <p id={descriptionId} data-svadmin-field-description class="text-xs text-muted-foreground">{field.description}</p>
   {/if}
 
   {#if children}
@@ -323,7 +323,7 @@
         {disabled}
         rows={10}
         placeholder={i18n.t('field.enterValue', { label: field.label })}
-        class="svadmin-u-5bd7b080992c"
+        class="resize-y"
       />
     {/if}
 
@@ -339,7 +339,7 @@
       {disabled}
       rows={4}
       placeholder={i18n.t('field.enterValue', { label: field.label })}
-      class="svadmin-u-5bd7b080992c"
+      class="resize-y"
     />
 
   {:else if field.type === 'tree-select' || field.type === 'treeselect'}
@@ -422,7 +422,7 @@
       <select
         id={controlId}
         data-slot="select"
-        class="svadmin-u-60fbb7713999 svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-9c24ab70af61 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752 svadmin-u-5f533b3a7de7 svadmin-u-b29d8adbad2e"
+        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         value={selectToken}
         onchange={changeSelect}
         required={field.required}
@@ -457,14 +457,14 @@
       <input type="hidden" name={nativeArrayName} value={String(selectedValue)} {disabled} />
     {/each}
     <div 
-      class="svadmin-u-6f7e013d6499 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-eb6e8b881acd svadmin-u-558f64349245 svadmin-u-92bf82f493b1"
+      class="space-y-2 rounded-lg border border-input p-3 max-h-48 overflow-y-auto"
       role="group" 
       aria-labelledby={labelId}
       aria-describedby={describedBy}
       data-invalid={invalid || undefined}
     >
       {#each field.options ?? [] as opt, _i (_i)}
-        <label class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-34516836730d svadmin-u-39f703dbe296 svadmin-u-07389a777c1f svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-ceb69a6b0e5f">
+        <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 transition-colors">
           <Checkbox
             id={`${controlId}-option-${_i}`}
             checked={multiVal.includes(opt.value)}
@@ -477,16 +477,16 @@
         </label>
       {/each}
       {#if !(field.options?.length)}
-        <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('field.noOptions')}</p>
+        <p class="text-xs text-muted-foreground">{i18n.t('field.noOptions')}</p>
       {/if}
     </div>
     {#if multiVal.length > 0}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421 svadmin-u-b6b02c0ebef6">
+      <div class="flex flex-wrap gap-1 mt-1">
         {#each multiVal as v, _i (_i)}
           {@const label = field.options?.find((o: { label: string; value: string | number }) => o.value === v)?.label ?? String(v)}
-          <Badge variant="secondary" class="svadmin-u-44ee8ba0a421">
+          <Badge variant="secondary" class="gap-1">
             {label}
-            <button type="button" disabled={disabled || field.options?.find((option: FieldOption) => option.value === v)?.disabled} onclick={() => toggleMulti(v)} class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f" aria-label={i18n.t('common.clear')}>×</button>
+            <button type="button" disabled={disabled || field.options?.find((option: FieldOption) => option.value === v)?.disabled} onclick={() => toggleMulti(v)} class="ml-0.5 rounded-sm hover:text-destructive hover:bg-destructive/10 transition-colors" aria-label={i18n.t('common.clear')}>×</button>
           </Badge>
         {/each}
       </div>
@@ -494,7 +494,7 @@
 
   {:else if field.type === 'boolean'}
     <input type="hidden" name={nativeFieldName} value={String(boolVal)} {disabled} />
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-6b7d6e21ccbd">
+    <div class="flex items-center gap-2 pt-1">
       <Switch
         id={controlId}
         checked={boolVal}
@@ -503,7 +503,7 @@
         aria-describedby={describedBy}
         disabled={disabled}
       />
-      <span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{boolVal ? i18n.t('common.yes') : i18n.t('common.no')}</span>
+      <span class="text-sm text-muted-foreground">{boolVal ? i18n.t('common.yes') : i18n.t('common.no')}</span>
     </div>
 
   {:else if field.type === 'tags'}
@@ -612,34 +612,34 @@
     {#each imagesVal as url, imageIndex (imageIndex)}
       <input type="hidden" name={nativeArrayName} value={url} {disabled} />
     {/each}
-    <div class="svadmin-u-6f7e013d6499">
+    <div class="space-y-2">
       {#each imagesVal as url, i (i)}
-        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+        <div class="flex items-center gap-2">
           <Input
             id={i === 0 ? controlId : undefined}
             type="text"
             value={url}
             oninput={(e) => updateImage(i, (e.target as HTMLInputElement).value)}
             placeholder="https://example.com/image.jpg"
-            class="svadmin-u-36e579c0b41c"
+            class="flex-1"
             aria-invalid={invalid || undefined}
             aria-describedby={describedBy}
             {disabled}
           />
           {#if url}
-            <div class="svadmin-u-665f07fe73cc svadmin-u-012fbd121f37"><MediaThumbnail src={url} alt="preview" size="full" fit="cover" showOverlay={false} /></div>
+            <div class="size-9 shrink-0"><MediaThumbnail src={url} alt="preview" size="full" fit="cover" showOverlay={false} /></div>
           {/if}
           <TooltipButton
             tooltip={i18n.t('common.removeImage')}
             variant="ghost"
             size="icon"
-            class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-012fbd121f37"
+            class="h-8 w-8 shrink-0"
             aria-describedby={describedBy}
             aria-invalid={invalid || undefined}
             {disabled}
             onclick={() => removeImage(i)}
           >
-            <X class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+            <X class="h-3.5 w-3.5" />
           </TooltipButton>
         </div>
       {/each}
@@ -652,7 +652,7 @@
         {disabled}
         onclick={addImage}
       >
-        <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" /> {i18n.t('field.addImage')}
+        <Plus class="h-3.5 w-3.5 mr-1" /> {i18n.t('field.addImage')}
       </Button>
     </div>
 
@@ -679,7 +679,7 @@
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
       rows={6}
-      class="svadmin-u-5bd7b080992c svadmin-u-0e65706bcccd svadmin-u-359090c2d529"
+      class="resize-y font-mono text-xs"
     />
 
   {:else}

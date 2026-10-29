@@ -10,7 +10,7 @@
     actions?: Snippet;
     steps: FormStep[];
     currentStep?: number;
-    children: Snippet;
+    children?: Snippet;
     stepContent?: Snippet<[number]>;
     onstepchange?: (newStep: number, prevStep: number) => boolean | Promise<boolean> | undefined;
     onfinish?: () => void | Promise<void>;
@@ -57,6 +57,6 @@
     {prevText}
     {isSubmitting}
   >
-    {@render children()}
+    {#if children}{@render children()}{/if}
   </StepForm>
 </ContentPageShell>

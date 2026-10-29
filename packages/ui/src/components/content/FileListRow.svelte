@@ -54,34 +54,34 @@
   }
 </script>
 
-<div class="file-list-row svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12"
+<div class="file-list-row flex items-center gap-3 px-4 py-3"
   role="listitem" aria-label={file.name} aria-busy={Boolean(pending)}>
-  <span class="svadmin-u-60fbb7713999 svadmin-u-665f07fe73cc svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748" aria-hidden="true"><File class="svadmin-u-f7b5fa971871" /></span>
-  <div class="svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c">
-    <p class="svadmin-u-f283ea9bea0e svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359" title={file.name}>{file.name}</p>
+  <span class="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground" aria-hidden="true"><File class="size-4" /></span>
+  <div class="min-w-0 flex-1">
+    <p class="truncate text-sm font-medium text-foreground" title={file.name}>{file.name}</p>
     {#if pending}
-      <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748" role="status">{i18n.t('common.loading')}</p>
+      <p class="text-xs text-muted-foreground" role="status">{i18n.t('common.loading')}</p>
     {:else}
-      <p class="file-list-row-meta svadmin-u-359090c2d529 svadmin-u-bfa603190748">{file.size ?? file.type ?? i18n.t('common.file')}{file.updatedAt ? ' / ' + file.updatedAt : ''}</p>
+      <p class="file-list-row-meta text-xs text-muted-foreground">{file.size ?? file.type ?? i18n.t('common.file')}{file.updatedAt ? ' / ' + file.updatedAt : ''}</p>
     {/if}
     {#if failed}<p class="file-list-row-error" role="alert" id={errorId}>{label(failed)}: {i18n.t('common.error')}</p>{/if}
   </div>
   {#if onpreview}<Button type="button" variant="ghost" size="icon-sm"
     aria-label={`${label('preview')} ${file.name}`} title={`${label('preview')} ${file.name}`}
     aria-describedby={failed ? errorId : undefined} disabled={Boolean(pending)}
-    onclick={() => { void run('preview'); }}><Eye aria-hidden="true" class="svadmin-u-f7b5fa971871" /></Button>{/if}
+    onclick={() => { void run('preview'); }}><Eye aria-hidden="true" class="size-4" /></Button>{/if}
   {#if ondownload}<Button type="button" variant="ghost" size="icon-sm"
     aria-label={`${label('download')} ${file.name}`} title={`${label('download')} ${file.name}`}
     aria-describedby={failed ? errorId : undefined} disabled={Boolean(pending)}
-    onclick={() => { void run('download'); }}><Download aria-hidden="true" class="svadmin-u-f7b5fa971871" /></Button>{/if}
+    onclick={() => { void run('download'); }}><Download aria-hidden="true" class="size-4" /></Button>{/if}
   {#if onremove}<Button type="button" variant="ghost" size="icon-sm"
     aria-label={`${label('remove')} ${file.name}`} title={`${label('remove')} ${file.name}`}
     aria-describedby={failed ? errorId : undefined} disabled={Boolean(pending)}
-    onclick={() => { void run('remove'); }}><Trash2 aria-hidden="true" class="svadmin-u-f7b5fa971871" /></Button>{/if}
+    onclick={() => { void run('remove'); }}><Trash2 aria-hidden="true" class="size-4" /></Button>{/if}
 </div>
 
 <style>
-  .file-list-row-error { margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--destructive); overflow-wrap: anywhere; }
+  .file-list-row-error { margin: var(--svadmin-space-1) 0 0; font-size: var(--svadmin-text-label); line-height: var(--svadmin-leading-body); color: var(--destructive); overflow-wrap: anywhere; }
   .file-list-row-meta { overflow-wrap: anywhere; }
   .file-list-row :global(button) { flex-shrink: 0; }
 </style>

@@ -267,24 +267,24 @@
 </script>
 
 <div class="svadmin-relation-picker">
-  <div class="svadmin-u-44ee8ba0a421 svadmin-u-60fbb7713999">
+  <div class="gap-1 flex">
     {#each selectedLabels as label, index (selectedValues[index])}
       <Badge variant="secondary">
         {label}
         {#if multiple && !disabled}
           <button type="button" aria-label={`${i18n.t('common.clear')} ${label}`} onclick={() => { if (allowed) onchange?.(selectedValues.filter((_, itemIndex) => itemIndex !== index)); }}>
-            <X class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+            <X class="h-3 w-3" />
           </button>
         {/if}
       </Badge>
     {/each}
     <Button type="button" variant="outline" disabled={disabled || !allowed} onclick={begin} aria-haspopup="dialog">
       {selectedLabels.length ? i18n.t('common.edit') : (placeholder ?? i18n.t('field.selectPlaceholder'))}
-      <ChevronsUpDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+      <ChevronsUpDown class="h-3 w-3" />
     </Button>
     {#if allowClear && selectedValues.length > 0}
       <Button type="button" variant="ghost" size="icon-sm" disabled={disabled} aria-label={i18n.t('common.clear')} onclick={clear}>
-        <X class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+        <X class="h-3 w-3" />
       </Button>
     {/if}
   </div>
@@ -296,8 +296,8 @@
         <Dialog.Description>{i18n.t('common.selectedItems', { count: draftValues.length })}</Dialog.Description>
       </Dialog.Header>
       {#if searchable}
-        <div class="svadmin-u-60fbb7713999">
-          <Search class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+        <div class="flex">
+          <Search class="h-3 w-3" />
           <Input value={searchText} oninput={search} placeholder={i18n.t('common.search')} aria-label={i18n.t('common.search')} />
         </div>
       {/if}
@@ -306,7 +306,7 @@
           <div role="alert">{i18n.t('select.loadFailed')}</div>
           <Button type="button" variant="outline" onclick={() => { void select.refetch(); }}>{i18n.t('common.retry')}</Button>
         {:else if select.isFetching && availableOptions.length === 0}
-          <div aria-live="polite"><Loader2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" /> {i18n.t('common.loading')}</div>
+          <div aria-live="polite"><Loader2 class="h-3 w-3" /> {i18n.t('common.loading')}</div>
         {:else if availableOptions.length === 0}
           <div>{i18n.t('common.noData')}</div>
         {:else}
@@ -328,7 +328,7 @@
                   <Table.Cell>
                     <button type="button" class="svadmin-relation-picker__option"
                       disabled={select.isFetching || searchText !== appliedSearch} onclick={() => toggle(option.value)}>
-                      {#if visibleValues.includes(option.value)}<Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />{/if}
+                      {#if visibleValues.includes(option.value)}<Check class="h-3 w-3" />{/if}
                       {option.label}
                     </button>
                   </Table.Cell>

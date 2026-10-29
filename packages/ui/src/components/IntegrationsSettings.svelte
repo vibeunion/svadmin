@@ -34,21 +34,21 @@
   const displayedIntegrations = $derived(integrations ?? defaultIntegrations);
 </script>
 
-<div class="svadmin-u-b3542e058833">
+<div class="space-y-6">
   <ContentPageHeader title={i18n.t('settings.integrations')} description={i18n.t('settings.integrationsDescription')} {headingLevel} />
   <SettingsGroup title={i18n.t('settings.integrations')} description={i18n.t('integrations.addMoreHint')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
-    <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3">
+    <div class="divide-y divide-border">
       {#each displayedIntegrations as integration (integration.id)}
         <SettingsFieldRow label={integration.name} description={integration.description}>
           {#snippet control()}
-            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
+            <div class="flex items-center gap-3">
               {#if integration.connected !== undefined}
                 <StatusBadge status={integration.connected ? 'success' : 'neutral'} label={integration.connected ? i18n.t('integrations.statusConnected') : i18n.t('integrations.statusDisconnected')} />
                 {#if onConnectionChange}
                   <Switch checked={integration.connected} onCheckedChange={(checked) => onConnectionChange?.(integration.id, checked)} aria-label={integration.name} />
                 {/if}
               {:else}
-                <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('integrations.statusProvidedByHost')}</span>
+                <span class="text-xs text-muted-foreground">{i18n.t('integrations.statusProvidedByHost')}</span>
               {/if}
             </div>
           {/snippet}

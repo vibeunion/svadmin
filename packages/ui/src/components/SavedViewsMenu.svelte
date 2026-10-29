@@ -26,16 +26,16 @@
 <Popover.Root bind:open={savedViews.savedViewsOpen}>
   <Popover.Trigger>
     {#snippet child({ props })}
-      <Button variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props} disabled={disabled} aria-label={i18n.t("common.savedViews")}>
-        <Bookmark class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {savedViews.activeSavedViewName ?? i18n.t("common.savedViews")}
+      <Button variant="outline" size="sm" class="h-9 px-2.5" {...props} disabled={disabled} aria-label={i18n.t("common.savedViews")}>
+        <Bookmark class="h-4 w-4" data-icon="inline-start" /> {savedViews.activeSavedViewName ?? i18n.t("common.savedViews")}
       </Button>
     {/snippet}
   </Popover.Trigger>
-  <Popover.Content align="end" class={cn("svadmin-u-7ab81aede9d8", className)}>
-    <div class="svadmin-u-6ed543e2fbbb">
+  <Popover.Content align="end" class={cn("w-80", className)}>
+    <div class="space-y-3">
       <div>
-        <h4 class="svadmin-u-2689f3958069 svadmin-u-fc7473ca09eb">{i18n.t("common.savedViews")}</h4>
-        <p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t("common.savedViewsHint")}</p>
+        <h4 class="font-medium text-sm">{i18n.t("common.savedViews")}</h4>
+        <p class="mt-1 text-xs text-muted-foreground">{i18n.t("common.savedViewsHint")}</p>
         {#if savedViews.staleSavedViewColumns.length > 0}
           <p role="status">{i18n.t('common.savedViewStaleFields', { count: savedViews.staleSavedViewColumns.length })}</p>
         {/if}
@@ -68,11 +68,11 @@
           <option value="system">{i18n.t('common.systemView')}</option>
         </Select.Root>
       {/if}
-      <div class="svadmin-u-da7c36cd8867">
-        <label class="svadmin-u-359090c2d529 svadmin-u-bfa603190748" for="saved-list-view">{i18n.t("common.currentView")}</label>
+      <div class="space-y-1">
+        <label class="text-xs text-muted-foreground" for="saved-list-view">{i18n.t("common.currentView")}</label>
         <Select.Root
           id="saved-list-view"
-          class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741"
+          class="h-9 w-full"
           value={savedViews.activeSavedViewId ?? ""}
           onchange={(event: Event) => {
             if (!(event.currentTarget instanceof HTMLSelectElement)) return;
@@ -88,35 +88,35 @@
           {/each}
         </Select.Root>
       </div>
-      <div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4">
+      <div class="flex gap-2">
         <Input
           aria-label={i18n.t("common.viewName")}
           placeholder={i18n.t("common.viewName")}
           maxlength={60}
           bind:value={savedViews.savedViewName}
           disabled={savedViews.savedViewMutationPending}
-          class="svadmin-u-e7a768f922d2"
+          class="h-9"
         />
-        <Button size="sm" class="svadmin-u-012fbd121f37" disabled={!savedViews.savedViewName.trim() || savedViews.savedViewMutationPending || savedViews.savedViewMutationError === 'conflict'} onclick={() => savedViews.saveCurrentView()}>
-          <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.saveView")}
+        <Button size="sm" class="shrink-0" disabled={!savedViews.savedViewName.trim() || savedViews.savedViewMutationPending || savedViews.savedViewMutationError === 'conflict'} onclick={() => savedViews.saveCurrentView()}>
+          <Check class="h-4 w-4" data-icon="inline-start" /> {i18n.t("common.saveView")}
         </Button>
       </div>
       {#if savedViews.availableSavedViews.length > 0}
-        <div class="svadmin-u-da7c36cd8867 svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-f46b61a9b310">
+        <div class="space-y-1 border-t border-border pt-2">
           {#each savedViews.availableSavedViews as view (view.id)}
-            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
-              <span class="svadmin-u-7e0b7cdf1a94 svadmin-u-f283ea9bea0e">{view.name}</span>
+            <div class="flex items-center justify-between gap-2 text-sm">
+              <span class="min-w-0 truncate">{view.name}</span>
               {#if (view.source === 'team' || view.source === 'system') && savedViews.provider?.setDefault}
                 <button
                   type="button"
-                  class="svadmin-u-52083e7da442 svadmin-u-012fbd121f37 svadmin-u-bfa603190748"
+                  class="inline-flex shrink-0 text-muted-foreground"
                   aria-label={`${i18n.t(view.default ? 'common.unsetDefaultView' : 'common.setDefaultView')} ${view.name}`}
                   aria-pressed={view.default === true}
                   title={i18n.t(view.default ? 'common.unsetDefaultView' : 'common.setDefaultView')}
                   disabled={view.readOnly === true || !view.version || savedViews.savedViewMutationPending || savedViews.savedViewMutationError === 'conflict'}
                   onclick={() => savedViews.setRemoteDefault(view)}
                 >
-                  <Star class={view.default ? "svadmin-u-e83a7042bc91" : ""} fill={view.default ? "currentColor" : "none"} />
+                  <Star class={view.default ? "font-semibold" : ""} fill={view.default ? "currentColor" : "none"} />
                 </button>
               {/if}
               {#if (view.source === 'team' || view.source === 'system') && savedViews.provider?.updateAccess}
@@ -215,14 +215,14 @@
               {/if}
               <button
                 type="button"
-                class="svadmin-u-52083e7da442 svadmin-u-cc46d0fa277d svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a"
+                class="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="{i18n.t("common.delete")} {view.name}"
                 title="{i18n.t("common.delete")} {view.name}"
                 disabled={view.readOnly === true || savedViews.savedViewMutationPending || savedViews.savedViewMutationError === 'conflict'
                   || (!!view.source && !savedViews.provider?.remove)}
                 onclick={() => savedViews.deleteSavedView(view.id)}
               >
-                <Trash2 class="svadmin-u-783b0d9d1e2c" />
+                <Trash2 class="size-3.5" />
               </button>
             </div>
           {/each}

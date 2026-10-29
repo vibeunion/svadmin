@@ -30,12 +30,12 @@
 <RowActions {actions} maxVisible={0} moreLabel={i18n.t('common.moreActions')}>
   {#if canShow && show.allowed === true}
     <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={onShow}>
-      <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      <Eye class="h-4 w-4" />
     </TooltipButton>
   {/if}
   {#if canEdit && edit.allowed === true}
     <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={onEdit}>
-      <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      <Pencil class="h-4 w-4" />
     </TooltipButton>
   {/if}
 </RowActions>

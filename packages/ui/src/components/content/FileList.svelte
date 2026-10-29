@@ -46,7 +46,7 @@
     retry, retryLabel, loadingLabel,
   })} class={className} />
 {:else}
-  <div class={'svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 ' + className} role="list" data-svadmin-file-list>
+  <div class={'divide-y divide-border overflow-hidden rounded-lg border border-border bg-card ' + className} role="list" data-svadmin-file-list>
     {#each rows as { file, key } (key)}
       <FileListRow {file} {...definedOptions({ ondownload, onpreview, onremove })} />
     {/each}

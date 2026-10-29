@@ -233,20 +233,20 @@
   function getPriorityClass(priority?: string) {
     switch (priority) {
       case 'urgent':
-        return 'svadmin-u-c698f77c9ba5 svadmin-u-811148b13d1e svadmin-u-9d5d8b4711b4';
+        return 'bg-destructive/15 text-destructive border-destructive/30';
       case 'high':
-        return 'svadmin-u-d9c3c520f7d5 svadmin-u-918184635b1d svadmin-u-2f960aa0c478';
+        return 'bg-warning/15 text-warning border-warning/30';
       case 'medium':
-        return 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-a6afccfc915b';
+        return 'bg-primary/10 text-primary border-primary/20';
       default:
-        return 'svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748 svadmin-u-6ee2d41e2d2d';
+        return 'bg-muted text-muted-foreground border-border/40';
     }
   }
 </script>
 
 {#if moveError}<div role="alert"><span>{moveError}</span>{#if failedMove}<Button type="button" variant="ghost" size="sm" disabled={busy} onclick={retryFailedMove}>{i18n.t('common.retry')}</Button>{/if}</div>{/if}
 <div role="region" aria-label={ariaLabel ?? i18n.t('kanban.label')} aria-busy={loading || busy}
-  class={cn('svadmin-kanban svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-1384f66f41d0 svadmin-u-9fcd8a13827e svadmin-u-359090c2d529 svadmin-u-7f6912283f11', className)}>
+  class={cn('svadmin-kanban flex gap-4 overflow-x-auto pb-4 text-xs select-none', className)}>
   {#if loading}
     <div role="status">{i18n.t('common.loading')}</div>
   {:else if displayError}
@@ -262,15 +262,15 @@
     <div
       role="region"
       aria-label={col.title}
-      class="svadmin-kanban__column svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-92e13d146fd7 svadmin-u-012fbd121f37 svadmin-u-ca6bcd4b6f3f svadmin-u-a4805b5f5b63"
+      class="svadmin-kanban__column flex flex-col w-72 shrink-0 border max-h-[80vh]"
       ondragover={handleDragOver}
       ondrop={(event) => { event.preventDefault(); handleDrop(col.id); }}
     >
       <!-- Column Header -->
-      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-eb6e8b881acd svadmin-u-65fdbade2025 svadmin-u-591f378e24a1">
-        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
+      <div class="flex items-center justify-between p-3 border-b border-border/50">
+        <div class="flex items-center gap-2 font-semibold text-foreground">
           <span>{col.title}</span>
-          <span class="svadmin-kanban__count svadmin-u-60fbb7713999 svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-0e65706bcccd svadmin-u-bfa603190748">
+          <span class="svadmin-kanban__count flex h-5 w-5 items-center justify-center bg-muted text-[10px] font-mono text-muted-foreground">
             {colCards.length}
           </span>
         </div>
@@ -283,19 +283,19 @@
             title={i18n.t('kanban.addTo', { column: col.title })}
             variant="ghost"
             size="sm"
-            class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-8a539c7fe216 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
+            class="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
             onclick={() => {
               addingColumnId = col.id;
               newCardTitle = '';
             }}
           >
-            <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+            <Plus class="h-3.5 w-3.5" />
           </Button>
         {/if}
       </div>
 
       <!-- Column Card List -->
-      <div class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-7660b450905a svadmin-u-6f7e013d6499 svadmin-u-53ecdb131b58">
+      <div class="flex-1 overflow-y-auto p-2 space-y-2 min-h-24">
         {#each colCards as card, cardIndex (card.id)}
           <div
             role="group"
@@ -303,50 +303,50 @@
             aria-busy={busy && movingCardId === card.id}
             draggable={canDragCard(card)}
             class={cn(
-              'svadmin-kanban__card group svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-77a2a20e90d4 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-cd0ad9a56558 svadmin-u-eb6e8b881acd svadmin-u-0fe7d7d814d0 svadmin-u-8d08385288a6 svadmin-u-d9bff91ef7ee svadmin-u-512e82e6a68f svadmin-u-ab1dd417ce7d svadmin-u-2eba0d65d059',
-              draggedCardId === card.id ? 'svadmin-u-2a2db4667b27 svadmin-u-16b1efa5875e svadmin-u-2691847b25ed' : ''
+              'svadmin-kanban__card group relative flex flex-col gap-2 border border-border/60 bg-card p-3 transition-all cursor-grab active:cursor-grabbing hover:border-border hover:shadow-sm text-left',
+              draggedCardId === card.id ? 'opacity-40 ring-2 ring-primary/40' : ''
             )}
             ondragstart={(e) => handleDragStart(e, card.id)}
             ondragend={() => { draggedCardId = null; }}
             ondragover={handleDragOver}
             ondrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDrop(col.id, cardIndex); }}
           >
-            <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
+            <div class="flex items-start justify-between gap-2">
               {#if oncardclick}
-                <button type="button" disabled={busy} onclick={() => oncardclick?.(card)} class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-e25ca6535dea">{card.title}</button>
+                <button type="button" disabled={busy} onclick={() => oncardclick?.(card)} class="font-medium text-foreground leading-snug">{card.title}</button>
               {:else}
-                <div class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-e25ca6535dea">{card.title}</div>
+                <div class="font-medium text-foreground leading-snug">{card.title}</div>
               {/if}
-              {#if oncardmove}<GripVertical aria-hidden="true" class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-52183a1cca53 svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024 svadmin-u-012fbd121f37" />{/if}
+              {#if oncardmove}<GripVertical aria-hidden="true" class="h-3.5 w-3.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />{/if}
             </div>
 
             {#if card.description}
-              <div class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-054cb4e36116">{card.description}</div>
+              <div class="text-[11px] text-muted-foreground line-clamp-2">{card.description}</div>
             {/if}
 
-            <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-58284b4ea568 svadmin-u-6b7d6e21ccbd svadmin-u-b950dda299d3 svadmin-u-6ee2d41e2d2d svadmin-u-1dc571a3609f">
-              <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1 border-t border-border/40 text-[10px]">
+              <div class="flex flex-wrap items-center gap-1">
                 {#if card.priority}
-                  <Badge variant="outline" class={cn('svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6 svadmin-u-0e65706bcccd svadmin-u-2689f3958069', getPriorityClass(card.priority))}>
+                  <Badge variant="outline" class={cn('px-1 py-0 font-mono font-medium', getPriorityClass(card.priority))}>
                     {card.priority}
                   </Badge>
                 {/if}
                 {#each card.tags ?? [] as tag, tagIndex (tagIndex)}
-                  <span class="svadmin-u-07389a777c1f svadmin-u-706701550477 svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-bfa603190748">#{tag}</span>
+                  <span class="rounded bg-muted/60 px-1 py-0.5 text-muted-foreground">#{tag}</span>
                 {/each}
               </div>
 
               {#if card.assignee}
-                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-bfa603190748">
-                  <div class="svadmin-u-60fbb7713999 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-6a1572b6bf5a svadmin-u-e09880869d1f svadmin-u-e83a7042bc91 svadmin-u-20aaf08a7ed1">
+                <div class="flex items-center gap-1 text-muted-foreground">
+                  <div class="flex h-4 w-4 items-center justify-center rounded-full bg-primary/20 text-[9px] font-semibold text-primary">
                     {card.assignee.name.slice(0, 1).toUpperCase()}
                   </div>
-                  <span class="svadmin-u-f283ea9bea0e svadmin-u-2534f14adad5">{card.assignee.name}</span>
+                  <span class="truncate max-w-16">{card.assignee.name}</span>
                 </div>
               {/if}
             </div>
             {#if oncardmove}
-              <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+              <div class="flex items-center gap-2">
                 <select aria-label={i18n.t('kanban.move', { card: card.title })} value={card.columnId} disabled={busy}
                   style="min-width: 0; max-width: 100%;"
                   onchange={(event) => {
@@ -372,7 +372,7 @@
         {/each}
 
         {#if addingColumnId === col.id}
-          <div class="svadmin-kanban__composer svadmin-u-ca6bcd4b6f3f svadmin-u-f5583b2907be svadmin-u-cd0ad9a56558 svadmin-u-9fe52d5d506c svadmin-u-6f7e013d6499">
+          <div class="svadmin-kanban__composer border border-primary/40 bg-card p-2.5 space-y-2">
             <textarea
               bind:value={newCardTitle}
               aria-label={i18n.t('kanban.cardTitle')}
@@ -380,7 +380,7 @@
               maxlength={1000}
               disabled={busy}
               rows={2}
-              class="svadmin-u-6da6a3c3f741 svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-cd009d7d208c svadmin-u-359090c2d529 svadmin-u-d4108abe6359 svadmin-u-9c24ab70af61 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a svadmin-u-6aef32016896"
+              class="w-full rounded border border-input bg-background p-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
               onkeydown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.repeat) {
                   e.preventDefault();
@@ -390,9 +390,9 @@
                 }
               }}
             ></textarea>
-            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-58284b4ea568">
-              <Button type="button" disabled={busy} variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d058ca6de60f svadmin-u-d5eab218aa34" onclick={() => { addingColumnId = null; }}>{i18n.t('common.cancel')}</Button>
-              <Button type="button" disabled={busy || !validText(newCardTitle)} size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d058ca6de60f svadmin-u-d5eab218aa34" onclick={() => submitAddCard(col.id)}>{i18n.t('common.add')}</Button>
+            <div class="flex items-center justify-end gap-1.5">
+              <Button type="button" disabled={busy} variant="ghost" size="sm" class="h-6 text-[11px] px-2" onclick={() => { addingColumnId = null; }}>{i18n.t('common.cancel')}</Button>
+              <Button type="button" disabled={busy || !validText(newCardTitle)} size="sm" class="h-6 text-[11px] px-2" onclick={() => submitAddCard(col.id)}>{i18n.t('common.add')}</Button>
             </div>
           </div>
         {/if}

@@ -74,7 +74,7 @@
   }
 </script>
 
-<div class="svadmin-u-b3542e058833">
+<div class="space-y-6">
   <ContentPageHeader title={i18n.t('settings.notifications')} description={i18n.t('settings.notificationsDescription')} {headingLevel}>
     {#snippet actions()}
       <Button disabled={!loaded || loading || saving} onclick={saveSettings}>{i18n.t('common.save')}</Button>
@@ -94,16 +94,16 @@
     <FeedbackNotice tone="danger" message={i18n.t('common.operationFailed')} />
   {/if}
   {#if loaded || !preferencesProvider}
-  <fieldset disabled={!preferencesProvider || saving} class="svadmin-u-b3542e058833">
+  <fieldset disabled={!preferencesProvider || saving} class="space-y-6">
   <SettingsGroup title={i18n.t('notifications.emailTitle')} description={i18n.t('notifications.emailDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
-    <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3">
+    <div class="divide-y divide-border">
       <SettingsFieldRow controlId={`${controlId}-email-security`} label={i18n.t('notifications.securityAlerts')} description={i18n.t('notifications.securityAlertsDesc')}>{#snippet control()}<Switch id={`${controlId}-email-security`} bind:checked={emailAlerts.security} />{/snippet}</SettingsFieldRow>
       <SettingsFieldRow controlId={`${controlId}-email-activity`} label={i18n.t('notifications.activityLogs')} description={i18n.t('notifications.activityLogsDesc')}>{#snippet control()}<Switch id={`${controlId}-email-activity`} bind:checked={emailAlerts.activity} />{/snippet}</SettingsFieldRow>
       <SettingsFieldRow controlId={`${controlId}-email-reports`} label={i18n.t('notifications.systemAlerts')} description={i18n.t('notifications.systemAlertsDesc')}>{#snippet control()}<Switch id={`${controlId}-email-reports`} bind:checked={emailAlerts.reports} />{/snippet}</SettingsFieldRow>
     </div>
   </SettingsGroup>
   <SettingsGroup title={i18n.t('notifications.pushTitle')} description={i18n.t('notifications.pushDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
-    <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3">
+    <div class="divide-y divide-border">
       <SettingsFieldRow controlId={`${controlId}-push-security`} label={i18n.t('notifications.securityAlerts')} description={i18n.t('notifications.securityPushDesc')}>{#snippet control()}<Switch id={`${controlId}-push-security`} bind:checked={pushAlerts.security} />{/snippet}</SettingsFieldRow>
       <SettingsFieldRow controlId={`${controlId}-push-activity`} label={i18n.t('notifications.activityLogs')} description={i18n.t('notifications.activityPushDesc')}>{#snippet control()}<Switch id={`${controlId}-push-activity`} bind:checked={pushAlerts.activity} />{/snippet}</SettingsFieldRow>
       <SettingsFieldRow controlId={`${controlId}-push-reports`} label={i18n.t('notifications.systemAlerts')} description={i18n.t('notifications.systemPushDesc')}>{#snippet control()}<Switch id={`${controlId}-push-reports`} bind:checked={pushAlerts.reports} />{/snippet}</SettingsFieldRow>

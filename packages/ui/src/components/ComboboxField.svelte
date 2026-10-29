@@ -412,21 +412,21 @@
     value={`${typeof opt.value}:${opt.value}`}
     onSelect={() => handleSelect(opt.value)}
     style={shouldVirtualize ? `height:${normalizedItemHeight}px;` : undefined}
-    class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-50ca6ba56aa3 svadmin-u-7f6912283f11 svadmin-u-3960ffc248d9 svadmin-u-36d4469299aa svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-fc7473ca09eb svadmin-u-df37b1fd9495 svadmin-u-99afb1cc3b47 svadmin-u-529780e25268"
+    class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected]:bg-accent data-[selected]:text-accent-foreground"
   >
-    <Check class="svadmin-u-d2347e8497a9 svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c {selectedValues.includes(opt.value) ? 'svadmin-u-3972e98dc84f' : 'svadmin-u-7065497e1ca0'}" />
+    <Check class="mr-2 h-3.5 w-3.5 {selectedValues.includes(opt.value) ? 'opacity-100' : 'opacity-0'}" />
     {opt.label}
   </Command.Item>
 {/snippet}
 
-<div class="svadmin-u-d89972fe17d6" use:menuInteractions onfocusout={handleFocusOut}
+<div class="relative" use:menuInteractions onfocusout={handleFocusOut}
   onkeydowncapture={handleVirtualNavigation}>
   <div class="select-control">
   <Button
     bind:ref={triggerButton}
     variant="outline"
     type="button"
-    class="svadmin-u-6da6a3c3f741 svadmin-u-8ef2268efbbc svadmin-u-8ecebc9f80e6"
+    class="w-full justify-between font-normal"
     onclick={() => { if (open) closeMenu(); else open = true; }}
     {...buttonRestProps}
     onkeydown={handleTriggerKeydownWithHost}
@@ -439,16 +439,16 @@
     aria-invalid={invalidOptions || restProps['aria-invalid']}
   >
     {#if selectedLabel}
-      <span class="svadmin-u-f283ea9bea0e">{selectedLabel}</span>
+      <span class="truncate">{selectedLabel}</span>
     {:else}
-      <span class="svadmin-u-bfa603190748">{placeholder ?? i18n.t('field.selectPlaceholder')}</span>
+      <span class="text-muted-foreground">{placeholder ?? i18n.t('field.selectPlaceholder')}</span>
     {/if}
-    <ChevronsUpDown class="svadmin-u-fb56d9cff341 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37 svadmin-u-0b8c506a0596" />
+    <ChevronsUpDown class="ml-auto h-4 w-4 shrink-0 opacity-50" />
   </Button>
   {#if selectedValues.length}
     <Button type="button" variant="ghost" size="icon-sm" {disabled}
       title={i18n.t('common.clear')} aria-label={i18n.t('common.clear')} onclick={handleClear}>
-      <X class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+      <X class="h-3 w-3" />
     </Button>
   {/if}
   </div>
@@ -457,24 +457,24 @@
       <span>{i18n.t('select.loadFailed')}</span>
       <Button type="button" variant="ghost" size="icon-sm" disabled={disabled || select.isFetching}
         title={i18n.t('common.retry')} aria-label={i18n.t('common.retry')} onclick={() => select.refetch()}>
-        <RotateCw class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+        <RotateCw class="h-3 w-3" />
       </Button>
     </div>
   {/if}
 
   {#if open && !disabled}
-    <div class="svadmin-u-da4dbfbc4fdc svadmin-u-181b286668b5 svadmin-u-b6b02c0ebef6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e541d86d1ec8 svadmin-u-06bbb43166db">
-      <Command.Root bind:ref={commandRoot} shouldFilter={false} class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-e541d86d1ec8 svadmin-u-9b13e8ae5c9c">
+    <div class="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
+      <Command.Root bind:ref={commandRoot} shouldFilter={false} class="flex flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
         {#if searchable}
-          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-65fdbade2025 svadmin-u-d5eab218aa34">
-            <Search class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-012fbd121f37 svadmin-u-0b8c506a0596" />
+          <div class="flex items-center border-b px-2">
+            <Search class="mr-1.5 h-3.5 w-3.5 shrink-0 opacity-50" />
             <Command.Input
               bind:ref={searchInput}
               bind:value={searchInputValue}
               oninput={handleSearchInput}
               aria-activedescendant={activeOptionId}
               placeholder={i18n.t('common.search')}
-              class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741 svadmin-u-7f19cdf4c5bb svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-df37b1fd9495 svadmin-u-9c24ab70af61"
+              class="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
         {/if}
@@ -490,15 +490,15 @@
           onscroll={(event: Event) => {
             if (event.currentTarget instanceof HTMLElement) listScrollTop = event.currentTarget.scrollTop;
           }}
-          class="svadmin-u-558f64349245 svadmin-u-92bf82f493b1 svadmin-u-eb6a3cef9686"
+          class="max-h-48 overflow-y-auto p-1"
         >
           {#if select.isLoading}
             {#each Array(3) as _, _i (_i)}
-              <div class="svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b"><Skeleton class="svadmin-u-cd0d9c512cdc svadmin-u-6da6a3c3f741" /></div>
+              <div class="px-2 py-1.5"><Skeleton class="h-5 w-full" /></div>
             {/each}
           {:else if !invalidOptions}
             {#if !availableOptions.length}
-              <Command.Empty class="svadmin-u-cb11fec3bb46 svadmin-u-ca6bf63030aa svadmin-u-359090c2d529 svadmin-u-bfa603190748">
+              <Command.Empty class="py-4 text-center text-xs text-muted-foreground">
                 {i18n.t('select.noResults')}
               </Command.Empty>
             {/if}

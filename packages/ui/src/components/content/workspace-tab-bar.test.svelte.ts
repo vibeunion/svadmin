@@ -3,7 +3,6 @@ import { createRawSnippet } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import WorkspaceTabBar from './WorkspaceTabBar.svelte';
 import WorkspaceActionBar from './WorkspaceActionBar.svelte';
-import utilityClasses from '../../../scripts/utility-class-map.json';
 
 describe('WorkspaceTabBar', () => {
   const items = [
@@ -58,7 +57,7 @@ describe('WorkspaceTabBar', () => {
     const { container } = render(WorkspaceTabBar, { items, activeId: 'overview', variant: 'underline' });
     const nav = container.querySelector('[data-svadmin-workspace-tab-bar]');
     expect(nav?.getAttribute('data-variant')).toBe('underline');
-    expect(nav?.classList.contains(utilityClasses['border-b'])).toBe(true);
+    expect(nav?.classList.contains('border-b')).toBe(true);
   });
 });
 
@@ -71,7 +70,7 @@ describe('WorkspaceActionBar status tones', () => {
       primaryAction: createRawSnippet(() => ({ render: () => '<button type="button">Continue</button>' })),
     });
 
-    const badge = container.querySelector(`span.${utilityClasses['text-success']}`);
+    const badge = container.querySelector(`span.${'text-success'}`);
     expect(badge).toBeTruthy();
     expect(badge?.textContent?.trim()).toBe('Signed');
   });

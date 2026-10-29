@@ -119,17 +119,17 @@
 </script>
 
 <Card.Root>
-  <Card.CardHeader class="svadmin-u-7fcf9124b5df">
-    <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
-      <Wand2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+  <Card.CardHeader class="pb-3">
+    <Card.CardTitle class="flex items-center gap-2 text-base">
+      <Wand2 class="h-4 w-4" />
       Resource Inferencer
     </Card.CardTitle>
   </Card.CardHeader>
-  <Card.CardContent class="svadmin-u-3e7ce58d64fa">
+  <Card.CardContent class="space-y-4">
     <!-- Resource selector -->
-    <div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4">
+    <div class="flex gap-2">
       <Select
-        class="svadmin-u-36e579c0b41c"
+        class="flex-1"
         bind:value={selectedResource}
         placeholder="— Select a resource —"
       >
@@ -137,10 +137,10 @@
           <option value={res.name}>{res.label} ({res.name})</option>
         {/each}
       </Select>
-      <span class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-359090c2d529 svadmin-u-bfa603190748">or</span>
+      <span class="flex items-center text-xs text-muted-foreground">or</span>
       <Input
         type="text"
-        class="svadmin-u-df403bbae8fc"
+        class="w-36"
         placeholder="custom endpoint"
         bind:value={customEndpoint}
       />
@@ -148,25 +148,25 @@
 
     <Button size="sm" onclick={runInference} disabled={loading || (!selectedResource && !customEndpoint.trim())}>
       {#if loading}
-        <Loader2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-afbdd13a380e" data-icon="inline-start" />
+        <Loader2 class="h-3 w-3 animate-spin" data-icon="inline-start" />
         Inferring...
       {:else}
-        <RefreshCw class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" data-icon="inline-start" />
+        <RefreshCw class="h-3 w-3" data-icon="inline-start" />
         Infer Fields
       {/if}
     </Button>
 
     {#if error}
       <Alert.Root variant="destructive">
-        <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+        <AlertCircle class="h-4 w-4" />
         <Alert.Description>{error}</Alert.Description>
       </Alert.Root>
     {/if}
 
     {#if loading}
-      <div class="svadmin-u-6f7e013d6499">
+      <div class="space-y-2">
         {#each Array(4) as _, _i (_i)}
-          <Skeleton class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741" />
+          <Skeleton class="h-8 w-full" />
         {/each}
       </div>
     {/if}
@@ -174,7 +174,7 @@
     {#if inferResult}
       {#if inferResult.review.needsReview}
         <Alert.Root>
-          <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <AlertCircle class="h-4 w-4" />
           <Alert.Description>
             Review recommended: {inferResult.review.confidence} confidence from {inferResult.review.sampleSize} sample records.
             {inferResult.review.warnings.length} heuristic warning(s) require confirmation before using generated code.
@@ -183,28 +183,28 @@
       {/if}
 
       <!-- Field table -->
-      <ScrollArea class="svadmin-u-e5738cbd2714">
+      <ScrollArea class="max-h-80">
         <Table.Root>
           <Table.Header>
-            <Table.Row class="svadmin-u-358af0b65a31">
+            <Table.Row class="bg-muted/50">
               <Table.Head>Field</Table.Head>
               <Table.Head>Type</Table.Head>
-              <Table.Head class="svadmin-u-ca6bf63030aa">List</Table.Head>
-              <Table.Head class="svadmin-u-ca6bf63030aa">Form</Table.Head>
+              <Table.Head class="text-center">List</Table.Head>
+              <Table.Head class="text-center">Form</Table.Head>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {#each inferResult.fields as field, _i (_i)}
               <Table.Row>
-                <Table.Cell class="svadmin-u-0e65706bcccd svadmin-u-359090c2d529">{field.key}</Table.Cell>
+                <Table.Cell class="font-mono text-xs">{field.key}</Table.Cell>
                 <Table.Cell>
                   <Badge variant={typeVariants[field.type] ?? 'secondary'}>
                     {field.type}
                     {#if field.resource}→ {field.resource}{/if}
                   </Badge>
                 </Table.Cell>
-                <Table.Cell class="svadmin-u-ca6bf63030aa">{field.showInList ? '✓' : '—'}</Table.Cell>
-                <Table.Cell class="svadmin-u-ca6bf63030aa">{field.showInForm ? '✓' : '—'}</Table.Cell>
+                <Table.Cell class="text-center">{field.showInList ? '✓' : '—'}</Table.Cell>
+                <Table.Cell class="text-center">{field.showInForm ? '✓' : '—'}</Table.Cell>
               </Table.Row>
             {/each}
           </Table.Body>
@@ -212,13 +212,13 @@
       </ScrollArea>
 
       <!-- Generated code -->
-      <div class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-2cd02d11d1af">
-        <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-44ee8ba0a421 svadmin-u-2ef11f1cb219 svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-65fdbade2025">
-          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
+      <div class="rounded-lg border overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-1 bg-muted px-3 py-1.5 text-xs text-muted-foreground border-b">
+          <div class="flex items-center gap-1">
             <Button
               variant={codeTarget === 'resource' ? 'secondary' : 'ghost'}
               size="sm"
-              class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-d5eab218aa34"
+              class="h-6 text-xs px-2"
               onclick={() => { codeTarget = 'resource'; }}
             >
               Resource (TS)
@@ -226,7 +226,7 @@
             <Button
               variant={codeTarget === 'typebox' ? 'secondary' : 'ghost'}
               size="sm"
-              class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-d5eab218aa34"
+              class="h-6 text-xs px-2"
               onclick={() => { codeTarget = 'typebox'; }}
             >
               TypeBox Schema
@@ -234,7 +234,7 @@
             <Button
               variant={codeTarget === 'list' ? 'secondary' : 'ghost'}
               size="sm"
-              class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-d5eab218aa34"
+              class="h-6 text-xs px-2"
               onclick={() => { codeTarget = 'list'; }}
             >
               List Page
@@ -242,7 +242,7 @@
             <Button
               variant={codeTarget === 'create' ? 'secondary' : 'ghost'}
               size="sm"
-              class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-d5eab218aa34"
+              class="h-6 text-xs px-2"
               onclick={() => { codeTarget = 'create'; }}
             >
               Create Form
@@ -250,7 +250,7 @@
             <Button
               variant={codeTarget === 'edit' ? 'secondary' : 'ghost'}
               size="sm"
-              class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-d5eab218aa34"
+              class="h-6 text-xs px-2"
               onclick={() => { codeTarget = 'edit'; }}
             >
               Edit Form
@@ -258,26 +258,26 @@
             <Button
               variant={codeTarget === 'show' ? 'secondary' : 'ghost'}
               size="sm"
-              class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-d5eab218aa34"
+              class="h-6 text-xs px-2"
               onclick={() => { codeTarget = 'show'; }}
             >
               Show Page
             </Button>
           </div>
-          <Button variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421" onclick={copyCode}>
+          <Button variant="ghost" size="sm" class="h-6 text-xs gap-1" onclick={copyCode}>
             {#if copied}
-              <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-76747e5e02ff" />
-              <span class="svadmin-u-76747e5e02ff">Copied!</span>
+              <Check class="h-3 w-3 text-success" />
+              <span class="text-success">Copied!</span>
             {:else}
-              <Copy class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+              <Copy class="h-3 w-3" />
               Copy
             {/if}
           </Button>
         </div>
-        <pre class="svadmin-u-8aee2b07b47d svadmin-u-73fc3fb18ceb svadmin-u-2859c861d7de svadmin-u-eb6e8b881acd svadmin-u-359090c2d529 svadmin-u-d4108abe6359 svadmin-u-0e65706bcccd">{activeCode}</pre>
+        <pre class="max-h-64 overflow-auto bg-muted/30 p-3 text-xs text-foreground font-mono">{activeCode}</pre>
       </div>
 
-      <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">
+      <p class="text-xs text-muted-foreground">
         Inferred {inferResult.fields.length} fields from sample data. Copy the code above into your Svelte 5 application files.
       </p>
     {/if}

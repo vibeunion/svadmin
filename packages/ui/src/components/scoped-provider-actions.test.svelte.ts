@@ -10,7 +10,6 @@ import {
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ScopedProviderActionsHost from './scoped-provider-actions.test-host.svelte';
-import utilityClasses from '../../scripts/utility-class-map.json';
 import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 
 interface Deferred<T> {
@@ -230,7 +229,7 @@ describe('scoped provider actions', () => {
     await waitFor(() => expect(recoveredToggle).toHaveProperty('disabled', false));
     expect(getPermissions).toHaveBeenCalledTimes(3);
     expect(update).toHaveBeenCalledTimes(1);
-    expect(recoveredToggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(false);
+    expect(recoveredToggle.querySelector('svg')?.classList.contains('block')).toBe(false);
   });
 
   it.each(['select', 'sidebar'] as const)('discards a failed permission read after selecting another role via %s', async control => {
@@ -254,7 +253,7 @@ describe('scoped provider actions', () => {
     await oldRead.promise.catch(() => {});
     await tick();
     expect(view.queryByRole('alert')).toBeNull();
-    expect(toggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(true);
+    expect(toggle.querySelector('svg')?.classList.contains('block')).toBe(true);
     expect(getToastQueue()).toHaveLength(0);
     expect(getPermissions).toHaveBeenCalledTimes(2);
   });
@@ -287,7 +286,7 @@ describe('scoped provider actions', () => {
     await waitFor(() => expect(toggle).toHaveProperty('disabled', false));
     expect(getPermissions).toHaveBeenCalledTimes(2);
     expect(view.queryByRole('alert')).toBeNull();
-    expect(view.getByRole('button', { name: 'Toggle Detail' }).querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(true);
+    expect(view.getByRole('button', { name: 'Toggle Detail' }).querySelector('svg')?.classList.contains('block')).toBe(true);
   });
 
   it.each(['diagnostic', 'empty', 'non-error', 'result'] as const)('sanitizes %s role writes and reloads permissions before another write', async failure => {
@@ -314,7 +313,7 @@ describe('scoped provider actions', () => {
     reload.resolve({ 'shared-resource': ['read'] });
     const recoveredToggle = await view.findByRole('button', { name: 'Toggle Create' });
     await waitFor(() => expect(recoveredToggle).toHaveProperty('disabled', false));
-    expect(recoveredToggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(false);
+    expect(recoveredToggle.querySelector('svg')?.classList.contains('block')).toBe(false);
     await fireEvent.click(recoveredToggle);
     await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
     expect(update).toHaveBeenLastCalledWith('shared-role', { 'shared-resource': ['read', 'create'] });
@@ -409,7 +408,7 @@ describe('scoped provider actions', () => {
     await waitFor(() => expect(freshPermissions).toHaveBeenCalledTimes(1));
     const readToggle = view.getByRole('button', { name: 'Toggle Detail' }) as HTMLButtonElement;
     expect(readToggle.disabled).toBe(false);
-    expect(readToggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(true);
+    expect(readToggle.querySelector('svg')?.classList.contains('block')).toBe(true);
 
     staleUpdate.reject(new Error('stale scope A failure'));
     await staleUpdate.promise.catch(() => undefined);
@@ -417,6 +416,6 @@ describe('scoped provider actions', () => {
 
     expect(freshPermissions).toHaveBeenCalledTimes(1);
     expect(freshUpdatePermissions).not.toHaveBeenCalled();
-    expect(readToggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(true);
+    expect(readToggle.querySelector('svg')?.classList.contains('block')).toBe(true);
   });
 });

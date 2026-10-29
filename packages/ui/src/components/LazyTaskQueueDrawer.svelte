@@ -15,12 +15,12 @@
 
 {#await module}
   <Button variant="ghost" size="icon" disabled aria-busy="true" aria-label={resolvedTitle}>
-    <ListTodo class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+    <ListTodo class="h-4 w-4" />
   </Button>
 {:then { default: Drawer }}
   <Drawer bind:open {...definedOptions({ taskProvider, title, initialTab })} />
 {:catch}
   <Button variant="ghost" size="icon" aria-label={`${resolvedTitle}: ${i18n.t('common.retry')}`} onclick={() => module = load()}>
-    <RotateCcw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+    <RotateCcw class="h-4 w-4" />
   </Button>
 {/await}

@@ -14,12 +14,12 @@
   const safeValue = $derived(Math.max(0, Math.min(100, Number(value ?? 0))));
 </script>
 
-<div class="svadmin-u-5a2508227c6a">
+<div class="space-y-1.5">
   {#if showLabel}
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d058ca6de60f svadmin-u-bfa603190748">
+    <div class="flex items-center justify-between text-[11px] text-muted-foreground">
       <span>{label}</span>
-      <span class="svadmin-u-0e65706bcccd">{safeValue}%</span>
+      <span class="font-mono">{safeValue}%</span>
     </div>
   {/if}
-  <Progress value={safeValue} max={100} class="svadmin-u-095acb275581" />
+  <Progress value={safeValue} max={100} class="h-1.5" />
 </div>

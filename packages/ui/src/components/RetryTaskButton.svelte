@@ -43,9 +43,9 @@
 <Button {variant} {size} onclick={action.run} disabled={!action.available || action.pending}
   aria-describedby={action.failed && !onError ? errorId : undefined}>
   {#if action.pending}
-    <Loader2 class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
+    <Loader2 class="mr-1.5 h-3.5 w-3.5 animate-spin" />
   {:else}
-    <RotateCcw class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+    <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
   {/if}
   {#if children}
     {@render children()}
@@ -60,5 +60,5 @@
 
 <style>
   .task-action-feedback { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 16rem; }
-  .task-action-feedback [role="alert"] { color: var(--destructive); font-size: 12px; line-height: 16px; white-space: normal; overflow-wrap: anywhere; }
+  .task-action-feedback [role="alert"] { color: var(--destructive); font-size: var(--svadmin-text-caption); line-height: var(--svadmin-leading-tight); white-space: normal; overflow-wrap: anywhere; }
 </style>

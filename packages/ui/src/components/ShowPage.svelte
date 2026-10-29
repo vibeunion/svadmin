@@ -66,15 +66,15 @@ import DataState from './content/DataState.svelte';
 
   const gridColumnClass = $derived.by(() => {
     switch (columns) {
-      case 4: return 'svadmin-u-d7c8339810d3 svadmin-u-e00ad81645a2 svadmin-u-9a638cfe8212 svadmin-u-4558bce6d8c0';
-      case 3: return 'svadmin-u-d7c8339810d3 svadmin-u-e00ad81645a2 svadmin-u-19d9b25e8fae';
-      case 2: return 'svadmin-u-d7c8339810d3 svadmin-u-e00ad81645a2';
+      case 4: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+      case 3: return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+      case 2: return 'grid-cols-1 sm:grid-cols-2';
       default: return 'grid-cols-1';
     }
   });
 </script>
 
-<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} data-svadmin-crud-page="show" data-svadmin-resource={resourceName} data-svadmin-record-id={id} class="svadmin-u-3e7ce58d64fa {className}">
+<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} data-svadmin-crud-page="show" data-svadmin-resource={resourceName} data-svadmin-record-id={id} class="space-y-4 {className}">
   <div data-svadmin-crud-page-header>
     <PageHeader
       title="{resource.label} {i18n.t('common.detail')} #{id}"
@@ -94,7 +94,7 @@ import DataState from './content/DataState.svelte';
       <Button type="button" variant="ghost" size="icon" title={i18n.t('common.refresh')}
         aria-label={i18n.t('common.refresh')} aria-busy={query.isFetching}
         disabled={!detail.canRead || query.isFetching} onclick={detail.refresh}>
-        <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+        <RefreshCw class="h-4 w-4" />
       </Button>
       {#if headerActions}
         {@render headerActions()}
@@ -105,12 +105,12 @@ import DataState from './content/DataState.svelte';
 
   <div data-svadmin-crud-page-content data-svadmin-detail-state={detail.checkingPermission || query.isLoading ? 'loading' : !detail.canRead ? 'forbidden' : query.isError ? 'error' : query.isSuccess ? 'ready' : 'empty'}>
   {#if detail.checkingPermission || query.isLoading}
-    <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-      <Card.Content class="svadmin-u-8a539c7fe216">
+    <Card.Root class="overflow-hidden border-border/40 shadow-sm">
+      <Card.Content class="p-0">
         {#each showFields.slice(0, 6) as _, i (i)}
-          <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-b7daff9b9ddd {i % 2 === 1 ? 'svadmin-u-967d113a1451' : ''}">
-            <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-b7ce0d2f6c04 svadmin-u-5a14cc9f9ed4" />
-            <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-1d9f2d98d149 svadmin-u-d2ffb24f3e1d svadmin-u-b6b02c0ebef6 svadmin-u-dfe9bd9e7001 svadmin-u-77533d414653" />
+          <div class="flex flex-col sm:flex-row px-4 sm:px-6 py-3 sm:py-4 {i % 2 === 1 ? 'bg-muted/20' : ''}">
+            <Skeleton class="h-4 w-1/2 sm:w-1/4" />
+            <Skeleton class="h-4 w-3/4 sm:w-2/5 mt-1 sm:mt-0 sm:ml-auto" />
           </div>
         {/each}
       </Card.Content>
@@ -124,14 +124,14 @@ import DataState from './content/DataState.svelte';
   {:else if query.isSuccess}
     {@const record = activeRendering ? activeRendering.record(query.data.data) : query.data.data}
     {#if layout === 'grid'}
-      <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-        <Card.Content class="svadmin-u-8a539c7fe216">
-          <dl class="svadmin-u-f3c543ad5fe9 svadmin-u-fa6acbf81d74 svadmin-u-3533cbce9e93 svadmin-u-4d9da416df16 {gridColumnClass}">
+      <Card.Root class="overflow-hidden border-border/40 shadow-sm">
+        <Card.Content class="p-0">
+          <dl class="grid divide-y divide-border/20 sm:divide-y-0 {gridColumnClass}">
             {#each showFields as field, i (i)}
               {@const value = record[field.key]}
-              <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed {bordered ? 'svadmin-u-65fdbade2025 svadmin-u-5ceb636bd9f3 svadmin-u-cdf6e054e5e0 svadmin-u-b4cf72cd1cd8 svadmin-u-eb6e8b881acd svadmin-u-1884518576f2' : 'svadmin-u-eb6e8b881acd svadmin-u-1884518576f2 svadmin-u-65fdbade2025 svadmin-u-945ecb9a9005'}">
-                <dt class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf">{field.label}</dt>
-                <dd class="svadmin-u-359090c2d529 svadmin-u-e2327d142859 svadmin-u-d4108abe6359 svadmin-u-2689f3958069 svadmin-u-170cee3ff4e4">
+              <div class="flex flex-col {bordered ? 'border-b border-r border-border/30 last:border-b-0 p-3 sm:p-4' : 'p-3 sm:p-4 border-b border-border/10'}">
+                <dt class="text-xs font-medium text-muted-foreground mb-1">{field.label}</dt>
+                <dd class="text-xs sm:text-sm text-foreground font-medium break-words">
                   <FieldDisplay
                     type={field.type}
                     {value}
@@ -145,13 +145,13 @@ import DataState from './content/DataState.svelte';
         </Card.Content>
       </Card.Root>
     {:else}
-      <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-        <Card.Content class="svadmin-u-8a539c7fe216 svadmin-u-fa6acbf81d74 svadmin-u-3533cbce9e93">
+      <Card.Root class="overflow-hidden border-border/40 shadow-sm">
+        <Card.Content class="p-0 divide-y divide-border/20">
           {#each showFields as field, i (i)}
             {@const value = record[field.key]}
-            <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-4701b613ff95 {i % 2 === 1 ? 'svadmin-u-8a25a995eb8e' : ''}">
-              <div class="svadmin-u-b03f3c253900 svadmin-u-359090c2d529 svadmin-u-e2327d142859 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-84bdd56b0e81">{field.label}</div>
-              <div class="svadmin-u-6b3526212209 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
+            <div class="flex flex-col sm:flex-row px-4 sm:px-6 py-3 sm:py-3.5 {i % 2 === 1 ? 'bg-muted/10' : ''}">
+              <div class="sm:w-1/3 text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-0">{field.label}</div>
+              <div class="sm:w-2/3 text-sm text-foreground">
                 <FieldDisplay
                   type={field.type}
                   {value}

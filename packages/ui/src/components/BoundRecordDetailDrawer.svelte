@@ -75,11 +75,11 @@
 {#snippet fieldsList(fields: FieldDefinition[])}
   {#if query.isSuccess}
     {@const record = detail.rendering ? detail.rendering.record(query.data.data) : query.data.data}
-    <dl class="svadmin-u-fa6acbf81d74 svadmin-u-d2c3932343f5">
+    <dl class="divide-y divide-border/60">
       {#each fields as field (field.key)}
-        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-58284b4ea568 svadmin-u-cb11fec3bb46 svadmin-u-d9bdd3d643a2 svadmin-u-022e8076dfea">
-          <dt class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-e2327d142859">{field.label}</dt>
-          <dd class="svadmin-u-7e0b7cdf1a94 svadmin-u-170cee3ff4e4 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
+        <div class="grid gap-1.5 py-4 sm:grid-cols-[minmax(8rem,1fr)_2fr] sm:gap-6">
+          <dt class="text-xs font-medium text-muted-foreground sm:text-sm">{field.label}</dt>
+          <dd class="min-w-0 break-words text-sm text-foreground">
             <FieldDisplay type={field.type} value={record[field.key]} options={field.options} resourceName={field.resource} />
           </dd>
         </div>
@@ -104,33 +104,33 @@
       <Button type="button" variant="ghost" size="icon" onclick={copyId}
         title={i18n.t('common.copyId')} aria-label={i18n.t('common.copyId')}>
         {#if copyState === 'copied'}
-          <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <Check class="h-4 w-4" />
         {:else}
-          <Copy class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <Copy class="h-4 w-4" />
         {/if}
       </Button>
       <span role="status">{copyState === 'copied' ? i18n.t('common.copied') : copyState === 'error' ? i18n.t('common.operationFailed') : ''}</span>
     {/if}
   {/snippet}
   {#if permissionPending || (canReadRecord && query.isLoading)}
-    <div class="svadmin-u-fa6acbf81d74 svadmin-u-d2c3932343f5" role="status" aria-live="polite" aria-label={i18n.t('common.loading')} aria-busy="true">
+    <div class="divide-y divide-border/60" role="status" aria-live="polite" aria-label={i18n.t('common.loading')} aria-busy="true">
       {#each showFields.slice(0, 6) as field (field.key)}
-        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-77a2a20e90d4 svadmin-u-cb11fec3bb46 svadmin-u-d9bdd3d643a2 svadmin-u-022e8076dfea">
-          <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-69da7e4ff95d" />
-          <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-6da6a3c3f741 svadmin-u-35b2f3aff60f" />
+        <div class="grid gap-2 py-4 sm:grid-cols-[minmax(8rem,1fr)_2fr] sm:gap-6">
+          <Skeleton class="h-4 w-24" />
+          <Skeleton class="h-4 w-full max-w-64" />
         </div>
       {/each}
     </div>
   {:else if !canReadRecord}
-    <div class="svadmin-u-61357c0c2f29 svadmin-u-ca6bf63030aa" data-svadmin-access-denied>
-      <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('common.accessDenied')}</p>
+    <div class="py-12 text-center" data-svadmin-access-denied>
+      <p class="text-sm text-muted-foreground">{i18n.t('common.accessDenied')}</p>
     </div>
   {:else if query.isError}
     <div role="alert">
       <p>{i18n.t('common.operationFailed')}</p>
       <Button type="button" variant="ghost" size="icon" title={i18n.t('common.retry')}
         aria-label={i18n.t('common.retry')} disabled={query.isFetching} onclick={detail.refresh}>
-        <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+        <RefreshCw class="h-4 w-4" />
       </Button>
     </div>
   {:else if query.isSuccess}
@@ -147,8 +147,8 @@
       {/each}
     {/key}
   {:else}
-    <div class="svadmin-u-61357c0c2f29 svadmin-u-ca6bf63030aa">
-      <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('common.noData')}</p>
+    <div class="py-12 text-center">
+      <p class="text-sm text-muted-foreground">{i18n.t('common.noData')}</p>
     </div>
   {/if}
 
@@ -163,13 +163,13 @@
   {#snippet footer()}
     {#if canReadRecord && query.isSuccess}
         <Button type="button" variant="outline" onclick={() => navigateTo('show')}>
-          <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" aria-hidden="true" />
+          <Eye class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
           {i18n.t('common.openFullDetail')}
         </Button>
     {/if}
     {#if canReadRecord && query.isSuccess && resource.canEdit !== false && editPermission.allowed === true}
         <Button type="button" onclick={() => navigateTo('edit')}>
-          <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" aria-hidden="true" />
+          <Pencil class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
           {i18n.t('common.edit')}
         </Button>
     {/if}

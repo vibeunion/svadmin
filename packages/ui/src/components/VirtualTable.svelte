@@ -125,14 +125,14 @@
 
 <div role="table" aria-label={ariaLabel ?? i18n.t('virtualTable.label')}
   aria-rowcount={(available ? items.length : 0) + 1} aria-colcount={columns.length} aria-busy={loading}
-  class={cn('svadmin-u-6da6a3c3f741 svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-2cd02d11d1af svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-359090c2d529', className)}>
+  class={cn('w-full rounded-xl border border-border bg-card shadow-xs overflow-hidden flex flex-col text-xs', className)}>
   <!-- Sticky Header -->
-  <div role="row" aria-rowindex="1" class="svadmin-u-65fdbade2025 svadmin-u-c9ed8c5f79ae svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-426b8b75185b svadmin-u-f0faeb26d656 svadmin-u-7f6912283f11 svadmin-u-012fbd121f37">
+  <div role="row" aria-rowindex="1" class="border-b border-border/80 bg-muted/40 font-semibold text-muted-foreground flex items-center h-10 px-4 select-none shrink-0">
     {#each columns as col (col.key)}
       <div
         role="columnheader"
         style={col.width ? `width: ${col.width}; flex-shrink: 0;` : 'flex: 1; min-width: 0;'}
-        class={cn('svadmin-u-f283ea9bea0e svadmin-u-d5eab218aa34', col.align === 'right' ? 'svadmin-u-308fc069e46e' : col.align === 'center' ? 'svadmin-u-ca6bf63030aa' : 'svadmin-u-2eba0d65d059')}
+        class={cn('truncate px-2', col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left')}
       >
         {col.label}
       </div>
@@ -149,7 +149,7 @@
     tabindex="0"
     aria-label={ariaLabel ?? i18n.t('virtualTable.label')}
     data-testid="virtual-table-viewport"
-    class="svadmin-u-92bf82f493b1 svadmin-u-d89972fe17d6 svadmin-u-6da6a3c3f741"
+    class="overflow-y-auto relative w-full"
     style="height: {normalizedHeight}px; min-height: 0; flex-shrink: 0; overflow: auto;"
     onscroll={handleScroll}
     onkeydown={handleKeydown}
@@ -160,7 +160,7 @@
         <div
           role="row"
           aria-rowindex={index + 2}
-          class="svadmin-u-da4dbfbc4fdc svadmin-u-c78facc7a0a6 svadmin-u-d8cdcad240d1 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-f0faeb26d656 svadmin-u-65fdbade2025 svadmin-u-6ee2d41e2d2d svadmin-u-12251b8f1749 svadmin-u-ceb69a6b0e5f"
+          class="absolute left-0 right-0 flex items-center px-4 border-b border-border/40 hover:bg-muted/30 transition-colors"
           style="top: {top}px; height: {normalizedItemHeight}px; overflow: hidden;"
         >
           {#if rowSnippet}
@@ -170,7 +170,7 @@
               <div
                 role="cell"
                 style={col.width ? `width: ${col.width}; flex-shrink: 0;` : 'flex: 1; min-width: 0;'}
-                class={cn('svadmin-u-f283ea9bea0e svadmin-u-d5eab218aa34 svadmin-u-2689f3958069 svadmin-u-d4108abe6359', col.align === 'right' ? 'svadmin-u-308fc069e46e' : col.align === 'center' ? 'svadmin-u-ca6bf63030aa' : 'svadmin-u-2eba0d65d059')}
+                class={cn('truncate px-2 font-medium text-foreground', col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left')}
               >
                 {item[col.key] ?? '—'}
               </div>
@@ -196,7 +196,7 @@
   </div>
 
   <!-- Footer Info -->
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-967d113a1451 svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-012fbd121f37">
+  <div class="flex items-center justify-between px-4 py-2 border-t border-border/60 bg-muted/20 text-[11px] text-muted-foreground shrink-0">
     <span>{i18n.t('virtualTable.totalRows', { count: String(available ? items.length : 0) })}</span>
   </div>
 </div>

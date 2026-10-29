@@ -2,7 +2,6 @@ import { expect, test } from 'bun:test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'svelte/compiler';
-import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with { type: 'json' };
 import { assertExampleLayoutCss } from './example-layout-contract.js';
 
 const root = resolve(import.meta.dir, '..');
@@ -58,7 +57,7 @@ function classDirectives(source: string): string[] {
   return result;
 }
 function isLegacy(name: string): boolean {
-  return Object.hasOwn(utilityClasses, name) || /[:[\]]/.test(name);
+  return /^svadmin-u-[a-f0-9]{12}$/u.test(name) || /[:[\]]/u.test(name);
 }
 
 test('the Svelte AST gate detects directives rather than strings or comments', () => {

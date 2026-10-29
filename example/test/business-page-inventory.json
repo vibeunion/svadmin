@@ -106,5 +106,9 @@
   {
     "file": "features/workspace/WorkspaceTabsView.svelte",
     "mode": "delegated-rendering"
+  },
+  {
+    "file": "features/templates/TemplateGalleryPage.svelte",
+    "mode": "local-state"
   }
 ]

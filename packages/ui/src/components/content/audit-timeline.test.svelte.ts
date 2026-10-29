@@ -2,7 +2,6 @@ import { cleanup, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AuditTimeline, { type TimelineItem } from './AuditTimeline.svelte';
-import utilityClasses from '../../../scripts/utility-class-map.json';
 import { renderWithI18n as render } from '../../../test/fixtures/render-with-i18n';
 
 afterEach(cleanup);
@@ -42,7 +41,7 @@ describe('AuditTimeline enterprise component', () => {
     expect(view.container.textContent).toContain('Review Approved');
     expect(view.container.textContent).toContain('by Approver A');
     expect(view.container.textContent).toContain('Approved');
-    expect(view.container.querySelector(`.${utilityClasses['text-success']}`)).not.toBeNull();
+    expect(view.container.querySelector(`.${'text-success'}`)).not.toBeNull();
     expect(view.container.querySelector('[data-svadmin-audit-events]')).toBeTruthy();
     expect(view.container.querySelector('[data-svadmin-audit-timeline]')?.getAttribute('data-svadmin-audit-state')).toBe('ready');
   });
