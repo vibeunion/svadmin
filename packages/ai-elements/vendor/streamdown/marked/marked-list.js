@@ -172,7 +172,6 @@ export const markedList = {
             }
         }
         else {
-            bull = this.lexer.options.pedantic ? bullet : '[*+-]';
             bull = this.lexer.options.pedantic ? escapeForRegex(bullet) : '[*+-]';
         }
         const list = {

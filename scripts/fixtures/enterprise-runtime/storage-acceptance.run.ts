@@ -157,11 +157,10 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 }
 
 let status = 1;
-let stage = 'runner';
+let stage = 'browser-deps';
 // 清理需要的插值变量必须在 try 之外可见，保证异常路径也能 down -v。
 let stackEnv: Record<string, string> = fallbackEnv;
 try {
-  stage = 'browser-deps';
   buildBrowserPrerequisites();
   stage = 'runner';
   console.info(`启动 Docker context ${dockerContext} 的 Storage 验收栈 ${project}`);

@@ -45,9 +45,11 @@ behavior deserve application-specific tests in addition to the package fixtures.
 
 The locked Apache-2.0 `streamdown-svelte` 3.0.6 distribution is retained as an explicit
 owned copy under `packages/ai-elements/vendor/streamdown`. Its parser, streaming repair,
-URL policy, sanitizers, controls, public props and type declarations remain unchanged.
-Only the two class-composition calls in theme.js use the native helper. Original file
-hashes and the modification list are recorded in provenance.json; LICENSE and any
+URL policy, sanitizers, controls, public props and type declarations retain their behavior.
+The two class-composition calls in theme.js use the native helper; reviewed quality
+patches remove unused code without changing parser or control behavior. Original file
+hashes, the modification list and reviewed modified-file hashes are recorded in
+provenance.json and verified by the integrity gate; LICENSE and any
 NOTICE are shipped with the package. Runtime dependencies are explicitly declared by
 AI-elements, with the class engine removed rather than aliased or hidden.
 

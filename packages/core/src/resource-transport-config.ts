@@ -22,7 +22,7 @@ function copySchemaData(value: unknown, ancestors = new Set<object>(), depth = 0
   if (depth > 128) return invalidSchema();
   if (value === null || value === undefined || typeof value === 'string' || typeof value === 'boolean') return value;
   if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value !== 'object' || value === null || ancestors.has(value)) return invalidSchema();
+  if (typeof value !== 'object' || ancestors.has(value)) return invalidSchema();
   const array = Array.isArray(value);
   const prototype: unknown = Object.getPrototypeOf(value);
   if (!array && prototype !== Object.prototype && prototype !== null) return invalidSchema();

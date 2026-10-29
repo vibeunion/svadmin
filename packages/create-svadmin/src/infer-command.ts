@@ -276,33 +276,33 @@ export async function loadSourceData(
       }
       throw new Error(`Unable to parse file ${filePath}. Expected valid JSON or GraphQL SDL schema.`);
     }
-      if (isOpenAPIDocument(json)) {
-        return {
-          sourceType: 'openapi',
-          data: json,
-          ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
-          sourceDescription: options.file,
-        };
-      }
-
-      if (isGraphQLDocument(json)) {
-        return {
-          sourceType: 'graphql',
-          data: json,
-          ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
-          sourceDescription: options.file,
-        };
-      }
-
-      // REST sample data
-      const records = readSampleRecords(json);
-
+    if (isOpenAPIDocument(json)) {
       return {
-        sourceType: 'rest',
-        data: records,
-        derivedResourceName: options.resource || baseName,
+        sourceType: 'openapi',
+        data: json,
+        ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
         sourceDescription: options.file,
       };
+    }
+
+    if (isGraphQLDocument(json)) {
+      return {
+        sourceType: 'graphql',
+        data: json,
+        ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
+        sourceDescription: options.file,
+      };
+    }
+
+    // REST sample data
+    const records = readSampleRecords(json);
+
+    return {
+      sourceType: 'rest',
+      data: records,
+      derivedResourceName: options.resource || baseName,
+      sourceDescription: options.file,
+    };
   }
 
   if (options.url) {

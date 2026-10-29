@@ -200,7 +200,13 @@
     "utils/useKeyDown.svelte.js": "380a2278d34cf51e8ac348ab2a814fca8168ecccfac79270299b7da119438ddb"
   },
   "modifiedFiles": [
-    "theme.js"
+    "theme.js",
+    "Elements/popover.svelte.js",
+    "contracts/streamdown.js",
+    "marked/marked-footnotes.js",
+    "marked/marked-list.js",
+    "marked/marked-mdx.js",
+    "utils/panzoom.svelte.js"
   ],
   "runtimeDependencies": {
     "@floating-ui/dom": "^1.7.4",
@@ -225,5 +231,14 @@
     "unist-util-visit": "^5.1.0",
     "@streamdown-svelte/plugin-core": "1.0.0",
     "@streamdown-svelte/remend": "1.3.0"
+  },
+  "modifiedFileHashes": {
+    "theme.js": "eeabfd97681eb38ca2ccea99725e77575687a1ffd6530f672bb3ec079a0f95fc",
+    "Elements/popover.svelte.js": "07b3c2168d55202be6c85d3f11654a87befa5ed929c6dbba4f5b6c58d51101c4",
+    "contracts/streamdown.js": "9aefd500de3cc74a4999cbce6d30c69c5a1f7c34f5a046495cff7b5f19b182e8",
+    "marked/marked-footnotes.js": "6698cf1d30d3df853cc2e743436e35895bc1eb43a122ed15b69e3cf34c7ed54b",
+    "marked/marked-list.js": "5d29eedc7c01cf5cd9e64320da8ad3a9dfc74b7d2f90a8b35a3a8cdf59891f3a",
+    "marked/marked-mdx.js": "179c2193ef814bc4e01c2d4d4351d9ad97d58a4087896dbf2e88e93f091a3e15",
+    "utils/panzoom.svelte.js": "6180e6090722882161a5f46f0e481570f89ec754fb35f26a4281ac1c8048444e"
   }
 }

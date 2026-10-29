@@ -207,7 +207,7 @@ export class TableState {
       const merged=[...this.currentFilters];
       for(const nf of newFilters) {
         if(!('field' in nf)) { merged.push(nf); continue; }
-        const idx=merged.findIndex(f => 'field' in f&&f.field===nf.field&&f.operator===nf.operator);
+        const idx = merged.findIndex(f => 'field' in f && f.field === nf.field && f.operator === nf.operator);
         if(idx>=0) {
           if(nf.value===undefined||nf.value===null||nf.value==='') merged.splice(idx,1);
           else merged[idx]=nf;

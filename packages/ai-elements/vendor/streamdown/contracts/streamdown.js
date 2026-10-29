@@ -1,4 +1,3 @@
-import { carets } from '../streaming.js';
 export const normalizeMermaidControls = (controls) => {
     if (controls === false) {
         return {

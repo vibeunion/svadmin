@@ -68,6 +68,16 @@ function installedPackages(directory, visited = new Set()) {
   return problems;
 }
 
+export function verifyVendorIntegrity(vendor) {
+  const provenance = JSON.parse(readFileSync(resolve(vendor, 'provenance.json'), 'utf8'));
+  for (const [file, originalHash] of Object.entries(provenance.originalFileHashes)) {
+    // 已审查的本地补丁也必须匹配固定哈希，不能通过修改清单跳过完整性检查。
+    const expected = provenance.modifiedFiles.includes(file) ? provenance.modifiedFileHashes?.[file] : originalHash;
+    const actual = createHash('sha256').update(readFileSync(resolve(vendor, file))).digest('hex');
+    assert.equal(actual, expected, `Vendored parser/security source changed: ${file}`);
+  }
+}
+
 export function verifyStyleBoundary({ sourceOnly = false, packages = ['ui', 'ai-elements', 'surface', 'lite', 'flow', 'editor'] } = {}) {
   const tracked = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
   const problems = [];
@@ -103,13 +113,7 @@ export function verifyStyleBoundary({ sourceOnly = false, packages = ['ui', 'ai-
       }
     }
   }
-  const vendor = resolve(root, 'packages/ai-elements/vendor/streamdown');
-  const provenance = JSON.parse(readFileSync(resolve(vendor, 'provenance.json'), 'utf8'));
-  for (const [file, expected] of Object.entries(provenance.originalFileHashes)) {
-    if (provenance.modifiedFiles.includes(file)) continue;
-    const actual = createHash('sha256').update(readFileSync(resolve(vendor, file))).digest('hex');
-    assert.equal(actual, expected, `Vendored parser/security source changed: ${file}`);
-  }
+  verifyVendorIntegrity(resolve(root, 'packages/ai-elements/vendor/streamdown'));
   assert.equal(problems.length, 0, `Style boundary violations:\n${problems.join('\n')}`);
   console.info('Style boundary passed: workspace manifests, aliases, lockfile, installed graph, production imports, CSS entries, and parser integrity.');
 }

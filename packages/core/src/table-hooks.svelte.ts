@@ -107,7 +107,7 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
       const merged=[...currentFilters];
       for(const nf of newFilters) {
         if(!('field' in nf)) { merged.push(nf); continue; }
-        const idx=merged.findIndex(f => 'field' in f&&f.field===nf.field&&f.operator===nf.operator);
+        const idx = merged.findIndex(f => 'field' in f && f.field === nf.field && f.operator === nf.operator);
         if(idx>=0) {
           if(nf.value===undefined||nf.value===null||nf.value==='') merged.splice(idx,1);
           else merged[idx]=nf;
@@ -217,7 +217,7 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
 
             let cmp: number;
             if(typeof va==='number'&&typeof vb==='number') cmp=va-vb;
-            else if(va instanceof Date&&vb instanceof Date) cmp=va.getTime()-vb.getTime();
+            else if (va instanceof Date && vb instanceof Date) cmp = va.getTime() - vb.getTime();
             else if(typeof va==='string'&&typeof vb==='string'&&!isNaN(Number(va))&&!isNaN(Number(vb))) cmp=Number(va)-Number(vb);
             else cmp=String(va).localeCompare(String(vb));
 

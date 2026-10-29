@@ -1,4 +1,3 @@
-import { useClickOutside } from '../utils/useClickOutside.svelte.js';
 import { autoPlacement, computePosition, autoUpdate, hide, offset, shift } from '@floating-ui/dom';
 import { setContext } from 'svelte';
 export class Popover {
@@ -19,7 +18,7 @@ export class Popover {
                 allowedPlacements: ['top', 'top-end', 'top-start', 'bottom', 'bottom-end', 'bottom-start']
             })
         ];
-        const { x, y, strategy, placement, middlewareData } = await computePosition(this.reference, node, {
+        const { x, y, strategy } = await computePosition(this.reference, node, {
             strategy: 'fixed',
             middleware
         });

@@ -22,7 +22,6 @@ export const usePanzoom = (opts = {}) => {
     let lastClientY = 0;
     let dragOffMove = null;
     let dragOffUp = null;
-    let previousStyle = null;
     // touch state
     let touchMode = 'none';
     let pinchDistance = 0;
@@ -30,7 +29,6 @@ export const usePanzoom = (opts = {}) => {
     // expand/collapse state
     let isExpanded = $state(false);
     let animating = false;
-    let placeholderEl = null;
     function onKeyDown(e) {
         if (e.key === 'Escape' || e.keyCode === 27) {
             if (isExpanded && !animating) {
@@ -42,10 +40,6 @@ export const usePanzoom = (opts = {}) => {
     const destroy = () => {
         listeners.forEach((off) => off());
         listeners.clear();
-        if (placeholderEl) {
-            placeholderEl.remove();
-            placeholderEl = null;
-        }
         if (createdWrapper) {
             // Move node back out of wrapper before removing wrapper
             if (node && createdWrapper.parentElement) {

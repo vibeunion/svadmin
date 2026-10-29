@@ -5,7 +5,7 @@ export function snapshotPlainData(value: unknown): JsonValue {
   function snapshot(value: unknown, ancestors: Set<object>): JsonValue {
     if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
     if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value !== 'object' || value === null || ancestors.has(value)) {
+    if (typeof value !== 'object' || ancestors.has(value)) {
       throw new TypeError('Invalid plain data');
     }
     const array = Array.isArray(value);

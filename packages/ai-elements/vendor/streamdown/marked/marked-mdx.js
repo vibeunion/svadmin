@@ -1,6 +1,3 @@
-import { Lexer } from 'marked';
-const defaultLexer = new Lexer({ gfm: true });
-const defaultTokenizer = defaultLexer.options.tokenizer;
 /**
  * Parse attributes from MDX component tag
  * Supports: attribute="string", attribute={number}, attribute={boolean}, attribute={expression}

@@ -246,8 +246,8 @@ export default ts.config(
       'output/**',
       'private/**',
       'xigu-fa/**',
-      // Immutable third-party distribution: hash and import/security boundaries
-      // are checked by check-style-boundary.mjs; first-party adapters stay linted.
+      // 第三方固定副本及已审查补丁由 check-style-boundary.mjs 校验哈希与导入边界；
+      // 项目自有适配器继续执行 lint。
       'packages/ai-elements/vendor/streamdown/**',
     ],
   },

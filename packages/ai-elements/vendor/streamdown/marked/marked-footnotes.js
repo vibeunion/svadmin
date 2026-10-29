@@ -1,5 +1,4 @@
 import {} from './index.js';
-import { StreamdownContext } from '../context.svelte.js';
 import { getContext } from 'svelte';
 import { STREAMDOWN_CONTEXT_KEY } from '../context-key.js';
 const footnoteRegex = /^\[\^([^\]\n]+)\]:(?:[ \t]+|\n|$)([^\n]*(?:\n(?:[ \t]+[^\n]*)?)*)/;

@@ -149,7 +149,7 @@ export async function authRequest<S extends TSchema>(
       : phase === 'session' ? 'INVALID_AUTH_SESSION' : 'INVALID_AUTH_RESPONSE');
   }
   if (error !== null) {
-    if (typeof error !== 'object' || error === null) {
+    if (typeof error !== 'object') {
       throw new SupabaseAuthError(write ? 'WRITE_OUTCOME_UNKNOWN'
         : phase === 'session' ? 'INVALID_AUTH_SESSION' : 'INVALID_AUTH_RESPONSE');
     }
