@@ -133,7 +133,7 @@
 </script>
 
 {#if editing && editingScope === scope && session.isCurrent()}
-  <div bind:this={editorRef} class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-6da6a3c3f741">
+  <div bind:this={editorRef} class="relative flex items-center w-full">
     <input
       bind:this={inputRef}
       type="text"
@@ -144,19 +144,19 @@
       disabled={saving}
       aria-label={fieldLabel}
       aria-invalid={failure !== null}
-      class="svadmin-u-d0a52b312f7d svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-fc7473ca09eb svadmin-u-df37b1fd9495 svadmin-u-3daca9af0861 svadmin-u-f42e9fee68a1 svadmin-u-608dd26cd5ba svadmin-u-1a5f9520d7fa svadmin-u-0fe7d7d814d0 svadmin-u-d463b664011d"
+      class="h-7 min-w-0 flex-1 rounded border bg-background px-2 text-sm outline-none ring-1 ring-primary/50 focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
     />
     <Button type="button" variant="ghost" size="icon-sm" disabled={saving} title={i18n.t('common.save')}
       aria-label={i18n.t('common.save')} aria-busy={saving} onclick={save}>
       {#if saving}
-        <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" role="status" aria-label="Saving..." />
+        <Loader2 class="h-4 w-4 animate-spin" role="status" aria-label="Saving..." />
       {:else}
-        <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+        <Check class="h-4 w-4" />
       {/if}
     </Button>
     <Button type="button" variant="ghost" size="icon-sm" disabled={saving} title={i18n.t('common.cancel')}
       aria-label={i18n.t('common.cancel')} onclick={cancel}>
-      <X class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      <X class="h-4 w-4" />
     </Button>
   </div>
   {#if failure}
@@ -164,7 +164,7 @@
   {/if}
 {:else if editable && display}
   <button type="button"
-    class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-34516836730d svadmin-u-07389a777c1f svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-76610325273f svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-2a6233dc87a9 svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a svadmin-u-ce4edccf4cbb svadmin-u-ceb69a6b0e5f"
+    class="inline-flex items-center cursor-pointer rounded px-1.5 py-0.5 -mx-1 text-sm text-foreground hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors"
     ondblclick={startEdit}
     onclick={startEdit}
     title={`${i18n.t('common.edit')} ${fieldLabel}`}

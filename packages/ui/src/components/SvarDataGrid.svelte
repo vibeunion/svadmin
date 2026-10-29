@@ -350,7 +350,7 @@
 <style>
   .svadmin-svar-grid {
     min-width: 0; color: var(--foreground, CanvasText); background: var(--card, Canvas); font-family: var(--font-sans, system-ui);
-    --wx-font-family: var(--font-sans, system-ui); --wx-font-size: 14px; --wx-font-size-md: 14px;
+    --wx-font-family: var(--font-sans, system-ui); --wx-font-size: var(--svadmin-text-label); --wx-font-size-md: var(--svadmin-text-label);
     --wx-color-font: var(--foreground, CanvasText); --wx-color-font-alt: var(--muted-foreground, GrayText);
     --wx-color-primary: var(--primary, Highlight); --wx-color-primary-font: var(--primary-foreground, HighlightText);
     --wx-background: var(--card, Canvas); --wx-background-alt: var(--muted, Canvas); --wx-background-hover: var(--accent, Canvas);

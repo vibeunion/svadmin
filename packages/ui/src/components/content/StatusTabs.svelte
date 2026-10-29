@@ -61,28 +61,28 @@
 
   const toneClasses: Record<NonNullable<StatusTabItem['tone']>, { activeBadge: string; inactiveBadge: string }> = {
     default: {
-      activeBadge: 'svadmin-u-6a1572b6bf5a svadmin-u-20aaf08a7ed1',
-      inactiveBadge: 'svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748',
+      activeBadge: 'bg-primary/20 text-primary',
+      inactiveBadge: 'bg-muted text-muted-foreground',
     },
     success: {
-      activeBadge: 'svadmin-u-68750801bcf6 svadmin-u-76747e5e02ff',
-      inactiveBadge: 'svadmin-u-17a9f7af2265 svadmin-u-76747e5e02ff',
+      activeBadge: 'bg-success/25 text-success',
+      inactiveBadge: 'bg-success/10 text-success',
     },
     warning: {
-      activeBadge: 'svadmin-u-3bb45dd48a74 svadmin-u-3a4ff758c2ab',
-      inactiveBadge: 'svadmin-u-283481e780bb svadmin-u-3a4ff758c2ab',
+      activeBadge: 'bg-warning/25 text-warning-foreground',
+      inactiveBadge: 'bg-warning/10 text-warning-foreground',
     },
     destructive: {
-      activeBadge: 'svadmin-u-f71dfc1f3d97 svadmin-u-811148b13d1e',
-      inactiveBadge: 'svadmin-u-43928fcc832f svadmin-u-811148b13d1e',
+      activeBadge: 'bg-destructive/25 text-destructive',
+      inactiveBadge: 'bg-destructive/10 text-destructive',
     },
     info: {
-      activeBadge: 'svadmin-u-ab159a179155 svadmin-u-fa68ba954fb0',
-      inactiveBadge: 'svadmin-u-1c1af10f0ece svadmin-u-fa68ba954fb0',
+      activeBadge: 'bg-info/25 text-info',
+      inactiveBadge: 'bg-info/10 text-info',
     },
     muted: {
-      activeBadge: 'svadmin-u-2ef11f1cb219 svadmin-u-d4108abe6359',
-      inactiveBadge: 'svadmin-u-358af0b65a31 svadmin-u-bfa603190748',
+      activeBadge: 'bg-muted text-foreground',
+      inactiveBadge: 'bg-muted/50 text-muted-foreground',
     },
   };
 </script>
@@ -93,9 +93,9 @@
   data-svadmin-status-tabs
   data-variant={variant}
   class={cn(
-    'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-1384f66f41d0',
-    variant === 'segmented' && 'svadmin-u-5f22e64f2282 svadmin-u-2ef11f1cb219 svadmin-u-eb6a3cef9686',
-    variant === 'underline' && 'svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-77a2a20e90d4',
+    'flex items-center gap-1 overflow-x-auto',
+    variant === 'segmented' && 'rounded-lg bg-muted p-1',
+    variant === 'underline' && 'border-b border-border gap-2',
     className
   )}
 >
@@ -112,25 +112,25 @@
       onclick={() => selectTab(item.key, item.disabled)}
       onkeydown={handleKeydown}
       class={cn(
-        'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-e82ae8be04aa svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-df37b1fd9495 svadmin-u-793c80e97ffb svadmin-u-ddac70ae5d29 svadmin-u-49330148794a svadmin-u-b29d8adbad2e',
-        'svadmin-u-fc7473ca09eb svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b',
+        'inline-flex items-center gap-1.5 whitespace-nowrap font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
+        'text-sm px-3 py-1.5',
         variant === 'pills' && [
-          'svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f',
+          'rounded-md border',
           active
-            ? 'svadmin-u-18049387f0af svadmin-u-e6f9e383a762 svadmin-u-d4108abe6359 svadmin-u-cef5b893cf23 svadmin-u-e83a7042bc91'
-            : 'svadmin-u-521fa0c7c407 svadmin-u-bfa603190748 svadmin-u-39f703dbe296 svadmin-u-ea7b2e9e070e',
+            ? 'border-border bg-background text-foreground shadow-xs font-semibold'
+            : 'border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground',
         ],
         variant === 'segmented' && [
-          'svadmin-u-421ac2be5045',
+          'rounded-md',
           active
-            ? 'svadmin-u-e6f9e383a762 svadmin-u-d4108abe6359 svadmin-u-cef5b893cf23 svadmin-u-e83a7042bc91'
-            : 'svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e',
+            ? 'bg-background text-foreground shadow-xs font-semibold'
+            : 'text-muted-foreground hover:text-foreground',
         ],
         variant === 'underline' && [
-          'svadmin-u-f04f99ff45cb svadmin-u-65ac0c49a5d5 svadmin-u-0c5e9137c7de svadmin-u-0e17f2bd9074 svadmin-u-f4cc511ff0c1 svadmin-u-6b7d6e21ccbd',
+          '-mb-px border-b-2 rounded-none px-3 pb-2 pt-1',
           active
-            ? 'svadmin-u-6cbc84dd9e1a svadmin-u-20aaf08a7ed1 svadmin-u-e83a7042bc91'
-            : 'svadmin-u-521fa0c7c407 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-03b959081b5e',
+            ? 'border-primary text-primary font-semibold'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30',
         ]
       )}
     >
@@ -138,8 +138,8 @@
       {#if item.count !== undefined}
         <span
           class={cn(
-            'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-e83a7042bc91 svadmin-u-3032cae0badb svadmin-u-c2385a463da8',
-            'svadmin-u-f8516763aedd svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-359090c2d529',
+            'inline-flex items-center justify-center rounded-full font-semibold tabular-nums leading-none',
+            'min-w-5 px-1.5 py-0.5 text-xs',
             active ? badgeTone.activeBadge : badgeTone.inactiveBadge
           )}
         >

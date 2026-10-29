@@ -42,16 +42,16 @@
 </script>
 
 {#if state === 'loading'}
-  <div data-svadmin-data-state={state} class={'svadmin-u-6ed543e2fbbb svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-c07e54fd1439 ' + className} role="status" aria-live="polite" aria-label={resolvedLoadingLabel} aria-busy="true">
-    <Skeleton class="svadmin-u-cd0d9c512cdc svadmin-u-84789e8a20cd" /><Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-6da6a3c3f741 svadmin-u-9794ab45094d" /><Skeleton class="svadmin-u-0a769880db93 svadmin-u-6da6a3c3f741" />
+  <div data-svadmin-data-state={state} class={'space-y-3 rounded-lg border border-border bg-card p-5 ' + className} role="status" aria-live="polite" aria-label={resolvedLoadingLabel} aria-busy="true">
+    <Skeleton class="h-5 w-40" /><Skeleton class="h-4 w-full max-w-md" /><Skeleton class="h-20 w-full" />
   </div>
 {:else if state === 'error' || state === 'forbidden'}
   <Alert.Root data-svadmin-data-state={state} variant={state === 'error' ? 'destructive' : 'warning'} class={className}>
-    {#if state === 'error'}<AlertTriangle class="svadmin-u-f7b5fa971871" aria-hidden="true" />{:else}<LockKeyhole class="svadmin-u-f7b5fa971871" aria-hidden="true" />{/if}
+    {#if state === 'error'}<AlertTriangle class="size-4" aria-hidden="true" />{:else}<LockKeyhole class="size-4" aria-hidden="true" />{/if}
     <Alert.Title>{resolvedTitle}</Alert.Title>
     <Alert.Description>{resolvedDescription}</Alert.Description>
-    {#if retry}<Button variant="outline" size="sm" class="svadmin-u-eccd13ef4f2f" onclick={retry}><RefreshCw class="svadmin-u-783b0d9d1e2c" aria-hidden="true" />{resolvedRetryLabel}</Button>{/if}
-    {#if action}<div class="svadmin-u-eccd13ef4f2f">{@render action()}</div>{/if}
+    {#if retry}<Button variant="outline" size="sm" class="mt-3" onclick={retry}><RefreshCw class="size-3.5" aria-hidden="true" />{resolvedRetryLabel}</Button>{/if}
+    {#if action}<div class="mt-3">{@render action()}</div>{/if}
   </Alert.Root>
 {:else}
   <div data-svadmin-data-state={state} class={'empty-state ' + className} role="status" aria-live="polite">
@@ -70,7 +70,7 @@
   .empty-state { display: flex; align-items: flex-start; gap: 12px; padding: 16px; text-align: left; color: var(--foreground); }
   .empty-state__icon { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 32px; border-radius: 6px; background: var(--muted); color: var(--muted-foreground); }
   .empty-state__body { min-width: 0; flex: 1; overflow-wrap: anywhere; }
-  .empty-state h3 { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; }
-  .empty-state p { margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted-foreground); }
+  .empty-state h3 { margin: 0; font-size: var(--svadmin-text-label); line-height: var(--svadmin-leading-body); font-weight: 600; letter-spacing: 0; }
+  .empty-state p { margin: var(--svadmin-space-1) 0 0; font-size: var(--svadmin-text-label); line-height: var(--svadmin-leading-body); color: var(--muted-foreground); }
   .empty-state__action { margin-top: 12px; }
 </style>

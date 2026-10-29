@@ -578,10 +578,10 @@
   {#if !resolvedDataProvider}
     <ConfigErrorScreen title="{title} — DataProvider is required" />
   {:else if !authChecked || authProviderPending}
-    <div class="svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227">
-      <div class="svadmin-u-3e7ce58d64fa svadmin-u-ca6bf63030aa">
-        <div class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-afbdd13a380e svadmin-u-ac204c108886 svadmin-u-b485ae1c3b47 svadmin-u-da2c5d419684 svadmin-u-8a5560925d62 svadmin-u-0e12dc7de920"></div>
-        <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">Loading...</p>
+    <div class="flex h-screen items-center justify-center">
+      <div class="space-y-4 text-center">
+        <div class="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
+        <p class="text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
   {:else if route === '/login' && loginPage}
@@ -613,12 +613,12 @@
     </SystemPageShell>
   {:else if isAuthenticated || !resolvedAuthProvider}
     <Layout {title} {...definedOptions({ "menu": menu })} {...definedOptions({ "siteUrl": siteUrl })} {...definedOptions({ "notifications": notifications, "notificationUnreadCount": notificationUnreadCount, "onnotificationread": onnotificationread, "onnotificationreadall": onnotificationreadall, "onnotificationopen": onnotificationopen })} routeMode={resolvedRouteMode} {...definedOptions({ "aiAssistant": aiAssistant })}>
-      <div class="svadmin-u-d89972fe17d6 svadmin-u-8a7a926578c8" aria-busy={authRechecking}>
+      <div class="relative min-h-40" aria-busy={authRechecking}>
         {#if authRechecking}
-          <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-236812d64c82 svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-d542b60b5312" role="status" aria-live="polite">
-            <div class="svadmin-u-6ed543e2fbbb svadmin-u-ca6bf63030aa">
-              <div class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-afbdd13a380e svadmin-u-ac204c108886 svadmin-u-b485ae1c3b47 svadmin-u-da2c5d419684 svadmin-u-8a5560925d62 svadmin-u-0e12dc7de920"></div>
-              <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">Loading...</p>
+          <div class="absolute inset-0 z-10 flex min-h-40 items-center justify-center bg-background/80" role="status" aria-live="polite">
+            <div class="space-y-3 text-center">
+              <div class="h-6 w-6 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
+              <p class="text-sm text-muted-foreground">Loading...</p>
             </div>
           </div>
         {:else}
@@ -718,8 +718,8 @@
       </div>
     </Layout>
   {:else}
-    <div class="svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227">
-      <p class="svadmin-u-bfa603190748">{translation.t('common.redirecting')}</p>
+    <div class="flex h-screen items-center justify-center">
+      <p class="text-muted-foreground">{translation.t('common.redirecting')}</p>
     </div>
   {/if}
   <Toast />

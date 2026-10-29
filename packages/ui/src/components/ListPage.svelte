@@ -63,7 +63,7 @@
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
 </script>
 
-<div class="svadmin-u-3e7ce58d64fa {className}" data-svadmin-list-page={resourceName}>
+<div class="space-y-4 {className}" data-svadmin-list-page={resourceName}>
   <PageHeader title={pageTitle}>
     {#snippet actions()}
       {#if showCreate}

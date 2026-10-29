@@ -39,7 +39,7 @@
   const pageTitle = $derived(title ?? `${i18n.t('common.create')}${resource.label}`);
 </script>
 
-<div class="svadmin-u-b3542e058833 {className}" data-svadmin-crud-page="create" data-svadmin-resource={resourceName}>
+<div class="space-y-6 {className}" data-svadmin-crud-page="create" data-svadmin-resource={resourceName}>
   <div data-svadmin-crud-page-header>
     <PageHeader
       title={pageTitle}

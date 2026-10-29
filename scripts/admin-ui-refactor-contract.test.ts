@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
-import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with { type: 'json' };
 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
@@ -157,7 +156,7 @@ describe('Admin UI refactor contract', () => {
     // 配方几何与发布 CSS 由 tailwind-recipes 和浏览器检查验证；这里仅检查装配边界。
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<ContentPageShell');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<ProfilePage');
-    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);
+    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain('grid items-start');
   });
 
   it('keeps example sources on semantic color tokens (no bare palette utilities or hex)', () => {

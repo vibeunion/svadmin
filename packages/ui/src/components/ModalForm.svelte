@@ -35,7 +35,7 @@
     triggerSize = 'sm',
     submitText = 'Confirm',
     cancelText = 'Cancel',
-    widthClass = 'svadmin-u-a09a722d3ce4',
+    widthClass = 'sm:max-w-lg',
     isSubmitting = false,
     disabled = false,
     onsubmit,
@@ -138,7 +138,7 @@
   {#if triggerSnippet}
     <Dialog.Trigger>
       {#snippet child({ props })}
-        <div {...props} class="svadmin-u-52083e7da442">
+        <div {...props} class="inline-flex">
           {@render triggerSnippet()}
         </div>
       {/snippet}
@@ -153,8 +153,8 @@
     </Dialog.Trigger>
   {/if}
 
-  <Dialog.Content class={cn(widthClass, 'svadmin-u-b4168890eac6 svadmin-u-92bf82f493b1', className)}>
-    <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="svadmin-u-3e7ce58d64fa">
+  <Dialog.Content class={cn(widthClass, 'max-h-[90vh] overflow-y-auto', className)}>
+    <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="space-y-4">
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>
         {#if description}
@@ -166,13 +166,13 @@
         <FeedbackNotice tone="danger" message={submitError} />
       {/if}
 
-      <div class="svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
+      <div class="py-2 text-sm text-foreground">
         {#if children}
           {@render children()}
         {/if}
       </div>
 
-      <Dialog.Footer class="svadmin-u-77a2a20e90d4 svadmin-u-f46b61a9b310 svadmin-u-b950dda299d3 svadmin-u-591f378e24a1">
+      <Dialog.Footer class="gap-2 pt-2 border-t border-border/50">
         <Button
           type="button"
           variant="outline"
@@ -186,10 +186,10 @@
           type="submit"
           size="sm"
           disabled={busy || disabled}
-          class="svadmin-u-58284b4ea568 svadmin-u-2e7a6d18a20d"
+          class="gap-1.5 min-w-20"
         >
           {#if busy}
-            <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
+            <Loader2 class="h-4 w-4 animate-spin" />
           {/if}
           {submitText}
         </Button>

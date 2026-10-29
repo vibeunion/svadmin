@@ -359,8 +359,29 @@ export * as ContextMenu from './components/ui/context-menu/index.js';
 export * as NavigationMenu from './components/ui/navigation-menu/index.js';
 
 export * as Collapsible from './components/ui/collapsible/index.js';
+export * as Popover from './components/ui/popover/index.js';
+export { Progress } from './components/ui/progress/index.js';
 export { Label } from './components/ui/label/index.js';
 export { Command } from './components/ui/command/index.js';
+
+// Foundation layout and data-display components
+export { default as Space } from './components/Space.svelte';
+export { default as Grid } from './components/Grid.svelte';
+export { default as GridCell } from './components/GridCell.svelte';
+export { default as Row } from './components/Row.svelte';
+export { default as Col } from './components/Col.svelte';
+export { default as Timeline } from './components/Timeline.svelte';
+export type { TimelineEntry } from './components/Timeline.svelte';
+export { default as Statistic } from './components/Statistic.svelte';
+export { default as Countdown } from './components/Countdown.svelte';
+export { default as ResizeBox } from './components/ResizeBox.svelte';
+export { default as Tour } from './components/Tour.svelte';
+export type { TourStep } from './components/Tour.svelte';
+export { default as Menu } from './components/Menu.svelte';
+export type { MenuEntry } from './components/Menu.svelte';
+export { default as ConfigProvider, useComponentConfig } from './components/ConfigProvider.svelte';
+export type { ComponentConfig } from './components/ConfigProvider.svelte';
+export { toast, toast as message } from '@svadmin/core';
 
 // Utils
 export { cn } from './utils';

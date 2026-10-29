@@ -40,10 +40,11 @@ The package publishes precompiled CSS: consumers do not need to compile library
 sources. Tailwind is an authoring/build dependency only; generated APIs are not
 a new compatibility commitment.
 
-Existing `svadmin-u-*` aliases and compatibility rules remain native CSS. Do not
-rename or delete them mechanically. New styles should use semantic Tailwind
-classes and reviewed recipes. This is not a wholesale rewrite of every UI
-component.
+Component sources use readable semantic Tailwind utilities and reviewed
+recipes. The historical `svadmin-u-*` aliases remain in the published native CSS
+for host compatibility, but component source must not add or reintroduce them.
+`scripts/rewrite-legacy-utility-aliases.mjs` documents the one-way migration;
+`src/style-source-contract.test.ts` prevents hashed aliases from returning.
 
 ## Product layer
 

@@ -111,7 +111,7 @@
   }
 </script>
 
-<div class={cn('svadmin-u-6da6a3c3f741', className)} data-date-time-input={mode}>
+<div class={cn('w-full', className)} data-date-time-input={mode}>
   {#if instantMode && name}
     <input type="hidden" {name} value={value ?? ''} {disabled} />
   {/if}

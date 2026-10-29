@@ -220,13 +220,13 @@
   }
 </script>
 
-<div aria-busy={effectiveLoading} class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
-    <div class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
-      {i18n.t('pivot.title')} <span class="svadmin-u-bfa603190748 svadmin-u-8ecebc9f80e6">({rowLabel} × {columnLabel})</span>
+<div aria-busy={effectiveLoading} class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
+  <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
+    <div class="font-semibold text-foreground">
+      {i18n.t('pivot.title')} <span class="text-muted-foreground font-normal">({rowLabel} × {columnLabel})</span>
     </div>
-    <div class="svadmin-u-bfa603190748">
-      <strong class="svadmin-u-20aaf08a7ed1">{i18n.t(`pivot.${aggregator}`)}</strong> ({valueLabel})
+    <div class="text-muted-foreground">
+      <strong class="text-primary">{i18n.t(`pivot.${aggregator}`)}</strong> ({valueLabel})
     </div>
   </div>
 
@@ -245,26 +245,26 @@
   {:else}
   {@const context = drillContext}
   {#if drillError === context}<p role="alert">{i18n.t('pivot.drilldownFailed')}</p>{/if}
-  <div class="svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff" style="overflow-x: auto;">
-    <table aria-label={ariaLabel ?? `${i18n.t('pivot.title')}: ${rowLabel} / ${columnLabel} / ${valueLabel}`} class="svadmin-u-6da6a3c3f741 svadmin-u-308fc069e46e svadmin-u-4583f90cd9bd">
-      <thead class="svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
+  <div class="overflow-x-auto rounded-lg border border-border/60" style="overflow-x: auto;">
+    <table aria-label={ariaLabel ?? `${i18n.t('pivot.title')}: ${rowLabel} / ${columnLabel} / ${valueLabel}`} class="w-full text-right border-collapse">
+      <thead class="bg-muted/40 font-semibold text-muted-foreground border-b border-border/60">
         <tr>
-          <th scope="col" class="svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-2eba0d65d059 svadmin-u-706701550477">{rowLabel} \ {columnLabel}</th>
+          <th scope="col" class="px-3 py-2.5 text-left bg-muted/60">{rowLabel} \ {columnLabel}</th>
           {#each pivot.columns as col (col.key)}
-            <th scope="col" class="svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{col.label}</th>
+            <th scope="col" class="px-3 py-2.5 font-semibold text-foreground">{col.label}</th>
           {/each}
-          <th scope="col" class="svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-706701550477 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('pivot.total')}</th>
+          <th scope="col" class="px-3 py-2.5 bg-muted/60 font-semibold text-foreground">{i18n.t('pivot.total')}</th>
         </tr>
       </thead>
-      <tbody class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258 svadmin-u-0e65706bcccd">
+      <tbody class="divide-y divide-border/40 font-mono">
         {#each pivot.rows as row (row.key)}
-          <tr class="svadmin-u-c4b5eaba40e3 svadmin-u-ceb69a6b0e5f">
-            <th scope="row" class="svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-2eba0d65d059 svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-967d113a1451 svadmin-u-79bf1259388b">{row.label}</th>
+          <tr class="hover:bg-muted/20 transition-colors">
+            <th scope="row" class="px-3 py-2 text-left font-medium text-foreground bg-muted/20 font-sans">{row.label}</th>
             {#each pivot.columns as col (col.key)}
               {@const val = pivot.cells.get(row.key)?.get(col.key)}
-              <td class={cn('svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b', val === 0 ? 'svadmin-u-52183a1cca53' : 'svadmin-u-d4108abe6359')}>
+              <td class={cn('px-3 py-2', val === 0 ? 'text-muted-foreground/40' : 'text-foreground')}>
                 {#if canDrill && pivot.cells.get(row.key)?.has(col.key)}
-                  <button type="button" class="svadmin-u-0e65706bcccd" onclick={() => drillDown(context, row.key, col.key)}
+                  <button type="button" class="font-mono" onclick={() => drillDown(context, row.key, col.key)}
                     disabled={drillPending === context} aria-busy={drillPending === context}
                     aria-label={`${i18n.t('pivot.drilldown')}: ${row.label} / ${col.label}`}>
                     {display(val)}
@@ -274,19 +274,19 @@
                 {/if}
               </td>
             {/each}
-            <td class="svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-967d113a1451">
+            <td class="px-3 py-2 font-semibold text-foreground bg-muted/20">
               {display(pivot.rowTotals.get(row.key))}
             </td>
           </tr>
         {/each}
       </tbody>
-      <tfoot class="svadmin-u-706701550477 svadmin-u-e83a7042bc91 svadmin-u-0e65706bcccd svadmin-u-bee68af349c9 svadmin-u-18049387f0af svadmin-u-d4108abe6359">
+      <tfoot class="bg-muted/60 font-semibold font-mono border-t-2 border-border text-foreground">
         <tr>
-          <th scope="row" class="svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-2eba0d65d059 svadmin-u-79bf1259388b">{i18n.t('pivot.grandTotal')}</th>
+          <th scope="row" class="px-3 py-2.5 text-left font-sans">{i18n.t('pivot.grandTotal')}</th>
           {#each pivot.columns as col (col.key)}
-            <td class="svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe">{display(pivot.columnTotals.get(col.key))}</td>
+            <td class="px-3 py-2.5">{display(pivot.columnTotals.get(col.key))}</td>
           {/each}
-          <td class="svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-20aaf08a7ed1">{display(pivot.grandTotal)}</td>
+          <td class="px-3 py-2.5 text-primary">{display(pivot.grandTotal)}</td>
         </tr>
       </tfoot>
     </table>

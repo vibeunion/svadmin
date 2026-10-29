@@ -66,32 +66,32 @@
   function getStatusBadgeVariant(status?: string) {
     switch (status) {
       case 'completed':
-        return 'svadmin-u-4cf5af8d25d3 svadmin-u-76747e5e02ff svadmin-u-18a6e7a36f29';
+        return 'bg-success/15 text-success border-success/30';
       case 'delayed':
-        return 'svadmin-u-c698f77c9ba5 svadmin-u-811148b13d1e svadmin-u-9d5d8b4711b4';
+        return 'bg-destructive/15 text-destructive border-destructive/30';
       case 'in_progress':
-        return 'svadmin-u-30f13f694038 svadmin-u-20aaf08a7ed1 svadmin-u-05f954a846d6';
+        return 'bg-primary/15 text-primary border-primary/30';
       default:
-        return 'svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748 svadmin-u-6ee2d41e2d2d';
+        return 'bg-muted text-muted-foreground border-border/40';
     }
   }
 
   function getBarColor(status?: string) {
     switch (status) {
       case 'completed':
-        return 'svadmin-u-3355648fe22b svadmin-u-5a1ab9dd55a5';
+        return 'bg-success text-success-foreground';
       case 'delayed':
-        return 'svadmin-u-fb1b0d05046d svadmin-u-00e05b9a87d5';
+        return 'bg-destructive text-destructive-foreground';
       default:
-        return 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2';
+        return 'bg-primary text-primary-foreground';
     }
   }
 </script>
 
-<div role="region" aria-label={ariaLabel ?? i18n.t('gantt.title')} aria-busy={loading} class={cn('svadmin-gantt svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
-    <div class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
-      {i18n.t('gantt.title')} <span class="svadmin-u-bfa603190748 svadmin-u-8ecebc9f80e6">({i18n.t('gantt.summary', { tasks: tasks.length, days: totalDays })})</span>
+<div role="region" aria-label={ariaLabel ?? i18n.t('gantt.title')} aria-busy={loading} class={cn('svadmin-gantt border border-border bg-card p-4 text-xs space-y-3', className)}>
+  <div class="flex items-center justify-between pb-2 border-b border-border/60">
+    <div class="font-semibold text-foreground">
+      {i18n.t('gantt.title')} <span class="text-muted-foreground font-normal">({i18n.t('gantt.summary', { tasks: tasks.length, days: totalDays })})</span>
     </div>
   </div>
 
@@ -105,14 +105,14 @@
   {:else if tasks.length === 0}
     <div role="status">{i18n.t('gantt.noData')}</div>
   {:else}
-  <div class="svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff" style="overflow-x: auto;">
-    <div class="svadmin-u-c05fcc7c4caa">
+  <div class="overflow-x-auto rounded-lg border border-border/60" style="overflow-x: auto;">
+    <div class="min-w-[700px]">
       <!-- Timeline Header -->
-      <div class="svadmin-gantt__head svadmin-u-60fbb7713999 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
-        <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-2eba0d65d059 svadmin-u-012fbd121f37">{i18n.t('gantt.task')}</div>
-        <div class="svadmin-u-36e579c0b41c svadmin-u-60fbb7713999">
+      <div class="svadmin-gantt__head flex border-b border-border/60 bg-muted/40 font-semibold text-muted-foreground">
+        <div class="w-56 p-2.5 border-r border-border/60 text-left shrink-0">{i18n.t('gantt.task')}</div>
+        <div class="flex-1 flex">
           {#each days as day (day)}
-            <div class="svadmin-u-36e579c0b41c svadmin-u-7660b450905a svadmin-u-ca6bf63030aa svadmin-u-5ceb636bd9f3 svadmin-u-6ee2d41e2d2d svadmin-u-d058ca6de60f svadmin-u-0e65706bcccd svadmin-u-bb5b5fc23bd9">
+            <div class="flex-1 p-2 text-center border-r border-border/40 text-[11px] font-mono last:border-r-0">
               {day}
             </div>
           {/each}
@@ -120,7 +120,7 @@
       </div>
 
       <!-- Task Rows -->
-      <div class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258">
+      <div class="divide-y divide-border/40">
         {#each tasks as task (task.id)}
           {@const leftPct = (task.startDay / totalDays) * 100}
           {@const widthPct = (task.durationDays / totalDays) * 100}
@@ -130,7 +130,7 @@
             role={onselecttask ? 'button' : 'group'}
             tabindex={onselecttask ? 0 : undefined}
             aria-label={taskLabel(task)}
-            class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-c4b5eaba40e3 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d"
+            class="flex items-center hover:bg-muted/20 transition-colors cursor-pointer"
             onclick={() => selectTask(task)}
             onkeydown={(e) => {
               if (onselecttask && (e.key === 'Enter' || e.key === ' ') && !e.repeat && !e.isComposing) {
@@ -140,21 +140,21 @@
             }}
           >
             <!-- Task Info Column -->
-            <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-012fbd121f37">
-              <div class="svadmin-u-f283ea9bea0e svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{task.title}</div>
+            <div class="w-56 p-2.5 border-r border-border/60 flex items-center justify-between gap-2 shrink-0">
+              <div class="truncate font-medium text-foreground">{task.title}</div>
               {#if task.status}
-                <Badge variant="outline" class={cn('svadmin-u-e09880869d1f svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6', getStatusBadgeVariant(task.status))}>
+                <Badge variant="outline" class={cn('text-[9px] px-1 py-0', getStatusBadgeVariant(task.status))}>
                   {i18n.t(`gantt.${task.status}`)}
                 </Badge>
               {/if}
             </div>
 
             <!-- Task Bar Grid Area -->
-            <div class="svadmin-u-36e579c0b41c svadmin-u-d89972fe17d6 svadmin-u-426b8b75185b svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-d8e0e382c67b">
+            <div class="flex-1 relative h-10 flex items-center px-1">
               <!-- Grid vertical guideline background -->
-              <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-60fbb7713999 svadmin-u-a4326536b8f5">
+              <div class="absolute inset-0 flex pointer-events-none">
                 {#each days as _, idx (idx)}
-                  <div class="svadmin-u-36e579c0b41c svadmin-u-5ceb636bd9f3 svadmin-u-d528c7381898 svadmin-u-bb5b5fc23bd9"></div>
+                  <div class="flex-1 border-r border-border/20 last:border-r-0"></div>
                 {/each}
               </div>
 
@@ -166,7 +166,7 @@
               {:else}
               <div
                 class={cn(
-                  'svadmin-gantt__bar svadmin-u-d89972fe17d6 svadmin-u-f6fe902450dc svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d5eab218aa34 svadmin-u-1dc571a3609f svadmin-u-2689f3958069 svadmin-u-2cd02d11d1af svadmin-u-0fe7d7d814d0 group svadmin-u-7703298183eb',
+                  'svadmin-gantt__bar relative h-6 flex items-center justify-between px-2 text-[10px] font-medium overflow-hidden transition-all group hover:brightness-110',
                   getBarColor(task.status)
                 )}
                 style={`margin-left: ${leftPct}%; width: ${widthPct}%; flex-shrink: 0;`}
@@ -174,14 +174,14 @@
                 <!-- Inner progress fill -->
                 {#if task.progress !== undefined}
                   <div
-                    class="svadmin-u-da4dbfbc4fdc svadmin-u-5f89f14a26db svadmin-u-c78facc7a0a6 svadmin-u-99d459b1015d svadmin-u-a4326536b8f5"
+                    class="absolute inset-y-0 left-0 bg-foreground/20 pointer-events-none"
                     style={`width: ${task.progress}%;`}
                   ></div>
                 {/if}
 
-                <span class="svadmin-u-f283ea9bea0e svadmin-u-d89972fe17d6 svadmin-u-236812d64c82">{task.title}</span>
+                <span class="truncate relative z-10">{task.title}</span>
                 {#if task.progress !== undefined}
-                  <span class="svadmin-u-d89972fe17d6 svadmin-u-236812d64c82 svadmin-u-e09880869d1f svadmin-u-4f5874c554b6 svadmin-u-0e65706bcccd">{task.progress}%</span>
+                  <span class="relative z-10 text-[9px] opacity-90 font-mono">{task.progress}%</span>
                 {/if}
               </div>
               {/if}

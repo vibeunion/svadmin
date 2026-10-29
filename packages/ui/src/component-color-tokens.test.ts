@@ -32,13 +32,7 @@ const BARE_HEX = /(?<![\w&])#[0-9a-fA-F]{3,8}\b/;
 
 // Explicit hex exceptions. Keep this list as short as possible; every literal
 // must still exist in its file, so stale allowances fail loudly.
-const HEX_ALLOWLIST: { file: string; literal: string; reason: string }[] = [
-  {
-    file: 'Sidebar.svelte',
-    literal: `'#165DFF'`,
-    reason: 'fallback swatch for the runtime theme preview dot when no registered theme matches (documented in Sidebar.svelte)',
-  },
-];
+const HEX_ALLOWLIST: { file: string; literal: string; reason: string }[] = [];
 
 function findViolations(): string[] {
   const violations: string[] = [];

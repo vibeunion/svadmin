@@ -110,7 +110,7 @@
   }
 </script>
 
-<div class={cn('svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-421ac2be5045', className)} data-date-range-input>
+<div class={cn('flex items-center rounded-md', className)} data-date-range-input>
   {#if presets.length > 0}
     <Select
       value=""

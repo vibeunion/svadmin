@@ -91,9 +91,9 @@
   }
 </script>
 
-<Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-  <Card.Header class="svadmin-u-7fcf9124b5df">
-    <Card.Title class="svadmin-u-4ee734926ff6">{resolvedTitle}</Card.Title>
+<Card.Root class="border-border/40 shadow-sm">
+  <Card.Header class="pb-3">
+    <Card.Title class="text-base">{resolvedTitle}</Card.Title>
     <Card.Description>
       {#if resolvedTask}
         {resolveTaskTitle(resolvedTask)}
@@ -102,7 +102,7 @@
       {/if}
     </Card.Description>
   </Card.Header>
-  <Card.Content class="svadmin-u-b43b4c086d9a svadmin-u-9335c39f6eff">
+  <Card.Content class="space-y-5 pt-0">
     {#if view.invalid}
       <p role="alert">{i18n.t('validation.invalidFormat')}</p>
     {:else if useProviderData && query.isError}
@@ -115,54 +115,54 @@
     {:else if useProviderData && taskProvider && query.isLoading}
       <DataState state="loading" loadingLabel={i18n.t('task.loadingDetail')} />
     {:else if resolvedTask}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <div class="flex flex-wrap items-center gap-2">
         <TaskStatusBadge status={String(resolvedTask.status ?? 'pending')} />
-        <Badge variant="outline" class="svadmin-u-0e65706bcccd svadmin-u-359090c2d529">{resolvedTask.id}</Badge>
+        <Badge variant="outline" class="font-mono text-xs">{resolvedTask.id}</Badge>
       </div>
 
       {#if typeof resolveTaskProgress(resolvedTask) === 'number'}
         <TaskProgressBar {...definedOptions({ "value": resolveTaskProgress(resolvedTask) })} />
       {/if}
 
-      <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff">
-        <div class="svadmin-u-da7c36cd8867">
-          <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.createdLabel')}</div>
-          <div class="svadmin-u-fc7473ca09eb">{formatTaskDate(resolveTaskCreatedAt(resolvedTask), i18n.locale)}</div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-muted-foreground">{i18n.t('task.createdLabel')}</div>
+          <div class="text-sm">{formatTaskDate(resolveTaskCreatedAt(resolvedTask), i18n.locale)}</div>
         </div>
-        <div class="svadmin-u-da7c36cd8867">
-          <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.updatedLabel')}</div>
-          <div class="svadmin-u-fc7473ca09eb">{formatTaskDate(resolveTaskUpdatedAt(resolvedTask), i18n.locale)}</div>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-muted-foreground">{i18n.t('task.updatedLabel')}</div>
+          <div class="text-sm">{formatTaskDate(resolveTaskUpdatedAt(resolvedTask), i18n.locale)}</div>
         </div>
       </div>
 
       {#if resolveTaskMessage(resolvedTask)}
-        <div class="svadmin-u-da7c36cd8867">
-          <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.messageLabel')}</div>
-          <div class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-2859c861d7de svadmin-u-eb6e8b881acd svadmin-u-fc7473ca09eb">{resolveTaskMessage(resolvedTask)}</div>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-muted-foreground">{i18n.t('task.messageLabel')}</div>
+          <div class="rounded-md border border-border/60 bg-muted/30 p-3 text-sm">{resolveTaskMessage(resolvedTask)}</div>
         </div>
       {/if}
 
       {#if resolveTaskError(resolvedTask)}
-        <div class="svadmin-u-da7c36cd8867">
-          <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-811148b13d1e">{i18n.t('task.errorLabel')}</div>
-          <pre class="svadmin-u-73fc3fb18ceb svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-f0c1e65bd6f2 svadmin-u-7a0854fdbc30 svadmin-u-eb6e8b881acd svadmin-u-359090c2d529 svadmin-u-811148b13d1e">{toPrettyJson(resolveTaskError(resolvedTask))}</pre>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-destructive">{i18n.t('task.errorLabel')}</div>
+          <pre class="overflow-auto rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive">{toPrettyJson(resolveTaskError(resolvedTask))}</pre>
         </div>
       {/if}
 
       {#if resolveTaskResult(resolvedTask) !== undefined}
-        <div class="svadmin-u-da7c36cd8867">
-          <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.resultLabel')}</div>
-          <pre class="svadmin-u-73fc3fb18ceb svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-967d113a1451 svadmin-u-eb6e8b881acd svadmin-u-359090c2d529">{toPrettyJson(resolveTaskResult(resolvedTask))}</pre>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-muted-foreground">{i18n.t('task.resultLabel')}</div>
+          <pre class="overflow-auto rounded-md border border-border/60 bg-muted/20 p-3 text-xs">{toPrettyJson(resolveTaskResult(resolvedTask))}</pre>
         </div>
       {/if}
 
-      <div class="svadmin-u-da7c36cd8867">
-        <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.payloadLabel')}</div>
-        <pre class="svadmin-u-73fc3fb18ceb svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-967d113a1451 svadmin-u-eb6e8b881acd svadmin-u-359090c2d529">{toPrettyJson(resolvedTask.payload ?? resolvedTask)}</pre>
+      <div class="space-y-1">
+        <div class="text-xs uppercase tracking-wide text-muted-foreground">{i18n.t('task.payloadLabel')}</div>
+        <pre class="overflow-auto rounded-md border border-border/60 bg-muted/20 p-3 text-xs">{toPrettyJson(resolvedTask.payload ?? resolvedTask)}</pre>
       </div>
 
       {#if taskProvider?.retry || taskProvider?.cancel}
-        <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4 svadmin-u-f46b61a9b310">
+        <div class="flex flex-wrap gap-2 pt-2">
           {#if taskProvider?.retry && canRetryTask(resolvedTask)}
             <RetryTaskButton taskId={resolvedTask.id} {taskProvider} />
           {/if}
@@ -172,7 +172,7 @@
         </div>
       {/if}
     {:else}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-b5f3ff77f4f9 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
+      <div class="flex h-32 items-center justify-center text-sm text-muted-foreground">
         {i18n.t('task.noSelection')}
       </div>
     {/if}

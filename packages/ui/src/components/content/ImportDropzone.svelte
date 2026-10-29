@@ -96,21 +96,21 @@
   }
 </script>
 
-<div class={'svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-a29b7a649c77 svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-ca6bf63030aa ' + className}
+<div class={'rounded-lg border border-dashed border-border bg-card p-6 text-center ' + className}
   data-svadmin-import-dropzone role="group" aria-label={i18n.t('common.importData')} aria-busy={busy}
   ondragover={event => event.preventDefault()}
   ondrop={event => { event.preventDefault(); void receive(event.dataTransfer?.files); }}>
-  <UploadCloud aria-hidden="true" class="svadmin-u-0e12dc7de920 svadmin-u-d8f5213f0fe0 svadmin-u-bfa603190748" />
-  <p class="svadmin-u-eccd13ef4f2f svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('common.importData')}</p>
-  {#if accept}<p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{accept}</p>{/if}
-  <Input class="svadmin-u-0e12dc7de920 svadmin-u-0ab8667228fd svadmin-u-2472e9b81a97" type="file"
+  <UploadCloud aria-hidden="true" class="mx-auto size-8 text-muted-foreground" />
+  <p class="mt-3 text-sm font-medium text-foreground">{i18n.t('common.importData')}</p>
+  {#if accept}<p class="mt-1 text-xs text-muted-foreground">{accept}</p>{/if}
+  <Input class="mx-auto mt-4 max-w-sm" type="file"
     {accept} {multiple} bind:files={nativeFiles} aria-label={i18n.t('common.chooseFile')}
     onchange={choose} disabled={busy || !onimport} />
-  {#if busy}<p class="svadmin-u-eccd13ef4f2f svadmin-u-359090c2d529 svadmin-u-bfa603190748" role="status">{i18n.t('common.importing')}</p>{/if}
-  {#if failure}<p class="svadmin-u-eccd13ef4f2f svadmin-u-359090c2d529 svadmin-u-76747e5e02ff" role="alert">{errorMessage}</p>{/if}
+  {#if busy}<p class="mt-3 text-xs text-muted-foreground" role="status">{i18n.t('common.importing')}</p>{/if}
+  {#if failure}<p class="mt-3 text-xs text-success" role="alert">{errorMessage}</p>{/if}
   {#if failure === 'import' && retryFiles}
-    <Button type="button" class="svadmin-u-0ab8667228fd" size="sm" disabled={busy || !onimport}
+    <Button type="button" class="mt-4" size="sm" disabled={busy || !onimport}
       onclick={() => { void receive(retryFiles); }}><RotateCw aria-hidden="true" />{i18n.t('common.retry')}</Button>
   {/if}
-  {#if status}<p class="svadmin-u-eccd13ef4f2f svadmin-u-359090c2d529 svadmin-u-76747e5e02ff" role="status">{status}</p>{/if}
+  {#if status}<p class="mt-3 text-xs text-success" role="status">{status}</p>{/if}
 </div>

@@ -100,7 +100,7 @@
     <input
       type="file"
       accept={importHook.inputProps.accept}
-      class="svadmin-u-99d72c7fc3e2"
+      class="hidden"
       bind:this={fileInput}
       onchange={handleFileChange}
     />
@@ -115,9 +115,9 @@
     aria-busy={importHook.isLoading}
     onclick={triggerImport}
   >
-    <Upload class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+    <Upload class="h-4 w-4" />
     {#if !hideText}
-      <span class="svadmin-u-f58b02572ab2">
+      <span class="ml-1">
         {#if children}
           {@render children()}
         {:else}

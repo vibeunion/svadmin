@@ -19,6 +19,7 @@
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
   import LazyWorkspaceTabs from './components/LazyWorkspaceTabs.svelte';
+  import LazyTemplateGallery from './components/LazyTemplateGallery.svelte';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
@@ -36,6 +37,7 @@
   const menu = $derived.by<MenuItem[]>(() => [
     { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
     { name: 'workspace_tabs', label: currentLocale === 'zh-CN' ? '多标签工作台' : 'Multi-tab Workspace', icon: 'folder', href: '/workspace' },
+    { name: 'page_templates', label: currentLocale === 'zh-CN' ? '页面模板' : 'Page Templates', icon: 'layout', href: '/templates' },
     ...createExampleMenu(currentLocale),
   ]);
   const appTitle = 'svadmin example';
@@ -60,6 +62,7 @@
 
   const pageRoutes = [
     { path: '/workspace', component: LazyWorkspaceTabs, title: 'Multi-tab Workspace' },
+    { path: '/templates', component: LazyTemplateGallery, title: 'Page Templates' },
   ];
 </script>
 

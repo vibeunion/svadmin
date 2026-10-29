@@ -410,12 +410,12 @@
   bind:this={formElement}
   aria-busy={isSubmitting}
   onsubmit={handleSubmit}
-  class={cn('svadmin-u-3e7ce58d64fa svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23 svadmin-u-359090c2d529', className)}
+  class={cn('space-y-4 rounded-xl border border-border bg-card p-6 shadow-xs text-xs', className)}
 >
   {#if resolvedSchema?.title}
-    <div class="svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
-      <h3 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{resolvedSchema.title}</h3>
-      {#if resolvedSchema.description}<p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{resolvedSchema.description}</p>{/if}
+    <div class="pb-2 border-b border-border/60">
+      <h3 class="text-sm font-semibold text-foreground">{resolvedSchema.title}</h3>
+      {#if resolvedSchema.description}<p class="text-xs text-muted-foreground mt-0.5">{resolvedSchema.description}</p>{/if}
     </div>
   {/if}
 
@@ -444,12 +444,12 @@
     {#if coreSchema && !isSchemaFormNodeVisible(node as SchemaFormSchema, prepared.ok ? prepared.value : {})}
       <!-- 隐藏字段保留草稿，但不进入提交数据。 -->
     {:else if oneOf}
-      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, selectionError ? `${selectorId}:error` : undefined].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
-        <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
-        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
-        <div class="svadmin-u-da7c36cd8867">
-          <label for={selectorId} class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
-            {oneOf.propertyName}{#if required}<span class="svadmin-u-811148b13d1e">*</span>{/if}
+      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, selectionError ? `${selectorId}:error` : undefined].filter(Boolean).join(' ') || undefined} class="space-y-1 rounded-md">
+        <legend class="block font-medium">{title}</legend>
+        {#if node.description}<p id={descriptionId} class="text-[11px] text-muted-foreground">{node.description}</p>{/if}
+        <div class="space-y-1">
+          <label for={selectorId} class="block font-medium text-foreground">
+            {oneOf.propertyName}{#if required}<span class="text-destructive">*</span>{/if}
           </label>
           <select id={selectorId} disabled={selectorLocked} aria-invalid={selectionError ? 'true' : undefined} aria-describedby={selectionError ? `${selectorId}:error` : undefined} value={oneOfOptionIndex(oneOf.values, oneOfValue)} onchange={(event) => {
             if (selectorLocked || !editable()) return;
@@ -465,7 +465,7 @@
               ? mergeDefaults(branchSchema as JsonSchema, next, true) as Record<string, unknown>
               : next;
             if (next) writePath(path, seeded as Record<string, unknown>);
-          }} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
+          }} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs">
             <option value="">{i18n.t('common.selectOption')}</option>
             {#each oneOf.values as branchValues, branch (branch)}
               {#each branchValues as value, valueIndex (valueIndex)}
@@ -477,10 +477,10 @@
         </div>
         {#if branchSchema && branchCompiled}
           {#if branchCompiled.kind === 'object'}
-            <fieldset disabled={fieldLocked} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
-              <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{branchSchema.title ?? title}</legend>
-              {#if branchSchema.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{branchSchema.description}</p>{/if}
-              <div class="svadmin-u-9c6cdfa2ba3d">
+            <fieldset disabled={fieldLocked} class="space-y-1 rounded-md">
+              <legend class="block font-medium">{branchSchema.title ?? title}</legend>
+              {#if branchSchema.description}<p class="text-[11px] text-muted-foreground">{branchSchema.description}</p>{/if}
+              <div class="space-y-3.5">
                 {#each Object.entries(branchSchema.properties ?? {}) as [key, child] (key)}
                   {#if key !== oneOf.propertyName}
                     {@render renderField(child, branchCompiled.properties[key], [...path, key], child.title ?? key, branchSchema.required?.includes(key) ?? false)}
@@ -494,11 +494,11 @@
         {/if}
       </fieldset>
     {:else if type === 'object' || node.properties}
-      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
-        <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
+      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="space-y-1 rounded-md">
+        <legend class="block font-medium">{title}</legend>
         {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
-        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
-        <div class="svadmin-u-9c6cdfa2ba3d">
+        {#if node.description}<p id={descriptionId} class="text-[11px] text-muted-foreground">{node.description}</p>{/if}
+        <div class="space-y-3.5">
           {#each Object.entries(node.properties ?? {}) as [key, child] (key)}
             {@render renderField(child, compiled?.kind === 'object' ? compiled.properties[key] : undefined, [...path, key], child.title ?? key, node.required?.includes(key) ?? false)}
           {/each}
@@ -506,30 +506,30 @@
       </fieldset>
     {:else if type === 'array'}
       {@const items = Array.isArray(current) ? current : []}
-      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
-        <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
+      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="space-y-1 rounded-md">
+        <legend class="block font-medium">{title}</legend>
         {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
-        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
+        {#if node.description}<p id={descriptionId} class="text-[11px] text-muted-foreground">{node.description}</p>{/if}
         {#each items as _, index (index)}
           {@render renderField(node.items ?? { type: 'string' }, compiled?.kind === 'array' ? compiled.item : undefined, [...path, String(index)], `${title} ${index + 1}`)}
           <Button type="button" variant="ghost" size="sm" disabled={fieldLocked || (node.minItems !== undefined && items.length <= node.minItems)} onclick={() => removeArrayItem(path, index)}>
-            <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.remove}
+            <Trash2 class="h-3.5 w-3.5" /> {labels.remove}
           </Button>
         {:else}
-          <span class="svadmin-u-bfa603190748">{labels.empty}</span>
+          <span class="text-muted-foreground">{labels.empty}</span>
         {/each}
         <Button type="button" variant="outline" size="sm" disabled={fieldLocked || (node.maxItems !== undefined && items.length >= node.maxItems)} onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>
-          <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.add}
+          <Plus class="h-3.5 w-3.5" /> {labels.add}
         </Button>
       </fieldset>
     {:else}
-      <div class="svadmin-u-da7c36cd8867">
-        <label for={id} class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
-          {title}{#if required}<span class="svadmin-u-811148b13d1e">*</span>{/if}
+      <div class="space-y-1">
+        <label for={id} class="block font-medium text-foreground">
+          {title}{#if required}<span class="text-destructive">*</span>{/if}
         </label>
-        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
+        {#if node.description}<p id={descriptionId} class="text-[11px] text-muted-foreground">{node.description}</p>{/if}
         {#if options}
-          <select id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} required={required} value={enumIndex(current, options) < 0 ? '' : enumToken(enumIndex(current, options))} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, options))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
+          <select id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} required={required} value={enumIndex(current, options) < 0 ? '' : enumToken(enumIndex(current, options))} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, options))} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs">
             <option value="">{i18n.t('common.selectOption')}</option>
             {#each options as option, index (index)}<option value={enumToken(index)}>{String(option)}</option>{/each}
           </select>
@@ -538,30 +538,30 @@
         {:else if type === 'boolean'}
           <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
         {:else if type === 'number' || type === 'integer'}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="number" step={type === 'integer' ? 1 : 'any'} min={node.minimum} max={node.maximum} required={required} value={current == null ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="number" step={type === 'integer' ? 1 : 'any'} min={node.minimum} max={node.maximum} required={required} value={current == null ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
         {:else}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="text" minlength={node.minLength} maxlength={node.maxLength} required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="text" minlength={node.minLength} maxlength={node.maxLength} required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
         {/if}
         {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
       </div>
     {/if}
   {/snippet}
 
-  <fieldset class="schema-form-fields svadmin-u-3e7ce58d64fa" disabled={locked}>
+  <fieldset class="schema-form-fields space-y-4" disabled={locked}>
   {#if prepared.ok}
     {#if model.node?.kind === 'oneOf'}
       {@render renderField(resolvedSchema as JsonSchema, model.node, [], resolvedSchema?.title ?? '', false)}
     {:else}
-      <div class="svadmin-u-9c6cdfa2ba3d">
+      <div class="space-y-3.5">
         {#each Object.entries(resolvedSchema?.properties ?? {}) as [key, node] (key)}
           {@render renderField(node, model.node?.kind === 'object' ? model.node.properties[key] : undefined, [key], node.title ?? key, resolvedSchema?.required?.includes(key) ?? false)}
         {/each}
       </div>
     {/if}
   {/if}
-  <div class="svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14">
-    <Button type="submit" size="sm" disabled={locked} class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab">
-      {#if isSubmitting}<Loader2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />{/if}
+  <div class="pt-4 border-t border-border/60 flex justify-end">
+    <Button type="submit" size="sm" disabled={locked} class="gap-1 min-w-24">
+      {#if isSubmitting}<Loader2 class="h-3.5 w-3.5 animate-spin" />{/if}
       {submitText}
     </Button>
   </div>

@@ -216,14 +216,14 @@
   {:else if error}
     <DataState state="error" title={isZh ? '企业设置加载失败' : 'Enterprise settings failed to load'} description={failureMessage()} retry={loadSettings} />
   {:else}
-    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-60541e1e26f8 svadmin-u-0c3bc98565dd svadmin-u-2f27a80ed92b">
+    <div class="grid items-start gap-4 lg:grid-cols-2">
       <SettingsGroup title={i18n.t('account.securityPolicy')} description={isZh ? '配置组织级身份、会话与审计策略。' : 'Configure organization-wide identity, session, and audit controls.'} bodyClass="space-y-4">
         {#if organizationProvider}
-          <div class="svadmin-u-6f7e013d6499"><Label for={`${controlId}-organization-name`}>{isZh ? '组织名称' : 'Organization name'}</Label><div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4"><Input id={`${controlId}-organization-name`} bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
+          <div class="space-y-2"><Label for={`${controlId}-organization-name`}>{isZh ? '组织名称' : 'Organization name'}</Label><div class="flex gap-2"><Input id={`${controlId}-organization-name`} bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
         {/if}
-        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2">
-          <div class="svadmin-u-6f7e013d6499"><Label for={`${controlId}-session-timeout`}>{i18n.t('account.sessionTimeout')}</Label><Input id={`${controlId}-session-timeout`} type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} aria-invalid={policy ? !sessionTimeoutValid : undefined} aria-describedby={policy && !sessionTimeoutValid ? `${controlId}-policy-error` : undefined} /></div>
-          <div class="svadmin-u-6f7e013d6499"><Label for={`${controlId}-retention`}>{i18n.t('account.dataRetention')}</Label><Input id={`${controlId}-retention`} type="number" min="1" step="1" bind:value={auditRetentionValue} disabled={!policy || saving} aria-invalid={policy ? !auditRetentionValid : undefined} aria-describedby={policy && !auditRetentionValid ? `${controlId}-policy-error` : undefined} /></div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="space-y-2"><Label for={`${controlId}-session-timeout`}>{i18n.t('account.sessionTimeout')}</Label><Input id={`${controlId}-session-timeout`} type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} aria-invalid={policy ? !sessionTimeoutValid : undefined} aria-describedby={policy && !sessionTimeoutValid ? `${controlId}-policy-error` : undefined} /></div>
+          <div class="space-y-2"><Label for={`${controlId}-retention`}>{i18n.t('account.dataRetention')}</Label><Input id={`${controlId}-retention`} type="number" min="1" step="1" bind:value={auditRetentionValue} disabled={!policy || saving} aria-invalid={policy ? !auditRetentionValid : undefined} aria-describedby={policy && !auditRetentionValid ? `${controlId}-policy-error` : undefined} /></div>
         </div>
         {#if policy && !policyNumbersValid}<div id={`${controlId}-policy-error`}><FeedbackNotice tone="warning" message={isZh ? '会话超时和审计保留天数必须为正整数。' : 'Session timeout and audit retention must be positive integers.'} /></div>{/if}
         <SettingsFieldRow label={i18n.t('account.auditLogging')} controlId={`${controlId}-audit`} description={isZh ? '由后端持久化组织级审计策略。' : 'Persist the organization audit policy through the backend provider.'} control={auditControl} separated />
@@ -231,14 +231,14 @@
       </SettingsGroup>
       <SettingsGroup title={i18n.t('account.singleSignOn')} description={i18n.t('account.ssoDescription')} bodyClass="space-y-4">
         <SettingsFieldRow label={i18n.t('account.enableSso')} controlId={`${controlId}-sso`} description={isZh ? '启用后由已配置身份源执行组织登录策略。' : 'Require the configured identity provider for organization members.'} control={ssoControl} />
-        <div class="svadmin-u-6f7e013d6499">
+        <div class="space-y-2">
           <Label for={`${controlId}-metadata-url`}>{i18n.t('account.ssoProvider')}</Label>
           <Input id={`${controlId}-metadata-url`} type="url" bind:value={metadataUrl} placeholder="https://idp.example.com/.well-known/openid-configuration" disabled={!identityProvider || testing} />
         </div>
         <Button variant="outline" size="sm" disabled={!identityProvider || testing} onclick={() => testConnection()}>{testing ? (isZh ? '测试中...' : 'Testing...') : i18n.t('common.test')}</Button>
       </SettingsGroup>
     </div>
-    <section class="svadmin-u-6ed543e2fbbb">
+    <section class="space-y-3">
       <SectionHeader title={i18n.t('account.connections')} />
       {#if identityProviders.length === 0}
         <DataState state="empty" title={isZh ? '尚未配置身份源' : 'No identity provider configured'} description={isZh ? '请在后端 IdentityGovernanceProvider 中创建并验证身份源。' : 'Create and verify an identity provider through the backend IdentityGovernanceProvider.'} />
@@ -248,6 +248,6 @@
         {/each}
       {/if}
     </section>
-    <section class="svadmin-u-6ed543e2fbbb"><SectionHeader title={i18n.t('account.securityLog')} /><SecurityEventTable events={displayEvents} emptyTitle={i18n.t('common.noData')} emptyDescription={isZh ? '当前 Provider 未返回安全事件。' : 'The provider returned no security events.'} /></section>
+    <section class="space-y-3"><SectionHeader title={i18n.t('account.securityLog')} /><SecurityEventTable events={displayEvents} emptyTitle={i18n.t('common.noData')} emptyDescription={isZh ? '当前 Provider 未返回安全事件。' : 'The provider returned no security events.'} /></section>
   {/if}
 </ContentPageShell>

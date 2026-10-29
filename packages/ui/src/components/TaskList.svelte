@@ -111,9 +111,9 @@
 
 </script>
 
-<Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-  <Card.Header class="svadmin-u-7fcf9124b5df">
-    <Card.Title class="svadmin-u-4ee734926ff6">{resolvedTitle}</Card.Title>
+<Card.Root class="border-border/40 shadow-sm">
+  <Card.Header class="pb-3">
+    <Card.Title class="text-base">{resolvedTitle}</Card.Title>
     {#if !readUnavailable}
       <Card.Description>
       {#if useProviderData && taskProvider}
@@ -124,7 +124,7 @@
       </Card.Description>
     {/if}
   </Card.Header>
-  <Card.Content class="svadmin-u-9335c39f6eff">
+  <Card.Content class="pt-0">
     {#if view.invalid}
       <p role="alert">{i18n.t('validation.invalidFormat')}</p>
     {:else if readUnavailable}
@@ -141,12 +141,12 @@
         {...definedOptions({ retry: !canRead || query.isFetching ? undefined : retryRead })}
       />
     {:else if useProviderData && taskProvider && query.isLoading}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
-        <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
+      <div class="flex h-40 items-center justify-center text-muted-foreground">
+        <Loader2 class="mr-2 h-4 w-4 animate-spin" />
         {i18n.t('task.loadingList')}
       </div>
     {:else}
-      <div class="svadmin-u-73fc3fb18ceb">
+      <div class="overflow-auto">
         <Table.Root>
           <Table.Header>
             <Table.Row>
@@ -154,24 +154,24 @@
               <Table.Head>{i18n.t('task.statusColumn')}</Table.Head>
               <Table.Head>{i18n.t('task.updatedColumn')}</Table.Head>
               {#if showActions}
-                <Table.Head class="svadmin-u-308fc069e46e">{i18n.t('task.actionsColumn')}</Table.Head>
+                <Table.Head class="text-right">{i18n.t('task.actionsColumn')}</Table.Head>
               {/if}
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {#each keyedTasks as { task, key } (key)}
-              <Table.Row class="svadmin-u-34516836730d svadmin-u-f6e31b39b8e4" onclick={(event) => selectRow(event, task)}>
-                <Table.Cell class="svadmin-u-00cde2e9f1cf">
-                  <div class="svadmin-u-da7c36cd8867">
+              <Table.Row class="cursor-pointer hover:bg-muted/40" onclick={(event) => selectRow(event, task)}>
+                <Table.Cell class="min-w-[240px]">
+                  <div class="space-y-1">
                     {#if onSelect && !showActions}
                       <Button type="button" variant="ghost" size="sm" onclick={() => onSelect?.(task)}>
                         {resolveTaskTitle(task)}
                       </Button>
                     {:else}
-                      <div class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{resolveTaskTitle(task)}</div>
+                      <div class="font-medium text-foreground">{resolveTaskTitle(task)}</div>
                     {/if}
                     {#if resolveTaskMessage(task)}
-                      <div class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{resolveTaskMessage(task)}</div>
+                      <div class="text-xs text-muted-foreground">{resolveTaskMessage(task)}</div>
                     {/if}
                     {#if showProgress && typeof resolveTaskProgress(task) === 'number'}
                       <TaskProgressBar {...definedOptions({ "value": resolveTaskProgress(task) })} />
@@ -181,12 +181,12 @@
                 <Table.Cell>
                   <TaskStatusBadge status={String(task.status ?? 'pending')} />
                 </Table.Cell>
-                <Table.Cell class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">
+                <Table.Cell class="text-xs text-muted-foreground">
                   {formatTaskDate(resolveTaskUpdatedAt(task), i18n.locale)}
                 </Table.Cell>
                 {#if showActions}
-                  <Table.Cell class="svadmin-u-308fc069e46e">
-                    <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4">
+                  <Table.Cell class="text-right">
+                    <div class="flex justify-end gap-2">
                       {#if taskProvider?.retry && canRetryTask(task)}
                         <RetryTaskButton taskId={task.id} {taskProvider} />
                       {/if}
@@ -204,7 +204,7 @@
               </Table.Row>
             {:else}
               <Table.Row>
-                <Table.Cell colspan={showActions ? 4 : 3} class="svadmin-u-9678c61eaac3 svadmin-u-ca6bf63030aa svadmin-u-bfa603190748">
+                <Table.Cell colspan={showActions ? 4 : 3} class="h-24 text-center text-muted-foreground">
                   {resolvedEmptyText}
                 </Table.Cell>
               </Table.Row>

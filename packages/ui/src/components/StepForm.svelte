@@ -73,46 +73,46 @@
   }
 </script>
 
-<div class={cn('svadmin-u-b3542e058833 svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23', className)}>
+<div class={cn('space-y-6 rounded-xl border border-border bg-card p-6 shadow-xs', className)}>
   <!-- Step Navigation Header -->
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-1384f66f41d0 svadmin-u-9fcd8a13827e svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
+  <div class="flex items-center justify-between gap-2 overflow-x-auto pb-4 border-b border-border/60">
     {#each steps as step, index (index)}
       {@const isCompleted = index < currentStep}
       {@const isCurrent = index === currentStep}
       <button
         type="button"
         class={cn(
-          'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-ceb69a6b0e5f svadmin-u-2eba0d65d059 group svadmin-u-34516836730d svadmin-u-7f19cdf4c5bb svadmin-u-119b2aa0b8f6 svadmin-u-8a539c7fe216',
-          index <= currentStep ? 'svadmin-u-3972e98dc84f' : 'svadmin-u-0b8c506a0596 svadmin-u-c79b07fb641f'
+          'flex items-center gap-3 transition-colors text-left group cursor-pointer bg-transparent border-0 p-0',
+          index <= currentStep ? 'opacity-100' : 'opacity-50 hover:opacity-75'
         )}
         onclick={() => goToStep(index)}
         disabled={isSubmitting || isMoving}
       >
         <div
           class={cn(
-            'svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 svadmin-u-0fe7d7d814d0 svadmin-u-cef5b893cf23',
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all shadow-xs',
             isCompleted
-              ? 'svadmin-u-3355648fe22b svadmin-u-5a1ab9dd55a5'
+              ? 'bg-success text-success-foreground'
               : isCurrent
-                ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2 svadmin-u-44559afbdbd7 svadmin-u-2b6f77ad4036'
-                : 'svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748 svadmin-u-1b5347a3c1a4'
+                ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
+                : 'bg-muted text-muted-foreground group-hover:bg-muted/80'
           )}
         >
           {#if isCompleted}
-            <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+            <Check class="h-4 w-4" />
           {:else if step.icon}
-            <step.icon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+            <step.icon class="h-4 w-4" />
           {:else}
             {index + 1}
           {/if}
         </div>
 
-        <div class="svadmin-u-99d72c7fc3e2 svadmin-u-676c91deb47e">
-          <div class={cn('svadmin-u-359090c2d529 svadmin-u-2689f3958069', isCurrent ? 'svadmin-u-d4108abe6359 svadmin-u-e83a7042bc91' : 'svadmin-u-bfa603190748')}>
+        <div class="hidden sm:block">
+          <div class={cn('text-xs font-medium', isCurrent ? 'text-foreground font-semibold' : 'text-muted-foreground')}>
             {step.title}
           </div>
           {#if step.description}
-            <div class="svadmin-u-d058ca6de60f svadmin-u-cddc79d3aaec svadmin-u-f283ea9bea0e svadmin-u-1d274d2422d8">
+            <div class="text-[11px] text-muted-foreground/70 truncate max-w-32">
               {step.description}
             </div>
           {/if}
@@ -120,15 +120,15 @@
       </button>
 
       {#if index < steps.length - 1}
-        <div class="svadmin-u-99d72c7fc3e2 svadmin-u-36e579c0b41c svadmin-u-02fc11cfd270 svadmin-u-3960ffc248d9 svadmin-u-d5eab218aa34">
-          <div class={cn('svadmin-u-10db0d558201 svadmin-u-6da6a3c3f741 svadmin-u-07389a777c1f svadmin-u-ceb69a6b0e5f', index < currentStep ? 'svadmin-u-3355648fe22b' : 'svadmin-u-a59afa8d9b9d')}></div>
+        <div class="hidden flex-1 sm:flex items-center px-2">
+          <div class={cn('h-0.5 w-full rounded transition-colors', index < currentStep ? 'bg-success' : 'bg-border')}></div>
         </div>
       {/if}
     {/each}
   </div>
 
   <!-- Step Content Body -->
-  <div class="svadmin-u-03b4dd7f172b svadmin-u-4b159de349a5">
+  <div class="py-2 min-h-48">
     {#if stepContent}
       {@render stepContent(currentStep)}
     {:else if children}
@@ -137,7 +137,7 @@
   </div>
 
   <!-- Actions Footer -->
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff">
+  <div class="flex items-center justify-between pt-4 border-t border-border/60">
     <div>
       {#if oncancel}
         <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSubmitting || isMoving}>
@@ -146,16 +146,16 @@
       {/if}
     </div>
 
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+    <div class="flex items-center gap-2">
       {#if currentStep > 0}
         <Button
           variant="outline"
           size="sm"
           onclick={handlePrev}
           disabled={isSubmitting || isMoving}
-          class="svadmin-u-44ee8ba0a421"
+          class="gap-1"
         >
-          <ChevronLeft class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <ChevronLeft class="h-4 w-4" />
           {prevText}
         </Button>
       {/if}
@@ -164,15 +164,15 @@
         size="sm"
         onclick={handleNext}
         disabled={isSubmitting || isMoving}
-        class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab"
+        class="gap-1 min-w-24"
       >
         {#if isSubmitting || isMoving}
-          <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
+          <Loader2 class="h-4 w-4 animate-spin" />
         {:else if currentStep === steps.length - 1}
           {submitText}
         {:else}
           {nextText}
-          <ChevronRight class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <ChevronRight class="h-4 w-4" />
         {/if}
       </Button>
     </div>

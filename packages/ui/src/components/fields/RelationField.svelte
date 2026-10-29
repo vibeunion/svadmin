@@ -20,11 +20,11 @@
 {#if href}
   <a
     {href}
-    class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-20aaf08a7ed1 svadmin-u-f673f4a7d061 svadmin-u-fc7473ca09eb"
+    class="inline-flex items-center gap-1 text-primary hover:underline text-sm"
   >
     {display}
-    <ExternalLink class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+    <ExternalLink class="h-3 w-3" />
   </a>
 {:else}
-  <span class="svadmin-u-bfa603190748">{display}</span>
+  <span class="text-muted-foreground">{display}</span>
 {/if}

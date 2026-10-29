@@ -161,7 +161,7 @@
 <div
   bind:this={ref}
   data-slot="row-actions"
-  class={cn("svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568", className)}
+  class={cn("inline-flex items-center gap-1.5", className)}
   onkeydown={manageMenuKeyboard}
   {...restProps}
 >
@@ -178,11 +178,11 @@
         disabled={action.disabled}
         disabledReason={action.disabled ? (action.disabledReason ?? '') : ''}
         title={actionTitle(action)}
-        class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
+        class="h-8 px-2 text-xs"
       >
         {#if action.icon}
           {@const Icon = action.icon}
-          <Icon class="svadmin-u-618162408e7a svadmin-u-783b0d9d1e2c" />
+          <Icon class="mr-1 size-3.5" />
         {/if}
         {action.label}
       </Button>
@@ -194,11 +194,11 @@
         disabled={action.disabled}
         disabledReason={action.disabled ? (action.disabledReason ?? '') : ''}
         title={actionTitle(action)}
-        class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
+        class="h-8 px-2 text-xs"
       >
         {#if action.icon}
           {@const Icon = action.icon}
-          <Icon class="svadmin-u-618162408e7a svadmin-u-783b0d9d1e2c" />
+          <Icon class="mr-1 size-3.5" />
         {/if}
         {action.label}
       </Button>
@@ -210,11 +210,11 @@
       <DropdownMenu.Trigger>
         {#snippet child({ props })}
           <Button {...props} variant="ghost" size="icon-sm" title={moreLabel} aria-label={moreLabel} aria-haspopup="menu" aria-expanded={overflowOpen}>
-            <Ellipsis class="svadmin-u-f7b5fa971871" />
+            <Ellipsis class="size-4" />
           </Button>
         {/snippet}
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content portal align="end" data-row-actions={menuOwner} class="svadmin-u-3143d72a3869" role="menu" aria-label={moreLabel}>
+      <DropdownMenu.Content portal align="end" data-row-actions={menuOwner} class="min-w-[8rem]" role="menu" aria-label={moreLabel}>
         {#each overflowActions as action (action)}
           {#if action.href}
             <Button
@@ -227,11 +227,11 @@
               role="menuitem"
               tabindex={-1}
               title={actionTitle(action)}
-              class="svadmin-u-b8f0a08ece1e svadmin-u-6da6a3c3f741 svadmin-u-4b5cc19bfdfc svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6"
+              class="h-auto w-full justify-start rounded-md px-2 py-1.5 text-sm font-normal"
             >
               {#if action.icon}
                 {@const Icon = action.icon}
-                <Icon class="svadmin-u-783b0d9d1e2c" />
+                <Icon class="size-3.5" />
               {/if}
               {action.label}
             </Button>
@@ -246,7 +246,7 @@
             >
               {#if action.icon}
                 {@const Icon = action.icon}
-                <Icon class="svadmin-u-783b0d9d1e2c" />
+                <Icon class="size-3.5" />
               {/if}
               <span class="row-action-label">
                 <span>{action.label}</span>

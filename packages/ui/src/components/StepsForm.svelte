@@ -258,9 +258,9 @@
   });
 </script>
 
-<div class="svadmin-u-b3542e058833">
+<div class="space-y-6">
   {#if permission.isLoading || form.loading}
-    <Skeleton class="svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741" />
+    <Skeleton class="h-10 w-full" />
   {:else if !allowed || !configurationValid || (!form.ready && form.error)}
     <p role="alert">{i18n.t('common.operationFailed')}</p>
     {#if allowed && configurationValid && form.query.isError}
@@ -270,51 +270,51 @@
     {/if}
   {:else if form.ready}
   <!-- Step indicators -->
-  <div class="svadmin-u-6ed543e2fbbb">
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-fc7473ca09eb">
+  <div class="space-y-3">
+    <div class="flex items-center justify-between text-sm">
       {#each steps as step, i (i)}
         <Button
           variant="ghost"
           type="button"
-          class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-ceb69a6b0e5f svadmin-u-b8f0a08ece1e svadmin-u-660d2effb880 svadmin-u-d5eab218aa34 {i === form.steps.currentStep ? 'svadmin-u-20aaf08a7ed1 svadmin-u-e83a7042bc91' : 'svadmin-u-bfa603190748'}"
+          class="flex items-center gap-2 transition-colors h-auto py-1 px-2 {i === form.steps.currentStep ? 'text-primary font-semibold' : 'text-muted-foreground'}"
           aria-current={i === form.steps.currentStep ? 'step' : undefined}
           disabled={form.submitting || !!submission}
           onclick={changeStep(i)}
         >
           <span
-            class="svadmin-u-60fbb7713999 svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f"
-            class:svadmin-u-75b1bec3ea0e={i <= form.steps.currentStep}
-            class:svadmin-u-30ca335ae9c2={i <= form.steps.currentStep}
-            class:svadmin-u-2ef11f1cb219={i > form.steps.currentStep}
-            class:svadmin-u-bfa603190748={i > form.steps.currentStep}
+            class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors"
+            class:bg-primary={i <= form.steps.currentStep}
+            class:text-primary-foreground={i <= form.steps.currentStep}
+            class:bg-muted={i > form.steps.currentStep}
+            class:text-muted-foreground={i > form.steps.currentStep}
           >
             {#if i < form.steps.currentStep}
-              <Check class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+              <Check class="h-3.5 w-3.5" />
             {:else}
               {i + 1}
             {/if}
           </span>
-          <span class="svadmin-u-99d72c7fc3e2 svadmin-u-ee3c1259a368">{step.title}</span>
+          <span class="hidden sm:inline">{step.title}</span>
         </Button>
         {#if i < steps.length - 1}
-          <div class="svadmin-u-36e579c0b41c svadmin-u-9e10c04e17bb svadmin-u-aea6160836e7 svadmin-u-a59afa8d9b9d" class:svadmin-u-75b1bec3ea0e={i < form.steps.currentStep}></div>
+          <div class="flex-1 mx-2 h-px bg-border" class:bg-primary={i < form.steps.currentStep}></div>
         {/if}
       {/each}
     </div>
-    <Progress value={progressValue} class="svadmin-u-095acb275581" />
+    <Progress value={progressValue} class="h-1.5" />
   </div>
 
   <!-- Step content -->
   <Card.Root>
     <Card.CardHeader>
       <Card.CardTitle>{steps[form.steps.currentStep]?.title ?? ''}</Card.CardTitle>
-      <Badge variant="outline" class="svadmin-u-92e7450ad20d">
+      <Badge variant="outline" class="w-fit">
         {i18n.t('common.step')} {form.steps.currentStep + 1} / {totalSteps}
       </Badge>
     </Card.CardHeader>
     <Card.CardContent>
       {#key rendered}
-        <form bind:this={element} class="svadmin-u-b43b4c086d9a" novalidate onsubmit={submitEvent} in:fly={{ x: 30, duration: 250 }}>
+        <form bind:this={element} class="space-y-5" novalidate onsubmit={submitEvent} in:fly={{ x: 30, duration: 250 }}>
         {#if submitError || form.error}
           <p role="alert">{submitError ?? i18n.t('common.operationFailed')}</p>
         {/if}
@@ -327,28 +327,28 @@
             {...definedOptions({ errorId: form.errors[field.key] ? errorId(field.key) : undefined })}
           />
           {#if form.errors[field.key]}
-            <p id={errorId(field.key)} role="alert" aria-live="polite" class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6">{form.errors[field.key]}</p>
+            <p id={errorId(field.key)} role="alert" aria-live="polite" class="text-destructive text-[0.8125rem] mt-1">{form.errors[field.key]}</p>
           {/if}
         {/each}
 
-        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-173fa8f06789">
+        <div class="flex items-center justify-between pt-4">
           <Button
             type="button"
             variant="outline"
             disabled={form.submitting || !!submission}
             onclick={back}
           >
-            <ArrowLeft class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" />
+            <ArrowLeft class="h-4 w-4" data-icon="inline-start" />
             {form.steps.currentStep === 0 ? i18n.t('common.cancel') : i18n.t('common.back')}
           </Button>
 
           <Button type="submit" disabled={form.submitting || !!submission}>
             {#if form.submitting}
-              <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" data-icon="inline-start" />
+              <Loader2 class="h-4 w-4 animate-spin" data-icon="inline-start" />
             {:else if isLastStep}
-              <Save class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" />
+              <Save class="h-4 w-4" data-icon="inline-start" />
             {:else}
-              <ArrowRight class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" />
+              <ArrowRight class="h-4 w-4" data-icon="inline-start" />
             {/if}
             {isLastStep ? i18n.t('common.save') : i18n.t('common.next')}
           </Button>
