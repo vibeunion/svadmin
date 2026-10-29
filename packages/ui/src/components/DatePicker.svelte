@@ -43,8 +43,6 @@
   const pad = (input: number): string => String(input).padStart(2, '0');
   const toIso = (date: Date): string => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   const toMonth = (date: Date): string => `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
-  const toYear = (date: Date): string => String(date.getFullYear());
-  const toQuarter = (date: Date): string => `${date.getFullYear()}-Q${Math.floor(date.getMonth() / 3) + 1}`;
 
   function initialView(input: string | null | undefined): Date {
     if (!input) return new Date();
