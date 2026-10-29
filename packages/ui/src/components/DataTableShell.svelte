@@ -112,22 +112,24 @@
     min-width: 0;
     overflow: visible;
   }
-  :global(.svadmin-data-table-shell__viewport [data-slot='table-head']) {
+  :global(.svadmin-data-table-shell__viewport > table > thead > tr > th),
+  :global(.svadmin-data-table-shell__viewport > [data-slot='table-container'] > table > thead > tr > th) {
     position: sticky;
     top: 0;
     z-index: 1;
     border-bottom: 1px solid var(--border);
     background: var(--muted);
   }
-  :global(.svadmin-data-table-shell--sticky-actions [data-slot='table-head']:last-child),
-  :global(.svadmin-data-table-shell--sticky-actions [data-slot='table-cell']:last-child) {
+  :global(.svadmin-data-table-shell--sticky-actions > .svadmin-data-table-shell__viewport > table > :is(thead, tbody, tfoot) > tr > :is(th, td):last-child),
+  :global(.svadmin-data-table-shell--sticky-actions > .svadmin-data-table-shell__viewport > [data-slot='table-container'] > table > :is(thead, tbody, tfoot) > tr > :is(th, td):last-child) {
     position: sticky;
     right: 0;
     z-index: 2;
     background: var(--card, var(--background));
     box-shadow: -1px 0 var(--border);
   }
-  :global(.svadmin-data-table-shell--sticky-actions [data-slot='table-head']:last-child) {
+  :global(.svadmin-data-table-shell--sticky-actions > .svadmin-data-table-shell__viewport > table > thead > tr > th:last-child),
+  :global(.svadmin-data-table-shell--sticky-actions > .svadmin-data-table-shell__viewport > [data-slot='table-container'] > table > thead > tr > th:last-child) {
     z-index: 3;
     background: var(--muted);
   }

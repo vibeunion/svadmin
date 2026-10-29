@@ -3,6 +3,7 @@
   import * as Table from '../../../packages/ui/src/components/ui/table/index.js';
   import { Button } from '../../../packages/ui/src/components/ui/button/index.js';
 
+  const native = new URLSearchParams(window.location.search).has('native');
   const rows = [
     { id: 'FA-2026-001', customer: '华东材料', status: '执行中' },
     { id: 'FA-2026-002', customer: '北辰电子', status: '待审核' },
@@ -18,7 +19,7 @@
       <Button variant="outline" size="sm">导出</Button>
       <Button size="sm">新建委托</Button>
     {/snippet}
-    <Table.Root>
+    {#snippet tableContent()}
       <Table.Header>
         <Table.Row>
           <Table.Head>委托单号</Table.Head>
@@ -37,7 +38,19 @@
           </Table.Row>
         {/each}
       </Table.Body>
-    </Table.Root>
+    {/snippet}
+    {#if native}
+      <table class="wide-table">
+        <thead><tr><th>委托单号</th><th>客户</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+          {#each rows as row (row.id)}
+            <tr><td>{row.id}</td><td>{row.customer}</td><td>{row.status}</td><td><button type="button">查看</button></td></tr>
+          {/each}
+        </tbody>
+      </table>
+    {:else}
+      <Table.Root class="wide-table">{@render tableContent()}</Table.Root>
+    {/if}
   </DataTableShell>
 </main>
 
@@ -46,4 +59,5 @@
   .evidence-shell { min-height: 100vh; padding: 48px; display: grid; align-content: start; gap: 16px; }
   h1 { margin: 0; font-size: 24px; }
   .evidence-copy { margin: 0 0 12px; color: #475569; }
+  :global(.wide-table) { min-width: 1800px; }
 </style>
