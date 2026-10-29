@@ -71,7 +71,7 @@ describe('date picker entry points', () => {
   });
 
   it('provides a date-only range picker with ordered endpoints', () => {
-    const view = render(DateRangePicker, {
+    render(DateRangePicker, {
       value: { start: '2026-09-01', end: '2026-09-20' },
     });
     const inputs = [...document.querySelectorAll('input')];
