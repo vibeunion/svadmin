@@ -159,6 +159,30 @@ describe('saved list views', () => {
     }]), allowedColumns)).toEqual([]);
   });
 
+  it('round-trips column pinning, prunes unknown columns and keeps legacy views unpinned', () => {
+    const state: SavedListViewState = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 20 },
+      columnVisibility: {}, columnOrder: ['id', 'email'], columnPinning: { left: ['id', 'removed'], right: ['_actions'] },
+    };
+    const view: SavedListView = { id: 'pinned', name: 'Pinned', state };
+    const decoded = readSavedListViews(serializeSavedListViews([view]), allowedColumns)[0];
+    expect(decoded?.state.columnPinning).toEqual({ left: ['id'], right: ['_actions'] });
+    const legacyState: SavedListViewState = { ...state };
+    delete legacyState.columnPinning;
+    expect(readSavedListViews(serializeSavedListViews([{
+      ...view, state: legacyState,
+    }]), allowedColumns)[0]?.state.columnPinning).toBeUndefined();
+    for (const columnPinning of [
+      { left: 'id', right: [] },
+      { left: ['id'], right: ['id'] },
+      { left: [], right: [], extra: [] },
+    ]) {
+      expect(readSavedListViews(serializeSavedListViews([{
+        ...view, state: { ...state, columnPinning } as unknown as SavedListViewState,
+      }]), allowedColumns)).toEqual([]);
+    }
+  });
+
   it('fails closed for malformed JSON and unknown filter or sorter fields', () => {
     expect(readSavedListViews('{bad-json', allowedColumns)).toEqual([]);
     expect(readSavedListViews(JSON.stringify({
@@ -303,6 +327,11 @@ describe('saved list views', () => {
     { columnVisibility: { removed: false } },
     { columnOrder: ['removed'] },
     { columnOrder: ['email', 'email'] },
+    { columnPinning: { left: ['removed'], right: [] } },
+    { columnPinning: { left: ['id'], right: ['id'] } },
+    { columnPinning: { left: ['id', 'id'], right: [] } },
+    { columnPinning: { left: [], right: [], extra: [] } },
+    { columnPinning: [] },
     { pagination: { current: 1, pageSize: 20, cursor: 'unhandled' } },
     { sorters: [{ field: 'email', order: 'asc', extra: true }] },
     { filters: [{ field: 'email', operator: 'eq', value: 'a', extra: true }] },
