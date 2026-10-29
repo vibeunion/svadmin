@@ -19,7 +19,7 @@ describe('Arco gap components', () => {
     expect(screen.getByRole('heading', { name: '提交成功' })).toBeTruthy();
     expect(screen.getByRole('status').textContent).toContain('加载中');
     expect(screen.getByRole('tree')).toBeTruthy();
-    expect(screen.getByRole('button', { name: '根节点' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /根节点/ })).toBeTruthy();
     expect(screen.getByText('第一条')).toBeTruthy();
   });
 });

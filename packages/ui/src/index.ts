@@ -343,7 +343,7 @@ export { default as BackTop } from './components/BackTop.svelte';
 export { default as ItemList } from './components/ItemList.svelte';
 export type { ListItem } from './components/ItemList.svelte';
 export { default as Tree } from './components/Tree.svelte';
-export type { TreeNode } from './components/Tree.svelte';
+export type { TreeNode, TreeCheckInfo, TreeDragInfo } from './components/Tree.svelte';
 export { Avatar } from './components/ui/avatar/index.js';
 export { Skeleton } from './components/ui/skeleton/index.js';
 export * as Sheet from './components/ui/sheet/index.js';
@@ -595,3 +595,7 @@ export type { CollapseItem } from './components/Collapse.svelte';
 export { default as CommentThread } from './components/CommentThread.svelte';
 export type { CommentItem } from './components/CommentThread.svelte';
 export * from './components/templates/index.js';
+
+export { default as FloatButton } from './components/FloatButton.svelte';
+export { default as Steps } from './components/Steps.svelte';
+export type { StepItem } from './components/Steps.svelte';
