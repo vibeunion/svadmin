@@ -97,14 +97,27 @@
     else if (event.key === 'ArrowRight') move(1);
     else if (event.key === 'ArrowLeft') move(-1);
     else if (event.key === 'Tab' && panel) {
-      const focusable = [...panel.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
-      if (focusable.length === 0) return;
+      const focusable = [...panel.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]')]
+        .filter(element => {
+          if (element.tabIndex < 0 || element.closest('[hidden], [inert]') || (element instanceof HTMLInputElement && element.type === 'hidden')) return false;
+          if (getComputedStyle(element).visibility === 'hidden') return false;
+          for (let node: HTMLElement | null = element; node && node !== panel; node = node.parentElement) {
+            if (getComputedStyle(node).display === 'none') return false;
+          }
+          return true;
+        });
+      if (focusable.length === 0) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const outsideControls = !focusable.includes(document.activeElement as HTMLElement);
+      if (event.shiftKey && (document.activeElement === first || outsideControls)) {
         event.preventDefault();
         last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && (document.activeElement === last || outsideControls)) {
         event.preventDefault();
         first?.focus();
       }
@@ -135,7 +148,7 @@
 
 {#if open}
   <div data-targeted={rect ? 'true' : 'false'} class={cn('svadmin-tour', className)}>
-    <button type="button" class="svadmin-tour__dismiss" aria-label={skipText} onclick={close}></button>
+    <button type="button" tabindex="-1" class="svadmin-tour__dismiss" aria-label={skipText} onclick={close}></button>
     {#if rect}
       <div
         class="svadmin-tour__spotlight"

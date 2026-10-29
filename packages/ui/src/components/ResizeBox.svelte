@@ -107,7 +107,7 @@
       tabindex="0"
       aria-label={`${label}: use arrow keys to resize, double click to reset`}
       aria-orientation={direction === 'vertical' ? 'horizontal' : 'vertical'}
-      aria-valuenow={width ?? element?.offsetWidth ?? minWidth}
+      aria-valuenow={direction === 'vertical' ? (height ?? element?.offsetHeight ?? minHeight) : (width ?? element?.offsetWidth ?? minWidth)}
       aria-valuemin={direction === 'vertical' ? minHeight : minWidth}
       aria-valuemax={direction === 'vertical' ? (maxHeight ?? undefined) : (maxWidth ?? undefined)}
       onpointerdown={startResize}

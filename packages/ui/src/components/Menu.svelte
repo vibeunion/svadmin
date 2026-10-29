@@ -44,12 +44,25 @@
     return openKeys.includes(item.id);
   }
 
-  function toggle(item: MenuEntry): void {
+  function setOpen(item: MenuEntry, open: boolean): void {
     if (item.disabled) return;
-    if (!item.children?.length) return;
-    const next = isOpen(item) ? openKeys.filter((key) => key !== item.id) : [...openKeys, item.id];
+    if (!item.children?.length || isOpen(item) === open) return;
+    const next = open ? [...openKeys, item.id] : openKeys.filter((key) => key !== item.id);
     openKeys = next;
     onopenchange?.(next);
+  }
+
+  function toggle(item: MenuEntry): void {
+    setOpen(item, !isOpen(item));
+  }
+
+  function closeFlyout(event: PointerEvent | FocusEvent, item: MenuEntry): void {
+    if (!collapsed || !(event.currentTarget instanceof HTMLElement)) return;
+    const owner = event.currentTarget;
+    if (event.relatedTarget instanceof Node && owner.contains(event.relatedTarget)) return;
+    if (event.type === 'pointerleave' && owner.contains(document.activeElement)) return;
+    if (event.type === 'focusout' && owner.matches(':hover')) return;
+    setOpen(item, false);
   }
 
   function select(item: MenuEntry): void {
@@ -61,10 +74,16 @@
 
   function links(): HTMLElement[] {
     if (!nav) return [];
-    return [...nav.querySelectorAll<HTMLElement>('.svadmin-menu__link:not([disabled]):not([aria-disabled="true"])')];
+    return [...nav.querySelectorAll<HTMLElement>('.svadmin-menu__link:not([disabled]):not([data-disabled="true"]):not([aria-disabled="true"])')]
+      .filter(link => {
+        for (let node: HTMLElement | null = link; node && node !== nav; node = node.parentElement) {
+          if (getComputedStyle(node).display === 'none') return false;
+        }
+        return true;
+      });
   }
 
-  function onkeydown(event: KeyboardEvent): void {
+  function onkeydown(event: KeyboardEvent, item: MenuEntry): void {
     const items = links();
     if (items.length === 0) return;
     const currentIndex = items.indexOf(document.activeElement as HTMLElement);
@@ -84,9 +103,10 @@
       const expanded = document.activeElement.getAttribute('aria-expanded');
       if (expanded === 'false') {
         event.preventDefault();
-        document.activeElement.click();
+        setOpen(item, true);
       } else if (expanded === 'true') {
-        const child = document.activeElement.closest('li')?.querySelector<HTMLElement>('.svadmin-menu__list .svadmin-menu__link');
+        const nested = document.activeElement.closest('li')?.querySelector<HTMLElement>(':scope > .svadmin-menu__list');
+        const child = nested?.querySelector<HTMLElement>('.svadmin-menu__link:not([disabled]):not([data-disabled="true"])');
         if (child) {
           event.preventDefault();
           child.focus();
@@ -108,16 +128,24 @@
 {#snippet renderItems(nodes: MenuEntry[], depth: number)}
   <ul class="svadmin-menu__list" data-depth={depth}>
     {#each nodes as item (item.id)}
-      <li class="svadmin-menu__item" data-open={isOpen(item) ? 'true' : undefined}>
+      <li
+        class="svadmin-menu__item"
+        data-open={isOpen(item) ? 'true' : undefined}
+        onpointerenter={() => { if (collapsed) setOpen(item, true); }}
+        onpointerleave={(event) => closeFlyout(event, item)}
+        onfocusin={() => { if (collapsed) setOpen(item, true); }}
+        onfocusout={(event) => closeFlyout(event, item)}
+      >
         {#if item.href && !item.children?.length}
           <a
             class="svadmin-menu__link"
             data-selected={selected === item.id ? 'true' : undefined}
             data-disabled={item.disabled ? 'true' : undefined}
             aria-current={selected === item.id ? 'page' : undefined}
+            aria-label={collapsed ? item.label : undefined}
             href={item.href}
             onclick={() => select(item)}
-            onkeydown={onkeydown}
+            onkeydown={(event) => onkeydown(event, item)}
           >
             {#if icon}<span class="svadmin-menu__icon">{@render icon(item)}</span>{/if}
             <span class="svadmin-menu__label">{item.label}</span>
@@ -130,9 +158,10 @@
             data-selected={selected === item.id ? 'true' : undefined}
             data-disabled={item.disabled ? 'true' : undefined}
             aria-expanded={item.children?.length ? isOpen(item) : undefined}
+            aria-label={collapsed ? item.label : undefined}
             disabled={item.disabled}
             onclick={() => select(item)}
-            onkeydown={onkeydown}
+            onkeydown={(event) => onkeydown(event, item)}
           >
             {#if icon}<span class="svadmin-menu__icon">{@render icon(item)}</span>{/if}
             <span class="svadmin-menu__label">{item.label}</span>
@@ -192,7 +221,7 @@
     position: absolute;
     z-index: 30;
     inset-block-start: 0;
-    inset-inline-start: calc(100% + var(--svadmin-space-1));
+    inset-inline-start: 100%;
     min-width: 12rem;
     margin: 0;
     padding: var(--svadmin-space-1);

@@ -63,7 +63,7 @@
   </div>
 {:else}
   <div
-    class={cn('svadmin-progress', className)}
+    class={cn('svadmin-progress', showInfo && 'svadmin-progress--with-info', className)}
     data-status={status}
     data-indeterminate={indeterminate ? 'true' : undefined}
     role="progressbar"
@@ -72,8 +72,14 @@
     aria-valuemax={max}
     {...restProps}
   >
-    <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
-    {#if showInfo}<span class="svadmin-progress__info">{indeterminate ? '…' : info}</span>{/if}
+    {#if showInfo}
+      <div class="svadmin-progress__line-track">
+        <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
+      </div>
+      <span class="svadmin-progress__info">{indeterminate ? '…' : info}</span>
+    {:else}
+      <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
+    {/if}
   </div>
 {/if}
 
@@ -92,6 +98,22 @@
     border-radius: inherit;
     background: var(--primary);
     transition: transform 160ms ease;
+  }
+  .svadmin-progress--with-info {
+    display: flex;
+    align-items: center;
+    gap: var(--svadmin-space-2);
+    height: auto;
+    overflow: visible;
+    background: transparent;
+  }
+  .svadmin-progress__line-track {
+    flex: 1;
+    min-width: 0;
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: inherit;
+    background: var(--muted);
   }
   .svadmin-progress[data-status='success'] .svadmin-progress-value { background: var(--success); }
   .svadmin-progress[data-status='warning'] .svadmin-progress-value { background: var(--warning); }

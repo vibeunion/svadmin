@@ -39,14 +39,14 @@
   const style = $derived([
     `--svadmin-col-span:${safeSpan(span)}`,
     `--svadmin-col-start:${safeStart(offset)}`,
-    sm !== undefined ? `--svadmin-col-sm:${safeSpan(sm)}` : '',
-    smOffset !== undefined ? `--svadmin-col-sm-start:${safeStart(smOffset)}` : '',
-    md !== undefined ? `--svadmin-col-md:${safeSpan(md)}` : '',
-    mdOffset !== undefined ? `--svadmin-col-md-start:${safeStart(mdOffset)}` : '',
-    lg !== undefined ? `--svadmin-col-lg:${safeSpan(lg)}` : '',
-    lgOffset !== undefined ? `--svadmin-col-lg-start:${safeStart(lgOffset)}` : '',
-    xl !== undefined ? `--svadmin-col-xl:${safeSpan(xl)}` : '',
-    xlOffset !== undefined ? `--svadmin-col-xl-start:${safeStart(xlOffset)}` : '',
+    `--svadmin-col-sm:${safeSpan(sm ?? span)}`,
+    `--svadmin-col-sm-start:${safeStart(smOffset ?? offset)}`,
+    `--svadmin-col-md:${safeSpan(md ?? sm ?? span)}`,
+    `--svadmin-col-md-start:${safeStart(mdOffset ?? smOffset ?? offset)}`,
+    `--svadmin-col-lg:${safeSpan(lg ?? md ?? sm ?? span)}`,
+    `--svadmin-col-lg-start:${safeStart(lgOffset ?? mdOffset ?? smOffset ?? offset)}`,
+    `--svadmin-col-xl:${safeSpan(xl ?? lg ?? md ?? sm ?? span)}`,
+    `--svadmin-col-xl-start:${safeStart(xlOffset ?? lgOffset ?? mdOffset ?? smOffset ?? offset)}`,
   ].filter(Boolean).join(';'));
 </script>
 

@@ -122,6 +122,18 @@ describe('foundation components', () => {
     expect(document.activeElement).toBe(one);
   });
 
+  it('expands menu groups with arrows without selecting or navigating', async () => {
+    const onselect = vi.fn();
+    render(Menu, { props: { items: [{ id: 'reports', label: 'Reports', children: [{ id: 'weekly', label: 'Weekly' }] }], onselect } });
+    const parent = screen.getByRole('button', { name: 'Reports' });
+    parent.focus();
+    await fireEvent.keyDown(parent, { key: 'ArrowRight' });
+    expect(parent.getAttribute('aria-expanded')).toBe('true');
+    expect(onselect).not.toHaveBeenCalled();
+    await fireEvent.keyDown(parent, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Weekly' }));
+  });
+
   it('propagates provider defaults to primitives and exposes resize semantics', () => {
     const view = render(ConfigProvider, { props: { density: 'compact', direction: 'rtl', locale: 'zh-CN', children: text('Content') } });
     const provider = view.container.querySelector('.svadmin-config-provider') as HTMLElement;
@@ -159,5 +171,28 @@ describe('foundation components', () => {
     expect(screen.getByRole('heading', { name: 'Ready' })).toBeTruthy();
     await fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     expect(onfinish).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the vertical resize dimension and keeps its range updated', async () => {
+    const view = render(ResizeBox, { props: { direction: 'vertical', width: 320, height: 200, maxHeight: 250 } });
+    const handle = view.getByRole('separator');
+    const owner = view.container.querySelector('.svadmin-resize-box');
+    if (!(owner instanceof HTMLElement)) throw new Error('ResizeBox root is missing');
+    Object.defineProperties(owner, { offsetHeight: { value: 200 }, offsetWidth: { value: 320 } });
+    expect(handle.getAttribute('aria-valuenow')).toBe('200');
+    expect(handle.getAttribute('aria-valuemax')).toBe('250');
+    await fireEvent.keyDown(handle, { key: 'ArrowDown' });
+    expect(handle.getAttribute('aria-valuenow')).toBe('204');
+  });
+
+  it('traps the first forward and reverse tab from the tour panel', async () => {
+    render(Tour, { props: { open: true, steps: [{ title: 'Welcome' }], children: createRawSnippet(() => ({ render: () => '<div><input type="hidden"><input style="display:none"><button tabindex="-1">Excluded</button></div>' })) } });
+    const dialog = screen.getByRole('dialog');
+    dialog.focus();
+    await fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Done' }));
+    dialog.focus();
+    await fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(document.activeElement).toBe(dialog.querySelector('footer button'));
   });
 });

@@ -34,10 +34,10 @@
   const templateFor = (value: number | 'auto'): string => value === 'auto' ? `repeat(auto-fit, minmax(min(100%, ${minItemWidth}), 1fr))` : `repeat(${value}, minmax(0, 1fr))`;
   const style = $derived([
     `--svadmin-grid-columns:${templateFor(columns)}`,
-    smColumns !== undefined ? `--svadmin-grid-sm-columns:${templateFor(smColumns)}` : '',
-    mdColumns !== undefined ? `--svadmin-grid-md-columns:${templateFor(mdColumns)}` : '',
-    lgColumns !== undefined ? `--svadmin-grid-lg-columns:${templateFor(lgColumns)}` : '',
-    xlColumns !== undefined ? `--svadmin-grid-xl-columns:${templateFor(xlColumns)}` : '',
+    `--svadmin-grid-sm-columns:${templateFor(smColumns ?? columns)}`,
+    `--svadmin-grid-md-columns:${templateFor(mdColumns ?? smColumns ?? columns)}`,
+    `--svadmin-grid-lg-columns:${templateFor(lgColumns ?? mdColumns ?? smColumns ?? columns)}`,
+    `--svadmin-grid-xl-columns:${templateFor(xlColumns ?? lgColumns ?? mdColumns ?? smColumns ?? columns)}`,
   ].filter(Boolean).join(';'));
   const alignMap = { start: 'start', center: 'center', end: 'end', stretch: 'stretch' } as const;
 </script>
