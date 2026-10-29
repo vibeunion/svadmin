@@ -11,10 +11,10 @@ external UI kits 为 React 生态维护了一份[推荐库清单](https://ant.de
 
 | 分类 | external UI kits 推荐 | svadmin 实现 | Svelte 生态 | 状态 |
 | --- | --- | --- | --- | --- |
-| 可视化图表 | chart libraries | `BarChart`、`LineChart`、`PieChart`、`AreaChart`、`ScatterChart` | LayerChart、svelte-echarts | 🔶 基础图表；统计图表用 LayerChart |
+| 可视化图表 | chart libraries | `BarChart`、`LineChart`、`PieChart`、`AreaChart`、`ScatterChart`、`RadarChart`、`GaugeChart`、`FunnelChart`、`HeatmapChart`、`WaterfallChart`、`RoseChart` | LayerChart、svelte-echarts | 🔶 基础图表；统计图表用 LayerChart |
 | 流图 | reactflow | `@svadmin/flow`（xyflow/svelte） | @xyflow/svelte | ✅ |
 | Hooks 库 | ahooks | `@svadmin/core` 数据/认证 hooks + `@svadmin/ui` runes hooks：`useMediaQuery`、`useDeviceDetect`、`useClipboard`、`useLocalStorage`、`useDebouncedValue`、`useInterval`、`useEventListener`、`useOnClickOutside`、`useWindowSize` | runed | ✅ |
-| 表单 | ProForm / Formily / react-hook-form / Formik | `AutoForm`、`JsonSchemaForm`、`StepForm`、`ModalForm`、`DrawerForm` 与字段组件 | sveltekit-superforms | ✅ |
+| 表单 | ProForm / Formily / react-hook-form / Formik | `AutoForm`、`JsonSchemaForm`、`StepForm`、`useModal` / `useDrawer` + `AutoForm`、字段组件 | sveltekit-superforms | ✅ |
 | 路由 | react-router | `useParsed`、`NavigateToResource`、core 路由、SvelteKit 适配 | SvelteKit | ✅ |
 | 布局 / 停靠 | react-grid-layout、react-grid-system、rc-dock | `DraggableGrid`、`ResizableGrid`、`SplitPaneLayout`、`WorkspaceSplitPane`、`MultiTabKeepAlive` | paneforge、svelte-grid | 🔶 无可停靠面板 |
 | 拖拽 | dnd-kit | `DraggableRowTable`、`DraggableHeader`、`DraggableGrid`、`KanbanBoard` | svelte-dnd-action | ✅ |

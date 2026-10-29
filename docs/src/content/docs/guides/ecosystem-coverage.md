@@ -13,10 +13,10 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 
 | Category | external UI kits pick | svadmin surface | Svelte ecosystem | Status |
 | --- | --- | --- | --- | --- |
-| Charts | chart libraries | `BarChart`, `LineChart`, `PieChart`, `AreaChart`, `ScatterChart` | LayerChart, svelte-echarts | 🔶 basic charts; statistical charts use LayerChart |
+| Charts | chart libraries | `BarChart`, `LineChart`, `PieChart`, `AreaChart`, `ScatterChart`, `RadarChart`, `GaugeChart`, `FunnelChart`, `HeatmapChart`, `WaterfallChart`, `RoseChart` | LayerChart, svelte-echarts | 🔶 basic charts; statistical charts use LayerChart |
 | Flow diagrams | reactflow | `@svadmin/flow` (xyflow/svelte) | @xyflow/svelte | ✅ |
 | Hooks library | ahooks | `@svadmin/core` data/auth hooks + `@svadmin/ui` runes hooks: `useMediaQuery`, `useDeviceDetect`, `useClipboard`, `useLocalStorage`, `useDebouncedValue`, `useInterval`, `useEventListener`, `useOnClickOutside`, `useWindowSize` | runed | ✅ |
-| Forms | ProForm / Formily / react-hook-form / Formik | `AutoForm`, `JsonSchemaForm`, `StepForm`, `ModalForm`, `DrawerForm`, field components | sveltekit-superforms | ✅ |
+| Forms | ProForm / Formily / react-hook-form / Formik | `AutoForm`, `JsonSchemaForm`, `StepForm`, `useModal` / `useDrawer` + `AutoForm`, field components | sveltekit-superforms | ✅ |
 | Routing | react-router | `useParsed`, `NavigateToResource`, core router, SvelteKit adapter | SvelteKit | ✅ |
 | Layout / dock | react-grid-layout, react-grid-system, rc-dock | `DraggableGrid`, `ResizableGrid`, `SplitPaneLayout`, `WorkspaceSplitPane`, `MultiTabKeepAlive` | paneforge, svelte-grid | 🔶 no dockable panels |
 | Drag & drop | dnd-kit | `DraggableRowTable`, `DraggableHeader`, `DraggableGrid`, `KanbanBoard` | svelte-dnd-action | ✅ |

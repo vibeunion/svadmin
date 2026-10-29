@@ -74,7 +74,6 @@
           <title>{step.label}: {step.value}</title>
         </rect>
         {#if index < steps.length - 1}
-          {@const next = steps[index + 1]}
           {@const connectorY = y(step.end)}
           <line
             x1={left + barWidth}
