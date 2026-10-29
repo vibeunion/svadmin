@@ -64,6 +64,17 @@ describe('ListFooter', () => {
     expect(screen.queryByText('第 1–50 条 / 共 5000 条')).toBeNull();
   });
 
+  it('does not duplicate the footer count when a summarized footer has one page', () => {
+    render(ListFooter, {
+      props: {
+        label: '记录', total: 8, loadedCount: 8, page: 1, totalPages: 1,
+        rangeStart: 1, rangeEnd: 8, onPageChange: () => {}, showSummary: true,
+      },
+    });
+    expect(screen.getAllByText('共 8 条')).toHaveLength(1);
+    expect(screen.queryByRole('navigation')).toBeNull();
+  });
+
   it('can show the pagination range alongside truncation guidance', () => {
     render(ListFooter, {
       props: {

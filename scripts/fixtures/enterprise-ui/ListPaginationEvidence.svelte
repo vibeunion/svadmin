@@ -6,8 +6,8 @@
   const pageSize = 20;
   const total = 137;
   const totalPages = Math.ceil(total / pageSize);
-  const rangeStart = (page - 1) * pageSize + 1;
-  const rangeEnd = Math.min(page * pageSize, total);
+  const rangeStart = $derived((page - 1) * pageSize + 1);
+  const rangeEnd = $derived(Math.min(page * pageSize, total));
 </script>
 
 <main class="evidence-shell">
@@ -17,6 +17,7 @@
     <div class="evidence-toolbar"><strong>委托单</strong><Button variant="outline" onclick={() => page = 1}>回到第一页</Button></div>
     <ListFooter
       label="委托单"
+      showSummary
       {total}
       loadedCount={137}
       {page}
@@ -32,6 +33,7 @@
     <div class="evidence-toolbar"><strong>截断说明</strong><span>仅展示前 2500 条</span></div>
     <ListFooter
       label="检索结果"
+      showSummary
       total={5000}
       loadedCount={2500}
       truncated
@@ -39,7 +41,7 @@
       page={1}
       totalPages={50}
       rangeStart={1}
-      rangeEnd={2500}
+      rangeEnd={50}
       onPageChange={() => {}}
     />
   </section>

@@ -67,7 +67,7 @@
     {pageSizeLabel}
     {onPageChange}
     {onPageSizeChange}
-    {showSummary}
+    showSummary={showSummary && totalPages > 1}
   />
 </div>
 
