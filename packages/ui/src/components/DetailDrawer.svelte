@@ -4,6 +4,7 @@
   import type { HTMLAttributes } from "svelte/elements";
   import { cn, type WithElementRef } from "../utils.js";
   import * as Sheet from "./ui/sheet/index.js";
+  import StatusBadge from "./content/StatusBadge.svelte";
 
   type Props = WithElementRef<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
     open?: boolean;
@@ -12,6 +13,8 @@
     description?: string;
     descriptionId?: string;
     closeLabel?: string;
+    statusLabel?: string;
+    statusTone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
     side?: "left" | "right";
     width?: string;
     onClose?: () => void;
@@ -35,6 +38,8 @@
     titleId,
     descriptionId,
     closeLabel = "Close",
+    statusLabel = "",
+    statusTone = 'neutral',
     onClose,
     onCloseRequest,
     children,
@@ -65,7 +70,7 @@
   {...restProps}
 >
   <Sheet.Content class="svadmin-u-60fbb7713999 svadmin-u-668b21aa5409 svadmin-u-8dddea0773ed svadmin-u-63a285be6490 svadmin-u-8a539c7fe216">
-    {#if title || description || extra}
+    {#if title || description || statusLabel || extra}
       <Sheet.Header class="svadmin-u-2074a75bf2e7 svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-f92d02360b8f svadmin-u-cb11fec3bb46 svadmin-u-ab82c25c24ec">
         <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-0c3bc98565dd">
           <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c svadmin-u-8dddea0773ed svadmin-u-58284b4ea568">
@@ -76,9 +81,10 @@
               <Sheet.Description id={descriptionId}>{description}</Sheet.Description>
             {/if}
           </div>
-          {#if extra}
+          {#if statusLabel || extra}
             <div class="svadmin-u-60fbb7713999 svadmin-u-2074a75bf2e7 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
-              {@render extra()}
+              {#if statusLabel}<StatusBadge status={statusTone} label={statusLabel} />{/if}
+              {#if extra}{@render extra()}{/if}
             </div>
           {/if}
         </div>

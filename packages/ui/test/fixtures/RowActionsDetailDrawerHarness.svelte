@@ -25,6 +25,8 @@
   description="Review the selected record."
   descriptionId="record-details-description"
   closeLabel="Close record details"
+  statusLabel="Active record"
+  statusTone="success"
   onClose={() => { closeCount += 1; }}
 >
   {#snippet extra()}
