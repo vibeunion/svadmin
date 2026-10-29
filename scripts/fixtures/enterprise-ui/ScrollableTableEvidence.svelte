@@ -2,10 +2,14 @@
   import ScrollableTable from '../../../packages/ui/src/components/ScrollableTable.svelte';
   import * as Table from '../../../packages/ui/src/components/ui/table/index.js';
 
-  const rows = Array.from({ length: 6 }, (_, index) => ({
+  const params = new URLSearchParams(window.location.search);
+  const native = params.has('native');
+  const scrollMode = params.has('contained') ? 'contained' : 'page';
+  const scrollbarPlacement = params.has('top') ? 'top' : 'bottom';
+  const rows = Array.from({ length: scrollMode === 'contained' ? 40 : 6 }, (_, index) => ({
     id: `FA-2026-${String(index + 1).padStart(3, '0')}`,
-    customer: ['华东材料', '北辰电子', '星河精工', '云岭检测', '海川装备', '启明新材'][index],
-    status: ['执行中', '待审核', '已完成', '执行中', '待开始', '已归档'][index],
+    customer: ['华东材料', '北辰电子', '星河精工', '云岭检测', '海川装备', '启明新材'][index % 6],
+    status: ['执行中', '待审核', '已完成', '执行中', '待开始', '已归档'][index % 6],
   }));
 </script>
 
@@ -14,8 +18,8 @@
   <p class="evidence-copy">A mirrored horizontal scrollbar keeps wide desktop tables operable without hiding the native table container.</p>
   <section class="evidence-panel">
     <h2>底部镜像滚动条</h2>
-    <ScrollableTable>
-      <Table.Root class="wide-table">
+    <ScrollableTable {scrollMode} {scrollbarPlacement}>
+      {#snippet tableContent()}
         <Table.Header>
           <Table.Row>
             <Table.Head>委托单号</Table.Head>
@@ -42,7 +46,12 @@
             </Table.Row>
           {/each}
         </Table.Body>
-      </Table.Root>
+      {/snippet}
+      {#if native}
+        <table class="wide-table">{@render tableContent()}</table>
+      {:else}
+        <Table.Root class="wide-table">{@render tableContent()}</Table.Root>
+      {/if}
     </ScrollableTable>
   </section>
 </main>
