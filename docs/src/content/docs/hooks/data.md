@@ -145,32 +145,42 @@ const invalidate = useInvalidate();
 invalidate({ resource: 'posts', invalidates: ['list', 'one'] });
 ```
 
-## Mutation Modes
+## Delete undo mode
 
-`useUpdate`, `useDelete`, and `useDeleteMany` support three modes via `mutationMode`:
-
-| Mode | Behavior |
-|------|----------|
-| `pessimistic` | Wait for server response (default) |
-| `optimistic` | Update UI immediately, rollback on error |
-| `undoable` | Show undo toast, delay server call by `undoableTimeout` ms |
+`useDelete` is the hook that exposes a deferred, undoable delete:
 
 ```typescript
-const mutation = useUpdate({ mutationMode: 'undoable', undoableTimeout: 5000 });
-```
-
-`useDeleteMany` can override the mode, timeout, and notifications for an individual batch without creating another hook instance:
-
-```typescript
-const { mutation } = useDeleteMany({ resource: 'posts', mutationMode: 'pessimistic' });
-
-mutation.mutate({
-  ids: [1, 2, 3],
-  mutationMode: 'undoable',
-  undoableTimeout: 10_000,
-  successNotification: 'Posts deleted',
-  onCancel: () => restoreSelection(),
+const { mutation } = useDelete({
+  resource: posts,
+  id: 1,
+  undoable: true,
+  undoableTimeout: 5000,
 });
 ```
 
-Use `mutationOptions` on the hook for lifecycle callbacks such as `onMutate`, `onSuccess`, `onError`, and `onSettled`.
+The record is removed from owned list/detail caches immediately, a toast offers undo,
+and the provider call is deferred for `undoableTimeout` ms. Undo restores the cache
+snapshot; the server call is cancelled when it has not been dispatched.
+
+`useUpdate` and `useDeleteMany` are pessimistic by default. Global mutation behavior
+(`mutationMode`, `undoableTimeout`) is configured on the admin options and applies to
+the legacy mutation path; per-hook optimistic updates should use `useQueryClient`
+cache writes with `onMutate`/`onError` rollback.
+
+
+
+## Audit hooks
+
+```typescript
+import { useLog, useLogList } from '@svadmin/core';
+
+const log = useLog();
+await log.log({ action: 'export', resource: 'orders', outcome: 'success' });
+
+const logs = useLogList({ resource: 'orders', action: 'export' });
+```
+
+- `useLog` waits for `AuditLogProvider.create` when configured; without a provider it
+  falls back to the local audit handler. Input is validated by the same audit contract.
+- `useLogList` reads `AuditLogProvider.get` and keys the cache by resource, action,
+  tenant, and auth session.

@@ -145,32 +145,36 @@ const invalidate = useInvalidate();
 invalidate({ resource: 'posts', invalidates: ['list', 'one'] });
 ```
 
-## 变更模式
+## 删除撤销模式
 
-`useUpdate`、`useDelete` 和 `useDeleteMany` 通过 `mutationMode` 支持三种模式：
-
-| 模式 | 行为 |
-|------|------|
-| `pessimistic` | 等待服务端响应（默认） |
-| `optimistic` | 立即更新 UI，出错时回滚 |
-| `undoable` | 显示撤销提示，延迟 `undoableTimeout` 毫秒后再调用服务端 |
+`useDelete` 提供延迟撤销的删除：
 
 ```typescript
-const mutation = useUpdate({ mutationMode: 'undoable', undoableTimeout: 5000 });
-```
-
-`useDeleteMany` 可以为单次批量操作覆盖模式、超时和通知，无需重新创建 Hook：
-
-```typescript
-const { mutation } = useDeleteMany({ resource: 'posts', mutationMode: 'pessimistic' });
-
-mutation.mutate({
-  ids: [1, 2, 3],
-  mutationMode: 'undoable',
-  undoableTimeout: 10_000,
-  successNotification: '文章已删除',
-  onCancel: () => restoreSelection(),
+const { mutation } = useDelete({
+  resource: posts,
+  id: 1,
+  undoable: true,
+  undoableTimeout: 5000,
 });
 ```
 
-在 Hook 上通过 `mutationOptions` 配置 `onMutate`、`onSuccess`、`onError` 和 `onSettled` 等生命周期回调。
+记录先从当前列表/详情缓存移除并显示撤销提示，provider 调用延后 `undoableTimeout` 毫秒；
+撤销会恢复缓存快照，尚未派发的请求会被取消。
+
+`useUpdate` 与 `useDeleteMany` 默认悲观提交。全局变更行为（`mutationMode`、`undoableTimeout`）
+在 admin options 上配置，作用于旧的 mutation 路径；单个 hook 的乐观更新请用
+`useQueryClient` 在 `onMutate` 写缓存、`onError` 回滚。
+
+## 审计 Hook
+
+```typescript
+import { useLog, useLogList } from '@svadmin/core';
+
+const log = useLog();
+await log.log({ action: 'export', resource: 'orders', outcome: 'success' });
+
+const logs = useLogList({ resource: 'orders', action: 'export' });
+```
+
+- 配置 `AuditLogProvider` 时 `useLog` 会等待 `create` 回执；没有 provider 时退化为本地审计 handler，输入沿用同一审计契约校验。
+- `useLogList` 读取 `AuditLogProvider.get`，缓存按资源、动作、租户和认证会话隔离。

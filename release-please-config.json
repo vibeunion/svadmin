@@ -3,32 +3,32 @@
   "changelog-sections": [
     {
       "type": "feat",
-      "section": "🚀 Features",
+      "section": "\ud83d\ude80 Features",
       "hidden": false
     },
     {
       "type": "fix",
-      "section": "🐛 Bug Fixes",
+      "section": "\ud83d\udc1b Bug Fixes",
       "hidden": false
     },
     {
       "type": "refactor",
-      "section": "💅 Elegance & Refactoring",
+      "section": "\ud83d\udc85 Elegance & Refactoring",
       "hidden": false
     },
     {
       "type": "perf",
-      "section": "⚡ Performance Improvements",
+      "section": "\u26a1 Performance Improvements",
       "hidden": false
     },
     {
       "type": "docs",
-      "section": "📝 Documentation",
+      "section": "\ud83d\udcdd Documentation",
       "hidden": false
     },
     {
       "type": "chore",
-      "section": "🔧 Miscellaneous Chores",
+      "section": "\ud83d\udd27 Miscellaneous Chores",
       "hidden": false
     }
   ],
@@ -343,6 +343,16 @@
     "packages/surface": {
       "release-type": "node",
       "component": "surface",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/parse": {
+      "release-type": "node",
+      "component": "parse",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/strapi-graphql": {
+      "release-type": "node",
+      "component": "strapi-graphql",
       "changelog-path": "CHANGELOG.md"
     }
   },

@@ -69,6 +69,13 @@ tokens.
 | `useOnClickOutside(target, handler, enabled?)` | `void` | Uses `composedPath()` with a `contains` fallback; `enabled` lets a host suspend it while a popover is closing |
 | `useSwipe(target, handlers)` | `void` | Recognises single-pointer swipes via `pointerdown`/`pointerup` and a configurable `threshold` (default 30); use `svelte-gestures` for pinch/rotate |
 
+## Utility hooks
+
+| Hook | Returns | Notes |
+| --- | --- | --- |
+| `useTitle(title, options?)` | `void` | Sets `document.title` for the component lifetime and restores the previous title on cleanup; `append` concatenates a suffix |
+| `useLoadingOvertime(source?, options?)` | `{ elapsedTime, overtime }` | Refine-compatible alias accepting a query-like object or loading getter; `useOvertime` keeps manual `start`/`stop` |
+
 ## Server rendering
 
 All hooks are safe to import on the server. Browser-only hooks return their

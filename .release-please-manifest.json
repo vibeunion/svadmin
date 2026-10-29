@@ -31,5 +31,7 @@
   "packages/surface": "0.19.12",
   "packages/app": "0.2.15",
   "packages/devtools": "0.3.12",
-  "packages/rest": "0.2.15"
+  "packages/rest": "0.2.15",
+  "packages/parse": "0.1.0",
+  "packages/strapi-graphql": "0.1.0"
 }

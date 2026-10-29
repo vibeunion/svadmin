@@ -1,0 +1,17 @@
+{
+  "extends": "../core/tsconfig.contracts.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": false,
+    "types": ["@types/bun", "svelte"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "../.."
+  },
+  "include": ["src/**/*", "../refine-adapter/src/refinedev-optional.d.ts"]
+}

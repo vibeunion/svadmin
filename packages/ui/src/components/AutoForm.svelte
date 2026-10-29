@@ -8,7 +8,7 @@
   import { useQueryClient } from '@tanstack/svelte-query';
   import { slide } from 'svelte/transition';
   import { untrack } from 'svelte';
-  import type { FieldDefinition } from '@svadmin/core';
+  import type { AutoSaveOptions, FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { Button } from './ui/button/index.js';
@@ -22,6 +22,7 @@
   import { Skeleton } from './ui/skeleton/index.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ErrorSummary from './ErrorSummary.svelte';
+  import AutoSaveIndicator from './AutoSaveIndicator.svelte';
   import { withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
   import { schemaFormSnapshot } from './json-schema-form-state.js';
   import { cn } from '../utils.js';
@@ -56,6 +57,8 @@
     draftFields?: readonly string[];
     /** 仅在宿主显式订阅时输出可分离的字段草稿；不可恢复状态下输出 undefined。 */
     onDraftChange?: (draft: Record<string, unknown> | undefined) => void;
+    /** 脏字段停止输入后自动保存；与手动保存共用同一合同校验和写入路径。 */
+    autoSave?: AutoSaveOptions;
   }
 
   let {
@@ -78,6 +81,7 @@
     cancelUpload,
     draftFields,
     onDraftChange,
+    autoSave,
   }: Props = $props();
   const navigation = useNavigation();
   const context = captureAdminContext();
@@ -185,6 +189,7 @@
     warnWhenUnsavedChanges: true,
     // 失败已经显示在表单内，不再额外弹一条相同的 toast。
     errorNotification: false,
+    get autoSave() { return autoSave; },
     get validate() { return validator; },
     get onMutationSuccess() {
       const callback = onSuccess;
@@ -680,6 +685,12 @@
       {/if}
 
       <div class="flex items-center gap-3">
+        {#if autoSave?.enabled}
+          <AutoSaveIndicator
+            status={form.autoSave.status === 'saving' ? 'loading' : form.autoSave.status === 'saved' ? 'success' : form.autoSave.status === 'error' ? 'error' : 'idle'}
+            error={form.autoSave.error?.message ?? ''}
+          />
+        {/if}
         {#if formActions && !isReadonly}
           {@render formActions({ isLoading: form.submitting || uploadPending, isDisabled: form.submitting || uploadBlocked, onSubmit: handleSubmit })}
         {:else if !isReadonly}

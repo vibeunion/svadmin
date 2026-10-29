@@ -47,6 +47,7 @@
   let collapsed = $state(false);
   let cacheDiagnostics = $state.raw<DevtoolsCacheDiagnostics>(EMPTY_CACHE_DIAGNOSTICS);
   let safeQueryDiagnostics = $state.raw<DevtoolsQueryDiagnostic[]>([]);
+  let invalidations = $state.raw<Array<{ at: number; provider: string; resource: string; operation: string }>>([]);
   const queryTimings = new SvelteMap<string, { startedAt?: number; duration?: number }>();
 
   function toggle() {
@@ -117,6 +118,16 @@
           queryTimings.set(event.query.queryHash, {
             duration: Math.max(0, Date.now() - current.startedAt),
           });
+        } else if (event.action.type === 'invalidate') {
+          const descriptor = parseQueryKey(event.query.queryKey);
+          if (descriptor) {
+            invalidations = [{
+              at: Date.now(),
+              provider: descriptor.provider,
+              resource: descriptor.kind === 'custom' ? '[custom]' : (descriptor.resource ?? '—'),
+              operation: `${descriptor.kind}:${descriptor.action ?? 'call'}`,
+            }, ...invalidations].slice(0, 8);
+          }
         }
       }
       refreshCacheDiagnostics();
@@ -408,6 +419,25 @@
                     <div class="flex justify-between"><dt class="text-muted-foreground">Paused</dt><dd>{cacheDiagnostics.mutations.paused}</dd></div>
                     <div class="flex justify-between"><dt class="text-muted-foreground">Errors</dt><dd>{cacheDiagnostics.mutations.errors}</dd></div>
                   </dl>
+                </section>
+
+                <section class="space-y-1.5 sm:col-span-2">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-semibold text-foreground">Recent invalidations</h4>
+                    <Badge variant="secondary" data-testid="devtools-invalidation-total">{invalidations.length}</Badge>
+                  </div>
+                  {#if invalidations.length === 0}
+                    <div class="rounded-md border px-2.5 py-2 text-[0.6875rem] text-muted-foreground">
+                      No query invalidations yet.
+                    </div>
+                  {:else}
+                    {#each invalidations as invalidation, index (`${invalidation.at}:${invalidation.provider}:${index}`)}
+                      <div class="flex flex-wrap items-center justify-between gap-2 rounded-md border px-2.5 py-2 text-xs" data-testid="devtools-invalidation">
+                        <span class="font-medium text-foreground">{invalidation.provider} · {invalidation.resource}</span>
+                        <Badge variant="outline">{invalidation.operation}</Badge>
+                      </div>
+                    {/each}
+                  {/if}
                 </section>
 
                 <section class="space-y-1.5 sm:col-span-2">

@@ -134,6 +134,10 @@
     "./admin-tool": {
       "types": "./src/admin-tool.ts",
       "default": "./src/admin-tool.ts"
+    },
+    "./contracts": {
+      "types": "./src/contracts.ts",
+      "default": "./src/contracts.ts"
     }
   },
   "bugs": {

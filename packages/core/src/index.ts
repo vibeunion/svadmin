@@ -56,8 +56,9 @@ export {
   useNavigation, useGo, useBack,
   useGetToPath, useLink,
   useResource,
-  useModal,
-  useOvertime,
+  useModal, useDrawer,
+  useOvertime, useLoadingOvertime,
+  useTitle,
   useNotification,
   useMenu, useBreadcrumb, useThemedLayoutContext,
   resetSidebarCollapsed,
@@ -110,6 +111,7 @@ export type { ContractUpdateParams as UseUpdateMutateParams } from './update-con
 export type { ContractDeleteOptions as UseDeleteOptions } from './delete-hooks.svelte';
 export type { ContractDeleteParams as UseDeleteMutateParams } from './delete-contract';
 export type { ContractFormAction, ContractFormDraft, ContractFormValues } from './resource-contract';
+export type { AutoSaveOptions, AutoSaveState, AutoSaveStatus } from './contract-form.svelte';
 export type { ContractProjectionOptions } from './resource-contract';
 export type { ResourceContract, ContractSchemas, ContractRecord, ContractId, ContractInput } from './resource-contract';
 export type { ContractFilter, ContractSort } from './strict-hooks.svelte';
@@ -140,6 +142,12 @@ export type {
   PermissionSnapshot,
 } from './permission-catalog';
 export { useLive, useSubscription, usePublish } from './live.svelte';
+export { createAblyLiveProvider } from './adapters/ably';
+export type { AblyAdapterOptions, AblyChannelLike, AblyClientLike, AblyMessage } from './adapters/ably';
+export { createFirebaseLiveProvider } from './adapters/firebase';
+export type { FirebaseAdapterOptions, FirebaseLiveTransport } from './adapters/firebase';
+export { createGraphQLSubscriptionLiveProvider } from './adapters/graphql-subscription';
+export type { GraphQLSubscriptionTransport } from './adapters/graphql-subscription';
 export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue, getToasts, removeToast, resetToast } from './toast.svelte';
 export {
   notify,
@@ -158,6 +166,8 @@ export type { DateTimeValueMode, DateTimeDisambiguation } from './date-time';
 export { validateGantt, GANTT_LIMITS } from './gantt';
 export type { GanttTaskShape, GanttValidationError } from './gantt';
 export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider, withValidatedAuditProvider, AuditError } from './audit';
+export { useLog, useLogList } from './audit-hooks.svelte';
+export type { UseLogOptions, UseLogMutation, UseLogListOptions, UseLogListResult } from './audit-hooks.svelte';
 export type { AuditLogProvider, AuditLogTransport, AuditCreateParams, AuditQueryParams, AuditDraft } from './audit';
 export { TaskError } from './task-contract';
 export { withValidatedTaskProvider } from './task-provider';
@@ -242,6 +252,10 @@ export { useCan } from './useCan';
 export type { UseCanOptions, UseCanResult } from './useCan';
 export { createCaslAccessControl } from './adapters/casl';
 export { createCasbinAccessControl } from './adapters/casbin';
+export { createCerbosAccessControl } from './adapters/cerbos';
+export type { CerbosAdapterOptions, CerbosOptions, CerbosPrincipal } from './adapters/cerbos';
+export { createPermitAccessControl } from './adapters/permit';
+export type { PermitAdapterOptions, PermitOptions } from './adapters/permit';
 export type { CasbinAdapterOptions } from './adapters/casbin';
 export { downloadData, toCsv, toJson, toXlsx, parseCSV } from './data-transfer.svelte';
 export { parseSpreadsheetClipboard, serializeSpreadsheetClipboard } from './spreadsheet-clipboard';
@@ -276,9 +290,11 @@ export {
   captureAuthLiveScope as captureAuthSession,
 } from './auth-hooks.svelte';
 export type { AuthNotificationOptions } from './auth-hooks.svelte';
-export { AuthQueryError, AuthErrorHandlingError } from './auth-query-contract';
-export type { AuthErrorHandlingResult } from './auth-query-contract';
-export { AuthMutationError } from './auth-mutation-contract';
+export { AuthQueryError, AuthErrorHandlingError, decodeAuthCheck, decodeAuthErrorResult, decodeIdentity } from './auth-query-contract';
+export type { AuthErrorHandlingResult, AuthErrorResult } from './auth-query-contract';
+export { AuthMutationError, decodeAuthAction } from './auth-mutation-contract';
+export { decodeCanResult } from './access-control-contract';
+export { snapshotLiveEvent } from './live-transport';
 export { useResourceContract } from './resource-binding.svelte';
 export { PermissionHintsError } from './permission-hints-contract';
 export type { PermissionHints } from './permission-hints-contract';
