@@ -4802,3 +4802,22 @@ details[data-svadmin-filter][open] > :not(summary),
 .svadmin-overflow__count {
   font-variant-numeric: tabular-nums;
 }
+
+.svadmin-grouped-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.svadmin-grouped-table__sticky thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.svadmin-grouped-table__striped {
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
+}
+
+.svadmin-table--bordered :is(th, td) {
+  border: 1px solid var(--border);
+}

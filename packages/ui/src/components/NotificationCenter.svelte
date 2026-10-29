@@ -22,6 +22,10 @@
     emptyText?: string;
     markAllText?: string;
     unreadCount?: number;
+    showFilters?: boolean;
+    categories?: string[];
+    category?: string;
+    allLabel?: string;
     loading?: boolean;
     open?: boolean;
     children?: Snippet;
@@ -37,6 +41,10 @@
     emptyText = 'No new notifications',
     markAllText = 'Mark all as read',
     unreadCount,
+    showFilters = false,
+    categories,
+    category = $bindable('all'),
+    allLabel = 'All',
     loading = false,
     open = $bindable(false),
     children,
@@ -47,6 +55,15 @@
   }: Props = $props();
 
   const resolvedUnread = $derived(unreadCount ?? items.filter((item) => !item.read).length);
+  const resolvedCategories = $derived(
+    categories ?? [...new Set(items.map((item) => item.category).filter((value): value is string => Boolean(value)))],
+  );
+  const activeCategory = $derived(
+    category === 'all' || resolvedCategories.includes(category) ? category : 'all',
+  );
+  const visibleItems = $derived(
+    activeCategory === 'all' ? items : items.filter((item) => item.category === activeCategory),
+  );
 
   function formatTime(value: string | Date | undefined): string {
     if (!value) return '';
@@ -89,14 +106,38 @@
         </Button>
       {/if}
     </header>
+    {#if showFilters && resolvedCategories.length > 0}
+      <div class="svadmin-notification-center__filters" role="tablist" aria-label="Notification categories">
+        <button
+          type="button"
+          role="tab"
+          class="svadmin-notification-center__filter"
+          aria-selected={activeCategory === 'all'}
+          onclick={() => (category = 'all')}
+        >
+          {allLabel}
+        </button>
+        {#each resolvedCategories as value (value)}
+          <button
+            type="button"
+            role="tab"
+            class="svadmin-notification-center__filter"
+            aria-selected={activeCategory === value}
+            onclick={() => (category = value)}
+          >
+            {value}
+          </button>
+        {/each}
+      </div>
+    {/if}
     <div class="svadmin-notification-center__body" aria-busy={loading}>
       {#if loading}
         <p class="svadmin-notification-center__state">Loading…</p>
-      {:else if items.length === 0}
+      {:else if visibleItems.length === 0}
         <p class="svadmin-notification-center__state">{emptyText}</p>
       {:else}
         <ul class="svadmin-notification-center__list">
-          {#each items as item (item.id)}
+          {#each visibleItems as item (item.id)}
             <li>
               <button
                 type="button"
@@ -158,6 +199,29 @@
     font-size: var(--svadmin-text-body);
     font-weight: 600;
     color: var(--foreground);
+  }
+  .svadmin-notification-center__filters {
+    display: flex;
+    gap: 0.25rem;
+    padding: var(--svadmin-space-2) var(--svadmin-space-3);
+    border-block-end: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .svadmin-notification-center__filter {
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 999px;
+    padding: 0.1875rem 0.625rem;
+    background: transparent;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: var(--svadmin-text-caption);
+    cursor: pointer;
+  }
+  .svadmin-notification-center__filter[aria-selected='true'] {
+    background: var(--accent);
+    color: var(--foreground);
+    font-weight: 600;
   }
   .svadmin-notification-center__body { max-height: min(28rem, 70vh); overflow: auto; }
   .svadmin-notification-center__state {
