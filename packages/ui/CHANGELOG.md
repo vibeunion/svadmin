@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.99.0](https://github.com/vibeunion/svadmin/compare/ui-v0.98.0...ui-v0.99.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** unify the default visual system ([#580](https://github.com/vibeunion/svadmin/issues/580)) ([2d4b645](https://github.com/vibeunion/svadmin/commit/2d4b6450e46b6ff8e370c11974c41a2c09be7046))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.11
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.67.0
+
 ## [0.98.0](https://github.com/vibeunion/svadmin/compare/ui-v0.97.0...ui-v0.98.0) (2026-10-29)
 
 

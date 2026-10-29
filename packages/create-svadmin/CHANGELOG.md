@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.46.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.45.9...create-svadmin-v0.46.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** unify the default visual system ([#580](https://github.com/vibeunion/svadmin/issues/580)) ([2d4b645](https://github.com/vibeunion/svadmin/commit/2d4b6450e46b6ff8e370c11974c41a2c09be7046))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.67.0
+
 ## [0.45.9](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.45.8...create-svadmin-v0.45.9) (2026-10-29)
 
 

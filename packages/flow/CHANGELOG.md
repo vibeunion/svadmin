@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/vibeunion/svadmin/compare/flow-v0.6.2...flow-v0.7.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** unify the default visual system ([#580](https://github.com/vibeunion/svadmin/issues/580)) ([2d4b645](https://github.com/vibeunion/svadmin/commit/2d4b6450e46b6ff8e370c11974c41a2c09be7046))
+
 ## [0.6.2](https://github.com/vibeunion/svadmin/compare/flow-v0.6.1...flow-v0.6.2) (2026-10-28)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.67.0](https://github.com/vibeunion/svadmin/compare/core-v0.66.3...core-v0.67.0) (2026-10-29)
+
+
+### 🚀 Features
+
+* **ui:** unify the default visual system ([#580](https://github.com/vibeunion/svadmin/issues/580)) ([2d4b645](https://github.com/vibeunion/svadmin/commit/2d4b6450e46b6ff8e370c11974c41a2c09be7046))
+
 ## [0.66.3](https://github.com/vibeunion/svadmin/compare/core-v0.66.2...core-v0.66.3) (2026-10-29)
 
 
