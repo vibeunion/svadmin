@@ -133,7 +133,7 @@ export { default as DynamicFormList } from './components/DynamicFormList.svelte'
 export { default as TreeSelect } from './components/TreeSelect.svelte';
 export type { TreeSelectOption } from './components/TreeSelect.svelte';
 export { default as Cascader } from './components/Cascader.svelte';
-export type { CascaderOption } from './components/Cascader.svelte';
+export type { CascaderOption, CascaderPath } from './components/Cascader.svelte';
 export { default as Transfer } from './components/Transfer.svelte';
 export type { TransferItem } from './components/Transfer.svelte';
 export { default as FilterBuilder } from './components/FilterBuilder.svelte';
@@ -242,7 +242,7 @@ export type { DateTimeInputMode } from './components/DateTimeInput.svelte';
 export { default as DateRangeInput } from './components/DateRangeInput.svelte';
 export type { DateRangeInputValue, DateRangePreset } from './components/DateRangeInput.svelte';
 export { default as DatePicker } from './components/DatePicker.svelte';
-export type { DatePickerProps } from './components/DatePicker.svelte';
+export type { DatePickerProps, DatePickerMode, DatePreset } from './components/DatePicker.svelte';
 export { default as DateRangePicker } from './components/DateRangePicker.svelte';
 export type { DateRangePickerProps } from './components/DateRangePicker.svelte';
 export { default as TimePicker } from './components/TimePicker.svelte';

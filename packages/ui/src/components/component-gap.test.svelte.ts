@@ -8,8 +8,8 @@ import Spin from './Spin.svelte';
 
 afterEach(() => cleanup());
 
-describe('Arco gap components', () => {
-  it('renders a link, result, list, tree and spin with Arco roles', () => {
+describe('component gap coverage', () => {
+  it('renders link, result, list, tree and spin primitives', () => {
     render(Link, { href: '/docs' });
     render(Result, { status: 'success', title: '提交成功', subtitle: '可以返回列表' });
     render(ItemList, { items: [{ id: '1', title: '第一条', description: '说明' }] });

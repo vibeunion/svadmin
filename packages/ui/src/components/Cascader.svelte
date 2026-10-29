@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ChevronRight, Check, X, ChevronsUpDown } from '@lucide/svelte';
+  import { ChevronRight, Check, X, ChevronsUpDown, Search } from '@lucide/svelte';
+  import Tree, { type TreeNode as UiTreeNode } from './Tree.svelte';
   import { SvelteMap, SvelteSet } from 'svelte/reactivity';
   import { onDestroy, tick, untrack } from 'svelte';
   import { cn } from '../utils.js';
@@ -16,6 +17,8 @@
     isLeaf?: boolean;
   }
 
+  export type CascaderPath = (string | number)[];
+
   const i18n = useTranslation();
 
   interface Props {
@@ -24,15 +27,24 @@
     describedby?: string;
     invalid?: boolean;
     options?: CascaderOption[];
-    value?: (string | number)[];
+    value?: CascaderPath | CascaderPath[];
     separator?: string;
     placeholder?: string;
     changeOnSelect?: boolean;
     disabled?: boolean;
     allowClear?: boolean;
+    /** Multi-select stores one full path per selected node. */
+    multiple?: boolean;
+    /** Checkable tree mode; implies multi-select. */
+    checkable?: boolean;
+    showSearch?: boolean;
+    searchPlaceholder?: string;
+    /** Maximum visible tags before showing +N. */
+    maxTagCount?: number;
+    displayRender?: (labels: string[], selectedOptions: CascaderOption[][]) => string;
     loadChildren?: (node: CascaderOption) => Promise<CascaderOption[]>;
     class?: string;
-    onchange?: (value: (string | number)[] | undefined, selectedOptions: CascaderOption[]) => void;
+    onchange?: (value: CascaderPath | CascaderPath[] | undefined, selectedOptions: CascaderOption[] | CascaderOption[][]) => void;
   }
 
   let {
@@ -47,6 +59,12 @@
     changeOnSelect = false,
     disabled = false,
     allowClear = true,
+    multiple = false,
+    checkable = false,
+    showSearch = false,
+    searchPlaceholder,
+    maxTagCount = 2,
+    displayRender,
     loadChildren,
     class: className,
     onchange,
@@ -55,7 +73,9 @@
   const instanceId = $props.id();
   const triggerId = $derived(id ?? `${instanceId}-trigger`);
   const panelId = $derived(`${triggerId}-panel`);
+  const multi = $derived(multiple || checkable);
   let open = $state(false);
+  let searchTerm = $state('');
   let triggerElement = $state<HTMLButtonElement>();
   let panelElement = $state<HTMLDivElement>();
   // Active selected path while navigating panels
@@ -229,7 +249,7 @@
     const currentHasChildren = hasChildren(currentOption);
     if (commitSelection && (!currentHasChildren || changeOnSelect)) {
       // 同一异步分支在请求期间被重复激活时，只有第一次可以提交。
-      if (!value || !samePath(value, nextPath)) {
+      if (!multi && (!value || !samePath(value as CascaderPath, nextPath))) {
         value = nextPath;
         onchange?.(nextPath, getOptionsForPath(nextPath));
       }
@@ -239,9 +259,9 @@
   }
 
   $effect(() => {
-    if (value && Array.isArray(value)) {
-      activePath = [...value];
-    } else {
+    if (!multi && value && Array.isArray(value)) {
+      activePath = [...value as CascaderPath];
+    } else if (!multi) {
       activePath = [];
     }
   });
@@ -264,7 +284,7 @@
 
   // Selected options objects corresponding to value
   const selectedOptions = $derived.by<CascaderOption[]>(() => {
-    if (!value || !Array.isArray(value) || value.length === 0) return [];
+    if (multi || !value || !Array.isArray(value) || value.length === 0) return [];
     const opts: CascaderOption[] = [];
     let currentLevel = effectiveOptions;
 
@@ -281,9 +301,116 @@
     return opts;
   });
 
+  const selectedPaths = $derived.by<CascaderPath[]>(() => {
+    if (!multi || !Array.isArray(value) || value.length === 0) return [];
+    const raw = value as unknown[];
+    return Array.isArray(raw[0]) ? raw as CascaderPath[] : [raw as CascaderPath];
+  });
+
+  const selectedMultiOptions = $derived(selectedPaths.map((path) => getOptionsForPath(path)));
+
   const displayLabel = $derived.by(() => {
+    if (multi) {
+      const labels = selectedMultiOptions.map((options) => options.map((option) => option.label).join(' '));
+      return displayRender?.(labels, selectedMultiOptions) ?? labels.map((_, index) => getOptionsForPath(selectedPaths[index] ?? []).at(-1)?.label ?? '').filter(Boolean).join(separator);
+    }
     if (selectedOptions.length === 0) return '';
     return selectedOptions.map((o) => o.label).join(separator);
+  });
+
+  function pathNodeId(path: CascaderPath): string {
+    return JSON.stringify(path);
+  }
+
+  function treeNode(path: CascaderPath, option: CascaderOption): UiTreeNode {
+    const nodePath = [...path, option.value];
+    const children = option.children?.map((child) => treeNode(nodePath, child));
+    return {
+      id: pathNodeId(nodePath),
+      label: option.label,
+      ...(children === undefined ? {} : { children }),
+      ...(option.disabled === true ? { disabled: true } : {}),
+      ...(option.isLeaf === true ? { isLeaf: true } : {}),
+      ...(hasChildren(option) && children === undefined ? { hasChildren: true } : {}),
+    };
+  }
+
+  const treeNodes = $derived(effectiveOptions.map((option) => treeNode([], option)));
+
+  function searchTreeNodes(items: UiTreeNode[], term: string): UiTreeNode[] {
+    if (!term) return items;
+    const lowered = term.toLowerCase();
+    return items.flatMap((node) => {
+      const children = node.children ? searchTreeNodes(node.children, term) : undefined;
+      const matched = node.label.toLowerCase().includes(lowered);
+      if (!matched && (!children || children.length === 0)) return [];
+      return [{ ...node, ...(children === undefined ? {} : { children }) }];
+    });
+  }
+
+  const filteredTreeNodes = $derived(searchTreeNodes(treeNodes, searchTerm.trim()));
+
+  const searchExpandedKeys = $derived.by(() => {
+    if (!searchTerm.trim()) return undefined;
+    const ids: string[] = [];
+    const walk = (items: UiTreeNode[]) => {
+      for (const node of items) {
+        if (node.children?.length) { ids.push(node.id); walk(node.children); }
+      }
+    };
+    walk(filteredTreeNodes);
+    return ids;
+  });
+
+  function treeChildren(path: CascaderPath): UiTreeNode[] {
+    return (getOptionsForPath(path).at(-1)?.children ?? []).map((child) => treeNode(path, child));
+  }
+
+  async function treeLoadChildren(node: UiTreeNode): Promise<UiTreeNode[]> {
+    const path = JSON.parse(node.id) as CascaderPath;
+    const current = getOptionsForPath(path).at(-1);
+    if (!current) return [];
+    await ensureChildren(current, path);
+    return treeChildren(path);
+  }
+
+  function emitMulti(paths: CascaderPath[]): void {
+    value = paths;
+    onchange?.(paths, paths.map((path) => getOptionsForPath(path)));
+  }
+
+  function emitChecked(paths: CascaderPath[]): void {
+    emitMulti(paths);
+  }
+
+  function pathFromId(id: string): CascaderPath {
+    return JSON.parse(id) as CascaderPath;
+  }
+
+  const selectedTreeIds = $derived(selectedPaths.map(pathNodeId));
+  const checkedTreeIds = $derived(selectedTreeIds);
+
+  function selectSinglePath(path: CascaderPath): void {
+    activePath = path;
+    value = path;
+    onchange?.(path, getOptionsForPath(path));
+    open = false;
+  }
+
+  interface SearchLeaf { path: CascaderPath; labels: string[]; disabled: boolean; }
+  const searchLeaves = $derived.by<SearchLeaf[]>(() => {
+    const leaves: SearchLeaf[] = [];
+    const walk = (items: CascaderOption[], prefix: CascaderPath, labels: string[]) => {
+      for (const item of items) {
+        const path = [...prefix, item.value];
+        const nextLabels = [...labels, item.label];
+        if (!hasChildren(item)) leaves.push({ path, labels: nextLabels, disabled: item.disabled === true });
+        else if (item.children) walk(item.children, path, nextLabels);
+      }
+    };
+    walk(effectiveOptions, [], []);
+    const term = searchTerm.trim().toLowerCase();
+    return leaves.filter((leaf) => !term || leaf.labels.join(separator).toLowerCase().includes(term));
   });
 
   async function handleSelectOption(colIndex: number, option: CascaderOption): Promise<void> {
@@ -338,9 +465,15 @@
     if (disabled) return;
     open = false;
     triggerElement?.focus();
-    value = undefined;
-    activePath = [];
-    onchange?.(undefined, []);
+    if (multi) {
+      value = [];
+      onchange?.([], []);
+    } else {
+      value = undefined;
+      activePath = [];
+      onchange?.(undefined, []);
+    }
+    searchTerm = '';
   }
 
   function focusColumnButton(columnIndex: number, optionIndex?: number): void {
@@ -463,8 +596,17 @@
             open && 'ring-2 ring-ring ring-offset-2'
           )}
         >
-          <span class={cn('truncate', displayLabel ? 'text-foreground' : 'text-muted-foreground')}>
-            {displayLabel || (placeholder ?? (i18n.t('field.selectPlaceholder', undefined) ?? '请选择...'))}
+          <span class={cn('flex min-w-0 flex-1 items-center gap-1 overflow-hidden', displayLabel ? 'text-foreground' : 'text-muted-foreground')}>
+            {#if multi && selectedMultiOptions.length > 0}
+              {#each selectedMultiOptions.slice(0, maxTagCount) as options, tagIndex (tagIndex)}
+                <span class="svadmin-cascader-tag">{options.at(-1)?.label ?? ''}</span>
+              {/each}
+              {#if selectedMultiOptions.length > maxTagCount}
+                <span class="svadmin-cascader-tag">+{selectedMultiOptions.length - maxTagCount}</span>
+              {/if}
+            {:else}
+              <span class="truncate">{displayLabel || (placeholder ?? (i18n.t('field.selectPlaceholder', undefined) ?? '请选择...'))}</span>
+            {/if}
           </span>
 
           <div class="flex items-center gap-1 shrink-0 ml-1 text-muted-foreground">
@@ -487,6 +629,50 @@
       {#snippet child({ props, wrapperProps })}
       <div {...wrapperProps}>
       <div {...props} id={panelId} bind:this={panelElement} onfocusin={handlePanelFocusIn}>
+      {#if showSearch}
+        <div class="flex items-center gap-2 border-b border-border px-2.5 py-2">
+          <Search class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <input
+            type="search"
+            class="h-7 w-full min-w-0 border-0 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
+            placeholder={searchPlaceholder ?? (i18n.t('common.search', undefined) ?? 'Search...')}
+            bind:value={searchTerm}
+            aria-label={searchPlaceholder ?? 'Search options'}
+          />
+        </div>
+      {/if}
+      {#if multi}
+        <div class="max-h-64 overflow-y-auto p-1">
+          <Tree
+            nodes={filteredTreeNodes}
+            {...(searchExpandedKeys === undefined ? {} : { expandedKeys: searchExpandedKeys })}
+            selectedKeys={checkable ? [] : selectedTreeIds}
+            checkedKeys={checkable ? checkedTreeIds : []}
+            checkable={checkable}
+            multiple={!checkable}
+            defaultExpandAll={!searchTerm.trim()}
+            {...(loadChildren ? { loadChildren: treeLoadChildren } : {})}
+            onselect={(keys) => { if (!checkable) emitMulti(keys.map(pathFromId)); }}
+            oncheck={(keys) => { if (checkable) emitChecked(keys.map(pathFromId)); }}
+          />
+        </div>
+      {:else if searchTerm.trim()}
+        <div class="max-h-64 w-72 overflow-y-auto p-1">
+          {#each searchLeaves as leaf (pathNodeId(leaf.path))}
+            <button
+              type="button"
+              class="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted/60"
+              disabled={leaf.disabled}
+              onclick={() => selectSinglePath(leaf.path)}
+            >
+              <span class="truncate">{leaf.labels.join(separator)}</span>
+              {#if value && samePath(value as CascaderPath, leaf.path)}<Check class="h-3.5 w-3.5 text-primary" />{/if}
+            </button>
+          {:else}
+            <p class="px-2 py-4 text-center text-xs text-muted-foreground">{i18n.t('common.noData', undefined) ?? 'No data'}</p>
+          {/each}
+        </div>
+      {:else}
       <div class="flex divide-x divide-border max-h-64 overflow-x-auto">
         {#each columns as columnOptions, colIndex (colIndex)}
           <div data-cascader-column={colIndex} class="w-40 min-w-[140px] max-h-64 overflow-y-auto p-1 space-y-0.5">
@@ -540,6 +726,7 @@
           </div>
         {/each}
       </div>
+      {/if}
       </div>
       </div>
       {/snippet}
@@ -560,5 +747,20 @@
   }
   :global(.svadmin-cascader-panel) {
     max-inline-size: calc(100vw - 32px);
+  }
+  .svadmin-cascader-tag {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    max-width: 8rem;
+    padding: 0 0.35rem;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--muted);
+    color: var(--foreground);
+    font-size: var(--svadmin-text-caption);
+    line-height: 1.35rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>
