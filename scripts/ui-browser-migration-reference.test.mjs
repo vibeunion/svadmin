@@ -10,6 +10,11 @@ import {
   stripeLightTokenMigration,
   tableSizeMigration,
 } from './ui-browser-migration-reference.mjs';
+import {
+  productDarkTokenMigration,
+  productLightTokenMigration,
+  productComponentSizeMigration,
+} from './ui-browser-product-migration.mjs';
 
 const baseline = readFileSync(new URL('../packages/ui/test/style-baselines/components.css', import.meta.url), 'utf8');
 
@@ -17,18 +22,27 @@ test('reference changes only explicitly approved token, body and table declarati
   assert.equal(Object.keys(lightTokenMigration).length, 11);
   assert.equal(Object.keys(stripeLightTokenMigration).length, 5);
   assert.equal(Object.keys(stripeDarkTokenMigration).length, 7);
+  assert.equal(Object.keys(productLightTokenMigration).length, 38);
+  assert.equal(Object.keys(productDarkTokenMigration).length, 38);
   assert.equal(Object.keys(bodyStyleMigration).length, 1);
   assert.deepEqual(tableSizeMigration, {
-    '.svadmin-table-head': { height: ['2.25rem', '2.75rem'], 'font-size': [null, '0.75rem'] },
-    '.svadmin-table-cell': { height: [null, '3rem'], 'font-size': [null, '0.8125rem'] },
+    '.svadmin-table-head': {
+      height: ['2.25rem', '2.5rem'],
+      background: [null, 'var(--background)'],
+      color: ['var(--foreground)', 'var(--muted-foreground)'],
+      'font-size': [null, '0.75rem'],
+    },
+    '.svadmin-table-cell': { height: [null, '2.5rem'], 'font-size': [null, '0.8125rem'] },
   });
   const reference = postcss.parse(createMigrationReference(baseline));
   const migrations = [
     { selector: ':root', values: lightTokenMigration },
     { selector: ':root', values: stripeLightTokenMigration },
     { selector: '.dark', values: stripeDarkTokenMigration },
+    { selector: ':root', values: productLightTokenMigration },
+    { selector: '.dark', values: productDarkTokenMigration },
     { selector: 'body', values: bodyStyleMigration },
-  ];
+  ].reverse();
   for (const { selector, values } of migrations) {
     for (const [property, [before, after]] of Object.entries(values)) {
       let changed = 0;
@@ -47,6 +61,17 @@ test('reference changes only explicitly approved token, body and table declarati
       });
       assert.equal(changed, 1);
     }
+  }
+  for (const [selector, values] of Object.entries(productComponentSizeMigration)) {
+    reference.walkRules(selector, rule => {
+      if (rule.parent?.name !== 'layer' || rule.parent.params !== 'components') return;
+      for (const [property, [before, after]] of Object.entries(values)) {
+        const matches = rule.nodes.filter(node => node.type === 'decl' && node.prop === property);
+        assert.equal(matches.length, 1);
+        assert.equal(matches[0].value, after);
+        matches[0].value = before;
+      }
+    });
   }
   for (const [selector, values] of Object.entries(tableSizeMigration)) {
     reference.walkRules(selector, rule => {
