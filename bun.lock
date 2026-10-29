@@ -495,21 +495,6 @@
         "@svadmin/core",
       ],
     },
-    "packages/parse": {
-      "name": "@svadmin/parse",
-      "version": "0.1.0",
-      "dependencies": {
-        "@svadmin/refine-adapter": "workspace:*",
-      },
-      "peerDependencies": {
-        "@refinedev/parse": "^2.0.0",
-        "@svadmin/core": "workspace:*",
-      },
-      "optionalPeers": [
-        "@refinedev/parse",
-        "@svadmin/core",
-      ],
-    },
     "packages/pocketbase": {
       "name": "@svadmin/pocketbase",
       "version": "0.13.13",
@@ -612,21 +597,6 @@
       },
       "optionalPeers": [
         "@refinedev/strapi-v4",
-        "@svadmin/core",
-      ],
-    },
-    "packages/strapi-graphql": {
-      "name": "@svadmin/strapi-graphql",
-      "version": "0.1.0",
-      "dependencies": {
-        "@svadmin/refine-adapter": "workspace:*",
-      },
-      "peerDependencies": {
-        "@refinedev/strapi-graphql": "^7.0.0",
-        "@svadmin/core": "workspace:*",
-      },
-      "optionalPeers": [
-        "@refinedev/strapi-graphql",
         "@svadmin/core",
       ],
     },
@@ -1518,8 +1488,6 @@
 
     "@svadmin/nestjsx-crud": ["@svadmin/nestjsx-crud@workspace:packages/nestjsx-crud"],
 
-    "@svadmin/parse": ["@svadmin/parse@workspace:packages/parse"],
-
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
@@ -1533,8 +1501,6 @@
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 
     "@svadmin/strapi": ["@svadmin/strapi@workspace:packages/strapi"],
-
-    "@svadmin/strapi-graphql": ["@svadmin/strapi-graphql@workspace:packages/strapi-graphql"],
 
     "@svadmin/supabase": ["@svadmin/supabase@workspace:packages/supabase"],
 
