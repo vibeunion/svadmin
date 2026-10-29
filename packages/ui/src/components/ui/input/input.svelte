@@ -6,6 +6,7 @@
 	import { useTranslation } from "@svadmin/core/i18n";
 	import { definedOptions } from "@svadmin/core/options";
 	import { cn, type WithElementRef } from "../../../utils.js";
+	import { useComponentConfig } from "../../ConfigProvider.svelte";
 
 	type InputValue = Type extends "number" | "range"
 		? number | null | undefined
@@ -23,12 +24,15 @@
 		type,
 		files = $bindable(),
 		disabled,
-		size = "default",
+		size: sizeProp,
 		nativeSize,
 		class: className,
 		"data-slot": dataSlot = "input",
 		...restProps
 	}: Props = $props();
+
+	const config = useComponentConfig();
+	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
 
 	const i18n = useTranslation();
 	const isFileInput = $derived(type?.toLowerCase() === "file");

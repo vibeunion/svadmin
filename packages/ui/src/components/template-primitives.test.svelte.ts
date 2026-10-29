@@ -17,6 +17,18 @@ describe('template primitives', () => {
     expect(screen.getByRole('region', { name: /November 2026/i })).toBeTruthy();
   });
 
+  it('navigates calendar years and dates from the keyboard', async () => {
+    render(Calendar, { props: { value: '2026-10-15', locale: 'en-US' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Next year' }));
+    expect(screen.getByRole('region', { name: /October 2027/i })).toBeTruthy();
+    const selected = screen.getByRole('button', { name: '2027-10-15' });
+    selected.focus();
+    await fireEvent.keyDown(selected, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: '2027-10-16' }));
+    await fireEvent.keyDown(screen.getByRole('button', { name: '2027-10-16' }), { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: '2027-10-23' }));
+  });
+
   it('renders carousel controls and switches slides', async () => {
     render(Carousel, { props: { count: 2 } });
     expect(screen.getByRole('tab', { name: 'Go to slide 1' }).getAttribute('aria-selected')).toBe('true');

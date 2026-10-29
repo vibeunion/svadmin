@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLSelectAttributes } from "svelte/elements";
+	import { useComponentConfig } from "../../ConfigProvider.svelte";
 
 	// Use HTMLElement instead of HTMLSelectElement to avoid TS error:
 	// HTMLSelectElement.remove() returns void, incompatible with HTMLElement's Element return
@@ -14,10 +15,13 @@
 		value = $bindable(""),
 		class: className,
 		placeholder,
-		size = "default",
+		size: sizeProp,
 		children,
 		...restProps
 	}: Props = $props();
+
+	const config = useComponentConfig();
+	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
 </script>
 
 <select

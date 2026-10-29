@@ -325,6 +325,15 @@ export const designSystemComponents = [
 		sizes: ["default", "compact"],
 	},
 	{
+		id: "ui.notification-host",
+		name: "NotificationHost",
+		codePath: "packages/ui/src/components/NotificationHost.svelte",
+		codeExport: "NotificationHost",
+		states: ["closed", "open", "success", "warning", "danger", "neutral"],
+		themes: ["light", "dark"],
+		sizes: ["default", "compact"],
+	},
+	{
 		id: "template.page",
 		name: "Page templates",
 		codePath: "packages/ui/src/components/templates/TemplatePageShell.svelte",

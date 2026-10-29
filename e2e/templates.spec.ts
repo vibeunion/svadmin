@@ -27,6 +27,13 @@ test('page template gallery renders every composition at desktop and mobile widt
 
   for (const template of templates) {
     await page.getByRole('button', { name: template.nav, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`#/templates/${template.nav.toLowerCase().replaceAll(' ', '-')}`));
+    await expect(page.getByRole('heading', { name: template.heading, exact: true })).toBeVisible();
+  }
+
+  for (const template of templates) {
+    const path = template.nav.toLowerCase().replaceAll(' ', '-');
+    await page.goto(`/#/templates/${path}`);
     await expect(page.getByRole('heading', { name: template.heading, exact: true })).toBeVisible();
   }
 

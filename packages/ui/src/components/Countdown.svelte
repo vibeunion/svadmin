@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { cn } from '../utils.js';
 
   interface Props {
@@ -32,18 +31,21 @@
     return format === 'clock' ? clock : days > 0 ? `${days}d ${clock}` : clock;
   }
 
-  onMount(() => {
-    remaining = resolveRemaining();
-    finished = remaining <= 0;
-    if (finished) return;
+  $effect(() => {
+    const next = resolveRemaining();
+    remaining = next;
+    finished = next <= 0;
+    if (next <= 0) return;
+    const deadline = Date.now() + next;
     const timer = setInterval(() => {
-      remaining = Math.max(0, remaining - 1000);
-      if (remaining === 0 && !finished) {
+      const value = Math.max(0, deadline - Date.now());
+      remaining = value;
+      if (value === 0) {
         finished = true;
         clearInterval(timer);
         onfinish?.();
       }
-    }, 1000);
+    }, 250);
     return () => clearInterval(timer);
   });
 </script>

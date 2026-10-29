@@ -63,6 +63,8 @@
   const pageRoutes = [
     { path: '/workspace', component: LazyWorkspaceTabs, title: 'Multi-tab Workspace' },
     { path: '/templates', component: LazyTemplateGallery, title: 'Page Templates' },
+    ...['workplace', 'monitor', 'analysis', 'search-table', 'card-list', 'group-form', 'step-form', 'advanced-form', 'basic-detail', 'advanced-detail', 'profile', 'result', 'exception']
+      .map((template) => ({ path: `/templates/${template}`, component: LazyTemplateGallery, title: `Page Template: ${template}` })),
   ];
 </script>
 

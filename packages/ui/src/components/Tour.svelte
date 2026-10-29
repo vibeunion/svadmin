@@ -96,10 +96,26 @@
     if (event.key === 'Escape') close();
     else if (event.key === 'ArrowRight') move(1);
     else if (event.key === 'ArrowLeft') move(-1);
+    else if (event.key === 'Tab' && panel) {
+      const focusable = [...panel.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
   }
 
   $effect(() => {
     if (!open) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     untrack(() => {
       const target = step?.target ? document.querySelector(step.target) : null;
       target?.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
@@ -109,8 +125,10 @@
     window.addEventListener('resize', measure);
     window.addEventListener('scroll', measure, true);
     return () => {
+      document.body.style.overflow = overflow;
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', measure, true);
+      previous?.focus();
     };
   });
 </script>
