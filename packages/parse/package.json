@@ -1,0 +1,51 @@
+{
+  "name": "@svadmin/parse",
+  "version": "0.1.0",
+  "description": "Parse DataProvider adapter — bridge @refinedev/parse to svadmin",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "svadmin": {
+    "capabilities": [
+      "data",
+      "parse"
+    ],
+    "core": "^0.55.0",
+    "stability": "experimental",
+    "migration": null
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*",
+    "@refinedev/parse": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@refinedev/parse": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@svadmin/refine-adapter": "workspace:*"
+  },
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/parse"
+  }
+}

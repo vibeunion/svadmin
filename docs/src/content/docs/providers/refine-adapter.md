@@ -3,7 +3,7 @@ title: Refine Adapter
 description: Use any @refinedev/* data provider with svadmin
 ---
 
-The `@svadmin/refine-adapter` package provides a universal bridge that wraps any official [Refine](https://refine.dev/) data provider so it can be used as a svadmin `DataProvider`.
+The `@svadmin/refine-adapter` package bridges official [Refine](https://refine.dev/) providers to svadmin. Data, auth, access control, notification, and live providers are supported.
 
 ## Why?
 
@@ -45,6 +45,26 @@ Then pass `dataProvider` to `<AdminApp>` or `setDataProvider()`:
 <AdminApp {dataProvider} {resources} title="My Admin" />
 ```
 
+## Other Refine providers
+
+```typescript
+import {
+  createRefineAuthAdapter,
+  createRefineAccessControlAdapter,
+  createRefineNotificationAdapter,
+  createRefineLiveAdapter,
+} from '@svadmin/refine-adapter';
+
+const authProvider = createRefineAuthAdapter(refineAuthProvider);
+const accessControlProvider = createRefineAccessControlAdapter(refineAccessControlProvider);
+const notificationProvider = createRefineNotificationAdapter(refineNotificationProvider);
+const liveProvider = createRefineLiveAdapter(refineLiveProvider);
+```
+
+- Results are validated with the same decoders as first-party providers.
+- Refine `created/updated/deleted` events map to `INSERT/UPDATE/DELETE`; channels map to resources.
+- Provider error text is not surfaced as authorization or authentication evidence.
+
 ## How It Works
 
 Refine's `DataProvider` interface closely mirrors svadmin's `DataProvider`. The adapter:
@@ -70,6 +90,8 @@ You don't need to use this package directly if you're already using one of the `
 | `@svadmin/nestjs-query` | NestJS GraphQL | `@refinedev/nestjs-query` |
 | `@svadmin/nestjsx-crud` | NestJS CRUD | `@refinedev/nestjsx-crud` |
 | `@svadmin/simple-rest` | REST API | `@refinedev/simple-rest` |
+| `@svadmin/parse` | Parse Server | `@refinedev/parse` |
+| `@svadmin/strapi-graphql` | Strapi GraphQL | `@refinedev/strapi-graphql` |
 
 ## Direct Usage
 

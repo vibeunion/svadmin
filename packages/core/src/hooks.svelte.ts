@@ -44,6 +44,40 @@ export function useOvertime(options?: OvertimeOptions) {
   };
 }
 
+/**
+ * Refine-compatible alias for query-heavy callers.
+ *
+ * Accepts a query-like object or a loading getter and reports elapsed time while
+ * loading. `useOvertime` keeps the manual start/stop form for custom work.
+ */
+export function useLoadingOvertime(
+  source?: (() => boolean) | { isLoading?: boolean; isPending?: boolean; isFetching?: boolean },
+  options?: OvertimeOptions,
+) {
+  const tracker=createOvertimeTracker(() => typeof source === 'function'
+    ? source()
+    : source?.isLoading === true || source?.isPending === true || source?.isFetching === true, options);
+  return {
+    get elapsedTime() { return tracker.elapsedTime; },
+    get overtime() { return tracker.elapsedTime; },
+  };
+}
+
+/** Set `document.title` for the lifetime of the calling component. */
+export function useTitle(value: string | (() => string) | undefined, options?: { append?: string }) {
+  let previous: string | undefined;
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+    const title = typeof value === 'function' ? value() : value;
+    if (title === undefined) return;
+    if (previous === undefined) previous = document.title;
+    document.title = options?.append === undefined ? title : `${title}${options.append}`;
+    return () => {
+      if (previous !== undefined) document.title = previous;
+    };
+  });
+}
+
 // ─── useDataProvider ────────────────────────────────────────────────
 
 export function useDataProvider(): (dataProviderName?: string) => DataProvider {

@@ -1,11 +1,11 @@
 ---
 title: 表单与表格 Hook
-description: useForm、useTable、useStepsForm、useModalForm、useDrawerForm
+description: useForm、useTable、useStepsForm、useModal、useDrawer
 ---
 
 ## `useForm`
 
-功能完备的表单 Hook，支持自动保存、验证和路由自动推导。
+功能完备的表单 Hook，支持自动保存、验证和合同化字段投影。
 
 ### 基本用法
 
@@ -13,14 +13,7 @@ description: useForm、useTable、useStepsForm、useModalForm、useDrawerForm
 const form = useForm({ resource: 'posts', action: 'create' });
 ```
 
-### 路由自动推导
-
-在页面 `/#/posts/edit/5` 上，只需调用：
-
-```typescript
-const form = useForm();
-// 自动推导：resource='posts', action='edit', id='5'
-```
+`resource`、`action`、`id` 都是显式合同入参。路由归属保留在宿主：解析路由后把结果传给 `useForm`。
 
 ### 选项
 
@@ -31,9 +24,8 @@ const form = useForm();
 | `id` | `string \| number` | 自动 | 编辑/克隆的记录 ID |
 | `redirect` | `'list' \| 'edit' \| 'show' \| false` | `'list'` | 提交后跳转位置 |
 | `validate` | `(values) => errors \| null` | — | 客户端验证 |
-| `autoSave` | `{ enabled, debounce? }` | — | 自动保存 |
-| `mutationMode` | `MutationMode` | `'pessimistic'` | 变更策略 |
-| `undoableTimeout` | `number` | `5000` | 撤销超时（毫秒） |
+| `autoSave` | `{ enabled, debounce? }` | — | 编辑表单的脏字段自动保存；create/clone 仍手动提交 |
+| `warnWhenUnsavedChanges` | `boolean` | 全局配置 | 脏表单离开页面前的浏览器提示 |
 | `successNotification` | `string \| false` | 自动消息 | 页面自行展示完成状态时设为 `false` |
 | `errorNotification` | `string \| false` | Provider 错误 | 覆盖或关闭全局错误通知 |
 
@@ -160,80 +152,29 @@ throw new HttpError('验证失败', 422, {
 | `canGoNext` | `boolean` | 是否可以前进 |
 | `canGoPrev` | `boolean` | 是否可以后退 |
 
-## `useModalForm`
+## 模态框与抽屉表单
 
-弹窗表单 — 同时管理打开/关闭状态和表单生命周期。
-
-```typescript
-const { modal, ...formProps } = useModalForm({ resource: 'posts' });
-
-// modal.show(id?)  — 打开弹窗（传入 id 表示编辑）
-// modal.close()    — 关闭弹窗
-// modal.visible    — boolean
-```
+`useModalForm` / `useDrawerForm` 已退役。请组合披露原语与 `useForm`（或 `<AutoForm>`），
+保持单一表单合同，并按需恢复 URL。
 
 ```svelte
-<button onclick={() => modal.show()}>创建文章</button>
-<button onclick={() => modal.show(post.id)}>编辑</button>
+<script lang="ts">
+  import { useModal } from '@svadmin/core';
+  const modal = useModal({ syncWithLocation: true });
+</script>
 
+<button onclick={modal.show}>新建文章</button>
 {#if modal.visible}
-<dialog open>
-  <form onsubmit|preventDefault={() => formProps.submit()}>
-    <!-- 表单字段 -->
-    <button type="submit">保存</button>
+  <dialog open>
+    <AutoForm resourceName="posts" mode="create" onSuccess={modal.close} />
     <button type="button" onclick={modal.close}>取消</button>
-  </form>
-</dialog>
+  </dialog>
 {/if}
 ```
 
-## `useDrawerForm`
+- `useModal()` → `{ visible, show, close, toggle }`
+- `useDrawer()` → 结构相同，URL 参数默认 `drawer`
+- `syncWithLocation` 把打开状态写入当前路由查询参数，刷新和前进/后退可恢复；`param` 可改参数名
 
-与 `useModalForm` 完全相同的 API，用于抽屉/侧滑面板：
+路由驱动的编辑页继续使用 `<AutoForm mode="edit" id={...}>`，记录身份已经在路由中。
 
-```typescript
-const { drawer, ...formProps } = useDrawerForm({ resource: 'posts' });
-
-// drawer.show(id?) / drawer.close() / drawer.visible
-```
-
-## `useTable`
-
-表格 Hook，支持分页、排序、过滤和 URL 同步。
-
-### 基本用法
-
-```typescript
-const table = useTable({ resource: 'posts' });
-```
-
-### 路由自动推导
-
-```typescript
-const table = useTable(); // 从路由自动推导资源名
-```
-
-### 选项
-
-| 选项 | 类型 | 默认值 |
-|------|------|--------|
-| `resource` | `string?` | 自动 |
-| `pagination` | `Pagination` | `{ current: 1, pageSize: 10 }` |
-| `sorters` | `Sort[]` | `[]` |
-| `filters` | `Filter[]` | `[]` |
-| `syncWithLocation` | `boolean` | `false` |
-
-### 返回值
-
-```typescript
-const {
-  query,         // TanStack 查询结果
-  pagination,    // { current, pageSize } — 响应式 $state
-  sorters,       // Sort[] — 响应式 $state
-  filters,       // Filter[] — 响应式 $state
-  setCurrent,    // (page) => void
-  setPageSize,   // (size) => void
-  setSorters,    // (sorters) => void
-  setFilters,    // (filters) => void
-} = useTable();
-```

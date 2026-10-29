@@ -57,3 +57,17 @@ declare module '@refinedev/supabase' {
   const defaultExport: (...args: unknown[]) => unknown;
   export default defaultExport;
 }
+
+declare module '@refinedev/parse' {
+  export const createDataProvider: (...args: unknown[]) => unknown;
+  export const dataProvider: (...args: unknown[]) => unknown;
+  const defaultExport: (...args: unknown[]) => unknown;
+  export default defaultExport;
+}
+
+declare module '@refinedev/strapi-graphql' {
+  export const createDataProvider: (...args: unknown[]) => unknown;
+  export const dataProvider: (...args: unknown[]) => unknown;
+  const defaultExport: (...args: unknown[]) => unknown;
+  export default defaultExport;
+}

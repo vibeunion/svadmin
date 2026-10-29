@@ -221,6 +221,34 @@ describe('contract-bound form', () => {
     expect(app.read().form.isDirty).toBe(false);
   });
 
+  it('auto-saves dirty fields after the debounce and clears the dirty state', async () => {
+    const source = provider();
+    const app = mount(source, { autoSave: { enabled: true, debounce: 20 } });
+    await app.view.rerender({ action: 'edit', id: 1 });
+    await ready(app);
+    app.read().form.setValues({ title: 'Auto', quantity: 2 });
+    expect(app.read().form.autoSave.status).toBe('idle');
+    await waitFor(() => expect(app.read().form.autoSave.status).toBe('saved'), { timeout: 2000 });
+    expect(source.update).toHaveBeenCalledTimes(1);
+    expect(app.read().form.isDirty).toBe(false);
+    expect(app.read().form.autoSave.data).toMatchObject({ title: 'Auto' });
+  });
+
+  it('reports auto-save failures once and retries only after a new edit', async () => {
+    const source = provider();
+    source.update = vi.fn(async () => { throw new HttpError('rejected', 500); });
+    const app = mount(source, { autoSave: { enabled: true, debounce: 20 } });
+    await app.view.rerender({ action: 'edit', id: 1 });
+    await ready(app);
+    app.read().form.setValues({ title: 'Auto', quantity: 2 });
+    await waitFor(() => expect(app.read().form.autoSave.status).toBe('error'), { timeout: 2000 });
+    expect(app.read().form.autoSave.error?.message).toBeTruthy();
+    await new Promise(resolve => setTimeout(resolve, 80));
+    expect(source.update).toHaveBeenCalledTimes(1);
+    app.read().form.setFieldValue('title', 'Retry');
+    await waitFor(() => expect(source.update).toHaveBeenCalledTimes(2), { timeout: 2000 });
+  });
+
   it('rejects unknown fields, accessors and non-plain draft inputs without executing them', async () => {
     const source = provider();
     const app = mount(source);

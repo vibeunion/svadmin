@@ -65,6 +65,13 @@ effect，在回调里再调用不会生效。
 | `useOnClickOutside(target, handler, enabled?)` | `void` | 优先用 `composedPath()`，回退到 `contains`；`enabled` 可在弹层关闭期间挂起 |
 | `useSwipe(target, handlers)` | `void` | 基于 `pointerdown`/`pointerup` 识别单指 swipe，可配 `threshold`（默认 30）；pinch/旋转用 `svelte-gestures` |
 
+## 工具 Hook
+
+| Hook | 返回 | 说明 |
+| --- | --- | --- |
+| `useTitle(title, options?)` | `void` | 在组件生命周期内设置 `document.title`，卸载时恢复；`append` 追加后缀 |
+| `useLoadingOvertime(source?, options?)` | `{ elapsedTime, overtime }` | 兼容 Refine 的别名，接受查询对象或 loading getter；`useOvertime` 保留手动 `start`/`stop` |
+
 ## 服务端渲染
 
 所有 hook 都可在服务端安全导入。仅浏览器可用的 hook 在 SSR 期间返回文档化

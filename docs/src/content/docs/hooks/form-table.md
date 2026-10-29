@@ -1,6 +1,6 @@
 ---
 title: Form & Table Hooks
-description: useForm, useTable, useStepsForm, useModalForm, useDrawerForm
+description: useForm, useTable, useStepsForm, useModal, useDrawer
 ---
 
 ## `useForm`
@@ -13,14 +13,8 @@ Full-featured form hook with auto-save, validation, and route auto-derivation.
 const form = useForm({ resource: 'posts', action: 'create' });
 ```
 
-### Route Auto-Derivation
-
-On page `/#/posts/edit/5`, simply call:
-
-```typescript
-const form = useForm();
-// Automatically: resource='posts', action='edit', id='5'
-```
+`resource`, `action`, and `id` are explicit contract inputs. Route ownership stays in
+the host: parse the route and pass the resolved values to `useForm`.
 
 ### Options
 
@@ -31,9 +25,8 @@ const form = useForm();
 | `id` | `string \| number` | auto | Record ID for edit/clone |
 | `redirect` | `'list' \| 'edit' \| 'show' \| false` | `'list'` | Where to go after submit |
 | `validate` | `(values) => errors \| null` | — | Client-side validation |
-| `autoSave` | `{ enabled, debounce? }` | — | Auto-save on change |
-| `mutationMode` | `MutationMode` | `'pessimistic'` | Mutation strategy |
-| `undoableTimeout` | `number` | `5000` | Undo timeout (ms) |
+| `autoSave` | `{ enabled, debounce? }` | — | Auto-save dirty fields for **edit** forms; create/clone forms stay manual |
+| `warnWhenUnsavedChanges` | `boolean` | global option | Browser before-unload guard for dirty forms |
 | `successNotification` | `string \| false` | generated message | Set `false` when the page renders the completed state |
 | `errorNotification` | `string \| false` | provider error | Override or disable the global error notification |
 
@@ -70,12 +63,13 @@ const {
   setId,          // (newId) => void
 
   // AutoSave
-  triggerAutoSave, // () => void
-  autoSave,       // { status, data, error }
+  triggerAutoSave, // () => void — save immediately even before the debounce elapses
+  autoSave,       // { status: 'idle' | 'saving' | 'saved' | 'error', data, error }
 
-  // Raw escape hatches
-  query,          // TanStack query (edit/clone mode)
-  mutation,       // TanStack mutation
+  // Read-only query view (edit/clone mode)
+  query,          // { data, error, isPending, isError, isSuccess, refetch }
+  ready,          // boolean — hydrated and scoped to the current target
+  isDirty,        // boolean — alias of isTainted()
 } = useForm();
 ```
 
@@ -162,42 +156,35 @@ Extends `useForm` return with a `steps` object:
 | `canGoNext` | `boolean` | Whether next step is available |
 | `canGoPrev` | `boolean` | Whether previous step is available |
 
-## `useModalForm`
+## Modal and drawer forms
 
-Form in a modal dialog — manages open/close state alongside form lifecycle.
-
-```typescript
-const { modal, ...formProps } = useModalForm({ resource: 'posts' });
-
-// modal.show(id?)  — open modal (pass id for edit)
-// modal.close()    — close modal
-// modal.visible    — boolean
-```
+`useModalForm` / `useDrawerForm` are retired. Compose the disclosure primitive with
+`useForm` (or `<AutoForm>`) instead; this keeps one form contract and optional URL
+restoration.
 
 ```svelte
-<button onclick={() => modal.show()}>Create Post</button>
-<button onclick={() => modal.show(post.id)}>Edit</button>
+<script lang="ts">
+  import { useModal, useForm } from '@svadmin/core';
+  const modal = useModal({ syncWithLocation: true });
+  // useForm still receives the explicit resource/action and optional id.
+</script>
 
+<button onclick={modal.show}>Create post</button>
 {#if modal.visible}
-<dialog open>
-  <form onsubmit|preventDefault={() => formProps.submit()}>
-    <!-- form fields -->
-    <button type="submit">Save</button>
+  <dialog open>
+    <AutoForm resourceName="posts" mode="create" onSuccess={modal.close} />
     <button type="button" onclick={modal.close}>Cancel</button>
-  </form>
-</dialog>
+  </dialog>
 {/if}
 ```
 
-## `useDrawerForm`
+- `useModal()` → `{ visible, show, close, toggle }`
+- `useDrawer()` → identical shape, URL parameter defaults to `drawer`
+- `syncWithLocation` keeps the open state in the current route query so refresh and
+  back/forward restore it; `param` overrides the query parameter name.
 
-Identical API to `useModalForm`, designed for drawer/slide-out panels:
-
-```typescript
-const { drawer, ...formProps } = useDrawerForm({ resource: 'posts' });
-
-// drawer.show(id?) / drawer.close() / drawer.visible
-```
+For route-driven edit pages keep using `<AutoForm mode="edit" id={...}>`; the route
+already carries the record identity.
 
 ## `useTable`
 

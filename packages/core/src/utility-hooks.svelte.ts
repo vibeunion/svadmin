@@ -9,14 +9,77 @@ import { toast } from './toast.svelte';
 import { createSelectQuery as useSelectImpl, type UseSelectOptions } from './select-query.svelte';
 import { decodeBaseRecord } from './record-decoder';
 
-// ─── useModal ─────────────────────────────────────────────────
-export function useModal(options?: { defaultVisible?: boolean }) {
-  let visible=$state(options?.defaultVisible??false);
+// ─── Disclosure (useModal / useDrawer) ────────────────────────
+
+export interface DisclosureOptions {
+  defaultVisible?: boolean;
+  /** 把可见状态同步到当前 URL 查询参数，便于刷新和前进/后退恢复。 */
+  syncWithLocation?: boolean;
+  /** URL 参数名；默认按 modal/drawer 区分。 */
+  param?: string;
+}
+
+function readDisclosureParam(param: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const search = new URLSearchParams(window.location.search).get(param);
+  if (search !== null) return search === '1';
+  const hash = window.location.hash;
+  const query = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : '';
+  return new URLSearchParams(query).get(param) === '1';
+}
+
+function writeDisclosureParam(param: string, visible: boolean): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  const hash = url.hash;
+  const separator = hash.indexOf('?');
+  if (separator >= 0) {
+    const params = new URLSearchParams(hash.slice(separator + 1));
+    if (visible) params.set(param, '1'); else params.delete(param);
+    const query = params.toString();
+    url.hash = query ? `${hash.slice(0, separator)}?${query}` : hash.slice(0, separator);
+  } else {
+    if (visible) url.searchParams.set(param, '1'); else url.searchParams.delete(param);
+  }
+  window.history.replaceState(window.history.state, '', url.toString());
+}
+
+function useDisclosure(kind: 'modal' | 'drawer', options: DisclosureOptions = {}) {
+  const param = options.param ?? kind;
+  const sync = options.syncWithLocation === true;
+  let visible = $state(options.defaultVisible ?? (sync ? readDisclosureParam(param) : false));
+
+  if (sync && typeof window !== 'undefined') {
+    const update = () => { visible = readDisclosureParam(param); };
+    $effect(() => {
+      window.addEventListener('popstate', update);
+      window.addEventListener('hashchange', update);
+      return () => {
+        window.removeEventListener('popstate', update);
+        window.removeEventListener('hashchange', update);
+      };
+    });
+  }
+
+  function setVisible(next: boolean): void {
+    visible = next;
+    if (sync) writeDisclosureParam(param, next);
+  }
+
   return {
     get visible() { return visible; },
-    show() { visible=true; },
-    close() { visible=false; },
+    show() { setVisible(true); },
+    close() { setVisible(false); },
+    toggle() { setVisible(!visible); },
   };
+}
+
+export function useModal(options?: DisclosureOptions) {
+  return useDisclosure('modal', options);
+}
+
+export function useDrawer(options?: DisclosureOptions) {
+  return useDisclosure('drawer', options);
 }
 
 // ─── useMenu ──────────────────────────────────────────────────

@@ -89,6 +89,11 @@ describe('DevTools diagnostics', () => {
     expect(view.container.textContent).not.toContain('sensitive-cache-record');
     expect(view.container.textContent).not.toContain('sensitive-mutation-key');
 
+    await queryClient.invalidateQueries();
+    await waitFor(() => expect(Number(view.getByTestId('devtools-invalidation-total').textContent)).toBeGreaterThan(0));
+    expect(view.getByTestId('devtools-invalidation').textContent).toContain('diagnostics-resource');
+    expect(view.container.textContent).not.toContain('sensitive-query-key');
+
     queryClient.setQueryData(['default', 'second-resource', 'list'], { data: [] });
     await waitFor(() => expect(view.getByTestId('devtools-query-total').textContent).toBe('2'));
 

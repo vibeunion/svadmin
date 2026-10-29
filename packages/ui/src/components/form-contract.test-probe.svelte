@@ -34,6 +34,7 @@
     get onMutationSuccess() { return settings.onMutationSuccess; },
     get onMutationError() { return settings.onMutationError; },
     get warnWhenUnsavedChanges() { return settings.warnWhenUnsavedChanges; },
+    get autoSave() { return settings.autoSave; },
   }));
   const list = useList(() => ({ resource: binding.resource }));
   $effect(() => onReady({ form, list }));

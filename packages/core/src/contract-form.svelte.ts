@@ -27,6 +27,20 @@ type Redirect = 'list' | 'edit' | 'show' | false;
 type Values<S extends ContractSchemas, A extends ContractFormAction> = ContractFormValues<S, A>;
 type Draft<S extends ContractSchemas, A extends ContractFormAction> = ContractFormDraft<S, A>;
 type Field<S extends ContractSchemas, A extends ContractFormAction> = Extract<keyof Values<S, A>, string>;
+export interface AutoSaveOptions {
+  enabled: boolean;
+  /** 停止输入后的等待时间，默认 1000ms。 */
+  debounce?: number;
+}
+
+export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+export interface AutoSaveState {
+  status: AutoSaveStatus;
+  data: ContractRecord<ContractSchemas> | null;
+  error: HttpError | null;
+}
+
 interface FormOptions<S extends ContractSchemas, A extends ContractFormAction> {
   resource: ResourceContract<S>;
   action: A;
@@ -42,6 +56,8 @@ interface FormOptions<S extends ContractSchemas, A extends ContractFormAction> {
   /** 为 false 时不弹默认失败 toast。调用方已有表单内提示时使用。 */
   errorNotification?: NotificationConfig;
   warnWhenUnsavedChanges?: boolean;
+  /** 脏字段停止输入后自动保存；保存失败保留在 autoSave.error。 */
+  autoSave?: AutoSaveOptions;
 }
 export type ContractFormOptions<S extends ContractSchemas, A extends ContractFormAction> =
   FormOptions<S, A> & ([Values<NoInfer<S>, NoInfer<A>>] extends [never] ? never : unknown) &
@@ -122,6 +138,11 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
   let tainted = $state<Record<string, boolean>>({});
   let error = $state<HttpError | null>(null);
   let submitting = $state(false);
+  let autoSaveStatus = $state<AutoSaveStatus>('idle');
+  let autoSaveData = $state<ContractRecord<S> | null>(null);
+  let autoSaveError = $state<HttpError | null>(null);
+  let autoSaveRevision = 0;
+  let autoSaveFailedSignature: string | undefined;
   let hydratedKey = $state<string | undefined>();
   let active: { token: object; scope: Scope; promise: Promise<{ data: ContractRecord<S> }>; wasDispatched: () => boolean } | undefined;
   let latest: object | undefined;
@@ -245,6 +266,10 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       error = null;
       errors = {};
       tainted = {};
+      autoSaveRevision++;
+      autoSaveStatus = 'idle';
+      autoSaveData = null;
+      autoSaveError = null;
       hydratedKey = undefined;
       values = snapshotContractFormDraft(options.resource, options.action, options.defaultValues ?? {});
       initial = snapshotContractFormDraft(options.resource, options.action, values);
@@ -290,12 +315,20 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
     if (settings.taint !== false) tainted = { ...tainted, ...Object.fromEntries(changed.map(key => [key, true])) };
     errors = Object.fromEntries(Object.entries(errors).filter(([key]) => !changed.includes(key)));
     error = null;
+    if (options.autoSave?.enabled) {
+      autoSaveFailedSignature = undefined;
+      if (autoSaveStatus !== 'saving') autoSaveStatus = 'idle';
+    }
   }
   function reset() {
     draftRevision = {};
+    autoSaveRevision++;
     active = undefined;
     latest = undefined;
     submitting = false;
+    autoSaveStatus = 'idle';
+    autoSaveData = null;
+    autoSaveError = null;
     if (!state.ok || !ready()) return;
     values = draft(state.scope, initial);
     tainted = {};
@@ -363,7 +396,12 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       if (current() && !isTainted()) return context.navigate(path);
     }, undefined);
   }
-  function submit(overrides: { redirect?: Redirect } = {}): Promise<{ data: ContractRecord<S> }> {
+  function submit(overrides: { redirect?: Redirect } = {}, internal: { autoSave?: boolean } = {}): Promise<{ data: ContractRecord<S> }> {
+    const autoSaving = internal.autoSave === true;
+    if (autoSaving) {
+      autoSaveStatus = 'saving';
+      autoSaveError = null;
+    }
     function joined(operation: NonNullable<typeof active>) {
       const current = () => isCurrent(operation.scope) && latest === operation.token;
       return operation.promise.then(result => {
@@ -388,6 +426,13 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       const rejected = failure(cause);
       if (!active) latest = undefined;
       error = rejected;
+      if (autoSaving) {
+        autoSaveStatus = 'error';
+        autoSaveError = rejected;
+        autoSaveRevision++;
+      }
+      if (!autoSaving) notify(() => fireErrorNotification({ config: options.errorNotification, defaultMessage: i18n.t('common.operationFailed'), error: copyFailure(rejected),
+        resource: options.resource.name, ...definedOptions({ provider: context.notificationProvider }) }), undefined);
       notify(options.onMutationError, copyFailure(rejected));
       if (origin && !isCurrent(origin)) return Promise.reject(cancelled());
       return Promise.reject(copyFailure(rejected));
@@ -479,7 +524,11 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
           () => targetCurrent(target) && latest === token,
           () => clearAuthQueries(client, target.authProvider), target.authScope,
           () => mounted && latest !== token); }, undefined);
-        if (current()) notify(() => fireErrorNotification({ config: options.errorNotification, defaultMessage: i18n.t('common.operationFailed'), error: copyFailure(failed.error),
+        if (current() && autoSaving) {
+          autoSaveStatus = 'error';
+          autoSaveError = failed.error;
+        }
+        if (current() && !autoSaving) notify(() => fireErrorNotification({ config: options.errorNotification, defaultMessage: i18n.t('common.operationFailed'), error: copyFailure(failed.error),
           resource: target.contract.name, ...definedOptions({ provider: target.notificationProvider }) }), undefined);
         if (current()) notify(onError, copyFailure(failed.error));
         throw failed.error;
@@ -497,10 +546,16 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       values = draft(target, reconciled);
       initial = draft(target, persisted);
       tainted = Object.fromEntries(changed.map(key => [key, true]));
-      notify(() => fireSuccessNotification({ config: undefined, defaultMessage: i18n.t(target.action === 'edit' ? 'common.updateSuccess' : 'common.createSuccess'),
-        resource: target.contract.name, ...definedOptions({ provider: target.notificationProvider }) }), undefined);
+      if (autoSaving) {
+        autoSaveStatus = 'saved';
+        autoSaveData = record;
+        autoSaveError = null;
+      } else {
+        notify(() => fireSuccessNotification({ config: undefined, defaultMessage: i18n.t(target.action === 'edit' ? 'common.updateSuccess' : 'common.createSuccess'),
+          resource: target.contract.name, ...definedOptions({ provider: target.notificationProvider }) }), undefined);
+      }
       if (current()) notify(onSuccess, { data: parseContractRecord(target.contract, record) });
-      if (current()) redirect(target, destination, resultId, current);
+      if (current() && !autoSaving) redirect(target, destination, resultId, current);
       if (!current()) throw cancelled(dispatched);
       return { data: parseContractRecord(target.contract, record) };
     }).finally(() => {
@@ -508,6 +563,34 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
     });
     active = { token, scope: target, promise, wasDispatched: () => dispatched };
     return joined(active);
+  }
+  $effect(() => {
+    const config = options.autoSave;
+    if (!config?.enabled) return;
+    // Track draft, submission and hydration without starting a write before the form is usable.
+    void values;
+    void tainted;
+    void submitting;
+    // Auto-save requires an existing record; create forms would keep creating duplicates.
+    if (!state.ok || !ready() || submitting || !isTainted() || state.scope.action !== 'edit') return;
+    const signature = JSON.stringify([values, tainted]);
+    if (autoSaveFailedSignature === signature) return;
+    const delay = config.debounce ?? 1000;
+    if (!Number.isFinite(delay) || delay < 0) return;
+    const revision = ++autoSaveRevision;
+    const timer = setTimeout(() => {
+      if (revision !== autoSaveRevision || autoSaveFailedSignature === signature ||
+        !state.ok || !ready() || submitting || !isTainted()) return;
+      void submit({ redirect: false }, { autoSave: true }).catch(() => { autoSaveFailedSignature = signature; });
+    }, delay);
+    return () => clearTimeout(timer);
+  });
+  function triggerAutoSave(): void {
+    if (!options.autoSave?.enabled || !state.ok || !ready() || submitting || !isTainted() || state.scope.action !== 'edit') return;
+    const signature = JSON.stringify([values, tainted]);
+    autoSaveFailedSignature = undefined;
+    autoSaveRevision++;
+    void submit({ redirect: false }, { autoSave: true }).catch(() => { autoSaveFailedSignature = signature; });
   }
   $effect(() => {
     if (!(options.warnWhenUnsavedChanges ?? adminOptions.warnWhenUnsavedChanges) || !isTainted() || !enabled() || typeof window === 'undefined') return;
@@ -524,7 +607,14 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       return state.ok && isCurrent(state.scope) && hydratedKey === state.scope.key
         ? draft(state.scope, values) : snapshotContractFormDraft(options.resource, options.action, {});
     },
-    setValues, setFieldValue, reset, submit, validateFields,
+    setValues, setFieldValue, reset, submit, validateFields, triggerAutoSave,
+    get autoSave(): AutoSaveState {
+      return {
+        status: options.autoSave?.enabled ? autoSaveStatus : 'idle',
+        data: autoSaveStatus === 'saved' ? (autoSaveData as ContractRecord<ContractSchemas> | null) : null,
+        error: autoSaveStatus === 'error' && autoSaveError ? copyFailure(autoSaveError) : null,
+      };
+    },
     get errors(): Readonly<Record<string, string>> { return ready() ? { ...errors } : {}; },
     setFieldError(field: Field<S, A> | '_root', message: string) {
       if (!ready()) return;

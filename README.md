@@ -14,7 +14,7 @@
 ## ✨ Features
 
 - 🎯 **Headless Architecture** — DataProvider / AuthProvider / RouterProvider / LiveProvider, swap backends freely
-- ⚡ **30+ Reactive Hooks** — `useList`, `useOne`, `useCreate`, `useUpdate`, `useDelete`, `useTable`, `useForm`, `useSelect`, `useInfiniteList`, `useShow`, `useStepsForm`, `useModalForm`, `useDrawerForm`, etc.
+- ⚡ **30+ Reactive Hooks** — `useList`, `useOne`, `useCreate`, `useUpdate`, `useDelete`, `useTable`, `useForm`, `useSelect`, `useInfiniteList`, `useShow`, `useStepsForm`, `useModal`, `useDrawer`, etc.
 - 🔑 **Auth Hooks** — `useLogin`, `useLogout`, `useRegister`, `useForgotPassword`, `useUpdatePassword`, `useGetIdentity`, `useIsAuthenticated`, `useOnError`, `usePermissions`
 - 🧩 **Pre-built UI** — AdminApp, AutoTable, AutoForm, ShowPage, Sidebar, Layout, SettingsPage, SecuritySettings, IntegrationsSettings, NotificationsSettings, ApiSettings, ErrorPage, StepsForm, CommandPalette, Sheet, Drawer, Collapsible, Tooltip (shadcn-svelte)
 - 🔠 **16 Field Components** — TextField, UrlField, EmailField, BooleanField, TagField, FileField, ImageField, MarkdownField, RichTextField, SelectField, MultiSelectField, RelationField, JsonField, ComboboxField, PasswordInput
@@ -33,12 +33,13 @@
 - 🏷️ **Resource Type Registry** — Compile-time resource name checking via `KnownResources` + auto type inference via `InferData<R>`
 - 🧰 **Helpers** — `unionFilters`, `unionSorters`, `file2Base64`, `getDefaultFilter`, `getDefaultSortOrder`, `generateDefaultDocumentTitle`
 - 📤 **Data Transfer** — `useExport` / `useImport` for CSV export/import with batch support
+- 💾 **Auto-save** — `useForm({ autoSave })` and `<AutoForm autoSave>` share validation and mutation paths
 - 🔄 **Optimistic Updates** — Built-in pessimistic / optimistic / undoable mutation modes
 
 ## ✨ 特性
 
 - 🎯 **Headless 架构** — DataProvider / AuthProvider / RouterProvider / LiveProvider，自由切换后端
-- ⚡ **30+ 响应式 Hook** — `useList`、`useOne`、`useCreate`、`useUpdate`、`useDelete`、`useTable`、`useForm`、`useSelect`、`useInfiniteList`、`useShow`、`useStepsForm`、`useModalForm`、`useDrawerForm` 等
+- ⚡ **30+ 响应式 Hook** — `useList`、`useOne`、`useCreate`、`useUpdate`、`useDelete`、`useTable`、`useForm`、`useSelect`、`useInfiniteList`、`useShow`、`useStepsForm`、`useModal`、`useDrawer` 等
 - 🔑 **Auth Hooks** — `useLogin`、`useLogout`、`useRegister`、`useForgotPassword`、`useUpdatePassword`、`useGetIdentity`、`useIsAuthenticated`、`useOnError`、`usePermissions`
 - 🧩 **开箱即用 UI** — AdminApp、AutoTable、AutoForm、ShowPage、Sidebar、Layout、SettingsPage、SecuritySettings、IntegrationsSettings、NotificationsSettings、ApiSettings、ErrorPage、StepsForm、CommandPalette、Sheet、Drawer、Collapsible、Tooltip（基于 shadcn-svelte）
 - 🔠 **16 种字段组件** — TextField、UrlField、EmailField、BooleanField、TagField、FileField、ImageField、MarkdownField、RichTextField、SelectField、MultiSelectField、RelationField、JsonField、ComboboxField、PasswordInput
@@ -57,6 +58,7 @@
 - 🏷️ **资源类型注册表** — 编译时资源名检查（`KnownResources`）+ 自动类型推断（`InferData<R>`）
 - 🧰 **工具函数** — `unionFilters`、`unionSorters`、`file2Base64`、`getDefaultFilter`、`getDefaultSortOrder`、`generateDefaultDocumentTitle`
 - 📤 **数据导入导出** — `useExport` / `useImport`，支持 CSV 批量导入导出
+- 💾 **自动保存** — `useForm({ autoSave })` 与 `<AutoForm autoSave>` 复用同一校验和写入路径
 - 🔄 **乐观更新** — 内置悲观 / 乐观 / 可撤销三种变更模式
 
 ## 📦 Packages / 包
@@ -94,7 +96,9 @@
 | `@svadmin/appwrite`     | Appwrite (data + auth + live)                |
 | `@svadmin/graphql`      | GraphQL                                      |
 | `@svadmin/elysia`       | Elysia (auto type inference via Eden Treaty) |
-| `@svadmin/strapi`       | Strapi CMS                                   |
+| `@svadmin/strapi`       | Strapi CMS (REST)                            |
+| `@svadmin/strapi-graphql` | Strapi GraphQL                             |
+| `@svadmin/parse`        | Parse Server                                 |
 | `@svadmin/directus`     | Directus                                     |
 | `@svadmin/firebase`     | Firebase / Firestore                         |
 | `@svadmin/hasura`       | Hasura GraphQL                               |

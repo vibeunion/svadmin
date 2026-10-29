@@ -1,0 +1,52 @@
+{
+  "name": "@svadmin/strapi-graphql",
+  "version": "0.1.0",
+  "description": "Strapi GraphQL DataProvider adapter — bridge @refinedev/strapi-graphql to svadmin",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "svadmin": {
+    "capabilities": [
+      "data",
+      "graphql",
+      "strapi"
+    ],
+    "core": "^0.55.0",
+    "stability": "experimental",
+    "migration": null
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*",
+    "@refinedev/strapi-graphql": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@refinedev/strapi-graphql": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@svadmin/refine-adapter": "workspace:*"
+  },
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/strapi-graphql"
+  }
+}

@@ -37,6 +37,8 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | **Elysia (Bun)** | ✅ `@svadmin/elysia` | ❌ | ❌ |
 | Airtable | ✅ `@svadmin/airtable` | Community | ✅ `ra-data-airtable` |
 | Medusa | ✅ `@svadmin/medusa` | ✅ `@refinedev/medusa` | ❌ |
+| Parse | ✅ `@svadmin/parse` | ✅ `@refinedev/parse` | ❌ |
+| Strapi GraphQL | ✅ `@svadmin/strapi-graphql` | ✅ `@refinedev/strapi-graphql` | Community |
 | Sanity | ✅ `@svadmin/sanity` | Community | Community |
 
 ## Feature Comparison
@@ -46,11 +48,12 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | Feature | **svadmin** | **Refine** | **React Admin** |
 |---------|-----------|-----------|----------------|
 | Provider pattern | ✅ | ✅ | ✅ |
+| Reuse Refine providers | ✅ Data / Auth / AccessControl / Notification / Live adapters | — | — |
 | Multi data provider | ✅ | ✅ | ✅ |
 | Auth provider | ✅ | ✅ | ✅ |
-| Live provider | ✅ WebSocket + SSE | ✅ WebSocket + SSE | ❌ Polling only |
-| Access control | ✅ RBAC + ABAC + CASL + Casbin | ✅ RBAC + ABAC | ✅ RBAC |
-| SSO (OIDC/OAuth2) | ✅ `@svadmin/sso` plugin | ✅ Enterprise (paid) | ❌ No |
+| Live provider | ✅ WebSocket / SSE / Supabase / Ably / Firebase / GraphQL subscriptions | ✅ WebSocket / SSE / Supabase / Ably / Firebase / GraphQL subscriptions | ❌ Polling only |
+| Access control | ✅ RBAC + ABAC + CASL + Casbin + Cerbos + Permit.io | ✅ RBAC + ABAC + Casbin / Cerbos / Permit.io | ✅ RBAC |
+| SSO (OIDC/OAuth2) | ✅ `@svadmin/sso` plugin | ✅ Ecosystem integrations (Auth0/Keycloak) | ❌ No |
 | Router agnostic | ✅ Hash / SvelteKit | ✅ React Router / Next | ✅ React Router |
 | i18n | ✅ | ✅ | ✅ |
 | SSR-first / low-JS fallback | ✅ `@svadmin/lite` (server-driven, optional enhancement) | ❌ Hydration Required | ❌ Hydration Required |
@@ -78,7 +81,7 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | Stripe-inspired auth shell | ✅ Auth pages | ❌ | ❌ |
 | Command palette | ✅ Built-in | ✅ `@refinedev/kbar` | ❌ |
 | Permission Matrix | ✅ Built-in component | ❌ Official unspecified | ❌ DIY |
-| Audit JSON Snapshot Viewer | ✅ Built-in component | ✅ Paid feature | ❌ DIY |
+| Audit JSON Snapshot Viewer | ✅ Built-in component | ✅ Core `auditLogProvider` | ❌ DIY |
 | Tenant switcher control | ✅ App wiring required | ❌ DIY | ❌ DIY |
 
 ### Developer Experience
