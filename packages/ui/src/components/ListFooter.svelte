@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { useTranslation } from '@svadmin/core/i18n';
+  import { listText } from './list-i18n.js';
   import ListPagination from './ListPagination.svelte';
 
   interface Props {
@@ -42,14 +44,16 @@
     onPageSizeChange,
     class: className = '',
   }: Props = $props();
+
+  const i18n = useTranslation();
 </script>
 
 <div class={`svadmin-list-footer ${className}`.trim()} data-svadmin-list-footer data-section={sectionId}>
   <div class="svadmin-list-footer__status">
-    <span>共 {loadedCount} 条</span>
+    <span>{listText(i18n, 'common.total', { total: loadedCount })}</span>
     {#if truncated}
       <span class="svadmin-list-footer__note" data-svadmin-list-truncated>
-        结果较多，仅加载前 {maxRecords} 条，请用筛选收窄范围。
+        {listText(i18n, 'listFooter.truncated', { maxRecords })}
       </span>
     {:else if note}
       <span class="svadmin-list-footer__note">{note}</span>

@@ -1,6 +1,10 @@
 <script lang="ts">
+  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
   import ListFooter from '../../../packages/ui/src/components/ListFooter.svelte';
   import { Button } from '../../../packages/ui/src/components/ui/button/index.js';
+
+  const locale = new URLSearchParams(window.location.search).get('locale') ?? 'zh-CN';
+  provideI18nScope(createI18nScope({ locale }));
 
   let page = $state(2);
   const pageSize = 20;
@@ -14,9 +18,9 @@
   <h1>List footer and pagination</h1>
   <p class="evidence-copy">A generic desktop list footer with loaded-count guidance and controlled page navigation.</p>
   <section class="evidence-panel">
-    <div class="evidence-toolbar"><strong>委托单</strong><Button variant="outline" onclick={() => page = 1}>回到第一页</Button></div>
+    <div class="evidence-toolbar"><strong>{locale === 'en' ? 'Orders' : '委托单'}</strong><Button variant="outline" onclick={() => page = 1}>{locale === 'en' ? 'First page' : '回到第一页'}</Button></div>
     <ListFooter
-      label="委托单"
+      label={locale === 'en' ? 'Orders' : '委托单'}
       showSummary
       {total}
       loadedCount={137}
@@ -30,9 +34,9 @@
     />
   </section>
   <section class="evidence-panel">
-    <div class="evidence-toolbar"><strong>截断说明</strong><span>仅展示前 2500 条</span></div>
+    <div class="evidence-toolbar"><strong>{locale === 'en' ? 'Truncation guidance' : '截断说明'}</strong><span>{locale === 'en' ? 'First 2500 records' : '仅展示前 2500 条'}</span></div>
     <ListFooter
-      label="检索结果"
+      label={locale === 'en' ? 'Results' : '检索结果'}
       showSummary
       total={5000}
       loadedCount={2500}
