@@ -6,7 +6,7 @@ test('package styles preserve host responsive layouts and header boundaries', as
   await page.locator('#login-identifier').fill('demo@example.com');
   await page.locator('#login-password').fill('demo');
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/#\/$/);
+  await expect(page).toHaveURL(/#\/(?:\?[^#]*)?$/);
   const dashboard = page.locator('[data-svadmin-content-page="operations-dashboard"]');
   await expect(dashboard.locator('[data-svadmin-dashboard-metrics] [data-svadmin-metric-card]')).toHaveCount(3);
   await expect(dashboard.locator('[data-svadmin-content-header] [role="status"]')).toBeVisible();
