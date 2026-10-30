@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { HTMLFormAttributes } from 'svelte/elements';
+
   interface Props {
     id: string;
     title: string;
@@ -6,7 +8,7 @@
     confirmLabel?: string;
     cancelLabel?: string;
     action?: string;
-    method?: string;
+    method?: HTMLFormAttributes['method'];
     href?: string;
   }
 

@@ -13,7 +13,7 @@
   const normalized = $derived(status.toLowerCase().replace(/[\s_]+/g, '-'));
   const resolvedTone = $derived(tone ?? (
     ['active', 'success', 'completed', 'approved', 'online', 'enabled'].includes(normalized) ? 'success'
-      : ['error', 'failed', 'rejected', 'danger', 'offline', 'disabled'].includes(normalized) ? 'danger'
+      : ['error', 'failed', 'rejected', 'danger', 'offline', 'disabled'].includes(normalized) ? 'destructive'
         : ['warning', 'pending', 'review', 'processing'].includes(normalized) ? 'warning'
           : ['info', 'new', 'draft'].includes(normalized) ? 'info'
             : 'secondary'
