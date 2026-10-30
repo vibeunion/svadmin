@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   buildParityReport,
+  collectBehaviorAssertionBudgets,
   collectBehaviorTestedComponents,
   generateMarkdownReport,
   parityOutputPaths,
@@ -32,8 +33,12 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(report.exactPercentage + report.fallbackPercentage).toBeLessThan(100);
     expect(report.behaviorVerifiedCount).toBeGreaterThan(0);
     expect(report.behaviorVerifiedCount).toBeLessThanOrEqual(report.totalComponents);
+    expect(report.behaviorAssertedCount).toBeLessThanOrEqual(report.behaviorVerifiedCount);
     expect(report.behaviorVerifiedPercentage).toBe(
       Number(((report.behaviorVerifiedCount / report.totalComponents) * 100).toFixed(1)),
+    );
+    expect(report.behaviorAssertedPercentage).toBe(
+      Number(((report.behaviorAssertedCount / report.totalComponents) * 100).toFixed(1)),
     );
 
     for (const [, categorySummary] of Object.entries(report.categories)) {
@@ -41,6 +46,7 @@ describe('UI/Lite Parity Tracking Contract', () => {
         Number(((categorySummary.adapted / categorySummary.total) * 100).toFixed(1)),
       );
       expect(categorySummary.behaviorVerified).toBeLessThanOrEqual(categorySummary.total);
+      expect(categorySummary.behaviorAsserted).toBeLessThanOrEqual(categorySummary.behaviorVerified);
     }
   });
 
@@ -52,6 +58,18 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(tested.has('LiteNotARealComponent.svelte')).toBe(false);
   });
 
+  it('requires an assertion budget per imported component before claiming verification', () => {
+    const budgets = collectBehaviorAssertionBudgets();
+    for (const [component, budget] of budgets) {
+      expect(component.endsWith('.svelte')).toBe(true);
+      expect(Number.isInteger(budget)).toBe(true);
+      expect(budget).toBeGreaterThanOrEqual(1);
+      expect(budget).toBeLessThan(2000);
+    }
+    // Dense table-driven files assert several times per imported component.
+    expect(budgets.get('LiteAreaChart.svelte')).toBeGreaterThanOrEqual(2);
+  });
+
   it('generates consistent Markdown matrix documentation and JSON parity data', () => {
     const report = buildParityReport();
     const markdown = generateMarkdownReport(report);
@@ -60,6 +78,7 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(markdown).toContain('清单映射覆盖率');
     expect(markdown).toContain('1:1 对齐率');
     expect(markdown).toContain('行为验证覆盖');
+    expect(markdown).toContain('行为断言覆盖');
     expect(markdown).toContain('LiteAvatarField.svelte');
     expect(markdown).toContain('LiteCurrencyField.svelte');
     expect(markdown).toContain('LitePercentField.svelte');

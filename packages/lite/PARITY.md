@@ -1,22 +1,23 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-30T13:30:17.990Z`
+> 自动生成时间：`2026-10-30T13:37:44.185Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
 > 1:1 对齐率 (Exact)：**61.5%**（110）· 语义降级率 (Fallback)：**37.4%**（67）
-> 行为验证覆盖：**73.7%**（132/179 映射组件被行为测试引用）
+> 行为验证覆盖：**72.6%**（130/179 映射组件具备断言预算）· 仅被引用：2
 >
-> 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为验证覆盖。
+> 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
+> 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
 
 ## 进度总览
 
-| 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为验证 |
+| 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 |
-| **advanced** | 43 | 22 | 20 | 1 | 0 | **51.2%** | 38/43 |
-| **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 33/37 |
-| **fields** | 46 | 30 | 16 | 0 | 0 | **65.2%** | 28/46 |
-| **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 |
-| **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 |
+| **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 | 0 |
+| **advanced** | 43 | 22 | 20 | 1 | 0 | **51.2%** | 38/43 | 0 |
+| **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 31/37 | 2 |
+| **fields** | 46 | 30 | 16 | 0 | 0 | **65.2%** | 28/46 | 0 |
+| **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 | 0 |
+| **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
 ---
 
@@ -104,8 +105,8 @@
 | `Badge` | `LiteBadge.svelte` | ✅ 1:1 对齐 | 语义状态徽章与原生链接承接 |
 | `Tag` | `LiteTag.svelte` | ⚡ 语义降级 | Lite 使用服务端渲染标签与可选删除链接；可选中交互由宿主表单承接 |
 | `BarChart` | `widgets/LiteBarChart.svelte` | ⚡ 语义降级 | 降级为 CSS 柱状图或数据明细表格 |
-| `LineChart` | `widgets/LiteLineChart.svelte` | ⚡ 语义降级 | 降级为折线数据点表格与趋势指示 |
-| `PieChart` | `widgets/LitePieChart.svelte` | ⚡ 语义降级 | 降级为占比条与结构化表格 |
+| `LineChart` | `widgets/LiteLineChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `PieChart` | `widgets/LitePieChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `PresenceAvatarGroup` | `LitePresenceAvatarGroup.svelte` | ✅ 1:1 对齐 | 多人在线协同感知状态 |
 | `GanttChart` | `LiteGanttChart.svelte` | ⚡ 语义降级 | 共享有界时间线校验；Lite 原生表格与链接恢复，SPA 交互选择与回调，不含依赖/工作日历/自动排程引擎 |
 | `OfflineSyncBanner` | `LiteOfflineSyncBanner.svelte` | ✅ 1:1 对齐 | 离线状态感知与变更队列同步栏 |
@@ -125,15 +126,15 @@
 | `Progress` | `LiteProgress.svelte` | ✅ 1:1 对齐 | 原生 progress 与语义色 |
 | `MediaThumbnail` | `LiteMediaThumbnail.svelte` | ✅ 1:1 对齐 | 媒体缩略图与访问性标签 |
 | `LiveIndicator` | `LiteRealtimeStatus.svelte` | ⚡ 语义降级 | 服务端快照时间与刷新回退 |
-| `AreaChart` | `LiteAreaChart.svelte` | ⚡ 语义降级 | 面积图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `ScatterChart` | `LiteScatterChart.svelte` | ⚡ 语义降级 | 散点图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `RadarChart` | `LiteRadarChart.svelte` | ⚡ 语义降级 | 雷达图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `GaugeChart` | `LiteGaugeChart.svelte` | ⚡ 语义降级 | 仪表图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `FunnelChart` | `LiteFunnelChart.svelte` | ⚡ 语义降级 | 漏斗图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `HeatmapChart` | `LiteHeatmapChart.svelte` | ⚡ 语义降级 | 热力图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `WaterfallChart` | `LiteWaterfallChart.svelte` | ⚡ 语义降级 | 瀑布图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `RoseChart` | `LiteRoseChart.svelte` | ⚡ 语义降级 | 玫瑰图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
-| `DonutChart` | `LiteDonutChart.svelte` | ⚡ 语义降级 | 环形图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `AreaChart` | `LiteAreaChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `ScatterChart` | `LiteScatterChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `RadarChart` | `LiteRadarChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `GaugeChart` | `LiteGaugeChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `FunnelChart` | `LiteFunnelChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `HeatmapChart` | `LiteHeatmapChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `WaterfallChart` | `LiteWaterfallChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `RoseChart` | `LiteRoseChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `DonutChart` | `LiteDonutChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 
 ### FIELDS
 

@@ -34,6 +34,8 @@ export interface ParityCategorySummary {
   fallbackRate: number;
   /** Mapped Lite components referenced from a behavior test file. */
   behaviorVerified: number;
+  /** Referenced components whose importing test file carries a real assertion budget. */
+  behaviorAsserted: number;
 }
 
 export interface ParityReport {
@@ -51,6 +53,9 @@ export interface ParityReport {
   /** Entries whose mapped Lite component appears in a behavior test. */
   behaviorVerifiedCount: number;
   behaviorVerifiedPercentage: number;
+  /** Referenced entries whose test file asserts at least twice per imported component. */
+  behaviorAssertedCount: number;
+  behaviorAssertedPercentage: number;
   categories: Record<string, ParityCategorySummary>;
   items: ParityItem[];
 }
@@ -146,8 +151,8 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'Badge', uiComponent: 'ui/badge/badge.svelte', liteComponent: 'LiteBadge.svelte', category: 'widgets', status: 'exact', strategy: '语义状态徽章与原生链接承接' },
   { name: 'Tag', uiComponent: 'Tag.svelte', liteComponent: 'LiteTag.svelte', category: 'widgets', status: 'fallback', strategy: 'Lite 使用服务端渲染标签与可选删除链接；可选中交互由宿主表单承接' },
   { name: 'BarChart', uiComponent: 'charts/BarChart.svelte', liteComponent: 'widgets/LiteBarChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为 CSS 柱状图或数据明细表格' },
-  { name: 'LineChart', uiComponent: 'charts/LineChart.svelte', liteComponent: 'widgets/LiteLineChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为折线数据点表格与趋势指示' },
-  { name: 'PieChart', uiComponent: 'charts/PieChart.svelte', liteComponent: 'widgets/LitePieChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为占比条与结构化表格' },
+  { name: 'LineChart', uiComponent: 'charts/LineChart.svelte', liteComponent: 'widgets/LiteLineChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'PieChart', uiComponent: 'charts/PieChart.svelte', liteComponent: 'widgets/LitePieChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
 
   // ─── Advanced & Interactivity Fallbacks ─────────────────────────────────
   { name: 'ConfirmDialog', uiComponent: 'ConfirmDialog.svelte', liteComponent: 'LiteConfirmDialog.svelte', category: 'advanced', status: 'exact', strategy: 'CSS :target 锚点模态框' },
@@ -237,15 +242,15 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'ListPagination', uiComponent: 'ListPagination.svelte', liteComponent: 'LitePagination.svelte', category: 'pages', status: 'exact', strategy: 'URL 驱动分页；页码窗口由服务端输出' },
   { name: 'Pagination', uiComponent: 'Pagination.svelte', liteComponent: 'LitePagination.svelte', category: 'layout', status: 'exact', strategy: '原生分页链接与当前页' },
   { name: 'LiveIndicator', uiComponent: 'LiveIndicator.svelte', liteComponent: 'LiteRealtimeStatus.svelte', category: 'widgets', status: 'fallback', strategy: '服务端快照时间与刷新回退' },
-  { name: 'AreaChart', uiComponent: 'AreaChart.svelte', liteComponent: 'LiteAreaChart.svelte', category: 'widgets', status: 'fallback', strategy: '面积图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'ScatterChart', uiComponent: 'ScatterChart.svelte', liteComponent: 'LiteScatterChart.svelte', category: 'widgets', status: 'fallback', strategy: '散点图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'RadarChart', uiComponent: 'RadarChart.svelte', liteComponent: 'LiteRadarChart.svelte', category: 'widgets', status: 'fallback', strategy: '雷达图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'GaugeChart', uiComponent: 'GaugeChart.svelte', liteComponent: 'LiteGaugeChart.svelte', category: 'widgets', status: 'fallback', strategy: '仪表图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'FunnelChart', uiComponent: 'FunnelChart.svelte', liteComponent: 'LiteFunnelChart.svelte', category: 'widgets', status: 'fallback', strategy: '漏斗图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'HeatmapChart', uiComponent: 'HeatmapChart.svelte', liteComponent: 'LiteHeatmapChart.svelte', category: 'widgets', status: 'fallback', strategy: '热力图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'WaterfallChart', uiComponent: 'WaterfallChart.svelte', liteComponent: 'LiteWaterfallChart.svelte', category: 'widgets', status: 'fallback', strategy: '瀑布图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'RoseChart', uiComponent: 'RoseChart.svelte', liteComponent: 'LiteRoseChart.svelte', category: 'widgets', status: 'fallback', strategy: '玫瑰图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
-  { name: 'DonutChart', uiComponent: 'DonutChart.svelte', liteComponent: 'LiteDonutChart.svelte', category: 'widgets', status: 'fallback', strategy: '环形图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'AreaChart', uiComponent: 'AreaChart.svelte', liteComponent: 'LiteAreaChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'ScatterChart', uiComponent: 'ScatterChart.svelte', liteComponent: 'LiteScatterChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'RadarChart', uiComponent: 'RadarChart.svelte', liteComponent: 'LiteRadarChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'GaugeChart', uiComponent: 'GaugeChart.svelte', liteComponent: 'LiteGaugeChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'FunnelChart', uiComponent: 'FunnelChart.svelte', liteComponent: 'LiteFunnelChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'HeatmapChart', uiComponent: 'HeatmapChart.svelte', liteComponent: 'LiteHeatmapChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'WaterfallChart', uiComponent: 'WaterfallChart.svelte', liteComponent: 'LiteWaterfallChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'RoseChart', uiComponent: 'RoseChart.svelte', liteComponent: 'LiteRoseChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
+  { name: 'DonutChart', uiComponent: 'DonutChart.svelte', liteComponent: 'LiteDonutChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },
@@ -279,26 +284,44 @@ function listFiles(directory: string): string[] {
   });
 }
 
+/** Assertions per imported component a test file must reach to count as behavior proof. */
+const ASSERTION_BUDGET_PER_COMPONENT = 2;
+
 /**
- * Components that a behavior test imports directly. A mapping only counts as
- * behavior-verified when its Lite component is referenced from a `*.test.svelte.ts`
- * file, so smoke-free inventory entries stay visible as unverified debt.
+ * Scan `*.test.svelte.ts` files and attribute an assertion budget to every Lite
+ * component they import. Budget = `expect()` calls in the file divided by the
+ * number of Lite components the file imports, so a file that imports twenty
+ * components but asserts twice cannot claim twenty verified behaviors.
  */
-export function collectBehaviorTestedComponents(
+export function collectBehaviorAssertionBudgets(
   repositoryRoot = resolve(import.meta.dir, '..'),
-): Set<string> {
+): Map<string, number> {
   const testFiles = listFiles(resolve(repositoryRoot, 'packages/lite/src')).filter((file) =>
     /\.test\.svelte\.ts$/u.test(file),
   );
-  const components = new Set<string>();
+  const budgets = new Map<string, number>();
   for (const file of testFiles) {
     const source = readFileSync(file, 'utf8');
+    const components = new Set<string>();
     for (const match of source.matchAll(/['"]([^'"]*\b(Lite[A-Za-z0-9]+\.svelte))['"]/gu)) {
       const componentFile = match[2];
       if (componentFile) components.add(componentFile);
     }
+    if (components.size === 0) continue;
+    const assertions = source.match(/\bexpect\(/gu)?.length ?? 0;
+    const budget = Math.floor(assertions / components.size);
+    for (const componentFile of components) {
+      budgets.set(componentFile, Math.max(budgets.get(componentFile) ?? 0, budget));
+    }
   }
-  return components;
+  return budgets;
+}
+
+/** Components that any behavior test imports, regardless of assertion density. */
+export function collectBehaviorTestedComponents(
+  repositoryRoot = resolve(import.meta.dir, '..'),
+): Set<string> {
+  return new Set(collectBehaviorAssertionBudgets(repositoryRoot).keys());
 }
 
 export function buildParityReport(): ParityReport {
@@ -317,6 +340,7 @@ export function buildParityReport(): ParityReport {
         exactRate: 0,
         fallbackRate: 0,
         behaviorVerified: 0,
+        behaviorAsserted: 0,
       };
     }
     const cat = categories[item.category];
@@ -341,14 +365,17 @@ export function buildParityReport(): ParityReport {
   const missingCount = PARITY_ITEMS.filter((i) => i.status === 'missing').length;
   const overallCoverage = rate(exactCount + fallbackCount + spaOnlyCount, total);
 
-  const behaviorVerifiedComponents = collectBehaviorTestedComponents();
-  const behaviorVerifiedCount = PARITY_ITEMS.filter(
-    (item) => item.liteComponent && behaviorVerifiedComponents.has(liteComponentFile(item.liteComponent)),
+  const assertionBudgets = collectBehaviorAssertionBudgets();
+  const budget = (liteComponent?: string): number =>
+    liteComponent ? assertionBudgets.get(liteComponentFile(liteComponent)) ?? 0 : 0;
+  const behaviorVerifiedCount = PARITY_ITEMS.filter((item) => budget(item.liteComponent) >= 1).length;
+  const behaviorAssertedCount = PARITY_ITEMS.filter(
+    (item) => budget(item.liteComponent) >= ASSERTION_BUDGET_PER_COMPONENT,
   ).length;
   for (const item of PARITY_ITEMS) {
-    if (item.liteComponent && behaviorVerifiedComponents.has(liteComponentFile(item.liteComponent))) {
-      categories[item.category].behaviorVerified += 1;
-    }
+    const itemBudget = budget(item.liteComponent);
+    if (itemBudget >= 1) categories[item.category].behaviorVerified += 1;
+    if (itemBudget >= ASSERTION_BUDGET_PER_COMPONENT) categories[item.category].behaviorAsserted += 1;
   }
 
   return {
@@ -363,6 +390,8 @@ export function buildParityReport(): ParityReport {
     fallbackPercentage: rate(fallbackCount, total),
     behaviorVerifiedCount,
     behaviorVerifiedPercentage: rate(behaviorVerifiedCount, total),
+    behaviorAssertedCount,
+    behaviorAssertedPercentage: rate(behaviorAssertedCount, total),
     categories,
     items: PARITY_ITEMS,
   };
@@ -381,18 +410,19 @@ export function generateMarkdownReport(report: ParityReport): string {
 > 自动生成时间：\`${report.timestamp}\`
 > 清单映射覆盖率：**${report.overallCoveragePercentage}%**（${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents} 组件）
 > 1:1 对齐率 (Exact)：**${report.exactPercentage}%**（${report.adaptedCount}）· 语义降级率 (Fallback)：**${report.fallbackPercentage}%**（${report.fallbackCount}）
-> 行为验证覆盖：**${report.behaviorVerifiedPercentage}%**（${report.behaviorVerifiedCount}/${report.totalComponents} 映射组件被行为测试引用）
+> 行为验证覆盖：**${report.behaviorAssertedPercentage}%**（${report.behaviorAssertedCount}/${report.totalComponents} 映射组件具备断言预算）· 仅被引用：${report.behaviorVerifiedCount - report.behaviorAssertedCount}
 >
-> 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为验证覆盖。
+> 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
+> 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ ${ASSERTION_BUDGET_PER_COMPONENT}"估算，是文件级预算，不等价于逐组件深度验收。
 
 ## 进度总览
 
-| 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为验证 |
+| 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 `;
 
   for (const [name, cat] of Object.entries(report.categories)) {
-    md += `| **${name}** | ${cat.total} | ${cat.adapted} | ${cat.fallback} | ${cat.spaOnly} | ${cat.missing} | **${cat.exactRate}%** | ${cat.behaviorVerified}/${cat.total} |\n`;
+    md += `| **${name}** | ${cat.total} | ${cat.adapted} | ${cat.fallback} | ${cat.spaOnly} | ${cat.missing} | **${cat.exactRate}%** | ${cat.behaviorAsserted}/${cat.total} | ${cat.behaviorVerified - cat.behaviorAsserted} |\n`;
   }
 
   md += `\n---\n\n## 详细对齐清单\n\n`;
@@ -434,7 +464,8 @@ export function printCliDashboard(report: ParityReport): void {
   console.info(`  - 语义降级: ${report.fallbackCount} (${report.fallbackPercentage}%)`);
   console.info(`  - 免适配(SPA): ${report.spaOnlyCount}`);
   console.info(`  - 待补齐: ${report.missingCount}`);
-  console.info(`  行为验证覆盖: ${report.behaviorVerifiedCount}/${report.totalComponents} (${report.behaviorVerifiedPercentage}%)`);
+  console.info(`  行为断言覆盖: ${report.behaviorAssertedCount}/${report.totalComponents} (${report.behaviorAssertedPercentage}%)`);
+  console.info(`  仅被测试引用: ${report.behaviorVerifiedCount - report.behaviorAssertedCount} (无足够断言预算)`);
   console.info('===============================================================\n');
 }
 
