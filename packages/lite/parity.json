@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-10-30T21:22:16.352Z",
+  "timestamp": "2026-10-30T21:26:29.187Z",
   "totalComponents": 179,
-  "adaptedCount": 116,
-  "fallbackCount": 61,
+  "adaptedCount": 121,
+  "fallbackCount": 56,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 64.8,
-  "fallbackPercentage": 34.1,
-  "behaviorVerifiedCount": 132,
-  "behaviorVerifiedPercentage": 73.7,
-  "behaviorAssertedCount": 132,
-  "behaviorAssertedPercentage": 73.7,
+  "exactPercentage": 67.6,
+  "fallbackPercentage": 31.3,
+  "behaviorVerifiedCount": 138,
+  "behaviorVerifiedPercentage": 77.1,
+  "behaviorAssertedCount": 138,
+  "behaviorAssertedPercentage": 77.1,
   "categories": {
     "pages": {
       "category": "pages",
@@ -55,15 +55,15 @@
     "fields": {
       "category": "fields",
       "total": 46,
-      "adapted": 36,
-      "fallback": 10,
+      "adapted": 41,
+      "fallback": 5,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 78.3,
-      "fallbackRate": 21.7,
-      "behaviorVerified": 28,
-      "behaviorAsserted": 28
+      "exactRate": 89.1,
+      "fallbackRate": 10.9,
+      "behaviorVerified": 34,
+      "behaviorAsserted": 34
     },
     "layout": {
       "category": "layout",
@@ -195,7 +195,7 @@
       "liteComponent": "LiteTextField.svelte",
       "category": "fields",
       "status": "exact",
-      "strategy": "原生 <input type=\"text\">"
+      "strategy": "按值域选择原生 input（text/time/datetime-local/color/email/url/tel）；非 hex 颜色回退 text"
     },
     {
       "name": "NumberField",
@@ -219,7 +219,7 @@
       "liteComponent": "LiteDateField.svelte",
       "category": "fields",
       "status": "exact",
-      "strategy": "原生 <input type=\"date\">"
+      "strategy": "原生 <input type=\"date\">（datetime 字段用 datetime-local），透传 dateInput 的 min/max/step 且不做 UTC 平移"
     },
     {
       "name": "DateRangeField",
@@ -259,7 +259,7 @@
       "liteComponent": "LiteTagField.svelte",
       "category": "fields",
       "status": "exact",
-      "strategy": "逗号分隔原生输入与徽章展示"
+      "strategy": "每个标签一个同名原生输入（服务端 getAll 解析为数组，兼容历史逗号值）与徽章展示"
     },
     {
       "name": "EmailField",
@@ -418,8 +418,8 @@
       "uiComponent": "DatePicker.svelte",
       "liteComponent": "fields/LiteDateField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 复用原生 date 字段；宿主通过 FieldDefinition 承接日期格式和服务端校验"
+      "status": "exact",
+      "strategy": "原生 <input type=\"date\"> 保留日期值域与 min/max/step；弹层日历与快捷预设属客户端增强"
     },
     {
       "name": "DateRangePicker",
@@ -434,16 +434,16 @@
       "uiComponent": "TimePicker.svelte",
       "liteComponent": "fields/LiteTextField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用受限文本输入；宿主负责时间格式、步进和时区解释"
+      "status": "exact",
+      "strategy": "原生 <input type=\"time\"> 保留时间值域；时区解释与业务步进由宿主承接"
     },
     {
       "name": "DateTimePicker",
       "uiComponent": "DateTimePicker.svelte",
       "liteComponent": "fields/LiteTextField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用受限文本输入；宿主负责本地时间、时区和消歧规则"
+      "status": "exact",
+      "strategy": "原生 <input type=\"datetime-local\"> 保留本地时刻值域；时区与消歧规则由宿主承接"
     },
     {
       "name": "RadioGroup",
@@ -458,8 +458,8 @@
       "uiComponent": "TagsInput.svelte",
       "liteComponent": "fields/LiteTagField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用逗号分隔标签字段；宿主负责数量、长度和允许值校验"
+      "status": "exact",
+      "strategy": "每个标签一个同名原生输入、留空即删除，服务端解析为数组；数量与取值校验由宿主承接"
     },
     {
       "name": "Slider",
@@ -482,8 +482,8 @@
       "uiComponent": "ColorPicker.svelte",
       "liteComponent": "fields/LiteTextField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用受限文本输入；宿主负责颜色格式和品牌白名单校验"
+      "status": "exact",
+      "strategy": "原生 <input type=\"color\">（非 hex 存量值回退 text）；品牌白名单与透明度由宿主承接"
     },
     {
       "name": "Rate",

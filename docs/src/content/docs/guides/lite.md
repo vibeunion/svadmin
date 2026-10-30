@@ -51,8 +51,8 @@ positioning are recorded in `docs/components/parity.md`,
   - Semantic Fallbacks: 67 (37.4%)
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
-  Behavior Asserted: 132/179 (73.7%) · Referenced only: 0
-  Fields 1:1: 36/46 (78.3%) · Widgets 1:1: 15/37 (40.5%, read-only by design)
+  Behavior Asserted: 138/179 (77.1%) · Referenced only: 0
+  Fields 1:1: 41/46 (89.1%) · Widgets 1:1: 15/37 (40.5%, read-only by design)
 ===============================================================
 ```
 

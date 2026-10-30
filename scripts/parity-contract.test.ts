@@ -111,11 +111,13 @@ describe('UI/Lite Parity Tracking Contract', () => {
     const fileUpload = report.items.find((item) => item.name === 'FileUpload');
     expect(fileUpload?.status).toBe('exact');
     const tagsInput = report.items.find((item) => item.name === 'TagsInput');
-    expect(tagsInput?.status).toBe('fallback');
+    expect(tagsInput?.status).toBe('exact');
     const timePicker = report.items.find((item) => item.name === 'TimePicker');
-    expect(timePicker?.status).toBe('fallback');
+    expect(timePicker?.status).toBe('exact');
     const datePicker = report.items.find((item) => item.name === 'DatePicker');
-    expect(datePicker?.status).toBe('fallback');
+    expect(datePicker?.status).toBe('exact');
+    const markdownField = report.items.find((item) => item.name === 'MarkdownField');
+    expect(markdownField?.status).toBe('fallback');
   });
 
   it('detects stale parity artifacts so CI cannot pass on drift', () => {

@@ -40,19 +40,20 @@ code change that makes the native-control condition true.
 | FileUpload | `input[type=file]` + multipart | exact | file domain preserved; progress/cancel are client state |
 | DateRangePicker | two `input[type=date]` | exact | date pair preserved; popup calendar is an enhancement |
 | SignaturePad | upload of signed image | fallback | canvas handwriting has no native equivalent |
-| TagsInput | `input[type=text]` comma separated | fallback | array domain approximated by free text |
-| DatePicker | `input[type=datetime-local]` | fallback | emits a datetime value where the reference is date-only; fix to `type=date` before upgrading |
-| DateTimePicker | `input[type=text]` | fallback | `datetime-local` exists and is not used; format discovery moves to the user |
-| TimePicker | `input[type=text]` | fallback | `type=time` exists and is not used |
-| ColorPicker | `input[type=text]` hex | fallback | `type=color` exists; invalid values only caught server-side |
+| TagsInput | one `input[type=text]` per tag, same `name` | exact | array domain preserved; clearing a field deletes that tag, server parses repeated keys |
+| DatePicker | `input[type=date]` (datetime → `datetime-local`) | exact | date-only stays date-only, `dateInput` min/max/step passed through, no UTC shift |
+| DateTimePicker | `input[type=datetime-local]` | exact | local instant preserved; timezone/disambiguation stays with the host |
+| TimePicker | `input[type=time]` | exact | time domain preserved |
+| ColorPicker | `input[type=color]`, text fallback for non-hex values | exact | colour domain preserved; brand whitelist stays with the host |
 | MarkdownField | `textarea` + `<pre>` source | fallback | no rendered Markdown preview |
 | RichTextField | `textarea` + pre-wrapped text | fallback | no rich rendering, only plain text |
 | AutoComplete | `input` + `datalist` | fallback | native suggestions exist, but remote query/selection is client state |
 | RelationPicker | `select` or link | fallback | large relation sets need client search/paging |
 
-Result: fields exact 30 → 36 of 46 (65.2% → 78.3%); the six upgrades all follow
-condition 1, and each downgrade candidate lists the fix that would justify an
-upgrade.
+Result: fields exact 30 → **41 of 46 (65.2% → 89.1%)**; every upgrade follows
+condition 1 with a matching code change (native control type, or repeated-name tag
+fields plus server parsing). Remaining fallbacks are MarkdownField, RichTextField,
+AutoComplete, RelationPicker and SignaturePad.
 
 ## Guard rails
 
@@ -64,11 +65,21 @@ upgrade.
 
 ## Follow-up work created by this audit
 
-1. `DateField`: use `type="date"` for date-only fields (currently
-   `datetime-local`), then upgrade DatePicker.
-2. `TimePicker` / `DateTimePicker`: introduce native `type=time` /
-   `datetime-local` controls, then upgrade both.
-3. `ColorPicker`: adopt `type=color` with a text fallback, then upgrade.
-4. `TagsInput`: emit repeated `name` inputs (or a documented separator) instead of
-   parsing free text, then upgrade.
+Completed in the same cycle:
+
+1. `DateField`: date-only fields now use `type="date"` (datetime keeps
+   `datetime-local`), replies on `dateInput` min/max/step and never shifts a
+   stored date through UTC. DatePicker upgraded.
+2. `TimePicker` / `DateTimePicker`: `LiteTextField` renders native `type=time` /
+   `datetime-local`; both upgraded.
+3. `ColorPicker`: native `type="color"` with a text fallback for legacy non-hex
+   values; upgraded.
+4. `TagsInput`: one same-name input per tag plus an empty "add" slot; the server
+   parses repeated keys into an array and still accepts legacy comma values;
+   upgraded.
+
+Still open:
+
 5. `MarkdownField`: render Markdown server-side before claiming preview parity.
+6. `RichTextField`: define whether plain-text editing is acceptable for rich
+   content, or route rich editing to the SPA.

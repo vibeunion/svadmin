@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-30T21:22:16.352Z`
+> 自动生成时间：`2026-10-30T21:26:29.187Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**64.8%**（116）· 语义降级率 (Fallback)：**34.1%**（61）
-> 行为验证覆盖：**73.7%**（132/179 映射组件具备断言预算）· 仅被引用：0
+> 1:1 对齐率 (Exact)：**67.6%**（121）· 语义降级率 (Fallback)：**31.3%**（56）
+> 行为验证覆盖：**77.1%**（138/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -15,7 +15,7 @@
 | **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 | 0 |
 | **advanced** | 43 | 22 | 20 | 1 | 0 | **51.2%** | 38/43 | 0 |
 | **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 33/37 | 0 |
-| **fields** | 46 | 36 | 10 | 0 | 0 | **78.3%** | 28/46 | 0 |
+| **fields** | 46 | 41 | 5 | 0 | 0 | **89.1%** | 34/46 | 0 |
 | **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
@@ -151,15 +151,15 @@
 |---|---|:---:|---|
 | `RelationPicker` | `fields/LiteRelationField.svelte` | ⚡ 语义降级 | Lite 使用原生关联选择或详情链接；服务端负责查询和授权 |
 | `FileUpload` | `LiteFileUpload.svelte` | ✅ 1:1 对齐 | 原生 <input type="file">（accept/multiple/required 透传）+ multipart POST，服务端校验；进度、取消与重试属客户端增强 |
-| `TextField` | `LiteTextField.svelte` | ✅ 1:1 对齐 | 原生 <input type="text"> |
+| `TextField` | `LiteTextField.svelte` | ✅ 1:1 对齐 | 按值域选择原生 input（text/time/datetime-local/color/email/url/tel）；非 hex 颜色回退 text |
 | `NumberField` | `LiteNumberField.svelte` | ✅ 1:1 对齐 | 原生 <input type="number"> |
 | `BooleanField` | `LiteBooleanField.svelte` | ✅ 1:1 对齐 | 原生 <input type="checkbox"> |
-| `DateField` | `LiteDateField.svelte` | ✅ 1:1 对齐 | 原生 <input type="date"> |
+| `DateField` | `LiteDateField.svelte` | ✅ 1:1 对齐 | 原生 <input type="date">（datetime 字段用 datetime-local），透传 dateInput 的 min/max/step 且不做 UTC 平移 |
 | `DateRangeField` | `LiteDateRangeField.svelte` | ✅ 1:1 对齐 | 区间展示与双 date 输入 |
 | `SelectField` | `LiteSelectField.svelte` | ✅ 1:1 对齐 | 原生 <select> |
 | `MultiSelectField` | `LiteMultiSelectField.svelte` | ✅ 1:1 对齐 | 原生 <select multiple> |
 | `RelationField` | `LiteRelationField.svelte` | ✅ 1:1 对齐 | 原生 <select> 或外键关联跳转 |
-| `TagField` | `LiteTagField.svelte` | ✅ 1:1 对齐 | 逗号分隔原生输入与徽章展示 |
+| `TagField` | `LiteTagField.svelte` | ✅ 1:1 对齐 | 每个标签一个同名原生输入（服务端 getAll 解析为数组，兼容历史逗号值）与徽章展示 |
 | `EmailField` | `LiteEmailField.svelte` | ✅ 1:1 对齐 | 原生 mailto 链接与 text 输入 |
 | `UrlField` | `LiteUrlField.svelte` | ✅ 1:1 对齐 | 原生 <a> 链接与 text 输入 |
 | `PhoneField` | `LitePhoneField.svelte` | ✅ 1:1 对齐 | 原生 tel 链接与 tel 输入 |
@@ -179,15 +179,15 @@
 | `Cascader` | `fields/LiteCascader.svelte` | ✅ 1:1 对齐 | 路径展开原生 <select> 与格式化展示 |
 | `Transfer` | `LiteTransfer.svelte` | ✅ 1:1 对齐 | 双列复选框/列表与左右转移 POST 表单 |
 | `DynamicFormList` | `LiteDynamicFormList.svelte` | ✅ 1:1 对齐 | 子表单卡片/表格与服务端索引数组解析 |
-| `DatePicker` | `fields/LiteDateField.svelte` | ⚡ 语义降级 | Lite 复用原生 date 字段；宿主通过 FieldDefinition 承接日期格式和服务端校验 |
+| `DatePicker` | `fields/LiteDateField.svelte` | ✅ 1:1 对齐 | 原生 <input type="date"> 保留日期值域与 min/max/step；弹层日历与快捷预设属客户端增强 |
 | `DateRangePicker` | `fields/LiteDateRangeField.svelte` | ✅ 1:1 对齐 | 双原生 <input type="date"> 保留区间数据契约；区间顺序与时区由宿主校验，弹层日历属客户端增强 |
-| `TimePicker` | `fields/LiteTextField.svelte` | ⚡ 语义降级 | Lite 使用受限文本输入；宿主负责时间格式、步进和时区解释 |
-| `DateTimePicker` | `fields/LiteTextField.svelte` | ⚡ 语义降级 | Lite 使用受限文本输入；宿主负责本地时间、时区和消歧规则 |
+| `TimePicker` | `fields/LiteTextField.svelte` | ✅ 1:1 对齐 | 原生 <input type="time"> 保留时间值域；时区解释与业务步进由宿主承接 |
+| `DateTimePicker` | `fields/LiteTextField.svelte` | ✅ 1:1 对齐 | 原生 <input type="datetime-local"> 保留本地时刻值域；时区与消歧规则由宿主承接 |
 | `RadioGroup` | `LiteSelectField.svelte` | ✅ 1:1 对齐 | 原生 <select> 承载同一枚举互斥值，服务端按资源契约校验枚举；单选按钮呈现属客户端增强 |
-| `TagsInput` | `fields/LiteTagField.svelte` | ⚡ 语义降级 | Lite 使用逗号分隔标签字段；宿主负责数量、长度和允许值校验 |
+| `TagsInput` | `fields/LiteTagField.svelte` | ✅ 1:1 对齐 | 每个标签一个同名原生输入、留空即删除，服务端解析为数组；数量与取值校验由宿主承接 |
 | `Slider` | `fields/LiteNumberField.svelte` | ✅ 1:1 对齐 | 原生 <input type="number"> 保留 min/max/step 数值契约；拖动滑杆属客户端增强 |
 | `RangeSlider` | `fields/LiteNumberField.svelte` | ✅ 1:1 对齐 | 两个原生 number 输入保留上下界与 step 契约；区间完整性由宿主校验，拖动属客户端增强 |
-| `ColorPicker` | `fields/LiteTextField.svelte` | ⚡ 语义降级 | Lite 使用受限文本输入；宿主负责颜色格式和品牌白名单校验 |
+| `ColorPicker` | `fields/LiteTextField.svelte` | ✅ 1:1 对齐 | 原生 <input type="color">（非 hex 存量值回退 text）；品牌白名单与透明度由宿主承接 |
 | `Rate` | `fields/LiteRatingField.svelte` | ✅ 1:1 对齐 | 原生 number 输入（min/max/step）+ 星级展示，保留评分契约；星标点选属客户端增强 |
 | `ImageCropper` | `LiteImageCropper.svelte` | ✅ 1:1 对齐 | 图片缩放与裁剪参数表单 |
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
