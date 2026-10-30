@@ -4,6 +4,59 @@
 @import "./app-shell.css";
 @import "./data-panel.css";
 
+/* 侧栏与设置页布局使用独立契约，避免宿主通用 utility 覆盖响应式状态。 */
+@layer components {
+  .svadmin-layout__desktop-sidebar {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .svadmin-layout__desktop-sidebar {
+      display: block;
+    }
+  }
+
+  .svadmin-settings-layout {
+    --svadmin-settings-nav-width: 14rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 100%;
+  }
+  .svadmin-settings-layout__nav {
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .svadmin-settings-layout__mobile-nav {
+    display: flex;
+  }
+  .svadmin-settings-layout__desktop-nav {
+    display: none;
+  }
+  .svadmin-settings-layout__content {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 0%;
+    padding: var(--svadmin-space-5);
+  }
+  @media (min-width: 1024px) {
+    .svadmin-settings-layout {
+      flex-direction: row;
+    }
+    .svadmin-settings-layout__nav {
+      width: var(--svadmin-settings-nav-width);
+    }
+    .svadmin-settings-layout__mobile-nav {
+      display: none;
+    }
+    .svadmin-settings-layout__desktop-nav {
+      display: block;
+    }
+    .svadmin-settings-layout__content {
+      padding: var(--svadmin-space-6);
+    }
+  }
+}
+
 /* 保留状态对比度和 clean-flat 卡片表现，颜色始终来自宿主 token。 */
 .svadmin-product-status[data-slot="badge"] {
   background: var(--muted);
