@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.18.0](https://github.com/vibeunion/svadmin/compare/lite-v0.17.2...lite-v0.18.0) (2026-10-30)
+
+
+### 🚀 Features
+
+* **lite:** add parity primitives and chart widgets ([efa45ed](https://github.com/vibeunion/svadmin/commit/efa45edd206ff9cc0962d6adbf53a038b580f39d))
+* **ui:** complete parity and workspace surfaces ([6c7f4ff](https://github.com/vibeunion/svadmin/commit/6c7f4ff7ba30e194c155f74e4a7eb7e47c6c4bdf))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** make the QR code dependency optional ([6308ef1](https://github.com/vibeunion/svadmin/commit/6308ef1dec4a3c264982bd0bff7188c1d63301f2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.70.0 to >=0.69.1
+
 ## [0.17.2](https://github.com/vibeunion/svadmin/compare/lite-v0.17.1...lite-v0.17.2) (2026-10-29)
 
 

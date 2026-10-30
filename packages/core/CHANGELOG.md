@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.1](https://github.com/vibeunion/svadmin/compare/core-v0.69.0...core-v0.69.1) (2026-10-30)
+
+
+### 💅 Elegance & Refactoring
+
+* **theme:** rename the default color preset id to `default` ([a30e707](https://github.com/vibeunion/svadmin/commit/a30e70728b99962d3ff2ef4cfb0c4d4982ebbc61))
+
 ## [0.69.0](https://github.com/vibeunion/svadmin/compare/core-v0.68.0...core-v0.69.0) (2026-10-29)
 
 

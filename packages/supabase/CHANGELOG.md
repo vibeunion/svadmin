@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.21.7](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.6...supabase-v0.21.7) (2026-10-30)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.14.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.1
+
 ## [0.21.6](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.5...supabase-v0.21.6) (2026-10-29)
 
 
