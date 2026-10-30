@@ -1,27 +1,45 @@
 <script lang="ts">
   import { X } from '@lucide/svelte';
-  import { closeNotification, getNotifications } from '../notifications.svelte.js';
+  import { closeNotification, getNotifications, type NotificationPlacement } from '../notifications.svelte.js';
+
+  const placements: NotificationPlacement[] = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
+  const groups = $derived(placements
+    .map((placement) => ({
+      placement,
+      items: getNotifications().filter((item) => item.placement === placement),
+    }))
+    .filter((group) => group.items.length > 0));
 </script>
 
-<div class="svadmin-notification-host" aria-label="Notifications" aria-live="polite">
-  {#each getNotifications() as item (item.id)}
-    <section class="svadmin-notification-host__item" data-tone={item.tone} role="status">
-      <div class="svadmin-notification-host__content">
-        <p class="svadmin-notification-host__title">{item.title}</p>
-        {#if item.description}<p class="svadmin-notification-host__description">{item.description}</p>{/if}
-        {#if item.actionLabel && item.onAction}
-          <button type="button" class="svadmin-notification-host__action" onclick={() => { item.onAction?.(); closeNotification(item.id); }}>{item.actionLabel}</button>
-        {/if}
-      </div>
-      <button type="button" class="svadmin-notification-host__close" aria-label="Close notification" onclick={() => closeNotification(item.id)}>
-        <X size={14} aria-hidden="true" />
-      </button>
-    </section>
-  {/each}
-</div>
+{#each groups as group (group.placement)}
+  <div
+    class="svadmin-notification-host"
+    data-placement={group.placement}
+    aria-label={group.placement === 'top-right' ? 'Notifications' : `Notifications ${group.placement}`}
+    aria-live="polite"
+  >
+    {#each group.items as item (item.id)}
+      <section class="svadmin-notification-host__item" data-tone={item.tone} role="status">
+        <div class="svadmin-notification-host__content">
+          <p class="svadmin-notification-host__title">{item.title}</p>
+          {#if item.description}<p class="svadmin-notification-host__description">{item.description}</p>{/if}
+          {#if item.actionLabel && item.onAction}
+            <button type="button" class="svadmin-notification-host__action" onclick={() => { item.onAction?.(); closeNotification(item.id); }}>{item.actionLabel}</button>
+          {/if}
+        </div>
+        <button type="button" class="svadmin-notification-host__close" aria-label="Close notification" onclick={() => closeNotification(item.id)}>
+          <X size={14} aria-hidden="true" />
+        </button>
+      </section>
+    {/each}
+  </div>
+{/each}
 
 <style>
   .svadmin-notification-host { position: fixed; z-index: 80; inset-block-start: 1rem; inset-inline-end: 1rem; display: grid; width: min(22rem, calc(100vw - 2rem)); gap: var(--svadmin-space-2); pointer-events: none; }
+  .svadmin-notification-host[data-placement='top-left'] { inset-inline-start: 1rem; inset-inline-end: auto; }
+  .svadmin-notification-host[data-placement='bottom-right'] { inset-block-start: auto; inset-block-end: 1rem; }
+  .svadmin-notification-host[data-placement='bottom-left'] { inset-block-start: auto; inset-block-end: 1rem; inset-inline-start: 1rem; inset-inline-end: auto; }
   .svadmin-notification-host__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--svadmin-space-3); padding: var(--svadmin-space-3); border: 1px solid var(--border); border-inline-start: 3px solid var(--info); border-radius: var(--radius-md); background: var(--card); color: var(--foreground); box-shadow: var(--shadow-overlay, 0 10px 28px color-mix(in srgb, var(--foreground) 16%, transparent)); pointer-events: auto; }
   .svadmin-notification-host__item[data-tone='success'] { border-inline-start-color: var(--success); }
   .svadmin-notification-host__item[data-tone='warning'] { border-inline-start-color: var(--warning); }

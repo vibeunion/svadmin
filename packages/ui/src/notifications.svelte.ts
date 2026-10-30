@@ -1,10 +1,12 @@
 export type NotificationTone = 'info' | 'success' | 'warning' | 'danger';
+export type NotificationPlacement = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 
 export interface NotificationOptions {
   key?: string;
   title: string;
   description?: string;
   tone?: NotificationTone;
+  placement?: NotificationPlacement;
   duration?: number;
   actionLabel?: string;
   onAction?: () => void;
@@ -13,6 +15,7 @@ export interface NotificationOptions {
 export interface NotificationRecord extends NotificationOptions {
   id: number;
   tone: NotificationTone;
+  placement: NotificationPlacement;
   duration: number;
 }
 
@@ -47,6 +50,7 @@ function open(options: NotificationOptions): number {
     ...options,
     id: nextId++,
     tone: options.tone ?? 'info',
+    placement: options.placement ?? 'top-right',
     duration: options.duration ?? 5000,
   };
   items = [...items, item];
