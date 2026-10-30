@@ -147,6 +147,29 @@ compositions stay in the UI layer.
   validation stay with the host or UI layer.
 - Trigger/Portal remain internal, matching Refine's UI-kit boundary.
 
+## Classification standard
+
+Lite parity entries follow one published rule set, not per-entry judgement:
+
+- **exact** — the reference capability survives with server HTML and native form
+  semantics; only client-only enhancements may be missing (clipboard copy,
+  animation, drag handle, popover positioning, optimistic preview) and the data
+  contract is unchanged.
+- **fallback** — the capability needs client state that changes what is visible or
+  computed (virtualization, recursive filter editing, drag with rollback, pivot
+  recompute, tree indeterminate selection, canvas/spreadsheet engines, chart
+  interaction), so Lite must state its server-owned boundary.
+- **spa_only** — meaningless without the client runtime.
+
+Ambiguous entries stay `fallback` until the boundary is proven and recorded.
+`scripts/check-parity.ts` enforces this: an `exact` entry may not carry a
+" degraded/fallback " strategy, and the generated `packages/lite/PARITY.md`
+reprints the rules.
+
+Dashboard-class widgets are the main application of this rule; the accepted
+boundary is recorded in
+[SSR dashboard-class boundaries](../architecture/ssr-dashboard-boundaries.md).
+
 ## Remaining API-depth candidates
 
 These are behavior or API-shape differences, not missing page families. They are

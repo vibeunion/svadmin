@@ -60,6 +60,33 @@ export interface ParityReport {
   items: ParityItem[];
 }
 
+/**
+ * Classification criteria (applies to every entry below, no per-entry exceptions).
+ *
+ * `exact` — the reference capability is preserved with server HTML and native
+ * form semantics. Only client-side enhancements may be missing (clipboard copy,
+ * animation, drag handle, scroll listener, popover positioning, optimistic
+ * preview), and the submitted/rendered data contract stays the same.
+ *
+ * `fallback` — the reference capability depends on client state that changes
+ * what is visible or computed (virtualization, recursive filter editing, drag
+ * reorder with rollback, pivot recomputation, tree indeterminate selection,
+ * canvas/spreadsheet engines, chart interaction) or on an interaction model with
+ * no native equivalent. The Lite component must state the server-owned boundary.
+ *
+ * `spa_only` — the capability is meaningless without the client runtime and is not
+ * part of the SSR contract at all.
+ *
+ * When an entry is ambiguous, keep `fallback` until the boundary is proven and
+ * recorded; do not upgrade an entry because it "looks close".
+ */
+const CLASSIFICATION_CRITERIA_SUMMARY = [
+  'exact = 服务端 HTML 与原生表单可完整保留能力，仅缺少客户端增强（复制、动画、拖拽手柄、滚动监听、弹层定位、乐观预览），数据契约不变。',
+  'fallback = 能力依赖客户端状态（虚拟滚动、递归筛选编辑、拖拽回滚、透视重算、树半选、画布/表格引擎、图表交互）或无原生等价交互，需在策略中写明服务端边界。',
+  'spa_only = 脱离客户端运行时无意义，不属于 SSR 契约。',
+  '存在争议时保持 fallback，直到边界被证明并记录；不得因"看起来接近"而升级。',
+];
+
 const PARITY_ITEMS: ParityItem[] = [
   { name: 'AutoTable', uiComponent: 'AutoTable.svelte', liteComponent: 'pages/LiteListPage.svelte', category: 'pages', status: 'fallback', strategy: 'Lite 使用服务端分页原生表格；筛选、批量命令和导出由宿主页面承接' },
   { name: 'AutoForm', uiComponent: 'AutoForm.svelte', liteComponent: 'LiteForm.svelte', category: 'pages', status: 'fallback', strategy: 'Lite 使用原生 POST 表单；字段契约和服务端错误回显由宿主承接' },
@@ -95,7 +122,7 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'ArrayField', uiComponent: 'ArrayField.svelte', liteComponent: 'LiteArrayField.svelte', category: 'fields', status: 'exact', strategy: '嵌套表格/Fieldset 与服务端索引解析' },
   { name: 'JsonField', uiComponent: 'JsonField.svelte', liteComponent: 'LiteJsonField.svelte', category: 'fields', status: 'exact', strategy: 'JSON 格式化与原生 Textarea' },
   { name: 'CopyField', uiComponent: 'CopyField.svelte', liteComponent: 'LiteCopyField.svelte', category: 'fields', status: 'exact', strategy: '可选中等宽文本展示' },
-  { name: 'CodeField', uiComponent: 'CodeField.svelte', liteComponent: 'LiteCodeField.svelte', category: 'fields', status: 'fallback', strategy: '降级为 <pre><code> 语法容器与 Textarea 编辑' },
+  { name: 'CodeField', uiComponent: 'CodeField.svelte', liteComponent: 'LiteCodeField.svelte', category: 'fields', status: 'exact', strategy: '服务端 <pre><code> 展示（含语言徽标与 maxHeight）与原生 Textarea 编辑；剪贴板复制为客户端增强，数据契约一致' },
   { name: 'MarkdownField', uiComponent: 'MarkdownField.svelte', liteComponent: 'LiteMarkdownField.svelte', category: 'fields', status: 'fallback', strategy: '降级为原生 Textarea 与纯 HTML 预览' },
   { name: 'RichTextField', uiComponent: 'RichTextField.svelte', liteComponent: 'LiteRichTextField.svelte', category: 'fields', status: 'fallback', strategy: '降级为原生 Textarea 与只读展示' },
   { name: 'TreeSelect', uiComponent: 'TreeSelect.svelte', liteComponent: 'fields/LiteTreeSelect.svelte', category: 'fields', status: 'exact', strategy: '原生层级缩进 <select> 与单选/多选' },
@@ -191,7 +218,7 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'MultiTabKeepAlive', uiComponent: 'MultiTabKeepAlive.svelte', liteComponent: 'LiteMultiTabKeepAlive.svelte', category: 'layout', status: 'exact', strategy: '工作台多标签页导航' },
   { name: 'GanttChart', uiComponent: 'GanttChart.svelte', liteComponent: 'LiteGanttChart.svelte', category: 'widgets', status: 'fallback', strategy: '共享有界时间线校验；Lite 原生表格与链接恢复，SPA 交互选择与回调，不含依赖/工作日历/自动排程引擎' },
   { name: 'CanvasAnnotation', uiComponent: 'CanvasAnnotation.svelte', liteComponent: 'LiteCanvasAnnotation.svelte', category: 'advanced', status: 'exact', strategy: '底图展示与交互式标注画板' },
-  { name: 'SignaturePad', uiComponent: 'SignaturePad.svelte', liteComponent: 'LiteSignaturePad.svelte', category: 'fields', status: 'exact', strategy: '电子签名画板与文件上传降级' },
+  { name: 'SignaturePad', uiComponent: 'SignaturePad.svelte', liteComponent: 'LiteSignaturePad.svelte', category: 'fields', status: 'fallback', strategy: 'SSR 承接已签署图片的上传与预览；canvas 手写板由 SPA 承接' },
   { name: 'PdfDocumentViewer', uiComponent: 'PdfDocumentViewer.svelte', liteComponent: 'LitePdfDocumentViewer.svelte', category: 'pages', status: 'exact', strategy: '嵌入式 PDF 文档与电子盖章批注' },
   { name: 'SpreadsheetView', uiComponent: 'SpreadsheetView.svelte', liteComponent: 'LiteSpreadsheetView.svelte', category: 'advanced', status: 'fallback', strategy: '有界原生单表 POST，提交 sheetId 与原始公式；计算、切表及导出由服务端承接，无客户端公式引擎' },
   { name: 'DecisionTable', uiComponent: 'DecisionTable.svelte', liteComponent: 'LiteDecisionTable.svelte', category: 'advanced', status: 'exact', strategy: '业务决策表与规则执行矩阵' },
@@ -425,6 +452,10 @@ export function generateMarkdownReport(report: ParityReport): string {
     md += `| **${name}** | ${cat.total} | ${cat.adapted} | ${cat.fallback} | ${cat.spaOnly} | ${cat.missing} | **${cat.exactRate}%** | ${cat.behaviorAsserted}/${cat.total} | ${cat.behaviorVerified - cat.behaviorAsserted} |\n`;
   }
 
+  md += `\n---\n\n## 判定标准\n\n`;
+  for (const rule of CLASSIFICATION_CRITERIA_SUMMARY) {
+    md += `- ${rule}\n`;
+  }
   md += `\n---\n\n## 详细对齐清单\n\n`;
 
   const categoryNames = Object.keys(report.categories);

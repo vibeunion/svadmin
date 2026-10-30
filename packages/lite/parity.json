@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-30T13:37:44.185Z",
+  "timestamp": "2026-10-30T21:14:50.246Z",
   "totalComponents": 179,
   "adaptedCount": 110,
   "fallbackCount": 67,
@@ -10,8 +10,8 @@
   "fallbackPercentage": 37.4,
   "behaviorVerifiedCount": 132,
   "behaviorVerifiedPercentage": 73.7,
-  "behaviorAssertedCount": 130,
-  "behaviorAssertedPercentage": 72.6,
+  "behaviorAssertedCount": 132,
+  "behaviorAssertedPercentage": 73.7,
   "categories": {
     "pages": {
       "category": "pages",
@@ -50,7 +50,7 @@
       "exactRate": 40.5,
       "fallbackRate": 59.5,
       "behaviorVerified": 33,
-      "behaviorAsserted": 31
+      "behaviorAsserted": 33
     },
     "fields": {
       "category": "fields",
@@ -362,8 +362,8 @@
       "uiComponent": "CodeField.svelte",
       "liteComponent": "LiteCodeField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "降级为 <pre><code> 语法容器与 Textarea 编辑"
+      "status": "exact",
+      "strategy": "服务端 <pre><code> 展示（含语言徽标与 maxHeight）与原生 Textarea 编辑；剪贴板复制为客户端增强，数据契约一致"
     },
     {
       "name": "MarkdownField",
@@ -1050,8 +1050,8 @@
       "uiComponent": "SignaturePad.svelte",
       "liteComponent": "LiteSignaturePad.svelte",
       "category": "fields",
-      "status": "exact",
-      "strategy": "电子签名画板与文件上传降级"
+      "status": "fallback",
+      "strategy": "SSR 承接已签署图片的上传与预览；canvas 手写板由 SPA 承接"
     },
     {
       "name": "PdfDocumentViewer",

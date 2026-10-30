@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-30T13:37:44.185Z`
+> 自动生成时间：`2026-10-30T21:14:50.246Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
 > 1:1 对齐率 (Exact)：**61.5%**（110）· 语义降级率 (Fallback)：**37.4%**（67）
-> 行为验证覆盖：**72.6%**（130/179 映射组件具备断言预算）· 仅被引用：2
+> 行为验证覆盖：**73.7%**（132/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -14,10 +14,19 @@
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 | 0 |
 | **advanced** | 43 | 22 | 20 | 1 | 0 | **51.2%** | 38/43 | 0 |
-| **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 31/37 | 2 |
+| **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 33/37 | 0 |
 | **fields** | 46 | 30 | 16 | 0 | 0 | **65.2%** | 28/46 | 0 |
 | **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
+
+---
+
+## 判定标准
+
+- exact = 服务端 HTML 与原生表单可完整保留能力，仅缺少客户端增强（复制、动画、拖拽手柄、滚动监听、弹层定位、乐观预览），数据契约不变。
+- fallback = 能力依赖客户端状态（虚拟滚动、递归筛选编辑、拖拽回滚、透视重算、树半选、画布/表格引擎、图表交互）或无原生等价交互，需在策略中写明服务端边界。
+- spa_only = 脱离客户端运行时无意义，不属于 SSR 契约。
+- 存在争议时保持 fallback，直到边界被证明并记录；不得因"看起来接近"而升级。
 
 ---
 
@@ -163,7 +172,7 @@
 | `ArrayField` | `LiteArrayField.svelte` | ✅ 1:1 对齐 | 嵌套表格/Fieldset 与服务端索引解析 |
 | `JsonField` | `LiteJsonField.svelte` | ✅ 1:1 对齐 | JSON 格式化与原生 Textarea |
 | `CopyField` | `LiteCopyField.svelte` | ✅ 1:1 对齐 | 可选中等宽文本展示 |
-| `CodeField` | `LiteCodeField.svelte` | ⚡ 语义降级 | 降级为 <pre><code> 语法容器与 Textarea 编辑 |
+| `CodeField` | `LiteCodeField.svelte` | ✅ 1:1 对齐 | 服务端 <pre><code> 展示（含语言徽标与 maxHeight）与原生 Textarea 编辑；剪贴板复制为客户端增强，数据契约一致 |
 | `MarkdownField` | `LiteMarkdownField.svelte` | ⚡ 语义降级 | 降级为原生 Textarea 与纯 HTML 预览 |
 | `RichTextField` | `LiteRichTextField.svelte` | ⚡ 语义降级 | 降级为原生 Textarea 与只读展示 |
 | `TreeSelect` | `fields/LiteTreeSelect.svelte` | ✅ 1:1 对齐 | 原生层级缩进 <select> 与单选/多选 |
@@ -183,7 +192,7 @@
 | `ImageCropper` | `LiteImageCropper.svelte` | ✅ 1:1 对齐 | 图片缩放与裁剪参数表单 |
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
 | `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
-| `SignaturePad` | `LiteSignaturePad.svelte` | ✅ 1:1 对齐 | 电子签名画板与文件上传降级 |
+| `SignaturePad` | `LiteSignaturePad.svelte` | ⚡ 语义降级 | SSR 承接已签署图片的上传与预览；canvas 手写板由 SPA 承接 |
 | `OtpInput` | `LiteOtpInput.svelte` | ✅ 1:1 对齐 | 原生一次性验证码输入与长度约束 |
 | `AutoComplete` | `LiteAutoComplete.svelte` | ⚡ 语义降级 | 原生 input + datalist 建议；异步查询和键盘弹层由 SPA 承接 |
 

@@ -79,6 +79,7 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(markdown).toContain('1:1 对齐率');
     expect(markdown).toContain('行为验证覆盖');
     expect(markdown).toContain('行为断言覆盖');
+    expect(markdown).toContain('## 判定标准');
     expect(markdown).toContain('LiteAvatarField.svelte');
     expect(markdown).toContain('LiteCurrencyField.svelte');
     expect(markdown).toContain('LitePercentField.svelte');
@@ -89,6 +90,24 @@ describe('UI/Lite Parity Tracking Contract', () => {
 
     expect(existsSync(parityMdPath)).toBe(true);
     expect(existsSync(parityJsonPath)).toBe(true);
+  });
+
+  it('applies the published classification criteria to every entry', () => {
+    const report = buildParityReport();
+    const downgraded = report.items.filter(
+      (item) => item.status === 'exact' && /降级|fallback|degraded/iu.test(item.strategy),
+    );
+
+    expect(downgraded.map((item) => item.name)).toEqual([]);
+
+    const codeField = report.items.find((item) => item.name === 'CodeField');
+    expect(codeField?.status).toBe('exact');
+    expect(codeField?.strategy).not.toMatch(/降级/u);
+
+    const relationPicker = report.items.find((item) => item.name === 'RelationPicker');
+    expect(relationPicker?.status).toBe('fallback');
+    const fileUpload = report.items.find((item) => item.name === 'FileUpload');
+    expect(fileUpload?.status).toBe('fallback');
   });
 
   it('keeps parity checking registered in package scripts', () => {

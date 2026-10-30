@@ -27,6 +27,8 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 The current inventory classifies **179/179 entries** as direct counterparts, semantic fallbacks, or SPA-only components.
 Inventory coverage is not release acceptance, so track the three numbers below instead: exact-counterpart rate,
 fallback rate, and how many mapped components carry a real assertion budget in a behavior test.
+The classification rules and the accepted SSR boundary for dashboard-class widgets are recorded in
+`docs/components/parity.md` and `docs/architecture/ssr-dashboard-boundaries.md`.
 
 ### Parity Breakdown by Module
 
@@ -46,7 +48,7 @@ fallback rate, and how many mapped components carry a real assertion budget in a
   - Semantic Fallbacks: 67 (37.4%)
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
-  Behavior Asserted: 130/179 (72.6%) · Referenced only: 2
+  Behavior Asserted: 132/179 (73.7%) · Referenced only: 0
 ===============================================================
 ```
 
