@@ -13,7 +13,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 
 | Category | external UI kits pick | svadmin surface | Svelte ecosystem | Status |
 | --- | --- | --- | --- | --- |
-| Charts | chart libraries | `@svadmin/charts` (`TreemapChart`, `SankeyChart`) + `BarChart`, `LineChart`, `PieChart`, `AreaChart`, `ScatterChart`, `RadarChart`, `GaugeChart`, `FunnelChart`, `HeatmapChart`, `WaterfallChart`, `RoseChart` | LayerChart | ✅ basic and advanced statistical charts |
+| Charts | chart libraries | `@svadmin/charts` (`BoxPlotChart`, `SunburstChart`, `GraphChart`, `TreemapChart`, `SankeyChart`) + `BarChart`, `LineChart`, `PieChart`, `AreaChart`, `ScatterChart`, `RadarChart`, `GaugeChart`, `FunnelChart`, `HeatmapChart`, `WaterfallChart`, `RoseChart` | LayerChart | ✅ basic and advanced statistical charts |
 | Flow diagrams | reactflow | `@svadmin/flow` (xyflow/svelte) | @xyflow/svelte | ✅ |
 | Hooks library | ahooks | `@svadmin/core` data/auth hooks + `@svadmin/ui` runes hooks: `useMediaQuery`, `useDeviceDetect`, `useClipboard`, `useLocalStorage`, `useDebouncedValue`, `useInterval`, `useEventListener`, `useOnClickOutside`, `useWindowSize` | runed | ✅ |
 | Forms | ProForm / Formily / react-hook-form / Formik | `AutoForm`, `JsonSchemaForm`, `StepForm`, `useModal` / `useDrawer` + `AutoForm`, field components | sveltekit-superforms | ✅ |
@@ -36,7 +36,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | Markdown | react-markdown | ai-elements `Response` (marked/rehype) | mdsvex | ✅ |
 | Infinite scroll | @rc-component/virtual-list, react-infinite-scroll-component | `InfiniteList`, `VirtualTable`, `scroll-area` primitive | @tanstack/svelte-virtual, virtua | ✅ |
 | Maps | google-map-react, react-amap | — | @sveltejs/amp, leaflet | ➖ |
-| Video player | react-player, video-react, video.js | `MediaPlayer` (native video/audio, optional HLS) | hls.js, vidstack | ✅ native + HLS; DASH/DRM delegated |
+| Video player | react-player, video-react, video.js | `MediaPlayer` (native video/audio, optional HLS), `VideoPlayer` (optional vidstack controls and tracks) | hls.js, vidstack | ✅ native + HLS; DASH/DRM delegated |
 | Context menu | react-contexify | `context-menu` primitive | bits-ui | ✅ |
 | Emoji | emoji-picker-react, emoji-mart | — | emoji-mart (framework-agnostic) | ➖ |
 | Split panes | react-split-pane, react-resizable-panels | `SplitPaneLayout`, `WorkspaceSplitPane` | paneforge | ✅ |
@@ -84,7 +84,7 @@ redaction decisions in svadmin code.
 | Statistical charts | `layerchart` | Use `@svadmin/charts` for treemap/sankey; keep built-in SVG charts for basics |
 | Dockable panels | `paneforge`, `dockview` | Use `@svadmin/dock` for split panes and full docking |
 | Virtual lists | `@tanstack/svelte-virtual`, `virtua` | `InfiniteList` and `VirtualTable` cover first-party needs |
-| Streaming video | `hls.js`, `vidstack` | `MediaPlayer` handles HLS; use vidstack for full player UI/DRM |
+| Streaming video | `hls.js`, `vidstack` | `MediaPlayer` handles HLS; `VideoPlayer` adds vidstack controls, tracks and quality surfaces |
 | Complex gestures | `svelte-gestures` | Simple swipe/pinch can stay on pointer events |
 | Emoji picker | `emoji-mart` + `@emoji-mart/data` | Optional; kept out of the default surface |
 | Maps | `leaflet` + `svelte-leafletjs` | Only if the product needs geo views |

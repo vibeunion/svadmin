@@ -3,10 +3,12 @@
   import DockPanelProbe from './DockPanelProbe.svelte';
   import type { DockPanel } from './dock-layout.js';
 
+  let { storageKey }: { storageKey?: string } = $props();
+
   const panels: DockPanel[] = [
     { id: 'one', title: 'One', component: DockPanelProbe },
     { id: 'two', title: 'Two', component: DockPanelProbe, referencePanel: 'one', direction: 'right' },
   ];
 </script>
 
-<DockLayout {panels} />
+<DockLayout {panels} {...(storageKey === undefined ? {} : { storageKey })} />

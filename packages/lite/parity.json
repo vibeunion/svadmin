@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-09-20T06:36:18.597Z",
-  "totalComponents": 125,
+  "timestamp": "2026-10-30T06:07:19.876Z",
+  "totalComponents": 126,
   "adaptedCount": 85,
-  "fallbackCount": 38,
+  "fallbackCount": 39,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
@@ -27,9 +27,9 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 11,
+      "total": 12,
       "adapted": 6,
-      "fallback": 5,
+      "fallback": 6,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100
@@ -694,6 +694,14 @@
       "category": "widgets",
       "status": "exact",
       "strategy": "语义状态徽章与原生链接承接"
+    },
+    {
+      "name": "Tag",
+      "uiComponent": "Tag.svelte",
+      "liteComponent": "LiteTag.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "Lite 使用服务端渲染标签与可选删除链接；可选中交互由宿主表单承接"
     },
     {
       "name": "BarChart",

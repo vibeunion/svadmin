@@ -96,7 +96,8 @@
     "svelte": "^5.56.10",
     "svelte-codemirror-editor": "^2.1.0",
     "svelte-jsoneditor": "^3.13.0",
-    "hls.js": "^1.7.0"
+    "hls.js": "^1.7.0",
+    "vidstack": "^1.15.7"
   },
   "peerDependenciesMeta": {
     "isomorphic-dompurify": {
@@ -139,6 +140,9 @@
       "optional": true
     },
     "hls.js": {
+      "optional": true
+    },
+    "vidstack": {
       "optional": true
     }
   },
@@ -190,6 +194,7 @@
     "@types/qrcode": "^1.5.6",
     "codemirror": "^6.0.2",
     "happy-dom": "^21.0.4",
+    "hls.js": "^1.7.4",
     "postcss": "^8.5.26",
     "postcss-selector-parser": "^7.1.6",
     "qrcode": "^1.5.4",
@@ -197,8 +202,8 @@
     "svelte-codemirror-editor": "^2.1.0",
     "svelte-jsoneditor": "^3.13.0",
     "tailwindcss": "4.3.3",
-    "vitest": "^4.1.11",
-    "hls.js": "^1.7.4"
+    "vidstack": "^1.15.7",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/stamp-build-version.mjs && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",

@@ -29,6 +29,23 @@ business content.
 | `ResultTemplate` | Success, failure and status results | `title` |
 | `ExceptionTemplate` | 403, 404 and 500 routes | `status` |
 
+
+## Arco Pro depth slots
+
+The route catalog above covers Arco Pro page families. The following optional
+slots close the composition-depth gap without forcing one mock layout:
+
+| Template | Optional Arco Pro sections |
+| --- | --- |
+| `WorkplaceTemplate` | `secondary`, `media`, `shortcuts`, `announcements`, `docs` |
+| `MonitorTemplate` | `activity`, `status`, `quickOperations`, `information` |
+| `SearchTableTemplate` | `filters`, `bulkActions`, `pagination`, `footer` |
+| `CardListTemplate` | `tabs`, `filters`, `addCard` |
+| `BasicDetailTemplate` | `steps`, `summary`, `history` |
+
+The host still owns the associated queries, permissions, mutations and
+telemetry. The slots only define where those sections render.
+
 ## Composition example
 
 ```svelte
@@ -83,7 +100,7 @@ templates must not re-implement those behaviors.
 
 The example application exposes an interactive gallery at `/templates` and a
 direct route per composition (`/templates/workplace`, `/templates/monitor`,
-`/templates/analysis`, `/templates/search-table`, `/templates/card-list`,
+`/templates/analysis`, `/templates/analysis-multi`, `/templates/search-table`, `/templates/card-list`,
 `/templates/group-form`, `/templates/step-form`, `/templates/advanced-form`,
 `/templates/basic-detail`, `/templates/advanced-detail`, `/templates/profile`,
 `/templates/result`, `/templates/exception`).

@@ -1166,6 +1166,29 @@ textarea.lite-input {
 .lite-badge-ghost { background: transparent; border-color: transparent; color: #475569; }
 .lite-badge-link { padding-left: 0; padding-right: 0; background: transparent; border-color: transparent; color: #0E42D2; text-decoration: underline; }
 
+.lite-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin-right: 4px;
+}
+.lite-tag .lite-badge {
+  margin-right: 0;
+}
+.lite-tag-close {
+  display: inline-block;
+  margin-left: 2px;
+  padding: 0 4px;
+  border-radius: 8px;
+  color: #4E5969;
+  font-size: 13px;
+  line-height: 18px;
+}
+.lite-tag-close:hover {
+  background: #F2F3F5;
+  color: #1D2129;
+}
+
 /* ─── Metric strip ────────────────────────────────────────── */
 .lite-metric-strip {
   display: flex;

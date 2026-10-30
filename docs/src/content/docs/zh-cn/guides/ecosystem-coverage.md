@@ -11,7 +11,7 @@ external UI kits 为 React 生态维护了一份[推荐库清单](https://ant.de
 
 | 分类 | external UI kits 推荐 | svadmin 实现 | Svelte 生态 | 状态 |
 | --- | --- | --- | --- | --- |
-| 可视化图表 | chart libraries | `@svadmin/charts`（`TreemapChart`、`SankeyChart`）+ `BarChart`、`LineChart`、`PieChart`、`AreaChart`、`ScatterChart`、`RadarChart`、`GaugeChart`、`FunnelChart`、`HeatmapChart`、`WaterfallChart`、`RoseChart` | LayerChart | ✅ 基础与高级统计图表 |
+| 可视化图表 | chart libraries | `@svadmin/charts`（`BoxPlotChart`、`SunburstChart`、`GraphChart`、`TreemapChart`、`SankeyChart`）+ `BarChart`、`LineChart`、`PieChart`、`AreaChart`、`ScatterChart`、`RadarChart`、`GaugeChart`、`FunnelChart`、`HeatmapChart`、`WaterfallChart`、`RoseChart` | LayerChart | ✅ 基础与高级统计图表 |
 | 流图 | reactflow | `@svadmin/flow`（xyflow/svelte） | @xyflow/svelte | ✅ |
 | Hooks 库 | ahooks | `@svadmin/core` 数据/认证 hooks + `@svadmin/ui` runes hooks：`useMediaQuery`、`useDeviceDetect`、`useClipboard`、`useLocalStorage`、`useDebouncedValue`、`useInterval`、`useEventListener`、`useOnClickOutside`、`useWindowSize` | runed | ✅ |
 | 表单 | ProForm / Formily / react-hook-form / Formik | `AutoForm`、`JsonSchemaForm`、`StepForm`、`useModal` / `useDrawer` + `AutoForm`、字段组件 | sveltekit-superforms | ✅ |
@@ -34,7 +34,7 @@ external UI kits 为 React 生态维护了一份[推荐库清单](https://ant.de
 | Markdown 渲染 | react-markdown | ai-elements `Response`（marked/rehype） | mdsvex | ✅ |
 | 无限滚动 | @rc-component/virtual-list、react-infinite-scroll-component | `InfiniteList`、`VirtualTable`、`scroll-area` 原语 | @tanstack/svelte-virtual、virtua | ✅ |
 | 地图 | google-map-react、react-amap | — | leaflet | ➖ |
-| 视频播放 | react-player、video-react、video.js | `MediaPlayer`（原生 video/audio，可选 HLS） | hls.js、vidstack | ✅ 原生 + HLS；DASH/DRM 由生态提供 |
+| 视频播放 | react-player、video-react、video.js | `MediaPlayer`（原生 video/audio，可选 HLS）、`VideoPlayer`（可选 vidstack 控件与字幕轨） | hls.js、vidstack | ✅ 原生 + HLS；DASH/DRM 由生态提供 |
 | 右键菜单 | react-contexify | `context-menu` 原语 | bits-ui | ✅ |
 | Emoji | emoji-picker-react、emoji-mart | — | emoji-mart（框架无关） | ➖ |
 | 分割面板 | react-split-pane、react-resizable-panels | `SplitPaneLayout`、`WorkspaceSplitPane` | paneforge | ✅ |
@@ -74,7 +74,7 @@ external UI kits 为 React 生态维护了一份[推荐库清单](https://ant.de
 | 统计图表 | `layerchart` | 高级图用 `@svadmin/charts` 的 treemap/sankey；基础图用内置 SVG 图表 |
 | 可停靠面板 | `paneforge`、`dockview` | 分栏与完整停靠使用 `@svadmin/dock` |
 | 虚拟列表 | `@tanstack/svelte-virtual`、`virtua` | 一方 `InfiniteList`、`VirtualTable` 已覆盖常规需求 |
-| 流媒体视频 | `hls.js`、`vidstack` | `MediaPlayer` 已支持 HLS；完整播放器/DRM 用 vidstack |
+| 流媒体视频 | `hls.js`、`vidstack` | `MediaPlayer` 支持 HLS；`VideoPlayer` 提供完整控件、字幕轨与画质入口 |
 | 复杂手势 | `svelte-gestures` | 简单 swipe/pinch 用 pointer events 即可 |
 | Emoji 选择器 | `emoji-mart` + `@emoji-mart/data` | 可选，不进入默认表面 |
 | 地图 | `leaflet` + `svelte-leafletjs` | 仅当产品需要地理视图 |

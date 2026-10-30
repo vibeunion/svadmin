@@ -69,6 +69,7 @@ export type {
 } from './components/LiteMetricStrip.svelte';
 export { default as LiteBadge } from './components/LiteBadge.svelte';
 export type { LiteBadgeVariant } from './components/LiteBadge.svelte';
+export { default as LiteTag } from './components/LiteTag.svelte';
 export { default as LiteConfirmDialog } from './components/LiteConfirmDialog.svelte';
 export { default as LiteEmptyState } from './components/LiteEmptyState.svelte';
 export { default as LiteTabs } from './components/LiteTabs.svelte';

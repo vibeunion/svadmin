@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Badge, Button, Grid, Input, Menu, Statistic, Textarea, Timeline } from '@svadmin/ui';
+  import { AppearanceSettings, Badge, Button, Grid, Input, ListPagination, Menu, NotificationsSettings, ProfilePage, PublicProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, TemplatePageShell, Textarea, Timeline } from '@svadmin/ui';
   import {
     AdvancedDetailTemplate,
     AdvancedFormTemplate,
@@ -9,18 +9,21 @@
     ExceptionTemplate,
     GroupFormTemplate,
     MonitorTemplate,
+    MultiDimensionAnalysisTemplate,
     ProfileTemplate,
     ResultTemplate,
     SearchTableTemplate,
     StepFormTemplate,
     WorkplaceTemplate,
   } from '@svadmin/ui';
+  import { untrack } from 'svelte';
   import type { FormStep } from '@svadmin/ui/components/StepForm.svelte';
 
   const navItems = [
     { id: 'workplace', label: 'Workplace' },
     { id: 'monitor', label: 'Monitor' },
     { id: 'analysis', label: 'Analysis' },
+    { id: 'analysis-multi', label: 'Multi-dimension' },
     { id: 'search-table', label: 'Search table' },
     { id: 'card-list', label: 'Card list' },
     { id: 'group-form', label: 'Group form' },
@@ -29,11 +32,34 @@
     { id: 'basic-detail', label: 'Basic detail' },
     { id: 'advanced-detail', label: 'Advanced detail' },
     { id: 'profile', label: 'Profile' },
+    { id: 'user-info', label: 'User info' },
+    { id: 'user-settings', label: 'User settings' },
     { id: 'result', label: 'Result' },
-    { id: 'exception', label: 'Exception' },
+    { id: 'result-error', label: 'Result error' },
+    { id: 'exception', label: 'Exception 403' },
+    { id: 'exception-404', label: 'Exception 404' },
+    { id: 'exception-500', label: 'Exception 500' },
   ];
-  const routeTemplate = (typeof window === 'undefined' ? '' : window.location.hash.split('?')[0]?.split('/').filter(Boolean).pop()) ?? '';
-  let active = $state<string>(navItems.some((item) => item.id === routeTemplate) ? routeTemplate : 'workplace');
+  let { route = '/templates', standalone = false }: { route?: string; standalone?: boolean } = $props();
+  const routeTemplate = untrack(() => route.split('/').filter(Boolean).pop() ?? (typeof window === 'undefined' ? '' : window.location.hash.split('?')[0]?.split('/').filter(Boolean).pop()) ?? '');
+  let active = $state<string>(untrack(() => navItems.some((item) => item.id === routeTemplate) ? routeTemplate : 'workplace'));
+  let dimension = $state<'region' | 'product' | 'channel'>('region');
+  const dimensionOptions = [
+    { value: 'region' as const, label: 'Region' },
+    { value: 'product' as const, label: 'Product' },
+    { value: 'channel' as const, label: 'Channel' },
+  ];
+  let cardScope = $state<'all' | 'quality' | 'service'>('all');
+  const cardScopeOptions = [
+    { value: 'all' as const, label: 'All cards' },
+    { value: 'quality' as const, label: 'Quality' },
+    { value: 'service' as const, label: 'Service' },
+  ];
+  const approvalSteps = [
+    { title: 'Commit', description: 'Submitted by Avery' },
+    { title: 'Approval', description: 'Pending operations review' },
+    { title: 'Finish', description: 'Publish after approval' },
+  ];
 
   function selectTemplate(id: string): void {
     active = id;
@@ -51,10 +77,11 @@
     { id: 'r3', name: 'Atlas expansion', owner: 'Noah Silva', status: 'Draft', amount: '$21,300' },
   ];
   const cardItems = [
-    { id: 'c1', title: 'Operations handbook', description: 'Ownership, escalation paths and service levels.', badge: 'Updated' },
-    { id: 'c2', title: 'Customer onboarding', description: 'Checklist, owners and first-week milestones.', badge: 'Template' },
-    { id: 'c3', title: 'Incident response', description: 'Detection, triage and post-incident review.', badge: 'Critical' },
+    { id: 'c1', category: 'quality' as const, title: 'Operations handbook', description: 'Ownership, escalation paths and service levels.', badge: 'Updated' },
+    { id: 'c2', category: 'service' as const, title: 'Customer onboarding', description: 'Checklist, owners and first-week milestones.', badge: 'Template' },
+    { id: 'c3', category: 'quality' as const, title: 'Incident response', description: 'Detection, triage and post-incident review.', badge: 'Critical' },
   ];
+  const visibleCards = $derived(cardScope === 'all' ? cardItems : cardItems.filter((card) => card.category === cardScope));
   const steps: FormStep[] = [
     { title: 'Basics', description: 'Name and owner' },
     { title: 'Scope', description: 'Teams and permissions' },
@@ -71,19 +98,44 @@
     ['Priority', 'High'],
     ['Due date', '2026-11-04'],
   ];
+  const studioDetails = [
+    ['Region', 'us-east-1'],
+    ['Channel', 'Web and mobile'],
+    ['Owner', 'Platform team'],
+    ['On-call', 'Mina Park'],
+  ];
 
   function finishStep(): void {
     active = 'result';
   }
 </script>
 
-<div class="svadmin-template-gallery">
-  <aside class="svadmin-template-gallery__nav" aria-label="Template navigation">
-    <p class="svadmin-template-gallery__eyebrow">Page templates</p>
-    <Menu items={navItems} bind:selected={active} onselect={(item) => selectTemplate(item.id)} />
-  </aside>
+<div class="svadmin-template-gallery" class:is-standalone={standalone}>
+  {#if !standalone}
+    <aside class="svadmin-template-gallery__nav" aria-label="Template navigation">
+      <p class="svadmin-template-gallery__eyebrow">Page templates</p>
+      <Menu items={navItems} bind:selected={active} onselect={(item) => selectTemplate(item.id)} />
+    </aside>
+  {/if}
 
   <main class="svadmin-template-gallery__main">
+    {#if standalone}
+      <div class="svadmin-template-gallery__standalone-nav" role="navigation" aria-label="Template switcher">
+        <a class="svadmin-template-gallery__back" href="#/templates">← All page templates</a>
+        <div class="svadmin-template-gallery__switcher">
+          {#each navItems as item (item.id)}
+            <button
+              type="button"
+              aria-pressed={active === item.id}
+              class="svadmin-template-gallery__switch"
+              onclick={() => selectTemplate(item.id)}
+            >
+              {item.label}
+            </button>
+          {/each}
+        </div>
+      </div>
+    {/if}
     {#snippet actions()}
       <Button size="sm">Create</Button>
     {/snippet}
@@ -112,7 +164,7 @@
     {/snippet}
     {#snippet cards()}
       <Grid columns={3} gap="md">
-        {#each cardItems as card (card.id)}
+        {#each visibleCards as card (card.id)}
           <article class="svadmin-template-gallery__card">
             <Badge variant="secondary">{card.badge}</Badge>
             <h3>{card.title}</h3>
@@ -194,16 +246,125 @@
       </div>
     {/snippet}
 
+    {#snippet dimensions()}
+      <div class="svadmin-template-gallery__dimensions">
+        <span>Dimension</span>
+        <SegmentedControl options={dimensionOptions} bind:value={dimension} ariaLabel="Analysis dimension" />
+      </div>
+    {/snippet}
+    {#snippet userSettings()}
+      <div class="svadmin-template-gallery__stack">
+        <ProfilePage headingLevel="h2" />
+        <NotificationsSettings headingLevel="h2" />
+        <AppearanceSettings headingLevel="h2" />
+        <SecuritySettings headingLevel="h2" />
+      </div>
+    {/snippet}
+    {#snippet retryActions()}
+      <Button size="sm" onclick={() => (active = 'advanced-form')}>Back to form</Button>
+      <Button variant="outline" size="sm" onclick={() => (active = 'workplace')}>Back to workspace</Button>
+    {/snippet}
+
+    {#snippet shortcuts()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Shortcuts</h3>
+        <div class="svadmin-template-gallery__shortcuts">
+          <Button variant="outline" size="sm">New approval</Button>
+          <Button variant="outline" size="sm">Open workspace</Button>
+          <Button variant="outline" size="sm">Invite member</Button>
+          <Button variant="outline" size="sm">Review incidents</Button>
+        </div>
+      </div>
+    {/snippet}
+    {#snippet announcements()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Announcements</h3>
+        <article class="svadmin-template-gallery__row">
+          <div><strong>Quarterly planning starts Monday</strong><p>Submit team objectives before Friday.</p></div>
+          <Badge variant="secondary">Pinned</Badge>
+        </article>
+        <article class="svadmin-template-gallery__row">
+          <div><strong>New approval policy</strong><p>High-value requests now require two reviewers.</p></div>
+          <Badge variant="outline">Policy</Badge>
+        </article>
+      </div>
+    {/snippet}
+    {#snippet docs()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Docs</h3>
+        <a class="svadmin-template-gallery__link" href="#/templates/workplace">Workspace guide</a>
+        <a class="svadmin-template-gallery__link" href="#/templates/advanced-detail">Approval handbook</a>
+        <a class="svadmin-template-gallery__link" href="#/templates/monitor">Incident response</a>
+      </div>
+    {/snippet}
+    {#snippet monitorQuick()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Quick operations</h3>
+        <div class="svadmin-template-gallery__shortcuts">
+          <Button size="sm">Restart worker</Button>
+          <Button variant="outline" size="sm">Rotate token</Button>
+          <Button variant="outline" size="sm">Open runbook</Button>
+        </div>
+      </div>
+    {/snippet}
+    {#snippet monitorStatus()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Studio status</h3>
+        <article class="svadmin-template-gallery__row"><div><strong>Ingestion pipeline</strong><p>No backlog detected.</p></div><Badge>Healthy</Badge></article>
+        <article class="svadmin-template-gallery__row"><div><strong>Transcode queue</strong><p>2 jobs waiting.</p></div><Badge variant="secondary">Degraded</Badge></article>
+      </div>
+    {/snippet}
+    {#snippet monitorInfo()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Studio information</h3>
+        <dl class="svadmin-template-gallery__details">
+          {#each studioDetails as [label, value] (label)}
+            <div><dt>{label}</dt><dd>{value}</dd></div>
+          {/each}
+        </dl>
+      </div>
+    {/snippet}
+    {#snippet bulkActions()}
+      <Button size="sm">Add record</Button>
+      <Button variant="outline" size="sm">Upload</Button>
+      <Button variant="outline" size="sm">Export</Button>
+    {/snippet}
+    {#snippet pagination()}
+      <ListPagination page={1} totalPages={8} total={72} rangeStart={1} rangeEnd={10} label="Records" onPageChange={() => {}} />
+    {/snippet}
+    {#snippet cardTabs()}
+      <SegmentedControl options={cardScopeOptions} bind:value={cardScope} ariaLabel="Card category" />
+    {/snippet}
+    {#snippet addCard()}
+      <Button variant="outline" size="sm">+ Add card</Button>
+    {/snippet}
+    {#snippet detailSteps()}
+      <Steps current={1} items={approvalSteps} />
+    {/snippet}
+    {#snippet history()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Adjustment history</h3>
+        {#each records as record (record.id)}
+          <article class="svadmin-template-gallery__row">
+            <div><strong>{record.name}</strong><p>{record.owner} · {record.amount}</p></div>
+            <Badge variant={record.status === 'Approved' ? 'default' : 'secondary'}>{record.status}</Badge>
+          </article>
+        {/each}
+      </div>
+    {/snippet}
+
     {#if active === 'workplace'}
-      <WorkplaceTemplate title="Workplace" description="Daily priorities, approvals and activity in one place" actions={actions} metrics={metrics} primary={list} secondary={activity} footer={footer} />
+      <WorkplaceTemplate title="Workplace" description="Daily priorities, approvals and activity in one place" actions={actions} metrics={metrics} primary={list} secondary={activity} {shortcuts} {announcements} {docs} footer={footer} />
     {:else if active === 'monitor'}
-      <MonitorTemplate title="Operations monitor" description="Live service health and active incidents" actions={actions} metrics={metrics} alerts={activity} activity={list} chart={charts} />
+      <MonitorTemplate title="Operations monitor" description="Live service health and active incidents" actions={actions} metrics={metrics} alerts={activity} activity={list} chart={charts} quickOperations={monitorQuick} status={monitorStatus} information={monitorInfo} />
     {:else if active === 'analysis'}
       <AnalysisTemplate title="Revenue analysis" description="Filter, compare and export performance" actions={actions} filters={filters} metrics={metrics} charts={charts} records={table} />
+    {:else if active === 'analysis-multi'}
+      <MultiDimensionAnalysisTemplate title="Multi-dimension analysis" description="Compare regions, products and channels with the same metric definitions" actions={actions} dimensions={dimensions} metrics={metrics} chart={charts} breakdown={list} insights={activity} footer={footer} />
     {:else if active === 'search-table'}
-      <SearchTableTemplate title="Search records" description="Composable filters with result summary" actions={actions} filters={filters} metrics={metrics} table={table} footer={footer} />
+      <SearchTableTemplate title="Search records" description="Composable filters with result summary" actions={actions} filters={filters} bulkActions={bulkActions} metrics={metrics} table={table} pagination={pagination} footer={footer} />
     {:else if active === 'card-list'}
-      <CardListTemplate title="Resource library" description="Browse reusable workspace assets" actions={actions} filters={filters} items={cards} footer={footer} />
+      <CardListTemplate title="Resource library" description="Browse reusable workspace assets" actions={actions} tabs={cardTabs} filters={filters} addCard={addCard} items={cards} footer={footer} />
     {:else if active === 'group-form'}
       <GroupFormTemplate title="Create workspace" description="Group related fields into a clear form" actions={actions} form={form} summary={summary} footer={footer} />
     {:else if active === 'step-form'}
@@ -211,21 +372,42 @@
     {:else if active === 'advanced-form'}
       <AdvancedFormTemplate title="Advanced request" description="Form, summary and activity side by side" actions={actions} form={form} summary={summary} footer={footer} />
     {:else if active === 'basic-detail'}
-      <BasicDetailTemplate title="Request detail" description="Read-only record summary" actions={actions} details={detailsBlock} summary={summary} footer={footer} />
+      <BasicDetailTemplate title="Request detail" description="Read-only record summary" actions={actions} steps={detailSteps} details={detailsBlock} summary={summary} history={history} footer={footer} />
     {:else if active === 'advanced-detail'}
       <AdvancedDetailTemplate title="Case detail" description="Details, approvals and related records" actions={actions} details={detailsBlock} activity={activity} related={list} metrics={metrics} footer={footer} />
     {:else if active === 'profile'}
       <ProfileTemplate title="Public profile" description="Identity, activity and shared work" actions={actions} profile={profile} activity={activity} projects={cards} />
+    {:else if active === 'user-info'}
+      <PublicProfilePage variant="default" showSections />
+    {:else if active === 'user-settings'}
+      <TemplatePageShell title="User settings" description="Manage profile, security and notification preferences" primary={userSettings} pageId="user-settings" width="wide" />
     {:else if active === 'result'}
       <ResultTemplate status="success" title="Workspace published" subtitle="Invitations are on the way." actions={resultActions} details={detailsBlock} />
+    {:else if active === 'result-error'}
+      <ResultTemplate status="failure" title="Publish failed" subtitle="Resolve the validation errors and try again." actions={retryActions} details={detailsBlock} />
     {:else if active === 'exception'}
       <ExceptionTemplate status={403} actions={resultActions} />
+    {:else if active === 'exception-404'}
+      <ExceptionTemplate status={404} actions={resultActions} />
+    {:else if active === 'exception-500'}
+      <ExceptionTemplate status={500} actions={resultActions} />
     {/if}
   </main>
 </div>
 
 <style>
   .svadmin-template-gallery { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); gap: var(--svadmin-space-5); padding: var(--svadmin-space-4); }
+  .svadmin-template-gallery.is-standalone { grid-template-columns: minmax(0, 1fr); }
+  .svadmin-template-gallery__standalone-nav { display: grid; gap: var(--svadmin-space-2); margin-block-end: var(--svadmin-space-3); }
+  .svadmin-template-gallery__switcher { display: flex; gap: var(--svadmin-space-1); overflow-x: auto; padding-block-end: var(--svadmin-space-1); }
+  .svadmin-template-gallery__switch { flex-shrink: 0; border: 1px solid var(--border); border-radius: 999px; padding: 0.25rem 0.625rem; background: var(--card); color: var(--muted-foreground); font: inherit; font-size: var(--svadmin-text-caption); cursor: pointer; }
+  .svadmin-template-gallery__switch[aria-pressed='true'] { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); }
+  .svadmin-template-gallery__back { display: inline-flex; color: var(--primary); font-size: var(--svadmin-text-label); text-decoration: none; }
+  .svadmin-template-gallery__back:hover { text-decoration: underline; }
+  .svadmin-template-gallery__dimensions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--svadmin-space-2); color: var(--muted-foreground); font-size: var(--svadmin-text-label); }
+  .svadmin-template-gallery__shortcuts { display: flex; flex-wrap: wrap; gap: var(--svadmin-space-2); }
+  .svadmin-template-gallery__link { color: var(--primary); font-size: var(--svadmin-text-label); text-decoration: none; }
+  .svadmin-template-gallery__link:hover { text-decoration: underline; }
   .svadmin-template-gallery__nav { position: sticky; inset-block-start: var(--svadmin-space-4); align-self: start; padding: var(--svadmin-space-3); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); }
   .svadmin-template-gallery__eyebrow { margin: 0 0 var(--svadmin-space-3); color: var(--muted-foreground); font-size: var(--svadmin-text-caption); text-transform: uppercase; letter-spacing: 0.06em; }
   .svadmin-template-gallery__main { min-width: 0; }

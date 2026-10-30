@@ -3,7 +3,7 @@ import { designSystemComponents } from "./design-system-components.js";
 
 describe("design system component contract", () => {
 	it("defines a complete contract for every component set", () => {
-		expect(designSystemComponents).toHaveLength(34);
+		expect(designSystemComponents).toHaveLength(35);
 		expect(new Set(designSystemComponents.map((component) => component.id)).size).toBe(
 			designSystemComponents.length,
 		);

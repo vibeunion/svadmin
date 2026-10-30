@@ -42,6 +42,7 @@ Complete reference for all `@svadmin/ui` components.
 | Switch | Toggle switch / 开关 |
 | Checkbox | Checkbox / 复选框 |
 | Badge | Status badge / 状态标签 |
+| Tag | Closable and checkable tag / 可关闭与可选中标签 |
 | Avatar | User avatar / 用户头像 |
 | Skeleton | Loading placeholder / 加载占位 |
 | Alert | Alert message / 提示消息 |
@@ -57,6 +58,7 @@ Complete reference for all `@svadmin/ui` components.
 | Separator | Visual divider / 分隔线 |
 | Calendar | Month calendar with events / 带事件月历 |
 | Carousel | Accessible slide carousel / 可访问轮播 |
+| Image | Responsive image with fallback and preview trigger / 响应式图片、失败占位与预览触发 |
 | ImagePreview | Image gallery preview / 图片预览与切换 |
 | Anchor | Scroll-spy section navigation / 锚点导航 |
 | Affix | Sticky container / 固钉容器 |
@@ -82,9 +84,41 @@ Complete reference for all `@svadmin/ui` components.
 
 | Package | Description / 描述 |
 |---------|-------------------|
-| `@svadmin/charts` | Treemap and Sankey charts with LayerChart / LayerChart 高级图表 |
-| `@svadmin/dock` | SplitPane and DockLayout workspaces / 分栏与可停靠工作区 |
+| `@svadmin/charts` | Box plot, sunburst, graph, treemap and sankey charts / 箱线图、旭日图、关系图、矩形树图与桑基图 |
+| `@svadmin/dock` | SplitPane, DockLayout and persisted DockWorkspace / 分栏、可停靠与持久化工作区 |
 | MediaPlayer HLS | Optional `hls.js` playback for `.m3u8` sources / 可选的 HLS 播放 |
+| VideoPlayer | Optional `vidstack` full player with HLS, tracks and controls / 可选的完整播放器 |
+
+## Compatibility aliases / 兼容别名
+
+Arco-style names are exported as aliases without changing the canonical svadmin
+component names:
+
+| Arco-style | Canonical |
+| --- | --- |
+| `Comment` | `CommentThread` |
+| `Descriptions` | `DescriptionList` |
+| `InputNumber` | `NumberInput` |
+| `InputTag` | `TagsInput` |
+| `List` | `ItemList` |
+| `Mentions` | `MentionsInput` |
+| `Message` | `toast` |
+| `Modal` | `Dialog` namespace |
+| `Drawer` | `Sheet` namespace |
+| `Dropdown` | `DropdownMenu` namespace |
+| `Notification` | `notification` service |
+| `Radio` | `RadioGroup` |
+| `Split` | `SplitPaneLayout` |
+| `Upload` | `FileUpload` |
+| `VerificationCode` | `OtpInput` |
+
+Prefer canonical names in new code; aliases exist for migration and host
+compatibility. `Modal`, `Drawer` and `Dropdown` are namespace aliases: their
+compound APIs still follow `Dialog`, `Sheet` and `DropdownMenu`, not Arco's
+component API one-to-one.
+
+See the [Arco / Arco Pro parity audit](./arco-parity.md) for remaining gaps and
+priorities.
 
 ## Data Visualization / 数据可视化
 

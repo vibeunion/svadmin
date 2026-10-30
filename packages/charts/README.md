@@ -8,7 +8,7 @@ bun add @svadmin/charts layerchart
 
 ```svelte
 <script lang="ts">
-  import { TreemapChart, SankeyChart } from '@svadmin/charts';
+  import { TreemapChart, SankeyChart, BoxPlotChart, SunburstChart, GraphChart } from '@svadmin/charts';
 </script>
 
 <TreemapChart
@@ -27,3 +27,9 @@ bun add @svadmin/charts layerchart
 ```
 
 The package is optional: `layerchart` is a peer dependency and is not loaded by `@svadmin/ui`.
+
+Additional components:
+
+- `BoxPlotChart` — grouped quartiles, whiskers and outliers.
+- `SunburstChart` — hierarchical rings with radial labels.
+- `GraphChart` — deterministic force layout for node-link diagrams.

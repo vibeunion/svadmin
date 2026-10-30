@@ -10,12 +10,39 @@
     alerts?: Snippet;
     activity?: Snippet;
     chart?: Snippet;
+    status?: Snippet;
+    quickOperations?: Snippet;
+    information?: Snippet;
     pageId?: string;
     width?: 'narrow' | 'default' | 'wide';
   }
 
-  let { title, description, actions, metrics, alerts, activity, chart, pageId = 'monitor', width = 'wide' }: Props = $props();
+  let {
+    title,
+    description,
+    actions,
+    metrics,
+    alerts,
+    activity,
+    chart,
+    status,
+    quickOperations,
+    information,
+    pageId = 'monitor',
+    width = 'wide',
+  }: Props = $props();
+
+  const hasContext = $derived(Boolean(activity || status || quickOperations || information));
 </script>
+
+{#snippet context()}
+  <div class="svadmin-monitor-template__context">
+    {#if activity}{@render activity()}{/if}
+    {#if status}{@render status()}{/if}
+    {#if quickOperations}{@render quickOperations()}{/if}
+    {#if information}{@render information()}{/if}
+  </div>
+{/snippet}
 
 <TemplatePageShell
   {title}
@@ -23,7 +50,7 @@
   {...(actions ? { actions } : {})}
   {metrics}
   primary={chart ?? alerts ?? fallback}
-  {...(activity ? { secondary: activity } : {})}
+  {...(hasContext ? { secondary: context } : {})}
   {pageId}
   {width}
   primaryLabel="Live monitor"
@@ -35,5 +62,6 @@
 {/snippet}
 
 <style>
+  .svadmin-monitor-template__context { display: grid; gap: var(--svadmin-space-4); min-width: 0; }
   .svadmin-monitor-template__empty { margin: 0; padding: var(--svadmin-space-5); border: 1px dashed var(--border); border-radius: var(--radius-md); color: var(--muted-foreground); text-align: center; }
 </style>

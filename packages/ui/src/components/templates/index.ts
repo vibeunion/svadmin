@@ -2,6 +2,7 @@ export { default as TemplatePageShell } from './TemplatePageShell.svelte';
 export { default as WorkplaceTemplate } from './WorkplaceTemplate.svelte';
 export { default as MonitorTemplate } from './MonitorTemplate.svelte';
 export { default as AnalysisTemplate } from './AnalysisTemplate.svelte';
+export { default as MultiDimensionAnalysisTemplate } from './MultiDimensionAnalysisTemplate.svelte';
 export { default as SearchTableTemplate } from './SearchTableTemplate.svelte';
 export { default as CardListTemplate } from './CardListTemplate.svelte';
 export { default as GroupFormTemplate } from './GroupFormTemplate.svelte';

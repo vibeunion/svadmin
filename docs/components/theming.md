@@ -268,5 +268,5 @@ explicit component `size` always wins.
 </ConfigProvider>
 ```
 
-当前 `Button`、`Input`、`Select`、`Badge` 会消费 `componentSize` / `density`；
+当前 `Button`、`Input`、`Select`、`Badge`、`Tag` 会消费 `componentSize` / `density`；
 其他组件可以继续显式传入自身尺寸。包装层使用 `display: contents`，不会改变页面布局。

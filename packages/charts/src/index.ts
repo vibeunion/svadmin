@@ -1,4 +1,10 @@
 export { default as TreemapChart } from './components/TreemapChart.svelte';
 export { default as SankeyChart } from './components/SankeyChart.svelte';
+export { default as BoxPlotChart } from './components/BoxPlotChart.svelte';
+export { default as SunburstChart } from './components/SunburstChart.svelte';
+export { default as GraphChart } from './components/GraphChart.svelte';
 export type { TreemapNode } from './components/treemap.js';
 export type { SankeyData, SankeyLink, SankeyNode } from './components/sankey.js';
+export type { BoxPlotGroup, BoxPlotStats } from './components/boxplot.js';
+export type { SunburstNode } from './components/sunburst.js';
+export type { GraphData, GraphLink, GraphNode } from './components/graph.js';

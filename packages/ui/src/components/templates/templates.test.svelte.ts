@@ -10,6 +10,7 @@ import CardListTemplate from './CardListTemplate.svelte';
 import ExceptionTemplate from './ExceptionTemplate.svelte';
 import GroupFormTemplate from './GroupFormTemplate.svelte';
 import MonitorTemplate from './MonitorTemplate.svelte';
+import MultiDimensionAnalysisTemplate from './MultiDimensionAnalysisTemplate.svelte';
 import ProfileTemplate from './ProfileTemplate.svelte';
 import ResultTemplate from './ResultTemplate.svelte';
 import SearchTableTemplate from './SearchTableTemplate.svelte';
@@ -43,6 +44,10 @@ describe('page templates', () => {
 
     render(AnalysisTemplate, { props: { title: 'Analysis', charts: body, records: body } });
     heading('Analysis');
+    cleanup();
+
+    render(MultiDimensionAnalysisTemplate, { props: { title: 'Multi-dimension analysis', chart: body, dimensions: body, breakdown: body, insights: body } });
+    heading('Multi-dimension analysis');
     cleanup();
 
     render(SearchTableTemplate, { props: { title: 'Search table', table: body } });
@@ -83,5 +88,26 @@ describe('page templates', () => {
 
     render(ExceptionTemplate, { props: { status: 404 } });
     heading('Page not found');
+  });
+
+  it('renders the Arco Pro page-depth slots', () => {
+    render(WorkplaceTemplate, { props: { title: 'Workplace', primary: body, secondary: body, media: body, shortcuts: body, announcements: body, docs: body } });
+    heading('Workplace');
+    cleanup();
+
+    render(MonitorTemplate, { props: { title: 'Monitor', metrics: body, chart: body, activity: body, status: body, quickOperations: body, information: body } });
+    heading('Monitor');
+    cleanup();
+
+    render(SearchTableTemplate, { props: { title: 'Search table', filters: body, bulkActions: body, table: body, pagination: body, footer: body } });
+    heading('Search table');
+    cleanup();
+
+    render(CardListTemplate, { props: { title: 'Card list', tabs: body, filters: body, addCard: body, items: body } });
+    heading('Card list');
+    cleanup();
+
+    render(BasicDetailTemplate, { props: { title: 'Basic detail', steps: body, details: body, summary: body, history: body } });
+    heading('Basic detail');
   });
 });

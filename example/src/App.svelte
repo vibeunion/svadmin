@@ -19,7 +19,9 @@
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
   import LazyWorkspaceTabs from './components/LazyWorkspaceTabs.svelte';
+  import LazyWorkspaceDock from './components/LazyWorkspaceDock.svelte';
   import LazyTemplateGallery from './components/LazyTemplateGallery.svelte';
+  import LazyTemplatePage from './components/LazyTemplatePage.svelte';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
@@ -37,6 +39,7 @@
   const menu = $derived.by<MenuItem[]>(() => [
     { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
     { name: 'workspace_tabs', label: currentLocale === 'zh-CN' ? '多标签工作台' : 'Multi-tab Workspace', icon: 'folder', href: '/workspace' },
+    { name: 'workspace_dock', label: currentLocale === 'zh-CN' ? '停靠工作区' : 'Dock Workspace', icon: 'layout', href: '/workspace/dock' },
     { name: 'page_templates', label: currentLocale === 'zh-CN' ? '页面模板' : 'Page Templates', icon: 'layout', href: '/templates' },
     ...createExampleMenu(currentLocale),
   ]);
@@ -62,9 +65,10 @@
 
   const pageRoutes = [
     { path: '/workspace', component: LazyWorkspaceTabs, title: 'Multi-tab Workspace' },
+    { path: '/workspace/dock', component: LazyWorkspaceDock, title: 'Dock Workspace' },
     { path: '/templates', component: LazyTemplateGallery, title: 'Page Templates' },
-    ...['workplace', 'monitor', 'analysis', 'search-table', 'card-list', 'group-form', 'step-form', 'advanced-form', 'basic-detail', 'advanced-detail', 'profile', 'result', 'exception']
-      .map((template) => ({ path: `/templates/${template}`, component: LazyTemplateGallery, title: `Page Template: ${template}` })),
+    ...['workplace', 'monitor', 'analysis', 'analysis-multi', 'search-table', 'card-list', 'group-form', 'step-form', 'advanced-form', 'basic-detail', 'advanced-detail', 'profile', 'user-info', 'user-settings', 'result', 'result-error', 'exception', 'exception-404', 'exception-500']
+      .map((template) => ({ path: `/templates/${template}`, component: LazyTemplatePage, title: `Page Template: ${template}` })),
   ];
 </script>
 

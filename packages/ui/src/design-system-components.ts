@@ -91,6 +91,15 @@ export const designSystemComponents = [
 		sizes: ["default", "compact"],
 	},
 	{
+		id: "ui.tag",
+		name: "Tag",
+		codePath: "packages/ui/src/components/Tag.svelte",
+		codeExport: "Tag",
+		states: ["default", "checked", "unchecked", "focus", "disabled"],
+		themes: ["light", "dark"],
+		sizes: ["default", "compact"],
+	},
+	{
 		id: "ui.dropdown-menu",
 		name: "DropdownMenu",
 		codePath: "packages/ui/src/components/ui/dropdown-menu/index.ts",

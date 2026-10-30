@@ -8,6 +8,8 @@
   interface Props {
     panels: DockPanel[];
     layout?: SerializedDockview;
+    /** Persist and restore the serialized layout under this localStorage key. */
+    storageKey?: string;
     ariaLabel?: string;
     class?: string;
     onlayout?: (layout: SerializedDockview) => void;
@@ -17,6 +19,7 @@
   let {
     panels,
     layout,
+    storageKey,
     ariaLabel = 'Dock workspace',
     class: className,
     onlayout,
@@ -59,8 +62,18 @@
         },
       });
 
-      if (layout) {
-        component.fromJSON(layout);
+      let restored = layout;
+      if (!restored && storageKey) {
+        try {
+          const raw = window.localStorage.getItem(storageKey);
+          if (raw) restored = JSON.parse(raw) as SerializedDockview;
+        } catch {
+          restored = undefined;
+        }
+      }
+
+      if (restored) {
+        component.fromJSON(restored);
       } else {
         for (const panel of panels) {
           component.addPanel({
@@ -79,7 +92,22 @@
         }
       }
 
-      disposeLayout = component.api.onDidLayoutChange(() => onlayout?.(component.toJSON()));
+      const persist = (next: SerializedDockview) => {
+        if (storageKey) {
+          try {
+            window.localStorage.setItem(storageKey, JSON.stringify(next));
+          } catch {
+            // Private browsing or a full quota must not break the workspace.
+          }
+        }
+      };
+
+      persist(component.toJSON());
+      disposeLayout = component.api.onDidLayoutChange(() => {
+        const next = component.toJSON();
+        onlayout?.(next);
+        persist(next);
+      });
       onready?.(component.api);
       dock = component;
     }).catch((cause: unknown) => {

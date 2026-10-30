@@ -152,7 +152,19 @@ Surface 包内定向测试验证分源重试和诊断回调；SVAR 的
 | Progress line | determinate / indeterminate / status | 语义色来自 token，不确定态不声明 `aria-valuenow` | 展示百分比由 `format` 或默认 `Math.round` 决定 |
 | Progress circle | determinate / indeterminate | SVG 圆环随 `size/strokeWidth` 缩放 | `showInfo` 时信息在圆环中心 |
 | NotificationHost | empty / open / success / warning / danger / info | 顶部右侧堆叠，移动端不超出视口 | `notification.close`、按 key 替换、超时自动关闭 |
-| ConfigProvider | default / compact / sm / rtl | 包装层不改变布局，仅提供配置上下文和 data 属性 | `Button`、`Input`、`Select`、`Badge` 消费默认尺寸；显式 size 覆盖默认值 |
+| ConfigProvider | default / compact / sm / rtl | 包装层不改变布局，仅提供配置上下文和 data 属性 | `Button`、`Input`、`Select`、`Badge`、`Tag` 消费默认尺寸；显式 size 覆盖默认值 |
+
+## Tag / EmptyState
+
+| 组件 | 状态 | 视觉契约 | 交互契约 |
+| --- | --- | --- | --- |
+| Tag | default | 使用 Badge 语义变体与当前字号，不新增硬编码颜色 | 无交互，只展示标签 |
+| Tag | checkable | `aria-pressed` 表达选中态，选中态沿用 Badge 的 primary 变体 | 点击或键盘触发 `onchange(!checked)` |
+| Tag | closable | 关闭按钮与标签同一基线，图标不挤压文本 | 关闭按钮有独立 `aria-label`，触发 `onclose` |
+| Tag | disabled | 降低不透明度，保留可读文本 | 可选中/关闭按钮均禁用，不触发回调 |
+| EmptyState | default | 默认图标、标题、描述和操作区 | 语义 `role=status`，不伪造数据 |
+| EmptyState | image | 使用 `image`/`imageAlt` 渲染插图，替代默认图标 | 图片失败不影响标题与恢复操作 |
+| EmptyState | custom icon | 通过 `icon` snippet 渲染宿主图标 | 图标仅装饰，标题仍承担可访问名称 |
 
 ## Page templates
 
@@ -165,3 +177,5 @@ Surface 包内定向测试验证分源重试和诊断回调；SVAR 的
 | Filtered empty | 有筛选但无匹配 | 使用 `DataState filtered-empty`，提供清除筛选 |
 | Error | 查询失败 | 使用 `DataState error` 的 `retry`，不并列重复重试按钮 |
 | Forbidden | 权限拒绝 | 使用 `DataState forbidden`，不渲染旧内容 |
+
+扩展路由：`/templates/analysis-multi`、`/templates/user-info`、`/templates/user-settings`、`/templates/result-error`、`/templates/exception-404`、`/templates/exception-500`。这些路由覆盖 Arco Pro 的多维分析、用户中心、错误结果与 404/500 异常场景；`e2e/templates.spec.ts` 验证每个导航项和独立路由都能渲染对应标题。

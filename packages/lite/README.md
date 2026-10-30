@@ -253,7 +253,7 @@ IE11 before the decision is made.
 
 ## Components & Parity (100% Coverage)
 
-`@svadmin/lite` provides **100% component parity** (103/103 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
+`@svadmin/lite` provides **100% component parity** (126/126 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
 
 ### Core Pages & Layout
 
@@ -335,7 +335,7 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 - **CLI Dashboard**: Run `bun run check:parity` to inspect the live coverage matrix in terminal.
 - **Parity Matrix Document**: [PARITY.md](./PARITY.md) is auto-generated with exhaustive module-by-module tables.
 - **Machine-Readable JSON**: `packages/lite/parity.json` provides structured data for automation.
-- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 103 components and live metrics.
+- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 126 components and live metrics.
 - **CI Contract Test**: `scripts/parity-contract.test.ts` runs in CI to prevent regression and ensure every new UI component has a documented Lite counterpart.
 
 ## Server Utilities

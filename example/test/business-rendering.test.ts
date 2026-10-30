@@ -68,7 +68,9 @@ describe('business rendering migration inventory', () => {
           'features/case/CaseWorkspacePage.svelte',
           'features/dashboard/DashboardWorkspace.svelte',
           'features/showcase/DesignPrinciplesPage.svelte',
+          'features/templates/DockPanelContent.svelte',
           'features/templates/TemplateGalleryPage.svelte',
+          'features/templates/WorkspaceDockPage.svelte',
           'features/workspace/WorkspaceResourceEditor.svelte',
           'features/workspace/WorkspaceTabsPage.svelte',
         ]).toContain(entry.file);

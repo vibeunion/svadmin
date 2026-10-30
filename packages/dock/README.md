@@ -21,4 +21,7 @@ bun add @svadmin/dock dockview
 ```
 
 Use `DockLayout` when tabs, split groups, drag-and-drop docking and layout
-serialization are required. Both engines are optional peer dependencies.
+serialization are required. Pass `storageKey` to persist and restore the layout
+automatically, or use `DockWorkspace` for the toolbar and workspace shell.
+
+Both engines are optional peer dependencies.

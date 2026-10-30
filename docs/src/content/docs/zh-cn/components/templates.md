@@ -27,6 +27,22 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 | `ResultTemplate` | 成功、失败与状态结果 | `title` |
 | `ExceptionTemplate` | 403、404、500 页面 | `status` |
 
+
+## Arco Pro 页面深度插槽
+
+上面的目录覆盖了 Arco Pro 的页面族。以下可选插槽用于补齐页面组合深度，同时不强制
+固定的模拟布局：
+
+| 模板 | Arco Pro 可选区块 |
+| --- | --- |
+| `WorkplaceTemplate` | `secondary`、`media`、`shortcuts`、`announcements`、`docs` |
+| `MonitorTemplate` | `activity`、`status`、`quickOperations`、`information` |
+| `SearchTableTemplate` | `filters`、`bulkActions`、`pagination`、`footer` |
+| `CardListTemplate` | `tabs`、`filters`、`addCard` |
+| `BasicDetailTemplate` | `steps`、`summary`、`history` |
+
+对应查询、权限、变更和遥测仍归宿主所有；插槽只负责这些区块的渲染位置。
+
 ## 组合示例
 
 ```svelte
@@ -81,8 +97,9 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 `/templates/workplace`、`/templates/monitor`、`/templates/analysis`、
 `/templates/search-table`、`/templates/card-list`、`/templates/group-form`、
 `/templates/step-form`、`/templates/advanced-form`、`/templates/basic-detail`、
-`/templates/advanced-detail`、`/templates/profile`、`/templates/result`、
-`/templates/exception`。
+`/templates/advanced-detail`、`/templates/profile`、`/templates/user-info`、
+`/templates/user-settings`、`/templates/result`、`/templates/result-error`、
+`/templates/exception`、`/templates/exception-404`、`/templates/exception-500`。
 
 画廊只证明结构组合，不替代数据 Provider 验收。真实路由必须在拥有查询的插槽内
 处理 loading、empty、filtered-empty、error 和 forbidden。

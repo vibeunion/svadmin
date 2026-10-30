@@ -16,6 +16,10 @@
     "mode": "local-state"
   },
   {
+    "file": "features/catalog/ProductsPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
     "file": "features/crm/CrmDashboardPage.svelte",
     "mode": "query-rendering"
   },
@@ -32,16 +36,8 @@
     "mode": "local-state"
   },
   {
-    "file": "features/showcase/DesignPrinciplesPage.svelte",
-    "mode": "static-showcase"
-  },
-  {
     "file": "features/domain/DomainWorkspacePage.svelte",
     "mode": "query-rendering"
-  },
-  {
-    "file": "features/resource/ExampleResourcePage.svelte",
-    "mode": "delegated-rendering"
   },
   {
     "file": "features/domain/InventoryDirectoryPage.svelte",
@@ -68,8 +64,12 @@
     "mode": "delegated-rendering"
   },
   {
-    "file": "features/catalog/ProductsPage.svelte",
-    "mode": "delegated-rendering"
+    "file": "features/people/UserManagementPage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "features/planning/TodoWorkspacePage.svelte",
+    "mode": "query-rendering"
   },
   {
     "file": "features/property/PropertyOperationsPage.svelte",
@@ -80,20 +80,24 @@
     "mode": "query-rendering"
   },
   {
-    "file": "features/planning/TodoWorkspacePage.svelte",
-    "mode": "query-rendering"
+    "file": "features/resource/ExampleResourcePage.svelte",
+    "mode": "delegated-rendering"
   },
   {
-    "file": "features/people/UserManagementPage.svelte",
-    "mode": "query-rendering"
+    "file": "features/showcase/DesignPrinciplesPage.svelte",
+    "mode": "static-showcase"
   },
   {
-    "file": "workspace/WorkspaceQueryState.svelte",
-    "mode": "workspace-helper"
+    "file": "features/templates/DockPanelContent.svelte",
+    "mode": "static-showcase"
   },
   {
-    "file": "workspace/WorkspaceRecordLinks.svelte",
-    "mode": "workspace-helper"
+    "file": "features/templates/TemplateGalleryPage.svelte",
+    "mode": "local-state"
+  },
+  {
+    "file": "features/templates/WorkspaceDockPage.svelte",
+    "mode": "local-state"
   },
   {
     "file": "features/workspace/WorkspaceResourceEditor.svelte",
@@ -108,7 +112,11 @@
     "mode": "delegated-rendering"
   },
   {
-    "file": "features/templates/TemplateGalleryPage.svelte",
-    "mode": "local-state"
+    "file": "workspace/WorkspaceQueryState.svelte",
+    "mode": "workspace-helper"
+  },
+  {
+    "file": "workspace/WorkspaceRecordLinks.svelte",
+    "mode": "workspace-helper"
   }
 ]

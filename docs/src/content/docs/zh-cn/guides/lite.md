@@ -24,7 +24,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ## 组件体系与 100% 对齐覆盖
 
-当前对齐清单的 **104/104 项**均已归类为直接适配、语义降级或仅 SPA。
+当前对齐清单的 **126/126 项**均已归类为直接适配、语义降级或仅 SPA。
 该覆盖率只统计清单映射，不表示涵盖所有公开组件，也不表示所有行为已通过企业级验收。
 
 ### 模块对齐看板
@@ -33,16 +33,16 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 ===============================================================
        @svadmin/ui ↔ @svadmin/lite 组件对齐进度看板
 ===============================================================
-  [fields]        33/33 (100.0%)  [██████████████]
+  [fields]        44/44 (100.0%)  [██████████████]
   [buttons]       10/10 (100.0%)  [██████████████]
-  [pages]          12/12 (100.0%)  [██████████████]
-  [layout]          9/9 (100.0%)  [██████████████]
-  [widgets]       10/10 (100.0%)  [██████████████]
-  [advanced]      30/30 (100.0%)  [██████████████]
+  [pages]          16/16 (100.0%)  [██████████████]
+  [layout]        10/10 (100.0%)  [██████████████]
+  [widgets]       12/12 (100.0%)  [██████████████]
+  [advanced]      34/34 (100.0%)  [██████████████]
 ---------------------------------------------------------------
-  总体覆盖率: 100% (104/104)
+  总体覆盖率: 100% (126/126)
   - 1:1 对齐 (Exact): 85
-  - 语义降级 (Fallback): 17
+  - 语义降级 (Fallback): 39
   - 免适配 (SPA Only): 2
   - 待补齐 (Missing): 0
 ===============================================================
@@ -50,9 +50,9 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ### 组件分类清单
 
-1. **核心页面 (Pages - 12 个)**:
+1. **核心页面 (Pages - 16 个)**:
    - `LiteListPage`、`LiteCreatePage`、`LiteEditPage`、`LiteShowPage`、`LiteLogin`、`LiteRegisterPage`、`LiteForgotPasswordPage`、`LiteUpdatePasswordPage`、`LiteProfilePage`、`LiteMasterDetailView`、`LitePrintableBill`、`LitePdfDocumentViewer`。
-2. **字段与复合选择器组件 (Fields - 33 个)**:
+2. **字段与复合选择器组件 (Fields - 44 个)**:
    - **文本与数值类**: `LiteTextField`、`LiteNumberField`、`LiteCurrencyField`、`LitePercentField`、`LitePhoneField`、`LiteEmailField`、`LiteUrlField`、`LiteRatingField`、`LiteCopyField`。
    - **选项与关联类**: `LiteBooleanField`、`LiteDateField`、`LiteDateRangeField`、`LiteSelectField`、`LiteMultiSelectField`、`LiteTreeSelect`、`LiteCascader`、`LiteTagField`、`LiteRelationField`。
    - **媒体与复杂数据**: `LiteAvatarField`、`LiteImageField`、`LiteFileField`、`LiteJsonField`、`LiteArrayField`、`LiteDynamicFormList`、`LiteTransfer`、`LiteImageCropper`、`LiteJsonSchemaForm`、`LiteMentionsInput`、`LiteSignaturePad`。
@@ -61,7 +61,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
    - `LiteListButton`、`LiteCreateButton`、`LiteEditButton`、`LiteShowButton`、`LiteCloneButton`（原生 `<a>` 链接）。
    - `LiteDeleteButton`（纯 CSS 锚点弹窗确认 + 原生 POST 表单）。
    - `LiteSaveButton`、`LiteRefreshButton`、`LiteExportButton`、`LiteImportButton`。
-4. **布局与导航 (Layout - 9 个)**:
+4. **布局与导航 (Layout - 10 个)**:
    - `LiteLayout`、`LiteSidebar`、`LiteHeader`、`LiteBreadcrumbs`、`LiteCanAccess`、`LiteErrorBoundary`、`LiteSplitPaneLayout`、`LiteMultiTabKeepAlive`。
    - `ThemeToggle` 明确为仅 SPA 组件；`LiteTabs` 与 `LiteEmptyState` 仍作为 SSR 基础组件提供，但不计入对齐矩阵条目。
 5. **挂件与图表 (Widgets & Charts - 10 个)**:
@@ -202,5 +202,5 @@ export const handle = createLegacyRedirectHook({
    ```
    终端直接输出分类覆盖率条形图与统计数据，并自动同步更新 `PARITY.md` 与 `parity.json`。
 2. **静态全量矩阵文档**: 查看 [packages/lite/PARITY.md](https://github.com/vibeunion/svadmin/blob/main/packages/lite/PARITY.md) 了解每个组件的详细承接方案。
-3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 103 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
+3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 126 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
 4. **自动化 CI 合约测试**: `scripts/parity-contract.test.ts` 已纳入 Monorepo 根目录 `bun run test`，当有未在矩阵中声明的 UI 组件时会自动阻断 CI，杜绝隐式遗漏。

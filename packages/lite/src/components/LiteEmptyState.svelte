@@ -10,6 +10,9 @@
     description?: string;
     /** Optional HTML entity or text icon */
     icon?: string;
+    /** Optional illustration URL; mirrors the full EmptyState image API. */
+    imageUrl?: string;
+    imageAlt?: string;
     actionLabel?: string;
     actionUrl?: string;
   }
@@ -18,13 +21,17 @@
     title,
     description,
     icon,
+    imageUrl,
+    imageAlt,
     actionLabel,
     actionUrl,
   }: Props = $props();
 </script>
 
 <div class="lite-empty-state lite-card" style="text-align:center;padding:48px 24px;">
-  {#if icon}
+  {#if imageUrl}
+    <img src={imageUrl} alt={imageAlt ?? ''} loading="lazy" style="display:block;width:96px;height:96px;object-fit:contain;margin:0 auto 16px auto;" />
+  {:else if icon}
     <div style="font-size:32px;color:#86909C;margin-bottom:16px;">{icon}</div>
   {/if}
   <h3 style="font-size:16px;font-weight:600;color:#1D2129;margin:0 0 8px 0;">{title}</h3>

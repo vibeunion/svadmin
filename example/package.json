@@ -23,7 +23,9 @@
     "@svadmin/ui": "workspace:*",
     "@tanstack/svelte-query": "^6.1.48",
     "bits-ui": "^2.19.0",
-    "clsx": "^2.1.1"
+    "clsx": "^2.1.1",
+    "@svadmin/charts": "workspace:*",
+    "@svadmin/dock": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",

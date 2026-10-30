@@ -24,7 +24,7 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 
 ## Component System & 100% Parity
 
-The current inventory classifies **104/104 entries** as direct counterparts, semantic fallbacks, or SPA-only components.
+The current inventory classifies **126/126 entries** as direct counterparts, semantic fallbacks, or SPA-only components.
 This measures inventory mappings, not coverage of every public export or verified enterprise behavior.
 
 ### Parity Breakdown by Module
@@ -33,16 +33,16 @@ This measures inventory mappings, not coverage of every public export or verifie
 ===============================================================
        @svadmin/ui <-> @svadmin/lite Parity Status
 ===============================================================
-  [fields]        33/33 (100.0%)  [##############]
+  [fields]        44/44 (100.0%)  [##############]
   [buttons]       10/10 (100.0%)  [##############]
-  [pages]          12/12 (100.0%)  [##############]
-  [layout]          9/9 (100.0%)  [##############]
-  [widgets]       10/10 (100.0%)  [##############]
-  [advanced]      30/30 (100.0%)  [##############]
+  [pages]          16/16 (100.0%)  [##############]
+  [layout]        10/10 (100.0%)  [##############]
+  [widgets]       12/12 (100.0%)  [##############]
+  [advanced]      34/34 (100.0%)  [##############]
 ---------------------------------------------------------------
-  Overall Coverage: 100% (104/104)
+  Overall Coverage: 100% (126/126)
   - 1:1 Exact Matches: 85
-  - Semantic Fallbacks: 17
+  - Semantic Fallbacks: 39
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
 ===============================================================
@@ -50,9 +50,9 @@ This measures inventory mappings, not coverage of every public export or verifie
 
 ### Component Categories
 
-1. **Pages & Views (12 Components)**:
+1. **Pages & Views (16 Components)**:
    - `LiteListPage`, `LiteCreatePage`, `LiteEditPage`, `LiteShowPage`, `LiteLogin`, `LiteRegisterPage`, `LiteForgotPasswordPage`, `LiteUpdatePasswordPage`, `LiteProfilePage`, `LiteMasterDetailView`, `LitePrintableBill`, `LitePdfDocumentViewer`.
-2. **Field & Complex Select Components (33 Components)**:
+2. **Field & Complex Select Components (44 Components)**:
    - **Text & Numeric**: `LiteTextField`, `LiteNumberField`, `LiteCurrencyField`, `LitePercentField`, `LitePhoneField`, `LiteEmailField`, `LiteUrlField`, `LiteRatingField`, `LiteCopyField`.
    - **Choice & Relations**: `LiteBooleanField`, `LiteDateField`, `LiteDateRangeField`, `LiteSelectField`, `LiteMultiSelectField`, `LiteTreeSelect`, `LiteCascader`, `LiteTagField`, `LiteRelationField`.
    - **Rich Media & Arrays**: `LiteAvatarField`, `LiteImageField`, `LiteFileField`, `LiteJsonField`, `LiteArrayField`, `LiteDynamicFormList`, `LiteTransfer`, `LiteImageCropper`, `LiteJsonSchemaForm`, `LiteMentionsInput`, `LiteSignaturePad`.
@@ -61,14 +61,14 @@ This measures inventory mappings, not coverage of every public export or verifie
    - `LiteListButton`, `LiteCreateButton`, `LiteEditButton`, `LiteShowButton`, `LiteCloneButton` (native `<a>` links).
    - `LiteDeleteButton` (fragment-target confirmation modal + native POST form).
    - `LiteSaveButton`, `LiteRefreshButton`, `LiteExportButton`, `LiteImportButton`.
-4. **Layout & Navigation (9 Components)**:
+4. **Layout & Navigation (10 Components)**:
    - `LiteLayout`, `LiteSidebar`, `LiteHeader`, `LiteBreadcrumbs`, `LiteCanAccess`, `LiteErrorBoundary`, `LiteSplitPaneLayout`, `LiteMultiTabKeepAlive`.
    - `ThemeToggle` is explicitly SPA-only; `LiteTabs` and `LiteEmptyState` remain available as SSR primitives but are not counted as parity entries.
-5. **Widgets & Charts (10 Components)**:
-   - `LiteStatsCard`, `LiteMetricStrip`, `LiteAnomalyBadge`, `LiteBadge`.
+5. **Widgets & Charts (12 Components)**:
+   - `LiteStatsCard`, `LiteMetricStrip`, `LiteAnomalyBadge`, `LiteBadge`, `LiteTag`.
    - `LiteBarChart`, `LiteLineChart`, `LitePieChart`, `LitePresenceAvatarGroup`, `LiteGanttChart`, `LiteOfflineSyncBanner` (server-rendered SVG/HTML or status fallbacks where required).
    - `LiteInsightCard` remains available as a Lite-only SSR primitive and is not counted in the `@svadmin/ui` parity matrix.
-6. **Advanced UX Degradations & Query (30 Components)**:
+6. **Advanced UX Degradations & Query (34 Components)**:
    - `LiteTable` with optional sticky edge/action columns.
    - `LiteConfirmDialog`, `LiteFilterBuilder`, `LiteDrawerForm`, `LiteModalForm`, `LiteVirtualTable` (native table fallback without SPA virtualization; paginate or bound data on the server).
    - `LiteInlineEdit`, `LiteAutoSaveIndicator`, `LiteToast`, `LiteUndoableNotification` (semantic server-driven fallbacks).
@@ -201,5 +201,5 @@ To guarantee that future development never introduces feature gaps between `@sva
    bun run check:parity
    ```
 2. **Matrix Documentation**: Check [packages/lite/PARITY.md](https://github.com/vibeunion/svadmin/blob/main/packages/lite/PARITY.md) for live per-component mapping and status notes.
-3. **Interactive Showroom**: Run the example app and navigate to `/lite/parity` to preview all 103 components live in both Light and Dark themes.
+3. **Interactive Showroom**: Run the example app and navigate to `/lite/parity` to preview all 126 components live in both Light and Dark themes.
 4. **Automated CI Contract Test**: `scripts/parity-contract.test.ts` validates that all exported UI components are tracked in the parity matrix during `bun run test`.

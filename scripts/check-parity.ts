@@ -131,6 +131,7 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'MetricStrip', uiComponent: 'MetricStrip.svelte', liteComponent: 'LiteMetricStrip.svelte', category: 'widgets', status: 'exact', strategy: '服务端指标条、趋势与原生链接' },
   { name: 'AnomalyBadge', uiComponent: 'AnomalyBadge.svelte', liteComponent: 'widgets/LiteAnomalyBadge.svelte', category: 'widgets', status: 'exact', strategy: '异常状态高亮徽章' },
   { name: 'Badge', uiComponent: 'ui/badge/badge.svelte', liteComponent: 'LiteBadge.svelte', category: 'widgets', status: 'exact', strategy: '语义状态徽章与原生链接承接' },
+  { name: 'Tag', uiComponent: 'Tag.svelte', liteComponent: 'LiteTag.svelte', category: 'widgets', status: 'fallback', strategy: 'Lite 使用服务端渲染标签与可选删除链接；可选中交互由宿主表单承接' },
   { name: 'BarChart', uiComponent: 'charts/BarChart.svelte', liteComponent: 'widgets/LiteBarChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为 CSS 柱状图或数据明细表格' },
   { name: 'LineChart', uiComponent: 'charts/LineChart.svelte', liteComponent: 'widgets/LiteLineChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为折线数据点表格与趋势指示' },
   { name: 'PieChart', uiComponent: 'charts/PieChart.svelte', liteComponent: 'widgets/LitePieChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为占比条与结构化表格' },
