@@ -78,6 +78,14 @@ Complete reference for all `@svadmin/ui` components.
 | Popover | Anchored popover primitive / 浮层 |
 | Overflow | Visible slice with dropdown remainder / 自适应溢出列表 |
 
+## Optional Packages / 可选包
+
+| Package | Description / 描述 |
+|---------|-------------------|
+| `@svadmin/charts` | Treemap and Sankey charts with LayerChart / LayerChart 高级图表 |
+| `@svadmin/dock` | SplitPane and DockLayout workspaces / 分栏与可停靠工作区 |
+| MediaPlayer HLS | Optional `hls.js` playback for `.m3u8` sources / 可选的 HLS 播放 |
+
 ## Data Visualization / 数据可视化
 
 | Component | Description / 描述 |
