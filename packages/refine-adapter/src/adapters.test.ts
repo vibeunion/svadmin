@@ -92,3 +92,64 @@ describe('createRefineLiveAdapter', () => {
     expect(published).toMatchObject({ channel: 'posts', type: 'updated', payload: { ids: [2] } });
   });
 });
+describe('createRefineRouterAdapter', () => {
+  test('resolves Refine router generators and normalizes route state', async () => {
+    const { createRefineRouterAdapter } = await import('./index');
+    const calls: unknown[] = [];
+    const adapter = createRefineRouterAdapter({
+      go: () => (config: unknown) => { calls.push(config); },
+      back: () => () => { calls.push('back'); },
+      parse: () => () => ({
+        resource: { identifier: 'posts' },
+        action: 'edit',
+        id: 7,
+        params: { tab: 'history', page: 2 },
+        pathname: '/posts/edit/7',
+      }),
+    });
+
+    adapter.go({ to: '/posts/edit/7', query: { tab: 'history' }, type: 'replace' });
+    adapter.back();
+    expect(calls).toEqual([
+      { to: '/posts/edit/7', query: { tab: 'history' }, type: 'replace' },
+      'back',
+    ]);
+    expect(adapter.parse()).toEqual({
+      resource: 'posts',
+      action: 'edit',
+      id: '7',
+      params: { tab: 'history', page: '2' },
+      pathname: '/posts/edit/7',
+    });
+  });
+
+  test('returns safe defaults when Refine omits bindings', async () => {
+    const { createRefineRouterAdapter } = await import('./index');
+    const adapter = createRefineRouterAdapter({});
+    expect(adapter.parse()).toEqual({ params: {}, pathname: '/' });
+    expect(adapter.go({ to: '/posts' })).toBe(false);
+  });
+});
+
+describe('createRefineI18nAdapter', () => {
+  test('maps translate, getLocale and changeLocale', async () => {
+    const { createRefineI18nAdapter } = await import('./index');
+    let locale = 'en';
+    const adapter = createRefineI18nAdapter({
+      translate: (key: string, options: unknown, fallback?: string) => `${fallback ?? key}:${JSON.stringify(options)}`,
+      getLocale: () => locale,
+      changeLocale: (next: string) => { locale = next; },
+    });
+
+    expect(adapter.translate('hello', { name: 'Ada' })).toBe('hello:{"name":"Ada"}');
+    expect(adapter.getLocale()).toBe('en');
+    adapter.setLocale('zh-CN');
+    expect(locale).toBe('zh-CN');
+  });
+
+  test('rejects incomplete Refine providers', async () => {
+    const { createRefineI18nAdapter } = await import('./index');
+    expect(() => createRefineI18nAdapter({ translate: () => '' }))
+      .toThrow('expected translate, changeLocale and getLocale');
+  });
+});

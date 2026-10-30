@@ -23,7 +23,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Arco | svadmin surface | Status | Notes |
 | --- | --- | --- | --- |
 | Affix | `Affix` | ✅ | |
-| Alert | `Alert` namespace | ✅ | Compound alert primitives |
+| Alert | `Alert` namespace | ✅ | Compound primitives, closable state |
 | Anchor | `Anchor` | ✅ | |
 | AutoComplete | `AutoComplete` | ✅ | |
 | Avatar | `Avatar` | ✅ | |
@@ -60,7 +60,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Menu | `Menu` | ✅ | Keyboard and nested menu behavior covered |
 | Message | `toast`, `message`, `Message` | 🔁 | Global service, not a component tree |
 | Modal | `Dialog` namespace, alias `Modal` | 🔁 | Namespace alias; compound API differs from Arco |
-| Notification | `notification`, `Notification`, `NotificationHost` | ✅ | Service plus host |
+| Notification | `notification`, `Notification`, `NotificationHost` | ✅ | Service, host and four placements |
 | PageHeader | `PageHeader`, `ContentPageHeader` | ✅ | |
 | Pagination | `Pagination`, `ListPagination` | ✅ | |
 | Popconfirm | `Popconfirm` | ✅ | |
@@ -133,6 +133,20 @@ forcing one fixed mock layout.
 | User settings | Basic info, security, verified identity | `UserSettingsTemplate` with `basic`, `security`, `verification` tabs | Identity-verification provider and document upload |
 | User info | Header, projects, news, team | `UserInfoTemplate` with `header`, `projects`, `news`, `team` | News feed and social graph provider |
 
+## Refine alignment
+
+svadmin follows Refine's split rather than emulating every Arco component API:
+core owns hooks and provider contracts, while UI components and page
+compositions stay in the UI layer.
+
+- `@svadmin/refine-adapter` bridges Refine data, auth, access control,
+  notification, live, router and i18n providers.
+- Table depth stays split across first-party components instead of one mega
+  table API.
+- Upload storage, DatePicker timezone rules, Modal/Drawer composition and form
+  validation stay with the host or UI layer.
+- Trigger/Portal remain internal, matching Refine's UI-kit boundary.
+
 ## Remaining API-depth candidates
 
 These are behavior or API-shape differences, not missing page families. They are
@@ -166,6 +180,10 @@ tracked separately so the route/component coverage remains honest.
   center and tabbed settings compositions.
 - Added `contentPercentage`, `chat` and `comparison` slots plus their gallery
   demos and E2E checks.
+- Added `Alert` closable state and `Notification` top/bottom-left/right
+  placement support.
+- Added Refine router and i18n provider adapters, completing the Refine-style
+  provider bridge without moving UI depth into core.
 
 ## Remaining non-goals
 

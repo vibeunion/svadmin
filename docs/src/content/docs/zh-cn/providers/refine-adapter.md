@@ -3,7 +3,7 @@ title: Refine 适配器
 description: 在 svadmin 中使用任意 @refinedev/* 数据源
 ---
 
-`@svadmin/refine-adapter` 提供了一个通用桥接层，可以将任意官方 [Refine](https://refine.dev/) 数据源适配器包装为 svadmin 的 `DataProvider`。
+`@svadmin/refine-adapter` 提供了一个通用桥接层，可以将官方 [Refine](https://refine.dev/) 的数据、认证、权限、通知、实时、路由和 i18n Provider 适配为 svadmin 契约。
 
 ## 为什么需要它？
 
@@ -44,6 +44,33 @@ const dataProvider = createRefineAdapter(refineProvider);
 ```svelte
 <AdminApp {dataProvider} {resources} title="管理后台" />
 ```
+
+## 其他 Refine Provider
+
+```typescript
+import {
+  createRefineAuthAdapter,
+  createRefineAccessControlAdapter,
+  createRefineNotificationAdapter,
+  createRefineLiveAdapter,
+  createRefineRouterAdapter,
+  createRefineI18nAdapter,
+} from '@svadmin/refine-adapter';
+
+const authProvider = createRefineAuthAdapter(refineAuthProvider);
+const accessControlProvider = createRefineAccessControlAdapter(refineAccessControlProvider);
+const notificationProvider = createRefineNotificationAdapter(refineNotificationProvider);
+const liveProvider = createRefineLiveAdapter(refineLiveProvider);
+const routerProvider = createRefineRouterAdapter(refineRouterProvider);
+const i18nProvider = createRefineI18nAdapter(refineI18nProvider);
+```
+
+## UI 仍然交给 UI 层
+
+与 Refine 的架构一致，这个桥接包不会把 UI 组件搬进 core。Table、Upload、
+DatePicker、Modal/Drawer 组合和表单校验仍由 svadmin UI 层或宿主应用负责。
+Refine 自己的 UI 包也遵循同一原则：core 只拥有 hooks 和 Provider 契约，组件由
+Ant Design、MUI、Mantine、Chakra 或 TanStack Table 提供。
 
 ## 工作原理
 

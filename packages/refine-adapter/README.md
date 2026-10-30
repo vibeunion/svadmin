@@ -1,6 +1,6 @@
 # @svadmin/refine-adapter
 
-> Bridge any [@refinedev](https://github.com/refinedev/refine) data provider to svadmin
+> Bridge [@refinedev](https://github.com/refinedev/refine) data and framework providers to svadmin
 
 [![npm](https://img.shields.io/npm/v/@svadmin/refine-adapter?color=ff3e00&label=npm)](https://www.npmjs.com/package/@svadmin/refine-adapter)
 
@@ -65,6 +65,36 @@ Then pass `dataProvider` to `<AdminApp>` or `setDataProvider()` as usual.
 | `custom` | Optional | Custom endpoint |
 
 Optional methods are only wired if the underlying Refine provider implements them.
+
+## Other Refine providers
+
+```typescript
+import {
+  createRefineAuthAdapter,
+  createRefineAccessControlAdapter,
+  createRefineNotificationAdapter,
+  createRefineLiveAdapter,
+  createRefineRouterAdapter,
+  createRefineI18nAdapter,
+} from '@svadmin/refine-adapter';
+
+const authProvider = createRefineAuthAdapter(refineAuthProvider);
+const accessControlProvider = createRefineAccessControlAdapter(refineAccessControlProvider);
+const notificationProvider = createRefineNotificationAdapter(refineNotificationProvider);
+const liveProvider = createRefineLiveAdapter(refineLiveProvider);
+const routerProvider = createRefineRouterAdapter(refineRouterProvider);
+const i18nProvider = createRefineI18nAdapter(refineI18nProvider);
+```
+
+Router adapters resolve Refine's function-generator bindings at call time. I18n
+adapters normalize translations to strings and map `changeLocale` to
+`setLocale`.
+
+## UI boundary
+
+Like Refine, this package keeps the core headless. It does not ship Table,
+Upload, DatePicker, Modal/Drawer, or form components. Those stay in the UI layer
+or host application, while Refine-style provider contracts stay in core.
 
 ## Which Svadmin Providers Use This?
 

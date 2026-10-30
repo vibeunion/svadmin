@@ -3,7 +3,7 @@ title: Refine Adapter
 description: Use any @refinedev/* data provider with svadmin
 ---
 
-The `@svadmin/refine-adapter` package bridges official [Refine](https://refine.dev/) providers to svadmin. Data, auth, access control, notification, and live providers are supported.
+The `@svadmin/refine-adapter` package bridges official [Refine](https://refine.dev/) providers to svadmin. Data, auth, access control, notification, live, router and i18n providers are supported.
 
 ## Why?
 
@@ -53,17 +53,31 @@ import {
   createRefineAccessControlAdapter,
   createRefineNotificationAdapter,
   createRefineLiveAdapter,
+  createRefineRouterAdapter,
+  createRefineI18nAdapter,
 } from '@svadmin/refine-adapter';
 
 const authProvider = createRefineAuthAdapter(refineAuthProvider);
 const accessControlProvider = createRefineAccessControlAdapter(refineAccessControlProvider);
 const notificationProvider = createRefineNotificationAdapter(refineNotificationProvider);
 const liveProvider = createRefineLiveAdapter(refineLiveProvider);
+const routerProvider = createRefineRouterAdapter(refineRouterProvider);
+const i18nProvider = createRefineI18nAdapter(refineI18nProvider);
 ```
 
 - Results are validated with the same decoders as first-party providers.
 - Refine `created/updated/deleted` events map to `INSERT/UPDATE/DELETE`; channels map to resources.
+- Refine router generators are resolved at call time and normalized into svadmin route state.
+- Refine i18n providers are normalized to string translations and locale changes.
 - Provider error text is not surfaced as authorization or authentication evidence.
+
+## UI stays delegated
+
+Following Refine's architecture, this bridge does not vendor UI components. Table,
+Upload, DatePicker, Modal/Drawer composition and form validation remain owned by
+the svadmin UI layer or the host application. Refine's own UI packages follow the
+same rule: core owns hooks and provider contracts, while Ant Design, MUI, Mantine,
+Chakra or TanStack Table own the components.
 
 ## How It Works
 

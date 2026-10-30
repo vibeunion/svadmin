@@ -100,3 +100,5 @@ export { createRefineAuthAdapter } from './auth';
 export { createRefineAccessControlAdapter } from './access-control';
 export { createRefineNotificationAdapter } from './notification';
 export { createRefineLiveAdapter } from './live';
+export { createRefineRouterAdapter } from './router';
+export { createRefineI18nAdapter } from './i18n';
