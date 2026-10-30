@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.14.0](https://github.com/vibeunion/svadmin/compare/refine-adapter-v0.13.0...refine-adapter-v0.14.0) (2026-10-30)
+
+
+### 🚀 Features
+
+* **refine-adapter:** bridge router and i18n providers ([256a46a](https://github.com/vibeunion/svadmin/commit/256a46a7e53b561691d03e699e35de50b0d63952))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.1
+
 ## [0.13.0](https://github.com/vibeunion/svadmin/compare/refine-adapter-v0.12.16...refine-adapter-v0.13.0) (2026-10-29)
 
 

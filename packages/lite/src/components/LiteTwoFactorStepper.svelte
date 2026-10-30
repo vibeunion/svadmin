@@ -1,11 +1,12 @@
 <script lang="ts">
+  import type { HTMLFormAttributes } from 'svelte/elements';
   import LiteSteps from './LiteSteps.svelte';
   import LiteOtpInput from './LiteOtpInput.svelte';
 
   interface Props {
     current?: number;
     action: string;
-    method?: string;
+    method?: HTMLFormAttributes['method'];
     codeName?: string;
     submitLabel?: string;
     title?: string;

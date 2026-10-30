@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.106.0](https://github.com/vibeunion/svadmin/compare/ui-v0.105.0...ui-v0.106.0) (2026-10-30)
+
+
+### 🚀 Features
+
+* **ui:** add closable alerts and notification placements ([ab76c2c](https://github.com/vibeunion/svadmin/commit/ab76c2cde3bb5e74af3311ecca254fed95053d26))
+* **ui:** complete parity and workspace surfaces ([6c7f4ff](https://github.com/vibeunion/svadmin/commit/6c7f4ff7ba30e194c155f74e4a7eb7e47c6c4bdf))
+* **ui:** deepen Pro user and page templates ([c57c83e](https://github.com/vibeunion/svadmin/commit/c57c83ed5c523ace5895f9f98faff1b50cefdb71))
+
+
+### 💅 Elegance & Refactoring
+
+* **theme:** rename the default color preset id to `default` ([a30e707](https://github.com/vibeunion/svadmin/commit/a30e70728b99962d3ff2ef4cfb0c4d4982ebbc61))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.4.1
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.1
+
 ## [0.105.0](https://github.com/vibeunion/svadmin/compare/ui-v0.104.0...ui-v0.105.0) (2026-10-30)
 
 

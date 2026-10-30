@@ -13,6 +13,9 @@ import LiteProgress from './LiteProgress.svelte';
 import LiteNotificationCenter from './LiteNotificationCenter.svelte';
 import LiteOtpInput from './LiteOtpInput.svelte';
 import LitePopconfirm from './LitePopconfirm.svelte';
+import LiteStatusBadge from './LiteStatusBadge.svelte';
+import LiteRowActions from './LiteRowActions.svelte';
+import LiteTwoFactorStepper from './LiteTwoFactorStepper.svelte';
 import LiteTour from './LiteTour.svelte';
 import LitePageHeader from './LitePageHeader.svelte';
 import LiteAreaChart from './widgets/LiteAreaChart.svelte';
@@ -111,6 +114,32 @@ expect(collapse.container.querySelector('#details')?.textContent).toBe('Server r
     });
     expect(confirm.getByRole('dialog', { name: 'Delete' })).toBeTruthy();
     expect(confirm.getByRole('button', { name: 'Delete item' })).toBeTruthy();
+  });
+
+  it('uses a styled destructive badge for failed statuses and preserves explicit tones', () => {
+    const failed = render(LiteStatusBadge, { status: 'Failed' });
+    expect(failed.container.querySelector('.lite-badge-destructive')?.textContent).toBe('Failed');
+
+    const linked = render(LiteStatusBadge, { status: 'Rejected', href: '/requests/1' });
+    expect(linked.getByRole('link', { name: 'Rejected' }).querySelector('.lite-badge-destructive')).toBeTruthy();
+
+    const override = render(LiteStatusBadge, { status: 'Failed', tone: 'warning' });
+    expect(override.container.querySelector('.lite-badge-warning')?.textContent).toBe('Failed');
+  });
+
+  it('preserves native form submission and OTP autofill attributes', () => {
+    const actions = render(LiteRowActions, {
+      actions: [{ id: 'archive', label: 'Archive', action: '/items/1/archive', method: 'POST' }],
+    });
+    expect(actions.container.querySelector('form')?.getAttribute('method')).toBe('POST');
+    expect(actions.container.querySelector('form')?.getAttribute('action')).toBe('/items/1/archive');
+
+    const stepper = render(LiteTwoFactorStepper, { action: '/verify', codeName: 'otp' });
+    const form = stepper.container.querySelector('form');
+    expect(form?.getAttribute('method')).toBe('POST');
+    expect(form?.getAttribute('action')).toBe('/verify');
+    expect(form?.querySelector('input')?.getAttribute('autocomplete')).toBe('one-time-code');
+    expect(form?.querySelector('input')?.getAttribute('name')).toBe('otp');
   });
 
   it('renders tour and page header content server-side', () => {

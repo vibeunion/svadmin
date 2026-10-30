@@ -45,7 +45,7 @@
 
   let host = $state<HTMLDivElement | null>(null);
   let width = $state(untrack(() => initialWidth));
-  const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+  const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'] as const;
 
   const layout = $derived.by(() => {
     const nodes: LayoutNode[] = data.nodes.map((node, index) => ({
@@ -77,9 +77,9 @@
 
   function groupColor(node: GraphNode, index: number): string {
     if (node.color) return node.color;
-    if (!node.group) return palette[index % palette.length] ?? palette[0]!;
+    if (!node.group) return palette[index % palette.length] ?? palette[0];
     const groups = [...new Set(data.nodes.map((item) => item.group).filter(Boolean))];
-    return palette[groups.indexOf(node.group) % palette.length] ?? palette[0]!;
+    return palette[groups.indexOf(node.group) % palette.length] ?? palette[0];
   }
 
   onMount(() => {

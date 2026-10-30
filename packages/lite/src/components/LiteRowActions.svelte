@@ -1,10 +1,12 @@
 <script lang="ts">
+  import type { HTMLFormAttributes } from 'svelte/elements';
+
   interface RowAction {
     id: string;
     label: string;
     href?: string;
     action?: string;
-    method?: string;
+    method?: HTMLFormAttributes['method'];
     danger?: boolean;
     disabled?: boolean;
   }
