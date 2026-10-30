@@ -253,13 +253,22 @@ IE11 before the decision is made.
 
 ## Components & Parity (100% Coverage)
 
-`@svadmin/lite` provides **100% component parity** (126/126 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
+`@svadmin/lite` provides **100% component parity** (179/179 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
 
 ### Core Pages & Layout
 
 | Component | Description |
 |-----------|-------------|
 | `LiteLayout` | Responsive sidebar + header + main shell (supports nested `menu` links) |
+| `LitePageHeader` / `LiteStatusTabs` / `LiteStatusBadge` | Page heading, status filters and semantic status pills |
+| `LiteMenu` / `LiteAnchor` / `LiteAffix` / `LiteCollapse` / `LiteLink` | Static navigation, in-page anchors and native disclosure |
+| `LiteSpace` / `LiteGrid` / `LiteResizeBox` / `LiteFloatButton` / `LiteBackTop` | Layout and fixed-action primitives |
+| `LiteImage` / `LiteImagePreview` / `LiteVideoPlayer` / `LiteQRCode` | Media rendering with native controls, links and server-rendered QR |
+| `LiteCalendar` / `LiteCarousel` / `LiteTimeline` / `LiteStatistic` / `LiteCountdown` | Read-only dashboards and chronological displays |
+| `LiteCommentThread` / `LiteTour` / `LiteNotificationCenter` / `LiteDetailDrawer` / `LitePopconfirm` | Server-rendered collaboration and disclosure surfaces |
+| `LiteSteps` / `LiteProgress` / `LiteSpin` / `LiteSkeleton` / `LiteResult` | Progress, loading and outcome surfaces |
+| `LiteTree` / `LiteItemList` / `LiteRowActions` / `LiteOtpInput` / `LiteTwoFactorStepper` | Hierarchical data, row actions and verification flows |
+| `LiteAutoComplete` | Native `datalist` suggestions without async client popovers |
 | `LiteSidebar` / `LiteHeader` | Discrete layout primitives |
 | `LiteListPage` | Full-featured list view with search, table, bulk actions, and pagination |
 | `LiteCreatePage` / `LiteEditPage` | Auto-generated CRUD form pages |
@@ -301,6 +310,8 @@ IE11 before the decision is made.
 |-----------|-------------|
 | `LiteStatsCard`, `LiteMetricStrip`, `LiteInsightCard`, `LiteAnomalyBadge`, `LiteBadge` | Metric KPI cards/strips and semantic status badges |
 | `LiteBarChart`, `LiteLineChart`, `LitePieChart` | Server-rendered SVG/HTML charts with fallback data tables |
+| `LiteAreaChart`, `LiteScatterChart`, `LiteRadarChart`, `LiteGaugeChart` | Bounded chart data tables where a client chart engine is unavailable |
+| `LiteFunnelChart`, `LiteHeatmapChart`, `LiteWaterfallChart`, `LiteRoseChart`, `LiteDonutChart` | Bounded chart data tables with the same fallback contract |
 | `LitePresenceAvatarGroup`, `LiteGanttChart`, `LiteOfflineSyncBanner` | Presence, schedule, and offline mutation status rendered without client hydration |
 
 ### Compatibility & Degradation Primitives
@@ -335,7 +346,7 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 - **CLI Dashboard**: Run `bun run check:parity` to inspect the live coverage matrix in terminal.
 - **Parity Matrix Document**: [PARITY.md](./PARITY.md) is auto-generated with exhaustive module-by-module tables.
 - **Machine-Readable JSON**: `packages/lite/parity.json` provides structured data for automation.
-- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 126 components and live metrics.
+- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 179 components and live metrics.
 - **CI Contract Test**: `scripts/parity-contract.test.ts` runs in CI to prevent regression and ensure every new UI component has a documented Lite counterpart.
 
 ## Server Utilities

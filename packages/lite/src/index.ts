@@ -121,6 +121,48 @@ export { default as LiteSpreadsheetView } from './components/LiteSpreadsheetView
 export { default as LiteDecisionTable } from './components/LiteDecisionTable.svelte';
 export { default as LiteOfflineSyncBanner } from './components/LiteOfflineSyncBanner.svelte';
 
+// Media, navigation and feedback primitives added to keep Lite aligned with
+// the modern @svadmin/ui surface. These render static SSR HTML and never
+// require hydration.
+export { default as LiteImage } from './components/LiteImage.svelte';
+export { default as LiteImagePreview } from './components/LiteImagePreview.svelte';
+export { default as LiteVideoPlayer } from './components/LiteVideoPlayer.svelte';
+export { default as LiteQRCode } from './components/LiteQRCode.svelte';
+export { default as LiteCalendar } from './components/LiteCalendar.svelte';
+export { default as LiteCarousel } from './components/LiteCarousel.svelte';
+export { default as LiteAnchor } from './components/LiteAnchor.svelte';
+export { default as LiteAffix } from './components/LiteAffix.svelte';
+export { default as LiteCollapse } from './components/LiteCollapse.svelte';
+export { default as LiteCommentThread } from './components/LiteCommentThread.svelte';
+export { default as LiteFloatButton } from './components/LiteFloatButton.svelte';
+export { default as LiteSteps } from './components/LiteSteps.svelte';
+export { default as LiteTimeline } from './components/LiteTimeline.svelte';
+export { default as LiteStatistic } from './components/LiteStatistic.svelte';
+export { default as LiteCountdown } from './components/LiteCountdown.svelte';
+export { default as LiteTour } from './components/LiteTour.svelte';
+export { default as LiteMenu } from './components/LiteMenu.svelte';
+export { default as LiteSpace } from './components/LiteSpace.svelte';
+export { default as LiteGrid } from './components/LiteGrid.svelte';
+export { default as LiteLink } from './components/LiteLink.svelte';
+export { default as LitePageHeader } from './components/LitePageHeader.svelte';
+export { default as LiteStatusBadge } from './components/LiteStatusBadge.svelte';
+export { default as LiteStatusTabs } from './components/LiteStatusTabs.svelte';
+export { default as LiteNotificationCenter } from './components/LiteNotificationCenter.svelte';
+export { default as LiteOtpInput } from './components/LiteOtpInput.svelte';
+export { default as LiteTwoFactorStepper } from './components/LiteTwoFactorStepper.svelte';
+export { default as LitePopconfirm } from './components/LitePopconfirm.svelte';
+export { default as LiteDetailDrawer } from './components/LiteDetailDrawer.svelte';
+export { default as LiteRowActions } from './components/LiteRowActions.svelte';
+export { default as LiteItemList } from './components/LiteItemList.svelte';
+export { default as LiteBackTop } from './components/LiteBackTop.svelte';
+export { default as LiteResizeBox } from './components/LiteResizeBox.svelte';
+export { default as LiteAutoComplete } from './components/LiteAutoComplete.svelte';
+export { default as LiteResult } from './components/LiteResult.svelte';
+export { default as LiteSkeleton } from './components/LiteSkeleton.svelte';
+export { default as LiteSpin } from './components/LiteSpin.svelte';
+export { default as LiteProgress } from './components/LiteProgress.svelte';
+export { default as LiteTree } from './components/LiteTree.svelte';
+
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';
 

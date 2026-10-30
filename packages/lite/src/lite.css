@@ -2,7 +2,7 @@
  * @svadmin/lite — lightweight server-rendered admin CSS
  *
  * Baseline: modern evergreen browsers with a conservative flexbox layout.
- * Color system: Arco primary accent and Arco neutral surfaces.
+ * Color system: default primary accent and neutral surfaces.
  *
  * RULES:
  * - No CSS variables (var(--x))

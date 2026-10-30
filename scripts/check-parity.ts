@@ -179,6 +179,61 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'DecisionTable', uiComponent: 'DecisionTable.svelte', liteComponent: 'LiteDecisionTable.svelte', category: 'advanced', status: 'exact', strategy: '业务决策表与规则执行矩阵' },
   { name: 'OfflineSyncBanner', uiComponent: 'OfflineSyncBanner.svelte', liteComponent: 'LiteOfflineSyncBanner.svelte', category: 'widgets', status: 'exact', strategy: '离线状态感知与变更队列同步栏' },
 
+  // ─── Modern UI surfaces added after the original parity inventory ───────
+  { name: 'Image', uiComponent: 'Image.svelte', liteComponent: 'LiteImage.svelte', category: 'widgets', status: 'fallback', strategy: '原生 img、链接与无图占位；图片加载失败回退由服务端或浏览器承接' },
+  { name: 'ImagePreview', uiComponent: 'ImagePreview.svelte', liteComponent: 'LiteImagePreview.svelte', category: 'widgets', status: 'fallback', strategy: '静态缩略图与下载链接；缩放、旋转和弹窗由 SPA 提供' },
+  { name: 'VideoPlayer', uiComponent: 'VideoPlayer.svelte', liteComponent: 'LiteVideoPlayer.svelte', category: 'widgets', status: 'fallback', strategy: '原生 video/audio controls、字幕轨与下载链接；不加载 Vidstack 客户端播放器' },
+  { name: 'QRCode', uiComponent: 'QRCode.svelte', liteComponent: 'LiteQRCode.svelte', category: 'widgets', status: 'exact', strategy: '服务端 SVG 二维码，与 UI 共用 qrcode 编码器' },
+  { name: 'Calendar', uiComponent: 'Calendar.svelte', liteComponent: 'LiteCalendar.svelte', category: 'widgets', status: 'fallback', strategy: '服务端月份快照、日期链接与事件列表；无客户端月切换' },
+  { name: 'Carousel', uiComponent: 'Carousel.svelte', liteComponent: 'LiteCarousel.svelte', category: 'widgets', status: 'fallback', strategy: '横向滚动与锚点分段；自动播放和手势由 SPA 承接' },
+  { name: 'Anchor', uiComponent: 'Anchor.svelte', liteComponent: 'LiteAnchor.svelte', category: 'layout', status: 'exact', strategy: '语义化页内锚点导航' },
+  { name: 'Affix', uiComponent: 'Affix.svelte', liteComponent: 'LiteAffix.svelte', category: 'layout', status: 'fallback', strategy: 'CSS position: sticky 固定；滚动监听状态样式由 SPA 承接' },
+  { name: 'Collapse', uiComponent: 'Collapse.svelte', liteComponent: 'LiteCollapse.svelte', category: 'layout', status: 'fallback', strategy: '原生 details/summary 展开面板；手风琴状态由宿主承接' },
+  { name: 'CommentThread', uiComponent: 'CommentThread.svelte', liteComponent: 'LiteCommentThread.svelte', category: 'advanced', status: 'fallback', strategy: '服务端评论列表、回复与 POST 评论表单；即时提交由宿主承接' },
+  { name: 'FloatButton', uiComponent: 'FloatButton.svelte', liteComponent: 'LiteFloatButton.svelte', category: 'layout', status: 'exact', strategy: '固定位置链接或状态按钮' },
+  { name: 'Steps', uiComponent: 'Steps.svelte', liteComponent: 'LiteSteps.svelte', category: 'layout', status: 'exact', strategy: '有序步骤与完成/处理中/错误状态' },
+  { name: 'Timeline', uiComponent: 'Timeline.svelte', liteComponent: 'LiteTimeline.svelte', category: 'widgets', status: 'exact', strategy: '服务端时间线列表与语义色标记' },
+  { name: 'Statistic', uiComponent: 'Statistic.svelte', liteComponent: 'LiteStatistic.svelte', category: 'widgets', status: 'exact', strategy: '服务端数字格式化、前后缀与趋势' },
+  { name: 'Countdown', uiComponent: 'Countdown.svelte', liteComponent: 'LiteCountdown.svelte', category: 'widgets', status: 'fallback', strategy: '服务端剩余时间快照与截止时间；实时倒计时由 SPA 承接' },
+  { name: 'Tour', uiComponent: 'Tour.svelte', liteComponent: 'LiteTour.svelte', category: 'advanced', status: 'fallback', strategy: '静态引导步骤与关闭链接；目标高亮和定位由 SPA 承接' },
+  { name: 'Menu', uiComponent: 'Menu.svelte', liteComponent: 'LiteMenu.svelte', category: 'layout', status: 'exact', strategy: '递归菜单、选中态与徽章，无客户端展开状态' },
+  { name: 'Space', uiComponent: 'Space.svelte', liteComponent: 'LiteSpace.svelte', category: 'layout', status: 'exact', strategy: 'Flex 间距容器' },
+  { name: 'Grid', uiComponent: 'Grid.svelte', liteComponent: 'LiteGrid.svelte', category: 'layout', status: 'exact', strategy: 'CSS Grid 列布局，窄屏降为单列' },
+  { name: 'Link', uiComponent: 'Link.svelte', liteComponent: 'LiteLink.svelte', category: 'layout', status: 'exact', strategy: '原生链接与禁用态' },
+  { name: 'PageHeader', uiComponent: 'PageHeader.svelte', liteComponent: 'LitePageHeader.svelte', category: 'layout', status: 'exact', strategy: '标题、说明、eyebrow 与操作区' },
+  { name: 'ContentPageHeader', uiComponent: 'ContentPageHeader.svelte', liteComponent: 'LitePageHeader.svelte', category: 'layout', status: 'exact', strategy: '复用 LitePageHeader 的标题与操作插槽' },
+  { name: 'StatusBadge', uiComponent: 'StatusBadge.svelte', liteComponent: 'LiteStatusBadge.svelte', category: 'widgets', status: 'exact', strategy: '状态到语义徽章的映射' },
+  { name: 'StatusTabs', uiComponent: 'StatusTabs.svelte', liteComponent: 'LiteStatusTabs.svelte', category: 'layout', status: 'exact', strategy: '状态筛选链接与计数徽章' },
+  { name: 'NotificationCenter', uiComponent: 'NotificationCenter.svelte', liteComponent: 'LiteNotificationCenter.svelte', category: 'advanced', status: 'fallback', strategy: '服务端通知列表、已读态与全部已读链接；筛选和实时更新由宿主承接' },
+  { name: 'OtpInput', uiComponent: 'OtpInput.svelte', liteComponent: 'LiteOtpInput.svelte', category: 'fields', status: 'exact', strategy: '原生一次性验证码输入与长度约束' },
+  { name: 'TwoFactorStepper', uiComponent: 'TwoFactorStepper.svelte', liteComponent: 'LiteTwoFactorStepper.svelte', category: 'advanced', status: 'fallback', strategy: '原生两步验证步骤与 POST 表单' },
+  { name: 'Popconfirm', uiComponent: 'Popconfirm.svelte', liteComponent: 'LitePopconfirm.svelte', category: 'advanced', status: 'fallback', strategy: 'details 锚点确认面板与原生 POST 表单' },
+  { name: 'DetailDrawer', uiComponent: 'DetailDrawer.svelte', liteComponent: 'LiteDetailDrawer.svelte', category: 'advanced', status: 'fallback', strategy: 'details 详情侧栏与关闭链接；焦点圈定由 SPA 承接' },
+  { name: 'RowActions', uiComponent: 'RowActions.svelte', liteComponent: 'LiteRowActions.svelte', category: 'advanced', status: 'exact', strategy: '行内链接或原生 POST 动作' },
+  { name: 'ItemList', uiComponent: 'ItemList.svelte', liteComponent: 'LiteItemList.svelte', category: 'widgets', status: 'exact', strategy: '语义列表、说明与右侧元信息' },
+  { name: 'BackTop', uiComponent: 'BackTop.svelte', liteComponent: 'LiteBackTop.svelte', category: 'layout', status: 'exact', strategy: '固定回顶锚点' },
+  { name: 'ResizeBox', uiComponent: 'ResizeBox.svelte', liteComponent: 'LiteResizeBox.svelte', category: 'layout', status: 'fallback', strategy: 'CSS resize 容器；尺寸持久化由宿主承接' },
+  { name: 'AutoComplete', uiComponent: 'AutoComplete.svelte', liteComponent: 'LiteAutoComplete.svelte', category: 'fields', status: 'fallback', strategy: '原生 input + datalist 建议；异步查询和键盘弹层由 SPA 承接' },
+  { name: 'Result', uiComponent: 'Result.svelte', liteComponent: 'LiteResult.svelte', category: 'advanced', status: 'exact', strategy: '成功、失败、警告与异常状态页' },
+  { name: 'Skeleton', uiComponent: 'Skeleton.svelte', liteComponent: 'LiteSkeleton.svelte', category: 'widgets', status: 'exact', strategy: '静态占位骨架与加载语义' },
+  { name: 'PageSkeleton', uiComponent: 'PageSkeleton.svelte', liteComponent: 'LiteSkeleton.svelte', category: 'pages', status: 'fallback', strategy: '页面级静态骨架' },
+  { name: 'Spin', uiComponent: 'Spin.svelte', liteComponent: 'LiteSpin.svelte', category: 'widgets', status: 'exact', strategy: 'CSS 加载指示器与 aria-busy' },
+  { name: 'Progress', uiComponent: 'Progress.svelte', liteComponent: 'LiteProgress.svelte', category: 'widgets', status: 'exact', strategy: '原生 progress 与语义色' },
+  { name: 'Tree', uiComponent: 'Tree.svelte', liteComponent: 'LiteTree.svelte', category: 'advanced', status: 'fallback', strategy: 'details 层级树与链接/选中态；展开、复选和键盘树导航由 SPA 承接' },
+  { name: 'MediaThumbnail', uiComponent: 'MediaThumbnail.svelte', liteComponent: 'LiteMediaThumbnail.svelte', category: 'widgets', status: 'exact', strategy: '媒体缩略图与访问性标签' },
+  { name: 'ListPagination', uiComponent: 'ListPagination.svelte', liteComponent: 'LitePagination.svelte', category: 'pages', status: 'exact', strategy: 'URL 驱动分页；页码窗口由服务端输出' },
+  { name: 'Pagination', uiComponent: 'Pagination.svelte', liteComponent: 'LitePagination.svelte', category: 'layout', status: 'exact', strategy: '原生分页链接与当前页' },
+  { name: 'LiveIndicator', uiComponent: 'LiveIndicator.svelte', liteComponent: 'LiteRealtimeStatus.svelte', category: 'widgets', status: 'fallback', strategy: '服务端快照时间与刷新回退' },
+  { name: 'AreaChart', uiComponent: 'AreaChart.svelte', liteComponent: 'LiteAreaChart.svelte', category: 'widgets', status: 'fallback', strategy: '面积图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'ScatterChart', uiComponent: 'ScatterChart.svelte', liteComponent: 'LiteScatterChart.svelte', category: 'widgets', status: 'fallback', strategy: '散点图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'RadarChart', uiComponent: 'RadarChart.svelte', liteComponent: 'LiteRadarChart.svelte', category: 'widgets', status: 'fallback', strategy: '雷达图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'GaugeChart', uiComponent: 'GaugeChart.svelte', liteComponent: 'LiteGaugeChart.svelte', category: 'widgets', status: 'fallback', strategy: '仪表图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'FunnelChart', uiComponent: 'FunnelChart.svelte', liteComponent: 'LiteFunnelChart.svelte', category: 'widgets', status: 'fallback', strategy: '漏斗图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'HeatmapChart', uiComponent: 'HeatmapChart.svelte', liteComponent: 'LiteHeatmapChart.svelte', category: 'widgets', status: 'fallback', strategy: '热力图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'WaterfallChart', uiComponent: 'WaterfallChart.svelte', liteComponent: 'LiteWaterfallChart.svelte', category: 'widgets', status: 'fallback', strategy: '瀑布图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'RoseChart', uiComponent: 'RoseChart.svelte', liteComponent: 'LiteRoseChart.svelte', category: 'widgets', status: 'fallback', strategy: '玫瑰图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+  { name: 'DonutChart', uiComponent: 'DonutChart.svelte', liteComponent: 'LiteDonutChart.svelte', category: 'widgets', status: 'fallback', strategy: '环形图降级为有界数据表格；图形绘制与交互由 SPA 承接' },
+
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },
   { name: 'DevTools', uiComponent: 'DevTools.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (SPA 调试器)', note: '受限环境不需要客户端 DevTools 悬浮球' },
@@ -325,7 +380,7 @@ if (import.meta.main) {
   if (isWrite) {
     const mdContent = generateMarkdownReport(report);
     const { markdownPath: mdPath, jsonPath } = parityOutputPaths();
-    writeFileSync(mdPath, mdContent, 'utf8');
+    writeFileSync(mdPath, `${mdContent.trimEnd()}\n`, 'utf8');
     writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
     console.info(`[OK] Generated ${mdPath} and ${jsonPath}`);
   }

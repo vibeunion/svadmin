@@ -24,7 +24,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ## 组件体系与 100% 对齐覆盖
 
-当前对齐清单的 **126/126 项**均已归类为直接适配、语义降级或仅 SPA。
+当前对齐清单的 **179/179 项**均已归类为直接适配、语义降级或仅 SPA。
 该覆盖率只统计清单映射，不表示涵盖所有公开组件，也不表示所有行为已通过企业级验收。
 
 ### 模块对齐看板
@@ -33,16 +33,16 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 ===============================================================
        @svadmin/ui ↔ @svadmin/lite 组件对齐进度看板
 ===============================================================
-  [fields]        44/44 (100.0%)  [██████████████]
+  [fields]        46/46 (100.0%)  [██████████████]
   [buttons]       10/10 (100.0%)  [██████████████]
-  [pages]          16/16 (100.0%)  [██████████████]
-  [layout]        10/10 (100.0%)  [██████████████]
-  [widgets]       12/12 (100.0%)  [██████████████]
-  [advanced]      34/34 (100.0%)  [██████████████]
+  [pages]          18/18 (100.0%)  [██████████████]
+  [layout]        25/25 (100.0%)  [██████████████]
+  [widgets]       37/37 (100.0%)  [██████████████]
+  [advanced]      43/43 (100.0%)  [██████████████]
 ---------------------------------------------------------------
-  总体覆盖率: 100% (126/126)
-  - 1:1 对齐 (Exact): 85
-  - 语义降级 (Fallback): 39
+  总体覆盖率: 100% (179/179)
+  - 1:1 对齐 (Exact): 110
+  - 语义降级 (Fallback): 67
   - 免适配 (SPA Only): 2
   - 待补齐 (Missing): 0
 ===============================================================
@@ -50,25 +50,27 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ### 组件分类清单
 
-1. **核心页面 (Pages - 16 个)**:
-   - `LiteListPage`、`LiteCreatePage`、`LiteEditPage`、`LiteShowPage`、`LiteLogin`、`LiteRegisterPage`、`LiteForgotPasswordPage`、`LiteUpdatePasswordPage`、`LiteProfilePage`、`LiteMasterDetailView`、`LitePrintableBill`、`LitePdfDocumentViewer`。
-2. **字段与复合选择器组件 (Fields - 44 个)**:
+1. **核心页面 (Pages - 18 个)**:
+   - `LiteListPage`、`LiteCreatePage`、`LiteEditPage`、`LiteShowPage`、`LiteLogin`、`LiteRegisterPage`、`LiteForgotPasswordPage`、`LiteUpdatePasswordPage`、`LiteProfilePage`、`LiteMasterDetailView`、`LitePrintableBill`、`LitePdfDocumentViewer`、`LitePagination`、`LiteSkeleton`。
+2. **字段与复合选择器组件 (Fields - 46 个)**:
    - **文本与数值类**: `LiteTextField`、`LiteNumberField`、`LiteCurrencyField`、`LitePercentField`、`LitePhoneField`、`LiteEmailField`、`LiteUrlField`、`LiteRatingField`、`LiteCopyField`。
    - **选项与关联类**: `LiteBooleanField`、`LiteDateField`、`LiteDateRangeField`、`LiteSelectField`、`LiteMultiSelectField`、`LiteTreeSelect`、`LiteCascader`、`LiteTagField`、`LiteRelationField`。
    - **媒体与复杂数据**: `LiteAvatarField`、`LiteImageField`、`LiteFileField`、`LiteJsonField`、`LiteArrayField`、`LiteDynamicFormList`、`LiteTransfer`、`LiteImageCropper`、`LiteJsonSchemaForm`、`LiteMentionsInput`、`LiteSignaturePad`。
    - **语义降级字段**: `LiteCodeField`、`LiteMarkdownField`、`LiteRichTextField`、`LiteFileUpload`。
+   - **验证与建议**: `LiteOtpInput`、`LiteTwoFactorStepper`、`LiteAutoComplete`。
 3. **操作按钮 (Buttons - 10 个)**:
    - `LiteListButton`、`LiteCreateButton`、`LiteEditButton`、`LiteShowButton`、`LiteCloneButton`（原生 `<a>` 链接）。
    - `LiteDeleteButton`（纯 CSS 锚点弹窗确认 + 原生 POST 表单）。
    - `LiteSaveButton`、`LiteRefreshButton`、`LiteExportButton`、`LiteImportButton`。
-4. **布局与导航 (Layout - 10 个)**:
+4. **布局与导航 (Layout - 25 个)**:
    - `LiteLayout`、`LiteSidebar`、`LiteHeader`、`LiteBreadcrumbs`、`LiteCanAccess`、`LiteErrorBoundary`、`LiteSplitPaneLayout`、`LiteMultiTabKeepAlive`。
+   - `LitePageHeader`、`LiteStatusTabs`、`LiteMenu`、`LiteAnchor`、`LiteAffix`、`LiteCollapse`、`LiteLink`、`LiteSpace`、`LiteGrid`、`LiteResizeBox`、`LiteFloatButton`、`LiteBackTop`、`LitePagination`。
    - `ThemeToggle` 明确为仅 SPA 组件；`LiteTabs` 与 `LiteEmptyState` 仍作为 SSR 基础组件提供，但不计入对齐矩阵条目。
-5. **挂件与图表 (Widgets & Charts - 10 个)**:
-   - `LiteStatsCard`、`LiteMetricStrip`、`LiteAnomalyBadge`、`LiteBadge`（KPI 指标卡、指标条与语义状态徽章）。
-   - `LiteBarChart`、`LiteLineChart`、`LitePieChart`、`LitePresenceAvatarGroup`、`LiteGanttChart`、`LiteOfflineSyncBanner`（服务端 SVG/HTML 或状态降级方案）。
+5. **挂件与图表 (Widgets & Charts - 37 个)**:
+   - `LiteStatsCard`、`LiteMetricStrip`、`LiteAnomalyBadge`、`LiteBadge`、`LiteStatusBadge`、`LiteItemList`、`LiteStatistic`、`LiteCountdown`、`LiteTimeline`、`LiteCalendar`、`LiteCarousel`、`LiteImage`、`LiteImagePreview`、`LiteVideoPlayer`、`LiteQRCode`、`LiteMediaThumbnail`、`LiteSkeleton`、`LiteSpin`、`LiteProgress`（KPI、媒体、时间与加载状态）。
+   - `LiteBarChart`、`LiteLineChart`、`LitePieChart`、`LiteAreaChart`、`LiteScatterChart`、`LiteRadarChart`、`LiteGaugeChart`、`LiteFunnelChart`、`LiteHeatmapChart`、`LiteWaterfallChart`、`LiteRoseChart`、`LiteDonutChart`、`LitePresenceAvatarGroup`、`LiteGanttChart`、`LiteOfflineSyncBanner`（服务端 SVG/HTML 或有界数据表降级）。
    - `LiteInsightCard` 继续作为 Lite 独有的 SSR 基础组件提供，不计入 `@svadmin/ui` 对齐矩阵。
-6. **高级交互与查询构造器 (Advanced UX - 30 个)**:
+6. **高级交互与查询构造器 (Advanced UX - 43 个)**:
    - `LiteTable`（原生排序表格、横向滚动与可选固定边缘/操作列）。
    - `LiteConfirmDialog`、`LiteFilterBuilder`、`LiteDrawerForm`、`LiteModalForm`、`LiteVirtualTable`（原生表格输出，不提供 SPA 虚拟窗口；服务端应分页或限制数据量）。
    - `LiteInlineEdit`、`LiteAutoSaveIndicator`、`LiteToast`、`LiteUndoableNotification`（服务端语义降级）。
@@ -77,6 +79,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
    - `LiteStepForm`、`LiteTableSummary`、`LiteVersionDiffViewer`、`LiteEditableTable`、`LiteDraggableRowTable`、`LiteMediaLibraryModal`、`LiteActivityFeed`。
    - `LiteKanbanBoard`、`LitePivotTable`、`LiteCanvasAnnotation`、`LiteSpreadsheetView`、`LiteDecisionTable`。
    - `LiteSpreadsheetView` 是有界原生表单降级，不提供 SPA 公式计算、交互切表或客户端导出；服务端承接这些操作。
+   - `LiteCommentThread`、`LiteTour`、`LiteNotificationCenter`、`LiteDetailDrawer`、`LitePopconfirm`、`LiteRowActions`、`LiteTree`、`LiteResult` 提供服务端协作、披露与导航降级。
    - `DevTools` 明确为仅 SPA 组件，不提供 Lite 对应物。
 
 ---
@@ -202,5 +205,5 @@ export const handle = createLegacyRedirectHook({
    ```
    终端直接输出分类覆盖率条形图与统计数据，并自动同步更新 `PARITY.md` 与 `parity.json`。
 2. **静态全量矩阵文档**: 查看 [packages/lite/PARITY.md](https://github.com/vibeunion/svadmin/blob/main/packages/lite/PARITY.md) 了解每个组件的详细承接方案。
-3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 126 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
+3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 179 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
 4. **自动化 CI 合约测试**: `scripts/parity-contract.test.ts` 已纳入 Monorepo 根目录 `bun run test`，当有未在矩阵中声明的 UI 组件时会自动阻断 CI，杜绝隐式遗漏。

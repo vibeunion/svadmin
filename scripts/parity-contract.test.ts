@@ -48,4 +48,25 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(paths.markdownPath).toBe('/tmp/caller-cwd/packages/lite/PARITY.md');
     expect(paths.jsonPath).toBe('/tmp/caller-cwd/packages/lite/parity.json');
   });
+
+  it('points every mapped entry at a real Lite component and keeps names unique', () => {
+    const report = buildParityReport();
+    const liteComponents = resolve(import.meta.dir, '../packages/lite/src/components');
+    const componentDirs = ['', 'advanced', 'buttons', 'compatibility', 'fields', 'layout', 'pages', 'widgets'];
+    const names = new Set<string>();
+    const missingTargets: string[] = [];
+    const duplicateNames: string[] = [];
+
+    for (const item of report.items) {
+      if (names.has(item.name)) duplicateNames.push(item.name);
+      names.add(item.name);
+      if (item.liteComponent
+        && !componentDirs.some((dir) => existsSync(resolve(liteComponents, dir, item.liteComponent ?? '')))) {
+        missingTargets.push(`${item.name} -> ${item.liteComponent}`);
+      }
+    }
+
+    expect(duplicateNames).toEqual([]);
+    expect(missingTargets).toEqual([]);
+  });
 });

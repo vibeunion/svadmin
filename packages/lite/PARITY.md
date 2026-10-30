@@ -1,7 +1,7 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-30T06:07:19.876Z`
-> 总体适配覆盖率：**100%**（126/126 组件）
+> 自动生成时间：`2026-10-30T09:13:40.330Z`
+> 总体适配覆盖率：**100%**（179/179 组件）
 >
 > 覆盖率仅统计本清单中的映射分类（含降级与免适配），不代表所有公开组件已收录或完整行为已通过验收。
 
@@ -9,11 +9,11 @@
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 覆盖率 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **pages** | 16 | 12 | 4 | 0 | 0 | **100%** |
-| **advanced** | 34 | 20 | 13 | 1 | 0 | **100%** |
-| **widgets** | 12 | 6 | 6 | 0 | 0 | **100%** |
-| **fields** | 44 | 29 | 15 | 0 | 0 | **100%** |
-| **layout** | 10 | 8 | 1 | 1 | 0 | **100%** |
+| **pages** | 18 | 13 | 5 | 0 | 0 | **100%** |
+| **advanced** | 43 | 22 | 20 | 1 | 0 | **100%** |
+| **widgets** | 37 | 15 | 22 | 0 | 0 | **100%** |
+| **fields** | 46 | 30 | 16 | 0 | 0 | **100%** |
+| **layout** | 25 | 20 | 4 | 1 | 0 | **100%** |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
 
 ---
@@ -40,6 +40,8 @@
 | `MasterDetailView` | `LiteMasterDetailView.svelte` | ✅ 1:1 对齐 | 主从数据联动视图与 URL 同步 |
 | `PrintableBill` | `LitePrintableBill.svelte` | ✅ 1:1 对齐 | 受控单据凭证 A4 打印排版 |
 | `PdfDocumentViewer` | `LitePdfDocumentViewer.svelte` | ✅ 1:1 对齐 | 嵌入式 PDF 文档与电子盖章批注 |
+| `PageSkeleton` | `LiteSkeleton.svelte` | ⚡ 语义降级 | 页面级静态骨架 |
+| `ListPagination` | `LitePagination.svelte` | ✅ 1:1 对齐 | URL 驱动分页；页码窗口由服务端输出 |
 
 ### ADVANCED
 
@@ -78,6 +80,15 @@
 | `CanvasAnnotation` | `LiteCanvasAnnotation.svelte` | ✅ 1:1 对齐 | 底图展示与交互式标注画板 |
 | `SpreadsheetView` | `LiteSpreadsheetView.svelte` | ⚡ 语义降级 | 有界原生单表 POST，提交 sheetId 与原始公式；计算、切表及导出由服务端承接，无客户端公式引擎 |
 | `DecisionTable` | `LiteDecisionTable.svelte` | ✅ 1:1 对齐 | 业务决策表与规则执行矩阵 |
+| `CommentThread` | `LiteCommentThread.svelte` | ⚡ 语义降级 | 服务端评论列表、回复与 POST 评论表单；即时提交由宿主承接 |
+| `Tour` | `LiteTour.svelte` | ⚡ 语义降级 | 静态引导步骤与关闭链接；目标高亮和定位由 SPA 承接 |
+| `NotificationCenter` | `LiteNotificationCenter.svelte` | ⚡ 语义降级 | 服务端通知列表、已读态与全部已读链接；筛选和实时更新由宿主承接 |
+| `TwoFactorStepper` | `LiteTwoFactorStepper.svelte` | ⚡ 语义降级 | 原生两步验证步骤与 POST 表单 |
+| `Popconfirm` | `LitePopconfirm.svelte` | ⚡ 语义降级 | details 锚点确认面板与原生 POST 表单 |
+| `DetailDrawer` | `LiteDetailDrawer.svelte` | ⚡ 语义降级 | details 详情侧栏与关闭链接；焦点圈定由 SPA 承接 |
+| `RowActions` | `LiteRowActions.svelte` | ✅ 1:1 对齐 | 行内链接或原生 POST 动作 |
+| `Result` | `LiteResult.svelte` | ✅ 1:1 对齐 | 成功、失败、警告与异常状态页 |
+| `Tree` | `LiteTree.svelte` | ⚡ 语义降级 | details 层级树与链接/选中态；展开、复选和键盘树导航由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -96,6 +107,31 @@
 | `PresenceAvatarGroup` | `LitePresenceAvatarGroup.svelte` | ✅ 1:1 对齐 | 多人在线协同感知状态 |
 | `GanttChart` | `LiteGanttChart.svelte` | ⚡ 语义降级 | 共享有界时间线校验；Lite 原生表格与链接恢复，SPA 交互选择与回调，不含依赖/工作日历/自动排程引擎 |
 | `OfflineSyncBanner` | `LiteOfflineSyncBanner.svelte` | ✅ 1:1 对齐 | 离线状态感知与变更队列同步栏 |
+| `Image` | `LiteImage.svelte` | ⚡ 语义降级 | 原生 img、链接与无图占位；图片加载失败回退由服务端或浏览器承接 |
+| `ImagePreview` | `LiteImagePreview.svelte` | ⚡ 语义降级 | 静态缩略图与下载链接；缩放、旋转和弹窗由 SPA 提供 |
+| `VideoPlayer` | `LiteVideoPlayer.svelte` | ⚡ 语义降级 | 原生 video/audio controls、字幕轨与下载链接；不加载 Vidstack 客户端播放器 |
+| `QRCode` | `LiteQRCode.svelte` | ✅ 1:1 对齐 | 服务端 SVG 二维码，与 UI 共用 qrcode 编码器 |
+| `Calendar` | `LiteCalendar.svelte` | ⚡ 语义降级 | 服务端月份快照、日期链接与事件列表；无客户端月切换 |
+| `Carousel` | `LiteCarousel.svelte` | ⚡ 语义降级 | 横向滚动与锚点分段；自动播放和手势由 SPA 承接 |
+| `Timeline` | `LiteTimeline.svelte` | ✅ 1:1 对齐 | 服务端时间线列表与语义色标记 |
+| `Statistic` | `LiteStatistic.svelte` | ✅ 1:1 对齐 | 服务端数字格式化、前后缀与趋势 |
+| `Countdown` | `LiteCountdown.svelte` | ⚡ 语义降级 | 服务端剩余时间快照与截止时间；实时倒计时由 SPA 承接 |
+| `StatusBadge` | `LiteStatusBadge.svelte` | ✅ 1:1 对齐 | 状态到语义徽章的映射 |
+| `ItemList` | `LiteItemList.svelte` | ✅ 1:1 对齐 | 语义列表、说明与右侧元信息 |
+| `Skeleton` | `LiteSkeleton.svelte` | ✅ 1:1 对齐 | 静态占位骨架与加载语义 |
+| `Spin` | `LiteSpin.svelte` | ✅ 1:1 对齐 | CSS 加载指示器与 aria-busy |
+| `Progress` | `LiteProgress.svelte` | ✅ 1:1 对齐 | 原生 progress 与语义色 |
+| `MediaThumbnail` | `LiteMediaThumbnail.svelte` | ✅ 1:1 对齐 | 媒体缩略图与访问性标签 |
+| `LiveIndicator` | `LiteRealtimeStatus.svelte` | ⚡ 语义降级 | 服务端快照时间与刷新回退 |
+| `AreaChart` | `LiteAreaChart.svelte` | ⚡ 语义降级 | 面积图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `ScatterChart` | `LiteScatterChart.svelte` | ⚡ 语义降级 | 散点图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `RadarChart` | `LiteRadarChart.svelte` | ⚡ 语义降级 | 雷达图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `GaugeChart` | `LiteGaugeChart.svelte` | ⚡ 语义降级 | 仪表图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `FunnelChart` | `LiteFunnelChart.svelte` | ⚡ 语义降级 | 漏斗图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `HeatmapChart` | `LiteHeatmapChart.svelte` | ⚡ 语义降级 | 热力图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `WaterfallChart` | `LiteWaterfallChart.svelte` | ⚡ 语义降级 | 瀑布图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `RoseChart` | `LiteRoseChart.svelte` | ⚡ 语义降级 | 玫瑰图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
+| `DonutChart` | `LiteDonutChart.svelte` | ⚡ 语义降级 | 环形图降级为有界数据表格；图形绘制与交互由 SPA 承接 |
 
 ### FIELDS
 
@@ -145,6 +181,8 @@
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
 | `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
 | `SignaturePad` | `LiteSignaturePad.svelte` | ✅ 1:1 对齐 | 电子签名画板与文件上传降级 |
+| `OtpInput` | `LiteOtpInput.svelte` | ✅ 1:1 对齐 | 原生一次性验证码输入与长度约束 |
+| `AutoComplete` | `LiteAutoComplete.svelte` | ⚡ 语义降级 | 原生 input + datalist 建议；异步查询和键盘弹层由 SPA 承接 |
 
 ### LAYOUT
 
@@ -159,6 +197,21 @@
 | `ErrorBoundary` | `layout/LiteErrorBoundary.svelte` | ✅ 1:1 对齐 | 受限环境错误提示面板 |
 | `SplitPaneLayout` | `LiteSplitPaneLayout.svelte` | ✅ 1:1 对齐 | 双栏弹性比例分屏布局 |
 | `MultiTabKeepAlive` | `LiteMultiTabKeepAlive.svelte` | ✅ 1:1 对齐 | 工作台多标签页导航 |
+| `Anchor` | `LiteAnchor.svelte` | ✅ 1:1 对齐 | 语义化页内锚点导航 |
+| `Affix` | `LiteAffix.svelte` | ⚡ 语义降级 | CSS position: sticky 固定；滚动监听状态样式由 SPA 承接 |
+| `Collapse` | `LiteCollapse.svelte` | ⚡ 语义降级 | 原生 details/summary 展开面板；手风琴状态由宿主承接 |
+| `FloatButton` | `LiteFloatButton.svelte` | ✅ 1:1 对齐 | 固定位置链接或状态按钮 |
+| `Steps` | `LiteSteps.svelte` | ✅ 1:1 对齐 | 有序步骤与完成/处理中/错误状态 |
+| `Menu` | `LiteMenu.svelte` | ✅ 1:1 对齐 | 递归菜单、选中态与徽章，无客户端展开状态 |
+| `Space` | `LiteSpace.svelte` | ✅ 1:1 对齐 | Flex 间距容器 |
+| `Grid` | `LiteGrid.svelte` | ✅ 1:1 对齐 | CSS Grid 列布局，窄屏降为单列 |
+| `Link` | `LiteLink.svelte` | ✅ 1:1 对齐 | 原生链接与禁用态 |
+| `PageHeader` | `LitePageHeader.svelte` | ✅ 1:1 对齐 | 标题、说明、eyebrow 与操作区 |
+| `ContentPageHeader` | `LitePageHeader.svelte` | ✅ 1:1 对齐 | 复用 LitePageHeader 的标题与操作插槽 |
+| `StatusTabs` | `LiteStatusTabs.svelte` | ✅ 1:1 对齐 | 状态筛选链接与计数徽章 |
+| `BackTop` | `LiteBackTop.svelte` | ✅ 1:1 对齐 | 固定回顶锚点 |
+| `ResizeBox` | `LiteResizeBox.svelte` | ⚡ 语义降级 | CSS resize 容器；尺寸持久化由宿主承接 |
+| `Pagination` | `LitePagination.svelte` | ✅ 1:1 对齐 | 原生分页链接与当前页 |
 | `ThemeToggle` | — | 🚫 免适配 | 免适配 (Lite 为固定 Slate/Indigo 配色) |
 
 ### BUTTONS
