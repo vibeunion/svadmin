@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.105.0](https://github.com/vibeunion/svadmin/compare/ui-v0.104.0...ui-v0.105.0) (2026-10-30)
+
+
+### 🚀 Features
+
+* **ui:** add advanced charts, dock layouts and HLS playback ([cc704b4](https://github.com/vibeunion/svadmin/commit/cc704b4bc11ca166152340b105b17d775d89e40f))
+* **ui:** add cascader multi-select and panel date picker ([c121eb9](https://github.com/vibeunion/svadmin/commit/c121eb9854130e3823aad8723673436b851e4b08))
+* **ui:** add editable tabs, breadcrumb collapse and overflow ([68682d5](https://github.com/vibeunion/svadmin/commit/68682d562a8a11e995014ba6dac263876ac98603))
+* **ui:** add notification filters, editable typography and grouped tables ([830628e](https://github.com/vibeunion/svadmin/commit/830628e98bc000c7e7d6458519c059e9fc0967fa))
+* **ui:** complete tree, steps and pagination affordances ([2f476cb](https://github.com/vibeunion/svadmin/commit/2f476cb0f89cecfb7b238eb2b5cff2813c69094f))
+* **ui:** extend chart family with six visualization types ([2aa4004](https://github.com/vibeunion/svadmin/commit/2aa4004c629bc0745d661014c7ba7573f98e88e8))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep layout styles in token contract ([#608](https://github.com/vibeunion/svadmin/issues/608)) ([6d9bfe9](https://github.com/vibeunion/svadmin/commit/6d9bfe9eab9c25aaa3837a1485d3c5d422e0a1cb))
+* **ui:** preserve desktop permission role sidebar ([#609](https://github.com/vibeunion/svadmin/issues/609)) ([16246aa](https://github.com/vibeunion/svadmin/commit/16246aa6e856be22cdb1e291d19b1356933cd3f9))
+* **ui:** preserve desktop sidebar visibility ([#605](https://github.com/vibeunion/svadmin/issues/605)) ([d61e2c6](https://github.com/vibeunion/svadmin/commit/d61e2c6460a8f633e75e3f33b60bd742c2e55783))
+* **ui:** preserve settings page layout ([#606](https://github.com/vibeunion/svadmin/issues/606)) ([3c14c44](https://github.com/vibeunion/svadmin/commit/3c14c44bc0c40339f4bb6e4a25e9a40406bd3cde))
+* **ui:** remove unused date picker bindings ([#604](https://github.com/vibeunion/svadmin/issues/604)) ([3e96ebd](https://github.com/vibeunion/svadmin/commit/3e96ebde5e6c1a6f9159d7d0c042f8eb8d4a93db))
+* **ui:** stabilize editor tests and complete chart exports ([c1efc35](https://github.com/vibeunion/svadmin/commit/c1efc35f784120bc7cb0dfb7167e682de915dc89))
+
+
+### 📝 Documentation
+
+* **ui:** catalog new table, tabs, text and chart primitives ([b408f9a](https://github.com/vibeunion/svadmin/commit/b408f9a9faeb9ebec945e87842fb1fbee172637f))
+
 ## [0.104.0](https://github.com/vibeunion/svadmin/compare/ui-v0.103.0...ui-v0.104.0) (2026-10-29)
 
 
