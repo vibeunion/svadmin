@@ -1,4 +1,14 @@
 @layer components {
+  /* 侧栏显隐使用独立契约，避免宿主的通用 hidden 规则覆盖桌面断点。 */
+  .svadmin-layout__desktop-sidebar {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .svadmin-layout__desktop-sidebar {
+      display: block;
+    }
+  }
+
   /*
    * The skip link uses a generated translate-y utility, whose composite
    * translate declaration is invalid when no x-axis value is present.
