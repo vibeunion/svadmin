@@ -306,6 +306,7 @@ export {
   HeatmapChart,
   WaterfallChart,
   RoseChart,
+  DonutChart,
 } from './components/charts/index.js';
 // Field display components
 export { default as NumberField } from './components/fields/NumberField.svelte';

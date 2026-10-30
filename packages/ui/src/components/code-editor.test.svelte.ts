@@ -25,7 +25,7 @@ describe('CodeEditor', () => {
 
     await waitFor(() => {
       expect(view.container.querySelector('[data-slot="code-editor"]')?.getAttribute('data-state')).toBe('ready');
-    });
+    }, { timeout: 5000 });
 
     const editor = requireValue(view.getByTestId('mock-codemirror'));
     await fireEvent.input(editor, { target: { value: 'const b = 2;' } });

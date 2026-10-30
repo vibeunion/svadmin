@@ -83,7 +83,7 @@ Complete reference for all `@svadmin/ui` components.
 | Component | Description / 描述 |
 |-----------|-------------------|
 | BarChart / LineChart / AreaChart | Cartesian series with axes / 坐标轴序列图 |
-| PieChart | Pie and donut charts / 饼图与环形图 |
+| PieChart / DonutChart | Pie and donut charts / 饼图与环形图 |
 | ScatterChart | Point distribution / 散点图 |
 | RadarChart | Multi-indicator series / 多指标雷达图 |
 | GaugeChart | Range and progress gauge / 仪表盘 |

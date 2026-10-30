@@ -180,4 +180,20 @@
       flex: 1 1 var(--svadmin-chrome-basis);
     }
   }
+  .svadmin-breadcrumbs__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--radius-sm);
+    padding: calc(var(--svadmin-space-1) / 2);
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+  }
+  .svadmin-breadcrumbs__ellipsis:hover {
+    color: var(--foreground);
+    background: var(--accent);
+  }
+
 }

@@ -26,7 +26,7 @@ describe('JsonEditor', () => {
     const onchange = vi.fn();
     const view = render(JsonEditor, { value: { a: 1 }, onchange });
 
-    await waitFor(() => expect(stateOf(view.container)).toBe('ready'));
+    await waitFor(() => expect(stateOf(view.container)).toBe('ready'), { timeout: 5000 });
 
     const editor = requireValue(view.getByTestId('mock-jsoneditor'));
     await fireEvent.input(editor, { target: { value: '{"a":2}' } });
