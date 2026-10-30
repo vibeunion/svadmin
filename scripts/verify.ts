@@ -10,6 +10,7 @@ const checks = [
   ['check:types:dependencies', []],
   ['build:example', []],
   ['check:lite:ssr', []],
+  ['check:parity:verify', []],
   ['pack:check', []],
   ['bundle:check', []],
   ['docs:build', []],

@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-10-30T21:14:50.246Z",
+  "timestamp": "2026-10-30T21:22:16.352Z",
   "totalComponents": 179,
-  "adaptedCount": 110,
-  "fallbackCount": 67,
+  "adaptedCount": 116,
+  "fallbackCount": 61,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 61.5,
-  "fallbackPercentage": 37.4,
+  "exactPercentage": 64.8,
+  "fallbackPercentage": 34.1,
   "behaviorVerifiedCount": 132,
   "behaviorVerifiedPercentage": 73.7,
   "behaviorAssertedCount": 132,
@@ -55,13 +55,13 @@
     "fields": {
       "category": "fields",
       "total": 46,
-      "adapted": 30,
-      "fallback": 16,
+      "adapted": 36,
+      "fallback": 10,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 65.2,
-      "fallbackRate": 34.8,
+      "exactRate": 78.3,
+      "fallbackRate": 21.7,
       "behaviorVerified": 28,
       "behaviorAsserted": 28
     },
@@ -186,8 +186,8 @@
       "uiComponent": "FileUpload.svelte",
       "liteComponent": "LiteFileUpload.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "可见原生文件输入与 multipart POST；服务端校验，不提供客户端进度、取消或重试"
+      "status": "exact",
+      "strategy": "原生 <input type=\"file\">（accept/multiple/required 透传）+ multipart POST，服务端校验；进度、取消与重试属客户端增强"
     },
     {
       "name": "TextField",
@@ -371,7 +371,7 @@
       "liteComponent": "LiteMarkdownField.svelte",
       "category": "fields",
       "status": "fallback",
-      "strategy": "降级为原生 Textarea 与纯 HTML 预览"
+      "strategy": "Textarea 编辑 + 服务端 <pre> 源码展示；Markdown 渲染预览由宿主或 SPA 承接"
     },
     {
       "name": "RichTextField",
@@ -426,8 +426,8 @@
       "uiComponent": "DateRangePicker.svelte",
       "liteComponent": "fields/LiteDateRangeField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 复用双原生 date 输入；区间顺序和业务时区由宿主校验"
+      "status": "exact",
+      "strategy": "双原生 <input type=\"date\"> 保留区间数据契约；区间顺序与时区由宿主校验，弹层日历属客户端增强"
     },
     {
       "name": "TimePicker",
@@ -450,8 +450,8 @@
       "uiComponent": "RadioGroup.svelte",
       "liteComponent": "LiteSelectField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用原生 select 提交互斥值；服务端仍按资源契约校验枚举"
+      "status": "exact",
+      "strategy": "原生 <select> 承载同一枚举互斥值，服务端按资源契约校验枚举；单选按钮呈现属客户端增强"
     },
     {
       "name": "TagsInput",
@@ -466,16 +466,16 @@
       "uiComponent": "Slider.svelte",
       "liteComponent": "fields/LiteNumberField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用带 min/max/step 的原生 number 输入"
+      "status": "exact",
+      "strategy": "原生 <input type=\"number\"> 保留 min/max/step 数值契约；拖动滑杆属客户端增强"
     },
     {
       "name": "RangeSlider",
       "uiComponent": "RangeSlider.svelte",
       "liteComponent": "fields/LiteNumberField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用两个受限数值字段；宿主负责范围完整性和精度校验"
+      "status": "exact",
+      "strategy": "两个原生 number 输入保留上下界与 step 契约；区间完整性由宿主校验，拖动属客户端增强"
     },
     {
       "name": "ColorPicker",
@@ -490,8 +490,8 @@
       "uiComponent": "Rate.svelte",
       "liteComponent": "fields/LiteRatingField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Lite 使用原生数值输入与星级展示；宿主负责评分范围校验"
+      "status": "exact",
+      "strategy": "原生 number 输入（min/max/step）+ 星级展示，保留评分契约；星标点选属客户端增强"
     },
     {
       "name": "ListButton",

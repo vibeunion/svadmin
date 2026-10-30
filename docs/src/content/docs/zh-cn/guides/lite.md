@@ -25,7 +25,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 ## 组件体系与清单对齐
 
 当前对齐清单的 **179/179 项**均已归类为直接适配、语义降级或仅 SPA。
-清单覆盖率不是发布口径，推进时应跟踪三个数字：1:1 对齐率、语义降级率，以及在行为测试中具备断言预算的映射组件数。判定标准与仪表盘类组件的 SSR 边界见 `docs/components/parity.md` 与 `docs/architecture/ssr-dashboard-boundaries.md`。
+清单覆盖率不是发布口径，推进时应跟踪三个数字：1:1 对齐率、语义降级率，以及在行为测试中具备断言预算的映射组件数。判定标准、字段 input-domain 规则与"只读仪表盘"定位见 `docs/components/parity.md`、`docs/architecture/lite-field-parity-criteria.md`、`docs/architecture/ssr-dashboard-boundaries.md` 与 `docs/architecture/ssr-widget-positioning.md`。
 
 ### 模块对齐看板
 
@@ -46,6 +46,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
   - 免适配 (SPA Only): 2
   - 待补齐 (Missing): 0
   行为断言覆盖: 132/179 (73.7%) · 仅被引用: 0
+  字段 1:1: 36/46 (78.3%) · 控件 1:1: 15/37 (40.5%，按设计只读)
 ===============================================================
 ```
 

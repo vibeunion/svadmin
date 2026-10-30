@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import {
   buildParityReport,
   collectBehaviorAssertionBudgets,
   collectBehaviorTestedComponents,
   generateMarkdownReport,
+  parityArtifactDrift,
   parityOutputPaths,
 } from './check-parity';
 
@@ -107,7 +109,47 @@ describe('UI/Lite Parity Tracking Contract', () => {
     const relationPicker = report.items.find((item) => item.name === 'RelationPicker');
     expect(relationPicker?.status).toBe('fallback');
     const fileUpload = report.items.find((item) => item.name === 'FileUpload');
-    expect(fileUpload?.status).toBe('fallback');
+    expect(fileUpload?.status).toBe('exact');
+    const tagsInput = report.items.find((item) => item.name === 'TagsInput');
+    expect(tagsInput?.status).toBe('fallback');
+    const timePicker = report.items.find((item) => item.name === 'TimePicker');
+    expect(timePicker?.status).toBe('fallback');
+    const datePicker = report.items.find((item) => item.name === 'DatePicker');
+    expect(datePicker?.status).toBe('fallback');
+  });
+
+  it('detects stale parity artifacts so CI cannot pass on drift', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'svadmin-parity-'));
+    try {
+      const { markdownPath, jsonPath } = parityOutputPaths(directory);
+      mkdirSync(dirname(markdownPath), { recursive: true });
+      const report = buildParityReport();
+      writeFileSync(markdownPath, `${generateMarkdownReport(report).trimEnd()}\n`, 'utf8');
+      writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
+      expect(parityArtifactDrift(directory)).toEqual([]);
+
+      writeFileSync(jsonPath, JSON.stringify({ ...report, fallbackCount: 0 }, null, 2), 'utf8');
+      const drift = parityArtifactDrift(directory);
+      expect(drift.some((entry) => entry.includes('parity.json'))).toBe(true);
+      expect(drift.some((entry) => entry.includes('PARITY.md'))).toBe(false);
+
+      writeFileSync(markdownPath, '# stale\n', 'utf8');
+      expect(parityArtifactDrift(directory).some((entry) => entry.includes('PARITY.md'))).toBe(true);
+
+      rmSync(jsonPath);
+      expect(parityArtifactDrift(directory).some((entry) => entry.includes('missing'))).toBe(true);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps parity checking registered in package scripts and CI', () => {
+    const rootPkg = JSON.parse(readFileSync(resolve(import.meta.dir, '../package.json'), 'utf8'));
+    expect(rootPkg.scripts['check:parity:verify']).toContain('--check');
+    const verifyScript = readFileSync(resolve(import.meta.dir, 'verify.ts'), 'utf8');
+    expect(verifyScript).toContain('check:parity:verify');
+    const ci = readFileSync(resolve(import.meta.dir, '../.github/workflows/ci.yml'), 'utf8');
+    expect(ci).toContain('bun run check:parity:verify');
   });
 
   it('keeps parity checking registered in package scripts', () => {

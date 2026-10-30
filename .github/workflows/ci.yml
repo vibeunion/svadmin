@@ -72,6 +72,9 @@ jobs:
       - name: Run tests
         run: bun run test
 
+      - name: Verify parity artifacts
+        run: bun run check:parity:verify
+
       - name: Build example application
         run: bun run --cwd example build
 

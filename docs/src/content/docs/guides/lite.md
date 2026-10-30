@@ -27,8 +27,11 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 The current inventory classifies **179/179 entries** as direct counterparts, semantic fallbacks, or SPA-only components.
 Inventory coverage is not release acceptance, so track the three numbers below instead: exact-counterpart rate,
 fallback rate, and how many mapped components carry a real assertion budget in a behavior test.
-The classification rules and the accepted SSR boundary for dashboard-class widgets are recorded in
-`docs/components/parity.md` and `docs/architecture/ssr-dashboard-boundaries.md`.
+The classification rules, the input-domain field rule and the accepted read-only widget
+positioning are recorded in `docs/components/parity.md`,
+`docs/architecture/lite-field-parity-criteria.md`,
+`docs/architecture/ssr-dashboard-boundaries.md` and
+`docs/architecture/ssr-widget-positioning.md`.
 
 ### Parity Breakdown by Module
 
@@ -49,6 +52,7 @@ The classification rules and the accepted SSR boundary for dashboard-class widge
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
   Behavior Asserted: 132/179 (73.7%) · Referenced only: 0
+  Fields 1:1: 36/46 (78.3%) · Widgets 1:1: 15/37 (40.5%, read-only by design)
 ===============================================================
 ```
 

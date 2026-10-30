@@ -169,6 +169,11 @@ reprints the rules.
 Dashboard-class widgets are the main application of this rule; the accepted
 boundary is recorded in
 [SSR dashboard-class boundaries](../architecture/ssr-dashboard-boundaries.md).
+Field/control mappings follow the
+[input-domain rule](../architecture/lite-field-parity-criteria.md): a native control
+must match the value domain, otherwise the entry stays `fallback`.
+Widget interactivity is deliberately out of SSR scope —
+[read-only widget positioning](../architecture/ssr-widget-positioning.md).
 
 ## Remaining API-depth candidates
 

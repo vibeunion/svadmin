@@ -99,7 +99,7 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'RelationPicker', uiComponent: 'RelationPicker.svelte', liteComponent: 'fields/LiteRelationField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用原生关联选择或详情链接；服务端负责查询和授权' },
   { name: 'FilterCollectionInput', uiComponent: 'FilterCollectionInput.svelte', liteComponent: 'LiteFilterBuilder.svelte', category: 'advanced', status: 'fallback', strategy: 'Lite 使用原生筛选表单；完整递归交互由服务端回显承接' },
   { name: 'SegmentedControl', uiComponent: 'SegmentedControl.svelte', liteComponent: 'LiteTabs.svelte', category: 'layout', status: 'fallback', strategy: 'Lite 使用原生链接或 tabs 导航；不承诺 SPA 内联状态切换' },
-  { name: 'FileUpload', uiComponent: 'FileUpload.svelte', liteComponent: 'LiteFileUpload.svelte', category: 'fields', status: 'fallback', strategy: '可见原生文件输入与 multipart POST；服务端校验，不提供客户端进度、取消或重试' },
+  { name: 'FileUpload', uiComponent: 'FileUpload.svelte', liteComponent: 'LiteFileUpload.svelte', category: 'fields', status: 'exact', strategy: '原生 <input type="file">（accept/multiple/required 透传）+ multipart POST，服务端校验；进度、取消与重试属客户端增强' },
   // ─── Fields ─────────────────────────────────────────────────────────────
   { name: 'TextField', uiComponent: 'TextField.svelte', liteComponent: 'LiteTextField.svelte', category: 'fields', status: 'exact', strategy: '原生 <input type="text">' },
   { name: 'NumberField', uiComponent: 'NumberField.svelte', liteComponent: 'LiteNumberField.svelte', category: 'fields', status: 'exact', strategy: '原生 <input type="number">' },
@@ -123,22 +123,22 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'JsonField', uiComponent: 'JsonField.svelte', liteComponent: 'LiteJsonField.svelte', category: 'fields', status: 'exact', strategy: 'JSON 格式化与原生 Textarea' },
   { name: 'CopyField', uiComponent: 'CopyField.svelte', liteComponent: 'LiteCopyField.svelte', category: 'fields', status: 'exact', strategy: '可选中等宽文本展示' },
   { name: 'CodeField', uiComponent: 'CodeField.svelte', liteComponent: 'LiteCodeField.svelte', category: 'fields', status: 'exact', strategy: '服务端 <pre><code> 展示（含语言徽标与 maxHeight）与原生 Textarea 编辑；剪贴板复制为客户端增强，数据契约一致' },
-  { name: 'MarkdownField', uiComponent: 'MarkdownField.svelte', liteComponent: 'LiteMarkdownField.svelte', category: 'fields', status: 'fallback', strategy: '降级为原生 Textarea 与纯 HTML 预览' },
+  { name: 'MarkdownField', uiComponent: 'MarkdownField.svelte', liteComponent: 'LiteMarkdownField.svelte', category: 'fields', status: 'fallback', strategy: 'Textarea 编辑 + 服务端 <pre> 源码展示；Markdown 渲染预览由宿主或 SPA 承接' },
   { name: 'RichTextField', uiComponent: 'RichTextField.svelte', liteComponent: 'LiteRichTextField.svelte', category: 'fields', status: 'fallback', strategy: '降级为原生 Textarea 与只读展示' },
   { name: 'TreeSelect', uiComponent: 'TreeSelect.svelte', liteComponent: 'fields/LiteTreeSelect.svelte', category: 'fields', status: 'exact', strategy: '原生层级缩进 <select> 与单选/多选' },
   { name: 'Cascader', uiComponent: 'Cascader.svelte', liteComponent: 'fields/LiteCascader.svelte', category: 'fields', status: 'exact', strategy: '路径展开原生 <select> 与格式化展示' },
   { name: 'Transfer', uiComponent: 'Transfer.svelte', liteComponent: 'LiteTransfer.svelte', category: 'fields', status: 'exact', strategy: '双列复选框/列表与左右转移 POST 表单' },
   { name: 'DynamicFormList', uiComponent: 'DynamicFormList.svelte', liteComponent: 'LiteDynamicFormList.svelte', category: 'fields', status: 'exact', strategy: '子表单卡片/表格与服务端索引数组解析' },
   { name: 'DatePicker', uiComponent: 'DatePicker.svelte', liteComponent: 'fields/LiteDateField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 复用原生 date 字段；宿主通过 FieldDefinition 承接日期格式和服务端校验' },
-  { name: 'DateRangePicker', uiComponent: 'DateRangePicker.svelte', liteComponent: 'fields/LiteDateRangeField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 复用双原生 date 输入；区间顺序和业务时区由宿主校验' },
+  { name: 'DateRangePicker', uiComponent: 'DateRangePicker.svelte', liteComponent: 'fields/LiteDateRangeField.svelte', category: 'fields', status: 'exact', strategy: '双原生 <input type="date"> 保留区间数据契约；区间顺序与时区由宿主校验，弹层日历属客户端增强' },
   { name: 'TimePicker', uiComponent: 'TimePicker.svelte', liteComponent: 'fields/LiteTextField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用受限文本输入；宿主负责时间格式、步进和时区解释' },
   { name: 'DateTimePicker', uiComponent: 'DateTimePicker.svelte', liteComponent: 'fields/LiteTextField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用受限文本输入；宿主负责本地时间、时区和消歧规则' },
-  { name: 'RadioGroup', uiComponent: 'RadioGroup.svelte', liteComponent: 'LiteSelectField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用原生 select 提交互斥值；服务端仍按资源契约校验枚举' },
+  { name: 'RadioGroup', uiComponent: 'RadioGroup.svelte', liteComponent: 'LiteSelectField.svelte', category: 'fields', status: 'exact', strategy: '原生 <select> 承载同一枚举互斥值，服务端按资源契约校验枚举；单选按钮呈现属客户端增强' },
   { name: 'TagsInput', uiComponent: 'TagsInput.svelte', liteComponent: 'fields/LiteTagField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用逗号分隔标签字段；宿主负责数量、长度和允许值校验' },
-  { name: 'Slider', uiComponent: 'Slider.svelte', liteComponent: 'fields/LiteNumberField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用带 min/max/step 的原生 number 输入' },
-  { name: 'RangeSlider', uiComponent: 'RangeSlider.svelte', liteComponent: 'fields/LiteNumberField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用两个受限数值字段；宿主负责范围完整性和精度校验' },
+  { name: 'Slider', uiComponent: 'Slider.svelte', liteComponent: 'fields/LiteNumberField.svelte', category: 'fields', status: 'exact', strategy: '原生 <input type="number"> 保留 min/max/step 数值契约；拖动滑杆属客户端增强' },
+  { name: 'RangeSlider', uiComponent: 'RangeSlider.svelte', liteComponent: 'fields/LiteNumberField.svelte', category: 'fields', status: 'exact', strategy: '两个原生 number 输入保留上下界与 step 契约；区间完整性由宿主校验，拖动属客户端增强' },
   { name: 'ColorPicker', uiComponent: 'ColorPicker.svelte', liteComponent: 'fields/LiteTextField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用受限文本输入；宿主负责颜色格式和品牌白名单校验' },
-  { name: 'Rate', uiComponent: 'Rate.svelte', liteComponent: 'fields/LiteRatingField.svelte', category: 'fields', status: 'fallback', strategy: 'Lite 使用原生数值输入与星级展示；宿主负责评分范围校验' },
+  { name: 'Rate', uiComponent: 'Rate.svelte', liteComponent: 'fields/LiteRatingField.svelte', category: 'fields', status: 'exact', strategy: '原生 number 输入（min/max/step）+ 星级展示，保留评分契约；星标点选属客户端增强' },
 
   // ─── Buttons ────────────────────────────────────────────────────────────
   { name: 'ListButton', uiComponent: 'buttons/ListButton.svelte', liteComponent: 'buttons/LiteListButton.svelte', category: 'buttons', status: 'exact', strategy: '原生 <a> 链接' },
@@ -500,6 +500,49 @@ export function printCliDashboard(report: ParityReport): void {
   console.info('===============================================================\n');
 }
 
+/**
+ * Detect artifacts that no longer match the generator output. Timestamps are
+ * normalized away so a stale matrix is reported for content reasons only.
+ */
+export function parityArtifactDrift(
+  repositoryRoot = resolve(import.meta.dir, '..'),
+): string[] {
+  const report = buildParityReport();
+  const { markdownPath, jsonPath } = parityOutputPaths(repositoryRoot);
+  const drift: string[] = [];
+
+  const stripMarkdownTimestamp = (value: string): string =>
+    value.replace(/^> .*自动生成时间[^\n]*$/mu, '> <timestamp>').trimEnd();
+  const stripJsonTimestamp = (value: string): string => {
+    const parsed = JSON.parse(value) as Record<string, unknown>;
+    delete parsed['timestamp'];
+    return JSON.stringify(parsed);
+  };
+
+  const expectedMarkdown = stripMarkdownTimestamp(generateMarkdownReport(report));
+  const expectedJson = stripJsonTimestamp(JSON.stringify(report));
+  const expected: Array<[string, string, (value: string) => string]> = [
+    [markdownPath, expectedMarkdown, stripMarkdownTimestamp],
+    [jsonPath, expectedJson, stripJsonTimestamp],
+  ];
+
+  for (const [path, expectedValue, normalize] of expected) {
+    if (!existsSync(path)) {
+      drift.push(`${path} (missing)`);
+      continue;
+    }
+    let current: string;
+    try {
+      current = normalize(readFileSync(path, 'utf8'));
+    } catch {
+      drift.push(`${path} (unparsable)`);
+      continue;
+    }
+    if (current !== expectedValue) drift.push(`${path} (out of date)`);
+  }
+  return drift;
+}
+
 // ─── Main Execution ──────────────────────────────────────────────────────────
 if (import.meta.main) {
   const report = buildParityReport();
@@ -524,5 +567,16 @@ if (import.meta.main) {
   if (isCheck && report.missingCount > 0) {
     console.error(`[FAIL] Found ${report.missingCount} missing component mappings!`);
     process.exit(1);
+  }
+
+  if (isCheck) {
+    const drift = parityArtifactDrift();
+    if (drift.length > 0) {
+      console.error('[FAIL] Parity artifacts are out of date:');
+      for (const entry of drift) console.error(`  - ${entry}`);
+      console.error('Run `bun run check:parity` and commit the regenerated artifacts.');
+      process.exit(1);
+    }
+    console.info('[OK] Parity artifacts match the generator output.');
   }
 }

@@ -1,8 +1,8 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-30T21:14:50.246Z`
+> 自动生成时间：`2026-10-30T21:22:16.352Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**61.5%**（110）· 语义降级率 (Fallback)：**37.4%**（67）
+> 1:1 对齐率 (Exact)：**64.8%**（116）· 语义降级率 (Fallback)：**34.1%**（61）
 > 行为验证覆盖：**73.7%**（132/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
@@ -15,7 +15,7 @@
 | **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 | 0 |
 | **advanced** | 43 | 22 | 20 | 1 | 0 | **51.2%** | 38/43 | 0 |
 | **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 33/37 | 0 |
-| **fields** | 46 | 30 | 16 | 0 | 0 | **65.2%** | 28/46 | 0 |
+| **fields** | 46 | 36 | 10 | 0 | 0 | **78.3%** | 28/46 | 0 |
 | **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
@@ -150,7 +150,7 @@
 | UI 组件 (SPA) | Lite 对应组件 (SSR) | 对齐状态 | 降级策略 / 承接方案 |
 |---|---|:---:|---|
 | `RelationPicker` | `fields/LiteRelationField.svelte` | ⚡ 语义降级 | Lite 使用原生关联选择或详情链接；服务端负责查询和授权 |
-| `FileUpload` | `LiteFileUpload.svelte` | ⚡ 语义降级 | 可见原生文件输入与 multipart POST；服务端校验，不提供客户端进度、取消或重试 |
+| `FileUpload` | `LiteFileUpload.svelte` | ✅ 1:1 对齐 | 原生 <input type="file">（accept/multiple/required 透传）+ multipart POST，服务端校验；进度、取消与重试属客户端增强 |
 | `TextField` | `LiteTextField.svelte` | ✅ 1:1 对齐 | 原生 <input type="text"> |
 | `NumberField` | `LiteNumberField.svelte` | ✅ 1:1 对齐 | 原生 <input type="number"> |
 | `BooleanField` | `LiteBooleanField.svelte` | ✅ 1:1 对齐 | 原生 <input type="checkbox"> |
@@ -173,22 +173,22 @@
 | `JsonField` | `LiteJsonField.svelte` | ✅ 1:1 对齐 | JSON 格式化与原生 Textarea |
 | `CopyField` | `LiteCopyField.svelte` | ✅ 1:1 对齐 | 可选中等宽文本展示 |
 | `CodeField` | `LiteCodeField.svelte` | ✅ 1:1 对齐 | 服务端 <pre><code> 展示（含语言徽标与 maxHeight）与原生 Textarea 编辑；剪贴板复制为客户端增强，数据契约一致 |
-| `MarkdownField` | `LiteMarkdownField.svelte` | ⚡ 语义降级 | 降级为原生 Textarea 与纯 HTML 预览 |
+| `MarkdownField` | `LiteMarkdownField.svelte` | ⚡ 语义降级 | Textarea 编辑 + 服务端 <pre> 源码展示；Markdown 渲染预览由宿主或 SPA 承接 |
 | `RichTextField` | `LiteRichTextField.svelte` | ⚡ 语义降级 | 降级为原生 Textarea 与只读展示 |
 | `TreeSelect` | `fields/LiteTreeSelect.svelte` | ✅ 1:1 对齐 | 原生层级缩进 <select> 与单选/多选 |
 | `Cascader` | `fields/LiteCascader.svelte` | ✅ 1:1 对齐 | 路径展开原生 <select> 与格式化展示 |
 | `Transfer` | `LiteTransfer.svelte` | ✅ 1:1 对齐 | 双列复选框/列表与左右转移 POST 表单 |
 | `DynamicFormList` | `LiteDynamicFormList.svelte` | ✅ 1:1 对齐 | 子表单卡片/表格与服务端索引数组解析 |
 | `DatePicker` | `fields/LiteDateField.svelte` | ⚡ 语义降级 | Lite 复用原生 date 字段；宿主通过 FieldDefinition 承接日期格式和服务端校验 |
-| `DateRangePicker` | `fields/LiteDateRangeField.svelte` | ⚡ 语义降级 | Lite 复用双原生 date 输入；区间顺序和业务时区由宿主校验 |
+| `DateRangePicker` | `fields/LiteDateRangeField.svelte` | ✅ 1:1 对齐 | 双原生 <input type="date"> 保留区间数据契约；区间顺序与时区由宿主校验，弹层日历属客户端增强 |
 | `TimePicker` | `fields/LiteTextField.svelte` | ⚡ 语义降级 | Lite 使用受限文本输入；宿主负责时间格式、步进和时区解释 |
 | `DateTimePicker` | `fields/LiteTextField.svelte` | ⚡ 语义降级 | Lite 使用受限文本输入；宿主负责本地时间、时区和消歧规则 |
-| `RadioGroup` | `LiteSelectField.svelte` | ⚡ 语义降级 | Lite 使用原生 select 提交互斥值；服务端仍按资源契约校验枚举 |
+| `RadioGroup` | `LiteSelectField.svelte` | ✅ 1:1 对齐 | 原生 <select> 承载同一枚举互斥值，服务端按资源契约校验枚举；单选按钮呈现属客户端增强 |
 | `TagsInput` | `fields/LiteTagField.svelte` | ⚡ 语义降级 | Lite 使用逗号分隔标签字段；宿主负责数量、长度和允许值校验 |
-| `Slider` | `fields/LiteNumberField.svelte` | ⚡ 语义降级 | Lite 使用带 min/max/step 的原生 number 输入 |
-| `RangeSlider` | `fields/LiteNumberField.svelte` | ⚡ 语义降级 | Lite 使用两个受限数值字段；宿主负责范围完整性和精度校验 |
+| `Slider` | `fields/LiteNumberField.svelte` | ✅ 1:1 对齐 | 原生 <input type="number"> 保留 min/max/step 数值契约；拖动滑杆属客户端增强 |
+| `RangeSlider` | `fields/LiteNumberField.svelte` | ✅ 1:1 对齐 | 两个原生 number 输入保留上下界与 step 契约；区间完整性由宿主校验，拖动属客户端增强 |
 | `ColorPicker` | `fields/LiteTextField.svelte` | ⚡ 语义降级 | Lite 使用受限文本输入；宿主负责颜色格式和品牌白名单校验 |
-| `Rate` | `fields/LiteRatingField.svelte` | ⚡ 语义降级 | Lite 使用原生数值输入与星级展示；宿主负责评分范围校验 |
+| `Rate` | `fields/LiteRatingField.svelte` | ✅ 1:1 对齐 | 原生 number 输入（min/max/step）+ 星级展示，保留评分契约；星标点选属客户端增强 |
 | `ImageCropper` | `LiteImageCropper.svelte` | ✅ 1:1 对齐 | 图片缩放与裁剪参数表单 |
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
 | `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
