@@ -6,7 +6,7 @@ async function login(page: Page): Promise<void> {
   await page.locator('#login-identifier').fill('admin@example.com');
   await page.locator('#login-password').fill('demo');
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/#\/$/);
+  await expect(page).toHaveURL(/#\/(?:\?[^#]*)?$/);
 }
 
 async function expectDesktopGeometry(

@@ -193,7 +193,7 @@
     class={cn('flex h-screen', className)}
     in:fade={{ duration: 150 }}
   >
-    <div class="hidden md:block w-[252px] bg-sidebar/80 p-4 space-y-4">
+    <div class="svadmin-layout__desktop-sidebar w-[252px] bg-sidebar/80 p-4 space-y-4">
       <Skeleton class="h-8 w-32" />
       <div class="space-y-2 mt-6">
         {#each Array(5) as _, _i (_i)}
@@ -235,7 +235,7 @@
 
     <!-- Desktop sidebar -->
     {#if showSidebar}
-      <div class="hidden md:block">
+      <div class="svadmin-layout__desktop-sidebar">
         <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
       </div>
     {/if}
