@@ -4,7 +4,10 @@ import LiteAvatarField from './LiteAvatarField.svelte';
 import LiteCodeField from './LiteCodeField.svelte';
 import LiteCopyField from './LiteCopyField.svelte';
 import LiteCurrencyField from './LiteCurrencyField.svelte';
+import LiteDateField from './LiteDateField.svelte';
 import LiteDateRangeField from './LiteDateRangeField.svelte';
+import LiteTagField from './LiteTagField.svelte';
+import LiteTextField from './LiteTextField.svelte';
 import LitePercentField from './LitePercentField.svelte';
 import LitePhoneField from './LitePhoneField.svelte';
 import LiteRatingField from './LiteRatingField.svelte';
@@ -162,5 +165,117 @@ describe('Lite Fields SSR rendering', () => {
       mode: 'edit',
     });
     expect(editView.container.querySelector('input')?.value).toBe('4');
+  });
+});
+
+describe('Lite native field domains', () => {
+  it('renders date-only fields with a native date control and no UTC shift', () => {
+    const view = render(LiteDateField, {
+      mode: 'edit',
+      value: '2024-03-15',
+      field: {
+        key: 'dueOn',
+        label: 'Due on',
+        type: 'date',
+        required: true,
+        dateInput: { min: '2024-01-01', max: '2024-12-31' },
+      },
+    });
+
+    const input = view.container.querySelector('input') as HTMLInputElement;
+    expect(input.type).toBe('date');
+    expect(input.value).toBe('2024-03-15');
+    expect(input.getAttribute('min')).toBe('2024-01-01');
+    expect(input.getAttribute('max')).toBe('2024-12-31');
+    expect(input.required).toBe(true);
+    expect(input.name).toBe('dueOn');
+  });
+
+  it('keeps datetime fields on datetime-local input', () => {
+    const view = render(LiteDateField, {
+      mode: 'edit',
+      value: '2024-03-15T09:30:45Z',
+      field: { key: 'startsAt', label: 'Starts at', type: 'datetime' },
+    });
+
+    const input = view.container.querySelector('input') as HTMLInputElement;
+    expect(input.type).toBe('datetime-local');
+    expect(input.value).toBe('2024-03-15T09:30');
+    expect(input.hasAttribute('min')).toBe(false);
+  });
+
+  it('maps time, datetime, colour, email, url and phone domains to native inputs', () => {
+    const cases: Array<[FieldDefinition['type'], string, string, Record<string, unknown>?]> = [
+      ['time', '09:30', 'time'],
+      ['datetime', '2024-03-15T09:30', 'datetime-local'],
+      ['color', '#165DFF', 'color'],
+      ['email', 'ada@example.test', 'email'],
+      ['url', 'https://example.test', 'url'],
+      ['phone', '+8613800000000', 'tel'],
+      ['text', 'plain', 'text'],
+    ];
+
+    for (const [type, value, expectedType] of cases) {
+      const view = render(LiteTextField, {
+        mode: 'edit',
+        value,
+        field: { key: 'value', label: 'Value', type },
+      });
+      const input = view.container.querySelector('input') as HTMLInputElement;
+      expect([type, input.type]).toEqual([type, expectedType]);
+      // Native colour inputs normalize hex to lower case.
+      expect(input.value.toLowerCase()).toBe(value.toLowerCase());
+      view.unmount();
+    }
+  });
+
+  it('falls back to a text control for non-hex colour values', () => {
+    const view = render(LiteTextField, {
+      mode: 'edit',
+      value: 'rgb(22, 93, 255)',
+      field: { key: 'accent', label: 'Accent', type: 'color' },
+    });
+
+    const input = view.container.querySelector('input') as HTMLInputElement;
+    expect(input.type).toBe('text');
+    expect(input.value).toBe('rgb(22, 93, 255)');
+
+    const empty = render(LiteTextField, {
+      mode: 'edit',
+      value: '',
+      field: { key: 'accent', label: 'Accent', type: 'color' },
+    });
+    const color = empty.container.querySelector('input') as HTMLInputElement;
+    expect(color.type).toBe('color');
+    expect(color.value).toBe('#000000');
+  });
+
+  it('submits one field per tag instead of a comma string', () => {
+    const view = render(LiteTagField, {
+      mode: 'edit',
+      value: ['admin', 'internal'],
+      field: { key: 'tags', label: 'Tags', type: 'tags', required: true },
+    });
+
+    const inputs = Array.from(view.container.querySelectorAll('input[type="text"]'));
+    expect(inputs.map((input) => input.getAttribute('name'))).toEqual(['tags', 'tags', 'tags']);
+    expect(inputs.map((input) => input.value)).toEqual(['admin', 'internal', '']);
+    expect(inputs.map((input) => input.getAttribute('aria-label'))).toEqual([
+      'Tags 1',
+      'Tags 2',
+      'Tags (new)',
+    ]);
+    expect(view.getByText(/One tag per field/u)).toBeTruthy();
+  });
+
+  it('keeps tag display mode as badges without inputs', () => {
+    const view = render(LiteTagField, {
+      mode: 'show',
+      value: ['admin'],
+      field: { key: 'tags', label: 'Tags', type: 'tags' },
+    });
+
+    expect(view.container.querySelector('input')).toBeNull();
+    expect(view.getByText('admin').className).toContain('lite-badge');
   });
 });

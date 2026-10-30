@@ -22,19 +22,33 @@
     {/each}
   </div>
 {:else}
-  <div>
-    <!-- For SSR without JS, we just accept a comma-separated string -->
-    <input
-      type="text"
-      name={field.key}
-      id={field.key}
-      value={tags.join(', ')}
-      class="lite-input {hasError ? 'lite-input-error' : ''}"
-      placeholder="Comma separated tags (e.g. admin, user, internal)"
-    />
-    <span style="font-size: 11px; color: #6b7280; display: block; margin-top: 4px;">
-      Separate tags with commas.
-    </span>
+  <div class="lite-tags-input">
+    <!-- SSR 无脚本：每个标签一个同名字段，服务端按 getAll 解析为数组。 -->
+    {#each tags as tag, index (index)}
+      <label class="lite-tags-input__row">
+        <span class="lite-visually-hidden">{field.label ?? 'Tag'} {index + 1}</span>
+        <input
+          type="text"
+          name={field.key}
+          value={tag}
+          class="lite-input{hasError ? ' lite-input-error' : ''}"
+          aria-label={`${field.label ?? 'Tag'} ${index + 1}`}
+          placeholder="Remove this tag by clearing the field"
+        />
+      </label>
+    {/each}
+    <label class="lite-tags-input__row">
+      <span class="lite-visually-hidden">{field.label ?? 'Tag'} (new)</span>
+      <input
+        type="text"
+        name={field.key}
+        value=""
+        class="lite-input{hasError ? ' lite-input-error' : ''}"
+        aria-label={`${field.label ?? 'Tag'} (new)`}
+        placeholder="Add a tag"
+      />
+    </label>
+    <span class="lite-tags-input__hint">One tag per field. Leave a field blank to drop it.</span>
     {#if hasError}
       {#each error as err, _i (_i)}
         <div class="lite-error-text">{err}</div>
@@ -42,3 +56,10 @@
     {/if}
   </div>
 {/if}
+
+<style>
+  .lite-tags-input { display: block; }
+  .lite-tags-input__row { display: block; margin-bottom: 6px; }
+  .lite-tags-input__hint { display: block; margin-top: 4px; color: #6B7280; font-size: 11px; }
+  .lite-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style>

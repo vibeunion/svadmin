@@ -475,7 +475,9 @@ export function fieldToInputType(field: FieldDefinition): string {
     case "url": return "text";
     case "phone": return "tel";
     case "boolean": return "checkbox";
-    case "date": return "text";
+    case "date": return "date";
+    case "time": return "time";
+    case "datetime": return "datetime-local";
     case "textarea":
     case "richtext":
     case "markdown":

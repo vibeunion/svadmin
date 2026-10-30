@@ -705,6 +705,54 @@ describe('createCrudActions array form parsing', () => {
     } as never)).resolves.toEqual({ success: false, error: 'Delete failed' });
   });
 
+  test('parses repeated tag fields into arrays and keeps legacy comma values working', async () => {
+    const create = mock(async (params: { variables: Record<string, unknown> }) => ({
+      data: { id: 'tagged-1', ...params.variables },
+    }));
+    const provider = { create } as unknown as DataProvider;
+    const tagResource: ResourceDefinition = {
+      name: 'tagged',
+      label: 'Tagged',
+      fields: [
+        { key: 'title', label: 'Title', type: 'text' },
+        { key: 'tags', label: 'Tags', type: 'tags' },
+      ],
+    };
+    const actions = createCrudActions(provider, tagResource);
+
+    const repeated = new FormData();
+    repeated.set('title', 'One input per tag');
+    repeated.append('tags', 'admin');
+    repeated.append('tags', '');
+    repeated.append('tags', 'internal,ops');
+    await actions.create({
+      request: new Request('https://admin.example/lite/tagged', { method: 'POST', body: repeated }),
+    } as never);
+    expect(create.mock.calls[0]?.[0].variables).toEqual({
+      title: 'One input per tag',
+      tags: ['admin', 'internal', 'ops'],
+    });
+
+    const legacy = new FormData();
+    legacy.set('title', 'Legacy client');
+    legacy.set('tags', 'sales, support');
+    await actions.create({
+      request: new Request('https://admin.example/lite/tagged', { method: 'POST', body: legacy }),
+    } as never);
+    expect(create.mock.calls[1]?.[0].variables).toEqual({
+      title: 'Legacy client',
+      tags: ['sales', 'support'],
+    });
+
+    const cleared = new FormData();
+    cleared.set('title', 'Cleared tags');
+    cleared.append('tags', '   ');
+    await actions.create({
+      request: new Request('https://admin.example/lite/tagged', { method: 'POST', body: cleared }),
+    } as never);
+    expect(create.mock.calls[2]?.[0].variables).toEqual({ title: 'Cleared tags', tags: [] });
+  });
+
   test('enforces ResourceDefinition CRUD flags before invoking the provider', async () => {
     const create = mock(async () => ({ data: { id: 'unexpected' } }));
     const update = mock(async () => ({ data: { id: 'unexpected' } }));

@@ -789,6 +789,17 @@ function isNonEmptyNativeFile(value: unknown): value is File {
   return isNativeFile(value) && value.size > 0 && value.name !== '';
 }
 
+/**
+ * Tags arrive as one form field per tag. Older clients sent a single
+ * comma-separated value, so both shapes are accepted and normalized here.
+ */
+function parseTagValues(values: FormDataEntryValue[]): string[] {
+  return values
+    .flatMap((value) => (typeof value === 'string' ? value.split(',') : []))
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 function formDataToObject(
   formData: FormData,
   fields: FieldDefinition[],
@@ -807,6 +818,11 @@ function formDataToObject(
       if (values.length > 0) {
         obj[field.key] = values.map(v => String(v));
       }
+      continue;
+    }
+
+    if (field.type === 'tags') {
+      obj[field.key] = parseTagValues(formData.getAll(field.key));
       continue;
     }
 
@@ -967,7 +983,7 @@ function coerceFieldValues(
     case 'boolean':
       return parseExplicitBoolean(raw) ?? raw;
     case 'tags':
-      return raw ? raw.split(',').map((value) => value.trim()).filter(Boolean) : [];
+      return parseTagValues(rawValues);
     case 'json':
       try {
         return raw ? JSON.parse(raw) : null;

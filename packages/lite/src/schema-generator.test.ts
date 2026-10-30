@@ -164,6 +164,14 @@ describe('fieldsToTypeBoxSchema shared ResourceDefinition values', () => {
     expect(fieldToInputType({ key: 'password', label: 'Password', type: 'password' })).toBe('password');
     expect(fieldToInputType({ key: 'notes', label: 'Notes', type: 'markdown' })).toBe('textarea');
   });
+
+  test('maps temporal and colour domains to native controls', () => {
+    expect(fieldToInputType({ key: 'day', label: 'Day', type: 'date' })).toBe('date');
+    expect(fieldToInputType({ key: 'at', label: 'At', type: 'time' })).toBe('time');
+    expect(fieldToInputType({ key: 'moment', label: 'Moment', type: 'datetime' })).toBe('datetime-local');
+    expect(fieldToInputType({ key: 'accent', label: 'Accent', type: 'color' })).toBe('color');
+    expect(fieldToInputType({ key: 'mail', label: 'Mail', type: 'email' })).toBe('text');
+  });
 });
 
 describe('resourceToTypeBoxSchema primary key compatibility', () => {

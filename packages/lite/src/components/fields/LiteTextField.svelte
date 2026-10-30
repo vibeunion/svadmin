@@ -10,6 +10,25 @@
 
   let { field, value, error = [], mode = 'show' }: Props = $props();
   let hasError = $derived(error.length > 0);
+
+  /**
+   * Native input type per value domain. Time, datetime, color, email, url and
+   * phone fields must not degrade to a free-text box.
+   */
+  const nativeType: Record<string, string> = {
+    time: 'time',
+    datetime: 'datetime-local',
+    color: 'color',
+    email: 'email',
+    url: 'url',
+    phone: 'tel',
+  };
+  const hexColour = $derived(typeof value === 'string' && /^#[0-9a-f]{6}$/iu.test(value) ? value : '#000000');
+  const colorNeedsTextFallback = $derived(field.type === 'color' && value != null && String(value) !== '' && !/^#[0-9a-f]{6}$/iu.test(String(value)));
+  const inputType = $derived(
+    field.type === 'color' && colorNeedsTextFallback ? 'text' : nativeType[field.type] ?? 'text',
+  );
+  const inputValue = $derived(inputType === 'color' ? hexColour : String(value ?? ''));
 </script>
 
 {#if mode === 'show'}
@@ -17,10 +36,10 @@
 {:else}
   <div>
     <input
-      type="text"
+      type={inputType}
       name={field.key}
       id={field.key}
-      value={String(value ?? '')}
+      value={inputValue}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
       placeholder={field.label}
       {...field.required ? { required: true } : {}}

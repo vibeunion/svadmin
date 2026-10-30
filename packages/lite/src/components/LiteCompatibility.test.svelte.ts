@@ -298,14 +298,26 @@ describe('Lite standalone field compatibility', () => {
       .toBe('/one.png\n/two.png');
     imagesView.unmount();
 
+    // Date-only fields must not silently widen to a datetime value: the native
+    // control keeps the stored calendar day and never shifts it through UTC.
     const dateView = render(LiteDateField, {
       field: { key: 'publishedAt', label: 'Published', type: 'date' },
       value: '2026-08-11T08:00:00.000Z',
       mode: 'edit',
     });
     const dateInput = dateView.container.querySelector<HTMLInputElement>('[name="publishedAt"]');
-    expect(dateInput?.type).toBe('datetime-local');
-    expect(dateInput?.value).toBe('2026-08-11T08:00');
+    expect(dateInput?.type).toBe('date');
+    expect(dateInput?.value).toBe('2026-08-11');
+    dateView.unmount();
+
+    const instantView = render(LiteDateField, {
+      field: { key: 'publishedAt', label: 'Published', type: 'datetime' },
+      value: '2026-08-11T08:00:00.000Z',
+      mode: 'edit',
+    });
+    const instantInput = instantView.container.querySelector<HTMLInputElement>('[name="publishedAt"]');
+    expect(instantInput?.type).toBe('datetime-local');
+    expect(instantInput?.value).toBe('2026-08-11T08:00');
   });
 
   it('retains numeric values in standalone select controls', () => {
