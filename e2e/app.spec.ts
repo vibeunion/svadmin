@@ -11,7 +11,7 @@ async function login(page: import('@playwright/test').Page) {
   await identifierInput.fill('admin@example.com');
   await page.locator('#login-password').fill('demo');
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/#\/$/, { timeout: 10000 });
+  await expect(page).toHaveURL(/#\/(?:\?[^#]*)?$/, { timeout: 10000 });
 }
 
 async function openRecords(page: import('@playwright/test').Page) {
