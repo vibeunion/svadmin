@@ -157,9 +157,9 @@ describe('IE11 SSR source contract', () => {
     // is not installed, so `LiteQRCode` is only reachable through its subpath.
     expect(indexSource).not.toMatch(/from\s+['"]qrcode['"]/u);
     expect(indexSource).not.toMatch(/export[^\n]*from\s+['"]\.\/components\/LiteQRCode\.svelte['"]/u);
-    expect(packageJson.dependencies?.qrcode).toBeUndefined();
-    expect(packageJson.peerDependencies?.qrcode).toBeDefined();
-    expect(packageJson.peerDependenciesMeta?.qrcode?.optional).toBe(true);
+    expect(packageJson.dependencies?.['qrcode']).toBeUndefined();
+    expect(packageJson.peerDependencies?.['qrcode']).toBeDefined();
+    expect(packageJson.peerDependenciesMeta?.['qrcode']?.optional).toBe(true);
     expect(Object.keys(packageJson.exports ?? {})).toContain('./components/*.svelte');
 
     const componentSource = await readFile(
