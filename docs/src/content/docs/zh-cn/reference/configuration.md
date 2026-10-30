@@ -148,6 +148,8 @@ interface FieldDefinition {
 | Violet | `violet` | `#8b5cf6` |
 | Stripe | `stripe` | `#635bff` |
 
+内置强调色预设的 id 是 `default`。已持久化或配置中引用的旧 id（例如历史版本保存的值）在运行时会归一化到 `default`，因此陈旧配置会降级到内置配色，而不会让文档停留在未知的 `data-theme` 上并丢失全部 tokens。自定义预设改名时，请同步更新自身的 `themeConfig`。
+
 可使用 `registerColorPreset()` 添加自定义预设，或使用
 `setColorTheme()`/`getColorThemes()` 在运行时切换。
 

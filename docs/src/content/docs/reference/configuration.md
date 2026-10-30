@@ -152,6 +152,12 @@ Nine color presets are built in. The built-in preset is the default:
 | Violet | `violet` | `#8b5cf6` |
 | Stripe | `stripe` | `#635bff` |
 
+The built-in accent preset id is `default`. Persisted or configured ids that no
+longer exist (for example ids saved by older releases) are normalized to
+`default` at runtime, so a stale value degrades to the built-in palette instead
+of leaving the document with an unknown `data-theme` and no tokens. Bump the
+preset id in your own `themeConfig` when you rename a registered preset.
+
 Use `registerColorPreset()` to add a custom preset, or use
 `setColorTheme()`/`getColorThemes()` for runtime selection.
 
