@@ -5,7 +5,7 @@
  * generate packages/lite/PARITY.md and packages/lite/parity.json,
  * and provide an executable CLI dashboard.
  */
-import { writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 export type ParityStatus = 'exact' | 'fallback' | 'spa_only' | 'missing';
@@ -28,6 +28,12 @@ export interface ParityCategorySummary {
   spaOnly: number;
   missing: number;
   percentage: number;
+  /** Share of entries that are 1:1 counterparts, not fallbacks. */
+  exactRate: number;
+  /** Share of entries that degrade to a server-rendered fallback. */
+  fallbackRate: number;
+  /** Mapped Lite components referenced from a behavior test file. */
+  behaviorVerified: number;
 }
 
 export interface ParityReport {
@@ -38,6 +44,13 @@ export interface ParityReport {
   spaOnlyCount: number;
   missingCount: number;
   overallCoveragePercentage: number;
+  /** 1:1 counterpart rate; the primary progress metric. */
+  exactPercentage: number;
+  /** Semantic-fallback rate; the debt metric. */
+  fallbackPercentage: number;
+  /** Entries whose mapped Lite component appears in a behavior test. */
+  behaviorVerifiedCount: number;
+  behaviorVerifiedPercentage: number;
   categories: Record<string, ParityCategorySummary>;
   items: ParityItem[];
 }
@@ -249,6 +262,45 @@ export function parityOutputPaths(repositoryRoot = resolve(import.meta.dir, '..'
   };
 }
 
+function rate(part: number, total: number): number {
+  return total === 0 ? 0 : Number(((part / total) * 100).toFixed(1));
+}
+
+/** Map a parity target path (for example `widgets/LiteChartTable.svelte`) to its file name. */
+function liteComponentFile(liteComponent: string): string {
+  return liteComponent.split('/').at(-1) ?? liteComponent;
+}
+
+function listFiles(directory: string): string[] {
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = resolve(directory, entry.name);
+    return entry.isDirectory() ? listFiles(entryPath) : [entryPath];
+  });
+}
+
+/**
+ * Components that a behavior test imports directly. A mapping only counts as
+ * behavior-verified when its Lite component is referenced from a `*.test.svelte.ts`
+ * file, so smoke-free inventory entries stay visible as unverified debt.
+ */
+export function collectBehaviorTestedComponents(
+  repositoryRoot = resolve(import.meta.dir, '..'),
+): Set<string> {
+  const testFiles = listFiles(resolve(repositoryRoot, 'packages/lite/src')).filter((file) =>
+    /\.test\.svelte\.ts$/u.test(file),
+  );
+  const components = new Set<string>();
+  for (const file of testFiles) {
+    const source = readFileSync(file, 'utf8');
+    for (const match of source.matchAll(/['"]([^'"]*\b(Lite[A-Za-z0-9]+\.svelte))['"]/gu)) {
+      const componentFile = match[2];
+      if (componentFile) components.add(componentFile);
+    }
+  }
+  return components;
+}
+
 export function buildParityReport(): ParityReport {
   const categories: Record<string, ParityCategorySummary> = {};
 
@@ -262,6 +314,9 @@ export function buildParityReport(): ParityReport {
         spaOnly: 0,
         missing: 0,
         percentage: 0,
+        exactRate: 0,
+        fallbackRate: 0,
+        behaviorVerified: 0,
       };
     }
     const cat = categories[item.category];
@@ -274,7 +329,9 @@ export function buildParityReport(): ParityReport {
 
   for (const cat of Object.values(categories)) {
     const covered = cat.adapted + cat.fallback + cat.spaOnly;
-    cat.percentage = Number(((covered / cat.total) * 100).toFixed(1));
+    cat.percentage = rate(covered, cat.total);
+    cat.exactRate = rate(cat.adapted, cat.total);
+    cat.fallbackRate = rate(cat.fallback, cat.total);
   }
 
   const total = PARITY_ITEMS.length;
@@ -282,7 +339,17 @@ export function buildParityReport(): ParityReport {
   const fallbackCount = PARITY_ITEMS.filter((i) => i.status === 'fallback').length;
   const spaOnlyCount = PARITY_ITEMS.filter((i) => i.status === 'spa_only').length;
   const missingCount = PARITY_ITEMS.filter((i) => i.status === 'missing').length;
-  const overallCoverage = Number((((exactCount + fallbackCount + spaOnlyCount) / total) * 100).toFixed(1));
+  const overallCoverage = rate(exactCount + fallbackCount + spaOnlyCount, total);
+
+  const behaviorVerifiedComponents = collectBehaviorTestedComponents();
+  const behaviorVerifiedCount = PARITY_ITEMS.filter(
+    (item) => item.liteComponent && behaviorVerifiedComponents.has(liteComponentFile(item.liteComponent)),
+  ).length;
+  for (const item of PARITY_ITEMS) {
+    if (item.liteComponent && behaviorVerifiedComponents.has(liteComponentFile(item.liteComponent))) {
+      categories[item.category].behaviorVerified += 1;
+    }
+  }
 
   return {
     timestamp: new Date().toISOString(),
@@ -292,6 +359,10 @@ export function buildParityReport(): ParityReport {
     spaOnlyCount: spaOnlyCount,
     missingCount: missingCount,
     overallCoveragePercentage: overallCoverage,
+    exactPercentage: rate(exactCount, total),
+    fallbackPercentage: rate(fallbackCount, total),
+    behaviorVerifiedCount,
+    behaviorVerifiedPercentage: rate(behaviorVerifiedCount, total),
     categories,
     items: PARITY_ITEMS,
   };
@@ -308,18 +379,20 @@ export function generateMarkdownReport(report: ParityReport): string {
   let md = `# @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
 > 自动生成时间：\`${report.timestamp}\`
-> 总体适配覆盖率：**${report.overallCoveragePercentage}%**（${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents} 组件）
+> 清单映射覆盖率：**${report.overallCoveragePercentage}%**（${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents} 组件）
+> 1:1 对齐率 (Exact)：**${report.exactPercentage}%**（${report.adaptedCount}）· 语义降级率 (Fallback)：**${report.fallbackPercentage}%**（${report.fallbackCount}）
+> 行为验证覆盖：**${report.behaviorVerifiedPercentage}%**（${report.behaviorVerifiedCount}/${report.totalComponents} 映射组件被行为测试引用）
 >
-> 覆盖率仅统计本清单中的映射分类（含降级与免适配），不代表所有公开组件已收录或完整行为已通过验收。
+> 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为验证覆盖。
 
 ## 进度总览
 
-| 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 覆盖率 |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为验证 |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 `;
 
   for (const [name, cat] of Object.entries(report.categories)) {
-    md += `| **${name}** | ${cat.total} | ${cat.adapted} | ${cat.fallback} | ${cat.spaOnly} | ${cat.missing} | **${cat.percentage}%** |\n`;
+    md += `| **${name}** | ${cat.total} | ${cat.adapted} | ${cat.fallback} | ${cat.spaOnly} | ${cat.missing} | **${cat.exactRate}%** | ${cat.behaviorVerified}/${cat.total} |\n`;
   }
 
   md += `\n---\n\n## 详细对齐清单\n\n`;
@@ -356,11 +429,12 @@ export function printCliDashboard(report: ParityReport): void {
   }
 
   console.info('---------------------------------------------------------------');
-  console.info(`  总体覆盖率: ${report.overallCoveragePercentage}% (${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents})`);
-  console.info(`  - 1:1 对齐: ${report.adaptedCount}`);
-  console.info(`  - 语义降级: ${report.fallbackCount}`);
+  console.info(`  清单映射覆盖率: ${report.overallCoveragePercentage}% (${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents})`);
+  console.info(`  - 1:1 对齐: ${report.adaptedCount} (${report.exactPercentage}%)`);
+  console.info(`  - 语义降级: ${report.fallbackCount} (${report.fallbackPercentage}%)`);
   console.info(`  - 免适配(SPA): ${report.spaOnlyCount}`);
   console.info(`  - 待补齐: ${report.missingCount}`);
+  console.info(`  行为验证覆盖: ${report.behaviorVerifiedCount}/${report.totalComponents} (${report.behaviorVerifiedPercentage}%)`);
   console.info('===============================================================\n');
 }
 

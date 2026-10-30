@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'bun:test';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { buildParityReport, generateMarkdownReport, parityOutputPaths } from './check-parity';
+import {
+  buildParityReport,
+  collectBehaviorTestedComponents,
+  generateMarkdownReport,
+  parityOutputPaths,
+} from './check-parity';
 
 describe('UI/Lite Parity Tracking Contract', () => {
   it('computes complete component parity without missing items', () => {
@@ -17,12 +22,44 @@ describe('UI/Lite Parity Tracking Contract', () => {
     }
   });
 
+  it('reports exact, fallback and behavior-verified rates instead of coverage alone', () => {
+    const report = buildParityReport();
+    const expectedExact = Number(((report.adaptedCount / report.totalComponents) * 100).toFixed(1));
+    const expectedFallback = Number(((report.fallbackCount / report.totalComponents) * 100).toFixed(1));
+
+    expect(report.exactPercentage).toBe(expectedExact);
+    expect(report.fallbackPercentage).toBe(expectedFallback);
+    expect(report.exactPercentage + report.fallbackPercentage).toBeLessThan(100);
+    expect(report.behaviorVerifiedCount).toBeGreaterThan(0);
+    expect(report.behaviorVerifiedCount).toBeLessThanOrEqual(report.totalComponents);
+    expect(report.behaviorVerifiedPercentage).toBe(
+      Number(((report.behaviorVerifiedCount / report.totalComponents) * 100).toFixed(1)),
+    );
+
+    for (const [, categorySummary] of Object.entries(report.categories)) {
+      expect(categorySummary.exactRate).toBe(
+        Number(((categorySummary.adapted / categorySummary.total) * 100).toFixed(1)),
+      );
+      expect(categorySummary.behaviorVerified).toBeLessThanOrEqual(categorySummary.total);
+    }
+  });
+
+  it('counts behavior verification from test imports rather than inventory claims', () => {
+    const tested = collectBehaviorTestedComponents();
+    expect(tested.has('LiteSteps.svelte')).toBe(true);
+    expect(tested.has('LiteAreaChart.svelte')).toBe(true);
+    expect(tested.has('LiteCalendar.svelte')).toBe(true);
+    expect(tested.has('LiteNotARealComponent.svelte')).toBe(false);
+  });
+
   it('generates consistent Markdown matrix documentation and JSON parity data', () => {
     const report = buildParityReport();
     const markdown = generateMarkdownReport(report);
 
     expect(markdown).toContain('# @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵');
-    expect(markdown).toContain('100%');
+    expect(markdown).toContain('清单映射覆盖率');
+    expect(markdown).toContain('1:1 对齐率');
+    expect(markdown).toContain('行为验证覆盖');
     expect(markdown).toContain('LiteAvatarField.svelte');
     expect(markdown).toContain('LiteCurrencyField.svelte');
     expect(markdown).toContain('LitePercentField.svelte');

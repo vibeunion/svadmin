@@ -22,10 +22,11 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 
 ---
 
-## Component System & 100% Parity
+## Component System & Inventory Parity
 
 The current inventory classifies **179/179 entries** as direct counterparts, semantic fallbacks, or SPA-only components.
-This measures inventory mappings, not coverage of every public export or verified enterprise behavior.
+Inventory coverage is not release acceptance, so track the three numbers below instead: exact-counterpart rate,
+fallback rate, and how many mapped components are referenced by a behavior test.
 
 ### Parity Breakdown by Module
 
@@ -40,11 +41,12 @@ This measures inventory mappings, not coverage of every public export or verifie
   [widgets]       37/37 (100.0%)  [##############]
   [advanced]      43/43 (100.0%)  [##############]
 ---------------------------------------------------------------
-  Overall Coverage: 100% (179/179)
-  - 1:1 Exact Matches: 110
-  - Semantic Fallbacks: 67
+  Inventory Coverage: 100% (179/179)
+  - 1:1 Exact Matches: 110 (61.5%)
+  - Semantic Fallbacks: 67 (37.4%)
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
+  Behavior Verified: 132/179 (73.7%)
 ===============================================================
 ```
 

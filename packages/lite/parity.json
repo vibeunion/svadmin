@@ -1,11 +1,15 @@
 {
-  "timestamp": "2026-10-30T09:13:40.330Z",
+  "timestamp": "2026-10-30T13:30:17.990Z",
   "totalComponents": 179,
   "adaptedCount": 110,
   "fallbackCount": 67,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
+  "exactPercentage": 61.5,
+  "fallbackPercentage": 37.4,
+  "behaviorVerifiedCount": 132,
+  "behaviorVerifiedPercentage": 73.7,
   "categories": {
     "pages": {
       "category": "pages",
@@ -14,7 +18,10 @@
       "fallback": 5,
       "spaOnly": 0,
       "missing": 0,
-      "percentage": 100
+      "percentage": 100,
+      "exactRate": 72.2,
+      "fallbackRate": 27.8,
+      "behaviorVerified": 11
     },
     "advanced": {
       "category": "advanced",
@@ -23,7 +30,10 @@
       "fallback": 20,
       "spaOnly": 1,
       "missing": 0,
-      "percentage": 100
+      "percentage": 100,
+      "exactRate": 51.2,
+      "fallbackRate": 46.5,
+      "behaviorVerified": 38
     },
     "widgets": {
       "category": "widgets",
@@ -32,7 +42,10 @@
       "fallback": 22,
       "spaOnly": 0,
       "missing": 0,
-      "percentage": 100
+      "percentage": 100,
+      "exactRate": 40.5,
+      "fallbackRate": 59.5,
+      "behaviorVerified": 33
     },
     "fields": {
       "category": "fields",
@@ -41,7 +54,10 @@
       "fallback": 16,
       "spaOnly": 0,
       "missing": 0,
-      "percentage": 100
+      "percentage": 100,
+      "exactRate": 65.2,
+      "fallbackRate": 34.8,
+      "behaviorVerified": 28
     },
     "layout": {
       "category": "layout",
@@ -50,7 +66,10 @@
       "fallback": 4,
       "spaOnly": 1,
       "missing": 0,
-      "percentage": 100
+      "percentage": 100,
+      "exactRate": 80,
+      "fallbackRate": 16,
+      "behaviorVerified": 18
     },
     "buttons": {
       "category": "buttons",
@@ -59,7 +78,10 @@
       "fallback": 0,
       "spaOnly": 0,
       "missing": 0,
-      "percentage": 100
+      "percentage": 100,
+      "exactRate": 100,
+      "fallbackRate": 0,
+      "behaviorVerified": 4
     }
   },
   "items": [
