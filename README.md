@@ -84,6 +84,8 @@
 | `@svadmin/mcp`           | MCP (Model Context Protocol) integration / AI 工具集成       |
 | `@svadmin/surface`       | Validated declarative dashboards / 严格校验的声明式仪表盘    |
 | `@svadmin/flow`          | Optional draggable node canvas / 可选拖拽节点画布           |
+| `@svadmin/charts`        | Optional LayerChart statistical charts / 可选高级统计图表   |
+| `@svadmin/dock`          | Optional split and dockable workspaces / 可选分栏与停靠工作区 |
 
 ### Data Providers / 数据适配器
 

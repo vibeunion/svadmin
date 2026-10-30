@@ -95,7 +95,8 @@
     "qrcode": "^1.5.4",
     "svelte": "^5.56.10",
     "svelte-codemirror-editor": "^2.1.0",
-    "svelte-jsoneditor": "^3.13.0"
+    "svelte-jsoneditor": "^3.13.0",
+    "hls.js": "^1.7.0"
   },
   "peerDependenciesMeta": {
     "isomorphic-dompurify": {
@@ -135,6 +136,9 @@
       "optional": true
     },
     "svelte-jsoneditor": {
+      "optional": true
+    },
+    "hls.js": {
       "optional": true
     }
   },
@@ -193,7 +197,8 @@
     "svelte-codemirror-editor": "^2.1.0",
     "svelte-jsoneditor": "^3.13.0",
     "tailwindcss": "4.3.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "hls.js": "^1.7.4"
   },
   "scripts": {
     "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/stamp-build-version.mjs && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",
