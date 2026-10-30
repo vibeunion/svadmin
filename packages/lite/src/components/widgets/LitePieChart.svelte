@@ -1,9 +1,9 @@
 <script lang="ts">
   /**
-   * SSR PieChart — Degraded to a list with colored dots.
-   * Drawing SVG pie charts inline is technically possible but IE11
-   * doesn't support CSS conic-gradient. We fall back to a plain list.
+   * SSR PieChart — renders SVG pie slices plus a list with the same shares.
    */
+  import LiteChartSvg from './LiteChartSvg.svelte';
+
   interface DataPoint {
     label: string;
     value: number;
@@ -17,6 +17,7 @@
 
   let { data, title }: Props = $props();
 
+  const rows = $derived(data.map((point) => [point.label, point.value] as [string, number]));
   const total = $derived(data.reduce((sum, d) => sum + d.value, 0));
   const defaultColors = ['#165DFF', '#FF7D00', '#00B42A', '#F53F3F', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'];
 </script>
@@ -27,6 +28,7 @@
       {title}
     </div>
   {/if}
+  <LiteChartSvg kind="pie" {rows} {title} />
   <div class="lite-stack-md" style="padding: 16px;">
     {#each data as point, i (i)}
       {@const pct = total > 0 ? ((point.value / total) * 100).toFixed(1) : '0.0'}

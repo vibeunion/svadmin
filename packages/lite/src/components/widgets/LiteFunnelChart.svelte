@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LiteChartSvg from './LiteChartSvg.svelte';
   import LiteChartTable from './LiteChartTable.svelte';
 
   interface Props {
@@ -13,4 +14,7 @@
   const normalized = $derived(rows ?? data.map((item) => Object.values(item).map((value) => typeof value === 'number' ? value : String(value ?? ''))));
 </script>
 
-<LiteChartTable {title} kind="funnel" columns={columns ?? ['Label', 'Value']} rows={normalized} {emptyText} />
+<div class="lite-chart-widget">
+  <LiteChartSvg kind="funnel" rows={normalized} {title} />
+  <LiteChartTable {title} kind="funnel" columns={columns ?? ['Label', 'Value']} rows={normalized} {emptyText} />
+</div>

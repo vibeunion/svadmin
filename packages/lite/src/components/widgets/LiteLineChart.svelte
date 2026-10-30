@@ -1,9 +1,10 @@
 <script lang="ts">
   /**
-   * SSR LineChart — Degraded to an HTML data table.
-   * Drawing SVG/Canvas line charts inline is possible but complex.
-   * For maximum compatibility (IE11), we render data as a simple table.
+   * SSR LineChart — renders an inline SVG polyline plus the same values as an
+   * accessible data table. No charting library and no client JavaScript.
    */
+  import LiteChartSvg from './LiteChartSvg.svelte';
+
   interface DataPoint {
     label: string;
     value: number;
@@ -16,6 +17,7 @@
   }
 
   let { data, title, valueLabel = 'Value' }: Props = $props();
+  const rows = $derived(data.map((point) => [point.label, point.value] as [string, number]));
 </script>
 
 <div class="lite-card" style="margin-bottom: 16px;">
@@ -24,6 +26,7 @@
       {title}
     </div>
   {/if}
+  <LiteChartSvg kind="line" {rows} {title} />
   <table style="width: 100%; border-collapse: collapse;">
     <thead>
       <tr>

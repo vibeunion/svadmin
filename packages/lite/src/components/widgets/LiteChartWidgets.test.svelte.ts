@@ -61,6 +61,41 @@ describe('Lite chart widgets', () => {
     });
   }
 
+  for (const [name, Widget, kind] of widgets) {
+    it(`${name} draws an inline SVG figure with a legend and data table`, () => {
+      const view = render(Widget, {
+        title: 'Pipeline',
+        rows: [
+          ['Won', 12],
+          ['Lost', 4],
+          ['Open', 9],
+        ],
+      });
+
+      const figure = view.getByRole('img', { name: 'Pipeline chart' });
+      expect(figure.tagName.toLowerCase()).toBe('svg');
+      expect(figure.querySelector('title')?.textContent).toContain('Pipeline chart');
+      const shapes = figure.querySelectorAll('path, rect, circle, polyline, polygon');
+      expect(shapes.length).toBeGreaterThan(0);
+      const painted = figure.querySelectorAll('rect[fill], circle[fill], polygon[fill], path[fill], path[stroke]');
+      expect(painted.length).toBeGreaterThan(0);
+
+      const legend = view.container.querySelectorAll('.lite-chart-svg__legend-item');
+      expect(Array.from(legend).map((item) => item.textContent?.trim())).toEqual(['Won', 'Lost', 'Open']);
+
+      // The accessible data table stays in the DOM next to the picture.
+      expect(view.getAllByRole('row')).toHaveLength(4);
+      expect(view.getByRole('region', { name: 'Pipeline' }).getAttribute('data-kind')).toBe(kind);
+    });
+
+    it(`${name} omits the SVG figure when there is no data`, () => {
+      const view = render(Widget, { title: 'Empty pipeline', emptyText: 'No rows' });
+
+      expect(view.queryByRole('img')).toBeNull();
+      expect(view.getByText('No rows')).toBeTruthy();
+    });
+  }
+
   it('normalizes object data into typed cells for the table fallback', () => {
     const view = render(LiteAreaChart, {
       data: [
