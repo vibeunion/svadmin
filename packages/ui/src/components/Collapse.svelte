@@ -17,13 +17,13 @@
     /** 是否允许多个面板同时展开；accordion 仍优先。 */
     multiple?: boolean;
     accordion?: boolean;
-    /** 对齐 Arco Collapse：默认带外框，可关闭以适应卡片内嵌套。 */
+    /** 对齐折叠面板：默认带外框，可关闭以适应卡片内嵌套。 */
     bordered?: boolean;
-    /** 展开图标位置，对齐 Arco 的 expand-icon-position。 */
+    /** 展开图标位置，对齐参考实现的 expand-icon-position。 */
     expandIconPosition?: 'left' | 'right';
     /** 关闭后是否销毁内容；默认保留以便做高度过渡。 */
     destroyOnHide?: boolean;
-    /** 首次展开前不渲染内容，对齐 Arco 的 lazyload。 */
+    /** 首次展开前不渲染内容，对齐参考实现的 lazyload。 */
     lazyload?: boolean;
     /** 是否显示展开图标。 */
     showExpandIcon?: boolean;

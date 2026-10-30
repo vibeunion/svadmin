@@ -106,7 +106,7 @@ try {
       }, mode);
       await page.reload();
       await expect(page.locator('html')).toHaveClass(/layout-clean-flat/);
-      await expect(page.locator('html')).toHaveAttribute('data-theme', 'arco');
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'default');
       await expect(page.locator('html')).toHaveAttribute('data-theme-mode', mode);
       await expect(page.getByRole('region', { name: 'Posts', exact: true }).getByRole('button', { name: /view all/i })).toBeVisible();
       await checkLayout(`bare-${mode}-${width}`);

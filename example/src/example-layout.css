@@ -144,8 +144,8 @@
     color: var(--muted-foreground);
   }
 
-  .layout-clean-flat[data-theme="arco"] .example-card,
-  .layout-clean-flat[data-theme="arco"] .example-table-shell,
+  .layout-clean-flat[data-theme="default"] .example-card,
+  .layout-clean-flat[data-theme="default"] .example-table-shell,
   .layout-clean-flat[data-theme="stripe"] .example-card,
   .layout-clean-flat[data-theme="stripe"] .example-table-shell {
     box-shadow: var(--shadow-surface);

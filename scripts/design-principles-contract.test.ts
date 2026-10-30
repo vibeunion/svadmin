@@ -57,7 +57,7 @@ describe('Admin UI design principles contract', () => {
     expect(read('packages/ui/src/default-theme.ts')).toContain("config?.layoutPreset ?? 'clean-flat'");
     expect(read('example/src/App.svelte')).not.toContain('themeConfig=');
     expect(read('packages/create-svadmin/template/src/App.svelte')).not.toContain('themeConfig=');
-    expect(read('design/admin-ui/preview/Preview.svelte')).toContain('data-theme="arco"');
+    expect(read('design/admin-ui/preview/Preview.svelte')).toContain('data-theme="default"');
     expect(read('design/admin-ui/preview/preview.css')).not.toContain('var(--svadmin-grid-size, 40px)');
     expect(read('design/admin-ui/preview/preview.css')).toContain('background: var(--background)');
   });

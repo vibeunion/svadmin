@@ -260,14 +260,21 @@ describe('theme owners', () => {
   });
 
   it('uses the built-in color as the default while preserving persisted presets', () => {
-    expect(getColorTheme()).toBe('arco');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('arco');
+    expect(getColorTheme()).toBe('default');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
 
     window.localStorage.setItem('svadmin-color-theme', 'blue');
     resetTheme();
 
     expect(getColorTheme()).toBe('blue');
     expect(document.documentElement.getAttribute('data-theme')).toBe('blue');
+  });
+
+  it('normalizes unknown or retired color ids to the default preset', () => {
+    setColorTheme('retired-preset' as never);
+
+    expect(getColorTheme()).toBe('default');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
   });
 
   it('avoids duplicate persistence writes for unchanged selections', () => {

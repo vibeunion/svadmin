@@ -27,7 +27,7 @@ import {
 } from './index.js';
 
 describe('public compatibility aliases', () => {
-  it('keeps Arco-style component aliases bound to canonical components', () => {
+  it('keeps Reference-style component aliases bound to canonical components', () => {
     expect(Comment).toBe(CommentThread);
     expect(Descriptions).toBe(DescriptionList);
     expect(InputTag).toBe(TagsInput);

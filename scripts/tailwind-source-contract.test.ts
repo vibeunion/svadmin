@@ -94,8 +94,8 @@ describe('@svadmin/ui native stylesheet contract', () => {
     const css = readRepositoryFile('packages/ui/src/app.css');
     expect(css).toContain('--primary: oklch(0.54 0.24 293);');
     expect(css).toContain('--ring: oklch(0.54 0.24 293);');
-    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("? stored as ColorTheme:'arco'");
-    expect(css).toContain('.layout-clean-flat[data-theme="arco"]');
+    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("? stored as ColorTheme:'default'");
+    expect(css).toContain('.layout-clean-flat[data-theme="default"]');
     expect(css).toContain('--primary: #165DFF;');
     expect(css).toContain('.layout-clean-flat[data-theme="stripe"]');
     expect(css).toContain('--svadmin-grid-size: 40px;');
@@ -113,8 +113,8 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(css).not.toContain('border-radius: 0.875rem');
     expect(css).not.toContain('text-transform: uppercase');
     expect(css).toContain('.layout-clean-flat [data-svadmin-auth-page] > main > div > section > header h1 {\n  color: var(--foreground);\n  font-size: 1.25rem;');
-    const toolbar = css.slice(css.indexOf('.layout-clean-flat[data-theme="arco"] [data-svadmin-table-toolbar]'));
-    expect(toolbar.startsWith('.layout-clean-flat[data-theme="arco"] [data-svadmin-table-toolbar]')).toBe(true);
+    const toolbar = css.slice(css.indexOf('.layout-clean-flat[data-theme="default"] [data-svadmin-table-toolbar]'));
+    expect(toolbar.startsWith('.layout-clean-flat[data-theme="default"] [data-svadmin-table-toolbar]')).toBe(true);
     expect(toolbar.slice(0, 280)).toContain('box-shadow: none;');
     expect(toolbar.slice(0, 280)).not.toContain('var(--svadmin-surface-shadow)');
   });

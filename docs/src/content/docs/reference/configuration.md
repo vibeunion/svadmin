@@ -122,7 +122,7 @@ layout is `default`; `clean-flat` enables the default admin canvas.
   {resources}
   defaultTheme="system"
   themeConfig={{
-    colorPreset: 'arco',
+    colorPreset: 'default',
     layoutPreset: 'clean-flat',
   }}
 />
@@ -133,7 +133,7 @@ layout is `default`; `clean-flat` enables the default admin canvas.
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Controls whether dark mode adds `.dark` or light mode adds `.light` |
-| `colorPreset` | `ColorPreset \| string` | `'arco'` | Built-in or registered color preset; persisted or explicit selections still take precedence |
+| `colorPreset` | `ColorPreset \| string` | `'default'` | Built-in or registered color preset; persisted or explicit selections still take precedence |
 | `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout treatment for the application shell |
 | `cssOverrides` | `Record<string, string>` | — | CSS variables injected on `<html>` |
 | `disableColorScheme` | `boolean` | `false` | Skip the built-in `color-scheme` attribute |
@@ -142,7 +142,7 @@ Nine color presets are built in. The built-in preset is the default:
 
 | Theme | ID | Preview color |
 |-------|----|---------------|
-| Default | `arco` | `#165DFF` |
+| Default | `default` | `#165DFF` |
 | Neutral | `neutral` | `#71717a` |
 | Indigo | `indigo` | `#4f46e5` |
 | Blue | `blue` | `#3b82f6` |

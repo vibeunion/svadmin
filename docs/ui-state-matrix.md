@@ -178,4 +178,4 @@ Surface 包内定向测试验证分源重试和诊断回调；SVAR 的
 | Error | 查询失败 | 使用 `DataState error` 的 `retry`，不并列重复重试按钮 |
 | Forbidden | 权限拒绝 | 使用 `DataState forbidden`，不渲染旧内容 |
 
-扩展路由：`/templates/analysis-multi`、`/templates/user-info`、`/templates/user-settings`、`/templates/result-error`、`/templates/exception-404`、`/templates/exception-500`。这些路由覆盖 Arco Pro 的多维分析、用户中心、错误结果与 404/500 异常场景；`e2e/templates.spec.ts` 验证每个导航项和独立路由都能渲染对应标题。
+扩展路由：`/templates/analysis-multi`、`/templates/user-info`、`/templates/user-settings`、`/templates/result-error`、`/templates/exception-404`、`/templates/exception-500`。这些路由覆盖 Pro 的多维分析、用户中心、错误结果与 404/500 异常场景；`e2e/templates.spec.ts` 验证每个导航项和独立路由都能渲染对应标题。

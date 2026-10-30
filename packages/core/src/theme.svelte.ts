@@ -6,7 +6,7 @@ import { definedOptions } from './defined-options';
 //   - 'dark-first': adds 'light' class for light mode (dark-first)
 
 export type ThemeMode='light'|'dark'|'system';
-export type ColorTheme='arco'|'blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
+export type ColorTheme='default'|'blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
 
 /** Controls how the theme class is applied to <html> */
 export type ThemeStrategy='standard'|'dark-first';
@@ -190,8 +190,8 @@ export const builtinPresets: Record<string,ColorPreset>=$state({
       '--chart-1': 'oklch(0.65 0.25 293)',
     },
   },
-  arco: {
-    name: 'arco',
+  default: {
+    name: 'default',
     label: 'Default',
     color: '#165DFF',
     light: {
@@ -349,7 +349,7 @@ function readStoredTheme(): ThemeMode|undefined {
 function readStoredColorTheme(): ColorTheme {
   const stored=getStorage()?.getItem(COLOR_STORAGE_KEY);
   // The built-in preset is the product default; an existing persisted preset remains authoritative.
-  return stored&&builtinPresets[stored]? stored as ColorTheme:'arco';
+  return stored&&builtinPresets[stored]? stored as ColorTheme:'default';
 }
 
 function persistSelection(key: string,value: string): void {
@@ -445,11 +445,13 @@ function applyEffectiveTheme(): void {
   const configuredPreset=!colorSelectionOverridesConfig&&nextConfig.colorPreset
     ? resolvePreset(nextConfig.colorPreset)
     :undefined;
-  const preset=configuredPreset??builtinPresets[selectedColorTheme];
+  // Unknown or retired preset ids normalize to the default preset so a stale
+  // persisted value never leaves the document with an unstyled theme id.
+  const preset=configuredPreset??builtinPresets[selectedColorTheme]??builtinPresets['default'];
 
   themeConfig=nextConfig;
   mode=nextMode;
-  colorTheme=(preset?.name??selectedColorTheme) as ColorTheme;
+  colorTheme=(preset?.name??'default') as ColorTheme;
 
   if(typeof document==='undefined') return;
   clearAppliedArtifacts();

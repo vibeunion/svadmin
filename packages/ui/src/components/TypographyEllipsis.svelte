@@ -7,9 +7,9 @@
   const i18n = useTranslation();
 
   interface Props {
-    /** 折叠时保留的行数，对齐 Arco Typography 的 ellipsis.rows。 */
+    /** 折叠时保留的行数，对齐参考排版的 ellipsis.rows。 */
     rows?: number;
-    /** 内容超出时显示“展开 / 收起”，对齐 Arco Typography 的 ellipsis.expandable。 */
+    /** 内容超出时显示“展开 / 收起”，对齐参考排版的 ellipsis.expandable。 */
     expandable?: boolean;
     expanded?: boolean;
     expandText?: string;

@@ -103,7 +103,7 @@ Using `border-color: var(--border)` with channel-only values is invalid CSS and 
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Class toggle strategy / 类名切换策略 |
 | `cssOverrides` | `Record<string, string>` | — | CSS variables to inject on `<html>` / 注入到 `<html>` 的 CSS 变量 |
 | `disableColorScheme` | `boolean` | `false` | Skip setting `color-scheme` attribute / 跳过 `color-scheme` 属性 |
-| `colorPreset` | `ColorPreset \| string` | `'arco'` | Built-in or registered color preset; the built-in preset is used when no selection exists / 内置或注册的配色预设；未选择时使用内置配色 |
+| `colorPreset` | `ColorPreset \| string` | `'default'` | Built-in or registered color preset; the built-in preset is used when no selection exists / 内置或注册的配色预设；未选择时使用内置配色 |
 | `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout composition / 布局结构 |
 
 ## Color Themes / 多色主题
@@ -117,7 +117,7 @@ The example combines both presets:
 示例同时使用以下两个预设：
 
 ```svelte
-<AdminApp themeConfig={{ colorPreset: 'arco', layoutPreset: 'clean-flat' }} />
+<AdminApp themeConfig={{ colorPreset: 'default', layoutPreset: 'clean-flat' }} />
 ```
 
 ```typescript
@@ -135,7 +135,7 @@ getColorThemes().forEach(ct => {
 
 | Theme | ID | Hex |
 |-------|----|-----|
-| Default | `arco` | `#165DFF` |
+| Default | `default` | `#165DFF` |
 | Neutral | `neutral` | `#71717a` |
 | Indigo | `indigo` | `#4f46e5` |
 | Blue | `blue` | `#3b82f6` |

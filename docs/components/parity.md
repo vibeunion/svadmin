@@ -1,15 +1,15 @@
-# Arco / Arco Pro parity audit
+# Component / Pro parity audit
 
 Status date: 2026-10-30
 
 This audit compares the current `@svadmin/ui` surface with:
 
-- the Arco Design React 2.x component catalog (`arco-design/arco-design`);
-- the Arco Design Pro React page catalog (`arco-design/arco-design-pro`, Next/Vite templates);
+- the reference React component catalog;
+- the reference Pro React page catalog;
 - the svadmin example template gallery and product pages.
 
 The goal is migration compatibility and missing admin capability, not pixel
-copying. Arco's visual style is already represented by the default `arco` color
+copying. The default visual style is already represented by the `default` color
 preset and the `clean-flat` layout preset.
 
 Legend: ✅ direct capability · 🔁 compatibility alias · ⚠️ partial or different
@@ -18,9 +18,9 @@ API shape · ❌ missing · ➖ internal / not a public contract.
 ## Component matrix
 
 Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
-**2 internal** across 71 Arco React components.
+**2 internal** across 71 reference React components.
 
-| Arco | svadmin surface | Status | Notes |
+| Reference | svadmin surface | Status | Notes |
 | --- | --- | --- | --- |
 | Affix | `Affix` | ✅ | |
 | Alert | `Alert` namespace | ✅ | Compound primitives, closable state |
@@ -36,15 +36,15 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Carousel | `Carousel` | ✅ | |
 | Cascader | `Cascader` | ✅ | |
 | Checkbox | `Checkbox` | ✅ | |
-| Collapse | `Collapse` | ✅ | Arco-aligned expansion behavior |
+| Collapse | `Collapse` | ✅ | aligned expansion behavior |
 | ColorPicker | `ColorPicker` | ✅ | |
 | Comment | `CommentThread`, alias `Comment` | 🔁 | |
 | ConfigProvider | `ConfigProvider` | ✅ | Defaults for size, density, direction, locale |
 | DatePicker | `DatePicker`, `DateRangePicker`, `DateTimePicker` | ✅ | |
 | Descriptions | `DescriptionList`, alias `Descriptions` | 🔁 | |
 | Divider | `Separator`, alias `Divider` | ✅ | |
-| Drawer | `Sheet` namespace, alias `Drawer` | 🔁 | Namespace alias; compound API differs from Arco |
-| Dropdown | `DropdownMenu` namespace, alias `Dropdown` | 🔁 | Namespace alias; compound API differs from Arco |
+| Drawer | `Sheet` namespace, alias `Drawer` | 🔁 | Namespace alias; compound API differs from the reference |
+| Dropdown | `DropdownMenu` namespace, alias `Dropdown` | 🔁 | Namespace alias; compound API differs from the reference |
 | Empty | `EmptyState`, `LiteEmptyState` | ✅ | Supports `image` / `imageUrl` and custom icon slot |
 | Form | `AutoForm`, `JsonSchemaForm`, `StepForm` | ⚠️ | Schema-first, not `Form.Item` compound API |
 | Grid | `Grid`, `GridCell`, `Row`, `Col` | ✅ | |
@@ -59,7 +59,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Mentions | `MentionsInput`, alias `Mentions` | 🔁 | |
 | Menu | `Menu` | ✅ | Keyboard and nested menu behavior covered |
 | Message | `toast`, `message`, `Message` | 🔁 | Global service, not a component tree |
-| Modal | `Dialog` namespace, alias `Modal` | 🔁 | Namespace alias; compound API differs from Arco |
+| Modal | `Dialog` namespace, alias `Modal` | 🔁 | Namespace alias; compound API differs from the reference |
 | Notification | `notification`, `Notification`, `NotificationHost` | ✅ | Service, host and four placements |
 | PageHeader | `PageHeader`, `ContentPageHeader` | ✅ | |
 | Pagination | `Pagination`, `ListPagination` | ✅ | |
@@ -94,9 +94,9 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | VerificationCode | `OtpInput`, alias `VerificationCode` | 🔁 | |
 | Watermark | `Watermark` | ✅ | |
 
-## Arco Pro page matrix
+## Pro page matrix
 
-| Arco Pro page | svadmin route / surface | Status | Notes |
+| Pro page | svadmin route / surface | Status | Notes |
 | --- | --- | --- | --- |
 | Login | `LoginPage`, `/#/login` | ✅ | |
 | Dashboard / Workplace | `/templates/workplace` | ✅ | |
@@ -119,11 +119,11 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 
 ## Page composition depth
 
-Route coverage is complete, but Arco Pro pages are richer than a single table or
+Route coverage is complete, but Pro pages are richer than a single table or
 card grid. The templates now expose optional slots for those sections without
 forcing one fixed mock layout.
 
-| Arco Pro page | Arco Pro sections | svadmin slots | Remaining host-owned work |
+| Pro page | Pro sections | svadmin slots | Remaining host-owned work |
 | --- | --- | --- | --- |
 | Workplace | Overview, popular contents, content percentage, shortcuts, carousel, announcement, docs | `metrics`, `primary`, `secondary`, `contentPercentage`, `media`, `shortcuts`, `announcements`, `docs` | Real content-percentage aggregation and carousel assets |
 | Monitor | Chat panel, studio, data statistics, studio status, quick operations, studio information | `metrics`, `chart`, `chat`, `activity`, `status`, `quickOperations`, `information` | Live chat transport and telemetry come from the host |
@@ -135,7 +135,7 @@ forcing one fixed mock layout.
 
 ## Refine alignment
 
-svadmin follows Refine's split rather than emulating every Arco component API:
+svadmin follows Refine's split rather than emulating every reference component API:
 core owns hooks and provider contracts, while UI components and page
 compositions stay in the UI layer.
 
@@ -152,14 +152,14 @@ compositions stay in the UI layer.
 These are behavior or API-shape differences, not missing page families. They are
 tracked separately so the route/component coverage remains honest.
 
-| Area | Arco behavior | Current svadmin surface | Next action |
+| Area | Reference behavior | Current svadmin surface | Next action |
 | --- | --- | --- | --- |
 | Table | Selection, expandable rows, tree data and virtualization in one table API | Split across `AutoTable`, `TreeTable`, `VirtualTable`, `GroupedTable` | Keep the split; add composition examples instead of a mega-table |
 | Upload | Drag/drop, directory upload, custom request | `FileUpload` has drag/drop, progress, cancel and retry | Directory upload remains host-owned |
 | Select | Remote search and virtualized option list | Native `Select` plus `ComboboxField` with remote search/virtualization | Prefer `ComboboxField` for large remote lists |
 | ConfigProvider | Component size/density cascades broadly | `Button`, `Input`, `Select`, `Badge`, `Tag` consume it | Extend size contracts only where a component already has a size prop |
 | DatePicker | Timezone, recurrence and business calendars | Date/range/time pickers without timezone ownership | Keep timezone and recurrence in the host domain layer |
-| Modal / Drawer / Dropdown | Arco compound call shape | Namespace aliases to `Dialog`, `Sheet`, `DropdownMenu` | Do not fake Arco's exact compound API |
+| Modal / Drawer / Dropdown | Compound call shape | Namespace aliases to `Dialog`, `Sheet`, `DropdownMenu` | Do not fake the reference compound API |
 | Form | `Form.Item` compound validation | Schema-first `AutoForm` / `JsonSchemaForm` | Non-goal: keep one validation owner |
 | Portal / Trigger | Public primitives | Internal portal/trigger seams | Non-goal: do not expose implementation details |
 
@@ -173,10 +173,10 @@ tracked separately so the route/component coverage remains honest.
   `/templates/user-settings`, `/templates/result-error`,
   `/templates/exception-404` and `/templates/exception-500`.
 - Added `MultiDimensionAnalysisTemplate` and covered all new routes in E2E.
-- Added optional Arco Pro page-depth slots to `WorkplaceTemplate`,
+- Added optional Pro page-depth slots to `WorkplaceTemplate`,
   `MonitorTemplate`, `SearchTableTemplate`, `CardListTemplate` and
   `BasicDetailTemplate`, with gallery demos and E2E assertions.
-- Added `UserInfoTemplate` and `UserSettingsTemplate` for the Arco Pro user
+- Added `UserInfoTemplate` and `UserSettingsTemplate` for the Pro user
   center and tabbed settings compositions.
 - Added `contentPercentage`, `chat` and `comparison` slots plus their gallery
   demos and E2E checks.
@@ -196,7 +196,7 @@ tracked separately so the route/component coverage remains honest.
 
 ## What changed in this round
 
-Added Arco-compatible aliases: `Comment`, `InputTag`, `List`, `Message`,
+Added compatible aliases: `Comment`, `InputTag`, `List`, `Message`,
 `Notification`, `Radio`, `Split`, `VerificationCode`, plus namespace aliases
 `Modal`, `Drawer` and `Dropdown`. Existing aliases `Descriptions`, `InputNumber`,
 `Mentions`, `message` and `Upload` remain.

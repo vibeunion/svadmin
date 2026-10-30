@@ -25,18 +25,18 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 | `BasicDetailTemplate` | 只读记录摘要 | `details` |
 | `AdvancedDetailTemplate` | 带审批和相关内容的详情 | `details` |
 | `ProfileTemplate` | 身份、动态与共享内容 | `profile` |
-| `UserInfoTemplate` | Arco Pro 用户中心 | `header` 或 `projects` |
+| `UserInfoTemplate` | Pro 用户中心 | `header` 或 `projects` |
 | `UserSettingsTemplate` | 基础信息、安全与认证分页设置 | `basic`、`security`、`verification` |
 | `ResultTemplate` | 成功、失败与状态结果 | `title` |
 | `ExceptionTemplate` | 403、404、500 页面 | `status` |
 
 
-## Arco Pro 页面深度插槽
+## Pro 页面深度插槽
 
-上面的目录覆盖了 Arco Pro 的页面族。以下可选插槽用于补齐页面组合深度，同时不强制
+上面的目录覆盖了 Pro 的页面族。以下可选插槽用于补齐页面组合深度，同时不强制
 固定的模拟布局：
 
-| 模板 | Arco Pro 可选区块 |
+| 模板 | Pro 可选区块 |
 | --- | --- |
 | `WorkplaceTemplate` | `secondary`、`contentPercentage`、`media`、`shortcuts`、`announcements`、`docs` |
 | `MonitorTemplate` | `chat`、`activity`、`status`、`quickOperations`、`information` |

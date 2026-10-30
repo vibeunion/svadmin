@@ -74,7 +74,7 @@
 
 ### 🚀 Features
 
-* **ui:** align expansion primitives with Arco ([d5c1a8f](https://github.com/vibeunion/svadmin/commit/d5c1a8f289df642ad88848ce7fc44ab37810529d))
+* **ui:** align expansion primitives with reference behavior ([d5c1a8f](https://github.com/vibeunion/svadmin/commit/d5c1a8f289df642ad88848ce7fc44ab37810529d))
 * **ui:** expose list footer range summary ([#593](https://github.com/vibeunion/svadmin/issues/593)) ([c019c88](https://github.com/vibeunion/svadmin/commit/c019c88fb226b0e014330b25b0ae1760f132baa0))
 * **ui:** forward list pagination DOM attributes ([#592](https://github.com/vibeunion/svadmin/issues/592)) ([b7f26ef](https://github.com/vibeunion/svadmin/commit/b7f26efd96bfdc39582125634509ac4d9ae1ccfc))
 

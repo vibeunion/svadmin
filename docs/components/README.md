@@ -91,10 +91,10 @@ Complete reference for all `@svadmin/ui` components.
 
 ## Compatibility aliases / 兼容别名
 
-Arco-style names are exported as aliases without changing the canonical svadmin
+Reference-style names are exported as aliases without changing the canonical svadmin
 component names:
 
-| Arco-style | Canonical |
+| Reference-style | Canonical |
 | --- | --- |
 | `Comment` | `CommentThread` |
 | `Descriptions` | `DescriptionList` |
@@ -114,10 +114,10 @@ component names:
 
 Prefer canonical names in new code; aliases exist for migration and host
 compatibility. `Modal`, `Drawer` and `Dropdown` are namespace aliases: their
-compound APIs still follow `Dialog`, `Sheet` and `DropdownMenu`, not Arco's
+compound APIs still follow `Dialog`, `Sheet` and `DropdownMenu`, not the reference's
 component API one-to-one.
 
-See the [Arco / Arco Pro parity audit](./arco-parity.md) for remaining gaps and
+See the [Component / Pro parity audit](./parity.md) for remaining gaps and
 priorities.
 
 ## Data Visualization / 数据可视化

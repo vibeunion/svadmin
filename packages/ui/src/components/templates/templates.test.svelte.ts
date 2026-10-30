@@ -92,7 +92,7 @@ describe('page templates', () => {
     heading('Page not found');
   });
 
-  it('renders the Arco Pro page-depth slots', () => {
+  it('renders the Pro page-depth slots', () => {
     render(WorkplaceTemplate, { props: { title: 'Workplace', primary: body, secondary: body, media: body, shortcuts: body, announcements: body, docs: body } });
     heading('Workplace');
     cleanup();

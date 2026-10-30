@@ -377,12 +377,12 @@ Switch between 9 color palettes via sidebar picker or programmatically. The buil
 import { getColorTheme, setColorTheme, getColorThemes } from "@svadmin/core";
 import type { ColorTheme } from "@svadmin/core";
 
-setColorTheme("rose"); // 'arco' | 'neutral' | 'indigo' | 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'stripe'
+setColorTheme("rose"); // 'default' | 'neutral' | 'indigo' | 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'stripe'
 getColorTheme(); // current color theme
 console.log(getColorThemes()); // [{ id: 'neutral', label: 'Neutral', color: '#71717a' }, ...]
 ```
 
-Available themes / 可用主题: `arco` (default), `neutral`, `indigo`, `blue`, `green`, `rose`, `orange`, `violet`, `stripe`
+Available themes / 可用主题: `default` (built-in), `neutral`, `indigo`, `blue`, `green`, `rose`, `orange`, `violet`, `stripe`
 
 ## 🏷️ Resource Type Registry / 资源类型注册表
 

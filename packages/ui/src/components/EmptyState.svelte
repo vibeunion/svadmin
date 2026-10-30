@@ -15,7 +15,7 @@
   } = $props<{
     title?: string;
     description?: string;
-    /** Optional illustration URL. Mirrors Arco's `image` prop. */
+    /** Optional illustration URL. Mirrors the reference `image` prop. */
     image?: string;
     imageAlt?: string;
     /** Optional custom icon slot; ignored when `image` is set. */

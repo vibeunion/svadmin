@@ -27,18 +27,18 @@ business content.
 | `BasicDetailTemplate` | Read-only record summary | `details` |
 | `AdvancedDetailTemplate` | Detail with approvals and related work | `details` |
 | `ProfileTemplate` | Identity, activity and shared work | `profile` |
-| `UserInfoTemplate` | Arco Pro user center | `header` or `projects` |
+| `UserInfoTemplate` | Pro user center | `header` or `projects` |
 | `UserSettingsTemplate` | Tabbed basic, security and verification settings | `basic`, `security`, `verification` |
 | `ResultTemplate` | Success, failure and status results | `title` |
 | `ExceptionTemplate` | 403, 404 and 500 routes | `status` |
 
 
-## Arco Pro depth slots
+## Pro depth slots
 
-The route catalog above covers Arco Pro page families. The following optional
+The route catalog above covers Pro page families. The following optional
 slots close the composition-depth gap without forcing one mock layout:
 
-| Template | Optional Arco Pro sections |
+| Template | Optional Pro sections |
 | --- | --- |
 | `WorkplaceTemplate` | `secondary`, `contentPercentage`, `media`, `shortcuts`, `announcements`, `docs` |
 | `MonitorTemplate` | `chat`, `activity`, `status`, `quickOperations`, `information` |

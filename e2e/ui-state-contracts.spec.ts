@@ -203,7 +203,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
         const swatch = main.getByRole('button', { name: preset, exact: true });
         await swatch.click();
         await expect(swatch).toHaveAttribute('aria-pressed', 'true');
-        const theme = preset === 'Default' ? 'arco' : preset.toLowerCase();
+        const theme = preset === 'Default' ? 'default' : preset.toLowerCase();
         await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await expect(main.getByRole('heading', { level: 1 })).toHaveCSS('font-size', '20px');
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);

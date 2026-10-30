@@ -18,7 +18,7 @@ export const designPresets = {
   enterprise: {
     label: '标准企业', width: 'wide',
     formColumns: 2, detailLayout: 'grid',
-    theme: { colorPreset: 'arco', layoutPreset: 'clean-flat' },
+    theme: { colorPreset: 'default', layoutPreset: 'clean-flat' },
   },
   collaboration: {
     label: '轻量协作', width: 'default',

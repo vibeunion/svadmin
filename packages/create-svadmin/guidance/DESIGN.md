@@ -190,8 +190,8 @@ Detail rules for every component:
 The same contract is used at every delivery surface:
 
 - `packages/ui/src/app.css` owns published semantic tokens and the
-  `clean-flat + arco` refinement; host applications consume this stylesheet.
-- `packages/core/src/theme.svelte.ts` owns the `arco` color preset and mode
+  `clean-flat + default` refinement; host applications consume this stylesheet.
+- `packages/core/src/theme.svelte.ts` owns the `default` color preset and mode
   attributes; it must stay aligned with the CSS fallback values. `stripe`
   remains an optional preset.
 - `AdminApp` supplies `clean-flat` as a fallback layout without taking over an
@@ -279,11 +279,11 @@ status and feedback. Consumer themes may replace the primary hue while keeping
 the neutral hierarchy and contrast relationships intact.
 
 **The Token Source Rule.** Frontmatter neutrals are the light values of
-`.layout-clean-flat[data-theme="arco"]` in `packages/ui/src/app.css`. The
+`.layout-clean-flat[data-theme="default"]` in `packages/ui/src/app.css`. The
 painted action color is `--primary: #165DFF` from `:root` and
-`[data-theme="arco"]`, matching `builtinPresets.arco.light` in
+`[data-theme="default"]`, matching `builtinPresets.default.light` in
 `packages/core/src/theme.svelte.ts`. The preset menu chip
-`builtinPresets.arco.color` is the same `#165DFF`. It is not a second primary.
+`builtinPresets.default.color` is the same `#165DFF`. It is not a second primary.
 
 Canvas neutrals in that block are `#F7F8FA`, `#1D2129`, `#FFFFFF`,
 `#F2F3F5`, `#4E5969`, and `#E5E6EB`. Success, warning, and danger stay on the
@@ -308,7 +308,7 @@ The dark primary:
 
 Named color themes (`neutral`, `indigo`, `blue`, `green`, `rose`, `orange`,
 `violet`, `stripe`) replace primary, ring, sidebar-primary, and chart-1 only.
-They do not rebuild the neutral ramp. `arco` is the default preset id and paints
+They do not rebuild the neutral ramp. `default` is the default preset id and paints
 the full ramp above.
 
 The grid is a low-contrast canvas texture only; buttons and data
