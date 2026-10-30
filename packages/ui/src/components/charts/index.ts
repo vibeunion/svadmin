@@ -8,3 +8,4 @@ export { default as FunnelChart } from './FunnelChart.svelte';
 export { default as HeatmapChart } from './HeatmapChart.svelte';
 export { default as WaterfallChart } from './WaterfallChart.svelte';
 export { default as RoseChart } from './RoseChart.svelte';
+export { default as DonutChart } from './DonutChart.svelte';

@@ -1,5 +1,6 @@
 import { cleanup, render } from '@testing-library/svelte';
 import { afterEach, describe, expect, it } from 'vitest';
+import DonutChart from './charts/DonutChart.svelte';
 import FunnelChart from './charts/FunnelChart.svelte';
 import GaugeChart from './charts/GaugeChart.svelte';
 import HeatmapChart from './charts/HeatmapChart.svelte';
@@ -26,6 +27,18 @@ describe('extended charts', () => {
     expect(view.getByRole('img').getAttribute('aria-label')).toBe('Usage');
     expect(view.getByText('72%')).toBeTruthy();
     expect(view.container.querySelectorAll('path')[1]?.getAttribute('stroke-dasharray')).toBe('72 100');
+  });
+
+  it('renders a donut with a center total and legend', () => {
+    const view = render(DonutChart, {
+      data: [
+        { label: 'Direct', value: 60, color: 'var(--chart-1)' },
+        { label: 'Referral', value: 40, color: 'var(--chart-2)' },
+      ],
+    });
+    expect(view.getByText('100')).toBeTruthy();
+    expect(view.getByText('Direct')).toBeTruthy();
+    expect(view.container.querySelectorAll('path')).toHaveLength(2);
   });
 
   it('renders funnel stages with ratios', () => {
