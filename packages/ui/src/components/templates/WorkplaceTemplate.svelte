@@ -10,6 +10,7 @@
     metrics?: Snippet;
     primary: Snippet;
     secondary?: Snippet;
+    contentPercentage?: Snippet;
     media?: Snippet;
     shortcuts?: Snippet;
     announcements?: Snippet;
@@ -27,6 +28,7 @@
     metrics,
     primary,
     secondary,
+    contentPercentage,
     media,
     shortcuts,
     announcements,
@@ -36,12 +38,13 @@
     width = 'default',
   }: Props = $props();
 
-  const hasContext = $derived(Boolean(secondary || media || shortcuts || announcements || docs));
+  const hasContext = $derived(Boolean(secondary || contentPercentage || media || shortcuts || announcements || docs));
 </script>
 
 {#snippet context()}
   <div class="svadmin-workplace-template__context">
     {#if secondary}{@render secondary()}{/if}
+    {#if contentPercentage}{@render contentPercentage()}{/if}
     {#if media}{@render media()}{/if}
     {#if shortcuts}{@render shortcuts()}{/if}
     {#if announcements}{@render announcements()}{/if}

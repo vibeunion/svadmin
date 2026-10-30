@@ -125,13 +125,13 @@ forcing one fixed mock layout.
 
 | Arco Pro page | Arco Pro sections | svadmin slots | Remaining host-owned work |
 | --- | --- | --- | --- |
-| Workplace | Overview, popular contents, content percentage, shortcuts, carousel, announcement, docs | `metrics`, `primary`, `secondary`, `media`, `shortcuts`, `announcements`, `docs` | Real content-percentage aggregation and carousel assets |
-| Monitor | Chat panel, studio, data statistics, studio status, quick operations, studio information | `metrics`, `chart`, `activity`, `status`, `quickOperations`, `information` | Chat panel belongs to the host AI workspace; live telemetry comes from the provider |
+| Workplace | Overview, popular contents, content percentage, shortcuts, carousel, announcement, docs | `metrics`, `primary`, `secondary`, `contentPercentage`, `media`, `shortcuts`, `announcements`, `docs` | Real content-percentage aggregation and carousel assets |
+| Monitor | Chat panel, studio, data statistics, studio status, quick operations, studio information | `metrics`, `chart`, `chat`, `activity`, `status`, `quickOperations`, `information` | Live chat transport and telemetry come from the host |
 | Search table | Search form, add/upload/download group, table, pagination | `filters`, `bulkActions`, `table`, `pagination`, `footer` | Column settings, export jobs and permission checks |
 | Card list | Tabs, search, add card, card grid | `tabs`, `filters`, `addCard`, `items` | Tab-specific queries and add-card mutations |
-| Basic detail | Approval steps, current/origin parameters, adjustment history | `steps`, `details`, `summary`, `history` | Parameter diff and audit writes |
-| User settings | Basic info, security, verified identity | `ProfilePage`, `NotificationsSettings`, `AppearanceSettings`, `SecuritySettings` | Identity-verification provider and document upload |
-| User info | Header, projects, news, team | `PublicProfilePage` sections | News feed and social graph provider |
+| Basic detail | Approval steps, current/origin parameters, adjustment history | `steps`, `details`, `summary`, `comparison`, `history` | Parameter diff source and audit writes |
+| User settings | Basic info, security, verified identity | `UserSettingsTemplate` with `basic`, `security`, `verification` tabs | Identity-verification provider and document upload |
+| User info | Header, projects, news, team | `UserInfoTemplate` with `header`, `projects`, `news`, `team` | News feed and social graph provider |
 
 ## Remaining API-depth candidates
 
@@ -162,6 +162,10 @@ tracked separately so the route/component coverage remains honest.
 - Added optional Arco Pro page-depth slots to `WorkplaceTemplate`,
   `MonitorTemplate`, `SearchTableTemplate`, `CardListTemplate` and
   `BasicDetailTemplate`, with gallery demos and E2E assertions.
+- Added `UserInfoTemplate` and `UserSettingsTemplate` for the Arco Pro user
+  center and tabbed settings compositions.
+- Added `contentPercentage`, `chat` and `comparison` slots plus their gallery
+  demos and E2E checks.
 
 ## Remaining non-goals
 

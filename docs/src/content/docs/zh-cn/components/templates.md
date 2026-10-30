@@ -16,6 +16,7 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 | `WorkplaceTemplate` | 日常待办与动态 | `primary` |
 | `MonitorTemplate` | 服务健康与告警 | `metrics`、`chart` |
 | `AnalysisTemplate` | 筛选分析与记录 | `charts`、`records` |
+| `MultiDimensionAnalysisTemplate` | 维度切换、对比与洞察 | `chart` |
 | `SearchTableTemplate` | 搜索与结果表格 | `table` |
 | `CardListTemplate` | 资源、项目卡片列表 | `items` |
 | `GroupFormTemplate` | 分组创建/编辑表单 | `form` |
@@ -24,6 +25,8 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 | `BasicDetailTemplate` | 只读记录摘要 | `details` |
 | `AdvancedDetailTemplate` | 带审批和相关内容的详情 | `details` |
 | `ProfileTemplate` | 身份、动态与共享内容 | `profile` |
+| `UserInfoTemplate` | Arco Pro 用户中心 | `header` 或 `projects` |
+| `UserSettingsTemplate` | 基础信息、安全与认证分页设置 | `basic`、`security`、`verification` |
 | `ResultTemplate` | 成功、失败与状态结果 | `title` |
 | `ExceptionTemplate` | 403、404、500 页面 | `status` |
 
@@ -35,11 +38,11 @@ description: 工作台、监控、分析、列表、表单、详情、结果与�
 
 | 模板 | Arco Pro 可选区块 |
 | --- | --- |
-| `WorkplaceTemplate` | `secondary`、`media`、`shortcuts`、`announcements`、`docs` |
-| `MonitorTemplate` | `activity`、`status`、`quickOperations`、`information` |
+| `WorkplaceTemplate` | `secondary`、`contentPercentage`、`media`、`shortcuts`、`announcements`、`docs` |
+| `MonitorTemplate` | `chat`、`activity`、`status`、`quickOperations`、`information` |
 | `SearchTableTemplate` | `filters`、`bulkActions`、`pagination`、`footer` |
 | `CardListTemplate` | `tabs`、`filters`、`addCard` |
-| `BasicDetailTemplate` | `steps`、`summary`、`history` |
+| `BasicDetailTemplate` | `steps`、`summary`、`comparison`、`history` |
 
 对应查询、权限、变更和遥测仍归宿主所有；插槽只负责这些区块的渲染位置。
 

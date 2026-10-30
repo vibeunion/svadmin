@@ -10,6 +10,7 @@
     alerts?: Snippet;
     activity?: Snippet;
     chart?: Snippet;
+    chat?: Snippet;
     status?: Snippet;
     quickOperations?: Snippet;
     information?: Snippet;
@@ -25,6 +26,7 @@
     alerts,
     activity,
     chart,
+    chat,
     status,
     quickOperations,
     information,
@@ -32,11 +34,12 @@
     width = 'wide',
   }: Props = $props();
 
-  const hasContext = $derived(Boolean(activity || status || quickOperations || information));
+  const hasContext = $derived(Boolean(chat || activity || status || quickOperations || information));
 </script>
 
 {#snippet context()}
   <div class="svadmin-monitor-template__context">
+    {#if chat}{@render chat()}{/if}
     {#if activity}{@render activity()}{/if}
     {#if status}{@render status()}{/if}
     {#if quickOperations}{@render quickOperations()}{/if}

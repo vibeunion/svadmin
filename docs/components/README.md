@@ -26,7 +26,7 @@ Complete reference for all `@svadmin/ui` components.
 | [ErrorBoundary](./error-boundary.md) | Error catch boundary / 错误边界 | ✅ |
 | [FieldRenderer](./field-renderer.md) | Field value renderer / 字段值渲染器 | ✅ |
 | [Theming](./theming.md) | Dark mode + color themes / 暗色模式 + 多色主题 | ✅ |
-| [Page templates](./templates.md) | Workplace, monitor, analysis, list, form, detail, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
+| [Page templates](./templates.md) | Workplace, monitor, analysis, list, form, detail, user center, settings, result and exception compositions / 工作台、监控、分析、列表、表单、详情、结果和异常页组合 | ✅ |
 | NotificationCenter | Header notification menu with unread state and category filters / 顶栏通知中心（含分类筛选） | ✅ |
 | NotificationHost | Imperative notification stack / 命令式通知栈 | ✅ |
 | ThemeSettingsDrawer | Live shell and appearance preferences / 实时外观与外壳设置抽屉 | ✅ |

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppearanceSettings, Badge, Button, Grid, Input, ListPagination, Menu, NotificationsSettings, ProfilePage, PublicProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, TemplatePageShell, Textarea, Timeline } from '@svadmin/ui';
+  import { AppearanceSettings, Badge, Button, Grid, Input, ListPagination, Menu, NotificationsSettings, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, TemplatePageShell, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
   import {
     AdvancedDetailTemplate,
     AdvancedFormTemplate,
@@ -12,6 +12,8 @@
     MultiDimensionAnalysisTemplate,
     ProfileTemplate,
     ResultTemplate,
+    UserInfoTemplate,
+    UserSettingsTemplate,
     SearchTableTemplate,
     StepFormTemplate,
     WorkplaceTemplate,
@@ -103,6 +105,11 @@
     ['Channel', 'Web and mobile'],
     ['Owner', 'Platform team'],
     ['On-call', 'Mina Park'],
+  ];
+  const comparisonRows = [
+    ['Priority', 'High', 'Medium'],
+    ['Due date', '2026-11-04', '2026-10-28'],
+    ['Approvers', 'Two reviewers', 'One reviewer'],
   ];
 
   function finishStep(): void {
@@ -252,12 +259,59 @@
         <SegmentedControl options={dimensionOptions} bind:value={dimension} ariaLabel="Analysis dimension" />
       </div>
     {/snippet}
-    {#snippet userSettings()}
+    {#snippet userBasicSettings()}
       <div class="svadmin-template-gallery__stack">
         <ProfilePage headingLevel="h2" />
         <NotificationsSettings headingLevel="h2" />
         <AppearanceSettings headingLevel="h2" />
+      </div>
+    {/snippet}
+    {#snippet userSecuritySettings()}
+      <div class="svadmin-template-gallery__stack">
         <SecuritySettings headingLevel="h2" />
+      </div>
+    {/snippet}
+    {#snippet userVerificationSettings()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Identity verification</h3>
+        <p>Review the identity checks required before sensitive workspace actions.</p>
+        <TwoFactorStepper current={1} steps={['Identity', 'Verify', 'Review']} />
+      </div>
+    {/snippet}
+    {#snippet userNews()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Latest news</h3>
+        <article class="svadmin-template-gallery__row"><div><strong>New approval policy</strong><p>High-value requests now require two reviewers.</p></div><Badge variant="secondary">Policy</Badge></article>
+        <article class="svadmin-template-gallery__row"><div><strong>Quarterly planning</strong><p>Submit team objectives before Friday.</p></div><Badge variant="outline">Planning</Badge></article>
+      </div>
+    {/snippet}
+    {#snippet teamMembers()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>My team</h3>
+        {#each ['Mina Park', 'Noah Silva', 'Avery Chen'] as name (name)}
+          <article class="svadmin-template-gallery__row"><div><strong>{name}</strong><p>Operations</p></div><Badge variant="secondary">Member</Badge></article>
+        {/each}
+      </div>
+    {/snippet}
+    {#snippet contentPercentage()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Content mix</h3>
+        {@render charts()}
+      </div>
+    {/snippet}
+    {#snippet monitorChat()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Team chat</h3>
+        <article class="svadmin-template-gallery__row"><div><strong>Mina Park</strong><p>Transcode queue recovered after the restart.</p></div><span class="svadmin-template-gallery__muted">09:42</span></article>
+        <article class="svadmin-template-gallery__row"><div><strong>Noah Silva</strong><p>Latency is back under the alert threshold.</p></div><span class="svadmin-template-gallery__muted">09:47</span></article>
+      </div>
+    {/snippet}
+    {#snippet comparison()}
+      <div class="svadmin-template-gallery__stack">
+        <h3>Parameter comparison</h3>
+        {#each comparisonRows as [label, current, previous] (label)}
+          <article class="svadmin-template-gallery__row"><div><strong>{label}</strong><p>Current: {current} · Previous: {previous}</p></div></article>
+        {/each}
       </div>
     {/snippet}
     {#snippet retryActions()}
@@ -354,9 +408,9 @@
     {/snippet}
 
     {#if active === 'workplace'}
-      <WorkplaceTemplate title="Workplace" description="Daily priorities, approvals and activity in one place" actions={actions} metrics={metrics} primary={list} secondary={activity} {shortcuts} {announcements} {docs} footer={footer} />
+      <WorkplaceTemplate title="Workplace" description="Daily priorities, approvals and activity in one place" actions={actions} metrics={metrics} primary={list} secondary={activity} {contentPercentage} {shortcuts} {announcements} {docs} footer={footer} />
     {:else if active === 'monitor'}
-      <MonitorTemplate title="Operations monitor" description="Live service health and active incidents" actions={actions} metrics={metrics} alerts={activity} activity={list} chart={charts} quickOperations={monitorQuick} status={monitorStatus} information={monitorInfo} />
+      <MonitorTemplate title="Operations monitor" description="Live service health and active incidents" actions={actions} metrics={metrics} alerts={activity} activity={list} chart={charts} chat={monitorChat} quickOperations={monitorQuick} status={monitorStatus} information={monitorInfo} />
     {:else if active === 'analysis'}
       <AnalysisTemplate title="Revenue analysis" description="Filter, compare and export performance" actions={actions} filters={filters} metrics={metrics} charts={charts} records={table} />
     {:else if active === 'analysis-multi'}
@@ -372,15 +426,15 @@
     {:else if active === 'advanced-form'}
       <AdvancedFormTemplate title="Advanced request" description="Form, summary and activity side by side" actions={actions} form={form} summary={summary} footer={footer} />
     {:else if active === 'basic-detail'}
-      <BasicDetailTemplate title="Request detail" description="Read-only record summary" actions={actions} steps={detailSteps} details={detailsBlock} summary={summary} history={history} footer={footer} />
+      <BasicDetailTemplate title="Request detail" description="Read-only record summary" actions={actions} steps={detailSteps} details={detailsBlock} summary={summary} comparison={comparison} history={history} footer={footer} />
     {:else if active === 'advanced-detail'}
       <AdvancedDetailTemplate title="Case detail" description="Details, approvals and related records" actions={actions} details={detailsBlock} activity={activity} related={list} metrics={metrics} footer={footer} />
     {:else if active === 'profile'}
       <ProfileTemplate title="Public profile" description="Identity, activity and shared work" actions={actions} profile={profile} activity={activity} projects={cards} />
     {:else if active === 'user-info'}
-      <PublicProfilePage variant="default" showSections />
+      <UserInfoTemplate title="User info" description="Projects, latest news and team context" actions={actions} header={profile} projects={cards} news={userNews} team={teamMembers} footer={footer} />
     {:else if active === 'user-settings'}
-      <TemplatePageShell title="User settings" description="Manage profile, security and notification preferences" primary={userSettings} pageId="user-settings" width="wide" />
+      <UserSettingsTemplate title="User settings" description="Manage profile, security and identity verification" basic={userBasicSettings} security={userSecuritySettings} verification={userVerificationSettings} />
     {:else if active === 'result'}
       <ResultTemplate status="success" title="Workspace published" subtitle="Invitations are on the way." actions={resultActions} details={detailsBlock} />
     {:else if active === 'result-error'}
@@ -408,6 +462,7 @@
   .svadmin-template-gallery__shortcuts { display: flex; flex-wrap: wrap; gap: var(--svadmin-space-2); }
   .svadmin-template-gallery__link { color: var(--primary); font-size: var(--svadmin-text-label); text-decoration: none; }
   .svadmin-template-gallery__link:hover { text-decoration: underline; }
+  .svadmin-template-gallery__muted { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-template-gallery__nav { position: sticky; inset-block-start: var(--svadmin-space-4); align-self: start; padding: var(--svadmin-space-3); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); }
   .svadmin-template-gallery__eyebrow { margin: 0 0 var(--svadmin-space-3); color: var(--muted-foreground); font-size: var(--svadmin-text-caption); text-transform: uppercase; letter-spacing: 0.06em; }
   .svadmin-template-gallery__main { min-width: 0; }

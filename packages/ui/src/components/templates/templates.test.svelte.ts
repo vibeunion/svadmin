@@ -15,6 +15,8 @@ import ProfileTemplate from './ProfileTemplate.svelte';
 import ResultTemplate from './ResultTemplate.svelte';
 import SearchTableTemplate from './SearchTableTemplate.svelte';
 import StepFormTemplate from './StepFormTemplate.svelte';
+import UserInfoTemplate from './UserInfoTemplate.svelte';
+import UserSettingsTemplate from './UserSettingsTemplate.svelte';
 import TemplatePageShell from './TemplatePageShell.svelte';
 import WorkplaceTemplate from './WorkplaceTemplate.svelte';
 
@@ -109,5 +111,13 @@ describe('page templates', () => {
 
     render(BasicDetailTemplate, { props: { title: 'Basic detail', steps: body, details: body, summary: body, history: body } });
     heading('Basic detail');
+    cleanup();
+
+    render(UserInfoTemplate, { props: { title: 'User info', header: body, projects: body, news: body, team: body } });
+    heading('User info');
+    cleanup();
+
+    render(UserSettingsTemplate, { props: { title: 'User settings', basic: body, security: body, verification: body } });
+    heading('User settings');
   });
 });

@@ -16,7 +16,7 @@ const templates: { nav: string; heading: string; path?: string }[] = [
   { nav: 'Basic detail', heading: 'Request detail' },
   { nav: 'Advanced detail', heading: 'Case detail' },
   { nav: 'Profile', heading: 'Public profile' },
-  { nav: 'User info', heading: 'Alex Chen' },
+  { nav: 'User info', heading: 'User info' },
   { nav: 'User settings', heading: 'User settings' },
   { nav: 'Result', heading: 'Workspace published' },
   { nav: 'Result error', heading: 'Publish failed' },
@@ -26,11 +26,12 @@ const templates: { nav: string; heading: string; path?: string }[] = [
 ];
 
 const pageDepthChecks: Record<string, string> = {
-  Workplace: 'Shortcuts',
-  Monitor: 'Quick operations',
+  Workplace: 'Content mix',
+  Monitor: 'Team chat',
   'Search table': 'Add record',
   'Card list': '+ Add card',
-  'Basic detail': 'Adjustment history',
+  'Basic detail': 'Parameter comparison',
+  'User info': 'Latest news',
 };
 
 test('page template gallery renders every composition at desktop and mobile widths', async ({ page }, testInfo) => {
@@ -100,4 +101,20 @@ test('dock workspace renders panels and restores a saved layout', async ({ page 
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Operations workspace', exact: true })).toBeVisible({ timeout: LAZY_ROUTE_TIMEOUT });
   await expect(page.getByText('Availability')).toBeVisible();
+});
+
+test('user settings tabs expose security and verification sections', async ({ page }) => {
+  await page.goto('/#/login');
+  await page.locator('#login-identifier').fill('demo@example.com');
+  await page.locator('#login-password').fill('demo');
+  await page.locator('form button[type="submit"]').click();
+  await expect(page).toHaveURL(/^[^#]+#\/(?:\?[^#]*)?$/);
+
+  await page.goto('/#/templates/user-settings');
+  await expect(page.getByRole('heading', { name: 'User settings', exact: true })).toBeVisible({ timeout: LAZY_ROUTE_TIMEOUT });
+  await expect(page.getByRole('radio', { name: 'Basic info' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: 'Security' }).click();
+  await expect(page.getByRole('heading', { name: 'Two-Factor Authentication (2FA)' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Verification' }).click();
+  await expect(page.getByText('Identity verification', { exact: true })).toBeVisible();
 });

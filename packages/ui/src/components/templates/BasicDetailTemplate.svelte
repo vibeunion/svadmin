@@ -10,17 +10,23 @@
     steps?: Snippet;
     details: Snippet;
     summary?: Snippet;
+    comparison?: Snippet;
     history?: Snippet;
     footer?: Snippet;
     pageId?: string;
     width?: 'narrow' | 'default' | 'wide';
   }
 
-  let { title, eyebrow, description, actions, steps, details, summary, history, footer, pageId = 'detail', width = 'default' }: Props = $props();
+  let { title, eyebrow, description, actions, steps, details, summary, comparison, history, footer, pageId = 'detail', width = 'default' }: Props = $props();
 </script>
 
 {#snippet primary()}
   {@render details()}
+  {#if comparison}
+    <section class="svadmin-basic-detail-template__history" aria-label="Parameter comparison">
+      {@render comparison()}
+    </section>
+  {/if}
   {#if history}
     <section class="svadmin-basic-detail-template__history" aria-label="Adjustment history">
       {@render history()}

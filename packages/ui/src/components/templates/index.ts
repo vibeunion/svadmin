@@ -15,3 +15,5 @@ export { default as ExceptionTemplate } from './ExceptionTemplate.svelte';
 export { default as ProfileTemplate } from './ProfileTemplate.svelte';
 export { default as BasicProfileTemplate } from './ProfileTemplate.svelte';
 export { default as AdvancedProfileTemplate } from './ProfileTemplate.svelte';
+export { default as UserInfoTemplate } from './UserInfoTemplate.svelte';
+export { default as UserSettingsTemplate } from './UserSettingsTemplate.svelte';

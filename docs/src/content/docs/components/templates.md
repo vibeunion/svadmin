@@ -18,6 +18,7 @@ business content.
 | `WorkplaceTemplate` | Daily priorities and activity | `primary` |
 | `MonitorTemplate` | Service health and incidents | `metrics`, `chart` |
 | `AnalysisTemplate` | Filtered analysis and records | `charts`, `records` |
+| `MultiDimensionAnalysisTemplate` | Dimension switching, comparison and insights | `chart` |
 | `SearchTableTemplate` | Search and result tables | `table` |
 | `CardListTemplate` | Resource and project galleries | `items` |
 | `GroupFormTemplate` | Grouped create/edit forms | `form` |
@@ -26,6 +27,8 @@ business content.
 | `BasicDetailTemplate` | Read-only record summary | `details` |
 | `AdvancedDetailTemplate` | Detail with approvals and related work | `details` |
 | `ProfileTemplate` | Identity, activity and shared work | `profile` |
+| `UserInfoTemplate` | Arco Pro user center | `header` or `projects` |
+| `UserSettingsTemplate` | Tabbed basic, security and verification settings | `basic`, `security`, `verification` |
 | `ResultTemplate` | Success, failure and status results | `title` |
 | `ExceptionTemplate` | 403, 404 and 500 routes | `status` |
 
@@ -37,11 +40,11 @@ slots close the composition-depth gap without forcing one mock layout:
 
 | Template | Optional Arco Pro sections |
 | --- | --- |
-| `WorkplaceTemplate` | `secondary`, `media`, `shortcuts`, `announcements`, `docs` |
-| `MonitorTemplate` | `activity`, `status`, `quickOperations`, `information` |
+| `WorkplaceTemplate` | `secondary`, `contentPercentage`, `media`, `shortcuts`, `announcements`, `docs` |
+| `MonitorTemplate` | `chat`, `activity`, `status`, `quickOperations`, `information` |
 | `SearchTableTemplate` | `filters`, `bulkActions`, `pagination`, `footer` |
 | `CardListTemplate` | `tabs`, `filters`, `addCard` |
-| `BasicDetailTemplate` | `steps`, `summary`, `history` |
+| `BasicDetailTemplate` | `steps`, `summary`, `comparison`, `history` |
 
 The host still owns the associated queries, permissions, mutations and
 telemetry. The slots only define where those sections render.
