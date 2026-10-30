@@ -120,7 +120,7 @@
   </div>
 
   <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[500px]">
-    <div class="w-full rounded-lg border border-border bg-card p-4 shadow-sm lg:hidden">
+    <div class="svadmin-permission-matrix__mobile-sidebar w-full rounded-lg border border-border bg-card p-4 shadow-sm">
       <label for={`${instanceId}-permission-role-select`} class="mb-2 block text-sm font-medium text-foreground">{i18n.t('permissions.roles') || 'Roles'}</label>
       <select id={`${instanceId}-permission-role-select`} value={selectedRole} onchange={(event) => { selectedRole = event.currentTarget.value; }} class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" disabled={roles.length === 0}>
         {#each roles as role (role.code)}<option value={role.code}>{role.name}</option>{/each}
@@ -130,7 +130,7 @@
     </div>
 
     <!-- Left: Role Selector Sidebar -->
-    <div class="hidden w-full flex-shrink-0 flex-col rounded-lg border border-border bg-card p-4 shadow-sm lg:flex lg:w-64">
+    <div class="svadmin-permission-matrix__desktop-sidebar rounded-lg border border-border bg-card p-4 shadow-sm">
       <h2 class="mb-4 px-2 text-sm font-semibold text-muted-foreground">{i18n.t('permissions.roles') || 'Roles'}</h2>
       <div class="space-y-1 flex-1 overflow-y-auto">
         {#each roles as role, _i (_i)}
