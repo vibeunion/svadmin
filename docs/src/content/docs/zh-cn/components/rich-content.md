@@ -1,0 +1,78 @@
+---
+title: 富文本内容渲染
+description: Lite 的 Markdown 与富文本字段如何服务端渲染存量内容
+---
+
+`MarkdownField` 与 `RichTextField` 在 SSR 阶段渲染存量内容：没有客户端编辑器、没有 hydration、也不引入 sanitizer 依赖。取值先整体转义，再只重建固定的 Markdown 子集或固定的 HTML 白名单。
+
+## 使用哪个渲染器
+
+| 存量值形态 | 渲染器 | 字段 |
+| --- | --- | --- |
+| 纯文本或 Markdown（`# 标题`、`- 项`、`**粗体**`） | Markdown 渲染器 | 两者 |
+| HTML（`<p>…`、`<strong>…`） | 白名单清洗 | `RichTextField` 展示/编辑预览 |
+
+含 HTML 标签的值走清洗器，其余走 Markdown 渲染器，因此宿主可以只存其中一种形态。
+
+## 支持的 Markdown
+
+| 语法 | 输出 |
+| --- | --- |
+| `# H1` … `###### H6` | `<h1>`…`<h6>` |
+| `**粗体**`、`__粗体__`、`*斜体*`、`_斜体_`、`~~删除~~` | `<strong>`、`<em>`、`<s>` |
+| `` `code` `` | `<code>` |
+| ```` ```lang ```` 围栏代码块 | `<pre><code class="language-lang">` |
+| `- 项`、`* 项`、`1. 项` | `<ul>` / `<ol>` |
+| `- [x] 完成`、`- [ ] 待办` | 带禁用复选框的任务列表 |
+| `> 引用` | `<blockquote>` |
+| `---`、`***`、`___` | `<hr />` |
+| `\| a \| b \|` 且带分隔行 | 带 `align` 属性的 `<table>` |
+| `[文字](https://…)`、`[文字](/path)` | `<a rel="noreferrer">` |
+
+其它语法保留为字面文本，不会被静默丢弃：缺少分隔行的表格仍会显示源码，而不是整段消失。
+
+## 富文本 HTML 白名单
+
+`RichTextField` 渲染时仅保留：
+
+```
+p strong b em i u s br hr ul ol li blockquote code pre h1 h2 h3 h4 h5 h6
+a[href|title] img[src|alt|title] table thead tbody tfoot tr th[align] td[align]
+input[type=checkbox][checked|disabled]
+```
+
+其余标签被移除但保留文本：
+
+- `script`、`style`、`iframe`、`object`、`embed` 整块连同内容删除
+- 事件属性（`onclick`、`onerror` 等）永不复制
+- 其它表单控件（如 `input[type=text]`）直接丢弃
+- 未知标签被解包（去标签保文本），不会渲染
+
+## 链接与图片策略
+
+所有 `href` 与 `src` 都经过与 Lite 其它位置一致的 `toSafeHref`：
+
+- 允许：`http`、`https`、`mailto`、`tel` 与相对路径
+- 拒绝：`javascript:`、`data:`，以及含控制字符或不可见字符的地址
+- 被拒属性整体消失，只留下链接文字或图片 alt
+- 渲染出的链接始终带 `rel="noreferrer"`
+
+## 编辑面
+
+两个字段都保留原生 `textarea` 编辑源码，并在其下方显示服务端渲染的预览，因此无 JavaScript 的页面既能阅读格式化内容，也能提交修改。
+
+没有工具栏、没有所见即所得选区模型、也没有客户端清洗器——这是刻意边界，决策记录与 parity 影响见仓库内 `docs/architecture/ssr-rich-content-boundaries.md`。
+
+## SSR 保证
+
+- 渲染器是纯函数：不触碰 DOM、`window` 与定时器，SSR 与测试输出一致
+- 预览样式保持 IE11 安全：纯 HTML 标签、无 `display: grid`、无 CSS 变量
+- Lite 的 IE11 契约测试会扫描每个组件的样式，预览样式同样受该门禁约束
+
+## 测试
+
+| 契约 | 测试 |
+| --- | --- |
+| Markdown 子集、表格、任务列表、转义、链接策略 | `packages/lite/src/components/fields/rich-content.test.svelte.ts` |
+| 字段在 show/edit 两种模式的渲染 | `packages/lite/src/components/fields/LiteFields.test.svelte.ts` |
+| 富文本永不产生可执行脚本或事件处理器 | `packages/lite/src/security.test.integration.ts` |

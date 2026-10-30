@@ -59,6 +59,12 @@
   .lite-markdown-preview :global(code) { font-family: monospace; font-size: 12px; }
   .lite-markdown-preview :global(blockquote) { margin: 0 0 8px; padding-left: 10px; border-left: 3px solid #E5E6EB; color: #4E5969; }
   .lite-markdown-preview :global(a) { color: #165DFF; }
+  .lite-markdown-preview :global(table) { width: 100%; margin: 0 0 8px; border-collapse: collapse; }
+  .lite-markdown-preview :global(th),
+  .lite-markdown-preview :global(td) { padding: 6px 8px; border: 1px solid #E5E6EB; text-align: left; }
+  .lite-markdown-preview :global(th) { background: #F2F3F5; font-weight: 600; }
+  .lite-markdown-preview :global(ul.lite-task-list) { padding-left: 2px; list-style: none; }
+  .lite-markdown-preview :global(.lite-task-item input) { margin-right: 6px; }
   .lite-markdown-preview-block { margin-top: 8px; }
   .lite-markdown-preview-block__label { display: block; margin-bottom: 4px; color: #86909C; font-size: 11px; font-weight: 600; }
   .lite-markdown-preview-block__empty { margin: 0; padding: 8px 12px; border: 1px dashed #E5E6EB; border-radius: 4px; color: #86909C; font-size: 12px; }

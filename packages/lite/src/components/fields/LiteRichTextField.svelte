@@ -65,6 +65,12 @@
   .lite-rich-preview :global(blockquote) { margin: 0 0 8px; padding-left: 10px; border-left: 3px solid #E5E6EB; color: #4E5969; }
   .lite-rich-preview :global(a) { color: #165DFF; }
   .lite-rich-preview :global(img) { max-width: 100%; height: auto; }
+  .lite-rich-preview :global(table) { width: 100%; margin: 0 0 8px; border-collapse: collapse; }
+  .lite-rich-preview :global(th),
+  .lite-rich-preview :global(td) { padding: 6px 8px; border: 1px solid #E5E6EB; text-align: left; }
+  .lite-rich-preview :global(th) { background: #F2F3F5; font-weight: 600; }
+  .lite-rich-preview :global(ul.lite-task-list) { padding-left: 2px; list-style: none; }
+  .lite-rich-preview :global(.lite-task-item input) { margin-right: 6px; }
   .lite-rich-preview-block { margin-top: 8px; }
   .lite-rich-preview-block__label { display: block; margin-bottom: 4px; color: #86909C; font-size: 11px; font-weight: 600; }
   .lite-rich-preview-block__empty { margin: 0; padding: 8px 12px; border: 1px dashed #E5E6EB; border-radius: 4px; color: #86909C; font-size: 12px; }

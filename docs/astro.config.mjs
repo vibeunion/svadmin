@@ -107,6 +107,7 @@ export default defineConfig({
             { slug: 'components/enterprise' },
             { slug: 'components/ai-components' },
             { slug: 'components/ecosystem-adapters' },
+            { slug: 'components/rich-content' },
           ],
         },
         {

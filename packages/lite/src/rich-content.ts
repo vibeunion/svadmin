@@ -71,6 +71,58 @@ export function renderInlineMarkdown(source: string): string {
   return output;
 }
 
+const TABLE_SEPARATOR = /^\s*\|?\s*:?-{1,}:?\s*(?:\|\s*:?-{1,}:?\s*)+\|?\s*$/u;
+const TASK_ITEM = /^\s*\[( |x|X)\]\s+(.*)$/u;
+
+function splitTableRow(line: string): string[] {
+  let row = line.trim();
+  if (row.startsWith('|')) row = row.slice(1);
+  if (row.endsWith('|')) row = row.slice(0, -1);
+  const cells: string[] = [];
+  let current = '';
+  for (const character of row) {
+    if (character === '|') {
+      cells.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += character;
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
+function tableAlignment(cell: string): 'left' | 'center' | 'right' | undefined {
+  const trimmed = cell.trim();
+  const left = trimmed.startsWith(':');
+  const right = trimmed.endsWith(':');
+  if (left && right) return 'center';
+  if (right) return 'right';
+  if (left) return 'left';
+  return undefined;
+}
+
+function renderTable(
+  header: string[],
+  alignments: Array<string | undefined>,
+  rows: string[][],
+): string {
+  const attribute = (index: number): string => {
+    const align = alignments[index];
+    return align ? ` align="${align}"` : '';
+  };
+  const head = header
+    .map((cell, index) => `<th${attribute(index)}>${renderInlineMarkdown(cell)}</th>`)
+    .join('');
+  const body = rows
+    .map((row) => {
+      const cells = header.map((_, index) => `<td${attribute(index)}>${renderInlineMarkdown(row[index] ?? '')}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    })
+    .join('');
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
 const HEADING = /^(#{1,6})\s+(.*)$/u;
 const UNORDERED = /^\s*[-*+]\s+(.*)$/u;
 const ORDERED = /^\s*\d+[.)]\s+(.*)$/u;
@@ -134,20 +186,47 @@ export function renderMarkdown(value: unknown): string {
       continue;
     }
 
+    if (line.includes('|') && TABLE_SEPARATOR.test(lines[index + 1] ?? '')) {
+      flush();
+      const header = splitTableRow(line);
+      const alignments = splitTableRow(lines[index + 1] ?? '').map(tableAlignment);
+      const rows: string[][] = [];
+      let cursor = index + 2;
+      while (cursor < lines.length) {
+        const candidate = lines[cursor] ?? '';
+        if (candidate.trim() === '' || !candidate.includes('|')) break;
+        rows.push(splitTableRow(candidate));
+        cursor += 1;
+      }
+      index = cursor - 1;
+      blocks.push(renderTable(header, alignments, rows));
+      continue;
+    }
+
     if (UNORDERED.test(line) || ORDERED.test(line)) {
       flush();
       const ordered = ORDERED.test(line);
       const pattern = ordered ? ORDERED : UNORDERED;
       const items: string[] = [];
+      let hasTask = false;
       let cursor = index;
       while (cursor < lines.length) {
         const item = pattern.exec(lines[cursor] ?? '');
         if (!item) break;
-        items.push(`<li>${renderInlineMarkdown(item[1] ?? '')}</li>`);
+        const content = item[1] ?? '';
+        const task = ordered ? null : TASK_ITEM.exec(content);
+        if (task) {
+          hasTask = true;
+          const checked = task[1] !== ' ';
+          items.push(`<li class="lite-task-item"><input type="checkbox" disabled${checked ? ' checked' : ''} /> ${renderInlineMarkdown(task[2] ?? '')}</li>`);
+        } else {
+          items.push(`<li>${renderInlineMarkdown(content)}</li>`);
+        }
         cursor += 1;
       }
       index = cursor - 1;
-      blocks.push(ordered ? `<ol>${items.join('')}</ol>` : `<ul>${items.join('')}</ul>`);
+      const listClass = hasTask ? ' class="lite-task-list"' : '';
+      blocks.push(ordered ? `<ol>${items.join('')}</ol>` : `<ul${listClass}>${items.join('')}</ul>`);
       continue;
     }
 
@@ -198,9 +277,17 @@ const ALLOWED_TAGS: Record<string, readonly string[]> = {
   h5: [],
   h6: [],
   img: ['src', 'alt', 'title'],
+  table: [],
+  thead: [],
+  tbody: [],
+  tfoot: [],
+  tr: [],
+  th: ['align'],
+  td: ['align'],
+  input: ['type', 'checked', 'disabled'],
 };
 
-const VOID_TAGS = new Set(['br', 'hr', 'img']);
+const VOID_TAGS = new Set(['br', 'hr', 'img', 'input']);
 const ATTRIBUTE = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/gu;
 
 function safeAttributeValue(tag: string, name: string, raw: string): string | undefined {
@@ -245,6 +332,8 @@ export function sanitizeRichTextHtml(value: unknown): string {
     }
 
     const attributes: string[] = [];
+    const isCheckbox = tag === 'input' && /type\s*=\s*["']?checkbox/iu.test(match[2] ?? '');
+    if ((tag === 'input' && !isCheckbox) || (tag === 'input' && closing)) continue;
     for (const attribute of (match[2] ?? '').matchAll(ATTRIBUTE)) {
       const name = (attribute[1] ?? '').toLowerCase();
       if (!allowedAttributes.includes(name)) continue;
@@ -255,6 +344,12 @@ export function sanitizeRichTextHtml(value: unknown): string {
     }
     if (tag === 'a' && attributes.some((attribute) => attribute.startsWith('href='))) {
       attributes.push('rel="noreferrer"');
+    }
+    if (tag === 'input') {
+      // Boolean attributes carry no value, so they cannot come from ATTRIBUTE.
+      const raw = match[2] ?? '';
+      if (/\bchecked\b/iu.test(raw)) attributes.push('checked');
+      if (/\bdisabled\b/iu.test(raw)) attributes.push('disabled');
     }
     const rendered = attributes.length > 0 ? `<${tag} ${attributes.join(' ')}` : `<${tag}`;
     output += VOID_TAGS.has(tag) ? `${rendered} />` : `${rendered}>`;

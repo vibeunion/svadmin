@@ -62,6 +62,38 @@ describe('Lite markdown renderer', () => {
     expect(html).not.toContain('<b>');
   });
 
+  it('renders GFM tables with alignment and escapes cell content', () => {
+    const html = renderMarkdown([
+      '| Name | Qty | Note |',
+      '| :--- | ---: | :---: |',
+      '| Bolt | 12 | **ok** |',
+      '| <script>x</script> | 3 | fine |',
+    ].join('\n'));
+
+    expect(html).toContain('<table><thead><tr>');
+    expect(html).toContain('<th align="left">Name</th>');
+    expect(html).toContain('<th align="right">Qty</th>');
+    expect(html).toContain('<th align="center">Note</th>');
+    expect(html).toContain('<td align="left">Bolt</td>');
+    expect(html).toContain('<strong>ok</strong>');
+    expect(html).toContain('&lt;script&gt;');
+    expect(html).not.toContain('<script');
+
+    // A pipe line without a separator row stays a paragraph.
+    expect(renderMarkdown('| not a table |')).not.toContain('<table>');
+  });
+
+  it('renders task lists as disabled checkboxes', () => {
+    const html = renderMarkdown(['- [x] shipped', '- [ ] pending'].join('\n'));
+
+    expect(html).toContain('<ul class="lite-task-list">');
+    expect(html).toContain('<input type="checkbox" disabled checked />');
+    expect(html).toContain('<input type="checkbox" disabled />');
+    expect(html).toContain('shipped');
+    expect(html).toContain('pending');
+    expect(html).not.toContain('[x]');
+  });
+
   it('keeps unsupported syntax literal instead of dropping content', () => {
     expect(renderMarkdown('| a | b |')).toContain('| a | b |');
     expect(renderMarkdown('')).toBe('');
@@ -95,6 +127,20 @@ describe('Lite rich text sanitizer', () => {
     expect(html).not.toContain('javascript:');
     expect(html).not.toContain('onerror');
     expect(html).toContain('alt="a &quot;quote&quot;"');
+  });
+
+  it('allows tables and checkbox inputs but never other input types', () => {
+    const html = sanitizeRichTextHtml(
+      '<table><thead><tr><th align="left">A</th></tr></thead><tbody><tr><td align="right">1</td></tr></tbody></table>'
+      + '<input type="checkbox" checked onchange="x">'
+      + '<input type="text" value="leak">',
+    );
+
+    expect(html).toContain('<table><thead><tr><th align="left">A</th>');
+    expect(html).toContain('<td align="right">1</td>');
+    expect(html).toContain('<input type="checkbox" checked />');
+    expect(html).not.toContain('onchange');
+    expect(html).not.toContain('type="text"');
   });
 
   it('escapes stray angle brackets and comments', () => {
