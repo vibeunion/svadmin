@@ -253,6 +253,10 @@ IE11 before the decision is made.
 
 ## Components & Parity (100% Coverage)
 
+`LiteQRCode` uses the optional peer dependency `qrcode`; install it with
+`bun add qrcode` only when you render QR codes. The rest of Lite has no extra
+runtime dependency.
+
 `@svadmin/lite` provides **100% component parity** (179/179 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
 
 ### Core Pages & Layout

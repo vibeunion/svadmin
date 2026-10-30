@@ -48,6 +48,9 @@ This measures inventory mappings, not coverage of every public export or verifie
 ===============================================================
 ```
 
+
+`LiteQRCode` requires the optional peer dependency `qrcode`; install it only when QR rendering is used.
+
 ### Component Categories
 
 1. **Pages & Views (18 Components)**:
