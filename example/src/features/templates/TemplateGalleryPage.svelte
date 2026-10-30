@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppearanceSettings, Badge, Button, Grid, Input, ListPagination, Menu, NotificationsSettings, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, TemplatePageShell, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
+  import { AppearanceSettings, Badge, Button, Grid, Input, ListPagination, Menu, NotificationsSettings, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
   import {
     AdvancedDetailTemplate,
     AdvancedFormTemplate,

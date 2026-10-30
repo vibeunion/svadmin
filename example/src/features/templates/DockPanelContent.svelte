@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Badge, GroupedTable, Statistic } from '@svadmin/ui';
+  import { GroupedTable, Statistic } from '@svadmin/ui';
   import { BoxPlotChart, GraphChart } from '@svadmin/charts';
   import type { TableColumn } from '@svadmin/ui';
 

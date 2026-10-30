@@ -27,7 +27,7 @@
   let width = $state(untrack(() => initialWidth));
   const size = $derived(Math.min(width, height));
   const radius = $derived(size / 2 - 8);
-  const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+  const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'] as const;
 
   const root = $derived.by(() => {
     const next = hierarchy<SunburstNode>(data)
@@ -69,7 +69,7 @@
     let current: HierarchyRectangularNode<SunburstNode> | null = node;
     while (current.parent && current.parent.depth > 0) current = current.parent as HierarchyRectangularNode<SunburstNode>;
     const index = current.parent?.children?.indexOf(current) ?? 0;
-    return node.data.color ?? palette[Math.max(0, index) % palette.length] ?? palette[0]!;
+    return node.data.color ?? palette[Math.max(0, index) % palette.length] ?? palette[0];
   }
 
   function activate(node: SunburstNode) {
