@@ -45,15 +45,16 @@ code change that makes the native-control condition true.
 | DateTimePicker | `input[type=datetime-local]` | exact | local instant preserved; timezone/disambiguation stays with the host |
 | TimePicker | `input[type=time]` | exact | time domain preserved |
 | ColorPicker | `input[type=color]`, text fallback for non-hex values | exact | colour domain preserved; brand whitelist stays with the host |
-| MarkdownField | `textarea` + `<pre>` source | fallback | no rendered Markdown preview |
-| RichTextField | `textarea` + pre-wrapped text | fallback | no rich rendering, only plain text |
+| MarkdownField | `textarea` + server-rendered Markdown preview | exact | preview rendered server-side; toolbar is a client enhancement |
+| RichTextField | `textarea` source + allowlisted HTML render | fallback | WYSIWYG editing has no native equivalent; see [rich content boundaries](./ssr-rich-content-boundaries.md) |
 | AutoComplete | `input` + `datalist` | fallback | native suggestions exist, but remote query/selection is client state |
 | RelationPicker | `select` or link | fallback | large relation sets need client search/paging |
 
-Result: fields exact 30 → **41 of 46 (65.2% → 89.1%)**; every upgrade follows
-condition 1 with a matching code change (native control type, or repeated-name tag
-fields plus server parsing). Remaining fallbacks are MarkdownField, RichTextField,
-AutoComplete, RelationPicker and SignaturePad.
+Result: fields exact 30 → **42 of 46 (65.2% → 91.3%)**; every upgrade follows
+condition 1 with a matching code change (native control type, repeated-name tag
+fields plus server parsing, or a server-rendered preview). Remaining fallbacks are
+RichTextField, AutoComplete, RelationPicker and SignaturePad, each with the
+boundary recorded in [rich content boundaries](./ssr-rich-content-boundaries.md).
 
 ## Guard rails
 
@@ -78,8 +79,9 @@ Completed in the same cycle:
    parses repeated keys into an array and still accepts legacy comma values;
    upgraded.
 
-Still open:
-
-5. `MarkdownField`: render Markdown server-side before claiming preview parity.
-6. `RichTextField`: define whether plain-text editing is acceptable for rich
-   content, or route rich editing to the SPA.
+5. `MarkdownField`: completed — server-side Markdown rendering with an escaped,
+   link-checked subset; upgraded to `exact`.
+6. `RichTextField`: decided — plain-text editing is **not** an acceptable
+   replacement for WYSIWYG, so the mapping stays `fallback` while read mode
+   renders allowlisted HTML. See
+   [rich content boundaries](./ssr-rich-content-boundaries.md).

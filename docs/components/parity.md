@@ -171,7 +171,9 @@ boundary is recorded in
 [SSR dashboard-class boundaries](../architecture/ssr-dashboard-boundaries.md).
 Field/control mappings follow the
 [input-domain rule](../architecture/lite-field-parity-criteria.md): a native control
-must match the value domain, otherwise the entry stays `fallback`.
+must match the value domain, otherwise the entry stays `fallback`. Rich content and
+remote-search fields follow
+[rich content boundaries](../architecture/ssr-rich-content-boundaries.md).
 Widget interactivity is deliberately out of SSR scope —
 [read-only widget positioning](../architecture/ssr-widget-positioning.md).
 

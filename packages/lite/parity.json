@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-10-30T21:26:29.187Z",
+  "timestamp": "2026-10-30T23:37:17.834Z",
   "totalComponents": 179,
-  "adaptedCount": 121,
-  "fallbackCount": 56,
+  "adaptedCount": 122,
+  "fallbackCount": 55,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 67.6,
-  "fallbackPercentage": 31.3,
-  "behaviorVerifiedCount": 138,
-  "behaviorVerifiedPercentage": 77.1,
-  "behaviorAssertedCount": 138,
-  "behaviorAssertedPercentage": 77.1,
+  "exactPercentage": 68.2,
+  "fallbackPercentage": 30.7,
+  "behaviorVerifiedCount": 140,
+  "behaviorVerifiedPercentage": 78.2,
+  "behaviorAssertedCount": 140,
+  "behaviorAssertedPercentage": 78.2,
   "categories": {
     "pages": {
       "category": "pages",
@@ -55,15 +55,15 @@
     "fields": {
       "category": "fields",
       "total": 46,
-      "adapted": 41,
-      "fallback": 5,
+      "adapted": 42,
+      "fallback": 4,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 89.1,
-      "fallbackRate": 10.9,
-      "behaviorVerified": 34,
-      "behaviorAsserted": 34
+      "exactRate": 91.3,
+      "fallbackRate": 8.7,
+      "behaviorVerified": 36,
+      "behaviorAsserted": 36
     },
     "layout": {
       "category": "layout",
@@ -370,8 +370,8 @@
       "uiComponent": "MarkdownField.svelte",
       "liteComponent": "LiteMarkdownField.svelte",
       "category": "fields",
-      "status": "fallback",
-      "strategy": "Textarea 编辑 + 服务端 <pre> 源码展示；Markdown 渲染预览由宿主或 SPA 承接"
+      "status": "exact",
+      "strategy": "原生 Textarea 编辑 + 服务端渲染 Markdown 预览（标题/列表/引用/代码/强调/安全链接）；工具栏与分屏属客户端增强"
     },
     {
       "name": "RichTextField",
@@ -379,7 +379,7 @@
       "liteComponent": "LiteRichTextField.svelte",
       "category": "fields",
       "status": "fallback",
-      "strategy": "降级为原生 Textarea 与只读展示"
+      "strategy": "服务端白名单渲染只读富文本 + Textarea 编辑源码；WYSIWYG 工具栏与所见即所得编辑由 SPA 承接"
     },
     {
       "name": "TreeSelect",

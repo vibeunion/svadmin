@@ -30,8 +30,9 @@ fallback rate, and how many mapped components carry a real assertion budget in a
 The classification rules, the input-domain field rule and the accepted read-only widget
 positioning are recorded in `docs/components/parity.md`,
 `docs/architecture/lite-field-parity-criteria.md`,
-`docs/architecture/ssr-dashboard-boundaries.md` and
-`docs/architecture/ssr-widget-positioning.md`.
+`docs/architecture/ssr-dashboard-boundaries.md`,
+`docs/architecture/ssr-widget-positioning.md` and
+`docs/architecture/ssr-rich-content-boundaries.md`.
 
 ### Parity Breakdown by Module
 
@@ -51,8 +52,8 @@ positioning are recorded in `docs/components/parity.md`,
   - Semantic Fallbacks: 67 (37.4%)
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
-  Behavior Asserted: 138/179 (77.1%) · Referenced only: 0
-  Fields 1:1: 41/46 (89.1%) · Widgets 1:1: 15/37 (40.5%, read-only by design)
+  Behavior Asserted: 140/179 (78.2%) · Referenced only: 0
+  Fields 1:1: 42/46 (91.3%) · Widgets 1:1: 15/37 (40.5%, read-only by design)
 ===============================================================
 ```
 

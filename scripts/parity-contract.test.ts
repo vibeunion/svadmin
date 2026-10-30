@@ -117,7 +117,9 @@ describe('UI/Lite Parity Tracking Contract', () => {
     const datePicker = report.items.find((item) => item.name === 'DatePicker');
     expect(datePicker?.status).toBe('exact');
     const markdownField = report.items.find((item) => item.name === 'MarkdownField');
-    expect(markdownField?.status).toBe('fallback');
+    expect(markdownField?.status).toBe('exact');
+    const richTextField = report.items.find((item) => item.name === 'RichTextField');
+    expect(richTextField?.status).toBe('fallback');
   });
 
   it('detects stale parity artifacts so CI cannot pass on drift', () => {

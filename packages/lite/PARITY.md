@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-30T21:26:29.187Z`
+> 自动生成时间：`2026-10-30T23:37:17.834Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**67.6%**（121）· 语义降级率 (Fallback)：**31.3%**（56）
-> 行为验证覆盖：**77.1%**（138/179 映射组件具备断言预算）· 仅被引用：0
+> 1:1 对齐率 (Exact)：**68.2%**（122）· 语义降级率 (Fallback)：**30.7%**（55）
+> 行为验证覆盖：**78.2%**（140/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -15,7 +15,7 @@
 | **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 | 0 |
 | **advanced** | 43 | 22 | 20 | 1 | 0 | **51.2%** | 38/43 | 0 |
 | **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 33/37 | 0 |
-| **fields** | 46 | 41 | 5 | 0 | 0 | **89.1%** | 34/46 | 0 |
+| **fields** | 46 | 42 | 4 | 0 | 0 | **91.3%** | 36/46 | 0 |
 | **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
@@ -173,8 +173,8 @@
 | `JsonField` | `LiteJsonField.svelte` | ✅ 1:1 对齐 | JSON 格式化与原生 Textarea |
 | `CopyField` | `LiteCopyField.svelte` | ✅ 1:1 对齐 | 可选中等宽文本展示 |
 | `CodeField` | `LiteCodeField.svelte` | ✅ 1:1 对齐 | 服务端 <pre><code> 展示（含语言徽标与 maxHeight）与原生 Textarea 编辑；剪贴板复制为客户端增强，数据契约一致 |
-| `MarkdownField` | `LiteMarkdownField.svelte` | ⚡ 语义降级 | Textarea 编辑 + 服务端 <pre> 源码展示；Markdown 渲染预览由宿主或 SPA 承接 |
-| `RichTextField` | `LiteRichTextField.svelte` | ⚡ 语义降级 | 降级为原生 Textarea 与只读展示 |
+| `MarkdownField` | `LiteMarkdownField.svelte` | ✅ 1:1 对齐 | 原生 Textarea 编辑 + 服务端渲染 Markdown 预览（标题/列表/引用/代码/强调/安全链接）；工具栏与分屏属客户端增强 |
+| `RichTextField` | `LiteRichTextField.svelte` | ⚡ 语义降级 | 服务端白名单渲染只读富文本 + Textarea 编辑源码；WYSIWYG 工具栏与所见即所得编辑由 SPA 承接 |
 | `TreeSelect` | `fields/LiteTreeSelect.svelte` | ✅ 1:1 对齐 | 原生层级缩进 <select> 与单选/多选 |
 | `Cascader` | `fields/LiteCascader.svelte` | ✅ 1:1 对齐 | 路径展开原生 <select> 与格式化展示 |
 | `Transfer` | `LiteTransfer.svelte` | ✅ 1:1 对齐 | 双列复选框/列表与左右转移 POST 表单 |
