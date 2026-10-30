@@ -135,11 +135,11 @@
   });
 </script>
 
-<div class="flex flex-col lg:flex-row gap-0 min-h-full">
+<div class="svadmin-settings-layout">
   <!-- Left sidebar navigation -->
-  <nav class="w-full lg:w-56 shrink-0 bg-muted/10 shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] lg:shadow-[inset_-1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
+  <nav class="svadmin-settings-layout__nav bg-muted/10 shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] lg:shadow-[inset_-1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
     <!-- Mobile: horizontal scroll tabs -->
-    <div class="flex lg:hidden overflow-x-auto px-4 py-2 gap-1">
+    <div class="svadmin-settings-layout__mobile-nav overflow-x-auto px-4 py-2 gap-1">
       {#each resolvedSections as section, _i (_i)}
         {#each section.items as item, _j (_j)}
           {@const active = activeKey === item.key}
@@ -156,7 +156,7 @@
     </div>
 
     <!-- Desktop: vertical nav with groups -->
-    <div class="hidden lg:block py-6 px-3 space-y-6">
+    <div class="svadmin-settings-layout__desktop-nav py-6 px-3 space-y-6">
       <div class="px-3">
         <h2 class="text-lg font-semibold text-foreground">{i18n.t("settings.title")}</h2>
         <p class="text-xs text-muted-foreground mt-1">{i18n.t("settings.settingsDescription")}</p>
@@ -187,7 +187,7 @@
   </nav>
 
   <!-- Right content area -->
-  <div class="min-w-0 w-full flex-1 p-6 lg:p-8 {contentWidth}">
+  <div class="svadmin-settings-layout__content {contentWidth}">
     {#if activeKey === "profile"}
       {#if profile}{@render profile()}{:else}<ProfilePage />{/if}
     {:else if activeKey === "appearance"}
