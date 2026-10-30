@@ -55,6 +55,25 @@
       padding: var(--svadmin-space-6);
     }
   }
+
+  .svadmin-permission-matrix__mobile-sidebar {
+    display: block;
+  }
+  .svadmin-permission-matrix__desktop-sidebar {
+    --svadmin-permission-sidebar-width: 16rem;
+    display: none;
+    width: var(--svadmin-permission-sidebar-width);
+    flex-shrink: 0;
+    flex-direction: column;
+  }
+  @media (min-width: 1024px) {
+    .svadmin-permission-matrix__mobile-sidebar {
+      display: none;
+    }
+    .svadmin-permission-matrix__desktop-sidebar {
+      display: flex;
+    }
+  }
 }
 
 /* 保留状态对比度和 clean-flat 卡片表现，颜色始终来自宿主 token。 */
