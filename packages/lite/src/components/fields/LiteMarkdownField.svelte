@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
+  import { renderMarkdown } from '../../rich-content.js';
 
   interface Props {
     field: FieldDefinition;
@@ -10,10 +11,15 @@
 
   let { field, value, error = [], mode = 'show' }: Props = $props();
   let hasError = $derived(error.length > 0);
+  const preview = $derived(renderMarkdown(value));
 </script>
 
 {#if mode === 'show'}
-  <pre style="white-space: pre-wrap; padding: 12px; background: #F7F8FA; border: 1px solid #e5e7eb; border-radius: 4px;">{String(value ?? '—')}</pre>
+  {#if preview}
+    <div class="lite-markdown-preview">{@html preview}</div>
+  {:else}
+    <span>—</span>
+  {/if}
 {:else}
   <div>
     <textarea
@@ -29,5 +35,31 @@
         <div class="lite-error-text">{err}</div>
       {/each}
     {/if}
+    <div class="lite-markdown-preview-block">
+      <span class="lite-markdown-preview-block__label">Preview</span>
+      {#if preview}
+        <div class="lite-markdown-preview">{@html preview}</div>
+      {:else}
+        <p class="lite-markdown-preview-block__empty">Nothing to preview yet.</p>
+      {/if}
+    </div>
   </div>
 {/if}
+
+<style>
+  .lite-markdown-preview { padding: 12px; border: 1px solid #E5E6EB; border-radius: 4px; background: #F7F8FA; color: #1D2129; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+  .lite-markdown-preview :global(h1),
+  .lite-markdown-preview :global(h2),
+  .lite-markdown-preview :global(h3),
+  .lite-markdown-preview :global(h4) { margin: 12px 0 6px; font-size: 15px; }
+  .lite-markdown-preview :global(p) { margin: 0 0 8px; }
+  .lite-markdown-preview :global(ul),
+  .lite-markdown-preview :global(ol) { margin: 0 0 8px; padding-left: 20px; }
+  .lite-markdown-preview :global(pre) { margin: 0 0 8px; padding: 8px; overflow-x: auto; border-radius: 4px; background: #F2F3F5; }
+  .lite-markdown-preview :global(code) { font-family: monospace; font-size: 12px; }
+  .lite-markdown-preview :global(blockquote) { margin: 0 0 8px; padding-left: 10px; border-left: 3px solid #E5E6EB; color: #4E5969; }
+  .lite-markdown-preview :global(a) { color: #165DFF; }
+  .lite-markdown-preview-block { margin-top: 8px; }
+  .lite-markdown-preview-block__label { display: block; margin-bottom: 4px; color: #86909C; font-size: 11px; font-weight: 600; }
+  .lite-markdown-preview-block__empty { margin: 0; padding: 8px 12px; border: 1px dashed #E5E6EB; border-radius: 4px; color: #86909C; font-size: 12px; }
+</style>

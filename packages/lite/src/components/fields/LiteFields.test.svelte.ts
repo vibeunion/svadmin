@@ -5,6 +5,8 @@ import LiteCodeField from './LiteCodeField.svelte';
 import LiteCopyField from './LiteCopyField.svelte';
 import LiteCurrencyField from './LiteCurrencyField.svelte';
 import LiteDateField from './LiteDateField.svelte';
+import LiteMarkdownField from './LiteMarkdownField.svelte';
+import LiteRichTextField from './LiteRichTextField.svelte';
 import LiteDateRangeField from './LiteDateRangeField.svelte';
 import LiteTagField from './LiteTagField.svelte';
 import LiteTextField from './LiteTextField.svelte';
@@ -277,5 +279,62 @@ describe('Lite native field domains', () => {
 
     expect(view.container.querySelector('input')).toBeNull();
     expect(view.getByText('admin').className).toContain('lite-badge');
+  });
+});
+
+describe('Lite rich content fields', () => {
+  it('renders a Markdown preview server-side and keeps the source editable', () => {
+    const view = render(LiteMarkdownField, {
+      mode: 'show',
+      value: '# Release notes\n\n- **shipped** a fix\n- linked [docs](https://example.test/docs)',
+      field: { key: 'notes', label: 'Notes', type: 'markdown' },
+    });
+
+    const preview = view.container.querySelector('.lite-markdown-preview');
+    expect(preview?.querySelector('h1')?.textContent).toBe('Release notes');
+    expect(preview?.querySelectorAll('li')).toHaveLength(2);
+    expect(preview?.querySelector('strong')?.textContent).toBe('shipped');
+    expect(preview?.querySelector('a')?.getAttribute('href')).toBe('https://example.test/docs');
+
+    const empty = render(LiteMarkdownField, {
+      mode: 'show',
+      value: '',
+      field: { key: 'notes', label: 'Notes', type: 'markdown' },
+    });
+    expect(empty.container.textContent).toContain('—');
+    expect(empty.container.querySelector('.lite-markdown-preview')).toBeNull();
+
+    const editable = render(LiteMarkdownField, {
+      mode: 'edit',
+      value: '## Draft',
+      field: { key: 'notes', label: 'Notes', type: 'markdown', required: true },
+    });
+    const textarea = editable.container.querySelector('textarea') as HTMLTextAreaElement;
+    expect(textarea.value).toBe('## Draft');
+    expect(textarea.required).toBe(true);
+    expect(editable.container.querySelector('.lite-markdown-preview h2')?.textContent).toBe('Draft');
+  });
+
+  it('sanitizes rich HTML before rendering and previews it while editing', () => {
+    const view = render(LiteRichTextField, {
+      mode: 'show',
+      value: '<p>Hello <strong>team</strong></p><script>alert(1)</script><img src="javascript:alert(1)" alt="x">',
+      field: { key: 'body', label: 'Body', type: 'richtext' },
+    });
+
+    const preview = view.container.querySelector('.lite-rich-preview');
+    expect(preview?.querySelector('strong')?.textContent).toBe('team');
+    expect(view.container.innerHTML).not.toContain('script');
+    expect(view.container.innerHTML).not.toContain('javascript:');
+
+    const editable = render(LiteRichTextField, {
+      mode: 'edit',
+      value: '**bold** source',
+      field: { key: 'body', label: 'Body', type: 'richtext' },
+    });
+    const textarea = editable.container.querySelector('textarea') as HTMLTextAreaElement;
+    expect(textarea.value).toBe('**bold** source');
+    // Markdown source is rendered for preview instead of being shown as HTML.
+    expect(editable.container.querySelector('.lite-rich-preview strong')?.textContent).toBe('bold');
   });
 });

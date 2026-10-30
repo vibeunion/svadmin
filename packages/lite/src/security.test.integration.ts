@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 describe('lite safe text rendering', () => {
-  it('does not interpret rich text field values as HTML', () => {
+  it('renders rich text through an allowlist instead of live HTML', () => {
     const field = { key: 'body', label: 'Body' } as FieldDefinition;
     const { container } = render(LiteRichTextField, {
       field,
@@ -23,11 +23,23 @@ describe('lite safe text rendering', () => {
       mode: 'show',
     });
 
+    // Script blocks and event handlers never reach the DOM, and no executable
+    // URL survives the allowlist.
     expect(container.querySelector('script')).toBeNull();
-    expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('[onerror]')).toBeNull();
-    expect(container.textContent).toContain('<script>');
+    expect(container.innerHTML).not.toContain('__liteXss');
+    expect(container.innerHTML).not.toContain('javascript:');
     expect(container.textContent).toContain('Safe text');
+
+    // Only allowlisted formatting is interpreted; everything else is escaped.
+    const safe = render(LiteRichTextField, {
+      field,
+      value: '<p>Hello <strong>team</strong></p><div>block</div>',
+      mode: 'show',
+    });
+    expect(safe.container.querySelector('strong')?.textContent).toBe('team');
+    expect(safe.container.querySelector('div.lite-rich-preview > div')).toBeNull();
+    expect(safe.container.textContent).toContain('block');
   });
 
   it('does not interpret insight content as HTML', () => {
