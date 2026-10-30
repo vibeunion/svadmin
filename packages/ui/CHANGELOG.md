@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.106.1](https://github.com/vibeunion/svadmin/compare/ui-v0.106.0...ui-v0.106.1) (2026-10-30)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** declare optional dashjs peer for vidstack types ([1162036](https://github.com/vibeunion/svadmin/commit/11620365946cbb298842cf2f8925c8849a9ee27e))
+
 ## [0.106.0](https://github.com/vibeunion/svadmin/compare/ui-v0.105.0...ui-v0.106.0) (2026-10-30)
 
 
