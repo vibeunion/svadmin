@@ -49,7 +49,11 @@ This measures inventory mappings, not coverage of every public export or verifie
 ```
 
 
-`LiteQRCode` requires the optional peer dependency `qrcode`; install it only when QR rendering is used.
+`LiteQRCode` is an opt-in subpath export because it statically imports the optional `qrcode` peer. The root entry stays importable without that package; install it and import the component directly only when QR rendering is used:
+
+```ts
+import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
+```
 
 ### Component Categories
 

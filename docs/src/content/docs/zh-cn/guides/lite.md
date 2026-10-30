@@ -49,7 +49,11 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 ```
 
 
-`LiteQRCode` 使用可选 peer dependency `qrcode`，仅在需要渲染二维码时安装。
+`LiteQRCode` 采用子路径按需导出：组件内部静态引入可选 peer dependency `qrcode`，因此根入口在未安装该依赖时依然可导入。仅在需要渲染二维码时安装并直接引入组件：
+
+```ts
+import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
+```
 
 ### 组件分类清单
 

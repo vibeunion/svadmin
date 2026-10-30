@@ -140,4 +140,32 @@ describe('IE11 SSR source contract', () => {
     expect(rootPackage).toContain('"check:lite:ssr"');
     expect(continuousIntegration).toContain('bun run check:lite:ssr');
   });
+
+  test('keeps optional peers out of the root entry', async () => {
+    const indexSource = await readFile(resolve(import.meta.dir, 'index.ts'), 'utf8');
+    const packageJson = JSON.parse(
+      await readFile(resolve(import.meta.dir, '../package.json'), 'utf8'),
+    ) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+      peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+      exports?: Record<string, unknown>;
+    };
+
+    // `qrcode` is an optional peer: the root entry must stay importable when it
+    // is not installed, so `LiteQRCode` is only reachable through its subpath.
+    expect(indexSource).not.toMatch(/from\s+['"]qrcode['"]/u);
+    expect(indexSource).not.toMatch(/export[^\n]*from\s+['"]\.\/components\/LiteQRCode\.svelte['"]/u);
+    expect(packageJson.dependencies?.qrcode).toBeUndefined();
+    expect(packageJson.peerDependencies?.qrcode).toBeDefined();
+    expect(packageJson.peerDependenciesMeta?.qrcode?.optional).toBe(true);
+    expect(Object.keys(packageJson.exports ?? {})).toContain('./components/*.svelte');
+
+    const componentSource = await readFile(
+      resolve(import.meta.dir, 'components/LiteQRCode.svelte'),
+      'utf8',
+    );
+    expect(componentSource).toMatch(/from\s+['"]qrcode['"]/u);
+  });
 });

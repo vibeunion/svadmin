@@ -127,7 +127,10 @@ export { default as LiteOfflineSyncBanner } from './components/LiteOfflineSyncBa
 export { default as LiteImage } from './components/LiteImage.svelte';
 export { default as LiteImagePreview } from './components/LiteImagePreview.svelte';
 export { default as LiteVideoPlayer } from './components/LiteVideoPlayer.svelte';
-export { default as LiteQRCode } from './components/LiteQRCode.svelte';
+// LiteQRCode is an opt-in subpath export because it statically imports the
+// optional `qrcode` peer. Keeping it out of the root entry lets a consumer
+// import '@svadmin/lite' without installing that peer:
+//   import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
 export { default as LiteCalendar } from './components/LiteCalendar.svelte';
 export { default as LiteCarousel } from './components/LiteCarousel.svelte';
 export { default as LiteAnchor } from './components/LiteAnchor.svelte';

@@ -253,9 +253,14 @@ IE11 before the decision is made.
 
 ## Components & Parity (100% Coverage)
 
-`LiteQRCode` uses the optional peer dependency `qrcode`; install it with
-`bun add qrcode` only when you render QR codes. The rest of Lite has no extra
-runtime dependency.
+`LiteQRCode` is an opt-in subpath export because it statically imports the
+optional `qrcode` peer. The root entry `@svadmin/lite` stays importable without
+it, so the rest of Lite has no extra runtime dependency. Install the peer with
+`bun add qrcode` and import the component directly only when you render QR codes:
+
+```ts
+import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
+```
 
 `@svadmin/lite` provides **100% component parity** (179/179 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
 
