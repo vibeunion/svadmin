@@ -23,6 +23,11 @@ export interface MarkdownRenderOptions {
   headingIds?: boolean;
   /** Deepest heading level included in a generated `[toc]` (default 3). */
   tocLevels?: number;
+  /**
+   * Open absolute `http(s)` links in a new tab and harden them with
+   * `rel="noopener noreferrer"`. Relative links are left untouched.
+   */
+  externalLinks?: boolean;
 }
 
 let configuredMarkdownOptions: MarkdownRenderOptions = {};
@@ -84,6 +89,15 @@ function emphasize(value: string): string {
  * escaping so their contents never re-enter the emphasis rules.
  */
 const TOC_PLACEHOLDER = '\u0000lite-toc\u0000';
+
+const EXTERNAL_HREF = /^(?:https?:)?\/\//iu;
+
+/** `rel`/`target` for a link, hardening cross-origin navigation on request. */
+function anchorAttributes(href: string, externalLinks?: boolean): string {
+  return externalLinks && EXTERNAL_HREF.test(href)
+    ? ' target="_blank" rel="noopener noreferrer"'
+    : ' rel="noreferrer"';
+}
 const TOC_DIRECTIVE = /^\[toc\]$/iu;
 
 function slugifyHeading(text: string): string {
@@ -121,7 +135,11 @@ function renderFootnoteRef(label: string, footnotes?: FootnoteContext): string |
   return `<sup class="lite-footnote-ref"><a href="#fn-${number}" id="${id}">${number}</a></sup>`;
 }
 
-export function renderInlineMarkdown(source: string, footnotes?: FootnoteContext): string {
+export function renderInlineMarkdown(
+  source: string,
+  footnotes?: FootnoteContext,
+  externalLinks?: boolean,
+): string {
   let rest = source;
   let output = '';
 
@@ -149,7 +167,7 @@ export function renderInlineMarkdown(source: string, footnotes?: FootnoteContext
       const label = emphasize(escapeHtml(next[1] ?? ''));
       const href = toSafeHref(next[2] ?? '');
       output += href
-        ? `<a href="${escapeHtml(href)}" rel="noreferrer">${label}</a>`
+        ? `<a href="${escapeHtml(href)}"${anchorAttributes(href, externalLinks)}>${label}</a>`
         : label;
     }
 
@@ -196,17 +214,18 @@ function renderTable(
   header: string[],
   alignments: Array<string | undefined>,
   rows: string[][],
+  externalLinks?: boolean,
 ): string {
   const attribute = (index: number): string => {
     const align = alignments[index];
     return align ? ` align="${align}"` : '';
   };
   const head = header
-    .map((cell, index) => `<th${attribute(index)}>${renderInlineMarkdown(cell)}</th>`)
+    .map((cell, index) => `<th${attribute(index)}>${renderInlineMarkdown(cell, undefined, externalLinks)}</th>`)
     .join('');
   const body = rows
     .map((row) => {
-      const cells = header.map((_, index) => `<td${attribute(index)}>${renderInlineMarkdown(row[index] ?? '')}</td>`).join('');
+      const cells = header.map((_, index) => `<td${attribute(index)}>${renderInlineMarkdown(row[index] ?? '', undefined, externalLinks)}</td>`).join('');
       return `<tr>${cells}</tr>`;
     })
     .join('');
@@ -263,9 +282,12 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
     return seen === 1 ? base : `${base}-${seen}`;
   };
 
+  const inline = (text: string): string =>
+    renderInlineMarkdown(text, footnotes, renderOptions.externalLinks);
+
   const flush = (): void => {
     if (paragraph.length === 0) return;
-    blocks.push(`<p>${paragraph.map((line) => renderInlineMarkdown(line, footnotes)).join('<br />')}</p>`);
+    blocks.push(`<p>${paragraph.map((line) => inline(line)).join('<br />')}</p>`);
     paragraph = [];
   };
 
@@ -324,7 +346,7 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
       const id = headingId(text);
       headings.push({ level, id, text });
       const anchor = renderOptions.headingIds || declaresToc ? ` id="${escapeHtml(id)}"` : '';
-      blocks.push(`<h${level}${anchor}>${renderInlineMarkdown(text, footnotes)}</h${level}>`);
+      blocks.push(`<h${level}${anchor}>${inline(text)}</h${level}>`);
       continue;
     }
 
@@ -341,7 +363,7 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
         cursor += 1;
       }
       index = cursor - 1;
-      blocks.push(renderTable(header, alignments, rows));
+      blocks.push(renderTable(header, alignments, rows, renderOptions.externalLinks));
       continue;
     }
 
@@ -360,9 +382,9 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
         if (task) {
           hasTask = true;
           const checked = task[1] !== ' ';
-          items.push(`<li class="lite-task-item"><input type="checkbox" disabled${checked ? ' checked' : ''} /> ${renderInlineMarkdown(task[2] ?? '', footnotes)}</li>`);
+          items.push(`<li class="lite-task-item"><input type="checkbox" disabled${checked ? ' checked' : ''} /> ${inline(task[2] ?? '')}</li>`);
         } else {
-          items.push(`<li>${renderInlineMarkdown(itemContent, footnotes)}</li>`);
+          items.push(`<li>${inline(itemContent)}</li>`);
         }
         cursor += 1;
       }
@@ -384,7 +406,7 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
         cursor += 1;
       }
       index = cursor - 1;
-      blocks.push(`<blockquote><p>${quoted.map((line) => renderInlineMarkdown(line, footnotes)).join('<br />')}</p></blockquote>`);
+      blocks.push(`<blockquote><p>${quoted.map((line) => inline(line)).join('<br />')}</p></blockquote>`);
       continue;
     }
 
@@ -398,7 +420,7 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
         const description = DEFINITION_LINE.exec(content[cursor + 1] ?? '');
         if (!term || !description?.[1]) break;
         terms.push(
-          `<dt>${renderInlineMarkdown(term, footnotes)}</dt><dd>${renderInlineMarkdown(description[1], footnotes)}</dd>`,
+          `<dt>${inline(term)}</dt><dd>${inline(description[1])}</dd>`,
         );
         cursor += 2;
       }
@@ -430,7 +452,7 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
           const id = refIndex === 0 ? `fnref-${number}` : `fnref-${number}-${refIndex + 1}`;
           return `<a href="#${id}" class="lite-footnote-backlink" aria-label="Back to reference">↩</a>`;
         }).join(' ');
-        return `<li id="fn-${number}">${renderInlineMarkdown(text, footnotes)} ${links}</li>`;
+        return `<li id="fn-${number}">${inline(text)} ${links}</li>`;
       })
       .join('');
     blocks.push(`<section class="lite-footnotes"><hr /><ol>${items}</ol></section>`);
@@ -533,7 +555,7 @@ export function sanitizeRichTextHtml(value: unknown): string {
       attributes.push(`${name}="${safeValue}"`);
     }
     if (tag === 'a' && attributes.some((attribute) => attribute.startsWith('href='))) {
-      attributes.push('rel="noreferrer"');
+      attributes.push('rel="noopener noreferrer"');
     }
     if (tag === 'input') {
       // Boolean attributes carry no value, so they cannot come from ATTRIBUTE.

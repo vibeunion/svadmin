@@ -80,3 +80,60 @@
 .lite-activity-rich .tok-type {
   color: var(--lite-token-type, #0E7490);
 }
+/**
+ * Dark preset. Add `lite-dark` to any ancestor (or the preview container) to
+ * swap the palette and the code block / table-of-contents chrome:
+ *
+ *   <div class="lite-dark"><div class="lite-markdown-preview">…</div></div>
+ *
+ * Hosts with their own theme root can map it instead, for example
+ * `[data-theme="dark"] { --lite-token-keyword: … }`.
+ */
+.lite-dark {
+  --lite-token-comment: #8B949E;
+  --lite-token-keyword: #7FD1FF;
+  --lite-token-string: #9BE39B;
+  --lite-token-number: #FFC17A;
+  --lite-token-function: #C4A7FF;
+  --lite-token-type: #79D7D0;
+  color: #E6EDF3;
+}
+
+.lite-dark pre,
+.lite-dark .lite-code-block {
+  background: #161B22;
+  border-color: #30363D;
+  color: #E6EDF3;
+}
+
+.lite-dark pre code {
+  color: #E6EDF3;
+}
+
+.lite-dark .lite-toc {
+  background: #161B22;
+  border-color: #30363D;
+}
+
+.lite-dark .lite-toc__list a {
+  color: #7FD1FF;
+}
+
+.lite-dark blockquote {
+  border-left-color: #30363D;
+  color: #C9D1D9;
+}
+
+.lite-dark table th,
+.lite-dark table td {
+  border-color: #30363D;
+}
+
+.lite-dark table th {
+  background: #161B22;
+}
+
+.lite-dark .lite-footnotes {
+  border-top-color: #30363D;
+  color: #C9D1D9;
+}

@@ -384,6 +384,18 @@ Import `@svadmin/lite/lite.css` in your layout. It's fully self-contained:
 - Print-optimized styles
 - ~800 lines, ~19KB unminified
 
+Rich content previews (Markdown, insight, comments, notifications, activity) ship
+literal `tok-*` token colours here. Hosts that can rely on CSS custom properties
+may also import the opt-in theme:
+
+```ts
+import '@svadmin/lite/lite-code-theme.css';
+```
+
+It exposes `--lite-token-{comment,keyword,string,number,function,type}` with the
+literal palette as fallbacks and a `lite-dark` preset class, so one override
+re-themes every preview surface.
+
 This CSS baseline helps older browsers, but the generated Svelte/SvelteKit application and any Tailwind v4 UI used alongside Lite still require the browser targets configured by those tools (Tailwind v4 itself targets modern browsers).
 
 ## Optional: Progressive Enhancement

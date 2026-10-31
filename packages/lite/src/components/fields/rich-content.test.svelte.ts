@@ -185,7 +185,7 @@ describe('Lite rich text sanitizer', () => {
     );
 
     expect(html).toContain('<p>Hello <strong>world</strong></p>');
-    expect(html).toContain('<p>Click <a href="https://example.test" rel="noreferrer">here</a></p>');
+    expect(html).toContain('<p>Click <a href="https://example.test" rel="noopener noreferrer">here</a></p>');
     expect(html).toContain('block');
     expect(html).not.toContain('<script');
     expect(html).not.toContain('onclick');
@@ -236,6 +236,52 @@ describe('Lite rich text sanitizer', () => {
     expect(renderRichContent('<p>rich</p>')).toBe('<p>rich</p>');
     expect(renderRichContent('# markdown')).toContain('<h1>markdown</h1>');
     expect(renderRichContent('')).toBe('');
+  });
+});
+
+describe('Lite markdown external links', () => {
+  it('keeps links in place by default', () => {
+    const html = renderMarkdown('See [docs](https://example.test/guide) and [local](/lite).');
+
+    expect(html).toContain('<a href="https://example.test/guide" rel="noreferrer">docs</a>');
+    expect(html).toContain('<a href="/lite" rel="noreferrer">local</a>');
+    expect(html).not.toContain('target="_blank"');
+  });
+
+  it('opens only absolute links in a new tab when asked', () => {
+    const html = renderMarkdown(
+      'See [docs](https://example.test/guide), [cdn](//cdn.test/x) and [local](#top) and [mail](mailto:a@b.test).',
+      { externalLinks: true },
+    );
+
+    expect(html).toContain(
+      '<a href="https://example.test/guide" target="_blank" rel="noopener noreferrer">docs</a>',
+    );
+    expect(html).toContain('<a href="//cdn.test/x" target="_blank" rel="noopener noreferrer">cdn</a>');
+    expect(html).toContain('<a href="#top" rel="noreferrer">local</a>');
+    expect(html).toContain('<a href="mailto:a@b.test" rel="noreferrer">mail</a>');
+  });
+
+  it('applies to links inside tables, lists and quotes', () => {
+    const html = renderMarkdown(
+      '| Link |\n| --- |\n| [a](https://a.test) |\n\n- [b](https://b.test)\n\n> [c](https://c.test)',
+      { externalLinks: true },
+    );
+
+    expect(html).toContain('href="https://a.test" target="_blank"');
+    expect(html).toContain('href="https://b.test" target="_blank"');
+    expect(html).toContain('href="https://c.test" target="_blank"');
+  });
+
+  it('does not rewrite code spans or unsafe schemes', () => {
+    const html = renderMarkdown('`[x](https://x.test)` and [bad](javascript:alert(1))', {
+      externalLinks: true,
+    });
+
+    expect(html).toContain('<code>[x](https://x.test)</code>');
+    expect(html).toContain('bad');
+    expect(html).not.toContain('javascript:');
+    expect(html).not.toContain('target="_blank"');
   });
 });
 
