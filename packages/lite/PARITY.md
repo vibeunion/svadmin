@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-31T03:44:16.663Z`
+> 自动生成时间：`2026-10-31T04:22:32.076Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**70.4%**（126）· 语义降级率 (Fallback)：**28.5%**（51）
-> 行为验证覆盖：**83.8%**（150/179 映射组件具备断言预算）· 仅被引用：0
+> 1:1 对齐率 (Exact)：**72.6%**（130）· 语义降级率 (Fallback)：**26.3%**（47）
+> 行为验证覆盖：**84.9%**（152/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -12,11 +12,11 @@
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 14/18 | 0 |
-| **advanced** | 43 | 26 | 16 | 1 | 0 | **60.5%** | 38/43 | 0 |
-| **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 34/37 | 0 |
+| **pages** | 18 | 14 | 4 | 0 | 0 | **77.8%** | 14/18 | 0 |
+| **advanced** | 43 | 27 | 15 | 1 | 0 | **62.8%** | 39/43 | 0 |
+| **widgets** | 37 | 16 | 21 | 0 | 0 | **43.2%** | 34/37 | 0 |
 | **fields** | 46 | 42 | 4 | 0 | 0 | **91.3%** | 40/46 | 0 |
-| **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 20/25 | 0 |
+| **layout** | 25 | 21 | 3 | 1 | 0 | **84%** | 21/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
 > 样式钩子（`class`）覆盖是独立指标，见 [CLASS-HOOKS.md](./CLASS-HOOKS.md)，不影响本表状态。
@@ -54,7 +54,7 @@
 | `MasterDetailView` | `LiteMasterDetailView.svelte` | ✅ 1:1 对齐 | 主从数据联动视图与 URL 同步 |
 | `PrintableBill` | `LitePrintableBill.svelte` | ✅ 1:1 对齐 | 受控单据凭证 A4 打印排版 |
 | `PdfDocumentViewer` | `LitePdfDocumentViewer.svelte` | ✅ 1:1 对齐 | 嵌入式 PDF 文档与电子盖章批注 |
-| `PageSkeleton` | `LiteSkeleton.svelte` | ⚡ 语义降级 | 页面级静态骨架 |
+| `PageSkeleton` | `LiteSkeleton.svelte` | ✅ 1:1 对齐 | 由 props 决定的页面骨架结构（list/show/form + rows），服务端直接生成 |
 | `ListPagination` | `LitePagination.svelte` | ✅ 1:1 对齐 | URL 驱动分页；页码窗口由服务端输出 |
 
 ### ADVANCED
@@ -62,7 +62,7 @@
 | UI 组件 (SPA) | Lite 对应组件 (SSR) | 对齐状态 | 降级策略 / 承接方案 |
 |---|---|:---:|---|
 | `ErrorSummary` | `LiteErrorSummary.svelte` | ✅ 1:1 对齐 | 错误汇总区域、字段锚点跳转与可访问标题，错误映射由服务端返回 |
-| `ApprovalCenter` | `LiteApprovalActionCard.svelte` | ⚡ 语义降级 | Lite 使用审批列表页与原生 POST 动作；审批规则、事务和审计由宿主承接 |
+| `ApprovalCenter` | `LiteApprovalActionCard.svelte` | ⚡ 语义降级 | 单条审批卡片：状态、意见与 approve/reject 原生 POST；审批列表、历史、动态允许动作与事务由宿主承接 |
 | `PivotExportButton` | `LitePivotTable.svelte` | ⚡ 语义降级 | Lite 使用服务端导出链接；任务回执和下载授权由宿主承接 |
 | `FilterCollectionInput` | `LiteFilterBuilder.svelte` | ⚡ 语义降级 | Lite 使用原生筛选表单；完整递归交互由服务端回显承接 |
 | `ConfirmDialog` | `LiteConfirmDialog.svelte` | ✅ 1:1 对齐 | CSS :target 锚点模态框 |
@@ -72,9 +72,9 @@
 | `VirtualTable` | `LiteVirtualTable.svelte` | ⚡ 语义降级 | SPA 固定高度虚拟窗口；Lite 使用完整原生表格，需由服务端分页或限制数据量 |
 | `Table` | `LiteTable.svelte` | ✅ 1:1 对齐 | 原生表格、横向滚动与可选固定边缘列 |
 | `InlineEdit` | `advanced/LiteInlineEdit.svelte` | ⚡ 语义降级 | 降级为行内单独提交按钮或跳转编辑 |
-| `AutoSaveIndicator` | `advanced/LiteAutoSaveIndicator.svelte` | ⚡ 语义降级 | 服务端保存时间戳展示 |
+| `AutoSaveIndicator` | `advanced/LiteAutoSaveIndicator.svelte` | ✅ 1:1 对齐 | 保存状态四态（idle/loading/success/error）、error 详情与 role=status/aria-live 语义 |
 | `Toast` | `advanced/LiteToast.svelte` | ⚡ 语义降级 | 降级为页面顶部 Alert 通知条 |
-| `UndoableNotification` | `advanced/LiteUndoableNotification.svelte` | ⚡ 语义降级 | 降级为带撤销表单的通知条 |
+| `UndoableNotification` | `advanced/LiteUndoableNotification.svelte` | ⚡ 语义降级 | 通知消息与撤销链接；到期结果、托管边界与动画由宿主承接 |
 | `Watermark` | `LiteWatermark.svelte` | ✅ 1:1 对齐 | 纯 CSS / SVG 矢量背景水印 |
 | `ColumnSettings` | `LiteColumnSettings.svelte` | ✅ 1:1 对齐 | 原生多选表单与查询参数列过滤 |
 | `ImportWizard` | `LiteImportWizard.svelte` | ✅ 1:1 对齐 | 原生 Multipart 文件上传与映射提示 |
@@ -136,7 +136,7 @@
 | `Spin` | `LiteSpin.svelte` | ✅ 1:1 对齐 | CSS 加载指示器与 aria-busy |
 | `Progress` | `LiteProgress.svelte` | ✅ 1:1 对齐 | 原生 progress 与语义色 |
 | `MediaThumbnail` | `LiteMediaThumbnail.svelte` | ✅ 1:1 对齐 | 媒体缩略图与访问性标签 |
-| `LiveIndicator` | `LiteRealtimeStatus.svelte` | ⚡ 语义降级 | 服务端快照时间与刷新回退 |
+| `LiveIndicator` | `LiteRealtimeStatus.svelte` | ✅ 1:1 对齐 | 连接状态徽章（connected/connecting/disconnected）、资源与最近事件详情、可选刷新链接 |
 | `AreaChart` | `LiteAreaChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `ScatterChart` | `LiteScatterChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `RadarChart` | `LiteRadarChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
@@ -202,7 +202,7 @@
 
 | UI 组件 (SPA) | Lite 对应组件 (SSR) | 对齐状态 | 降级策略 / 承接方案 |
 |---|---|:---:|---|
-| `SegmentedControl` | `LiteTabs.svelte` | ⚡ 语义降级 | Lite 使用原生链接或 tabs 导航；不承诺 SPA 内联状态切换 |
+| `SegmentedControl` | `LiteTabs.svelte` | ✅ 1:1 对齐 | URL 驱动的分段选择链接：当前项 aria-current、可访问分组名称与禁用项不可激活 |
 | `Layout` | `LiteLayout.svelte` | ✅ 1:1 对齐 | 侧边栏与主工作区 Flex 布局 |
 | `Sidebar` | `layout/LiteSidebar.svelte` | ✅ 1:1 对齐 | 多级常开导航与权限裁剪 |
 | `Header` | `layout/LiteHeader.svelte` | ✅ 1:1 对齐 | 顶栏面包屑与用户菜单 |
