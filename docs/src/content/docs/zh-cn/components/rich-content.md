@@ -27,6 +27,8 @@ description: Lite 的 Markdown 与富文本字段如何服务端渲染存量内�
 | `> 引用` | `<blockquote>` |
 | `---`、`***`、`___` | `<hr />` |
 | `\| a \| b \|` 且带分隔行 | 带 `align` 属性的 `<table>` |
+| `术语` + `: 定义` | `<dl><dt><dd>` |
+| `文字[^note]` + `[^note]: 说明` | 编号 `<sup>` 引用与带回跳链接的脚注区 |
 | `[文字](https://…)`、`[文字](/path)` | `<a rel="noreferrer">` |
 
 其它语法保留为字面文本，不会被静默丢弃：缺少分隔行的表格仍会显示源码，而不是整段消失。
@@ -57,6 +59,17 @@ input[type=checkbox][checked|disabled]
 - 被拒属性整体消失，只留下链接文字或图片 alt
 - 渲染出的链接始终带 `rel="noreferrer"`
 
+## 在线示例
+
+Lite 示例应用用一条路由演示全部能力：
+
+```bash
+bun run --cwd packages/lite/example dev
+# 打开 http://localhost:5173/lite/rich-content
+```
+
+覆盖 show/edit 两种模式、带对齐的表格、任务列表、脚注、定义列表、洞察卡片、可选富文本评论与通知，以及宿主注入的高亮钩子。SSR 契约测试会断言该页面渲染出上述结构且**不含** `<script>`。
+
 ## 使用位置
 
 | 位置 | 行为 |
@@ -65,6 +78,8 @@ input[type=checkbox][checked|disabled]
 | `RichTextField` | HTML 值走白名单清洗，文本值走 Markdown 渲染 |
 | `LiteInsightCard` | 渲染服务端预先算好的洞察内容（Markdown 或白名单 HTML） |
 | `LiteCommentThread` | 默认纯文本；显式设置 `richContent` 后按 Markdown 渲染正文 |
+| `LiteNotificationCenter` | 默认纯文本；设置 `richContent` 后渲染描述 |
+| `LiteActivityFeed` | 默认纯文本；设置 `richContent` 后渲染备注正文 |
 
 评论正文默认保持字面文本，因为参考组件按纯文本渲染，parity 结论跟随参考实现。
 
@@ -87,6 +102,8 @@ configureMarkdownRenderer({
 - 仅对带语言标记的围栏块调用；行内代码不会进入该钩子。
 - 返回值按原样插入，须视为可信 HTML：不要把未经处理、会回显标签的用户输入交给高亮器。
 - 钩子返回 `undefined` 时，回退为转义代码 + `language-*` 类名。
+
+零依赖的完整示例见示例应用：`packages/lite/example/src/lib/highlight.ts`。它识别注释、字符串、数字与关键字，逐段转义，遇到不支持的语言返回 `undefined`。可直接作为起点，也可替换为 Shiki/Prism 的服务端输出并按请求或构建缓存结果。
 
 ## 编辑面
 

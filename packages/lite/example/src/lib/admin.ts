@@ -48,6 +48,7 @@ export function getResource(name: string): ResourceDefinition | undefined {
 
 export const menu: MenuItem[] = [
   { name: "home", label: "Dashboard", href: "/lite" },
+  { name: "rich_content", label: "Rich Content", href: "/lite/rich-content" },
   {
     name: "inventory",
     label: "Inventory",

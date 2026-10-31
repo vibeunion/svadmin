@@ -46,9 +46,16 @@ to the SPA route instead of implying formatting support.
 Markdown/allowlist path: AI-generated text is Markdown-shaped in practice and the
 card has no other way to present it in SSR.
 
-`LiteCommentThread` keeps text-only output by default and exposes an opt-in
-`richContent` prop. The reference comment component renders plain text, so
-rendering Markdown by default would be a capability difference, not parity.
+`LiteCommentThread`, `LiteNotificationCenter` and `LiteActivityFeed` keep
+text-only output by default and expose an opt-in `richContent` prop. Their
+reference components render plain text, so rendering Markdown by default would be
+a capability difference, not parity; hosts opt in per surface.
+
+Markdown support now also covers pipe tables, task lists, footnotes and
+definition lists, and hosts can plug a trusted server-side highlighter through
+`configureMarkdownRenderer` or per-field `renderOptions`. The hook only receives
+fenced blocks and its HTML is inserted as-is, so it is a documented trust
+boundary rather than a sanitizer.
 
 ### 3. AutoComplete — keep `fallback`
 

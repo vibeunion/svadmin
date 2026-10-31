@@ -30,6 +30,8 @@ goes through the Markdown renderer. Hosts can therefore store either shape.
 | `> quote` | `<blockquote>` |
 | `---`, `***`, `___` | `<hr />` |
 | `| a | b |` with a separator row | `<table>` with `align` attributes |
+| `Term` + `: definition` | `<dl><dt><dd>` |
+| `text[^note]` + `[^note]: detail` | numbered `<sup>` reference and a footnotes section with backlinks |
 | `[label](https://…)`, `[label](/path)` | `<a rel="noreferrer">` |
 
 Anything else stays literal text. Unsupported syntax is never silently dropped, so
@@ -65,6 +67,20 @@ Lite (`toSafeHref`):
 - rejected attributes disappear entirely, leaving the link label or image alt text,
 - rendered links always carry `rel="noreferrer"`.
 
+## Live example
+
+The Lite demo app renders every feature on one route:
+
+```bash
+bun run --cwd packages/lite/example dev
+# open http://localhost:5173/lite/rich-content
+```
+
+It covers show and edit modes, tables with alignment, task lists, footnotes,
+definition lists, an insight card, opt-in rich comments and notifications, and a
+host-provided highlighter. The SSR contract test asserts that page renders those
+markup shapes with **no** `<script>` tag.
+
 ## Where it is used
 
 | Surface | Behaviour |
@@ -73,6 +89,8 @@ Lite (`toSafeHref`):
 | `RichTextField` | allowlist sanitizer for HTML values, Markdown for text values |
 | `LiteInsightCard` | renders pre-computed insight content (Markdown or allowlisted HTML) |
 | `LiteCommentThread` | text-only by default; set `richContent` to render bodies as Markdown |
+| `LiteNotificationCenter` | text-only by default; set `richContent` for descriptions |
+| `LiteActivityFeed` | text-only by default; set `richContent` for note bodies |
 
 Comment bodies stay literal unless the host opts in, because the reference comment
 component renders plain text and parity claims follow the reference.
@@ -101,6 +119,12 @@ configureMarkdownRenderer({
   user input to a highlighter that echoes markup.
 - When the hook returns `undefined`, output falls back to escaped code with a
   `language-*` class.
+
+A complete dependency-free example lives in the demo app:
+`packages/lite/example/src/lib/highlight.ts`. It tokenizes comments, strings,
+numbers and keywords, escapes every fragment and returns `undefined` for
+languages it does not support. Copy it as a starting point, or replace it with
+Shiki/Prism server output and cache the result per request/build.
 
 ## Editing surface
 

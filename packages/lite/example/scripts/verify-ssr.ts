@@ -81,6 +81,20 @@ try {
   assert.match(parityHtml, parityCount);
   checkedRoutes += 1;
 
+  // 4. Rich content renders server-side (Markdown, tables, footnotes, highlight hook).
+  const richHtml = await assertServerRenderedPage(
+    baseUrl,
+    '/lite/rich-content',
+    /富文本与 Markdown 服务端渲染/u,
+  );
+  assert.match(richHtml, /<h1>Release notes<\/h1>/u);
+  assert.match(richHtml, /<table>/u);
+  assert.match(richHtml, /class="lite-footnote-ref"/u);
+  assert.match(richHtml, /<span class="tok-keyword">export<\/span>/u);
+  assert.match(richHtml, /class="lite-comments__rich\b/u);
+  assert.match(richHtml, /class="lite-notification-center__rich\b/u);
+  checkedRoutes += 1;
+
   for (const path of ['/lite/compatibility/flow.json', '/lite/compatibility/result.json']) {
     const response = await fetch(new URL(path, baseUrl));
     assert.equal(response.status, 200, `GET ${path} returned ${response.status}`);
