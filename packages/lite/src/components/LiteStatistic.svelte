@@ -8,6 +8,8 @@
     trend?: 'up' | 'down' | 'neutral';
     trendLabel?: string;
     loading?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -19,6 +21,7 @@
     trend,
     trendLabel,
     loading = false,
+    class: className = '',
   }: Props = $props();
 
   const display = $derived(
@@ -28,7 +31,7 @@
   );
 </script>
 
-<div class="lite-statistic" aria-busy={loading || undefined}>
+<div class="lite-statistic {className}" aria-busy={loading || undefined}>
   {#if title}<p class="lite-statistic__title">{title}</p>{/if}
   <p class="lite-statistic__value">
     {#if prefix}<span>{prefix}</span>{/if}

@@ -4,14 +4,16 @@
   interface Props {
     columns?: number;
     gap?: 'sm' | 'md' | 'lg';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
     children: Snippet;
   }
 
-  let { columns = 3, gap = 'md', children }: Props = $props();
+  let { columns = 3, gap = 'md', class: className = '', children }: Props = $props();
   const safeColumns = $derived(columns >= 4 ? 4 : columns === 2 ? 2 : 3);
 </script>
 
-<div class="lite-grid" data-columns={safeColumns} data-gap={gap}>
+<div class="lite-grid {className}" data-columns={safeColumns} data-gap={gap}>
   {@render children()}
 </div>
 

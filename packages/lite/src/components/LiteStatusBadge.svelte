@@ -6,9 +6,11 @@
     tone?: LiteBadgeVariant;
     label?: string;
     href?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { status, tone, label, href }: Props = $props();
+  let { status, tone, label, href, class: className = '' }: Props = $props();
 
   const normalized = $derived(status.toLowerCase().replace(/[\s_]+/g, '-'));
   const resolvedTone = $derived(tone ?? (
@@ -21,9 +23,9 @@
 </script>
 
 {#if href}
-  <a href={href} class="lite-status-badge"><LiteBadge variant={resolvedTone}>{label ?? status}</LiteBadge></a>
+  <a href={href} class="lite-status-badge {className}"><LiteBadge variant={resolvedTone}>{label ?? status}</LiteBadge></a>
 {:else}
-  <span class="lite-status-badge"><LiteBadge variant={resolvedTone}>{label ?? status}</LiteBadge></span>
+  <span class="lite-status-badge {className}"><LiteBadge variant={resolvedTone}>{label ?? status}</LiteBadge></span>
 {/if}
 
 <style>

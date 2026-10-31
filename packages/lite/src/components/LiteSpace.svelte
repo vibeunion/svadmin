@@ -5,13 +5,15 @@
     direction?: 'horizontal' | 'vertical';
     size?: 'sm' | 'md' | 'lg';
     wrap?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
     children: Snippet;
   }
 
-  let { direction = 'horizontal', size = 'md', wrap = false, children }: Props = $props();
+  let { direction = 'horizontal', size = 'md', wrap = false, class: className = '', children }: Props = $props();
 </script>
 
-<div class="lite-space" data-direction={direction} data-size={size} data-wrap={wrap || undefined}>
+<div class="lite-space {className}" data-direction={direction} data-size={size} data-wrap={wrap || undefined}>
   {@render children()}
 </div>
 

@@ -13,15 +13,18 @@
     items: BreadcrumbItem[];
     /** Separator character between items */
     separator?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
     items,
     separator = '/',
+    class: className = '',
   }: Props = $props();
 </script>
 
-<nav class="lite-breadcrumbs" aria-label="Breadcrumb">
+<nav class="lite-breadcrumbs {className}" aria-label="Breadcrumb">
   <ol>
     {#each items as item, i (i)}
       <li>

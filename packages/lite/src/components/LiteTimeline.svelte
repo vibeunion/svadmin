@@ -11,12 +11,14 @@
   interface Props {
     items: TimelineEntry[];
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { items, label = 'Timeline' }: Props = $props();
+  let { items, label = 'Timeline', class: className = '' }: Props = $props();
 </script>
 
-<ol class="lite-timeline" aria-label={label}>
+<ol class="lite-timeline {className}" aria-label={label}>
   {#each items as item (item.id)}
     <li class="lite-timeline__item" data-tone={item.tone ?? 'neutral'} data-active={item.active || undefined}>
       <span class="lite-timeline__marker" aria-hidden="true"></span>
