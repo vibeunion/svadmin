@@ -12,6 +12,6 @@
 
 截图：`sidebar-1440x900.png`、`sidebar-1920x1080.png`，均为当前 CSS 的真实视口截图。
 
-复现：构建 UI 包，将 `fixture.html` 复制至 `output/playwright/pr-619/index.html`，在仓库根目录启动 `python3 -m http.server 4239 --bind 127.0.0.1`，用 Playwright CLI 打开 `/output/playwright/pr-619/index.html`，并通过 `run-code --filename docs/evidence/pr-619/verify-browser.js` 执行计算样式断言。
+复现：构建 UI 包，将 `fixture.html` 复制至 `output/playwright/pr-619/index.html`，在仓库根目录启动 `python3 -m http.server 4239 --bind 127.0.0.1`，用 Playwright CLI 打开 `/output/playwright/pr-619/index.html`，并通过 `run-code --filename docs/evidence/pr-619/verify-browser.txt` 执行计算样式断言。
 
 定向检查：app-css 与颜色契约 19 项，发布 CSS 契约 55 项，UI 包构建、定向 ESLint、`git diff --check` 均通过。

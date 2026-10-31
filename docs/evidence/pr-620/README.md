@@ -13,4 +13,4 @@
 
 24 项定向组件测试及现有 DataTableShell Playwright 用例通过；浏览器用例显式固定 zh-CN locale。UI 包构建、定向 ESLint、`git diff --check` 通过。浏览器 DOM 验证结果及源文件 SHA-256 见 `browser-results.json`。
 
-`localized-1440x900.png` 与 `localized-1920x1080.png` 是相同源代码渲染的真实双语言视口截图。`verify-browser.js` 为 Playwright CLI 使用的 DOM 验证函数。
+`localized-1440x900.png` 与 `localized-1920x1080.png` 是相同源代码渲染的真实双语言视口截图。`verify-browser.txt` 为 Playwright CLI 使用的 DOM 验证函数。
