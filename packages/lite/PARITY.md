@@ -1,8 +1,8 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-31T04:22:32.076Z`
+> 自动生成时间：`2026-10-31T05:16:25.747Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**72.6%**（130）· 语义降级率 (Fallback)：**26.3%**（47）
+> 1:1 对齐率 (Exact)：**73.7%**（132）· 语义降级率 (Fallback)：**25.1%**（45）
 > 行为验证覆盖：**84.9%**（152/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
@@ -14,9 +14,9 @@
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 18 | 14 | 4 | 0 | 0 | **77.8%** | 14/18 | 0 |
 | **advanced** | 43 | 27 | 15 | 1 | 0 | **62.8%** | 39/43 | 0 |
-| **widgets** | 37 | 16 | 21 | 0 | 0 | **43.2%** | 34/37 | 0 |
+| **widgets** | 37 | 17 | 20 | 0 | 0 | **45.9%** | 34/37 | 0 |
 | **fields** | 46 | 42 | 4 | 0 | 0 | **91.3%** | 40/46 | 0 |
-| **layout** | 25 | 21 | 3 | 1 | 0 | **84%** | 21/25 | 0 |
+| **layout** | 25 | 22 | 2 | 1 | 0 | **88%** | 21/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
 > 样式钩子（`class`）覆盖是独立指标，见 [CLASS-HOOKS.md](./CLASS-HOOKS.md)，不影响本表状态。
@@ -126,7 +126,7 @@
 | `VideoPlayer` | `LiteVideoPlayer.svelte` | ⚡ 语义降级 | 原生 video/audio controls、字幕轨与下载链接；不加载 Vidstack 客户端播放器 |
 | `QRCode` | `LiteQRCode.svelte` | ✅ 1:1 对齐 | 服务端 SVG 二维码，与 UI 共用 qrcode 编码器 |
 | `Calendar` | `LiteCalendar.svelte` | ⚡ 语义降级 | 服务端月份快照、日期链接与事件列表；无客户端月切换 |
-| `Carousel` | `LiteCarousel.svelte` | ⚡ 语义降级 | 横向滚动与锚点分段；自动播放和手势由 SPA 承接 |
+| `Carousel` | `LiteCarousel.svelte` | ✅ 1:1 对齐 | CSS scroll-snap 轮播：当前幻灯片由 index 服务端标记（data-current/aria-current），编号链接用于切换；自动播放与手势由宿主承接 |
 | `Timeline` | `LiteTimeline.svelte` | ✅ 1:1 对齐 | 服务端时间线列表与语义色标记 |
 | `Statistic` | `LiteStatistic.svelte` | ✅ 1:1 对齐 | 服务端数字格式化、前后缀与趋势 |
 | `Countdown` | `LiteCountdown.svelte` | ⚡ 语义降级 | 服务端剩余时间快照与截止时间；实时倒计时由 SPA 承接 |
@@ -212,7 +212,7 @@
 | `SplitPaneLayout` | `LiteSplitPaneLayout.svelte` | ✅ 1:1 对齐 | 双栏弹性比例分屏布局 |
 | `MultiTabKeepAlive` | `LiteMultiTabKeepAlive.svelte` | ✅ 1:1 对齐 | 工作台多标签页导航 |
 | `Anchor` | `LiteAnchor.svelte` | ✅ 1:1 对齐 | 语义化页内锚点导航 |
-| `Affix` | `LiteAffix.svelte` | ⚡ 语义降级 | CSS position: sticky 固定；滚动监听状态样式由 SPA 承接 |
+| `Affix` | `LiteAffix.svelte` | ✅ 1:1 对齐 | CSS position: sticky 容器，保留 top/bottom 偏移与层级；吸顶阴影观察由宿主承接 |
 | `Collapse` | `LiteCollapse.svelte` | ⚡ 语义降级 | 锚点展开的分组面板与初始 open 态；互斥手风琴、懒加载与关闭回调由宿主承接 |
 | `FloatButton` | `LiteFloatButton.svelte` | ✅ 1:1 对齐 | 固定位置链接或状态按钮 |
 | `Steps` | `LiteSteps.svelte` | ✅ 1:1 对齐 | 有序步骤与完成/处理中/错误状态 |
