@@ -1,4 +1,5 @@
 import { requireValue } from "../../../../scripts/test-assertions";
+import { TaskError } from '@svadmin/core';
 import type { TaskProvider, TaskRecord, UseSubmitTaskMutateParams } from '@svadmin/core';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/svelte';
@@ -458,6 +459,23 @@ describe('TaskQueueDrawer', () => {
     });
     await waitFor(() => expect(refetchTasks).toHaveBeenCalledOnce());
     expect(refetchDlq).toHaveBeenCalledOnce();
+  });
+
+  it('distinguishes an unconfirmed submission from a failed submission', async () => {
+    mutateAsync.mockRejectedValueOnce(new TaskError('INVALID_TASK_RESPONSE', true));
+    render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
+    await fireEvent.input(screen.getByLabelText('Task name'), { target: { value: 'image.generate' } });
+    await fireEvent.input(screen.getByLabelText('Task payload (JSON)'), { target: { value: '{}' } });
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' }).at(-1)));
+
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveProperty(
+      'textContent',
+      'Submission result is unconfirmed. Refresh the task list before trying again.',
+    ));
+    expect(screen.getByLabelText('Task name')).toHaveProperty('value', 'image.generate');
+    expect(refetchTasks).not.toHaveBeenCalled();
+    expect(refetchDlq).not.toHaveBeenCalled();
   });
 
   it('retries a failed detail read without exposing cached task content or executing the task', async () => {
