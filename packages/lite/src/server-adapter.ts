@@ -15,7 +15,7 @@ import type {
 } from '@svadmin/core';
 import { error, redirect, isRedirect, type RequestEvent } from '@sveltejs/kit';
 import { resourceToTypeBoxSchema } from './schema-generator';
-import { parseExplicitBoolean } from './value-normalization';
+import { isNativeFile, isNonEmptyNativeFile, parseExplicitBoolean, parseTagValues } from './value-normalization';
 
 // ─── List Loader ──────────────────────────────────────────────
 
@@ -752,10 +752,6 @@ function validateFormVariables(
   };
 }
 
-function isNativeFile(value: unknown): value is File {
-  return typeof File !== 'undefined' && value instanceof File;
-}
-
 function formValuesForResponse(
   fields: FieldDefinition[],
   values: Record<string, unknown>,
@@ -783,21 +779,6 @@ function formValuesForResponse(
   }
 
   return responseValues;
-}
-
-function isNonEmptyNativeFile(value: unknown): value is File {
-  return isNativeFile(value) && value.size > 0 && value.name !== '';
-}
-
-/**
- * Tags arrive as one form field per tag. Older clients sent a single
- * comma-separated value, so both shapes are accepted and normalized here.
- */
-function parseTagValues(values: FormDataEntryValue[]): string[] {
-  return values
-    .flatMap((value) => (typeof value === 'string' ? value.split(',') : []))
-    .map((value) => value.trim())
-    .filter(Boolean);
 }
 
 function formDataToObject(
@@ -859,9 +840,6 @@ function formDataToObject(
         break;
       case 'boolean':
         obj[field.key] = parseExplicitBoolean(strRaw) ?? strRaw;
-        break;
-      case 'tags':
-        obj[field.key] = strRaw ? strRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
         break;
       case 'json':
         try {

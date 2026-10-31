@@ -50,6 +50,7 @@
           {#if item.href}<a href={item.href}>{item.title}</a>{:else}<strong>{item.title}</strong>{/if}
           {#if item.description}
             {#if richContent}
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
               <div class="lite-notification-center__rich">{@html body(item.description)}</div>
             {:else}
               <p>{item.description}</p>

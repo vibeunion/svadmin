@@ -17,6 +17,22 @@ export function isExplicitBooleanTrue(rawBoolean: unknown): boolean {
   return parseExplicitBoolean(rawBoolean) === true;
 }
 
+export function isNativeFile(value: unknown): value is File {
+  return typeof File !== 'undefined' && value instanceof File;
+}
+
+export function isNonEmptyNativeFile(value: unknown): value is File {
+  return isNativeFile(value) && value.size > 0 && value.name !== '';
+}
+
+/** 同时兼容逐个提交的标签字段和旧客户端的逗号分隔值。 */
+export function parseTagValues(values: FormDataEntryValue[]): string[] {
+  return values
+    .flatMap((value) => (typeof value === 'string' ? value.split(',') : []))
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 export function getStatusBadgeClass(value: unknown): string {
   if (typeof value !== "string") return "lite-badge";
   const v = value.toLowerCase().trim();

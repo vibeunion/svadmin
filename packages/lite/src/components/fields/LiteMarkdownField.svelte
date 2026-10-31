@@ -18,6 +18,7 @@
 
 {#if mode === 'show'}
   {#if preview}
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderMarkdown 转义，高亮回调仅允许可信服务端实现。 -->
     <div class="lite-markdown-preview">{@html preview}</div>
   {:else}
     <span>—</span>
@@ -40,6 +41,7 @@
     <div class="lite-markdown-preview-block">
       <span class="lite-markdown-preview-block__label">Preview</span>
       {#if preview}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderMarkdown 转义，高亮回调仅允许可信服务端实现。 -->
         <div class="lite-markdown-preview">{@html preview}</div>
       {:else}
         <p class="lite-markdown-preview-block__empty">Nothing to preview yet.</p>
