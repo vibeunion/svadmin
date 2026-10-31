@@ -7,7 +7,7 @@
 
 * The following workspace dependencies were updated
   * peerDependencies
-    * @svadmin/ui bumped from >=0.73.0 <0.109.0 to >=0.108.3
+    * @svadmin/ui remains compatible with >=0.73.0 <0.109.0
 
 ## [0.20.3](https://github.com/vibeunion/svadmin/compare/surface-v0.20.2...surface-v0.20.3) (2026-10-31)
 
