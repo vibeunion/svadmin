@@ -25,7 +25,7 @@
   "packages/nestjsx-crud": "0.12.19",
   "packages/sanity": "0.11.19",
   "packages/strapi": "0.12.19",
-  "packages/lite": "0.21.1",
+  "packages/lite": "0.22.0",
   "packages/mcp": "0.4.29",
   "packages/devtools-contract": "0.3.1",
   "packages/surface": "0.20.2",
