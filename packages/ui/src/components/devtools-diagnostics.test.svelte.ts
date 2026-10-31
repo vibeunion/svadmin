@@ -124,8 +124,12 @@ describe('DevTools diagnostics', () => {
     await waitFor(() => expect(view.queryAllByTestId('devtools-inspector-row')).toHaveLength(0));
     await fireEvent.input(view.getByTestId('devtools-filter-query'), { target: { value: '' } });
 
-    const refetch = await waitFor(() => view.getAllByTestId('devtools-refetch')[0]);
-    await fireEvent.click(refetch!);
+    const refetch = await waitFor(() => {
+      const button = view.getAllByTestId('devtools-refetch')[0];
+      if (!button) throw new Error('devtools refetch control is missing');
+      return button;
+    });
+    await fireEvent.click(refetch);
     await waitFor(() => {
       const entries = view.getAllByTestId('devtools-timeline');
       expect(entries.some((entry) => entry.textContent?.includes('devtools-replay'))).toBe(true);
