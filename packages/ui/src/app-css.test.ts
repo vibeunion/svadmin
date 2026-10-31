@@ -202,6 +202,27 @@ describe('native component CSS', () => {
     expect(css).not.toContain('class:w-[70px]');
   });
 
+  it('disables sidebar offset transitions only below the desktop breakpoint', () => {
+    const overrides: string[][] = [];
+    postcss.parse(readAppCss()).walkRules((rule) => {
+      if (!rule.selectors.includes('.svadmin-sidebar-content-expanded')) return;
+      rule.walkDecls('transition-property', (declaration) => {
+        expect(declaration.value).toBe('none');
+        const media = rule.parent;
+        expect(media?.type).toBe('atrule');
+        if (media?.type === 'atrule') expect(media.params).toBe('(max-width: 767px)');
+        overrides.push(rule.selectors);
+      });
+    });
+
+    expect(overrides).toEqual([[
+      '.svadmin-sidebar-content-expanded',
+      '.svadmin-sidebar-content-collapsed',
+      '.sidebar-content-expanded',
+      '.sidebar-content-collapsed',
+    ]]);
+  });
+
   it('mirrors the mobile app-shell drawer in RTL layouts', () => {
     const css = readAppShellCss();
     expect(css).toContain('[dir="rtl"] .svadmin-app-shell__sidebar');
