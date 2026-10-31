@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.2](https://github.com/vibeunion/svadmin/compare/core-v0.69.1...core-v0.69.2) (2026-10-31)
+
+
+### 🐛 Bug Fixes
+
+* **tasks:** avoid retrying unconfirmed task submissions ([#617](https://github.com/vibeunion/svadmin/issues/617)) ([f8fcd48](https://github.com/vibeunion/svadmin/commit/f8fcd48e5c41362d912c7ad5b1e0f1c4741e3927))
+
 ## [0.69.1](https://github.com/vibeunion/svadmin/compare/core-v0.69.0...core-v0.69.1) (2026-10-30)
 
 

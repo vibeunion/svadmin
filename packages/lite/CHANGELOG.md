@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.22.0](https://github.com/vibeunion/svadmin/compare/lite-v0.21.0...lite-v0.22.0) (2026-10-31)
+
+
+### ✨ Features
+
+* **lite:** upgrade Affix and Carousel after the third fallback audit ([f10d2b6](https://github.com/vibeunion/svadmin/commit/f10d2b6f7be3414f00821ccf941cb6f97ae31307))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.70.0
+
 ## [0.21.0](https://github.com/vibeunion/svadmin/compare/lite-v0.20.0...lite-v0.21.0) (2026-10-31)
 
 

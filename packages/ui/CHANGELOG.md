@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.108.1](https://github.com/vibeunion/svadmin/compare/ui-v0.108.0...ui-v0.108.1) (2026-10-31)
+
+
+### 🐛 Bug Fixes
+
+* **tasks:** avoid retrying unconfirmed task submissions ([#617](https://github.com/vibeunion/svadmin/issues/617)) ([f8fcd48](https://github.com/vibeunion/svadmin/commit/f8fcd48e5c41362d912c7ad5b1e0f1c4741e3927))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.4.2
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.4
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.2
+
 ## [0.108.0](https://github.com/vibeunion/svadmin/compare/ui-v0.107.0...ui-v0.108.0) (2026-10-31)
 
 
