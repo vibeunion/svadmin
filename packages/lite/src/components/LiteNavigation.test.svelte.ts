@@ -201,7 +201,10 @@ describe('Lite navigation primitives', () => {
     expect(affix.getByRole('button', { name: 'Save' })).toBeTruthy();
 
     const bottom = render(LiteAffix, { bottom: 8, children: snippet('<span>Footer</span>') });
-    expect(bottom.container.querySelector('.lite-affix')?.getAttribute('style')).toMatch(/bottom:\s*8px/);
+    const bottomStyle = bottom.container.querySelector('.lite-affix')?.getAttribute('style') ?? '';
+    expect(bottomStyle).toMatch(/bottom:\s*8px/);
+    // The reference keeps `top` alongside `bottom`; dropping it made the offset wrong.
+    expect(bottomStyle).toMatch(/top:\s*16px/);
 
     const grid = render(LiteGrid, { columns: 9, gap: 'lg', children: snippet('<div>Cell</div>') });
     const gridBox = grid.container.querySelector('.lite-grid');
@@ -291,13 +294,19 @@ describe('Lite navigation primitives', () => {
     expect(tour.getByRole('link', { name: 'View step' }).getAttribute('href')).toBe('/lite/review');
     expect(tour.getByRole('link', { name: 'Dismiss tour' })).toBeTruthy();
 
-    const carousel = render(LiteCarousel, { count: 2, label: 'Highlights', id: 'hl' });
+    const carousel = render(LiteCarousel, { count: 2, label: 'Highlights', id: 'hl', index: 1 });
     const region = carousel.getByRole('region', { name: 'Highlights' });
     expect(region.getAttribute('aria-roledescription')).toBe('carousel');
     const slides = Array.from(region.querySelectorAll('[aria-roledescription="slide"]'));
     expect(slides.map((slide) => slide.getAttribute('aria-label'))).toEqual(['1 / 2', '2 / 2']);
     expect(slides[0]?.textContent).toContain('Slide 1');
     expect(carousel.getByRole('link', { name: 'Go to slide 2' }).getAttribute('href')).toBe('#hl-2');
+    // The current slide is expressed in server HTML, so a host can render it.
+    expect(region.getAttribute('data-current')).toBe('2');
+    expect(slides[1]?.getAttribute('data-current')).toBe('true');
+    expect(slides[0]?.getAttribute('data-current')).toBeNull();
+    expect(carousel.getByRole('link', { name: 'Go to slide 2' }).getAttribute('aria-current')).toBe('true');
+    expect(carousel.getByRole('link', { name: 'Go to slide 1' }).getAttribute('aria-current')).toBeNull();
 
     const gallery = render(LiteImagePreview, {
       src: '/shot.png',

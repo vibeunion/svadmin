@@ -212,6 +212,27 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(strategy('UndoableNotification')).not.toContain('表单');
   });
 
+  it('records the third fallback re-audit outcome', () => {
+    const report = buildParityReport();
+    const status = (name: string): string | undefined =>
+      report.items.find((item) => item.name === name)?.status;
+    const strategy = (name: string): string =>
+      report.items.find((item) => item.name === name)?.strategy ?? '';
+
+    // Upgraded: sticky offsets and slide selection are server-expressible.
+    expect(status('Affix')).toBe('exact');
+    expect(status('Carousel')).toBe('exact');
+    expect(strategy('Affix')).toContain('top/bottom');
+    expect(strategy('Carousel')).toContain('data-current');
+
+    // Kept: expiry/undo results, controlled resizing and load-failure states are
+    // capabilities that need client or host state.
+    expect(status('Toast')).toBe('fallback');
+    expect(status('ResizeBox')).toBe('fallback');
+    expect(status('Tag')).toBe('fallback');
+    expect(status('Image')).toBe('fallback');
+  });
+
   it('keeps the fallback decisions for NotificationCenter, Tree and Collapse', () => {
     const report = buildParityReport();
     for (const name of ['NotificationCenter', 'Tree', 'Collapse']) {

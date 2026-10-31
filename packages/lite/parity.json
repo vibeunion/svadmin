@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-10-31T04:22:32.076Z",
+  "timestamp": "2026-10-31T05:15:03.329Z",
   "totalComponents": 179,
-  "adaptedCount": 130,
-  "fallbackCount": 47,
+  "adaptedCount": 132,
+  "fallbackCount": 45,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 72.6,
-  "fallbackPercentage": 26.3,
+  "exactPercentage": 73.7,
+  "fallbackPercentage": 25.1,
   "behaviorVerifiedCount": 152,
   "behaviorVerifiedPercentage": 84.9,
   "behaviorAssertedCount": 152,
@@ -42,13 +42,13 @@
     "widgets": {
       "category": "widgets",
       "total": 37,
-      "adapted": 16,
-      "fallback": 21,
+      "adapted": 17,
+      "fallback": 20,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 43.2,
-      "fallbackRate": 56.8,
+      "exactRate": 45.9,
+      "fallbackRate": 54.1,
       "behaviorVerified": 34,
       "behaviorAsserted": 34
     },
@@ -68,13 +68,13 @@
     "layout": {
       "category": "layout",
       "total": 25,
-      "adapted": 21,
-      "fallback": 3,
+      "adapted": 22,
+      "fallback": 2,
       "spaOnly": 1,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 84,
-      "fallbackRate": 12,
+      "exactRate": 88,
+      "fallbackRate": 8,
       "behaviorVerified": 21,
       "behaviorAsserted": 21
     },
@@ -1130,8 +1130,8 @@
       "uiComponent": "Carousel.svelte",
       "liteComponent": "LiteCarousel.svelte",
       "category": "widgets",
-      "status": "fallback",
-      "strategy": "横向滚动与锚点分段；自动播放和手势由 SPA 承接"
+      "status": "exact",
+      "strategy": "CSS scroll-snap 轮播：当前幻灯片由 index 服务端标记（data-current/aria-current），编号链接用于切换；自动播放与手势由宿主承接"
     },
     {
       "name": "Anchor",
@@ -1146,8 +1146,8 @@
       "uiComponent": "Affix.svelte",
       "liteComponent": "LiteAffix.svelte",
       "category": "layout",
-      "status": "fallback",
-      "strategy": "CSS position: sticky 固定；滚动监听状态样式由 SPA 承接"
+      "status": "exact",
+      "strategy": "CSS position: sticky 容器，保留 top/bottom 偏移与层级；吸顶阴影观察由宿主承接"
     },
     {
       "name": "Collapse",

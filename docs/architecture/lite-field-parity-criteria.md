@@ -154,3 +154,16 @@ Lite component does not actually render.
 
 The outcome is pinned by `scripts/parity-contract.test.ts`
 (`records the second fallback re-audit outcome`).
+### Third re-audit (media, tag and resize surfaces)
+
+| Component | Was | Now | Why |
+| --- | --- | --- | --- |
+| `Affix` | fallback | `exact` | `position: sticky` plus the `top`/`bottom` offset *is* the capability; the `IntersectionObserver` shadow is an enhancement. The component previously dropped `top` whenever `bottom` was set, which silently changed the offset — fixed. |
+| `Carousel` | fallback | `exact` | Slide selection is preserved by anchor links; Lite now takes `index` and marks the current slide in server HTML (`data-current`, `aria-current` on its number link). Autoplay, swipe and looping stay client-side. |
+| `Toast` | fallback | `fallback` | The reference expiry fires `onTimeout` and undo fires `onUndo`, with a promise queue behind it; a static `role="alert"` chip cannot preserve those results. Same precedent as `UndoableNotification`. |
+| `ResizeBox` | fallback | `fallback` | CSS `resize` gives the drag, but controlled `width`/`height`, min/max, disabled state, keyboard resizing and size persistence are capability/host contract. |
+| `Tag` | fallback | `fallback` | `closable` as a link matches the delete precedent, but checkable/`checked`/`disabled` tag states are missing. |
+| `Image` | fallback | `fallback` | Zoom preview is a separate client capability, and the reference also exposes a load-failure state that server HTML cannot know. |
+
+Pinned by `scripts/parity-contract.test.ts`
+(`records the third fallback re-audit outcome`).
