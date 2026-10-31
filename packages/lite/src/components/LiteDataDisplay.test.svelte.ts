@@ -2,6 +2,7 @@ import { cleanup, render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import LiteCommentThread from './LiteCommentThread.svelte';
+import LiteInsightCard from './widgets/LiteInsightCard.svelte';
 import LiteItemList from './LiteItemList.svelte';
 import LiteNotificationCenter from './LiteNotificationCenter.svelte';
 import LiteProgress from './LiteProgress.svelte';
@@ -279,5 +280,60 @@ describe('Lite data display primitives', () => {
     expect(view.getByText('Reference: TX-9')).toBeTruthy();
     expect(view.getByRole('link', { name: 'Continue' }).getAttribute('href')).toBe('/lite/retry');
     expect(view.getByRole('link', { name: 'Orders' }).getAttribute('href')).toBe('/lite/orders');
+  });
+});
+
+describe('Lite rich content display surfaces', () => {
+  it('renders insight content as server-side Markdown with safe links', () => {
+    const view = render(LiteInsightCard, {
+      title: 'Revenue insight',
+      content: [
+        '## Weekly change',
+        '',
+        '- **+12%** from renewals',
+        '- see [report](https://example.test/report)',
+        '',
+        '```ts',
+        'const delta = 12;',
+        '```',
+      ].join('\n'),
+    });
+
+    expect(view.getByText('Revenue insight')).toBeTruthy();
+    const content = view.container.querySelector('.lite-insight-content');
+    expect(content?.querySelector('h2')?.textContent).toBe('Weekly change');
+    expect(content?.querySelectorAll('li')).toHaveLength(2);
+    expect(content?.querySelector('strong')?.textContent).toBe('+12%');
+    expect(content?.querySelector('a')?.getAttribute('href')).toBe('https://example.test/report');
+    expect(content?.querySelector('pre code')?.textContent).toContain('const delta = 12;');
+  });
+
+  it('never lets raw HTML through the insight card', () => {
+    const view = render(LiteInsightCard, {
+      content: 'Plain sentence about **markup** <script>alert(1)</script>',
+    });
+    const content = view.container.querySelector('.lite-insight-content');
+
+    // A value that contains HTML-shaped tags takes the sanitizer path, so the
+    // script is deleted with its content and Markdown syntax stays literal.
+    expect(view.container.querySelector('script')).toBeNull();
+    expect(content?.innerHTML).not.toContain('<script');
+    expect(content?.textContent).toContain('**markup**');
+    expect(content?.textContent).toContain('Plain sentence about');
+  });
+
+  it('keeps comment bodies literal by default and renders them on request', () => {
+    const comments = [
+      { id: 'c1', author: 'Ada', content: '**bold** note', replies: [{ id: 'r1', author: 'Lin', content: '*reply*' }] },
+    ];
+
+    const literal = render(LiteCommentThread, { comments });
+    expect(literal.container.querySelector('.lite-comments__rich')).toBeNull();
+    expect(literal.getByText('**bold** note')).toBeTruthy();
+
+    const rich = render(LiteCommentThread, { comments, richContent: true });
+    const body = rich.container.querySelector('.lite-comments__rich');
+    expect(body?.querySelector('strong')?.textContent).toBe('bold');
+    expect(body?.querySelector('em')?.textContent ?? rich.container.querySelector('em')?.textContent).toBe('reply');
   });
 });

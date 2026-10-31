@@ -30,10 +30,10 @@
     if (typeof v === 'string') {
       if (inputType === 'datetime-local') {
         const match = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/u.exec(v);
-        if (match) return `${match[1]}T${match[2]}`;
+        if (match?.[1] && match[2]) return `${match[1]}T${match[2]}`;
       } else {
         const match = /^(\d{4}-\d{2}-\d{2})/u.exec(v);
-        if (match) return match[1];
+        if (match?.[1]) return match[1];
       }
     }
     const date = v instanceof Date ? v : new Date(String(v));

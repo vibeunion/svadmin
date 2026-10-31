@@ -65,6 +65,43 @@ Lite (`toSafeHref`):
 - rejected attributes disappear entirely, leaving the link label or image alt text,
 - rendered links always carry `rel="noreferrer"`.
 
+## Where it is used
+
+| Surface | Behaviour |
+| --- | --- |
+| `MarkdownField` | Markdown renderer in show mode and under the editor |
+| `RichTextField` | allowlist sanitizer for HTML values, Markdown for text values |
+| `LiteInsightCard` | renders pre-computed insight content (Markdown or allowlisted HTML) |
+| `LiteCommentThread` | text-only by default; set `richContent` to render bodies as Markdown |
+
+Comment bodies stay literal unless the host opts in, because the reference comment
+component renders plain text and parity claims follow the reference.
+
+## Code highlighting hook
+
+Fenced blocks can be highlighted by a **trusted server-side** highlighter; no
+highlighter ships with Lite.
+
+```ts
+import { configureMarkdownRenderer } from '@svadmin/lite';
+
+configureMarkdownRenderer({
+  // Return ready-to-render HTML (for example Shiki/Prism server output),
+  // or `undefined` to keep the escaped plain-text block.
+  highlight: (code, language) => shikiHighlight(code, language),
+  codeBlockClass: 'lite-code-block',
+});
+```
+
+- Per-field override: `LiteMarkdownField` / `LiteRichTextField` accept
+  `renderOptions`; `LiteInsightCard` accepts the same prop.
+- The hook only runs for fenced blocks with an info string; inline code is never
+  passed to it.
+- The returned string is inserted as-is. Treat it as trusted HTML: never feed raw
+  user input to a highlighter that echoes markup.
+- When the hook returns `undefined`, output falls back to escaped code with a
+  `language-*` class.
+
 ## Editing surface
 
 Both fields keep a native `textarea` for source editing and show the

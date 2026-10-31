@@ -57,6 +57,37 @@ input[type=checkbox][checked|disabled]
 - 被拒属性整体消失，只留下链接文字或图片 alt
 - 渲染出的链接始终带 `rel="noreferrer"`
 
+## 使用位置
+
+| 位置 | 行为 |
+| --- | --- |
+| `MarkdownField` | 展示模式与编辑器下方均走 Markdown 渲染器 |
+| `RichTextField` | HTML 值走白名单清洗，文本值走 Markdown 渲染 |
+| `LiteInsightCard` | 渲染服务端预先算好的洞察内容（Markdown 或白名单 HTML） |
+| `LiteCommentThread` | 默认纯文本；显式设置 `richContent` 后按 Markdown 渲染正文 |
+
+评论正文默认保持字面文本，因为参考组件按纯文本渲染，parity 结论跟随参考实现。
+
+## 代码高亮钩子
+
+围栏代码块可交给**可信的服务端**高亮器处理；Lite 不自带任何高亮依赖。
+
+```ts
+import { configureMarkdownRenderer } from '@svadmin/lite';
+
+configureMarkdownRenderer({
+  // 返回可直接渲染的 HTML（如 Shiki/Prism 的服务端输出），
+  // 返回 undefined 则保留转义后的纯文本代码块。
+  highlight: (code, language) => shikiHighlight(code, language),
+  codeBlockClass: 'lite-code-block',
+});
+```
+
+- 单字段覆盖：`LiteMarkdownField` / `LiteRichTextField` 支持 `renderOptions`；`LiteInsightCard` 同名属性。
+- 仅对带语言标记的围栏块调用；行内代码不会进入该钩子。
+- 返回值按原样插入，须视为可信 HTML：不要把未经处理、会回显标签的用户输入交给高亮器。
+- 钩子返回 `undefined` 时，回退为转义代码 + `language-*` 类名。
+
 ## 编辑面
 
 两个字段都保留原生 `textarea` 编辑源码，并在其下方显示服务端渲染的预览，因此无 JavaScript 的页面既能阅读格式化内容，也能提交修改。

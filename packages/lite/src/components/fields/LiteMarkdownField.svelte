@@ -1,17 +1,19 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
-  import { renderMarkdown } from '../../rich-content.js';
+  import { renderMarkdown, type MarkdownRenderOptions } from '../../rich-content.js';
 
   interface Props {
     field: FieldDefinition;
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Per-field renderer options; app-wide defaults come from configureMarkdownRenderer. */
+    renderOptions?: MarkdownRenderOptions;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', renderOptions }: Props = $props();
   let hasError = $derived(error.length > 0);
-  const preview = $derived(renderMarkdown(value));
+  const preview = $derived(renderMarkdown(value, renderOptions));
 </script>
 
 {#if mode === 'show'}

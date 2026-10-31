@@ -42,17 +42,19 @@ describe('lite safe text rendering', () => {
     expect(safe.container.textContent).toContain('block');
   });
 
-  it('does not interpret insight content as HTML', () => {
+  it('renders insight content through the allowlist instead of live HTML', () => {
     const { container } = render(LiteInsightCard, {
       title: 'Security insight',
       content: maliciousHtml,
     });
 
+    // Script blocks are deleted with their content, handlers never render, and
+    // the harmless relative image survives without the executable handler.
     expect(container.querySelector('script')).toBeNull();
-    expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('[onerror]')).toBeNull();
-    expect(container.textContent).toContain('<script>');
+    expect(container.innerHTML).not.toContain('__liteXss');
     expect(container.textContent).toContain('Safe text');
+    expect(container.querySelector('.lite-insight-content')?.innerHTML).not.toContain('<script');
   });
 });
 

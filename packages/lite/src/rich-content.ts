@@ -8,6 +8,40 @@
  */
 import { toSafeHref, toSafeText } from './security';
 
+export interface MarkdownRenderOptions {
+  /**
+   * Trusted server-side highlighter. It receives the raw code and the fenced
+   * language and must return ready-to-render HTML (for example from Shiki or
+   * Prism running on the server). Returning `undefined` keeps the escaped
+   * plain-text block. The result is inserted as-is, so never forward user input
+   * into a highlighter that echoes unescaped markup.
+   */
+  highlight?: (code: string, language: string) => string | undefined;
+  /** Extra class names applied to every fenced `<pre>`. */
+  codeBlockClass?: string;
+}
+
+let configuredMarkdownOptions: MarkdownRenderOptions = {};
+
+/**
+ * Register app-wide Markdown rendering options (for example a server-side
+ * highlighter). Returns the previous options so tests and hosts can restore them.
+ */
+export function configureMarkdownRenderer(options: MarkdownRenderOptions): MarkdownRenderOptions {
+  const previous = configuredMarkdownOptions;
+  configuredMarkdownOptions = { ...options };
+  return previous;
+}
+
+function resolveOptions(options?: MarkdownRenderOptions): MarkdownRenderOptions {
+  return options ? { ...configuredMarkdownOptions, ...options } : configuredMarkdownOptions;
+}
+
+function classAttribute(...values: Array<string | undefined>): string {
+  const classes = values.filter((value): value is string => Boolean(value && value.trim()));
+  return classes.length > 0 ? ` class="${escapeHtml(classes.join(' '))}"` : '';
+}
+
 const ESCAPES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -135,9 +169,10 @@ const FENCE = /^\s*```([\w-]*)\s*$/u;
  * paragraphs, inline code/emphasis/links). Unsupported syntax stays literal
  * text, which is safer than silently dropping user content.
  */
-export function renderMarkdown(value: unknown): string {
+export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions): string {
   const source = toSafeText(value).replace(/\r\n?/gu, '\n');
   if (source.trim() === '') return '';
+  const renderOptions = resolveOptions(options);
 
   const lines = source.split('\n');
   const blocks: string[] = [];
@@ -162,8 +197,18 @@ export function renderMarkdown(value: unknown): string {
         cursor += 1;
       }
       index = cursor;
-      const language = fence[1] ? ` class="language-${escapeHtml(fence[1])}"` : '';
-      blocks.push(`<pre><code${language}>${escapeHtml(code.join('\n'))}</code></pre>`);
+      const language = fence[1] ?? '';
+      const highlighted = language && renderOptions.highlight
+        ? renderOptions.highlight(code.join('\n'), language)
+        : undefined;
+      const languageClass = language ? `language-${language}` : undefined;
+      const preClass = classAttribute(renderOptions.codeBlockClass);
+      const codeClass = classAttribute(languageClass);
+      blocks.push(
+        highlighted === undefined
+          ? `<pre${preClass}><code${codeClass}>${escapeHtml(code.join('\n'))}</code></pre>`
+          : `<pre${preClass}><code${codeClass}>${highlighted}</code></pre>`,
+      );
       continue;
     }
 
@@ -360,10 +405,10 @@ export function sanitizeRichTextHtml(value: unknown): string {
 }
 
 /** Pick the renderer for a field: rich HTML values pass through the allowlist. */
-export function renderRichContent(value: unknown): string {
+export function renderRichContent(value: unknown, options?: MarkdownRenderOptions): string {
   const text = toSafeText(value);
   if (text.trim() === '') return '';
   return /<\/?[a-zA-Z][a-zA-Z0-9-]*[\s/>]/u.test(text)
     ? sanitizeRichTextHtml(text)
-    : renderMarkdown(text);
+    : renderMarkdown(text, options);
 }

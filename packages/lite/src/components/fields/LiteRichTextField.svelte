@@ -1,18 +1,20 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
   import { toSafeText } from '../../security.js';
-  import { renderRichContent } from '../../rich-content.js';
+  import { renderRichContent, type MarkdownRenderOptions } from '../../rich-content.js';
 
   interface Props {
     field: FieldDefinition;
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Per-field renderer options; app-wide defaults come from configureMarkdownRenderer. */
+    renderOptions?: MarkdownRenderOptions;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', renderOptions }: Props = $props();
   let hasError = $derived(error.length > 0);
-  const preview = $derived(renderRichContent(value));
+  const preview = $derived(renderRichContent(value, renderOptions));
 </script>
 
 {#if mode === 'show'}

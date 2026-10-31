@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  configureMarkdownRenderer,
   escapeHtml,
   renderInlineMarkdown,
   renderMarkdown,
@@ -153,5 +154,59 @@ describe('Lite rich text sanitizer', () => {
     expect(renderRichContent('<p>rich</p>')).toBe('<p>rich</p>');
     expect(renderRichContent('# markdown')).toContain('<h1>markdown</h1>');
     expect(renderRichContent('')).toBe('');
+  });
+});
+
+describe('Lite markdown highlighting hook', () => {
+  it('delegates fenced blocks to a trusted highlighter with the language', () => {
+    const calls: Array<[string, string]> = [];
+    const html = renderMarkdown(['```ts', 'const a = 1;', '```'].join('\n'), {
+      highlight: (code, language) => {
+        calls.push([code, language]);
+        return `<span class="tok-keyword">const</span> ${escapeHtml(code.slice(6))}`;
+      },
+      codeBlockClass: 'lite-code-block',
+    });
+
+    expect(calls).toEqual([['const a = 1;', 'ts']]);
+    expect(html).toContain('<pre class="lite-code-block"><code class="language-ts">');
+    expect(html).toContain('<span class="tok-keyword">const</span>');
+    expect(html).toContain('a = 1;');
+  });
+
+  it('falls back to escaped code when the highlighter declines or has no language', () => {
+    const declined = renderMarkdown(['```ts', 'a < b', '```'].join('\n'), {
+      highlight: () => undefined,
+    });
+    expect(declined).toContain('a &lt; b');
+    expect(declined).toContain('<code class="language-ts">');
+
+    const noLanguage = renderMarkdown(['```', 'a < b', '```'].join('\n'), {
+      highlight: () => '<b>should not run</b>',
+    });
+    expect(noLanguage).not.toContain('should not run');
+    expect(noLanguage).toContain('a &lt; b');
+  });
+
+  it('supports app-wide configuration that can be restored', () => {
+    const previous = configureMarkdownRenderer({
+      highlight: (code) => `<mark>${escapeHtml(code)}</mark>`,
+    });
+    try {
+      expect(renderMarkdown(['```js', 'x()', '```'].join('\n'))).toContain('<mark>x()</mark>');
+      // Per-call options win over the app-wide default.
+      expect(renderMarkdown(['```js', 'x()', '```'].join('\n'), { highlight: undefined }))
+        .toContain('<code class="language-js">x()</code>');
+    } finally {
+      configureMarkdownRenderer(previous);
+    }
+    expect(renderMarkdown(['```js', 'x()', '```'].join('\n'))).not.toContain('<mark>');
+  });
+
+  it('does not let the highlighter affect inline code', () => {
+    const html = renderMarkdown('`inline`', { highlight: () => '<b>raw</b>' });
+
+    expect(html).toContain('<code>inline</code>');
+    expect(html).not.toContain('<b>raw</b>');
   });
 });

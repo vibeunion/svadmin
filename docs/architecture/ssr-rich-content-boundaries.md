@@ -40,6 +40,16 @@ What Lite does promise instead:
 The WYSIWYG job belongs to the SPA: a Lite page that needs rich editing must link
 to the SPA route instead of implying formatting support.
 
+### 2b. Free-text display surfaces
+
+`LiteInsightCard` renders pre-computed insight content through the same
+Markdown/allowlist path: AI-generated text is Markdown-shaped in practice and the
+card has no other way to present it in SSR.
+
+`LiteCommentThread` keeps text-only output by default and exposes an opt-in
+`richContent` prop. The reference comment component renders plain text, so
+rendering Markdown by default would be a capability difference, not parity.
+
 ### 3. AutoComplete — keep `fallback`
 
 `datalist` gives native suggestions, but the reference capability is remote
@@ -73,6 +83,8 @@ image upload with a preview; drawing stays in the SPA.
 | Markdown renders server-side and escapes raw HTML | `packages/lite/src/components/fields/rich-content.test.svelte.ts` |
 | Rich HTML allowlist strips script/handlers/unsafe URLs | same file (`Lite rich text sanitizer`) |
 | Fields render preview + editable source | `LiteFields.test.svelte.ts` (`Lite rich content fields`) |
+| Insight card and opt-in comment rendering | `LiteDataDisplay.test.svelte.ts` (`Lite rich content display surfaces`) |
+| Highlight hook stays opt-in and escapes by default | `rich-content.test.svelte.ts` (`Lite markdown highlighting hook`) |
 | Mapping statuses follow the criteria | `scripts/parity-contract.test.ts` |
 
 ## Revisit triggers

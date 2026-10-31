@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { renderRichContent, type MarkdownRenderOptions } from '../rich-content.js';
+
   interface CommentItem {
     id: string;
     author: string;
@@ -15,6 +17,12 @@
     action?: string;
     submitLabel?: string;
     name?: string;
+    /**
+     * Render comment bodies as Markdown/allowlisted HTML. Defaults to `false` so
+     * the default output stays text-only, matching the reference component.
+     */
+    richContent?: boolean;
+    richContentOptions?: MarkdownRenderOptions;
   }
 
   let {
@@ -24,7 +32,13 @@
     action,
     submitLabel = 'Comment',
     name = 'comment',
+    richContent = false,
+    richContentOptions,
   }: Props = $props();
+
+  function body(value: string): string {
+    return renderRichContent(value, richContentOptions);
+  }
 </script>
 
 <section class="lite-comments" aria-label={label}>
@@ -37,11 +51,22 @@
           {#if comment.avatar}<img src={comment.avatar} alt="" loading="lazy" />{:else}<span class="lite-comments__avatar" aria-hidden="true">{comment.author.slice(0, 1)}</span>{/if}
           <div class="lite-comments__body">
             <p class="lite-comments__meta"><strong>{comment.author}</strong>{#if comment.time}<time>{comment.time}</time>{/if}</p>
-            <p>{comment.content}</p>
+            {#if richContent}
+              <div class="lite-comments__rich">{@html body(comment.content)}</div>
+            {:else}
+              <p>{comment.content}</p>
+            {/if}
             {#if comment.replies?.length}
               <ol class="lite-comments__replies">
                 {#each comment.replies as reply (reply.id)}
-                  <li><strong>{reply.author}</strong> {reply.content}</li>
+                  <li>
+                    <strong>{reply.author}</strong>
+                    {#if richContent}
+                      <span class="lite-comments__rich">{@html body(reply.content)}</span>
+                    {:else}
+                      {reply.content}
+                    {/if}
+                  </li>
                 {/each}
               </ol>
             {/if}
@@ -76,4 +101,11 @@
   .lite-comments__item > img, .lite-comments__avatar { margin-right: 10px; }
   .lite-comments__meta > * + * { margin-left: 8px; }
   .lite-comments__form textarea { margin-bottom: 8px; }
+  .lite-comments__rich :global(p) { margin: 0 0 6px; }
+  .lite-comments__rich :global(p:last-child) { margin-bottom: 0; }
+  .lite-comments__rich :global(code) { padding: 1px 4px; border-radius: 3px; background: #F2F3F5; font-family: monospace; font-size: 12px; }
+  .lite-comments__rich :global(pre) { margin: 0 0 6px; padding: 8px; overflow-x: auto; border-radius: 4px; background: #F2F3F5; }
+  .lite-comments__rich :global(a) { color: #165DFF; }
+  .lite-comments__rich :global(ul),
+  .lite-comments__rich :global(ol) { margin: 0 0 6px; padding-left: 18px; }
 </style>
