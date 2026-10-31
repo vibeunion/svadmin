@@ -452,6 +452,7 @@ export function generateMarkdownReport(report: ParityReport): string {
     md += `| **${name}** | ${cat.total} | ${cat.adapted} | ${cat.fallback} | ${cat.spaOnly} | ${cat.missing} | **${cat.exactRate}%** | ${cat.behaviorAsserted}/${cat.total} | ${cat.behaviorVerified - cat.behaviorAsserted} |\n`;
   }
 
+  md += `\n> 样式钩子（\`class\`）覆盖是独立指标，见 [CLASS-HOOKS.md](./CLASS-HOOKS.md)，不影响本表状态。\n`;
   md += `\n---\n\n## 判定标准\n\n`;
   for (const rule of CLASSIFICATION_CRITERIA_SUMMARY) {
     md += `- ${rule}\n`;
@@ -543,6 +544,148 @@ export function parityArtifactDrift(
   return drift;
 }
 
+// ─── Styling hook audit (separate metric, never a status) ────────────────────
+
+/**
+ * A component exposes a caller styling hook when it declares `class?: string` or
+ * destructures `class: className`. Both shapes are used across `@svadmin/ui` and
+ * `@svadmin/lite`, so the audit must not prefer one.
+ */
+const CLASS_PROP = /class\??\s*:\s*string|class\s*:\s*[A-Za-z_$][\w$]*/u;
+
+export interface ClassHookMiss {
+  name: string;
+  category: ParityCategory;
+  liteComponent: string;
+}
+
+export interface ClassHookAudit {
+  /** `exact` entries whose reference and Lite components both resolve to files. */
+  reviewedCount: number;
+  /** Reviewed entries whose reference exposes a `class` hook. */
+  referenceHookCount: number;
+  /** Of those, entries where Lite also accepts `class`. */
+  preservedCount: number;
+  coveragePercentage: number;
+  missing: ClassHookMiss[];
+  timestamp: string;
+}
+
+/** Map every component file name in a directory tree to its path (first hit wins). */
+function componentIndex(directory: string): Map<string, string> {
+  const index = new Map<string, string>();
+  for (const file of listFiles(directory)) {
+    const name = file.split('/').at(-1) ?? file;
+    if (!index.has(name)) index.set(name, file);
+  }
+  return index;
+}
+
+/**
+ * Compare the styling-hook surface of every `exact` entry.
+ *
+ * A missing `class` hook is styling debt, not a capability regression: Lite ships
+ * its own stylesheet and hosts can wrap the component. It is reported on its own
+ * artifact so the parity ratio cannot be nudged by adding trivial pass-throughs,
+ * and so the debt does not silently disappear either.
+ */
+export function buildClassHookAudit(
+  repositoryRoot = resolve(import.meta.dir, '..'),
+): ClassHookAudit {
+  const liteIndex = componentIndex(resolve(repositoryRoot, 'packages/lite/src/components'));
+  const uiIndex = componentIndex(resolve(repositoryRoot, 'packages/ui/src/components'));
+
+  let reviewedCount = 0;
+  let referenceHookCount = 0;
+  let preservedCount = 0;
+  const missing: ClassHookMiss[] = [];
+
+  for (const item of PARITY_ITEMS) {
+    if (item.status !== 'exact') continue;
+    const litePath = liteIndex.get(liteComponentFile(item.liteComponent));
+    const uiPath = uiIndex.get(item.uiComponent);
+    if (!litePath || !uiPath) continue;
+    reviewedCount += 1;
+    const referenceExposesHook = CLASS_PROP.test(readFileSync(uiPath, 'utf8'));
+    if (!referenceExposesHook) continue;
+    referenceHookCount += 1;
+    if (CLASS_PROP.test(readFileSync(litePath, 'utf8'))) {
+      preservedCount += 1;
+      continue;
+    }
+    missing.push({
+      name: item.name,
+      category: item.category,
+      liteComponent: liteComponentFile(item.liteComponent),
+    });
+  }
+
+  missing.sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+
+  return {
+    reviewedCount,
+    referenceHookCount,
+    preservedCount,
+    coveragePercentage: rate(preservedCount, referenceHookCount),
+    missing,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+export function classHookOutputPaths(repositoryRoot = resolve(import.meta.dir, '..')): {
+  markdownPath: string;
+} {
+  return { markdownPath: resolve(repositoryRoot, 'packages/lite/CLASS-HOOKS.md') };
+}
+
+export function generateClassHookMarkdown(audit: ClassHookAudit): string {
+  const rows = audit.missing.map(
+    (item) => `| \`${item.name}\` | ${item.category} | \`${item.liteComponent}\` |`,
+  );
+  return `# Lite styling hook coverage (\`class\`)
+
+> 自动生成时间: ${audit.timestamp}
+> 重新生成: \`bun scripts/check-parity.ts --write\`
+
+## 这是什么指标
+
+参考组件若声明了 \`class\` 属性，调用方就多一个样式入口。Lite 是否也接受
+\`class\`，属于**样式钩子覆盖**，与 \`exact\` / \`fallback\` 的能力判定相互独立：
+
+- Lite 自带 \`lite.css\` 基线，宿主也可以用外层容器收口样式；
+- 因此缺少 \`class\` 不计为能力缺口，也不改变任何条目的 status；
+- 但把它显式统计出来，避免"补一个 class 就把数字抬高"或者"债务悄无声息消失"。
+
+## 现状
+
+- 参与统计的 \`exact\` 条目: **${audit.reviewedCount}**
+- 参考组件暴露 \`class\` 的条目: **${audit.referenceHookCount}**
+- Lite 同时接受 \`class\` 的条目: **${audit.preservedCount}**（**${audit.coveragePercentage}%**）
+- 仍缺样式钩子的条目: **${audit.missing.length}**
+
+## 待补齐清单
+
+| 组件 | 分类 | Lite 实现 |
+| --- | --- | --- |
+${rows.join('\n')}
+`;
+}
+
+/** Drift check for the styling hook artifact, mirroring the parity artifacts. */
+export function classHookArtifactDrift(
+  repositoryRoot = resolve(import.meta.dir, '..'),
+): string[] {
+  const { markdownPath } = classHookOutputPaths(repositoryRoot);
+  if (!existsSync(markdownPath)) return [`${markdownPath} (missing)`];
+  const expected = generateClassHookMarkdown(buildClassHookAudit(repositoryRoot))
+    .replace(/^> .*自动生成时间[^\n]*$/mu, '> <timestamp>')
+    .trimEnd();
+  const current = readFileSync(markdownPath, 'utf8')
+    .replace(/^> .*自动生成时间[^\n]*$/mu, '> <timestamp>')
+    .trimEnd();
+  return current === expected ? [] : [`${markdownPath} (out of date)`];
+}
+
 // ─── Main Execution ──────────────────────────────────────────────────────────
 if (import.meta.main) {
   const report = buildParityReport();
@@ -561,7 +704,13 @@ if (import.meta.main) {
     const { markdownPath: mdPath, jsonPath } = parityOutputPaths();
     writeFileSync(mdPath, `${mdContent.trimEnd()}\n`, 'utf8');
     writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
-    console.info(`[OK] Generated ${mdPath} and ${jsonPath}`);
+    const audit = buildClassHookAudit();
+    const { markdownPath: hooksPath } = classHookOutputPaths();
+    writeFileSync(hooksPath, `${generateClassHookMarkdown(audit).trimEnd()}\n`, 'utf8');
+    console.info(`[OK] Generated ${mdPath}, ${jsonPath} and ${hooksPath}`);
+    console.info(
+      `[OK] Styling hook coverage: ${audit.preservedCount}/${audit.referenceHookCount} (${audit.coveragePercentage}%), ${audit.missing.length} pending`,
+    );
   }
 
   if (isCheck && report.missingCount > 0) {
@@ -570,7 +719,7 @@ if (import.meta.main) {
   }
 
   if (isCheck) {
-    const drift = parityArtifactDrift();
+    const drift = [...parityArtifactDrift(), ...classHookArtifactDrift()];
     if (drift.length > 0) {
       console.error('[FAIL] Parity artifacts are out of date:');
       for (const entry of drift) console.error(`  - ${entry}`);

@@ -56,6 +56,25 @@ fields plus server parsing, or a server-rendered preview). Remaining fallbacks a
 RichTextField, AutoComplete, RelationPicker and SignaturePad, each with the
 boundary recorded in [rich content boundaries](./ssr-rich-content-boundaries.md).
 
+## Styling hooks (`class`) are debt, never a status
+
+The reference components often declare a caller `class` hook. Whether Lite also
+accepts one is tracked as **styling-hook coverage** in
+`packages/lite/CLASS-HOOKS.md` (`bun scripts/check-parity.ts --write` regenerates
+it, `--check` fails on drift) and is deliberately *not* a parity criterion:
+
+- Lite ships its own `lite.css` baseline and hosts can style through a wrapper, so
+  a missing hook is not a missing capability;
+- treating hooks as required would flip ~60 previously-reviewed `exact` entries to
+  `fallback` on a styling technicality, which would make the ratio meaningless;
+- tracking it separately means the debt is visible and cannot be paid down to
+  inflate the number either.
+
+`TwoFactorStepper` is the deliberate exception: its reference API is only
+`{ current, steps, class }`, so once `steps` was added the missing `class` was the
+entire remaining difference, and it was implemented rather than deferred
+(recorded in [the review](./reviews/two-factor-stepper.md)).
+
 ## Guard rails
 
 - `scripts/check-parity.ts` rejects an `exact` entry whose strategy still says
