@@ -5,6 +5,7 @@
 
 ### 🐛 Bug Fixes
 
+* **ui:** localize table counts and color presets ([#620](https://github.com/vibeunion/svadmin/issues/620)) ([bb891b0](https://github.com/vibeunion/svadmin/commit/bb891b053806bd9517056d3f34703c7ddd9936d9))
 * **ui:** stop mobile sidebar offset transitions ([#619](https://github.com/vibeunion/svadmin/issues/619)) ([e7977ee](https://github.com/vibeunion/svadmin/commit/e7977ee9a7aeeb6a2068f100d1435ad3a109fd1f))
 
 ## [0.108.1](https://github.com/vibeunion/svadmin/compare/ui-v0.108.0...ui-v0.108.1) (2026-10-31)
