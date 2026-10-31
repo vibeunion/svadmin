@@ -134,6 +134,10 @@ describe('UI/Lite Parity Tracking Contract', () => {
     // Listing errors with field anchors is the full capability; scrolling and
     // focus are client enhancements.
     expect(status('ErrorSummary')).toBe('exact');
+    // The reference `TwoFactorStepper` is a step list (no auth engine); after
+    // adding `steps` and `class` passthrough Lite preserves all of it, plus a
+    // native OTP form. Reviewed twice before flipping, see the audit log.
+    expect(status('TwoFactorStepper')).toBe('exact');
     // Still client-owned: anchored tour highlights, accordion/tree expansion
     // state and moderate checkbox trees change what the user can reach.
     expect(status('Tour')).toBe('fallback');

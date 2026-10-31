@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-10-31T00:51:06.752Z",
+  "timestamp": "2026-10-31T01:20:56.262Z",
   "totalComponents": 179,
-  "adaptedCount": 125,
-  "fallbackCount": 52,
+  "adaptedCount": 126,
+  "fallbackCount": 51,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 69.8,
-  "fallbackPercentage": 29.1,
+  "exactPercentage": 70.4,
+  "fallbackPercentage": 28.5,
   "behaviorVerifiedCount": 140,
   "behaviorVerifiedPercentage": 78.2,
   "behaviorAssertedCount": 140,
@@ -29,13 +29,13 @@
     "advanced": {
       "category": "advanced",
       "total": 43,
-      "adapted": 25,
-      "fallback": 17,
+      "adapted": 26,
+      "fallback": 16,
       "spaOnly": 1,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 58.1,
-      "fallbackRate": 39.5,
+      "exactRate": 60.5,
+      "fallbackRate": 37.2,
       "behaviorVerified": 38,
       "behaviorAsserted": 38
     },
@@ -1298,8 +1298,8 @@
       "uiComponent": "TwoFactorStepper.svelte",
       "liteComponent": "LiteTwoFactorStepper.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "原生两步验证步骤与 POST 表单"
+      "status": "exact",
+      "strategy": "服务端有序步骤，保留自定义步骤、当前索引与列表 class；附原生验证码提交表单"
     },
     {
       "name": "Popconfirm",

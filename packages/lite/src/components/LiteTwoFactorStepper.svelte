@@ -5,20 +5,26 @@
 
   interface Props {
     current?: number;
+    /** Step labels; mirrors the reference `steps` prop. */
+    steps?: string[];
     action: string;
     method?: HTMLFormAttributes['method'];
     codeName?: string;
     submitLabel?: string;
     title?: string;
+    /** Applied to the step list, matching the reference component. */
+    class?: string;
   }
 
   let {
     current = 1,
+    steps = ['Password verified', 'Enter verification code', 'Access granted'],
     action,
     method = 'POST',
     codeName = 'code',
     submitLabel = 'Verify',
     title = 'Two-factor authentication',
+    class: className = '',
   }: Props = $props();
 </script>
 
@@ -26,11 +32,9 @@
   <h2>{title}</h2>
   <LiteSteps
     current={current}
-    items={[
-      { title: 'Password verified' },
-      { title: 'Enter verification code' },
-      { title: 'Access granted' },
-    ]}
+    label="Progress"
+    class={className}
+    items={steps.map((step) => ({ title: step }))}
   />
   <form {method} {action} class="lite-two-factor__form">
     <LiteOtpInput name={codeName} />

@@ -428,6 +428,47 @@ describe('Lite form and media primitives', () => {
     expect(view.getByText(/Recovery codes/)).toBeTruthy();
   });
 
+  it('mirrors the reference step contract for the two-factor stepper', () => {
+    const defaults = render(LiteTwoFactorStepper, { action: '/lite/2fa' });
+    const defaultSteps = [...defaults.container.querySelectorAll('.lite-steps__item')];
+    expect(defaultSteps).toHaveLength(3);
+    expect(defaultSteps.map((item) => item.textContent?.trim())).toEqual([
+      '✓ Password verified',
+      '2 Enter verification code',
+      '3 Access granted',
+    ]);
+    expect(defaults.container.querySelector('.lite-steps')?.getAttribute('aria-label')).toBe('Progress');
+
+    const custom = render(LiteTwoFactorStepper, {
+      current: 2,
+      action: '/lite/2fa',
+      steps: ['Setup', 'Verify', 'Recovery', 'Audit'],
+    });
+    const items = [...custom.container.querySelectorAll('.lite-steps__item')];
+    expect(items).toHaveLength(4);
+    expect(items.map((item) => item.getAttribute('data-status'))).toEqual([
+      'finish',
+      'finish',
+      'process',
+      'wait',
+    ]);
+    expect(items.map((item) => item.querySelector('strong')?.textContent)).toEqual([
+      'Setup',
+      'Verify',
+      'Recovery',
+      'Audit',
+    ]);
+
+    // The reference merges a caller class into the step list itself.
+    const styled = render(LiteTwoFactorStepper, {
+      action: '/lite/2fa',
+      class: 'compact-steps',
+    });
+    const list = styled.container.querySelector('.lite-steps');
+    expect(list?.className).toContain('lite-steps');
+    expect(list?.className).toContain('compact-steps');
+  });
+
   it('renders collapse items with open and disabled state', () => {
     const view = render(LiteCollapse, {
       label: 'FAQ',

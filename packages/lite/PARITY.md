@@ -1,8 +1,8 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-31T00:51:06.752Z`
+> 自动生成时间：`2026-10-31T01:20:56.262Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**69.8%**（125）· 语义降级率 (Fallback)：**29.1%**（52）
+> 1:1 对齐率 (Exact)：**70.4%**（126）· 语义降级率 (Fallback)：**28.5%**（51）
 > 行为验证覆盖：**78.2%**（140/179 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
@@ -13,7 +13,7 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 18 | 13 | 5 | 0 | 0 | **72.2%** | 11/18 | 0 |
-| **advanced** | 43 | 25 | 17 | 1 | 0 | **58.1%** | 38/43 | 0 |
+| **advanced** | 43 | 26 | 16 | 1 | 0 | **60.5%** | 38/43 | 0 |
 | **widgets** | 37 | 15 | 22 | 0 | 0 | **40.5%** | 33/37 | 0 |
 | **fields** | 46 | 42 | 4 | 0 | 0 | **91.3%** | 36/46 | 0 |
 | **layout** | 25 | 20 | 4 | 1 | 0 | **80%** | 18/25 | 0 |
@@ -95,7 +95,7 @@
 | `CommentThread` | `LiteCommentThread.svelte` | ⚡ 语义降级 | 服务端评论列表、回复与 POST 评论表单；即时提交由宿主承接 |
 | `Tour` | `LiteTour.svelte` | ⚡ 语义降级 | 静态引导步骤与关闭链接；目标高亮和定位由 SPA 承接 |
 | `NotificationCenter` | `LiteNotificationCenter.svelte` | ⚡ 语义降级 | 服务端通知列表、已读态与全部已读链接；筛选和实时更新由宿主承接 |
-| `TwoFactorStepper` | `LiteTwoFactorStepper.svelte` | ⚡ 语义降级 | 原生两步验证步骤与 POST 表单 |
+| `TwoFactorStepper` | `LiteTwoFactorStepper.svelte` | ✅ 1:1 对齐 | 服务端有序步骤，保留自定义步骤、当前索引与列表 class；附原生验证码提交表单 |
 | `Popconfirm` | `LitePopconfirm.svelte` | ✅ 1:1 对齐 | 锚点确认面板（dialog 语义）与原生 POST 表单/链接的确认与取消 |
 | `DetailDrawer` | `LiteDetailDrawer.svelte` | ✅ 1:1 对齐 | 锚点驱动的详情侧栏与关闭链接，缺省闭合不影响页面其余内容 |
 | `RowActions` | `LiteRowActions.svelte` | ✅ 1:1 对齐 | 行内链接或原生 POST 动作 |

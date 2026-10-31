@@ -12,6 +12,8 @@
     status?: 'wait' | 'process' | 'finish' | 'error';
     direction?: 'horizontal' | 'vertical';
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -20,6 +22,7 @@
     status = 'process',
     direction = 'horizontal',
     label = 'Steps',
+    class: className = '',
   }: Props = $props();
 
   function state(index: number): string {
@@ -29,7 +32,7 @@
   }
 </script>
 
-<ol class="lite-steps" data-direction={direction} aria-label={label}>
+<ol class="lite-steps {className}" data-direction={direction} aria-label={label}>
   {#each items as item, index (item.title)}
     {@const stateValue = state(index)}
     <li class="lite-steps__item" data-status={stateValue} data-disabled={item.disabled || undefined}>

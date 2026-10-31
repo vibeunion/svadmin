@@ -251,7 +251,7 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'StatusTabs', uiComponent: 'StatusTabs.svelte', liteComponent: 'LiteStatusTabs.svelte', category: 'layout', status: 'exact', strategy: '状态筛选链接与计数徽章' },
   { name: 'NotificationCenter', uiComponent: 'NotificationCenter.svelte', liteComponent: 'LiteNotificationCenter.svelte', category: 'advanced', status: 'fallback', strategy: '服务端通知列表、已读态与全部已读链接；筛选和实时更新由宿主承接' },
   { name: 'OtpInput', uiComponent: 'OtpInput.svelte', liteComponent: 'LiteOtpInput.svelte', category: 'fields', status: 'exact', strategy: '原生一次性验证码输入与长度约束' },
-  { name: 'TwoFactorStepper', uiComponent: 'TwoFactorStepper.svelte', liteComponent: 'LiteTwoFactorStepper.svelte', category: 'advanced', status: 'fallback', strategy: '原生两步验证步骤与 POST 表单' },
+  { name: 'TwoFactorStepper', uiComponent: 'TwoFactorStepper.svelte', liteComponent: 'LiteTwoFactorStepper.svelte', category: 'advanced', status: 'exact', strategy: '服务端有序步骤，保留自定义步骤、当前索引与列表 class；附原生验证码提交表单' },
   { name: 'Popconfirm', uiComponent: 'Popconfirm.svelte', liteComponent: 'LitePopconfirm.svelte', category: 'advanced', status: 'exact', strategy: '锚点确认面板（dialog 语义）与原生 POST 表单/链接的确认与取消' },
   { name: 'DetailDrawer', uiComponent: 'DetailDrawer.svelte', liteComponent: 'LiteDetailDrawer.svelte', category: 'advanced', status: 'exact', strategy: '锚点驱动的详情侧栏与关闭链接，缺省闭合不影响页面其余内容' },
   { name: 'RowActions', uiComponent: 'RowActions.svelte', liteComponent: 'LiteRowActions.svelte', category: 'advanced', status: 'exact', strategy: '行内链接或原生 POST 动作' },

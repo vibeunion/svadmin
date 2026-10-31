@@ -102,3 +102,9 @@ Advanced-category re-audit (same cycle as the field audit above):
 The outcome is pinned by `scripts/parity-contract.test.ts`
 (`records the advanced disclosure re-audit outcome`) so a later status flip has
 to argue against this table instead of silently changing the number.
+| `TwoFactorStepper` | fallback | `exact` | The reference component is only a step list (`current` + `steps` + `class`, no auth engine). Lite now renders that list server-side with the same index semantics and a caller class on the list, plus a native OTP form. Two review rounds rejected the upgrade first (missing `steps`, then missing `class`), so the status only moved after the code did. |
+
+`TwoFactorStepper` keeps its own default labels (`Password verified` /
+`Enter verification code` / `Access granted`) instead of the reference
+`Setup`/`Verify`/`Recovery`; labels are content, and a caller can pass any list
+through `steps`, so this is a content difference rather than a capability gap.
