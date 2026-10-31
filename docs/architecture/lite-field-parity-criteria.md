@@ -133,3 +133,11 @@ to argue against this table instead of silently changing the number.
 `Enter verification code` / `Access granted`) instead of the reference
 `Setup`/`Verify`/`Recovery`; labels are content, and a caller can pass any list
 through `steps`, so this is a content difference rather than a capability gap.
+| `NotificationCenter` | fallback | `fallback` | The reference ships category filters and a client popover/read model; Lite only renders the server list, read state and a mark-all link, so filtering and live updates would be a capability gap, not an enhancement. |
+| `Tree` | fallback | `fallback` | `indeterminate` is a DOM property, not an HTML attribute, so native checkboxes cannot express half-selected parents; recursive selection, keyboard tree navigation and lazy loading also need client state. The strategy text was corrected because it claimed a `details` tree that the component does not render. |
+| `Collapse` | fallback | `fallback` | The current component is anchor-`#target` based, not `<details>`. `<details name>` does give a native exclusive accordion where supported, but it covers only that one behaviour: controlled open state, multi-open mode, disabled semantics, lazy mounting and the change callback all remain client concerns. See [the progressive enhancement note](./reviews/collapse-progressive-enhancement.md). |
+
+Strategy text is now machine-checked: `scripts/parity-contract.test.ts`
+(`keeps strategy text honest about the markup Lite actually renders`) fails when a
+strategy mentions `details`/`summary`, a checkbox or a `<select>` that the mapped
+Lite component does not actually render.

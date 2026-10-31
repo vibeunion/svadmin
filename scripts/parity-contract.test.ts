@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import {
@@ -10,6 +10,20 @@ import {
   parityArtifactDrift,
   parityOutputPaths,
 } from './check-parity';
+
+function listLiteFiles(directories: string[]): string[] {
+  const files: string[] = [];
+  const walk = (directory: string): void => {
+    if (!existsSync(directory)) return;
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const full = resolve(directory, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else files.push(full);
+    }
+  };
+  for (const directory of directories) walk(directory);
+  return files;
+}
 
 describe('UI/Lite Parity Tracking Contract', () => {
   it('computes complete component parity without missing items', () => {
@@ -143,6 +157,48 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(status('Tour')).toBe('fallback');
     expect(status('Tree')).toBe('fallback');
     expect(status('Collapse')).toBe('fallback');
+  });
+
+  it('keeps strategy text honest about the markup Lite actually renders', () => {
+    const report = buildParityReport();
+    const sourceOf = (liteComponent: string): string => {
+      const candidates = [resolve(import.meta.dir, '../packages/lite/src/components'), resolve(import.meta.dir, '../packages/lite/src')];
+      const file = listLiteFiles(candidates).find((path) => path.endsWith(`/${liteComponent}`) || path.endsWith(`/${liteComponent.split('/').at(-1)}`));
+      return file ? readFileSync(file, 'utf8') : '';
+    };
+
+    // Claims that must be backed by real markup, not by a nicer-sounding strategy.
+    const claims: Array<[RegExp, RegExp, string]> = [
+      [/details|summary/iu, /<details|<summary/iu, 'details/summary'],
+      [/type="?checkbox/iu, /type="checkbox"/iu, 'native checkbox'],
+      [/<select>/iu, /<select/iu, 'native select'],
+    ];
+
+    const violations: string[] = [];
+    for (const item of report.items) {
+      if (!item.liteComponent) continue;
+      const source = sourceOf(item.liteComponent);
+      for (const [claimed, required, label] of claims) {
+        if (claimed.test(item.strategy) && !required.test(source)) {
+          violations.push(`${item.name} (${item.liteComponent}) claims ${label} but does not render it`);
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it('keeps the fallback decisions for NotificationCenter, Tree and Collapse', () => {
+    const report = buildParityReport();
+    for (const name of ['NotificationCenter', 'Tree', 'Collapse']) {
+      expect(report.items.find((item) => item.name === name)?.status).toBe('fallback');
+    }
+    // The strategy must describe the real mechanism, not a nicer one.
+    const collapse = report.items.find((item) => item.name === 'Collapse');
+    expect(collapse?.strategy).toContain('锚点');
+    const tree = report.items.find((item) => item.name === 'Tree');
+    expect(tree?.strategy).not.toContain('details');
+    expect(tree?.strategy).toContain('静态层级树');
   });
 
   it('detects stale parity artifacts so CI cannot pass on drift', () => {

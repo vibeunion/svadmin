@@ -372,6 +372,43 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 
 Schema generation is TypeBox-only. The former Zod-named exports and parser-compatible methods were removed; use `Check`, `Errors`, and `Decode` on the returned schema.
 
+## Styling Hooks
+
+Most components accept a single `class` that is **merged** with the built-in class
+list, never replacing it:
+
+```svelte
+<LiteStatsCard class="dense" label="Orders" value={42} />
+<!-- renders class="lite-stats-card lite-card dense" -->
+```
+
+Fields take the hook on both of their render roots, so one prop covers show and
+edit mode (`LiteTextField` → `.lite-field-value` / `.lite-field-edit`,
+`LiteTagField` → tag container / `.lite-tags-input`, …).
+
+Structural components take **named** hooks, because the part you usually restyle is
+inside the wrapper:
+
+| Component | Hooks | Lands on |
+| --- | --- | --- |
+| `LiteLayout` | `class`, `classSidebar`, `classMobileNav`, `classMain` | wrapper, desktop sidebar, mobile nav, main region |
+| `LiteSidebar` | `class` | the sidebar `nav` |
+| `LiteSplitPaneLayout` | `class`, `classPane1`, `classDivider`, `classPane2` | container, first pane, divider, second pane |
+
+Omitting every hook leaves the rendered HTML byte-identical (the class attribute is
+built with a trimmed template, not an empty interpolation). This is covered by
+`packages/lite/src/components/LiteClassHooks.test.svelte.ts`.
+
+Styling hook coverage — how many `exact` mappings expose the same `class` entry the
+reference component does — is tracked separately in `CLASS-HOOKS.md` and never
+changes a parity status. `Lite` ships `lite.css`, so a missing hook is styling debt,
+not a capability gap. Regenerate both artifacts with:
+
+```bash
+bun run check:parity   # writes PARITY.md, parity.json, CLASS-HOOKS.md, class-hooks.json
+bun run check:parity:verify
+```
+
 ## CSS
 
 Import `@svadmin/lite/lite.css` in your layout. It's fully self-contained:

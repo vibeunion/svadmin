@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-31T02:50:46.174Z",
+  "timestamp": "2026-10-31T03:44:16.663Z",
   "totalComponents": 179,
   "adaptedCount": 126,
   "fallbackCount": 51,
@@ -1155,7 +1155,7 @@
       "liteComponent": "LiteCollapse.svelte",
       "category": "layout",
       "status": "fallback",
-      "strategy": "原生 details/summary 展开面板；手风琴状态由宿主承接"
+      "strategy": "锚点展开的分组面板与初始 open 态；互斥手风琴、懒加载与关闭回调由宿主承接"
     },
     {
       "name": "CommentThread",
@@ -1403,7 +1403,7 @@
       "liteComponent": "LiteTree.svelte",
       "category": "advanced",
       "status": "fallback",
-      "strategy": "details 层级树与链接/选中态；展开、复选和键盘树导航由 SPA 承接"
+      "strategy": "静态层级树（缩进 + 节点链接/选中态）；展开、复选半选与键盘树导航由 SPA 承接"
     },
     {
       "name": "MediaThumbnail",

@@ -19,10 +19,19 @@
 <div class="lite-collapse" role="group" aria-label={label}>
   {#each items as item (item.id)}
     <section class="lite-collapse__item" data-open={item.open || undefined} data-disabled={item.disabled || undefined}>
-      <a class="lite-collapse__trigger" href={`#${item.id}`}>
-        <span>{item.title}</span>
-        {#if item.description}<small>{item.description}</small>{/if}
-      </a>
+      {#if item.disabled}
+        <!-- Disabled sections must not navigate: a dead anchor still moves focus and
+             changes the URL, so render plain text instead of a link. -->
+        <span class="lite-collapse__trigger" aria-disabled="true">
+          <span>{item.title}</span>
+          {#if item.description}<small>{item.description}</small>{/if}
+        </span>
+      {:else}
+        <a class="lite-collapse__trigger" href={`#${item.id}`}>
+          <span>{item.title}</span>
+          {#if item.description}<small>{item.description}</small>{/if}
+        </a>
+      {/if}
       <div class="lite-collapse__body" id={item.id}>{item.content}</div>
     </section>
   {/each}

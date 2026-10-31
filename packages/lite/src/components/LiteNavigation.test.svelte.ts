@@ -485,6 +485,11 @@ describe('Lite form and media primitives', () => {
     expect(items[0]?.textContent).toContain('30 days');
     expect(group.querySelector('#q1')?.textContent).toBe('Full refund');
     expect(items[1]?.getAttribute('data-disabled')).toBe('true');
+    // A disabled section must not be reachable as a link (no href, no navigation).
+    const disabledTrigger = items[1]?.querySelector('.lite-collapse__trigger');
+    expect(disabledTrigger?.tagName.toLowerCase()).toBe('span');
+    expect(disabledTrigger?.getAttribute('aria-disabled')).toBe('true');
+    expect(items[1]?.querySelector('a')).toBeNull();
   });
 
   it('renders audio players with tracks and download links', () => {

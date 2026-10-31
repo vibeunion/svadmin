@@ -1,6 +1,6 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-31T02:50:46.174Z`
+> 自动生成时间：`2026-10-31T03:44:16.663Z`
 > 清单映射覆盖率：**100%**（179/179 组件）
 > 1:1 对齐率 (Exact)：**70.4%**（126）· 语义降级率 (Fallback)：**28.5%**（51）
 > 行为验证覆盖：**83.8%**（150/179 映射组件具备断言预算）· 仅被引用：0
@@ -102,7 +102,7 @@
 | `DetailDrawer` | `LiteDetailDrawer.svelte` | ✅ 1:1 对齐 | 锚点驱动的详情侧栏与关闭链接，缺省闭合不影响页面其余内容 |
 | `RowActions` | `LiteRowActions.svelte` | ✅ 1:1 对齐 | 行内链接或原生 POST 动作 |
 | `Result` | `LiteResult.svelte` | ✅ 1:1 对齐 | 成功、失败、警告与异常状态页 |
-| `Tree` | `LiteTree.svelte` | ⚡ 语义降级 | details 层级树与链接/选中态；展开、复选和键盘树导航由 SPA 承接 |
+| `Tree` | `LiteTree.svelte` | ⚡ 语义降级 | 静态层级树（缩进 + 节点链接/选中态）；展开、复选半选与键盘树导航由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -213,7 +213,7 @@
 | `MultiTabKeepAlive` | `LiteMultiTabKeepAlive.svelte` | ✅ 1:1 对齐 | 工作台多标签页导航 |
 | `Anchor` | `LiteAnchor.svelte` | ✅ 1:1 对齐 | 语义化页内锚点导航 |
 | `Affix` | `LiteAffix.svelte` | ⚡ 语义降级 | CSS position: sticky 固定；滚动监听状态样式由 SPA 承接 |
-| `Collapse` | `LiteCollapse.svelte` | ⚡ 语义降级 | 原生 details/summary 展开面板；手风琴状态由宿主承接 |
+| `Collapse` | `LiteCollapse.svelte` | ⚡ 语义降级 | 锚点展开的分组面板与初始 open 态；互斥手风琴、懒加载与关闭回调由宿主承接 |
 | `FloatButton` | `LiteFloatButton.svelte` | ✅ 1:1 对齐 | 固定位置链接或状态按钮 |
 | `Steps` | `LiteSteps.svelte` | ✅ 1:1 对齐 | 有序步骤与完成/处理中/错误状态 |
 | `Menu` | `LiteMenu.svelte` | ✅ 1:1 对齐 | 递归菜单、选中态与徽章，无客户端展开状态 |
