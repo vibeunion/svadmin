@@ -11,6 +11,6 @@
 | 1440x900 / 1920x1080 / 390x844 | 无横向溢出 |
 | 缺失宿主翻译 | 定向单元测试确认原始颜色标签与计数回退 |
 
-24 项定向组件测试通过，UI 包构建、定向 ESLint、`git diff --check` 通过。浏览器 DOM 验证结果及源文件 SHA-256 见 `browser-results.json`。
+24 项定向组件测试及现有 DataTableShell Playwright 用例通过；浏览器用例显式固定 zh-CN locale。UI 包构建、定向 ESLint、`git diff --check` 通过。浏览器 DOM 验证结果及源文件 SHA-256 见 `browser-results.json`。
 
 `localized-1440x900.png` 与 `localized-1920x1080.png` 是相同源代码渲染的真实双语言视口截图。`verify-browser.js` 为 Playwright CLI 使用的 DOM 验证函数。

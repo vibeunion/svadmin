@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+test.use({ locale: 'zh-CN' });
+
 test('DataTableShell renders the titled table surface with toolbar and sticky actions', async ({ page }) => {
   const directory = resolve(process.cwd(), 'docs/evidence/data-table-shell');
   mkdirSync(directory, { recursive: true });
