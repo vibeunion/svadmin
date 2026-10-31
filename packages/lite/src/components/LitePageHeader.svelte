@@ -7,12 +7,14 @@
     eyebrow?: string;
     actions?: Snippet;
     children?: Snippet;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { title, description, eyebrow, actions, children }: Props = $props();
+  let { title, description, eyebrow, actions, children, class: className = '' }: Props = $props();
 </script>
 
-<header class="lite-page-header lite-page-header-rich">
+<header class="lite-page-header lite-page-header-rich {className}">
   <div>
     {#if eyebrow}<p class="lite-page-header__eyebrow">{eyebrow}</p>{/if}
     <h1 class="lite-page-title">{title}</h1>

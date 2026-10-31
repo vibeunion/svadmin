@@ -6,12 +6,14 @@
     mode?: 'vertical' | 'horizontal';
     selected?: string;
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { items, mode = 'vertical', selected, label = 'Menu' }: Props = $props();
+  let { items, mode = 'vertical', selected, label = 'Menu', class: className = '' }: Props = $props();
 </script>
 
-<nav class="lite-menu" data-mode={mode} aria-label={label}>
+<nav class="lite-menu {className}" data-mode={mode} aria-label={label}>
   <LiteMenuList {items} {selected} {mode} />
 </nav>
 

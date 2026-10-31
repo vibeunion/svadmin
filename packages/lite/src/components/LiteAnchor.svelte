@@ -8,12 +8,14 @@
   interface Props {
     items: AnchorItem[];
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { items, label = 'On this page' }: Props = $props();
+  let { items, label = 'On this page', class: className = '' }: Props = $props();
 </script>
 
-<nav class="lite-anchor" aria-label={label}>
+<nav class="lite-anchor {className}" aria-label={label}>
   <p class="lite-anchor__title">{label}</p>
   <ul>
     {#each items as item (item.id)}

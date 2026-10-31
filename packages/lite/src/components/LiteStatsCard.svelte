@@ -20,6 +20,8 @@
     icon?: string;
     /** Link to detail page */
     href?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -30,11 +32,12 @@
     trendValue,
     icon,
     href,
+    class: className = '',
   }: Props = $props();
 </script>
 
 {#if href}
-  <a href={href} class="lite-stats-card lite-card" style="text-decoration:none;display:block;">
+  <a href={href} class="lite-stats-card lite-card {className}" style="text-decoration:none;display:block;">
     {#if icon}
       <div class="lite-stats-icon">{icon}</div>
     {/if}
@@ -51,7 +54,7 @@
     {/if}
   </a>
 {:else}
-  <div class="lite-stats-card lite-card">
+  <div class="lite-stats-card lite-card {className}">
     {#if icon}
       <div class="lite-stats-icon">{icon}</div>
     {/if}

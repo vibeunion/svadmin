@@ -9,6 +9,8 @@
     color?: string;
     background?: string;
     ariaLabel?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -19,6 +21,7 @@
     color = '#1D2129',
     background = '#FFFFFF',
     ariaLabel = 'QR code',
+    class: className = '',
   }: Props = $props();
 
   const matrix = $derived.by(() => {
@@ -41,7 +44,7 @@
   });
 </script>
 
-<figure class="lite-qr-code">
+<figure class="lite-qr-code {className}">
   {#if matrix}
     <svg width={size} height={size} viewBox={`0 0 ${matrix.total} ${matrix.total}`} role="img" aria-label={ariaLabel} shape-rendering="crispEdges">
       <rect width={matrix.total} height={matrix.total} fill={background} />

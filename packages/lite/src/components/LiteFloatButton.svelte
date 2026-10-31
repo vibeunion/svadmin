@@ -8,6 +8,8 @@
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     target?: string;
     ariaLabel?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -19,10 +21,11 @@
     position = 'bottom-right',
     target,
     ariaLabel,
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-float-button" data-position={position}>
+<div class="lite-float-button {className}" data-position={position}>
   {#if href}
     <a class="lite-float-button__control" href={href} {target} aria-label={ariaLabel ?? label ?? description ?? 'Float button'}>
       <span aria-hidden="true">{icon}</span>

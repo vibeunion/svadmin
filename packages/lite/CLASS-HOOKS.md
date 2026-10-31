@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-10-31T01:30:12.219Z
+> 自动生成时间: 2026-10-31T01:31:45.810Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标
@@ -16,8 +16,8 @@
 
 - 参与统计的 `exact` 条目: **111**
 - 参考组件暴露 `class` 的条目: **84**
-- Lite 同时接受 `class` 的条目: **30**（**35.7%**）
-- 仍缺样式钩子的条目: **54**
+- Lite 同时接受 `class` 的条目: **37**（**44%**）
+- 仍缺样式钩子的条目: **47**
 
 ## 待补齐清单
 
@@ -57,12 +57,7 @@
 | `Transfer` | fields | `LiteTransfer.svelte` |
 | `TreeSelect` | fields | `LiteTreeSelect.svelte` |
 | `UrlField` | fields | `LiteUrlField.svelte` |
-| `Anchor` | layout | `LiteAnchor.svelte` |
-| `ContentPageHeader` | layout | `LitePageHeader.svelte` |
-| `FloatButton` | layout | `LiteFloatButton.svelte` |
 | `Layout` | layout | `LiteLayout.svelte` |
-| `Menu` | layout | `LiteMenu.svelte` |
-| `PageHeader` | layout | `LitePageHeader.svelte` |
 | `Sidebar` | layout | `LiteSidebar.svelte` |
 | `SplitPaneLayout` | layout | `LiteSplitPaneLayout.svelte` |
 | `CreatePage` | pages | `LiteCreatePage.svelte` |
@@ -75,5 +70,3 @@
 | `ShowPage` | pages | `LiteShowPage.svelte` |
 | `AnomalyBadge` | widgets | `LiteAnomalyBadge.svelte` |
 | `PresenceAvatarGroup` | widgets | `LitePresenceAvatarGroup.svelte` |
-| `QRCode` | widgets | `LiteQRCode.svelte` |
-| `StatsCard` | widgets | `LiteStatsCard.svelte` |
