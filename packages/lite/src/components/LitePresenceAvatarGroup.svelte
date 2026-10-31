@@ -8,15 +8,18 @@
   interface Props {
     users?: LitePresenceUser[];
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
     users = [],
     label = 'Viewing now',
+    class: className = ''
   }: Props = $props();
 </script>
 
-<div class="lite-presence-container">
+<div class="lite-presence-container {className}">
   <span class="lite-presence-label">{label}:</span>
   {#each users as user (user.id)}
     <span class="lite-presence-badge" title="{user.name} ({user.status ?? 'online'})">

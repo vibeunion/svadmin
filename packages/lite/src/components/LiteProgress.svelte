@@ -5,15 +5,19 @@
     label?: string;
     showValue?: boolean;
     tone?: 'default' | 'success' | 'warning' | 'danger';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { value, max = 100, label, showValue = true, tone = 'default' }: Props = $props();
+  let { value, max = 100, label, showValue = true, tone = 'default',
+    class: className = ''
+  }: Props = $props();
   const safeMax = $derived(max > 0 ? max : 100);
   const safeValue = $derived(Math.max(0, Math.min(value, safeMax)));
   const percent = $derived(Math.round((safeValue / safeMax) * 100));
 </script>
 
-<div class="lite-progress" data-tone={tone}>
+<div class="lite-progress {className}" data-tone={tone}>
   {#if label || showValue}
     <div class="lite-progress__meta">
       {#if label}<span>{label}</span>{/if}

@@ -5,12 +5,16 @@
     height?: string;
     circle?: boolean;
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { lines = 3, width = '100%', height = '14px', circle = false, label = 'Loading' }: Props = $props();
+  let { lines = 3, width = '100%', height = '14px', circle = false, label = 'Loading',
+    class: className = ''
+  }: Props = $props();
 </script>
 
-<div class="lite-skeleton" role="status" aria-label={label} aria-busy="true">
+<div class="lite-skeleton {className}" role="status" aria-label={label} aria-busy="true">
   {#if circle}
     <span class="lite-skeleton__circle" aria-hidden="true"></span>
   {:else}

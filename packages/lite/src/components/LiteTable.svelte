@@ -24,6 +24,8 @@
     stickyColumns?: { left?: string; right?: string };
     /** Pin actions on the right; this takes precedence over stickyColumns.right. */
     stickyActions?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -39,6 +41,7 @@
     enableBatch = false,
     stickyColumns = {},
     stickyActions = false,
+    class: className = ''
   }: Props = $props();
 
   const tableId = $props.id();
@@ -98,7 +101,7 @@
   <form id={"batch-delete-" + tableId} method="POST" action="?/batchDelete" style="display:none;"></form>
 {/if}
 
-<table class="lite-table">
+<table class="lite-table {className}">
   <thead>
     <tr>
       {#if showBatch}

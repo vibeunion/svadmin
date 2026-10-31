@@ -53,6 +53,10 @@ import LiteJsonSchemaForm from './LiteJsonSchemaForm.svelte';
 import LiteMarkdownField from './fields/LiteMarkdownField.svelte';
 import LiteTransfer from './LiteTransfer.svelte';
 import LiteTreeSelect from './fields/LiteTreeSelect.svelte';
+import LitePresenceAvatarGroup from './LitePresenceAvatarGroup.svelte';
+import LiteProgress from './LiteProgress.svelte';
+import LiteSkeleton from './LiteSkeleton.svelte';
+import LiteTable from './LiteTable.svelte';
 
 const pageResource = {
   name: 'orders',
@@ -580,6 +584,41 @@ describe('Lite styling hook contract', () => {
     }).container.querySelector('.lite-cropper-card');
     expect(cropper?.classList.contains('host-surface')).toBe(true);
     expect(cropper?.classList.contains('lite-cropper-card')).toBe(true);
+  });
+
+  it('merges the caller class on LiteTable and LiteProgress', () => {
+    const table = render(LiteTable, {
+      class: 'host-surface',
+      records: [{ id: 1, title: 'Row' }],
+      resource: pageResource,
+    }).container.querySelector('.lite-table');
+    expect(table?.classList.contains('host-surface')).toBe(true);
+    expect(table?.tagName.toLowerCase()).toBe('table');
+
+    const progress = render(LiteProgress, {
+      class: 'host-surface',
+      value: 40,
+      max: 80,
+      label: 'Upload',
+    }).container.querySelector('.lite-progress');
+    expect(progress?.classList.contains('host-surface')).toBe(true);
+    expect(progress?.querySelector('progress')?.getAttribute('value')).toBe('40');
+  });
+
+  it('merges the caller class on LiteSkeleton and LitePresenceAvatarGroup', () => {
+    const skeleton = render(LiteSkeleton, {
+      class: 'host-surface',
+      lines: 2,
+    }).container.querySelector('.lite-skeleton');
+    expect(skeleton?.classList.contains('host-surface')).toBe(true);
+    expect(skeleton?.getAttribute('role')).toBe('status');
+
+    const presence = render(LitePresenceAvatarGroup, {
+      class: 'host-surface',
+      users: [{ id: '1', name: 'Alice' }],
+    }).container.querySelector('.lite-presence-container');
+    expect(presence?.classList.contains('host-surface')).toBe(true);
+    expect(presence?.textContent).toContain('Alice');
   });
 
   it('keeps the default markup unchanged when no class is passed', () => {
