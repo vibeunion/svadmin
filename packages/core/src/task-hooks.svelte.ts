@@ -99,6 +99,7 @@ export function useSubmitTask(options: UseSubmitTaskOptions={}) {
   const failureScopes = new WeakMap<Error, SubmissionScope>();
 
   const mutation=createMutation<TaskHandle,Error,UseSubmitTaskMutateParams>(() => ({
+    retry: false,
     mutationFn: async (params) => {
       const authProvider = adminContext.authProvider;
       const auth = captureAuthLiveScope(authProvider);

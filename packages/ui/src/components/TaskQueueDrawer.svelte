@@ -3,7 +3,7 @@
   import { definedReactiveOptions, definedOptions } from '@svadmin/core/options';
 
   import { ListTodo, Loader2, Plus, Search, RefreshCw } from '@lucide/svelte';
-  import { captureAdminContext, captureAuthSession, useSubmitTask, useTaskList } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, TaskError, useSubmitTask, useTaskList } from '@svadmin/core';
   import { decodeTaskSubmitOptions } from '@svadmin/core/schema';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { TaskProvider, TaskRecord } from '@svadmin/core';
@@ -238,6 +238,7 @@
       const handle = await submitTask.mutation.mutateAsync(definedOptions({
         taskName: submitTaskName.trim(),
         taskProvider: activeTaskProvider,
+        errorNotification: false,
         options: definedOptions({
           body,
           idempotencyKey: submitIdempotencyKey.trim() || undefined,
@@ -252,9 +253,11 @@
         ...(canListTasks ? [taskQuery.refetch?.()] : []),
         ...(canListDlq ? [dlqQuery.refetch?.()] : []),
       ]);
-    } catch {
+    } catch (error) {
       if (!current()) return;
-      submitError = i18n.t('task.submitFailed');
+      submitError = error instanceof TaskError && error.writeMayHaveSucceeded
+        ? i18n.t('task.submitUnconfirmed')
+        : i18n.t('task.submitFailed');
     } finally {
       if (submitAttempt === attempt) submitAttempt = null;
     }

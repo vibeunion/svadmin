@@ -8,7 +8,7 @@
     "example/src/providers/inMemoryDb.ts": 1399,
     "packages/ui/src/components/ImportWizard.svelte": 916,
     "packages/ui/src/components/TreeSelect.svelte": 964,
-    "packages/core/src/i18n.svelte.ts": 2102,
+    "packages/core/src/i18n.svelte.ts": 2104,
     "packages/lite/src/server-adapter.ts": 981,
     "packages/ai-elements/src/components/ChatDialog.svelte": 1417,
     "packages/sso/src/auth-provider.ts": 808
