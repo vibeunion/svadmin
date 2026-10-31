@@ -55,6 +55,7 @@ export {
   useApiUrl,
   useNavigation, useGo, useBack,
   useGetToPath, useLink,
+  useMutationMode, useWarnAboutChange, useSyncWithLocation, useMeta,
   useResource,
   useModal, useDrawer,
   useOvertime, useLoadingOvertime,
@@ -68,6 +69,9 @@ export {
   useCreate, useUpdate, useDelete, useCreateMany, useUpdateMany, useDeleteMany, useForm,
   useInvalidate,
 } from './strict-hooks.svelte';
+export { useEditableTable } from './editable-table.svelte';
+export { createEditableTableController } from './editable-table';
+export type { EditableTableSnapshot } from './editable-table';
 export { defineResource, getContractFormFields, withContractProjection } from './resource-contract';
 export {
   defineAdminConfig,
@@ -319,6 +323,7 @@ export {
   generateEditPageCode,
   generateShowPageCode,
   generateResourceCode,
+  generateResourceContractCode,
   generateComponentCode,
   generateResourceBundle,
 } from './inferencer';

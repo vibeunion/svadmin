@@ -209,11 +209,19 @@ describe('inferResource',() => {
     expect(requireValue(field).showInList).toBe(false);
   });
 
-  test('generates valid TypeScript code',() => {
+  test('generates a strict ResourceContract',() => {
     const result=inferResource('posts',sampleData);
     expect(result.code).toContain("name: 'posts'");
-    expect(result.code).toContain("import type { ResourceDefinition }");
-    expect(result.code).toContain("export const postsResource");
+    expect(result.code).toContain("import { defineResource, type AdminResourceDefinition } from '@svadmin/core';");
+    expect(result.code).toContain('export const postsResource = defineResource(\'posts\'');
+    expect(result.code).toContain('record: postsRecordSchema');
+    expect(result.code).toContain('create: postsCreateSchema');
+    expect(result.code).toContain('update: postsUpdateSchema');
+    expect(result.code).toContain('delete: postsDeleteSchema');
+    expect(result.code).toContain('contract: postsResource');
+    expect(result.code).toContain('primaryKey: \'id\'');
+    expect(result.code).toContain('additionalProperties: false');
+    expect(result.code).not.toContain('Type.Record(');
   });
 
   test('handles empty data gracefully',() => {
@@ -233,12 +241,14 @@ describe('inferResource',() => {
   test('generates complete Svelte 5 component code for list, create, edit, show',() => {
     const result=inferResource('posts',sampleData);
     expect(result.componentCode).toBeDefined();
-    expect(result.componentCode.list).toContain('<ListPage resourceName="posts">');
-    expect(result.componentCode.list).toContain('<AutoTable resourceName="posts" />');
-    expect(result.componentCode.create).toContain('<CreatePage resourceName="posts">');
-    expect(result.componentCode.create).toContain('<AutoForm resourceName="posts" mode="create" />');
-    expect(result.componentCode.edit).toContain('<EditPage resourceName="posts" {id}>');
-    expect(result.componentCode.show).toContain('<ShowPage resourceName="posts" {id}>');
+    expect(result.componentCode.list).toContain('import { postsDefinition } from \'../posts.resource\'');
+    expect(result.componentCode.list).toContain('const resourceName = postsDefinition.name');
+    expect(result.componentCode.list).toContain('<ListPage {resourceName}>');
+    expect(result.componentCode.list).toContain('<AutoTable {resourceName} />');
+    expect(result.componentCode.create).toContain('<CreatePage {resourceName}>');
+    expect(result.componentCode.create).toContain('<AutoForm {resourceName} mode="create" />');
+    expect(result.componentCode.edit).toContain('<EditPage {resourceName} {id}>');
+    expect(result.componentCode.show).toContain('<ShowPage {resourceName} {id}>');
   });
 
   test('generateComponentCode helper produces matching code for each kind',() => {
@@ -280,9 +290,12 @@ describe('generateResourceBundle',() => {
     expect(bundle.fields).toBe(resource.fields);
     expect(bundle.code).toContain('export const categoriesResource');
     expect(bundle.typeboxCode).toContain('export const CategorieSchema = Type.Object({');
-    expect(bundle.componentCode.list).toContain('<ListPage resourceName="categories">');
-    expect(bundle.componentCode.create).toContain('<CreatePage resourceName="categories">');
-    expect(bundle.componentCode.edit).toContain('<EditPage resourceName="categories" {id}>');
-    expect(bundle.componentCode.show).toContain('<ShowPage resourceName="categories" {id}>');
+    expect(bundle.code).toContain('defineResource(\'categories\'');
+    expect(bundle.code).toContain('contract: categoriesResource');
+    expect(bundle.componentCode.list).toContain('categoriesDefinition');
+    expect(bundle.componentCode.list).toContain('<ListPage {resourceName}>');
+    expect(bundle.componentCode.create).toContain('<CreatePage {resourceName}>');
+    expect(bundle.componentCode.edit).toContain('<EditPage {resourceName} {id}>');
+    expect(bundle.componentCode.show).toContain('<ShowPage {resourceName} {id}>');
   });
 });

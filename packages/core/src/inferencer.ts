@@ -98,7 +98,8 @@ export type InferReviewWarningCode =
   | 'nullable-field'
   | 'mixed-types'
   | 'heuristic-relation'
-  | 'heuristic-select';
+  | 'heuristic-select'
+  | 'unconstrained-field';
 
 export interface InferReviewWarning {
   code: InferReviewWarningCode;
@@ -135,7 +136,7 @@ export function inferResource(
     return {
       fields: [],
       resource: emptyResource,
-      code: `// No data available to infer fields for "${resourceName}".`,
+      code: `// No data available to infer fields for "${resourceName}".\n${generateCode(emptyResource)}`,
       typeboxCode: generateTypeBoxSchemaCode(emptyResource),
       review: {
         needsReview: true,
@@ -242,6 +243,14 @@ export function inferResource(
       field.options = [...uniqueStrings].map(v => ({ label: capitalize(v), value: v }));
     }
 
+    if (field.type === 'json' || field.type === 'richtext') {
+      warnings.push({
+        code: 'unconstrained-field',
+        field: key,
+        message: `Field "${key}" is omitted from the strict ResourceContract because its value is not a closed JSON type.`,
+      });
+    }
+
     fields.push(field);
   }
 
@@ -293,40 +302,163 @@ export function inferResource(
 
 // ─── Code Generation ─────────────────────────────────────────
 
-function generateCode(resource: ResourceDefinition): string {
-  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-  const fieldsCode = resource.fields.map((f: FieldDefinition) => {
-    const lines = [
-      `    { key: '${esc(f.key)}', label: '${esc(f.label)}', type: '${f.type}'`,
-    ];
-    if (f.sortable) lines.push(`      sortable: true`);
-    if (f.searchable) lines.push(`      searchable: true`);
-    if (f.showInList === false) lines.push(`      showInList: false`);
-    if (f.showInForm === false) lines.push(`      showInForm: false`);
-    if (f.resource) {
-      lines.push(`      resource: '${f.resource}'`);
-      lines.push(`      optionLabel: '${f.optionLabel}'`);
-      lines.push(`      optionValue: '${f.optionValue}'`);
-    }
-    if (f.options) {
-      lines.push(`      options: ${JSON.stringify(f.options)}`);
-    }
+function propertyKey(key: string): string {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+}
 
-    return lines.join(',\n') + ' }';
+function moduleName(resource: ResourceDefinition): string {
+  const safe = resource.name.replace(/[^A-Za-z0-9_$]/g, '_');
+  return /^[A-Za-z_$]/.test(safe) ? safe : `resource_${safe}`;
+}
+
+/** Closed TypeBox expression, or null when the value cannot be a strict contract field. */
+function contractTypeExpression(field: FieldDefinition): string | null {
+  const esc = (value: string) => value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  switch (field.type) {
+    case 'number':
+      return 'Type.Number()';
+    case 'boolean':
+      return 'Type.Boolean()';
+    case 'date':
+      return "Type.String({ format: 'date-time' })";
+    case 'email':
+      return "Type.String({ format: 'email' })";
+    case 'url':
+    case 'image':
+      return "Type.String({ format: 'uri' })";
+    case 'phone':
+      return "Type.String({ pattern: '^\\\\+?[\\\\d\\\\s\\\\-()]{7,}$' })";
+    case 'tags':
+      return 'Type.Array(Type.String())';
+    case 'images':
+      return "Type.Array(Type.String({ format: 'uri' }))";
+    case 'select':
+      if (field.options && field.options.length > 0) {
+        const literals = field.options.map((option) => `Type.Literal('${esc(String(option.value))}')`).join(', ');
+        return `Type.Union([${literals}])`;
+      }
+      return 'Type.String()';
+    case 'relation':
+      return 'Type.Union([Type.String(), Type.Number()])';
+    case 'daterange':
+      return 'Type.Union([Type.Object({ start: Type.Union([Type.String(), Type.Null()]), end: Type.Union([Type.String(), Type.Null()]) }, { additionalProperties: false }), Type.Null()])';
+    case 'json':
+    case 'richtext':
+      return null;
+    case 'datetime':
+    case 'time':
+    case 'textarea':
+    case 'text':
+    case 'color':
+    default:
+      return 'Type.String()';
+  }
+}
+
+function idTypeExpression(field: FieldDefinition | undefined): string {
+  if (!field) return 'Type.String()';
+  if (field.type === 'number') return 'Type.Number()';
+  if (field.type === 'relation') return 'Type.Union([Type.String(), Type.Number()])';
+  return 'Type.String()';
+}
+
+function schemaProperty(key: string, expression: string, optional: boolean): string {
+  const value = optional ? `Type.Optional(${expression})` : expression;
+  return `  ${propertyKey(key)}: ${value},`;
+}
+
+function objectConst(name: string, properties: string[]): string {
+  const body = properties.length > 0 ? `\n${properties.join('\n')}\n` : '\n';
+  return `const ${name} = Type.Object({${body}}, { additionalProperties: false });`;
+}
+
+function definitionFieldLines(fields: FieldDefinition[]): string {
+  const esc = (value: string) => value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return fields.map((field) => {
+    const lines = [`    { key: '${esc(field.key)}', label: '${esc(field.label)}', type: '${field.type}'`];
+    if (field.sortable) lines.push('      sortable: true');
+    if (field.searchable) lines.push('      searchable: true');
+    if (field.showInList === false) lines.push('      showInList: false');
+    if (field.showInForm === false) lines.push('      showInForm: false');
+    if (field.resource) {
+      lines.push(`      resource: '${esc(field.resource)}'`);
+      lines.push(`      optionLabel: '${esc(field.optionLabel ?? 'name')}'`);
+      lines.push(`      optionValue: '${esc(field.optionValue ?? 'id')}'`);
+    }
+    if (field.options) lines.push(`      options: ${JSON.stringify(field.options)}`);
+    return `${lines.join(',\n')} }`;
   }).join(',\n');
+}
 
-  return `import type { ResourceDefinition } from '@svadmin/core';
+function contractParts(resource: ResourceDefinition): { idField: FieldDefinition | undefined; writable: FieldDefinition[] } {
+  const sourceKey = resource.primaryKey ?? 'id';
+  const idField = resource.fields.find((field) => field.key === sourceKey) ?? resource.fields.find((field) => field.key === 'id');
+  const writable = resource.fields.filter((field) => (
+    field.key !== sourceKey
+    && field.key !== 'id'
+    && field.showInForm !== false
+    && contractTypeExpression(field) !== null
+  ));
+  return { idField, writable };
+}
 
-export const ${resource.name}Resource: ResourceDefinition = {
-  name: '${resource.name}',
-  label: '${resource.label}',
-  primaryKey: '${resource.primaryKey ?? 'id'}',
-  canCreate: true,
-  canEdit: true,
-  canDelete: true,
-  canShow: true,
+function definitionFields(resource: ResourceDefinition): FieldDefinition[] {
+  const sourceKey = resource.primaryKey ?? 'id';
+  const idField = resource.fields.find((field) => field.key === sourceKey) ?? resource.fields.find((field) => field.key === 'id');
+  const rest = resource.fields.filter((field) => field.key !== sourceKey && field.key !== 'id');
+  const idDefinition: FieldDefinition = idField
+    ? { ...idField, key: 'id', showInForm: false }
+    : { key: 'id', label: 'ID', type: 'text', showInForm: false, showInList: false };
+  return [idDefinition, ...rest];
+}
+
+function generateCode(resource: ResourceDefinition): string {
+  const name = moduleName(resource);
+  const literalName = resource.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const literalLabel = resource.label.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const { idField, writable } = contractParts(resource);
+  const idType = idTypeExpression(idField);
+  const recordProps = [
+    schemaProperty('id', idType, false),
+    ...writable.map((field) => schemaProperty(field.key, contractTypeExpression(field) ?? 'Type.String()', field.required !== true)),
+  ];
+  const createProps = writable.map((field) => schemaProperty(field.key, contractTypeExpression(field) ?? 'Type.String()', field.required !== true));
+  const updateProps = writable.map((field) => schemaProperty(field.key, contractTypeExpression(field) ?? 'Type.String()', true));
+  const sourceKey = resource.primaryKey ?? 'id';
+  const projection = sourceKey === 'id'
+    ? ''
+    : `// Source primary key "${sourceKey.replace(/"/g, '\\"')}" is projected onto the contract id.\n`;
+  return `import { Type } from 'typebox';
+import { defineResource, type AdminResourceDefinition } from '@svadmin/core';
+
+${projection}${objectConst(`${name}RecordSchema`, recordProps)}
+
+${objectConst(`${name}CreateSchema`, createProps)}
+
+${objectConst(`${name}UpdateSchema`, updateProps)}
+
+${objectConst(`${name}DeleteSchema`, [schemaProperty('id', idType, false)])}
+
+/** Runtime contract consumed by AutoTable and AutoForm through resolveResourceContract(). */
+export const ${name}Resource = defineResource('${literalName}', {
+  record: ${name}RecordSchema,
+  create: ${name}CreateSchema,
+  update: ${name}UpdateSchema,
+  delete: ${name}DeleteSchema,
+});
+
+/** Register this definition on the admin config resources array. */
+export const ${name}Definition: AdminResourceDefinition = {
+  name: '${literalName}',
+  label: '${literalLabel}',
+  primaryKey: 'id',
+  canCreate: ${resource.canCreate ?? true},
+  canEdit: ${resource.canEdit ?? true},
+  canDelete: ${resource.canDelete ?? true},
+  canShow: ${resource.canShow ?? true},
+  contract: ${name}Resource,
   fields: [
-${fieldsCode}
+${definitionFieldLines(definitionFields(resource))}
   ],
 };
 `;
@@ -336,12 +468,16 @@ ${fieldsCode}
  * Generate Svelte 5 ListPage component code for a resource.
  */
 export function generateListPageCode(resource: ResourceDefinition): string {
+  const name = moduleName(resource);
   return `<script lang="ts">
   import { ListPage, AutoTable } from '@svadmin/ui';
+  import { ${name}Definition } from '../${resource.name}.resource';
+
+  const resourceName = ${name}Definition.name;
 </script>
 
-<ListPage resourceName="${resource.name}">
-  <AutoTable resourceName="${resource.name}" />
+<ListPage {resourceName}>
+  <AutoTable {resourceName} />
 </ListPage>
 `;
 }
@@ -350,12 +486,16 @@ export function generateListPageCode(resource: ResourceDefinition): string {
  * Generate Svelte 5 CreatePage component code for a resource.
  */
 export function generateCreatePageCode(resource: ResourceDefinition): string {
+  const name = moduleName(resource);
   return `<script lang="ts">
   import { CreatePage, AutoForm } from '@svadmin/ui';
+  import { ${name}Definition } from '../${resource.name}.resource';
+
+  const resourceName = ${name}Definition.name;
 </script>
 
-<CreatePage resourceName="${resource.name}">
-  <AutoForm resourceName="${resource.name}" mode="create" />
+<CreatePage {resourceName}>
+  <AutoForm {resourceName} mode="create" />
 </CreatePage>
 `;
 }
@@ -364,18 +504,21 @@ export function generateCreatePageCode(resource: ResourceDefinition): string {
  * Generate Svelte 5 EditPage component code for a resource.
  */
 export function generateEditPageCode(resource: ResourceDefinition): string {
+  const name = moduleName(resource);
   return `<script lang="ts">
   import { EditPage, AutoForm } from '@svadmin/ui';
+  import { ${name}Definition } from '../${resource.name}.resource';
 
   interface Props {
     id?: string | number;
   }
 
   let { id }: Props = $props();
+  const resourceName = ${name}Definition.name;
 </script>
 
-<EditPage resourceName="${resource.name}" {id}>
-  <AutoForm resourceName="${resource.name}" {id} mode="edit" />
+<EditPage {resourceName} {id}>
+  <AutoForm {resourceName} {id} mode="edit" />
 </EditPage>
 `;
 }
@@ -384,18 +527,21 @@ export function generateEditPageCode(resource: ResourceDefinition): string {
  * Generate Svelte 5 ShowPage component code for a resource.
  */
 export function generateShowPageCode(resource: ResourceDefinition): string {
+  const name = moduleName(resource);
   return `<script lang="ts">
   import { ShowPage, AutoForm } from '@svadmin/ui';
+  import { ${name}Definition } from '../${resource.name}.resource';
 
   interface Props {
     id?: string | number;
   }
 
   let { id }: Props = $props();
+  const resourceName = ${name}Definition.name;
 </script>
 
-<ShowPage resourceName="${resource.name}" {id}>
-  <AutoForm resourceName="${resource.name}" {id} mode="show" />
+<ShowPage {resourceName} {id}>
+  <AutoForm {resourceName} {id} mode="show" />
 </ShowPage>
 `;
 }
@@ -404,6 +550,11 @@ export function generateShowPageCode(resource: ResourceDefinition): string {
  * Generate TypeScript code for ResourceDefinition.
  */
 export function generateResourceCode(resource: ResourceDefinition): string {
+  return generateCode(resource);
+}
+
+/** Alias that makes the ResourceContract output explicit for callers. */
+export function generateResourceContractCode(resource: ResourceDefinition): string {
   return generateCode(resource);
 }
 
@@ -486,7 +637,7 @@ export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string 
 
 export const ${typeName}Schema = Type.Object({
 ${schemaProps}
-});
+}, { additionalProperties: false });
 
 export type ${typeName} = Static<typeof ${typeName}Schema>;
 `;

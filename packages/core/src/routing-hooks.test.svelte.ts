@@ -1,11 +1,14 @@
 import { requireValue } from '../test/assertions';
 
 import { describe,it,expect,vi } from 'vitest';
-import { useGo,useBack,useNavigation } from './routing-hooks.svelte';
+import { useGo,useBack,useGetToPath,useNavigation } from './routing-hooks.svelte';
 import { useParsed } from './useParsed.svelte';
 import { flushSync } from 'svelte';
 
-const { navigate }=vi.hoisted(() => ({ navigate: vi.fn(async () => { }) }));
+const { navigate, toPath }=vi.hoisted(() => ({
+  navigate: vi.fn(async () => { }),
+  toPath: vi.fn((options: { path: string }) => options.path),
+}));
 
 vi.mock('./context.svelte',() => {
   const routerContext={
@@ -20,7 +23,12 @@ vi.mock('./context.svelte',() => {
       providers: null,
       authProvider: null,
       resources: [],
-      routerProvider: undefined,
+      routerProvider: {
+        go: () => {},
+        back: () => {},
+        parse: () => ({ pathname: '/posts/1/edit', params: {} }),
+        toPath,
+      },
       liveProvider: undefined,
       taskProvider: undefined,
       getDataProvider: vi.fn(),
@@ -98,6 +106,26 @@ describe('routing-hooks - Headless Svelte 5 Compatibility',() => {
     expect(navigate).toHaveBeenNthCalledWith(1,'/posts/show/1?page=2&q=open',undefined);
     expect(navigate).toHaveBeenNthCalledWith(2,'/posts?page=2&q=open',undefined);
     expect(navigate).toHaveBeenNthCalledWith(3,'/users/show/2',undefined);
+    expect(toPath).toHaveBeenCalled();
+    cleanup();
+  });
+
+  it('useGetToPath delegates to a custom router provider', () => {
+    toPath.mockClear();
+    toPath.mockImplementation((options: { path: string }) => `/kit${options.path}`);
+    let getToPath: ReturnType<typeof useGetToPath> | undefined;
+    const cleanup = $effect.root(() => {
+      getToPath = useGetToPath();
+    });
+    flushSync();
+    expect(getToPath?.({ resource: 'posts', action: 'show', id: 9 })).toBe('/kit/posts/show/9');
+    expect(toPath).toHaveBeenCalledWith(expect.objectContaining({
+      resource: 'posts',
+      action: 'show',
+      id: 9,
+      path: '/posts/show/9',
+    }));
+    toPath.mockImplementation((options: { path: string }) => options.path);
     cleanup();
   });
 });
