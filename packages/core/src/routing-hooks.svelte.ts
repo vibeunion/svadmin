@@ -1,5 +1,8 @@
 import { definedOptions } from './defined-options';
 import { captureAdminContext } from './context.svelte';
+import { getAdminOptions, setAdminOptions } from './options.svelte';
+import type { MutationMode } from './types';
+import { getUnsavedChanges, setUnsavedChanges } from './unsaved-changes.svelte';
 import { useParsed } from './useParsed.svelte';
 import { sanitizeListQueryParams } from './url-sync';
 
@@ -30,11 +33,71 @@ export function useGetToPath() {
     else if(action==='show'&&id) path+=`/show/${id}`;
     else if(action==='clone'&&id) path+=`/clone/${id}`;
 
-    // Apply router mapping if the router provider defines custom path transformers
-    if(adminContext.routerProvider?.go) {
-      // SvelteKit path generation can be injected here.
+    const provider = adminContext.routerProvider;
+    if (provider?.toPath) {
+      return provider.toPath({
+        path,
+        ...definedOptions({ resource, action, id, meta }),
+      });
     }
     return path;
+  };
+}
+
+/** Refine migration hook: the configured mutation mode. */
+export function useMutationMode(): MutationMode {
+  return getAdminOptions().mutationMode ?? 'pessimistic';
+}
+
+/**
+ * Refine migration hook for unsaved-change prompts.
+ * `setWarnWhen` marks the form dirty; `setWarnWhenUnsavedChanges` toggles the guard.
+ */
+export function useWarnAboutChange() {
+  return {
+    get warnWhenUnsavedChanges() {
+      return getAdminOptions().warnWhenUnsavedChanges ?? false;
+    },
+    setWarnWhen(value: boolean) {
+      setUnsavedChanges(value);
+    },
+    setWarnWhenUnsavedChanges(value: boolean) {
+      setAdminOptions({ warnWhenUnsavedChanges: value }, true);
+    },
+    get hasUnsavedChanges() {
+      return getUnsavedChanges();
+    },
+  };
+}
+
+/** Refine migration hook: whether list state is synced to the URL, plus the current params. */
+export function useSyncWithLocation() {
+  const parsed = useParsed();
+  return {
+    get syncWithLocation() {
+      return getAdminOptions().syncWithLocation ?? false;
+    },
+    get params() {
+      return parsed.params;
+    },
+  };
+}
+
+/** Refine migration hook: resource meta merged with the current route. */
+export function useMeta(resourceName?: string) {
+  const resourceState = useResource(resourceName);
+  const parsed = useParsed();
+  return {
+    get meta() {
+      const resource = resourceState.resource;
+      return {
+        ...(resource?.meta ?? {}),
+        ...(resourceState.parent ? { parent: resourceState.parent } : {}),
+        route: parsed.resource,
+        action: parsed.action,
+        id: parsed.id,
+      };
+    },
   };
 }
 

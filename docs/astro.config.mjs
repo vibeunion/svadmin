@@ -65,6 +65,7 @@ export default defineConfig({
             { slug: 'guides/reference-targets' },
             { slug: 'guides/interface-generation' },
             { slug: 'guides/comparison' },
+            { slug: 'guides/playground' },
             { slug: 'guides/ecosystem-coverage' },
             { slug: 'guides/lite' },
           ],

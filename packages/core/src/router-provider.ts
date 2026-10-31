@@ -23,6 +23,17 @@ export interface RouterProvider {
   };
   /** Formats an internal path into an href string for <a> tags */
   formatLink?: (path: string) => string;
+  /**
+   * Optional path builder. useGetToPath calls this when a router wants to
+   * map the default resource path onto its own routes.
+   */
+  toPath?: (options: {
+    resource?: string;
+    action?: 'list' | 'create' | 'edit' | 'show' | 'clone';
+    id?: string | number;
+    meta?: Record<string, unknown>;
+    path: string;
+  }) => string;
 }
 
 // ─── Hash Router (default) ──────────────────────────────────
