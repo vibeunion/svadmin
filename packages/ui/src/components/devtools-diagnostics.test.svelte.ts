@@ -108,6 +108,30 @@ describe('DevTools diagnostics', () => {
       expect(timedOperation?.textContent).toMatch(/Duration\s*\d+ms/);
     });
     expect(view.container.textContent).not.toContain('hidden-record-id');
+
+    const inspector = view.getAllByTestId('devtools-inspector-row');
+    expect(inspector.some((row) => row.textContent?.includes('diagnostics-resource'))).toBe(true);
+    expect(inspector.some((row) => row.textContent?.includes('Trigger'))).toBe(true);
+    expect(view.container.textContent).not.toContain('sensitive-cache-record');
+    expect(view.container.textContent).not.toContain('sensitive-query-key');
+
+    await fireEvent.input(view.getByTestId('devtools-filter-query'), { target: { value: 'diagnostics-resource' } });
+    await waitFor(() => {
+      const visible = view.getAllByTestId('devtools-inspector-row');
+      expect(visible.every((row) => row.textContent?.includes('diagnostics-resource') || row.textContent?.includes('[mutation]'))).toBe(true);
+    });
+    await fireEvent.input(view.getByTestId('devtools-filter-query'), { target: { value: 'no-such-resource' } });
+    await waitFor(() => expect(view.queryAllByTestId('devtools-inspector-row')).toHaveLength(0));
+    await fireEvent.input(view.getByTestId('devtools-filter-query'), { target: { value: '' } });
+
+    const refetch = await waitFor(() => view.getAllByTestId('devtools-refetch')[0]);
+    await fireEvent.click(refetch!);
+    await waitFor(() => {
+      const entries = view.getAllByTestId('devtools-timeline');
+      expect(entries.some((entry) => entry.textContent?.includes('devtools-replay'))).toBe(true);
+    });
+    expect(view.container.textContent).not.toContain('hidden-record-id');
+    expect(view.container.textContent).not.toContain('sensitive-cache-record');
   });
 
   it('tracks resources from the scoped AdminContext after rerender', async () => {

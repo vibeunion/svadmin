@@ -14,6 +14,18 @@
     readonly?: boolean;
   }
 
+  export interface EditableTableEditor {
+    rows: Record<string, unknown>[];
+    errors?: Readonly<Record<string, string>>;
+    saving?: boolean;
+    failure?: string | null;
+    onCell?: (rowIndex: number, key: string, value: unknown) => void;
+    onSubmit?: () => void | Promise<void>;
+    onRetry?: () => void | Promise<void>;
+    onAdd?: () => void;
+    onDelete?: (rowIndex: number) => void;
+  }
+
   interface Props {
     columns: EditableTableColumn[];
     data?: Record<string, unknown>[];
@@ -22,6 +34,8 @@
     allowDelete?: boolean;
     onchange?: (data: Record<string, unknown>[]) => void;
     onsave?: (data: Record<string, unknown>[]) => void | Promise<void>;
+    /** Headless contract from useEditableTable().editor. */
+    editor?: EditableTableEditor;
     class?: string;
   }
 
@@ -33,14 +47,21 @@
     allowDelete = true,
     onchange,
     onsave,
+    editor,
     class: className = '',
   }: Props = $props();
+
+  const rows = $derived(editor ? editor.rows : data);
 
   const i18n = useTranslation();
 
   let isSaving = $state(false);
 
   function updateCell(rowIndex: number, columnKey: string, value: unknown) {
+    if (editor?.onCell) {
+      editor.onCell(rowIndex, columnKey, value);
+      return;
+    }
     const nextData = [...data];
     nextData[rowIndex] = {
       ...nextData[rowIndex],
@@ -51,6 +72,10 @@
   }
 
   function handleAddRow() {
+    if (editor?.onAdd) {
+      editor.onAdd();
+      return;
+    }
     const newRow: Record<string, unknown> = {
       [rowKey]: `row_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     };
@@ -64,11 +89,19 @@
   }
 
   function handleDeleteRow(index: number) {
+    if (editor?.onDelete) {
+      editor.onDelete(index);
+      return;
+    }
     data = data.filter((_, idx) => idx !== index);
     onchange?.(data);
   }
 
   async function handleSave() {
+    if (editor?.onSubmit) {
+      await editor.onSubmit();
+      return;
+    }
     isSaving = true;
     try {
       await onsave?.(data);
@@ -76,12 +109,16 @@
       isSaving = false;
     }
   }
+
+  async function handleRetry() {
+    await editor?.onRetry?.();
+  }
 </script>
 
 <div class={cn('space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs text-xs', className)}>
   <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="font-semibold text-foreground">
-      Editable Grid <span class="text-muted-foreground font-normal">({data.length} records)</span>
+      Editable Grid <span class="text-muted-foreground font-normal">({rows.length} records)</span>
     </div>
 
     <div class="flex items-center gap-2">
@@ -91,9 +128,9 @@
           Add Row
         </Button>
       {/if}
-      {#if onsave}
-        <Button size="sm" class="h-8 text-xs gap-1 min-w-20" disabled={isSaving} onclick={handleSave}>
-          {#if isSaving}
+      {#if onsave || editor?.onSubmit}
+        <Button size="sm" class="h-8 text-xs gap-1 min-w-20" disabled={isSaving || editor?.saving} onclick={handleSave}>
+          {#if isSaving || editor?.saving}
             <Loader2 class="h-3.5 w-3.5 animate-spin" />
           {:else}
             <Save class="h-3.5 w-3.5" />
@@ -101,8 +138,17 @@
           Save All
         </Button>
       {/if}
+      {#if editor?.failure && editor.onRetry}
+        <Button variant="outline" size="sm" class="h-8 text-xs" onclick={handleRetry}>
+          Retry
+        </Button>
+      {/if}
     </div>
   </div>
+
+  {#if editor?.failure}
+    <p class="text-destructive" data-testid="editable-table-failure">{editor.failure}</p>
+  {/if}
 
   <div class="overflow-x-auto rounded-lg border border-border/60">
     <table class="w-full text-left border-collapse">
@@ -120,7 +166,7 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-border/40">
-        {#each data as row, rowIndex (row[rowKey] ?? rowIndex)}
+        {#each rows as row, rowIndex (row[rowKey] ?? rowIndex)}
           <tr class="hover:bg-muted/20 transition-colors">
             {#each columns as col (col.key)}
               <td class="p-1.5">
@@ -184,9 +230,16 @@
               </td>
             {/if}
           </tr>
+          {#if editor?.errors?.[String(row[rowKey] ?? '')]}
+            <tr>
+              <td colspan={columns.length + (allowDelete ? 1 : 0)} class="px-3 py-1 text-destructive">
+                {editor.errors[String(row[rowKey] ?? '')]}
+              </td>
+            </tr>
+          {/if}
         {/each}
 
-        {#if data.length === 0}
+        {#if rows.length === 0}
           <tr>
             <td colspan={columns.length + (allowDelete ? 1 : 0)} class="py-8 text-center text-muted-foreground">
               No rows. Click "Add Row" to create the first record.
