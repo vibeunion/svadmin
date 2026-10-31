@@ -187,7 +187,7 @@ tracked separately so the route/component coverage remains honest.
 | Table | Selection, expandable rows, tree data and virtualization in one table API | Split across `AutoTable`, `TreeTable`, `VirtualTable`, `GroupedTable` | Keep the split; add composition examples instead of a mega-table |
 | Upload | Drag/drop, directory upload, custom request | `FileUpload` has drag/drop, progress, cancel and retry | Directory upload remains host-owned |
 | Select | Remote search and virtualized option list | Native `Select` plus `ComboboxField` with remote search/virtualization | Prefer `ComboboxField` for large remote lists |
-| ConfigProvider | Component size/density cascades broadly | `Button`, `Input`, `Select`, `Badge`, `Tag` consume it | Extend size contracts only where a component already has a size prop |
+| ConfigProvider | Component size/density cascades broadly | `Button`, `Input`, `Select`, `Badge`, `Tag` consume size/density; `DatePicker` and `Calendar` consume locale through `component-messages.ts` | Extend size contracts only where a component already has a size prop |
 | DatePicker | Timezone, recurrence and business calendars | Date/range/time pickers without timezone ownership | Keep timezone and recurrence in the host domain layer |
 | Modal / Drawer / Dropdown | Compound call shape | Namespace aliases to `Dialog`, `Sheet`, `DropdownMenu` | Do not fake the reference compound API |
 | Form | `Form.Item` compound validation | Schema-first `AutoForm` / `JsonSchemaForm` | Non-goal: keep one validation owner |

@@ -166,7 +166,7 @@ Surface 包内定向测试验证分源重试和诊断回调；SVAR 的
 | Progress line | determinate / indeterminate / status | 语义色来自 token，不确定态不声明 `aria-valuenow` | 展示百分比由 `format` 或默认 `Math.round` 决定 |
 | Progress circle | determinate / indeterminate | SVG 圆环随 `size/strokeWidth` 缩放 | `showInfo` 时信息在圆环中心 |
 | NotificationHost | empty / open / success / warning / danger / info / placement | 支持顶部/底部、左/右四个堆叠位置，移动端不超出视口 | `notification.close`、按 key 替换、超时自动关闭 |
-| ConfigProvider | default / compact / sm / rtl | 包装层不改变布局，仅提供配置上下文和 data 属性 | `Button`、`Input`、`Select`、`Badge`、`Tag` 消费默认尺寸；显式 size 覆盖默认值 |
+| ConfigProvider | default / compact / sm / rtl / 运行时变更 | 包装层不改变布局，仅提供配置上下文和 data 属性 | `Button`、`Input`、`Select`、`Badge`、`Tag` 消费默认尺寸，显式 size 覆盖默认值；运行时修改尺寸、密度或 locale 会同步上下文。`DatePicker`、`Calendar` 消费 locale |
 
 ## Tag / EmptyState
 

@@ -269,4 +269,8 @@ explicit component `size` always wins.
 ```
 
 当前 `Button`、`Input`、`Select`、`Badge`、`Tag` 会消费 `componentSize` / `density`；
-其他组件可以继续显式传入自身尺寸。包装层使用 `display: contents`，不会改变页面布局。
+其他组件可以继续显式传入自身尺寸。上下文保存的是可响应读取器，运行时修改
+`componentSize`、`density` 或 `locale` 会同步到这些消费者。包装层使用 `display: contents`，不会改变页面布局。
+
+`DatePicker` 与 `Calendar` 消费 `locale`。解析顺序是组件 `locale` 属性、`ConfigProvider.locale`、i18n，最后才是 `en`。
+文案扩展点在 `packages/ui/src/components/component-messages.ts`：优先使用同名 i18n key，缺失时回退到内置中文 / 英文。

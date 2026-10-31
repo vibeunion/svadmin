@@ -1,8 +1,11 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
+  import { hasComponentConfig, useComponentConfig } from './ConfigProvider.svelte';
+  import { componentText, resolveComponentLocale } from './component-messages.js';
 
   export interface CalendarEvent {
     id: string;
@@ -39,12 +42,29 @@
   let viewYear = $state(initial.getFullYear());
   let viewMonth = $state(initial.getMonth());
 
-  const weekdays = $derived.by(() => {
-    const format = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-    return Array.from({ length: 7 }, (_, index) => format.format(new Date(2024, 0, 7 + ((index + weekStartsOn) % 7))));
+  const config = useComponentConfig();
+  const i18n = useTranslation();
+  const provided = hasComponentConfig();
+  // 显式 locale 仍优先。未传入时与 DatePicker 共用 ConfigProvider / i18n 解析。
+  const activeLocale = $derived(resolveComponentLocale({
+    explicit: locale,
+    configLocale: provided ? config.locale : undefined,
+    i18nLocale: i18n.locale,
+  }));
+  const copy = $derived({
+    previousMonth: componentText(i18n, activeLocale, 'datePicker.previousMonth'),
+    nextMonth: componentText(i18n, activeLocale, 'datePicker.nextMonth'),
+    previousYear: componentText(i18n, activeLocale, 'datePicker.previousYear'),
+    nextYear: componentText(i18n, activeLocale, 'datePicker.nextYear'),
+    calendarDates: componentText(i18n, activeLocale, 'datePicker.calendarDates'),
   });
 
-  const title = $derived(new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(viewYear, viewMonth, 1)));
+  const weekdays = $derived.by(() => {
+    const format = new Intl.DateTimeFormat(activeLocale, { weekday: 'short' });
+    return Array.from({ length: 7 }, (_, index) => format.format(new Date(2024, 0, 7 + ((index + weekStartsOn) % 7), 12)));
+  });
+
+  const title = $derived(new Intl.DateTimeFormat(activeLocale, { month: 'long', year: 'numeric' }).format(new Date(viewYear, viewMonth, 1, 12)));
 
   const days = $derived.by(() => {
     const first = new Date(viewYear, viewMonth, 1);
@@ -107,17 +127,17 @@
   <header class="svadmin-calendar__header">
     <strong>{title}</strong>
     <div class="svadmin-calendar__nav">
-      <Button variant="outline" size="icon-sm" aria-label="Previous year" onclick={() => moveYear(-1)}><ChevronsLeft size={16} /></Button>
-      <Button variant="outline" size="icon-sm" aria-label="Previous month" onclick={() => move(-1)}><ChevronLeft size={16} /></Button>
-      <Button variant="outline" size="icon-sm" aria-label="Next month" onclick={() => move(1)}><ChevronRight size={16} /></Button>
-      <Button variant="outline" size="icon-sm" aria-label="Next year" onclick={() => moveYear(1)}><ChevronsRight size={16} /></Button>
+      <Button variant="outline" size="icon-sm" aria-label={copy.previousYear} onclick={() => moveYear(-1)}><ChevronsLeft size={16} /></Button>
+      <Button variant="outline" size="icon-sm" aria-label={copy.previousMonth} onclick={() => move(-1)}><ChevronLeft size={16} /></Button>
+      <Button variant="outline" size="icon-sm" aria-label={copy.nextMonth} onclick={() => move(1)}><ChevronRight size={16} /></Button>
+      <Button variant="outline" size="icon-sm" aria-label={copy.nextYear} onclick={() => moveYear(1)}><ChevronsRight size={16} /></Button>
     </div>
   </header>
   <div class="svadmin-calendar__weekdays" aria-hidden="true">
     {#each weekdays as weekday (weekday)}<span>{weekday}</span>{/each}
   </div>
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-  <div class="svadmin-calendar__grid" role="group" aria-label="Calendar dates" onkeydown={onGridKeydown}>
+  <div class="svadmin-calendar__grid" role="group" aria-label={copy.calendarDates} onkeydown={onGridKeydown}>
     {#each days as day (day.iso)}
       <button
         type="button"

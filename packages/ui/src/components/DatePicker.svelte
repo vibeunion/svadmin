@@ -1,10 +1,13 @@
 <script lang="ts">
   import { untrack, type ComponentProps } from 'svelte';
   import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import DateTimeInput from './DateTimeInput.svelte';
   import { Button } from './ui/button/index.js';
   import * as Popover from './ui/popover/index.js';
   import { cn } from '../utils.js';
+  import { hasComponentConfig, useComponentConfig } from './ConfigProvider.svelte';
+  import { componentText, monthLabel, resolveComponentLocale, weekdayLabels } from './component-messages.js';
 
   export type DatePickerMode = 'date' | 'month' | 'year' | 'quarter';
   export interface DatePreset { label: string; value: string; }
@@ -17,7 +20,10 @@
     panel?: boolean;
     picker?: DatePickerMode;
     presets?: DatePreset[];
+    /** 未传入时跟随已解析 locale，英文为 Select date，中文为选择日期。 */
     placeholder?: string;
+    /** 覆盖 ConfigProvider 与 i18n 的面板语言。不传则保持原有默认路径。 */
+    locale?: string;
     onchange?: (value: string | null) => void;
   }
 
@@ -28,14 +34,31 @@
     panel = false,
     picker = 'date',
     presets = [],
-    placeholder = 'Select date',
+    placeholder,
+    locale: localeProp,
     disabled = false,
     class: className,
     onchange,
     ...nativeProps
   }: Props = $props();
 
-  const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const config = useComponentConfig();
+  const i18n = useTranslation();
+  const provided = hasComponentConfig();
+  // 组件属性 > ConfigProvider（仅存在时）> i18n > en。无 Provider 时不拿默认 en 盖住 i18n。
+  const activeLocale = $derived(resolveComponentLocale({
+    explicit: localeProp,
+    configLocale: provided ? config.locale : undefined,
+    i18nLocale: i18n.locale,
+  }));
+  const copy = $derived({
+    previous: componentText(i18n, activeLocale, 'datePicker.previous'),
+    next: componentText(i18n, activeLocale, 'datePicker.next'),
+    clear: componentText(i18n, activeLocale, 'datePicker.clear'),
+    selectDate: componentText(i18n, activeLocale, 'datePicker.selectDate'),
+  });
+  const resolvedPlaceholder = $derived(placeholder ?? copy.selectDate);
+  const weekdays = $derived(weekdayLabels(activeLocale));
   let open = $state(false);
   let viewMode = $state<'day' | 'month' | 'year'>(untrack(() => picker === 'year' ? 'year' : picker === 'month' ? 'month' : 'day'));
   let viewDate = $state(initialView(value));
@@ -92,7 +115,7 @@
 
   const months = $derived(Array.from({ length: 12 }, (_, month) => {
     const key = `${viewDate.getFullYear()}-${pad(month + 1)}`;
-    return { month, key, label: new Intl.DateTimeFormat(undefined, { month: 'short' }).format(new Date(viewDate.getFullYear(), month, 1)), selected: value === key, disabled: false };
+    return { month, key, label: monthLabel(activeLocale, viewDate.getFullYear(), month), selected: value === key, disabled: false };
   }));
 
   const years = $derived.by(() => {
@@ -180,22 +203,22 @@
           aria-label={nativeProps.ariaLabel}
           class="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-left text-sm focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span class={value ? 'text-foreground' : 'text-muted-foreground'}>{formatValue(value) || placeholder}</span>
+          <span class={value ? 'text-foreground' : 'text-muted-foreground'}>{formatValue(value) || resolvedPlaceholder}</span>
           <ChevronRight class="h-4 w-4 rotate-90 opacity-50" />
         </button>
       {/snippet}
     </Popover.Trigger>
     <Popover.Content class="svadmin-date-picker-panel w-auto p-0" align="start">
-      <div class="w-64 p-2">
+      <div class="w-64 p-2" lang={activeLocale}>
         <div class="mb-2 flex items-center justify-between">
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Previous" onclick={() => move(-1)}><ChevronLeft size={16} /></Button>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={copy.previous} onclick={() => move(-1)}><ChevronLeft size={16} /></Button>
           <button type="button" class="rounded px-2 py-1 text-sm font-medium hover:bg-muted" onclick={toggleTitle}>{title}</button>
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Next" onclick={() => move(1)}><ChevronRight size={16} /></Button>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={copy.next} onclick={() => move(1)}><ChevronRight size={16} /></Button>
         </div>
 
         {#if viewMode === 'day'}
           <div class="grid grid-cols-7 gap-0.5 text-center text-[0.6875rem] text-muted-foreground">
-            {#each weekdays as weekday (weekday)}<span class="py-1">{weekday}</span>{/each}
+            {#each weekdays as weekday, index (index)}<span class="py-1">{weekday}</span>{/each}
           </div>
           <div class="grid grid-cols-7 gap-0.5">
             {#each days as day (day.iso)}
@@ -242,7 +265,7 @@
         {/if}
         {#if value}
           <div class="mt-1 flex justify-end border-t border-border pt-1">
-            <Button type="button" variant="ghost" size="sm" onclick={clear}>Clear</Button>
+            <Button type="button" variant="ghost" size="sm" onclick={clear}>{copy.clear}</Button>
           </div>
         {/if}
       </div>

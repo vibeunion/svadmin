@@ -73,17 +73,42 @@
     { id: 'a2', title: 'Review requested for invoice batch', time: '10:05', tone: 'warning' as const },
     { id: 'a3', title: 'New member joined the workspace', time: '11:30', tone: 'info' as const },
   ];
-  const records = [
+  let records = $state([
     { id: 'r1', name: 'Northwind renewal', owner: 'Avery Chen', status: 'In review', amount: '$12,400' },
     { id: 'r2', name: 'Harbor onboarding', owner: 'Mina Park', status: 'Approved', amount: '$8,900' },
     { id: 'r3', name: 'Atlas expansion', owner: 'Noah Silva', status: 'Draft', amount: '$21,300' },
-  ];
+  ]);
+  let searchQuery = $state('');
+  let ownerQuery = $state('');
+  let formName = $state('');
+  let formOwner = $state('');
+  let formDescription = $state('');
+  let simulateFailure = $state(false);
+  type SubmissionStatus = 'idle' | 'draft-saved' | 'failed' | 'published';
+  let submission = $state<{ status: SubmissionStatus; message: string }>({ status: 'idle', message: '' });
+  const filteredRecords = $derived.by(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const owner = ownerQuery.trim().toLowerCase();
+    return records.filter((record) => {
+      const haystack = `${record.name} ${record.owner} ${record.status} ${record.amount}`.toLowerCase();
+      const matchesQuery = query.length === 0 || haystack.includes(query);
+      const matchesOwner = owner.length === 0 || record.owner.toLowerCase().includes(owner);
+      return matchesQuery && matchesOwner;
+    });
+  });
   const cardItems = [
     { id: 'c1', category: 'quality' as const, title: 'Operations handbook', description: 'Ownership, escalation paths and service levels.', badge: 'Updated' },
     { id: 'c2', category: 'service' as const, title: 'Customer onboarding', description: 'Checklist, owners and first-week milestones.', badge: 'Template' },
     { id: 'c3', category: 'quality' as const, title: 'Incident response', description: 'Detection, triage and post-incident review.', badge: 'Critical' },
   ];
-  const visibleCards = $derived(cardScope === 'all' ? cardItems : cardItems.filter((card) => card.category === cardScope));
+  const visibleCards = $derived.by(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return cardItems.filter((card) => {
+      if (cardScope !== 'all' && card.category !== cardScope) return false;
+      if (!query) return true;
+      return `${card.title} ${card.description} ${card.badge}`.toLowerCase().includes(query);
+    });
+  });
   const steps: FormStep[] = [
     { title: 'Basics', description: 'Name and owner' },
     { title: 'Scope', description: 'Teams and permissions' },
@@ -115,6 +140,46 @@
   function finishStep(): void {
     active = 'result';
   }
+
+  // 示例只使用本地状态。业务方仍可替换这些处理函数，这里展示搜索、草稿、失败和重试的完整路径。
+  function startCreate(): void {
+    formName = searchQuery.trim();
+    formOwner = ownerQuery.trim();
+    formDescription = '';
+    simulateFailure = false;
+    submission = { status: 'idle', message: 'Started a new workspace draft. Save it or publish when the name is ready.' };
+    selectTemplate('group-form');
+  }
+
+  function saveDraft(): void {
+    const name = formName.trim();
+    submission = {
+      status: 'draft-saved',
+      message: name
+        ? `Draft saved locally for “${name}”. You can keep editing and publish later.`
+        : 'Draft saved locally. Add a workspace name before publishing.',
+    };
+  }
+
+  function publish(): void {
+    const name = formName.trim();
+    if (!name) {
+      submission = { status: 'failed', message: 'Publish failed: name is required. Enter a workspace name and try again.' };
+      selectTemplate('group-form');
+      return;
+    }
+    if (simulateFailure) {
+      submission = { status: 'failed', message: 'Publish failed: the demo service rejected the request. Turn off “Simulate publish failure” and retry. Your draft is unchanged.' };
+      selectTemplate('group-form');
+      return;
+    }
+    records = [
+      { id: `local-${records.length + 1}`, name, owner: formOwner.trim() || 'Unassigned', status: 'Approved', amount: '$0' },
+      ...records,
+    ];
+    submission = { status: 'published', message: `Published “${name}”.` };
+    selectTemplate('result');
+  }
 </script>
 
 <div class="svadmin-template-gallery" class:is-standalone={standalone}>
@@ -144,7 +209,7 @@
       </div>
     {/if}
     {#snippet actions()}
-      <Button size="sm">Create</Button>
+      <Button size="sm" onclick={startCreate}>Create</Button>
     {/snippet}
     {#snippet metrics()}
       <Grid columns={3} gap="sm">
@@ -170,28 +235,33 @@
       </div>
     {/snippet}
     {#snippet cards()}
-      <Grid columns={3} gap="md">
-        {#each visibleCards as card (card.id)}
-          <article class="svadmin-template-gallery__card">
-            <Badge variant="secondary">{card.badge}</Badge>
-            <h3>{card.title}</h3>
-            <p>{card.description}</p>
-          </article>
-        {/each}
-      </Grid>
+      {#if visibleCards.length === 0}
+        <p class="svadmin-template-gallery__empty" role="status">No matching cards. Adjust the search or category.</p>
+      {:else}
+        <Grid columns={3} gap="md">
+          {#each visibleCards as card (card.id)}
+            <article class="svadmin-template-gallery__card">
+              <Badge variant="secondary">{card.badge}</Badge>
+              <h3>{card.title}</h3>
+              <p>{card.description}</p>
+            </article>
+          {/each}
+        </Grid>
+      {/if}
     {/snippet}
     {#snippet filters()}
       <div class="svadmin-template-gallery__filters">
-        <Input placeholder="Search records" aria-label="Search records" />
-        <Input placeholder="Owner" aria-label="Filter owner" />
+        <Input placeholder="Search records" aria-label="Search records" bind:value={searchQuery} />
+        <Input placeholder="Owner" aria-label="Filter owner" bind:value={ownerQuery} />
       </div>
     {/snippet}
     {#snippet table()}
+      <p class="svadmin-template-gallery__empty" role="status">{filteredRecords.length === 0 ? 'No matching records. Adjust the search or create one.' : `${filteredRecords.length} matching records`}</p>
       <div class="svadmin-template-gallery__table" role="table" aria-label="Records">
         <div role="row" class="is-head">
           <span role="columnheader">Record</span><span role="columnheader">Owner</span><span role="columnheader">Amount</span><span role="columnheader">Status</span>
         </div>
-        {#each records as record (record.id)}
+        {#each filteredRecords as record (record.id)}
           <div role="row">
             <span role="cell">{record.name}</span><span role="cell">{record.owner}</span><span role="cell">{record.amount}</span><span role="cell">{record.status}</span>
           </div>
@@ -207,9 +277,13 @@
     {/snippet}
     {#snippet form()}
       <div class="svadmin-template-gallery__form">
-        <label>Name<Input placeholder="Workspace name" /></label>
-        <label>Owner<Input placeholder="Owner" /></label>
-        <label>Description<Textarea rows={4} placeholder="What should this workspace contain?" /></label>
+        <label>Name<Input aria-label="Workspace name" placeholder="Workspace name" bind:value={formName} /></label>
+        <label>Owner<Input aria-label="Workspace owner" placeholder="Owner" bind:value={formOwner} /></label>
+        <label>Description<Textarea aria-label="Workspace description" rows={4} placeholder="What should this workspace contain?" bind:value={formDescription} /></label>
+        <label class="svadmin-template-gallery__check">
+          <input type="checkbox" bind:checked={simulateFailure} />
+          Simulate publish failure
+        </label>
       </div>
     {/snippet}
     {#snippet summary()}
@@ -233,8 +307,14 @@
       </div>
     {/snippet}
     {#snippet footer()}
-      <Button variant="outline" size="sm">Save draft</Button>
-      <Button size="sm">Publish</Button>
+      {#if submission.message}
+        <p class="svadmin-template-gallery__status" role="status" data-submission={submission.status}>{submission.message}</p>
+      {/if}
+      <Button variant="outline" size="sm" onclick={saveDraft}>Save draft</Button>
+      <Button size="sm" onclick={publish}>Publish</Button>
+      {#if submission.status === 'failed'}
+        <Button variant="outline" size="sm" onclick={publish}>Retry publish</Button>
+      {/if}
     {/snippet}
     {#snippet resultActions()}
       <Button size="sm" onclick={() => (active = 'workplace')}>Back to workspace</Button>
@@ -474,6 +554,12 @@
   .svadmin-template-gallery__card h3 { margin: 0; font-size: var(--svadmin-text-body); }
   .svadmin-template-gallery__card p { margin: 0; color: var(--muted-foreground); font-size: var(--svadmin-text-label); line-height: var(--svadmin-leading-body); }
   .svadmin-template-gallery__filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--svadmin-space-2); }
+  .svadmin-template-gallery__empty { margin: 0; color: var(--muted-foreground); font-size: var(--svadmin-text-label); }
+  .svadmin-template-gallery__status { flex: 1 0 100%; margin: 0; color: var(--muted-foreground); font-size: var(--svadmin-text-label); }
+  .svadmin-template-gallery__status[data-submission='failed'] { color: var(--destructive); }
+  .svadmin-template-gallery__status[data-submission='published'],
+  .svadmin-template-gallery__status[data-submission='draft-saved'] { color: var(--foreground); }
+  .svadmin-template-gallery__form label.svadmin-template-gallery__check { display: flex; flex-direction: row; align-items: center; gap: var(--svadmin-space-2); color: var(--foreground); }
   .svadmin-template-gallery__table { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); }
   .svadmin-template-gallery__table [role='row'] { display: grid; grid-template-columns: minmax(12rem, 2fr) repeat(3, minmax(7rem, 1fr)); gap: var(--svadmin-space-3); padding: var(--svadmin-space-2) var(--svadmin-space-3); border-block-end: 1px solid var(--border); font-size: var(--svadmin-text-label); }
   .svadmin-template-gallery__table [role='row']:last-child { border-block-end: 0; }
