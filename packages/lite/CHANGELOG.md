@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.19.0](https://github.com/vibeunion/svadmin/compare/lite-v0.18.0...lite-v0.19.0) (2026-10-31)
+
+
+### 🚀 Features
+
+* **lite:** add footnotes, definition lists and opt-in rich lists ([ba99e7e](https://github.com/vibeunion/svadmin/commit/ba99e7e3b8004c98d41e6db84ef280ca220291b3))
+* **lite:** render chart widgets as server-side SVG ([56af43d](https://github.com/vibeunion/svadmin/commit/56af43d309d4704f874f316223a64f76fe3df528))
+* **lite:** render insight content and add a highlight hook ([91450bb](https://github.com/vibeunion/svadmin/commit/91450bb1868151abc39b55aa1b574891f539b168))
+* **lite:** render markdown and rich text on the server ([e997c38](https://github.com/vibeunion/svadmin/commit/e997c3823730a0bf015b078faeb00843b3c12a1f))
+* **lite:** support markdown tables and task lists ([233d6c5](https://github.com/vibeunion/svadmin/commit/233d6c57cbe2083cd5916d6c482c7b34fe8eb29e))
+* **lite:** use native controls for temporal, colour and tag fields ([8db27ff](https://github.com/vibeunion/svadmin/commit/8db27ff5c5c98f95f64a73554dd4d4dc9e8ad18d))
+* **parity:** apply the input-domain rule and gate artifact drift in CI ([9a12ffc](https://github.com/vibeunion/svadmin/commit/9a12ffc9a99d51f34f4a116bb90802ab596987f8))
+* **parity:** publish classification criteria and recalibrate entries ([3dced73](https://github.com/vibeunion/svadmin/commit/3dced73174bf626ca53dfac033c638eef4baa49b))
+* **parity:** report exact, fallback and behavior-verified rates ([6ae35f3](https://github.com/vibeunion/svadmin/commit/6ae35f361bbeedd5392b42b148860b3a7ade9a38))
+* **parity:** require an assertion budget before claiming verification ([a55f49d](https://github.com/vibeunion/svadmin/commit/a55f49dd350823c8bf50d153c66b6517788d2b33))
+* **parity:** upgrade field mappings now that native controls exist ([d65dcf8](https://github.com/vibeunion/svadmin/commit/d65dcf8b5dbed44d23d7a2aac478dc5010a53be8))
+* **parity:** upgrade MarkdownField and record rich content boundaries ([52a7f81](https://github.com/vibeunion/svadmin/commit/52a7f81e284d7564eec3c2fdd1cf21e7104d5366))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** keep the optional qrcode peer out of the root entry ([b807a86](https://github.com/vibeunion/svadmin/commit/b807a8653497cb9350bad43bcd752e1696c176ac))
+* **lite:** use index access for optional peer contract ([c923a7b](https://github.com/vibeunion/svadmin/commit/c923a7b454bf54bdff5490eac490d1b0f23bf5e6))
+
+
+### 📝 Documentation
+
+* **lite:** demo rich content rendering in the example app ([a122b40](https://github.com/vibeunion/svadmin/commit/a122b40e2cb3832f64e20e670ca805366b5fff2e))
+
 ## [0.18.0](https://github.com/vibeunion/svadmin/compare/lite-v0.17.2...lite-v0.18.0) (2026-10-30)
 
 
