@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.2](https://github.com/vibeunion/svadmin/compare/parse-v0.2.1...parse-v0.2.2) (2026-10-31)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.14.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.2
+
 ## [0.2.1](https://github.com/vibeunion/svadmin/compare/parse-v0.2.0...parse-v0.2.1) (2026-10-30)
 
 
