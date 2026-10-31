@@ -1,0 +1,12 @@
+{
+  "counts": true,
+  "accentLabels": true,
+  "customLabels": true,
+  "localeScope": true,
+  "viewportOverflow": false,
+  "rendererCommit": "d34e4d0c",
+  "sourceSha256": {
+    "DataTableShell.svelte": "9c92c562dd53049891330015072c460e7b07ae3dd2eafc1f985411ac2d13f7f0",
+    "AppearanceSettings.svelte": "9624a1d53729415c54a8737a3c8b58538a7f5444d9f9f504a8ae463f9320f26e"
+  }
+}
