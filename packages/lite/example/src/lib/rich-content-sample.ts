@@ -44,6 +44,8 @@ export const richContentSample = {
     '',
     'Latency',
     ': Time from request to first byte.',
+
+    'Read the [changelog](https://example.test/changelog) before rolling back.',
     '',
     '[^latency]: Measured against the previous weekly median.',
   ].join('\n'),

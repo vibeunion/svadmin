@@ -3,6 +3,8 @@ title: 富文本内容渲染
 description: Lite 的 Markdown 与富文本字段如何服务端渲染存量内容
 ---
 
+import RichContentDemo from '../../../../components/RichContentDemo.astro';
+
 `MarkdownField` 与 `RichTextField` 在 SSR 阶段渲染存量内容：没有客户端编辑器、没有 hydration、也不引入 sanitizer 依赖。取值先整体转义，再只重建固定的 Markdown 子集或固定的 HTML 白名单。
 
 ## 使用哪个渲染器
@@ -71,9 +73,23 @@ renderMarkdown(source, { headingIds: true, tocLevels: 3 });
 - 仅含 `[toc]` 的一行会被替换为 `<nav class="lite-toc">`，链接到收集到的标题；只要存在该指令，即使未开启 `headingIds` 也会生成 id。
 - `tocLevels`（默认 `3`）限制进入目录的标题层级。
 
+外链默认仍在当前标签打开，需要时显式开启：
+
+```ts
+renderMarkdown(source, { externalLinks: true });
+```
+
+此时 `http(s)://` 或 `//` 开头的链接会渲染为
+`<a href="…" target="_blank" rel="noopener noreferrer">`；相对链接、锚点以及
+`mailto:`/`tel:` 保持不变。存量 HTML 经清洗后，锚点一律补 `rel="noopener noreferrer"`。
+
 ## 在线示例
 
-Lite 示例应用用一条路由演示全部能力：
+本页在构建期用与下文完全相同的 `renderMarkdown` 实现渲染，不发送客户端脚本、不做 hydration：
+
+<RichContentDemo />
+
+Lite 示例应用用同一样例提供可交互路由：
 
 ```bash
 bun run --cwd packages/lite/example dev
@@ -140,6 +156,17 @@ import '@svadmin/lite/lite-code-theme.css'; // 可选，需要 CSS 变量支持
 ```
 
 在任一预览容器（或单个代码块的 `.lite-code-block`）上覆盖变量，所有 token 类名随之生效，无需为每个容器、每个 token 各写一份样式。需要维持 IE11 基线的宿主只引入 `lite.css`，保留字面调色板即可。
+
+在祖先元素上加 `lite-dark` 即可启用内置深色预设（上页第三栏）：
+
+```html
+<div class="lite-dark">
+  <div class="lite-markdown-preview">…</div>
+</div>
+```
+
+它会同时替换六个 token 变量以及代码块、表格、目录、引用与脚注的底色。若宿主已有主题根节点，也可以自行映射，例如
+`[data-theme="dark"] { --lite-token-keyword: … }`。
 
 ## 编辑面
 

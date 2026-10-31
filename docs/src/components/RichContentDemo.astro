@@ -1,0 +1,89 @@
+---
+/**
+ * Build-time render of the shared rich content sample.
+ *
+ * The markup comes from the real `renderMarkdown` implementation in
+ * `packages/lite/src/rich-content.ts` — the same function the SSR demo route
+ * uses — so this page cannot drift from the renderer contract. Nothing here
+ * ships client JavaScript: Astro inlines the HTML at build time.
+ */
+import { renderRichContent } from '../../../packages/lite/src/rich-content';
+import { highlightCode } from '../../../packages/lite/example/src/lib/highlight';
+import {
+  richContentOptions,
+  richContentSample,
+} from '../../../packages/lite/example/src/lib/rich-content-sample';
+import '../../../packages/lite/src/lite.css';
+import '../../../packages/lite/src/lite-code-theme.css';
+
+const options = { ...richContentOptions, highlight: highlightCode, externalLinks: true };
+const notes = renderRichContent(richContentSample.notes, options);
+const insight = renderRichContent(richContentSample.insight, options);
+---
+
+<div class="rich-demo">
+  <div class="rich-demo__pane">
+    <p class="rich-demo__label">notes · Markdown</p>
+    <div class="lite-markdown-preview" set:html={notes} />
+  </div>
+
+  <div class="rich-demo__pane">
+    <p class="rich-demo__label">insight · Markdown</p>
+    <div class="lite-insight-content" set:html={insight} />
+  </div>
+
+  <div class="rich-demo__pane lite-dark">
+    <p class="rich-demo__label">notes · dark preset</p>
+    <div class="lite-markdown-preview" set:html={notes} />
+  </div>
+</div>
+
+<style>
+  .rich-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .rich-demo__pane {
+    flex: 1 1 280px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 8px;
+    background: var(--sl-color-bg-inline-code, transparent);
+  }
+
+  .rich-demo__pane.lite-dark {
+    background: #0d1117;
+    border-color: #30363d;
+  }
+
+  .rich-demo__label {
+    margin: 0 0 12px;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sl-color-gray-3);
+  }
+
+  .lite-dark .rich-demo__label {
+    color: #8b949e;
+  }
+
+  .rich-demo :global(.lite-toc) {
+    margin-bottom: 12px;
+  }
+
+  .rich-demo :global(.lite-markdown-preview),
+  .rich-demo :global(.lite-insight-content) {
+    font-size: var(--sl-text-sm);
+    line-height: 1.65;
+  }
+
+  .rich-demo :global(table) {
+    width: 100%;
+    font-size: var(--sl-text-xs);
+  }
+</style>

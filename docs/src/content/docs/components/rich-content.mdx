@@ -3,6 +3,8 @@ title: Rich Content Rendering
 description: How the Lite Markdown and rich text fields render stored content on the server
 ---
 
+import RichContentDemo from '../../../components/RichContentDemo.astro';
+
 `MarkdownField` and `RichTextField` render stored content during SSR. There is no
 client editor, no hydration step and no sanitizer dependency: the value is escaped
 first, then only a fixed Markdown subset or a fixed HTML allowlist is rebuilt.
@@ -82,9 +84,26 @@ renderMarkdown(source, { headingIds: true, tocLevels: 3 });
   forces heading ids even if `headingIds` is off.
 - `tocLevels` (default `3`) limits which heading levels enter the TOC.
 
+Absolute links stay same-tab by default. Opt in when a document links out to
+external references:
+
+```ts
+renderMarkdown(source, { externalLinks: true });
+```
+
+Links with an `http(s)://` or `//` href then render as
+`<a href="…" target="_blank" rel="noopener noreferrer">`. Relative, anchor and
+`mailto:`/`tel:` links are untouched, and the sanitizer always hardens anchors in
+stored HTML with `rel="noopener noreferrer"`.
+
 ## Live example
 
-The Lite demo app renders every feature on one route:
+This page is rendered at build time with the same `renderMarkdown` implementation
+you are reading about — no client JavaScript, no hydration:
+
+<RichContentDemo />
+
+The Lite demo app renders the same sample on one interactive route:
 
 ```bash
 bun run --cwd packages/lite/example dev
@@ -174,6 +193,18 @@ Override the variables on any preview container (or on `.lite-code-block` for on
 block) and every token class follows — no extra CSS per token per surface. Hosts
 that must keep the IE11 baseline import only `lite.css` and keep the literal
 palette.
+
+Add `lite-dark` to an ancestor for the bundled dark preset (the third pane above):
+
+```html
+<div class="lite-dark">
+  <div class="lite-markdown-preview">…</div>
+</div>
+```
+
+It swaps all six token variables plus the code block, table, TOC, quote and
+footnote chrome. Hosts with their own theme root can map it instead, for example
+`[data-theme="dark"] { --lite-token-keyword: … }`.
 
 ## Editing surface
 

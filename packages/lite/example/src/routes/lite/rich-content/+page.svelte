@@ -13,7 +13,7 @@
   let { data }: PageProps = $props();
 
   const markdownField = { key: 'notes', label: 'Release notes', type: 'markdown' } as FieldDefinition;
-  const renderOptions = { ...richContentOptions, highlight: highlightCode };
+  const renderOptions = { ...richContentOptions, highlight: highlightCode, externalLinks: true };
 </script>
 
 <svelte:head>

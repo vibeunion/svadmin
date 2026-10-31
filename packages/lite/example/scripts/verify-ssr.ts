@@ -99,6 +99,10 @@ try {
   assert.match(richHtml, /<dl><dt>Latency<\/dt>/u);
   assert.match(richHtml, /<span class="tok-keyword">export<\/span>/u);
   assert.match(richHtml, /<span class="tok-comment">/u);
+  assert.match(
+    richHtml,
+    /<a href="https:\/\/example\.test\/changelog" target="_blank" rel="noopener noreferrer">changelog<\/a>/u,
+  );
   assert.match(richHtml, /class="lite-comments__rich\b/u);
   assert.match(richHtml, /class="lite-notification-center__rich\b/u);
   checkedRoutes += 1;

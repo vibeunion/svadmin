@@ -52,10 +52,17 @@ reference components render plain text, so rendering Markdown by default would b
 a capability difference, not parity; hosts opt in per surface.
 
 Markdown support now also covers pipe tables, task lists, footnotes, definition
-lists, heading anchors and an opt-in `[toc]`, and hosts can plug a trusted server-side highlighter through
-`configureMarkdownRenderer` or per-field `renderOptions`. The hook only receives
-fenced blocks and its HTML is inserted as-is, so it is a documented trust
-boundary rather than a sanitizer.
+lists, heading anchors, an opt-in `[toc]` and opt-in `externalLinks` (absolute
+links get `target="_blank"` plus `rel="noopener noreferrer"`; relative, anchor,
+`mailto:` and `tel:` links are untouched). Hosts can plug a trusted server-side
+highlighter through `configureMarkdownRenderer` or per-field `renderOptions`. The
+hook only receives fenced blocks and its HTML is inserted as-is, so it is a
+documented trust boundary rather than a sanitizer.
+
+Code-highlight token theming is split by baseline: `lite.css` stays IE11-safe with
+literal `tok-*` colours, while the opt-in `lite-code-theme.css` drives the same
+palette from `--lite-token-*` variables (with a `lite-dark` preset). The
+sanitizer always adds `rel="noopener noreferrer"` to anchors in stored HTML.
 
 ### 3. AutoComplete — keep `fallback`
 
@@ -92,6 +99,9 @@ image upload with a preview; drawing stays in the SPA.
 | Fields render preview + editable source | `LiteFields.test.svelte.ts` (`Lite rich content fields`) |
 | Insight card and opt-in comment rendering | `LiteDataDisplay.test.svelte.ts` (`Lite rich content display surfaces`) |
 | Highlight hook stays opt-in and escapes by default | `rich-content.test.svelte.ts` (`Lite markdown highlighting hook`) |
+| External links are opt-in and never rewrite relative/unsafe links | `rich-content.test.svelte.ts` (`Lite markdown external links`) |
+| Token theme covers every surface and the dark preset every variable | `packages/lite/src/lite-code-theme.test.ts` |
+| Docs demo renders the shared sample at build time | `docs/src/components/RichContentDemo.astro`, `bun run docs:build` |
 | Mapping statuses follow the criteria | `scripts/parity-contract.test.ts` |
 
 ## Revisit triggers
