@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.21.0](https://github.com/vibeunion/svadmin/compare/lite-v0.20.0...lite-v0.21.0) (2026-10-31)
+
+
+### 🚀 Features
+
+* **lite:** give the structural layout components real styling hooks ([5505ab8](https://github.com/vibeunion/svadmin/commit/5505ab85cce6e2d4211010dbf98dfe51d89d43d1))
+* **lite:** keep the reference step contract on the two-factor stepper ([dc3b897](https://github.com/vibeunion/svadmin/commit/dc3b897c7d111fa2f6f0bf6222ca9d3296f94325))
+* **lite:** merge caller classes on six display and layout primitives ([3460f9b](https://github.com/vibeunion/svadmin/commit/3460f9b57c876f817c3e9b8d749f6a5cadbb4a03))
+* **lite:** merge caller classes on six navigation and display primitives ([b715d6b](https://github.com/vibeunion/svadmin/commit/b715d6bd8a302851a296c753d2ceac3e33fb7be4))
+* **lite:** merge caller classes on the advanced containers and fix hook resolution ([14324e0](https://github.com/vibeunion/svadmin/commit/14324e06307ef00848c30b4c980ea0fc9c6cc624))
+* **lite:** merge caller classes on the base table and status widgets ([566ec19](https://github.com/vibeunion/svadmin/commit/566ec196e56c1aec1a4ab9a50870025c326b6d3e))
+* **lite:** merge caller classes on the complex field controls ([f8ce613](https://github.com/vibeunion/svadmin/commit/f8ce6139f4ed6176eb35787dff580f32c5f593c0))
+* **lite:** merge caller classes on the generated pages ([3a58d2f](https://github.com/vibeunion/svadmin/commit/3a58d2fef4d711422735edaa2ec1ab12c6ca362a))
+* **lite:** merge caller classes on the native field controls ([85b3c8b](https://github.com/vibeunion/svadmin/commit/85b3c8b2298476ce202d8c57123829c4b6c7201a))
+* **lite:** show the three coverage metrics separately on the parity board ([ac030e5](https://github.com/vibeunion/svadmin/commit/ac030e54c707c1353f2f259030f7534402498e82))
+* **lite:** track styling hook coverage as its own metric ([9a57dc3](https://github.com/vibeunion/svadmin/commit/9a57dc3d91b518fb68d1fba434f4fedc6c5d3027))
+
+
+### 📝 Documentation
+
+* **lite:** audit NotificationCenter, Tree and Collapse against the criteria ([7869dd4](https://github.com/vibeunion/svadmin/commit/7869dd479b19b06562a1f14073304b82c9990a4a))
+
 ## [0.20.0](https://github.com/vibeunion/svadmin/compare/lite-v0.19.0...lite-v0.20.0) (2026-10-31)
 
 

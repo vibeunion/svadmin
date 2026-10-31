@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.7...supabase-v0.22.0) (2026-10-31)
+
+
+### 🚀 Features
+
+* **supabase:** link SupaCloud tasks to business records ([#615](https://github.com/vibeunion/svadmin/issues/615)) ([61eebed](https://github.com/vibeunion/svadmin/commit/61eebed35c4b8343b6223bbb85c3d2f416b5cfc1))
+
 ## [0.21.7](https://github.com/vibeunion/svadmin/compare/supabase-v0.21.6...supabase-v0.21.7) (2026-10-30)
 
 
