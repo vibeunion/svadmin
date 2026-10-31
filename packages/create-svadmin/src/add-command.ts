@@ -11,9 +11,13 @@ import pc from 'picocolors';
 import {
   ADMIN_AI_MANIFEST_FILENAME,
   SCAFFOLD_AUTH_PROVIDERS,
+  SCAFFOLD_CONFIG_PATH,
   SCAFFOLD_DATA_PROVIDERS,
+  envExampleForWiring,
+  wireConfigSource,
   type AdminAiManifest,
 } from './scaffold-platform';
+import { authSmokeSource, providerSmokeSource, renderDataProvider } from './provider-wiring';
 import {
   AUTH_PROVIDER_CHOICES,
   DATA_PROVIDER_CHOICES,
@@ -63,6 +67,13 @@ export interface AddProviderPlan {
   addedDependencies: ProviderDependency[];
   manifestPath: string;
   updatedManifest: AdminAiManifest | null;
+  configPath: string;
+  configSource: string;
+  envExamplePath: string;
+  envExampleSource: string;
+  examplePath: string;
+  exampleRelativePath: string;
+  exampleSource: string;
 }
 
 export interface AddWriteResult {
@@ -257,6 +268,22 @@ export function planAddProvider(
       ? { ...manifest, providers: { ...manifest.providers, data: { choice: choice as DataProviderChoice, ...descriptor } } }
       : { ...manifest, providers: { ...manifest.providers, auth: { choice: choice as AuthProviderChoice, ...descriptor } } };
 
+  const rawName = project['name'];
+  const projectName = typeof rawName === 'string' && rawName.length > 0 ? rawName : 'app';
+  const configPath = path.join(projectDirectory, SCAFFOLD_CONFIG_PATH);
+  const existingConfig = fs.existsSync(configPath) ? fs.readFileSync(configPath, 'utf8') : '';
+  const envExamplePath = path.join(projectDirectory, '.env.example');
+  const existingEnv = fs.existsSync(envExamplePath) ? fs.readFileSync(envExamplePath, 'utf8') : '';
+  const wiring = kind === 'provider'
+    ? { projectName, dataProvider: choice as DataProviderChoice }
+    : { projectName, authProvider: choice as AuthProviderChoice };
+  const exampleRelativePath = kind === 'provider'
+    ? `src/examples/${choice}-smoke.ts`
+    : `src/examples/${choice}-auth-smoke.ts`;
+  const exampleSource = kind === 'provider'
+    ? providerSmokeSource(choice, renderDataProvider(choice as DataProviderChoice).exampleResource)
+    : authSmokeSource(choice);
+
   return {
     projectDirectory,
     kind,
@@ -266,7 +293,30 @@ export function planAddProvider(
     addedDependencies,
     manifestPath,
     updatedManifest: manifest === null ? null : updatedManifest,
+    configPath,
+    configSource: wireConfigSource(existingConfig, wiring),
+    envExamplePath,
+    envExampleSource: envExampleForWiring(existingEnv, wiring),
+    examplePath: path.join(projectDirectory, exampleRelativePath),
+    exampleRelativePath,
+    exampleSource,
   };
+}
+
+function writeIfChanged(
+  written: string[],
+  preserved: string[],
+  filePath: string,
+  relativePath: string,
+  content: string,
+): void {
+  if (fs.existsSync(filePath) && fs.readFileSync(filePath, 'utf8') === content) {
+    preserved.push(relativePath);
+    return;
+  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, content);
+  written.push(relativePath);
 }
 
 export function writeAddProvider(plan: AddProviderPlan): AddWriteResult {
@@ -282,6 +332,9 @@ export function writeAddProvider(plan: AddProviderPlan): AddWriteResult {
     fs.writeFileSync(plan.manifestPath, `${JSON.stringify(plan.updatedManifest, null, 2)}\n`);
     written.push(ADMIN_AI_MANIFEST_FILENAME);
   }
+  writeIfChanged(written, preserved, plan.configPath, SCAFFOLD_CONFIG_PATH, plan.configSource);
+  writeIfChanged(written, preserved, plan.envExamplePath, '.env.example', plan.envExampleSource);
+  writeIfChanged(written, preserved, plan.examplePath, plan.exampleRelativePath, plan.exampleSource);
   return { written, preserved };
 }
 
@@ -332,11 +385,14 @@ export function addCommand(args: string[], scaffold: ScaffoldManifest): void {
   if (plan.updatedManifest !== null) {
     console.log(`  update ${ADMIN_AI_MANIFEST_FILENAME} -> ${options.kind}: ${options.target}`);
   }
+  console.log(`  wire ${SCAFFOLD_CONFIG_PATH}`);
+  console.log(`  write .env.example and ${plan.exampleRelativePath}`);
+  const hint = `Run \`bun ${plan.exampleRelativePath}\` to exercise the wired provider.`;
   if (!options.write) {
-    console.log('\nDry run only; re-run with --write to update package.json and the AI manifest.');
-    console.log(pc.dim('  Update src/svadmin.config.ts to wire the new provider.'));
+    console.log('\nDry run only; re-run with --write to update package.json, the AI manifest, and provider wiring.');
+    console.log(pc.dim(`  ${hint}`));
     console.log();
     return;
   }
-  printAddResult(true, writeAddProvider(plan), 'Update src/svadmin.config.ts to wire the new provider.');
+  printAddResult(true, writeAddProvider(plan), hint);
 }

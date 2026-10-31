@@ -171,7 +171,7 @@ export type { DetailWorkspaceSectionsConfig, DetailWorkspaceSection, DetailWorks
 export { default as VirtualTable } from './components/VirtualTable.svelte';
 export type { VirtualTableColumn } from './components/VirtualTable.svelte';
 export { default as EditableTable } from './components/EditableTable.svelte';
-export type { EditableTableColumn } from './components/EditableTable.svelte';
+export type { EditableTableColumn, EditableTableEditor } from './components/EditableTable.svelte';
 export { default as DraggableRowTable } from './components/DraggableRowTable.svelte';
 export type { DraggableTableColumn } from './components/DraggableRowTable.svelte';
 export { default as SplitPaneLayout, default as Split } from './components/SplitPaneLayout.svelte';

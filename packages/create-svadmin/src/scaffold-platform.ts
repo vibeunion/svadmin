@@ -13,6 +13,14 @@ import type {
   DataProviderChoice,
 } from './project-manifest';
 import type { MaintainedPackageJson } from './project-maintenance';
+import {
+  AUTH_PROVIDER_IMPORTS,
+  DATA_PROVIDER_IMPORTS,
+  markRegion,
+  mergeEnvExample,
+  renderAuthProvider,
+  renderDataProvider,
+} from './provider-wiring';
 
 export const SCAFFOLD_CONFIG_PATH = 'src/svadmin.config.ts';
 export const ADMIN_AI_MANIFEST_FILENAME = 'svadmin.ai.json';
@@ -338,22 +346,12 @@ export const SCAFFOLD_UI_COMPONENTS: readonly AdminManifestComponent[] = [
   { name: 'QRCode', package: '@svadmin/ui', import: '@svadmin/ui/qr-code' },
 ];
 
-const CUSTOM_DATA_PROVIDER_BODY = [
-  'const unsupported = (): never => {',
-  "  throw new Error('Configure a DataProvider in src/svadmin.config.ts before using the app.');",
-  '};',
-  'const dataProvider: DataProvider = {',
-  "  getApiUrl: () => '',",
-  '  getList: async () => unsupported(),',
-  '  getOne: async () => unsupported(),',
-  '  create: async () => unsupported(),',
-  '  update: async () => unsupported(),',
-  '  deleteOne: async () => unsupported(),',
-  '};',
-];
-
 function quote(value: string): string {
   return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+}
+
+function uniqueImports(lines: readonly string[]): string[] {
+  return [...new Set(lines)];
 }
 
 /**
@@ -361,83 +359,25 @@ function quote(value: string): string {
  * await so the exported config is always a fully-resolved static bundle.
  */
 export function buildSvadminConfigSource(options: ScaffoldPlatformOptions): string {
-  const imports = new Set<string>(["import { createProviderBundle, defineAdminConfig } from '@svadmin/app';"]);
-  const body: string[] = [];
-  let needsSupabaseClient = false;
-
-  switch (options.dataProvider) {
-    case 'simple-rest':
-      imports.add("import { createSimpleRestDataProvider } from '@svadmin/simple-rest';");
-      body.push("const dataProvider = await createSimpleRestDataProvider('https://jsonplaceholder.typicode.com');");
-      break;
-    case 'supabase':
-      imports.add("import { createSupabaseDataProvider } from '@svadmin/supabase';");
-      needsSupabaseClient = true;
-      body.push('const dataProvider = createSupabaseDataProvider(supabaseClient);');
-      break;
-    case 'graphql':
-      imports.add("import { createGraphQLDataProvider } from '@svadmin/graphql';");
-      body.push("const dataProvider = await createGraphQLDataProvider('https://example.com/graphql');");
-      break;
-    case 'none':
-      imports.add("import type { DataProvider } from '@svadmin/core';");
-      body.push(...CUSTOM_DATA_PROVIDER_BODY);
-      break;
-    default: {
-      const descriptor = SCAFFOLD_DATA_PROVIDERS[options.dataProvider];
-      const packageName = descriptor.package ?? '@svadmin/core';
-      imports.add("import type { DataProvider } from '@svadmin/core';");
-      body.push(
-        `// TODO: configure ${packageName} in src/svadmin.config.ts.`,
-        'async function createDataProvider(): Promise<DataProvider> {',
-        `  throw new Error('Configure the ${options.dataProvider} data provider before running the app.');`,
-        '}',
-        'const dataProvider = await createDataProvider();',
-      );
-      break;
-    }
-  }
-
-  let authExpression: string | null = null;
-  switch (options.authProvider) {
-    case 'mock':
-      imports.add("import { mockAuthProvider } from './providers/mockAuth';");
-      authExpression = 'mockAuthProvider';
-      break;
-    case 'jwt':
-      imports.add("import { createSimpleRestAuthProvider } from '@svadmin/simple-rest';");
-      body.push("const authProvider = createSimpleRestAuthProvider({ loginUrl: '/api/auth/login', identityUrl: '/api/auth/me' });");
-      authExpression = 'authProvider';
-      break;
-    case 'supabase':
-      imports.add("import { createSupabaseAuthProvider } from '@svadmin/supabase';");
-      needsSupabaseClient = true;
-      body.push('const authProvider = createSupabaseAuthProvider(supabaseClient);');
-      authExpression = 'authProvider';
-      break;
-    case 'none':
-      break;
-  }
-
-  if (needsSupabaseClient) {
-    imports.add("import { supabaseClient } from './providers/supabase';");
-    body.unshift(
-      "if (!supabaseClient) throw new Error('Supabase is not configured: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');",
-    );
-  }
-
-  imports.add("import { resources } from './resources';");
-
-  const providerEntries = ['    dataProvider,', ...(authExpression === null ? [] : [`    authProvider: ${authExpression},`])].join('\n');
-
+  const data = renderDataProvider(options.dataProvider);
+  const auth = renderAuthProvider(options.authProvider);
+  const imports = uniqueImports([
+    "import { createProviderBundle, defineAdminConfig } from '@svadmin/app';",
+    ...data.imports,
+    ...auth.imports,
+    "import { resources } from './resources';",
+  ]);
+  const providerEntries = ['    dataProvider,', ...(auth.expression === null ? [] : [`    authProvider: ${auth.expression},`])].join('\n');
   return [
     '/**',
     ' * svadmin application entrypoint — the first file AI tooling should read.',
     ' * Generated by create-svadmin; edit freely.',
     ' */',
-    [...imports].join('\n'),
+    imports.join('\n'),
     '',
-    body.join('\n'),
+    markRegion('data', data.body),
+    '',
+    markRegion('auth', auth.body),
     '',
     'export default defineAdminConfig({',
     `  name: ${quote(options.projectName)},`,
@@ -448,6 +388,91 @@ export function buildSvadminConfigSource(options: ScaffoldPlatformOptions): stri
     '});',
     '',
   ].join('\n');
+}
+
+function replaceRegion(source: string, kind: 'data' | 'auth', body: string): string | null {
+  const start = `/* @svadmin ${kind}-provider */`;
+  const end = `/* @svadmin end ${kind}-provider */`;
+  const startIndex = source.indexOf(start);
+  const endIndex = source.indexOf(end);
+  if (startIndex === -1 || endIndex < startIndex) return null;
+  return `${source.slice(0, startIndex)}${markRegion(kind, body)}${source.slice(endIndex + end.length)}`;
+}
+
+function ensureImports(source: string, imports: readonly string[]): string {
+  let next = source;
+  for (const line of imports) {
+    if (next.includes(line)) continue;
+    const firstImport = next.indexOf('import ');
+    next = firstImport === -1 ? `${line}\n${next}` : `${next.slice(0, firstImport)}${line}\n${next.slice(firstImport)}`;
+  }
+  return next;
+}
+
+function stripImportLines(source: string, imports: readonly string[]): string {
+  return imports.reduce((current, line) => current.replaceAll(`${line}\n`, ''), source);
+}
+
+function ensureAuthBinding(source: string, expression: string | null): string {
+  if (expression === null) return source.replace(/\n\s*authProvider:[^\n]+,/, '');
+  if (/authProvider:/.test(source)) {
+    return source.replace(/authProvider:[^\n]+,/, `authProvider: ${expression},`);
+  }
+  return source.replace('dataProvider,', `dataProvider,\n    authProvider: ${expression},`);
+}
+
+export interface ConfigWiringPatch {
+  projectName: string;
+  dataProvider?: DataProviderChoice;
+  authProvider?: AuthProviderChoice;
+}
+
+/**
+ * Inserts or replaces the data/auth region of an existing config.
+ * Configs that are not an svadmin entrypoint are replaced with a runnable one.
+ */
+export function wireConfigSource(source: string, patch: ConfigWiringPatch): string {
+  if (!source.includes('defineAdminConfig')) {
+    return buildSvadminConfigSource({
+      projectName: patch.projectName,
+      dataProvider: patch.dataProvider ?? 'simple-rest',
+      authProvider: patch.authProvider ?? 'none',
+    });
+  }
+  let next = source;
+  if (patch.dataProvider !== undefined) {
+    const snippet = renderDataProvider(patch.dataProvider);
+    const replaced = replaceRegion(next, 'data', snippet.body);
+    next = replaced ?? next.replace(
+      'export default defineAdminConfig(',
+      `${markRegion('data', snippet.body)}\n\nexport default defineAdminConfig(`,
+    );
+    next = stripImportLines(next, DATA_PROVIDER_IMPORTS.filter((line) => !snippet.imports.includes(line)));
+    next = ensureImports(next, snippet.imports);
+  }
+  if (patch.authProvider !== undefined) {
+    const snippet = renderAuthProvider(patch.authProvider);
+    const replaced = replaceRegion(next, 'auth', snippet.body);
+    next = replaced ?? next.replace(
+      'export default defineAdminConfig(',
+      `${markRegion('auth', snippet.body)}\n\nexport default defineAdminConfig(`,
+    );
+    next = stripImportLines(next, AUTH_PROVIDER_IMPORTS.filter((line) => !snippet.imports.includes(line)));
+    next = ensureImports(next, snippet.imports);
+    next = ensureAuthBinding(next, snippet.expression);
+  }
+  const clientImport = "import { supabaseClient } from './providers/supabase';";
+  if (!next.includes('supabaseClient')) next = stripImportLines(next, [clientImport]);
+  else if (!next.includes(clientImport)) next = ensureImports(next, [clientImport]);
+  return next;
+}
+
+export function envExampleForWiring(existing: string, patch: ConfigWiringPatch): string {
+  const entries = {
+    ...(patch.dataProvider === undefined ? {} : renderDataProvider(patch.dataProvider).env),
+    ...(patch.authProvider === undefined ? {} : renderAuthProvider(patch.authProvider).env),
+  };
+  return mergeEnvExample(existing, entries);
 }
 
 export function buildAdminAiManifest(options: ScaffoldPlatformOptions): AdminAiManifest {

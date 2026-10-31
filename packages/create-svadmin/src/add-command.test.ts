@@ -137,6 +137,15 @@ test('addCommand --write updates package.json and manifest', async () => {
     expect(packageJson.dependencies['@svadmin/graphql']).toBeDefined();
     const manifest = JSON.parse(await readFile(join(projectDirectory, ADMIN_AI_MANIFEST_FILENAME), 'utf8'));
     expect(manifest.providers.data.choice).toBe('graphql');
+    const config = await readFile(join(projectDirectory, 'src', 'svadmin.config.ts'), 'utf8');
+    expect(config).toContain("import { createGraphQLDataProvider } from '@svadmin/graphql';");
+    expect(config).toContain('createGraphQLDataProvider(');
+    expect(config).not.toContain('TODO');
+    const envExample = await readFile(join(projectDirectory, '.env.example'), 'utf8');
+    expect(envExample).toContain('VITE_GRAPHQL_URL=');
+    const example = await readFile(join(projectDirectory, 'src', 'examples', 'graphql-smoke.ts'), 'utf8');
+    expect(example).toContain('getList');
+    expect(example).toContain('countries');
   } finally {
     await rm(projectDirectory, { recursive: true, force: true });
   }

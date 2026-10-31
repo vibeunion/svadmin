@@ -13,6 +13,7 @@ const FROZEN_CORE_HOOKS = [
   'useSubmitTask', 'useTask', 'useTaskList', 'useTaskSubscription',
   'useCan', 'useLive', 'useSubscription', 'usePublish',
   'useNavigation', 'useGo', 'useBack', 'useGetToPath', 'useLink', 'useResource',
+  'useMutationMode', 'useWarnAboutChange', 'useSyncWithLocation', 'useMeta', 'useEditableTable',
   'useModal', 'useMenu', 'useBreadcrumb', 'useThemedLayoutContext',
   'useNotification', 'useOvertime',
   'useParsed', 'useTranslation',

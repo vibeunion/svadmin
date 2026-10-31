@@ -11,7 +11,9 @@ import {
   buildScaffoldPlatformFiles,
   buildSvadminConfigSource,
   checkAdminManifest,
+  wireConfigSource,
 } from './scaffold-platform';
+import { DATA_PROVIDER_CHOICES } from './project-manifest';
 
 test('config source wires the selected data and auth providers', () => {
   const simpleRest = buildSvadminConfigSource({
@@ -39,6 +41,39 @@ test('config source wires the selected data and auth providers', () => {
   expect(supabase).toContain('const authProvider = createSupabaseAuthProvider(supabaseClient);');
   expect(supabase).toContain('authProvider: authProvider,');
   expect(supabase).toContain('VITE_SUPABASE_URL');
+});
+
+test('every official provider is wired without a TODO stub', () => {
+  for (const choice of DATA_PROVIDER_CHOICES) {
+    const source = buildSvadminConfigSource({
+      projectName: 'demo',
+      dataProvider: choice,
+      authProvider: 'none',
+    });
+    expect(source).not.toContain('TODO');
+    expect(source).toContain('const dataProvider');
+    expect(source).toContain('/* @svadmin data-provider */');
+  }
+  const pocketbase = buildSvadminConfigSource({
+    projectName: 'demo',
+    dataProvider: 'pocketbase',
+    authProvider: 'jwt',
+  });
+  expect(pocketbase).toContain('createPocketBaseDataProvider');
+  expect(pocketbase).toContain('createSimpleRestAuthProvider');
+});
+
+test('wireConfigSource replaces the data provider and keeps auth', () => {
+  const original = buildSvadminConfigSource({
+    projectName: 'demo',
+    dataProvider: 'simple-rest',
+    authProvider: 'mock',
+  });
+  const wired = wireConfigSource(original, { projectName: 'demo', dataProvider: 'directus' });
+  expect(wired).toContain('createDirectusDataProvider');
+  expect(wired).not.toContain('createSimpleRestDataProvider');
+  expect(wired).toContain('mockAuthProvider');
+  expect(wired).not.toContain('TODO');
 });
 
 test('custom data provider yields a typed placeholder instead of a broken import', () => {

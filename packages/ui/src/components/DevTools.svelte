@@ -16,7 +16,15 @@
     attachSvadminDevtoolsQueryClient,
     installSvadminDevtoolsBridge,
     publishSvadminDevtoolsSnapshot,
+    runSvadminDevtoolsCacheAction,
   } from '../devtools-bridge.js';
+  import {
+    componentSource,
+    filterInspectorRows,
+    redactValueSummary,
+    type DevtoolsInspectorRow,
+    type DevtoolsTimelineEntry,
+  } from '../devtools-inspector.js';
 
   import TooltipButton from './TooltipButton.svelte';
   import * as Tabs from './ui/tabs/index.js';
@@ -48,7 +56,53 @@
   let cacheDiagnostics = $state.raw<DevtoolsCacheDiagnostics>(EMPTY_CACHE_DIAGNOSTICS);
   let safeQueryDiagnostics = $state.raw<DevtoolsQueryDiagnostic[]>([]);
   let invalidations = $state.raw<Array<{ at: number; provider: string; resource: string; operation: string }>>([]);
+  let inspectorRows = $state.raw<DevtoolsInspectorRow[]>([]);
+  let timeline = $state.raw<DevtoolsTimelineEntry[]>([]);
+  let filterText = $state('');
+  let filterKind = $state<'all' | 'query' | 'mutation'>('all');
+  let filterResource = $state('all');
+  let filterStatus = $state('all');
+  let filterComponent = $state('');
   const queryTimings = new SvelteMap<string, { startedAt?: number; duration?: number }>();
+  const triggers = new Map<string, string>();
+
+  function pushTimeline(entry: DevtoolsTimelineEntry) {
+    timeline = [entry, ...timeline].slice(0, 24);
+  }
+
+  async function replayRow(row: DevtoolsInspectorRow) {
+    if (row.kind !== 'query') return;
+    triggers.set(row.id, 'devtools-replay');
+    pushTimeline({
+      at: Date.now(),
+      kind: 'query',
+      resource: row.resource,
+      operation: row.operation,
+      status: 'refetch',
+      trigger: 'devtools-replay',
+      source: 'devtools',
+    });
+    try {
+      await runSvadminDevtoolsCacheAction({
+        action: 'refetch',
+        selector: {
+          provider: row.provider,
+          ...(row.resource === '—' || row.resource === '[custom]' || row.resource === '[mutation]' ? {} : { resource: row.resource }),
+          operation: row.operation,
+        },
+      });
+    } catch {
+      pushTimeline({
+        at: Date.now(),
+        kind: 'query',
+        resource: row.resource,
+        operation: row.operation,
+        status: 'error',
+        trigger: 'devtools-replay',
+        source: 'devtools',
+      });
+    }
+  }
 
   function toggle() {
     visible = !visible;
@@ -97,7 +151,64 @@
         invalidation: query.state.isInvalidated ? 'cache invalidation' : '—',
       }];
     });
+    const queryRows: DevtoolsInspectorRow[] = queries.flatMap((query) => {
+      const descriptor = parseQueryKey(query.queryKey);
+      if (!descriptor) return [];
+      const loose = query as typeof query & {
+        meta?: unknown;
+        options?: { meta?: unknown };
+        observers?: readonly unknown[];
+      };
+      const attribution = componentSource(loose.meta ?? loose.options?.meta, loose.observers?.length ?? 0);
+      const resource = descriptor.kind === 'custom' ? '[custom]' : (descriptor.resource ?? '—');
+      const operation = `${descriptor.kind}:${descriptor.action ?? 'call'}`;
+      return [{
+        id: query.queryHash,
+        kind: 'query' as const,
+        provider: descriptor.provider,
+        resource,
+        operation,
+        status: query.state.fetchStatus === 'fetching' ? 'fetching' : query.state.status,
+        component: attribution.component,
+        trigger: triggers.get(query.queryHash) ?? 'cache',
+        source: attribution.source,
+        requestSummary: redactValueSummary({ operation, resource }),
+        responseSummary: redactValueSummary(query.state.data),
+      }];
+    });
+    const mutationRows: DevtoolsInspectorRow[] = mutations.map((mutation, index) => {
+      const loose = mutation as typeof mutation & {
+        mutationId?: number;
+        options?: { meta?: unknown };
+        state: { status: string; variables?: unknown; data?: unknown };
+      };
+      const attribution = componentSource(loose.options?.meta, 0);
+      const id = `mutation:${loose.mutationId ?? index}`;
+      return {
+        id,
+        kind: 'mutation' as const,
+        provider: 'mutation',
+        resource: '[mutation]',
+        operation: 'mutation',
+        status: loose.state.status,
+        component: attribution.component,
+        trigger: triggers.get(id) ?? 'mutation',
+        source: attribution.source,
+        requestSummary: redactValueSummary(loose.state.variables),
+        responseSummary: redactValueSummary(loose.state.data),
+      };
+    });
+    inspectorRows = [...queryRows, ...mutationRows];
   }
+
+  const filteredInspectorRows = $derived(filterInspectorRows(inspectorRows, {
+    text: filterText,
+    kind: filterKind,
+    resource: filterResource,
+    status: filterStatus,
+    component: filterComponent,
+  }));
+  const inspectorResources = $derived(['all', ...new Set(inspectorRows.map((row) => row.resource))]);
 
   onMount(() => {
     if (!isDev) return;
@@ -128,6 +239,20 @@
               operation: `${descriptor.kind}:${descriptor.action ?? 'call'}`,
             }, ...invalidations].slice(0, 8);
           }
+        }
+        const descriptor = parseQueryKey(event.query.queryKey);
+        if (descriptor) {
+          const trigger = event.action.type;
+          triggers.set(event.query.queryHash, trigger);
+          pushTimeline({
+            at: Date.now(),
+            kind: 'query',
+            resource: descriptor.kind === 'custom' ? '[custom]' : (descriptor.resource ?? '—'),
+            operation: `${descriptor.kind}:${descriptor.action ?? 'call'}`,
+            status: event.query.state.fetchStatus === 'fetching' ? 'fetching' : event.query.state.status,
+            trigger,
+            source: 'query-cache',
+          });
         }
       }
       refreshCacheDiagnostics();
@@ -463,6 +588,79 @@
                           <div><dt>Cache age</dt><dd class="text-foreground">{query.cacheAge}</dd></div>
                           <div><dt>Invalidation</dt><dd class="text-foreground">{query.invalidation}</dd></div>
                         </dl>
+                      </div>
+                    {/each}
+                  {/if}
+                </section>
+
+                <section class="space-y-2 sm:col-span-2" data-testid="devtools-inspector">
+                  <h4 class="text-xs font-semibold text-foreground">Activity filters</h4>
+                  <div class="grid gap-2 sm:grid-cols-2">
+                    <input
+                      class="h-8 rounded-md border bg-background px-2 text-xs"
+                      placeholder="Filter query, mutation, resource, status, component"
+                      data-testid="devtools-filter-query"
+                      bind:value={filterText}
+                    />
+                    <input
+                      class="h-8 rounded-md border bg-background px-2 text-xs"
+                      placeholder="Component"
+                      data-testid="devtools-filter-component"
+                      bind:value={filterComponent}
+                    />
+                    <select class="h-8 rounded-md border bg-background px-2 text-xs" data-testid="devtools-filter-kind" bind:value={filterKind}>
+                      <option value="all">All kinds</option>
+                      <option value="query">Queries</option>
+                      <option value="mutation">Mutations</option>
+                    </select>
+                    <select class="h-8 rounded-md border bg-background px-2 text-xs" data-testid="devtools-filter-status" bind:value={filterStatus}>
+                      <option value="all">All statuses</option>
+                      <option value="success">success</option>
+                      <option value="error">error</option>
+                      <option value="fetching">fetching</option>
+                      <option value="pending">pending</option>
+                    </select>
+                    <select class="h-8 rounded-md border bg-background px-2 text-xs sm:col-span-2" data-testid="devtools-filter-resource" bind:value={filterResource}>
+                      {#each inspectorResources as resource (resource)}
+                        <option value={resource}>{resource}</option>
+                      {/each}
+                    </select>
+                  </div>
+                  {#if filteredInspectorRows.length === 0}
+                    <div class="rounded-md border px-2.5 py-2 text-[0.6875rem] text-muted-foreground">No matching activity.</div>
+                  {:else}
+                    {#each filteredInspectorRows as row (row.id)}
+                      <div class="rounded-md border px-2.5 py-2 text-xs" data-testid="devtools-inspector-row">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <span class="font-medium text-foreground">{row.kind} · {row.provider} · {row.resource}</span>
+                          <Badge variant="outline">{row.operation}</Badge>
+                        </div>
+                        <dl class="mt-1 grid grid-cols-2 gap-1 text-[0.6875rem] text-muted-foreground sm:grid-cols-4">
+                          <div><dt>Status</dt><dd class="text-foreground">{row.status}</dd></div>
+                          <div><dt>Trigger</dt><dd class="text-foreground">{row.trigger}</dd></div>
+                          <div><dt>Source</dt><dd class="text-foreground">{row.source}</dd></div>
+                          <div><dt>Component</dt><dd class="text-foreground">{row.component}</dd></div>
+                        </dl>
+                        <p class="mt-1 text-[0.6875rem] text-muted-foreground" data-testid="devtools-redacted-payload">request {row.requestSummary} · response {row.responseSummary}</p>
+                        {#if row.kind === 'query'}
+                          <button type="button" class="mt-1 text-[0.6875rem] underline" data-testid="devtools-refetch" onclick={() => replayRow(row)}>
+                            Refetch
+                          </button>
+                        {/if}
+                      </div>
+                    {/each}
+                  {/if}
+                </section>
+
+                <section class="space-y-1.5 sm:col-span-2">
+                  <h4 class="text-xs font-semibold text-foreground">Dependency updates</h4>
+                  {#if timeline.length === 0}
+                    <div class="rounded-md border px-2.5 py-2 text-[0.6875rem] text-muted-foreground">No dependency updates yet.</div>
+                  {:else}
+                    {#each timeline as entry, index (`${entry.at}:${entry.operation}:${index}`)}
+                      <div class="flex flex-wrap items-center justify-between gap-2 rounded-md border px-2.5 py-2 text-xs" data-testid="devtools-timeline">
+                        <span>{entry.resource} · {entry.operation}</span>
+                        <Badge variant="outline">{entry.trigger} · {entry.source}</Badge>
                       </div>
                     {/each}
                   {/if}
