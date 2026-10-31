@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-10-30T23:37:17.834Z",
+  "timestamp": "2026-10-31T00:51:06.752Z",
   "totalComponents": 179,
-  "adaptedCount": 122,
-  "fallbackCount": 55,
+  "adaptedCount": 125,
+  "fallbackCount": 52,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 68.2,
-  "fallbackPercentage": 30.7,
+  "exactPercentage": 69.8,
+  "fallbackPercentage": 29.1,
   "behaviorVerifiedCount": 140,
   "behaviorVerifiedPercentage": 78.2,
   "behaviorAssertedCount": 140,
@@ -29,13 +29,13 @@
     "advanced": {
       "category": "advanced",
       "total": 43,
-      "adapted": 22,
-      "fallback": 20,
+      "adapted": 25,
+      "fallback": 17,
       "spaOnly": 1,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 51.2,
-      "fallbackRate": 46.5,
+      "exactRate": 58.1,
+      "fallbackRate": 39.5,
       "behaviorVerified": 38,
       "behaviorAsserted": 38
     },
@@ -114,8 +114,8 @@
       "uiComponent": "ErrorSummary.svelte",
       "liteComponent": "LiteErrorSummary.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "Lite 使用静态错误区域与原生锚点；校验和服务端错误映射由宿主承接"
+      "status": "exact",
+      "strategy": "错误汇总区域、字段锚点跳转与可访问标题，错误映射由服务端返回"
     },
     {
       "name": "ResourceOperationsPage",
@@ -1306,16 +1306,16 @@
       "uiComponent": "Popconfirm.svelte",
       "liteComponent": "LitePopconfirm.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "details 锚点确认面板与原生 POST 表单"
+      "status": "exact",
+      "strategy": "锚点确认面板（dialog 语义）与原生 POST 表单/链接的确认与取消"
     },
     {
       "name": "DetailDrawer",
       "uiComponent": "DetailDrawer.svelte",
       "liteComponent": "LiteDetailDrawer.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "details 详情侧栏与关闭链接；焦点圈定由 SPA 承接"
+      "status": "exact",
+      "strategy": "锚点驱动的详情侧栏与关闭链接，缺省闭合不影响页面其余内容"
     },
     {
       "name": "RowActions",

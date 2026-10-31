@@ -85,3 +85,20 @@ Completed in the same cycle:
    replacement for WYSIWYG, so the mapping stays `fallback` while read mode
    renders allowlisted HTML. See
    [rich content boundaries](./ssr-rich-content-boundaries.md).
+
+## Audit log
+
+Advanced-category re-audit (same cycle as the field audit above):
+
+| Component | Was | Now | Why |
+| --- | --- | --- | --- |
+| `Popconfirm` | fallback | `exact` | An anchor opens a `dialog`-role panel (`:target`), and the confirm is a native POST form or link; cancel is a plain anchor. Only focus trap, scroll lock and click-outside are client extras. |
+| `DetailDrawer` | fallback | `exact` | Anchored side panel with an explicit close link; the rest of the page stays usable. Focus trapping stays in the SPA. |
+| `ErrorSummary` | fallback | `exact` | Errors are listed with accessible heading and field anchors; mapping rules come from the server. Auto-focus and scroll are client extras. |
+| `Tour` | fallback | `fallback` | Anchored highlight and step positioning are the capability, not an enhancement. |
+| `Tree` | fallback | `fallback` | Indeterminate multi-select is listed in the criteria; `details` preserves expansion only. |
+| `Collapse` | fallback | `fallback` | Exclusive accordion state belongs to the host/SPA. |
+
+The outcome is pinned by `scripts/parity-contract.test.ts`
+(`records the advanced disclosure re-audit outcome`) so a later status flip has
+to argue against this table instead of silently changing the number.

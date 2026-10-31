@@ -122,6 +122,25 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(richTextField?.status).toBe('fallback');
   });
 
+  it('records the advanced disclosure re-audit outcome', () => {
+    const report = buildParityReport();
+    const status = (name: string): string | undefined =>
+      report.items.find((item) => item.name === name)?.status;
+
+    // Anchors plus a native form already preserve the whole confirm/dismiss
+    // capability; only focus management and click-outside are client extras.
+    expect(status('Popconfirm')).toBe('exact');
+    expect(status('DetailDrawer')).toBe('exact');
+    // Listing errors with field anchors is the full capability; scrolling and
+    // focus are client enhancements.
+    expect(status('ErrorSummary')).toBe('exact');
+    // Still client-owned: anchored tour highlights, accordion/tree expansion
+    // state and moderate checkbox trees change what the user can reach.
+    expect(status('Tour')).toBe('fallback');
+    expect(status('Tree')).toBe('fallback');
+    expect(status('Collapse')).toBe('fallback');
+  });
+
   it('detects stale parity artifacts so CI cannot pass on drift', () => {
     const directory = mkdtempSync(join(tmpdir(), 'svadmin-parity-'));
     try {
