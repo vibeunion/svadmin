@@ -8,7 +8,7 @@ test('DataTableShell renders the titled table surface with toolbar and sticky ac
   await page.goto('/?view=data-table-shell');
   const shell = page.getByRole('region', { name: '委托单列表' });
   await expect(shell.getByRole('heading', { name: '委托单' })).toBeVisible();
-  await expect(shell.getByText('128 条')).toBeVisible();
+  await expect(shell.getByText('共 128 条')).toBeVisible();
   await expect(shell.getByRole('button', { name: '导出' })).toBeVisible();
   await expect(shell.getByText('FA-2026-003')).toBeVisible();
   await page.setViewportSize({ width: 900, height: 720 });
