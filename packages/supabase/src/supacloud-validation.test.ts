@@ -250,9 +250,19 @@ describe('SupaCloud validated task bridge', () => {
   test('validates SDK array lists and closed list/DLQ filters', async () => {
     const { provider, client } = fixture();
     expect(await provider.list({ status: ['running', 'queued'], limit: 2 })).toEqual({ data: [task], total: 1 });
+    expect(client.tasks.list).toHaveBeenCalledWith({ status: ['running', 'queued'], limit: 2 });
+    expect(await provider.list({
+      correlationId: 'workflow-1', businessTaskId: 'biz-1', limit: 2,
+    })).toEqual({ data: [task], total: 1 });
+    expect(client.tasks.list).toHaveBeenLastCalledWith({
+      correlationId: 'workflow-1', businessTaskId: 'biz-1', limit: 2,
+    });
     expect(await provider.listDlq({ limit: 7 })).toEqual({ data: [task], total: 1 });
     expect(client.tasks.listDlq).toHaveBeenCalledWith(7);
-    for (const params of [null, { limit: 0 }, { limit: 1.5 }, { limit: Infinity }, { status: [] }, { tenantId: 'other' }]) {
+    for (const params of [
+      null, { limit: 0 }, { limit: 1.5 }, { limit: Infinity }, { status: [] },
+      { correlationId: '' }, { businessTaskId: '' }, { correlationId: 42 }, { tenantId: 'other' },
+    ]) {
       const result: unknown = Reflect.apply(provider.list, provider, [params]);
       await expect(result).rejects.toMatchObject({ code: 'INVALID_TASK_INPUT' });
     }
@@ -536,7 +546,9 @@ describe.each(sdkVersions)('installed SupaCloud SDK %s', (_version, createSupaCl
     expect(handle.id).toBe('task-1');
     expect((await handle.wait()).status).toBe('succeeded');
     expect((await provider.get('task-1')).progress).toBeNull();
-    expect((await provider.list({ status: 'succeeded', limit: 2 })).total).toBe(1);
+    expect((await provider.list({
+      status: 'succeeded', correlationId: 'workflow-1', businessTaskId: 'biz-1', limit: 2,
+    })).total).toBe(1);
     expect((await provider.listDlq({ limit: 7 })).total).toBe(1);
     expect((await handle.cancel()).status).toBe('cancelled');
     expect((await handle.retry()).status).toBe('retry_scheduled');
@@ -545,7 +557,7 @@ describe.each(sdkVersions)('installed SupaCloud SDK %s', (_version, createSupaCl
       metadata: '{"tenant":"a"}', body: { prompt: 'poster' },
     });
     expect(requests.map(request => request.url)).toContain(
-      'https://management.example.test/v1/projects/project-1/tasks?status=succeeded&limit=2',
+      'https://management.example.test/v1/projects/project-1/tasks?status=succeeded&correlation_id=workflow-1&business_task_id=biz-1&limit=2',
     );
     expect(requests.map(request => request.url)).toContain(
       'https://management.example.test/v1/projects/project-1/tasks?dlq=true&limit=7',

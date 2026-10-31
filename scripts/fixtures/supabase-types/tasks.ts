@@ -20,7 +20,7 @@ provider.subscribe('task-1', task => {
   const result: { output: string } = task.result;
   void [progress, result];
 });
-provider.list({ status: ['running', 'pending'], limit: 20 });
+provider.list({ status: ['running', 'pending'], correlationId: 'workflow-1', businessTaskId: 'biz-1', limit: 20 });
 // @ts-expect-error Task IDs must be strings, not silently coerced numeric values.
 provider.get(42);
 // @ts-expect-error Closed SDK filters do not silently ignore tenant-specific parameters.

@@ -124,8 +124,9 @@ promise ISO timestamp semantics.
 
 Submission bodies and metadata must be JSON objects. `meta` maps to the SDK's
 `metadata`; reserved metadata/idempotency headers cannot override these values.
-List filters accept only `status`, `taskType`, `functionSlug`, `dlq`, and `limit`;
-DLQ parameters accept only `limit`. Invalid input is rejected before dispatch.
+List filters accept only `status`, `taskType`, `functionSlug`,
+`correlationId`, `businessTaskId`, `dlq`, and `limit`; DLQ parameters accept only
+`limit`. Invalid input is rejected before dispatch.
 
 Every submitted handle has an `id`. `wait()` returns a matching terminal record.
 Cancel and retry return the matching current record, not a fabricated terminal
@@ -161,6 +162,37 @@ const latest = await taskProvider.get('task_123');
 const recent = await taskProvider.list({ limit: 20 });
 const dlq = await taskProvider.listDlq({ limit: 20 });
 ```
+
+Use `correlationId` and `businessTaskId` when the application already owns a
+workflow, order, or business task record. SupaCloud stores these values and echoes
+them back; it does not interpret them. Both filters are forwarded to the SDK:
+
+```ts
+const related = await taskProvider.list({
+  correlationId: 'workflow-run-123',
+  businessTaskId: 'order-456',
+  limit: 20,
+});
+```
+
+### SSR, SPA, and Lite
+
+SupaCloud tasks are durable background work. They are not a page-load dependency:
+
+| Runtime | Submit | Read snapshot | Wait / subscribe |
+| --- | --- | --- | --- |
+| SPA | Yes, with the current user session | Yes | Preferred, with cleanup on navigation |
+| Modern SSR | Prefer a server action with request credentials | Yes, render the last known snapshot | No; do not block the request |
+| Lite SSR | Native form POST to a server action | Yes | No; provide a refresh link or meta refresh |
+
+In SSR, create the Supabase and SupaCloud clients per request. Never place a user
+session or access token in a module-level singleton. The Management API URL and
+project reference are fixed configuration; use only task endpoints authorized for
+the current user. Keep service-role commands on the server.
+
+Do not call `wait()` or `subscribe()` during SSR. A task may run for minutes or
+hours, and cleanup only stops observation; it does not cancel the server task.
+The SPA owns live task updates and query invalidation after a terminal state.
 
 ### Cancel or Retry
 

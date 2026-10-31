@@ -116,8 +116,9 @@ SDK 要求任务提交返回 HTTP 202，任务回执带上匹配配置的 `proje
 
 提交的正文和元数据必须是 JSON 对象。`meta` 映射到 SDK 的 `metadata`，
 不能通过保留的元数据或幂等请求头覆盖这些值。
-列表筛选仅接受 `status`、`taskType`、`functionSlug`、`dlq` 和 `limit`；
-DLQ 参数仅接受 `limit`。非法输入在请求发出前被拒绝。
+列表筛选仅接受 `status`、`taskType`、`functionSlug`、`correlationId`、
+`businessTaskId`、`dlq` 和 `limit`；DLQ 参数仅接受 `limit`。
+非法输入在请求发出前被拒绝。
 
 提交句柄必须有 `id`，`wait()` 返回 ID 匹配的终态记录。
 取消和重试返回 ID 匹配的当前记录，不虚构终态：
@@ -151,6 +152,35 @@ const latest = await taskProvider.get('task_123');
 const recent = await taskProvider.list({ limit: 20 });
 const dlq = await taskProvider.listDlq({ limit: 20 });
 ```
+
+当应用自己已有工作流、订单或业务任务记录时，使用 `correlationId` 和
+`businessTaskId`。SupaCloud 只存储并回传这些值，不解释其含义。两个过滤条件都会
+转发给 SDK：
+
+```ts
+const related = await taskProvider.list({
+  correlationId: 'workflow-run-123',
+  businessTaskId: 'order-456',
+  limit: 20,
+});
+```
+
+### SSR、SPA 与 Lite
+
+SupaCloud 任务是持久化后台工作，不是页面加载依赖：
+
+| 运行形态 | 提交 | 读取快照 | wait / subscribe |
+| --- | --- | --- | --- |
+| SPA | 可以，使用当前用户会话 | 可以 | 推荐，并在导航或目标变化时清理 |
+| 现代 SSR | 优先用 server action 携带请求凭据 | 可以，渲染最后一次已知快照 | 不可以；不要阻塞请求 |
+| Lite SSR | 原生表单 POST 到 server action | 可以 | 不可以；提供刷新链接或 meta refresh |
+
+SSR 中必须按请求创建 Supabase 和 SupaCloud 客户端。不要把用户会话或 access token
+放进模块级单例。Management API URL 和 project ref 是固定配置；只调用对当前用户
+授权的任务端点。service-role 命令必须留在服务端。
+
+不要在 SSR 中调用 `wait()` 或 `subscribe()`。任务可能运行数分钟到数小时，清理
+只停止观察，不会取消服务端任务。实时任务更新和终态后的查询失效由 SPA 负责。
 
 ### 取消与重试
 
