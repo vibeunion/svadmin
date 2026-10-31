@@ -42,6 +42,7 @@ describe('Lite styling hook audit', () => {
     const { markdownPath } = classHookOutputPaths(repositoryRoot);
 
     expect(existsSync(markdownPath)).toBe(true);
+    expect(existsSync(classHookOutputPaths(repositoryRoot).jsonPath)).toBe(true);
     expect(classHookArtifactDrift(repositoryRoot)).toEqual([]);
     // The artifact must state that it is a separate metric, not a status.
     const artifact = readFileSync(markdownPath, 'utf8');
@@ -55,14 +56,19 @@ describe('Lite styling hook audit', () => {
   it('detects a stale or missing artifact', () => {
     const directory = mkdtempSync(join(tmpdir(), 'svadmin-class-hooks-'));
     try {
-      const { markdownPath } = classHookOutputPaths(directory);
+      const { markdownPath, jsonPath } = classHookOutputPaths(directory);
 
       expect(classHookArtifactDrift(directory).some((entry) => entry.includes('missing'))).toBe(true);
 
       const audit = buildClassHookAudit(directory);
       mkdirSync(`${directory}/packages/lite`, { recursive: true });
       writeFileSync(markdownPath, `${generateClassHookMarkdown(audit).trimEnd()}\n`, 'utf8');
+      writeFileSync(jsonPath, JSON.stringify(audit, null, 2), 'utf8');
       expect(classHookArtifactDrift(directory)).toEqual([]);
+
+      writeFileSync(jsonPath, JSON.stringify({ ...audit, reviewedCount: 999 }, null, 2), 'utf8');
+      expect(classHookArtifactDrift(directory).some((entry) => entry.includes('class-hooks.json'))).toBe(true);
+      writeFileSync(jsonPath, JSON.stringify(audit, null, 2), 'utf8');
 
       writeFileSync(markdownPath, '# stale\n', 'utf8');
       expect(classHookArtifactDrift(directory).some((entry) => entry.includes('out of date'))).toBe(true);

@@ -1,0 +1,184 @@
+{
+  "reviewedCount": 111,
+  "referenceHookCount": 84,
+  "preservedCount": 49,
+  "coveragePercentage": 58.3,
+  "missing": [
+    {
+      "name": "ActivityFeed",
+      "category": "advanced",
+      "liteComponent": "LiteActivityFeed.svelte"
+    },
+    {
+      "name": "ApprovalActionCard",
+      "category": "advanced",
+      "liteComponent": "LiteApprovalActionCard.svelte"
+    },
+    {
+      "name": "ColumnHeaderFilter",
+      "category": "advanced",
+      "liteComponent": "LiteColumnHeaderFilter.svelte"
+    },
+    {
+      "name": "ColumnSettings",
+      "category": "advanced",
+      "liteComponent": "LiteColumnSettings.svelte"
+    },
+    {
+      "name": "DetailDrawer",
+      "category": "advanced",
+      "liteComponent": "LiteDetailDrawer.svelte"
+    },
+    {
+      "name": "DraggableRowTable",
+      "category": "advanced",
+      "liteComponent": "LiteDraggableRowTable.svelte"
+    },
+    {
+      "name": "DrawerForm",
+      "category": "advanced",
+      "liteComponent": "LiteDrawerForm.svelte"
+    },
+    {
+      "name": "EditableTable",
+      "category": "advanced",
+      "liteComponent": "LiteEditableTable.svelte"
+    },
+    {
+      "name": "FilterBuilder",
+      "category": "advanced",
+      "liteComponent": "LiteFilterBuilder.svelte"
+    },
+    {
+      "name": "MediaLibraryModal",
+      "category": "advanced",
+      "liteComponent": "LiteMediaLibraryModal.svelte"
+    },
+    {
+      "name": "ModalForm",
+      "category": "advanced",
+      "liteComponent": "LiteModalForm.svelte"
+    },
+    {
+      "name": "SensitiveDataMask",
+      "category": "advanced",
+      "liteComponent": "LiteSensitiveDataMask.svelte"
+    },
+    {
+      "name": "StepForm",
+      "category": "advanced",
+      "liteComponent": "LiteStepForm.svelte"
+    },
+    {
+      "name": "TableSummary",
+      "category": "advanced",
+      "liteComponent": "LiteTableSummary.svelte"
+    },
+    {
+      "name": "VersionDiffViewer",
+      "category": "advanced",
+      "liteComponent": "LiteVersionDiffViewer.svelte"
+    },
+    {
+      "name": "Cascader",
+      "category": "fields",
+      "liteComponent": "LiteCascader.svelte"
+    },
+    {
+      "name": "ImageCropper",
+      "category": "fields",
+      "liteComponent": "LiteImageCropper.svelte"
+    },
+    {
+      "name": "ImageField",
+      "category": "fields",
+      "liteComponent": "LiteImageField.svelte"
+    },
+    {
+      "name": "JsonSchemaForm",
+      "category": "fields",
+      "liteComponent": "LiteJsonSchemaForm.svelte"
+    },
+    {
+      "name": "MarkdownField",
+      "category": "fields",
+      "liteComponent": "LiteMarkdownField.svelte"
+    },
+    {
+      "name": "Transfer",
+      "category": "fields",
+      "liteComponent": "LiteTransfer.svelte"
+    },
+    {
+      "name": "TreeSelect",
+      "category": "fields",
+      "liteComponent": "LiteTreeSelect.svelte"
+    },
+    {
+      "name": "Layout",
+      "category": "layout",
+      "liteComponent": "LiteLayout.svelte"
+    },
+    {
+      "name": "Sidebar",
+      "category": "layout",
+      "liteComponent": "LiteSidebar.svelte"
+    },
+    {
+      "name": "SplitPaneLayout",
+      "category": "layout",
+      "liteComponent": "LiteSplitPaneLayout.svelte"
+    },
+    {
+      "name": "CreatePage",
+      "category": "pages",
+      "liteComponent": "LiteCreatePage.svelte"
+    },
+    {
+      "name": "EditPage",
+      "category": "pages",
+      "liteComponent": "LiteEditPage.svelte"
+    },
+    {
+      "name": "ListPage",
+      "category": "pages",
+      "liteComponent": "LiteListPage.svelte"
+    },
+    {
+      "name": "ListPagination",
+      "category": "pages",
+      "liteComponent": "LitePagination.svelte"
+    },
+    {
+      "name": "LoginPage",
+      "category": "pages",
+      "liteComponent": "LiteLogin.svelte"
+    },
+    {
+      "name": "MasterDetailView",
+      "category": "pages",
+      "liteComponent": "LiteMasterDetailView.svelte"
+    },
+    {
+      "name": "PrintableBill",
+      "category": "pages",
+      "liteComponent": "LitePrintableBill.svelte"
+    },
+    {
+      "name": "ShowPage",
+      "category": "pages",
+      "liteComponent": "LiteShowPage.svelte"
+    },
+    {
+      "name": "AnomalyBadge",
+      "category": "widgets",
+      "liteComponent": "LiteAnomalyBadge.svelte"
+    },
+    {
+      "name": "PresenceAvatarGroup",
+      "category": "widgets",
+      "liteComponent": "LitePresenceAvatarGroup.svelte"
+    }
+  ],
+  "timestamp": "2026-10-31T01:39:39.226Z"
+}

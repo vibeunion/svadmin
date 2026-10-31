@@ -1,4 +1,5 @@
 import parityReportSource from '../../../../../parity.json';
+import classHookSource from '../../../../../class-hooks.json';
 import type { PageServerLoad } from './$types';
 
 export interface ParityCategorySummary {
@@ -29,12 +30,27 @@ export interface ParityReportData {
   spaOnlyCount: number;
   missingCount: number;
   overallCoveragePercentage: number;
+  exactPercentage: number;
+  fallbackPercentage: number;
+  behaviorAssertedCount: number;
+  behaviorAssertedPercentage: number;
+  behaviorVerifiedCount: number;
+  behaviorVerifiedPercentage: number;
   categories: Record<string, ParityCategorySummary>;
   items: ParityItem[];
+}
+
+export interface ClassHookAuditData {
+  reviewedCount: number;
+  referenceHookCount: number;
+  preservedCount: number;
+  coveragePercentage: number;
+  missing: Array<{ name: string; category: string; liteComponent: string }>;
 }
 
 export const load = (() => {
   return {
     parityReport: parityReportSource as ParityReportData,
+    classHooks: classHookSource as ClassHookAuditData,
   };
 }) satisfies PageServerLoad;

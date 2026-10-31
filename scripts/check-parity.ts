@@ -634,8 +634,12 @@ export function buildClassHookAudit(
 
 export function classHookOutputPaths(repositoryRoot = resolve(import.meta.dir, '..')): {
   markdownPath: string;
+  jsonPath: string;
 } {
-  return { markdownPath: resolve(repositoryRoot, 'packages/lite/CLASS-HOOKS.md') };
+  return {
+    markdownPath: resolve(repositoryRoot, 'packages/lite/CLASS-HOOKS.md'),
+    jsonPath: resolve(repositoryRoot, 'packages/lite/class-hooks.json'),
+  };
 }
 
 export function generateClassHookMarkdown(audit: ClassHookAudit): string {
@@ -671,19 +675,43 @@ ${rows.join('\n')}
 `;
 }
 
-/** Drift check for the styling hook artifact, mirroring the parity artifacts. */
+/** Drift check for the styling hook artifacts, mirroring the parity artifacts. */
 export function classHookArtifactDrift(
   repositoryRoot = resolve(import.meta.dir, '..'),
 ): string[] {
-  const { markdownPath } = classHookOutputPaths(repositoryRoot);
-  if (!existsSync(markdownPath)) return [`${markdownPath} (missing)`];
-  const expected = generateClassHookMarkdown(buildClassHookAudit(repositoryRoot))
-    .replace(/^> .*自动生成时间[^\n]*$/mu, '> <timestamp>')
-    .trimEnd();
-  const current = readFileSync(markdownPath, 'utf8')
-    .replace(/^> .*自动生成时间[^\n]*$/mu, '> <timestamp>')
-    .trimEnd();
-  return current === expected ? [] : [`${markdownPath} (out of date)`];
+  const { markdownPath, jsonPath } = classHookOutputPaths(repositoryRoot);
+  const audit = buildClassHookAudit(repositoryRoot);
+  const drift: string[] = [];
+
+  const stripMarkdownTimestamp = (value: string): string =>
+    value.replace(/^> .*自动生成时间[^\n]*$/mu, '> <timestamp>').trimEnd();
+  const stripJsonTimestamp = (value: string): string => {
+    const parsed = JSON.parse(value) as Record<string, unknown>;
+    delete parsed['timestamp'];
+    return JSON.stringify(parsed);
+  };
+
+  const expected: Array<[string, string, (value: string) => string]> = [
+    [markdownPath, stripMarkdownTimestamp(generateClassHookMarkdown(audit)), stripMarkdownTimestamp],
+    [jsonPath, stripJsonTimestamp(JSON.stringify(audit)), stripJsonTimestamp],
+  ];
+
+  for (const [path, expectedValue, normalize] of expected) {
+    if (!existsSync(path)) {
+      drift.push(`${path} (missing)`);
+      continue;
+    }
+    let current: string;
+    try {
+      current = normalize(readFileSync(path, 'utf8'));
+    } catch {
+      drift.push(`${path} (unparsable)`);
+      continue;
+    }
+    if (current !== expectedValue) drift.push(`${path} (out of date)`);
+  }
+
+  return drift;
 }
 
 // ─── Main Execution ──────────────────────────────────────────────────────────
@@ -705,9 +733,10 @@ if (import.meta.main) {
     writeFileSync(mdPath, `${mdContent.trimEnd()}\n`, 'utf8');
     writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
     const audit = buildClassHookAudit();
-    const { markdownPath: hooksPath } = classHookOutputPaths();
+    const { markdownPath: hooksPath, jsonPath: hooksJsonPath } = classHookOutputPaths();
     writeFileSync(hooksPath, `${generateClassHookMarkdown(audit).trimEnd()}\n`, 'utf8');
-    console.info(`[OK] Generated ${mdPath}, ${jsonPath} and ${hooksPath}`);
+    writeFileSync(hooksJsonPath, JSON.stringify(audit, null, 2), 'utf8');
+    console.info(`[OK] Generated ${mdPath}, ${jsonPath}, ${hooksPath} and ${hooksJsonPath}`);
     console.info(
       `[OK] Styling hook coverage: ${audit.preservedCount}/${audit.referenceHookCount} (${audit.coveragePercentage}%), ${audit.missing.length} pending`,
     );

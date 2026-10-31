@@ -79,6 +79,11 @@ try {
   const parityCount = new RegExp(`${parityCovered}\\s*\\/\\s*${parityTotal}`, 'u');
   const parityHtml = await assertServerRenderedPage(baseUrl, '/lite/parity', parityCount);
   assert.match(parityHtml, parityCount);
+  // The board must show the three metrics separately instead of blending them.
+  assert.match(parityHtml, /能力对齐率/u);
+  assert.match(parityHtml, /行为断言覆盖率/u);
+  assert.match(parityHtml, /样式钩子覆盖率/u);
+  assert.match(parityHtml, /不参与状态判定/u);
   checkedRoutes += 1;
 
   // 4. Rich content renders server-side (Markdown, tables, footnotes, highlight hook).

@@ -19,6 +19,7 @@
 
   let { data }: PageProps = $props();
   const report = $derived(data.parityReport);
+  const classHooks = $derived(data.classHooks);
 
   const statusLabel: Record<string, { label: string; badgeClass: string }> = {
     exact: { label: '1:1 对齐', badgeClass: 'lite-badge-success' },
@@ -66,6 +67,37 @@
       value={String(report.missingCount)}
       description={report.missingCount === 0 ? '全量覆盖，无缺口' : '需尽快补齐'}
     />
+  </div>
+
+  <!-- Metric definitions: three separate numbers, never one blended score -->
+  <div class="lite-card" style="margin-bottom: 24px;">
+    <h2>指标口径</h2>
+    <p class="lite-muted" style="margin-bottom: 16px;">
+      三个数字分开统计、互不换算。缺少样式钩子不计入能力判定，也不改变任何条目的状态。
+    </p>
+    <div class="lite-dashboard-stats">
+      <LiteStatsCard
+        label="能力对齐率"
+        value={`${report.exactPercentage}%`}
+        description={`${report.adaptedCount} / ${report.totalComponents} 条与参考能力 1:1，其余为语义降级或免适配`}
+        href="/lite/parity#items"
+      />
+      <LiteStatsCard
+        label="行为断言覆盖率"
+        value={`${report.behaviorAssertedPercentage}%`}
+        description={`${report.behaviorAssertedCount} / ${report.totalComponents} 条有测试导入且断言密度达标`}
+      />
+      <LiteStatsCard
+        label="样式钩子覆盖率"
+        value={`${classHooks.coveragePercentage}%`}
+        description={`${classHooks.preservedCount} / ${classHooks.referenceHookCount} 条接受宿主 class（债务 ${classHooks.missing.length} 条，不参与状态判定）`}
+      />
+    </div>
+    <ul class="lite-muted" style="margin: 12px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.7;">
+      <li><strong>能力对齐率</strong>：服务端 HTML 与原生表单语义是否完整保留参考能力；只有客户端增强才算缺口。</li>
+      <li><strong>行为断言覆盖率</strong>：测试文件导入该组件且断言预算达标（<code>expect()</code> 数 ÷ 导入组件数）。</li>
+      <li><strong>样式钩子覆盖率</strong>：参考组件暴露 <code>class</code> 时 Lite 是否也接受；Lite 自带 <code>lite.css</code> 基线，宿主也可用外层容器收口，所以它单独统计、不抬状态。</li>
+    </ul>
   </div>
 
   <!-- Category progress panel -->
