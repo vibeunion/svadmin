@@ -26,6 +26,7 @@
   </div>
   <div class="lite-insight-card__body" style="padding: 16px; font-size: 14px; color: #1D2129; line-height: 1.6;">
     {#if renderedContent}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
       <div class="lite-insight-content">{@html renderedContent}</div>
     {:else}
       <p style="color: #86909C; font-style: italic; margin: 0;">No insights available. AI analysis requires JavaScript.</p>

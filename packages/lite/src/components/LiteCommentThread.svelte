@@ -52,6 +52,7 @@
           <div class="lite-comments__body">
             <p class="lite-comments__meta"><strong>{comment.author}</strong>{#if comment.time}<time>{comment.time}</time>{/if}</p>
             {#if richContent}
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
               <div class="lite-comments__rich">{@html body(comment.content)}</div>
             {:else}
               <p>{comment.content}</p>
@@ -62,6 +63,7 @@
                   <li>
                     <strong>{reply.author}</strong>
                     {#if richContent}
+                      <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
                       <span class="lite-comments__rich">{@html body(reply.content)}</span>
                     {:else}
                       {reply.content}

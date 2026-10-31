@@ -19,6 +19,7 @@
 
 {#if mode === 'show'}
   {#if preview}
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
     <div class="lite-rich-preview">{@html preview}</div>
   {:else}
     <span>—</span>
@@ -47,6 +48,7 @@
     <div class="lite-rich-preview-block">
       <span class="lite-rich-preview-block__label">Preview</span>
       {#if preview}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
         <div class="lite-rich-preview">{@html preview}</div>
       {:else}
         <p class="lite-rich-preview-block__empty">Nothing to preview yet.</p>

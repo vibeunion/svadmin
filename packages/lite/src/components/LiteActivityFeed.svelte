@@ -49,6 +49,7 @@
         {#if act.comment}
           <div class="lite-activity-comment">
             {#if richContent}
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
               <div class="lite-activity-rich">{@html body(act.comment)}</div>
             {:else}
               {act.comment}

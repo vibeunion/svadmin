@@ -1,5 +1,96 @@
 # Changelog
 
+## [0.20.0](https://github.com/vibeunion/svadmin/compare/surface-v0.19.16...surface-v0.20.0) (2026-10-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🚀 Features
+
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+* **design:** integrate Stripe-first patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
+* **enterprise:** harden UI feedback and add isolated service CI acceptance ([#549](https://github.com/vibeunion/svadmin/issues/549)) ([bda1fa2](https://github.com/vibeunion/svadmin/commit/bda1fa21a9162050b5d1742f2a82adc8d173a342))
+* **surface:** accept constrained json-render specs ([1b11203](https://github.com/vibeunion/svadmin/commit/1b11203b29ca7228b4c7eb08cd0dde6184f28f17))
+* **surface:** accept constrained json-render specs ([fe34ef7](https://github.com/vibeunion/svadmin/commit/fe34ef727c1c112e49d411ab3d2bb22790a917d0))
+* **surface:** accept widget value submissions as host interactions ([923af25](https://github.com/vibeunion/svadmin/commit/923af251d5278f8e2e4452a2f22142ad09ea5f04))
+* **surface:** accept widget value submissions as host interactions ([2e27666](https://github.com/vibeunion/svadmin/commit/2e2766640621cb0990143cbd360cf4c7d2dc8bd3))
+* **surface:** add controlled OpenUI streaming and audited form actions ([baae627](https://github.com/vibeunion/svadmin/commit/baae627c35d68dc754b60237d3ab79f394914810))
+* **surface:** add policy-bound record details and activity timelines ([b5b75fc](https://github.com/vibeunion/svadmin/commit/b5b75fc2aca1f5ec0207777da738bf5c8f079463))
+* **surface:** emit host-only record selection interactions ([9231480](https://github.com/vibeunion/svadmin/commit/92314803c2a12e10ef4e49d73a5dd84bd753ad58))
+* **surface:** emit host-only record selection interactions ([d64fefd](https://github.com/vibeunion/svadmin/commit/d64fefd0d15e66b33e0badb90a0c7764622d42b8))
+* **surface:** policy-bound record details and activity timelines ([5b6b727](https://github.com/vibeunion/svadmin/commit/5b6b727cb2a54716ab429ca4987f9bdd0055b10d))
+* **surface:** split chat replies into prose and inline surface proposals ([f0e88c4](https://github.com/vibeunion/svadmin/commit/f0e88c4f34fc579de6f2f3436c960dd96e98af17))
+* **surface:** split chat replies into prose and inline surface proposals ([a22f4cd](https://github.com/vibeunion/svadmin/commit/a22f4cd971c49a2e183458ee22668f08784b34ea))
+* **ui:** close remaining local enterprise UI contracts ([c08ec27](https://github.com/vibeunion/svadmin/commit/c08ec27f18248b1d8aad6f78abfc5f22e0b10be2))
+* **ui:** close remaining local enterprise UI contracts ([8fd3c73](https://github.com/vibeunion/svadmin/commit/8fd3c734b3f9cf8477167960f8ff8160910a87be))
+* **ui:** complete page chrome and design token foundation ([376ead9](https://github.com/vibeunion/svadmin/commit/376ead9b98081ec959e14a34826c0de93b9c7c36))
+* **ui:** complete page chrome and design token foundation ([d14e68e](https://github.com/vibeunion/svadmin/commit/d14e68ecc19a3f4bdfa343c67042631957067657))
+* **ui:** record enterprise interaction contracts ([#541](https://github.com/vibeunion/svadmin/issues/541)) ([723001f](https://github.com/vibeunion/svadmin/commit/723001f73f75cbd3863c9c0a20388f8386454471))
+* **ui:** replace Panda with Tailwind OpenUI and complete example remediation ([d5196a8](https://github.com/vibeunion/svadmin/commit/d5196a87e3f81a27bff421f86738fe91fb58e182))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** resolve advisories and stabilize browser contracts ([e1f01e3](https://github.com/vibeunion/svadmin/commit/e1f01e3703c01188b65c2de6ec76e54d9a6b4df8))
+* **ci:** restore main and release gates ([5bc68e2](https://github.com/vibeunion/svadmin/commit/5bc68e2560d387cb8aab75d71c18834035b21dc9))
+* **merge:** restore Tailwind integration lost in architecture merge ([0db9c58](https://github.com/vibeunion/svadmin/commit/0db9c58e7053f4d5fe3e6e761f85fd14cc5e86ec))
+* reconcile reviewed UI, Surface and Panda PRs for combined validation ([d298ace](https://github.com/vibeunion/svadmin/commit/d298ace8dbca35eb898a0157427a31bbb232a80b))
+* **surface:** detach nested values in interaction records ([b6ed69f](https://github.com/vibeunion/svadmin/commit/b6ed69f24e757c0c35a08d166159404679e53058))
+* **surface:** enforce pre-dispatch scope isolation and repair workflow prerequisites ([0994a52](https://github.com/vibeunion/svadmin/commit/0994a52e9faf44e6baf56a33fc55855dcad43bcb))
+* **surface:** honor interactive business widget appearance ([13b7b8b](https://github.com/vibeunion/svadmin/commit/13b7b8b062a7ae796e83441b6972f9f6a1afc086))
+* **surface:** integrate business widgets with current Tailwind contracts ([db9aa62](https://github.com/vibeunion/svadmin/commit/db9aa62ba38a15b052cea869d64f1efff2e05df9))
+* **surface:** reject undefined and sparse referenced-field selectors ([9d251f0](https://github.com/vibeunion/svadmin/commit/9d251f0ef8a37c6f3b9db681e32a6ad530c72dc4))
+* **surface:** retire reentrant form callbacks before dispatch and completion ([bc721dd](https://github.com/vibeunion/svadmin/commit/bc721dd17c777fe7708268306cd9d3da8a00ee02))
+* **surface:** satisfy strict appearance access ([e1c7fc1](https://github.com/vibeunion/svadmin/commit/e1c7fc192cde0e0c131f9237df14afa4da243ed4))
+* **surface:** satisfy strict indexed contracts and avoid rune name collision ([9d24ca5](https://github.com/vibeunion/svadmin/commit/9d24ca53c0624ddd94f047dc602e82af3f0ca684))
+* **surface:** satisfy strict lint without weakening stream validation ([d353d68](https://github.com/vibeunion/svadmin/commit/d353d683f054efa26584021830d81813e68be7a7))
+* **ui:** neutralize design naming and complete migration regressions ([36651a0](https://github.com/vibeunion/svadmin/commit/36651a03fa06bcf11046692d1e03c97cba67380c))
+* **ui:** preserve nested form drafts and submission ownership ([2570ce5](https://github.com/vibeunion/svadmin/commit/2570ce5a05ae4acf3bc158ffdeeed2928ce05b88))
+* **ui:** reconcile enterprise validation with recursive form and host-filter contracts ([034eb73](https://github.com/vibeunion/svadmin/commit/034eb737b1ad4caca02fcd42c5f83559aaedb592))
+* **ui:** reconcile product recipes and nested forms with current main ([f1f46c5](https://github.com/vibeunion/svadmin/commit/f1f46c5c48832f29f5ff7695d0d7faf6db82ba73))
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+* **merge:** integrate architecture and type safety ([cc77e09](https://github.com/vibeunion/svadmin/commit/cc77e09192c916a1b123f8ceb483d70fb7edff41))
+* **release:** release main ([#611](https://github.com/vibeunion/svadmin/issues/611)) ([a430fbf](https://github.com/vibeunion/svadmin/commit/a430fbfb5799a18cb036aff61894dff6ca0422ae))
+* **release:** release main ([#612](https://github.com/vibeunion/svadmin/issues/612)) ([c4eea80](https://github.com/vibeunion/svadmin/commit/c4eea80fa411a95c41606dcfc942af061f08c4ac))
+* **release:** synchronize workspace metadata ([585cbf8](https://github.com/vibeunion/svadmin/commit/585cbf8320a5e3b11a5840e542a1c0b582cef2c5))
+* **release:** synchronize workspace metadata ([3d2622b](https://github.com/vibeunion/svadmin/commit/3d2622b7ae0ca7dcc955b3d4cf772c4d477e5dee))
+* **release:** synchronize workspace metadata ([008d1f5](https://github.com/vibeunion/svadmin/commit/008d1f5151d5db68dec02eb443c0f493b3e398e3))
+* **release:** synchronize workspace metadata ([ad2c312](https://github.com/vibeunion/svadmin/commit/ad2c3126a16ae92c3ade5634e1c813276b00736a))
+* **release:** synchronize workspace metadata ([6e1d644](https://github.com/vibeunion/svadmin/commit/6e1d6441551d485485f18079f7379414d96d8990))
+* **release:** synchronize workspace metadata ([13bf7c5](https://github.com/vibeunion/svadmin/commit/13bf7c5494677370e52fa531563f410a6c5e4afd))
+* **release:** synchronize workspace metadata ([2913699](https://github.com/vibeunion/svadmin/commit/29136998f9e96558882ad33af3d3bbd47256b0ff))
+* **release:** synchronize workspace metadata ([aec1309](https://github.com/vibeunion/svadmin/commit/aec130909e269bee7f005522fb3206085f8c98f6))
+* **release:** synchronize workspace metadata ([eb7b138](https://github.com/vibeunion/svadmin/commit/eb7b138879b63a47959cc7f0e5e8504f5735c767))
+* **release:** synchronize workspace metadata ([c1df448](https://github.com/vibeunion/svadmin/commit/c1df448a81fd611563535223181883eb9670536a))
+* **release:** synchronize workspace metadata ([5ba5de6](https://github.com/vibeunion/svadmin/commit/5ba5de6fcdf18ccbed3b1fe16d0663a855135e24))
+* **release:** synchronize workspace metadata ([c62e539](https://github.com/vibeunion/svadmin/commit/c62e5399ab1bb884955a4e1885b9c9f0839066d6))
+* **release:** synchronize workspace metadata ([7cbe228](https://github.com/vibeunion/svadmin/commit/7cbe228b352e98c05e3331ecd3af49f8da917e51))
+* **release:** synchronize workspace metadata ([3b84baa](https://github.com/vibeunion/svadmin/commit/3b84baacd3b236e65cff83f36353bb39c6b3cd5d))
+* **release:** synchronize workspace metadata ([866921a](https://github.com/vibeunion/svadmin/commit/866921acf2b7da086d21713f4bab5e51e8731df7))
+* **release:** synchronize workspace metadata ([1b4a817](https://github.com/vibeunion/svadmin/commit/1b4a817fa9b381b8948bc9f635ec5c2ee2cb7bca))
+* **release:** synchronize workspace metadata ([c4cafa5](https://github.com/vibeunion/svadmin/commit/c4cafa50e16c9deefff7ae8f5b425f7e891f0ad5))
+* **release:** synchronize workspace metadata ([ef729d7](https://github.com/vibeunion/svadmin/commit/ef729d7f932c8be203a2e10d159f208c532af868))
+* **release:** synchronize workspace metadata ([579c8ab](https://github.com/vibeunion/svadmin/commit/579c8ab0efa7adb6b137a48e0c916abe9e4d8bc5))
+* **release:** synchronize workspace metadata ([0b1e8c1](https://github.com/vibeunion/svadmin/commit/0b1e8c1489936013c317a8f191a24133eefa3eb0))
+* **release:** synchronize workspace metadata ([bd34be9](https://github.com/vibeunion/svadmin/commit/bd34be97826916667ade7a7ae7bf0a0a2229bccf))
+* **release:** synchronize workspace metadata ([f4f9172](https://github.com/vibeunion/svadmin/commit/f4f9172097801bb0f84b4a48d9e14284a5d8afc9))
+* **release:** synchronize workspace metadata ([252d413](https://github.com/vibeunion/svadmin/commit/252d413b782c02301900593a1617d2319144f3e5))
+* **ui:** synchronize health office with verified product and nested-form main ([bb2edb2](https://github.com/vibeunion/svadmin/commit/bb2edb2a9597e6fd3a4569b937f40f647789404e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/ui bumped from >=0.73.0 <0.107.0 to >=0.73.0 <0.108.0
+
 ## [0.19.16](https://github.com/vibeunion/svadmin/compare/surface-v0.19.15...surface-v0.19.16) (2026-10-30)
 
 
