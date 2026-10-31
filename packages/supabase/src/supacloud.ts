@@ -16,7 +16,9 @@ const filterValue = Type.Union([text, Type.Array(text, { minItems: 1 })]);
 const limitSchema = Type.Integer({ minimum: 1, maximum: Number.MAX_SAFE_INTEGER });
 const listSchema = Type.Object({
   status: Type.Optional(filterValue), taskType: Type.Optional(filterValue),
-  functionSlug: Type.Optional(text), dlq: Type.Optional(Type.Boolean()), limit: Type.Optional(limitSchema),
+  functionSlug: Type.Optional(text), correlationId: Type.Optional(text),
+  businessTaskId: Type.Optional(text), dlq: Type.Optional(Type.Boolean()),
+  limit: Type.Optional(limitSchema),
 }, { additionalProperties: false });
 const dlqSchema = Type.Object({ limit: Type.Optional(limitSchema) }, { additionalProperties: false });
 const snapshotSchema = Type.Object({
