@@ -16,6 +16,8 @@
     mediaItems?: LiteMediaItem[];
     action?: string;
     method?: 'get' | 'post' | 'dialog' | 'GET' | 'POST' | 'DIALOG' | null;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -24,10 +26,11 @@
     mediaItems = [],
     action = '',
     method = 'POST',
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-media-library-card">
+<div class="lite-media-library-card {className}">
   <div class="lite-media-header">
     <strong>{title}</strong>
   </div>

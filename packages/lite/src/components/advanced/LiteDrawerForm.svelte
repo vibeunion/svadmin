@@ -13,6 +13,8 @@
     recordId?: string | number;
     basePath?: string;
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -21,6 +23,7 @@
     recordId,
     basePath = '/lite',
     label,
+    class: className = '',
   }: Props = $props();
 
   const href = $derived(
@@ -37,6 +40,6 @@
   );
 </script>
 
-<a href={href} class="lite-btn lite-btn-outline">
+<a href={href} class="lite-btn lite-btn-outline {className}">
   {buttonLabel}
 </a>

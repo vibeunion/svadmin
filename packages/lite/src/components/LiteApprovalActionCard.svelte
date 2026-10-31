@@ -6,6 +6,8 @@
     status?: 'pending' | 'approved' | 'rejected' | 'recalled';
     action?: string;
     children?: Snippet;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -13,10 +15,11 @@
     status = 'pending',
     action = '',
     children,
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-approval-card lite-form-group">
+<div class="lite-approval-card lite-form-group {className}">
   <div class="lite-approval-header">
     <strong>{title}</strong>
     <span class="lite-badge lite-badge-{status}">{status}</span>

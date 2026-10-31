@@ -18,6 +18,8 @@
     /** Render note bodies as Markdown/allowlisted HTML. Defaults to plain text. */
     richContent?: boolean;
     richContentOptions?: MarkdownRenderOptions;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -26,6 +28,7 @@
     method = 'POST',
     richContent = false,
     richContentOptions,
+    class: className = '',
   }: Props = $props();
 
   function body(value: string): string {
@@ -33,7 +36,7 @@
   }
 </script>
 
-<div class="lite-activity-card">
+<div class="lite-activity-card {className}">
   <div class="lite-activity-header">
     <strong>Activity & Timeline Stream</strong>
   </div>

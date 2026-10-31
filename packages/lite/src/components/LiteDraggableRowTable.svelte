@@ -10,6 +10,8 @@
     action?: string;
     method?: 'get' | 'post' | 'dialog' | 'GET' | 'POST' | 'DIALOG' | null;
     rowKey?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -18,10 +20,11 @@
     action = '',
     method = 'POST',
     rowKey = 'id',
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-sortable-table-card">
+<div class="lite-sortable-table-card {className}">
   <form {action} {method}>
     <table class="lite-table">
       <thead>

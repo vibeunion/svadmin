@@ -9,6 +9,8 @@
     submitText?: string;
     cancelText?: string;
     children?: Snippet;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -19,10 +21,11 @@
     submitText = 'Save',
     cancelText = 'Cancel',
     children,
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-drawer-card">
+<div class="lite-drawer-card {className}">
   <div class="lite-drawer-header">
     <h3 class="lite-drawer-title">{title}</h3>
     {#if description}

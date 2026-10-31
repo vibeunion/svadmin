@@ -14,6 +14,8 @@
     recordId?: string | number;
     basePath?: string;
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -22,6 +24,7 @@
     recordId,
     basePath = '/lite',
     label,
+    class: className = '',
   }: Props = $props();
 
   const href = $derived(
@@ -39,6 +42,6 @@
 </script>
 
 <!-- In lite mode, modals degrade to a full-page navigation -->
-<a href={href} class="lite-btn lite-btn-primary">
+<a href={href} class="lite-btn lite-btn-primary {className}">
   {buttonLabel}
 </a>

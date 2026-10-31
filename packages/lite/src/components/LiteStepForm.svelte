@@ -15,6 +15,8 @@
     nextText?: string;
     prevText?: string;
     children?: Snippet;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -26,10 +28,11 @@
     nextText = 'Next Step',
     prevText = 'Previous Step',
     children,
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-step-form-card">
+<div class="lite-step-form-card {className}">
   <!-- Step Indicators -->
   <div class="lite-step-header">
     {#each steps as step, index (index)}

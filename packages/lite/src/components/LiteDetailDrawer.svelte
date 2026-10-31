@@ -8,12 +8,22 @@
     open?: boolean;
     closeHref?: string;
     children: Snippet;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { id, title, description, open = false, closeHref = '#', children }: Props = $props();
+  let {
+    id,
+    title,
+    description,
+    open = false,
+    closeHref = '#',
+    children,
+    class: className = '',
+  }: Props = $props();
 </script>
 
-<div class="lite-detail-drawer" data-open={open || undefined}>
+<div class="lite-detail-drawer {className}" data-open={open || undefined}>
   <a class="lite-btn lite-btn-sm" href={`#${id}`}>Details</a>
   <aside class="lite-detail-drawer__panel" id={id} aria-label={title}>
     <header>

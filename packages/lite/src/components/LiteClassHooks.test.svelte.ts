@@ -22,6 +22,22 @@ import LiteTagField from './fields/LiteTagField.svelte';
 import LiteTextField from './fields/LiteTextField.svelte';
 import LiteUrlField from './fields/LiteUrlField.svelte';
 import LiteOtpInput from './LiteOtpInput.svelte';
+import LiteActivityFeed from './LiteActivityFeed.svelte';
+import LiteDetailDrawer from './LiteDetailDrawer.svelte';
+import LiteDrawerForm from './LiteDrawerForm.svelte';
+import LiteModalForm from './LiteModalForm.svelte';
+import LiteStepForm from './LiteStepForm.svelte';
+import LiteEditableTable from './LiteEditableTable.svelte';
+import LiteFilterBuilder from './LiteFilterBuilder.svelte';
+import LiteColumnSettings from './LiteColumnSettings.svelte';
+import LiteColumnHeaderFilter from './LiteColumnHeaderFilter.svelte';
+import LiteTableSummary from './LiteTableSummary.svelte';
+import LiteSensitiveDataMask from './LiteSensitiveDataMask.svelte';
+import LiteApprovalActionCard from './LiteApprovalActionCard.svelte';
+import LiteVersionDiffViewer from './LiteVersionDiffViewer.svelte';
+import LiteDraggableRowTable from './LiteDraggableRowTable.svelte';
+import LiteMediaLibraryModal from './LiteMediaLibraryModal.svelte';
+import LiteAnomalyBadge from './widgets/LiteAnomalyBadge.svelte';
 
 function snippet(html: string) {
   return createRawSnippet(() => ({ render: () => html }));
@@ -259,6 +275,141 @@ describe('Lite styling hook contract', () => {
     expect(element?.classList.contains('host-surface')).toBe(true);
     expect(element?.classList.contains('lite-form-group')).toBe(true);
     expect(element?.querySelector('input')?.getAttribute('name')).toBe('code');
+  });
+
+  it('merges the caller class on the form containers', () => {
+    const modal = render(LiteModalForm, { class: 'host-surface', title: 'Confirm' })
+      .container.querySelector('.lite-modal-card');
+    expect(modal?.classList.contains('host-surface')).toBe(true);
+    expect(modal?.classList.contains('lite-modal-card')).toBe(true);
+
+    const drawer = render(LiteDrawerForm, { class: 'host-surface', title: 'Edit' })
+      .container.querySelector('.lite-drawer-card');
+    expect(drawer?.classList.contains('host-surface')).toBe(true);
+    expect(drawer?.classList.contains('lite-drawer-card')).toBe(true);
+  });
+
+  it('merges the caller class on LiteStepForm and LiteDetailDrawer', () => {
+    const step = render(LiteStepForm, {
+      class: 'host-surface',
+      steps: [
+        { title: 'Account' },
+        { title: 'Payment' },
+      ],
+    }).container.querySelector('.lite-step-form-card');
+    expect(step?.classList.contains('host-surface')).toBe(true);
+    expect(step?.classList.contains('lite-step-form-card')).toBe(true);
+
+    const drawer = render(LiteDetailDrawer, {
+      class: 'host-surface',
+      id: 'order-detail',
+      title: 'Order detail',
+      children: snippet('<p>Total</p>'),
+    }).container.querySelector('.lite-detail-drawer');
+    expect(drawer?.classList.contains('host-surface')).toBe(true);
+    expect(drawer?.classList.contains('lite-detail-drawer')).toBe(true);
+  });
+
+  it('merges the caller class on the table containers', () => {
+    const editable = render(LiteEditableTable, {
+      class: 'host-surface',
+      columns: [{ key: 'title', label: 'Title' }],
+      data: [{ id: 1, title: 'Row' }],
+    }).container.querySelector('.lite-editable-table-card');
+    expect(editable?.classList.contains('host-surface')).toBe(true);
+    expect(editable?.classList.contains('lite-editable-table-card')).toBe(true);
+
+    const sortable = render(LiteDraggableRowTable, {
+      class: 'host-surface',
+      columns: [{ key: 'name', label: 'Name' }],
+      items: [{ id: 1, name: 'First' }],
+    }).container.querySelector('.lite-sortable-table-card');
+    expect(sortable?.classList.contains('host-surface')).toBe(true);
+    expect(sortable?.classList.contains('lite-sortable-table-card')).toBe(true);
+  });
+
+  it('merges the caller class on LiteTableSummary and LiteVersionDiffViewer', () => {
+    const summary = render(LiteTableSummary, {
+      class: 'host-surface',
+      columns: [{ key: 'amount', label: 'Amount' }],
+      data: [{ amount: 10 }, { amount: 5 }],
+    }).container.querySelector('.lite-table-summary-container');
+    expect(summary?.classList.contains('host-surface')).toBe(true);
+    expect(summary?.classList.contains('lite-table-summary-container')).toBe(true);
+
+    const diff = render(LiteVersionDiffViewer, {
+      class: 'host-surface',
+      oldValue: { name: 'A' },
+      newValue: { name: 'B' },
+    }).container.querySelector('.lite-diff-viewer');
+    expect(diff?.classList.contains('host-surface')).toBe(true);
+    expect(diff?.classList.contains('lite-diff-viewer')).toBe(true);
+  });
+
+  it('merges the caller class on LiteFilterBuilder and LiteColumnSettings', () => {
+    const filters = render(LiteFilterBuilder, {
+      class: 'host-surface',
+      fields: [{ key: 'name', label: 'Name', type: 'text' }],
+      filters: [{ field: 'name', operator: 'contains', value: 'Ann' }],
+    }).container.querySelector('.lite-filter-builder');
+    expect(filters?.classList.contains('host-surface')).toBe(true);
+    expect(filters?.classList.contains('lite-filter-builder')).toBe(true);
+
+    const columns = render(LiteColumnSettings, {
+      class: 'host-surface',
+      columns: [{ key: 'name', label: 'Name' }],
+    }).container.querySelector('.lite-column-settings');
+    expect(columns?.classList.contains('host-surface')).toBe(true);
+    expect(columns?.classList.contains('lite-column-settings')).toBe(true);
+  });
+
+  it('merges the caller class on the compact widgets', () => {
+    const header = render(LiteColumnHeaderFilter, {
+      class: 'host-surface',
+      field: { key: 'name', label: 'Name', type: 'text' },
+    }).container.querySelector('.lite-column-header-filter');
+    expect(header?.classList.contains('host-surface')).toBe(true);
+    expect(header?.tagName.toLowerCase()).toBe('span');
+
+    const mask = render(LiteSensitiveDataMask, {
+      class: 'host-surface',
+      value: '13800001111',
+    }).container.querySelector('.lite-sensitive-mask');
+    expect(mask?.classList.contains('host-surface')).toBe(true);
+    expect(mask?.textContent).not.toContain('13800001111');
+  });
+
+  it('merges the caller class on LiteApprovalActionCard and LiteActivityFeed', () => {
+    const approval = render(LiteApprovalActionCard, {
+      class: 'host-surface',
+      title: 'Approve refund',
+    }).container.querySelector('.lite-approval-card');
+    expect(approval?.classList.contains('host-surface')).toBe(true);
+    expect(approval?.textContent).toContain('Approve refund');
+
+    const feed = render(LiteActivityFeed, {
+      class: 'host-surface',
+      activities: [{ id: 'a1', title: 'Shipped', time: '09:00' }],
+    } as never).container.querySelector('.lite-activity-card');
+    expect(feed?.classList.contains('host-surface')).toBe(true);
+    expect(feed?.classList.contains('lite-activity-card')).toBe(true);
+  });
+
+  it('merges the caller class on LiteMediaLibraryModal and LiteAnomalyBadge', () => {
+    const library = render(LiteMediaLibraryModal, {
+      class: 'host-surface',
+      mediaItems: [{ id: 'm1', name: 'cover.png', url: '/cover.png' }],
+    } as never).container.querySelector('.lite-media-library-card');
+    expect(library?.classList.contains('host-surface')).toBe(true);
+    expect(library?.classList.contains('lite-media-library-card')).toBe(true);
+
+    const anomaly = render(LiteAnomalyBadge, {
+      class: 'host-surface',
+      value: 140,
+      baseline: 100,
+    }).container.querySelector('.lite-badge');
+    expect(anomaly?.classList.contains('host-surface')).toBe(true);
+    expect(anomaly?.textContent).toContain('140');
   });
 
   it('keeps the default markup unchanged when no class is passed', () => {

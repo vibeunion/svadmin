@@ -5,6 +5,8 @@
     oldTitle?: string;
     newTitle?: string;
     fieldLabels?: Record<string, string>;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -13,6 +15,7 @@
     oldTitle = 'Previous Version',
     newTitle = 'Current Version',
     fieldLabels = {},
+    class: className = '',
   }: Props = $props();
 
   const allKeys = $derived(
@@ -35,7 +38,7 @@
   }
 </script>
 
-<div class="lite-diff-viewer">
+<div class="lite-diff-viewer {className}">
   <div class="lite-diff-header">
     <strong>Record Comparison</strong>
   </div>

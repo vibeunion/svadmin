@@ -2,11 +2,14 @@
   interface Props {
     value?: string | number | null;
     type?: 'phone' | 'id-card' | 'email' | 'bank-card' | 'secret' | 'custom';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
     value = '',
     type = 'phone',
+    class: className = '',
   }: Props = $props();
 
   const rawString = $derived(String(value ?? ''));
@@ -31,6 +34,6 @@
   const masked = $derived(mask(rawString, type));
 </script>
 
-<span class="lite-sensitive-mask" style="font-family: monospace; font-size: 12px;">
+<span class="lite-sensitive-mask {className}" style="font-family: monospace; font-size: 12px;">
   {masked}
 </span>

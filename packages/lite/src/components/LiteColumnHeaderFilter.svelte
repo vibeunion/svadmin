@@ -4,15 +4,18 @@
   interface Props {
     field: FieldDefinition;
     action?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
     field,
     action = '',
+    class: className = '',
   }: Props = $props();
 </script>
 
-<span class="lite-column-header-filter">
+<span class="lite-column-header-filter {className}">
   <a
     href="{action}?filter_field={field.key}"
     class="lite-filter-icon"

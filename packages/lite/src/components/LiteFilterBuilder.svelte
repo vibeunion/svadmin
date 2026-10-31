@@ -23,6 +23,8 @@
     method?: 'GET' | 'POST';
     disabled?: boolean;
     onApply?: (filters: Filter[]) => void;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -32,6 +34,7 @@
     method = 'GET',
     disabled = false,
     onApply,
+    class: className = '',
   }: Props = $props();
   let validationError = $state<string | undefined>();
 
@@ -105,7 +108,7 @@
 
 </script>
 
-<div class="lite-filter-builder lite-form-group">
+<div class="lite-filter-builder lite-form-group {className}">
   <div class="lite-filter-header">
     <strong>{t('common.filters') || '高级多条件筛选'}</strong>
     <button type="submit" form={formId} class="lite-btn lite-btn-primary lite-btn-sm" disabled={disabled}>

@@ -9,6 +9,8 @@
     submitText?: string;
     cancelText?: string;
     children?: Snippet;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -19,10 +21,11 @@
     submitText = 'Confirm',
     cancelText = 'Cancel',
     children,
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-modal-card">
+<div class="lite-modal-card {className}">
   <div class="lite-modal-header">
     <h3 class="lite-modal-title">{title}</h3>
     {#if description}

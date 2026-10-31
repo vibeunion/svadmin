@@ -260,14 +260,14 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'ResizeBox', uiComponent: 'ResizeBox.svelte', liteComponent: 'LiteResizeBox.svelte', category: 'layout', status: 'fallback', strategy: 'CSS resize 容器；尺寸持久化由宿主承接' },
   { name: 'AutoComplete', uiComponent: 'AutoComplete.svelte', liteComponent: 'LiteAutoComplete.svelte', category: 'fields', status: 'fallback', strategy: '原生 input + datalist 建议；异步查询和键盘弹层由 SPA 承接' },
   { name: 'Result', uiComponent: 'Result.svelte', liteComponent: 'LiteResult.svelte', category: 'advanced', status: 'exact', strategy: '成功、失败、警告与异常状态页' },
-  { name: 'Skeleton', uiComponent: 'Skeleton.svelte', liteComponent: 'LiteSkeleton.svelte', category: 'widgets', status: 'exact', strategy: '静态占位骨架与加载语义' },
+  { name: 'Skeleton', uiComponent: 'ui/skeleton/skeleton.svelte', liteComponent: 'LiteSkeleton.svelte', category: 'widgets', status: 'exact', strategy: '静态占位骨架与加载语义' },
   { name: 'PageSkeleton', uiComponent: 'PageSkeleton.svelte', liteComponent: 'LiteSkeleton.svelte', category: 'pages', status: 'fallback', strategy: '页面级静态骨架' },
   { name: 'Spin', uiComponent: 'Spin.svelte', liteComponent: 'LiteSpin.svelte', category: 'widgets', status: 'exact', strategy: 'CSS 加载指示器与 aria-busy' },
-  { name: 'Progress', uiComponent: 'Progress.svelte', liteComponent: 'LiteProgress.svelte', category: 'widgets', status: 'exact', strategy: '原生 progress 与语义色' },
+  { name: 'Progress', uiComponent: 'ui/progress/progress.svelte', liteComponent: 'LiteProgress.svelte', category: 'widgets', status: 'exact', strategy: '原生 progress 与语义色' },
   { name: 'Tree', uiComponent: 'Tree.svelte', liteComponent: 'LiteTree.svelte', category: 'advanced', status: 'fallback', strategy: 'details 层级树与链接/选中态；展开、复选和键盘树导航由 SPA 承接' },
   { name: 'MediaThumbnail', uiComponent: 'MediaThumbnail.svelte', liteComponent: 'LiteMediaThumbnail.svelte', category: 'widgets', status: 'exact', strategy: '媒体缩略图与访问性标签' },
   { name: 'ListPagination', uiComponent: 'ListPagination.svelte', liteComponent: 'LitePagination.svelte', category: 'pages', status: 'exact', strategy: 'URL 驱动分页；页码窗口由服务端输出' },
-  { name: 'Pagination', uiComponent: 'Pagination.svelte', liteComponent: 'LitePagination.svelte', category: 'layout', status: 'exact', strategy: '原生分页链接与当前页' },
+  { name: 'Pagination', uiComponent: 'ui/pagination/pagination.svelte', liteComponent: 'LitePagination.svelte', category: 'layout', status: 'exact', strategy: '原生分页链接与当前页' },
   { name: 'LiveIndicator', uiComponent: 'LiveIndicator.svelte', liteComponent: 'LiteRealtimeStatus.svelte', category: 'widgets', status: 'fallback', strategy: '服务端快照时间与刷新回退' },
   { name: 'AreaChart', uiComponent: 'AreaChart.svelte', liteComponent: 'LiteAreaChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
   { name: 'ScatterChart', uiComponent: 'ScatterChart.svelte', liteComponent: 'LiteScatterChart.svelte', category: 'widgets', status: 'fallback', strategy: 'SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接' },
@@ -562,6 +562,12 @@ export interface ClassHookMiss {
 export interface ClassHookAudit {
   /** `exact` entries whose reference and Lite components both resolve to files. */
   reviewedCount: number;
+  /**
+   * Entries the audit could not resolve to exactly one component file (missing or
+   * duplicate basename). Reported instead of silently picking one, because
+   * `LiteModalForm` and friends exist both at the root and under a category dir.
+   */
+  unresolved: Array<{ name: string; liteComponent: string; reason: string }>;
   /** Reviewed entries whose reference exposes a `class` hook. */
   referenceHookCount: number;
   /** Of those, entries where Lite also accepts `class`. */
@@ -571,14 +577,30 @@ export interface ClassHookAudit {
   timestamp: string;
 }
 
-/** Map every component file name in a directory tree to its path (first hit wins). */
-function componentIndex(directory: string): Map<string, string> {
-  const index = new Map<string, string>();
+/** Index every component file by basename, keeping duplicates visible. */
+function componentIndex(directory: string): Map<string, string[]> {
+  const index = new Map<string, string[]>();
   for (const file of listFiles(directory)) {
     const name = file.split('/').at(-1) ?? file;
-    if (!index.has(name)) index.set(name, file);
+    const paths = index.get(name) ?? [];
+    paths.push(file);
+    index.set(name, paths);
   }
   return index;
+}
+
+/** Resolve one mapped component path, preferring its exact relative path. */
+function resolveComponent(
+  directory: string,
+  mappedPath: string,
+  index: Map<string, string[]>,
+): { path?: string; reason?: string } {
+  const direct = resolve(directory, mappedPath);
+  if (existsSync(direct)) return { path: direct };
+  const candidates = index.get(liteComponentFile(mappedPath)) ?? [];
+  if (candidates.length === 1) return { path: candidates[0] };
+  if (candidates.length === 0) return { reason: 'not found' };
+  return { reason: `ambiguous (${candidates.length} files share the basename)` };
 }
 
 /**
@@ -592,19 +614,28 @@ function componentIndex(directory: string): Map<string, string> {
 export function buildClassHookAudit(
   repositoryRoot = resolve(import.meta.dir, '..'),
 ): ClassHookAudit {
-  const liteIndex = componentIndex(resolve(repositoryRoot, 'packages/lite/src/components'));
-  const uiIndex = componentIndex(resolve(repositoryRoot, 'packages/ui/src/components'));
+  const liteDirectory = resolve(repositoryRoot, 'packages/lite/src/components');
+  const uiDirectory = resolve(repositoryRoot, 'packages/ui/src/components');
+  const liteIndex = componentIndex(liteDirectory);
+  const uiIndex = componentIndex(uiDirectory);
 
   let reviewedCount = 0;
   let referenceHookCount = 0;
   let preservedCount = 0;
   const missing: ClassHookMiss[] = [];
+  const unresolved: ClassHookAudit['unresolved'] = [];
 
   for (const item of PARITY_ITEMS) {
     if (item.status !== 'exact') continue;
-    const litePath = liteIndex.get(liteComponentFile(item.liteComponent));
-    const uiPath = uiIndex.get(item.uiComponent);
-    if (!litePath || !uiPath) continue;
+    const liteResolution = resolveComponent(liteDirectory, item.liteComponent, liteIndex);
+    const uiResolution = resolveComponent(uiDirectory, item.uiComponent, uiIndex);
+    if (!liteResolution.path || !uiResolution.path) {
+      const reason = liteResolution.reason ?? uiResolution.reason ?? 'not found';
+      unresolved.push({ name: item.name, liteComponent: item.liteComponent, reason });
+      continue;
+    }
+    const litePath = liteResolution.path;
+    const uiPath = uiResolution.path;
     reviewedCount += 1;
     const referenceExposesHook = CLASS_PROP.test(readFileSync(uiPath, 'utf8'));
     if (!referenceExposesHook) continue;
@@ -622,8 +653,11 @@ export function buildClassHookAudit(
 
   missing.sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
 
+  unresolved.sort((a, b) => a.name.localeCompare(b.name));
+
   return {
     reviewedCount,
+    unresolved,
     referenceHookCount,
     preservedCount,
     coveragePercentage: rate(preservedCount, referenceHookCount),
@@ -646,6 +680,11 @@ export function generateClassHookMarkdown(audit: ClassHookAudit): string {
   const rows = audit.missing.map(
     (item) => `| \`${item.name}\` | ${item.category} | \`${item.liteComponent}\` |`,
   );
+  const unresolvedRows = audit.unresolved.length
+    ? audit.unresolved.map(
+        (item) => `| \`${item.name}\` | \`${item.liteComponent}\` | ${item.reason} |`,
+      )
+    : ['| — | — | 全部可唯一定位 |'];
   return `# Lite styling hook coverage (\`class\`)
 
 > 自动生成时间: ${audit.timestamp}
@@ -663,6 +702,7 @@ export function generateClassHookMarkdown(audit: ClassHookAudit): string {
 ## 现状
 
 - 参与统计的 \`exact\` 条目: **${audit.reviewedCount}**
+- 无法唯一定位（需人工确认）: **${audit.unresolved.length}**
 - 参考组件暴露 \`class\` 的条目: **${audit.referenceHookCount}**
 - Lite 同时接受 \`class\` 的条目: **${audit.preservedCount}**（**${audit.coveragePercentage}%**）
 - 仍缺样式钩子的条目: **${audit.missing.length}**
@@ -672,6 +712,15 @@ export function generateClassHookMarkdown(audit: ClassHookAudit): string {
 | 组件 | 分类 | Lite 实现 |
 | --- | --- | --- |
 ${rows.join('\n')}
+
+## 未能唯一定位
+
+同名文件同时存在于根目录与分类目录（例如 \`LiteModalForm\`），审计不会猜一个文件，
+而是列在这里等待人工确认映射路径：
+
+| 组件 | 映射路径 | 原因 |
+| --- | --- | --- |
+${unresolvedRows.join('\n')}
 `;
 }
 

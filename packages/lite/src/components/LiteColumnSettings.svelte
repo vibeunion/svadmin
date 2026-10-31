@@ -11,6 +11,8 @@
     method?: 'GET' | 'POST' | 'get' | 'post';
     title?: string;
     submitText?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -19,10 +21,11 @@
     method = 'GET',
     title = 'Column Visibility',
     submitText = 'Apply',
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-column-settings lite-form-group">
+<div class="lite-column-settings lite-form-group {className}">
   <div class="lite-column-settings-title">
     <strong>⚙ {title}</strong>
   </div>

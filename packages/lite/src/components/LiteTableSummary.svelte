@@ -13,6 +13,8 @@
     titleColumnKey?: string;
     prefix?: Record<string, string>;
     suffix?: Record<string, string>;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -23,6 +25,7 @@
     titleColumnKey,
     prefix = {},
     suffix = {},
+    class: className = '',
   }: Props = $props();
 
   const titleKey = $derived(titleColumnKey || (columns[0]?.key ?? ''));
@@ -50,7 +53,7 @@
   }
 </script>
 
-<div class="lite-table-summary-container">
+<div class="lite-table-summary-container {className}">
   <table class="lite-table lite-summary-table">
     <tbody>
       <tr>

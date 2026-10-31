@@ -1,83 +1,14 @@
 {
-  "reviewedCount": 111,
-  "referenceHookCount": 84,
-  "preservedCount": 49,
-  "coveragePercentage": 58.3,
+  "reviewedCount": 126,
+  "unresolved": [],
+  "referenceHookCount": 99,
+  "preservedCount": 76,
+  "coveragePercentage": 76.8,
   "missing": [
     {
-      "name": "ActivityFeed",
+      "name": "Table",
       "category": "advanced",
-      "liteComponent": "LiteActivityFeed.svelte"
-    },
-    {
-      "name": "ApprovalActionCard",
-      "category": "advanced",
-      "liteComponent": "LiteApprovalActionCard.svelte"
-    },
-    {
-      "name": "ColumnHeaderFilter",
-      "category": "advanced",
-      "liteComponent": "LiteColumnHeaderFilter.svelte"
-    },
-    {
-      "name": "ColumnSettings",
-      "category": "advanced",
-      "liteComponent": "LiteColumnSettings.svelte"
-    },
-    {
-      "name": "DetailDrawer",
-      "category": "advanced",
-      "liteComponent": "LiteDetailDrawer.svelte"
-    },
-    {
-      "name": "DraggableRowTable",
-      "category": "advanced",
-      "liteComponent": "LiteDraggableRowTable.svelte"
-    },
-    {
-      "name": "DrawerForm",
-      "category": "advanced",
-      "liteComponent": "LiteDrawerForm.svelte"
-    },
-    {
-      "name": "EditableTable",
-      "category": "advanced",
-      "liteComponent": "LiteEditableTable.svelte"
-    },
-    {
-      "name": "FilterBuilder",
-      "category": "advanced",
-      "liteComponent": "LiteFilterBuilder.svelte"
-    },
-    {
-      "name": "MediaLibraryModal",
-      "category": "advanced",
-      "liteComponent": "LiteMediaLibraryModal.svelte"
-    },
-    {
-      "name": "ModalForm",
-      "category": "advanced",
-      "liteComponent": "LiteModalForm.svelte"
-    },
-    {
-      "name": "SensitiveDataMask",
-      "category": "advanced",
-      "liteComponent": "LiteSensitiveDataMask.svelte"
-    },
-    {
-      "name": "StepForm",
-      "category": "advanced",
-      "liteComponent": "LiteStepForm.svelte"
-    },
-    {
-      "name": "TableSummary",
-      "category": "advanced",
-      "liteComponent": "LiteTableSummary.svelte"
-    },
-    {
-      "name": "VersionDiffViewer",
-      "category": "advanced",
-      "liteComponent": "LiteVersionDiffViewer.svelte"
+      "liteComponent": "LiteTable.svelte"
     },
     {
       "name": "Cascader",
@@ -118,6 +49,11 @@
       "name": "Layout",
       "category": "layout",
       "liteComponent": "LiteLayout.svelte"
+    },
+    {
+      "name": "Pagination",
+      "category": "layout",
+      "liteComponent": "LitePagination.svelte"
     },
     {
       "name": "Sidebar",
@@ -170,15 +106,20 @@
       "liteComponent": "LiteShowPage.svelte"
     },
     {
-      "name": "AnomalyBadge",
-      "category": "widgets",
-      "liteComponent": "LiteAnomalyBadge.svelte"
-    },
-    {
       "name": "PresenceAvatarGroup",
       "category": "widgets",
       "liteComponent": "LitePresenceAvatarGroup.svelte"
+    },
+    {
+      "name": "Progress",
+      "category": "widgets",
+      "liteComponent": "LiteProgress.svelte"
+    },
+    {
+      "name": "Skeleton",
+      "category": "widgets",
+      "liteComponent": "LiteSkeleton.svelte"
     }
   ],
-  "timestamp": "2026-10-31T01:39:39.226Z"
+  "timestamp": "2026-10-31T01:51:07.740Z"
 }

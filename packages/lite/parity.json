@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-31T01:39:39.220Z",
+  "timestamp": "2026-10-31T01:51:07.734Z",
   "totalComponents": 179,
   "adaptedCount": 126,
   "fallbackCount": 51,
@@ -1367,7 +1367,7 @@
     },
     {
       "name": "Skeleton",
-      "uiComponent": "Skeleton.svelte",
+      "uiComponent": "ui/skeleton/skeleton.svelte",
       "liteComponent": "LiteSkeleton.svelte",
       "category": "widgets",
       "status": "exact",
@@ -1391,7 +1391,7 @@
     },
     {
       "name": "Progress",
-      "uiComponent": "Progress.svelte",
+      "uiComponent": "ui/progress/progress.svelte",
       "liteComponent": "LiteProgress.svelte",
       "category": "widgets",
       "status": "exact",
@@ -1423,7 +1423,7 @@
     },
     {
       "name": "Pagination",
-      "uiComponent": "Pagination.svelte",
+      "uiComponent": "ui/pagination/pagination.svelte",
       "liteComponent": "LitePagination.svelte",
       "category": "layout",
       "status": "exact",

@@ -10,6 +10,8 @@
     threshold?: number;
     formatter?: (val: number) => string;
     lowerIsBetter?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -18,6 +20,7 @@
     threshold = 0.2,
     formatter = (v: number) => v.toString(),
     lowerIsBetter = false,
+    class: className = '',
   }: Props = $props();
 
   const diff = $derived(
@@ -32,11 +35,11 @@
 </script>
 
 {#if !isAnomaly}
-  <span style="font-size: 14px; color: #4E5969;">{formatter(value)}</span>
+  <span class="lite-anomaly-value {className}" style="font-size: 14px; color: #4E5969;">{formatter(value)}</span>
 {:else}
   <span
     title="Baseline: {formatter(baseline)} ({diff > 0 ? '+' : '-'}{percentLabel})"
-    class="lite-badge"
+    class="lite-badge {className}"
     style="background: {isGood ? '#E8FFEA' : '#FFECE8'}; color: {isGood ? '#009A29' : '#CB272D'}; border: 1px solid {isGood ? '#E8FFEA' : '#FDCDC5'};"
   >
     {arrow} {formatter(value)}

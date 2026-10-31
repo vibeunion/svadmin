@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-10-31T01:39:39.226Z
+> 自动生成时间: 2026-10-31T01:51:07.740Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标
@@ -14,30 +14,17 @@
 
 ## 现状
 
-- 参与统计的 `exact` 条目: **111**
-- 参考组件暴露 `class` 的条目: **84**
-- Lite 同时接受 `class` 的条目: **49**（**58.3%**）
-- 仍缺样式钩子的条目: **35**
+- 参与统计的 `exact` 条目: **126**
+- 无法唯一定位（需人工确认）: **0**
+- 参考组件暴露 `class` 的条目: **99**
+- Lite 同时接受 `class` 的条目: **76**（**76.8%**）
+- 仍缺样式钩子的条目: **23**
 
 ## 待补齐清单
 
 | 组件 | 分类 | Lite 实现 |
 | --- | --- | --- |
-| `ActivityFeed` | advanced | `LiteActivityFeed.svelte` |
-| `ApprovalActionCard` | advanced | `LiteApprovalActionCard.svelte` |
-| `ColumnHeaderFilter` | advanced | `LiteColumnHeaderFilter.svelte` |
-| `ColumnSettings` | advanced | `LiteColumnSettings.svelte` |
-| `DetailDrawer` | advanced | `LiteDetailDrawer.svelte` |
-| `DraggableRowTable` | advanced | `LiteDraggableRowTable.svelte` |
-| `DrawerForm` | advanced | `LiteDrawerForm.svelte` |
-| `EditableTable` | advanced | `LiteEditableTable.svelte` |
-| `FilterBuilder` | advanced | `LiteFilterBuilder.svelte` |
-| `MediaLibraryModal` | advanced | `LiteMediaLibraryModal.svelte` |
-| `ModalForm` | advanced | `LiteModalForm.svelte` |
-| `SensitiveDataMask` | advanced | `LiteSensitiveDataMask.svelte` |
-| `StepForm` | advanced | `LiteStepForm.svelte` |
-| `TableSummary` | advanced | `LiteTableSummary.svelte` |
-| `VersionDiffViewer` | advanced | `LiteVersionDiffViewer.svelte` |
+| `Table` | advanced | `LiteTable.svelte` |
 | `Cascader` | fields | `LiteCascader.svelte` |
 | `ImageCropper` | fields | `LiteImageCropper.svelte` |
 | `ImageField` | fields | `LiteImageField.svelte` |
@@ -46,6 +33,7 @@
 | `Transfer` | fields | `LiteTransfer.svelte` |
 | `TreeSelect` | fields | `LiteTreeSelect.svelte` |
 | `Layout` | layout | `LiteLayout.svelte` |
+| `Pagination` | layout | `LitePagination.svelte` |
 | `Sidebar` | layout | `LiteSidebar.svelte` |
 | `SplitPaneLayout` | layout | `LiteSplitPaneLayout.svelte` |
 | `CreatePage` | pages | `LiteCreatePage.svelte` |
@@ -56,5 +44,15 @@
 | `MasterDetailView` | pages | `LiteMasterDetailView.svelte` |
 | `PrintableBill` | pages | `LitePrintableBill.svelte` |
 | `ShowPage` | pages | `LiteShowPage.svelte` |
-| `AnomalyBadge` | widgets | `LiteAnomalyBadge.svelte` |
 | `PresenceAvatarGroup` | widgets | `LitePresenceAvatarGroup.svelte` |
+| `Progress` | widgets | `LiteProgress.svelte` |
+| `Skeleton` | widgets | `LiteSkeleton.svelte` |
+
+## 未能唯一定位
+
+同名文件同时存在于根目录与分类目录（例如 `LiteModalForm`），审计不会猜一个文件，
+而是列在这里等待人工确认映射路径：
+
+| 组件 | 映射路径 | 原因 |
+| --- | --- | --- |
+| — | — | 全部可唯一定位 |
