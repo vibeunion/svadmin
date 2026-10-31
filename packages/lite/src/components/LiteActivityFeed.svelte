@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { renderRichContent, type MarkdownRenderOptions } from '../rich-content.js';
+
   interface LiteActivityItem {
     id: string;
     user?: { name: string };
@@ -13,13 +15,22 @@
     activities?: LiteActivityItem[];
     action?: string;
     method?: 'get' | 'post' | 'dialog' | 'GET' | 'POST' | 'DIALOG' | null;
+    /** Render note bodies as Markdown/allowlisted HTML. Defaults to plain text. */
+    richContent?: boolean;
+    richContentOptions?: MarkdownRenderOptions;
   }
 
   let {
     activities = [],
     action = '',
     method = 'POST',
+    richContent = false,
+    richContentOptions,
   }: Props = $props();
+
+  function body(value: string): string {
+    return renderRichContent(value, richContentOptions);
+  }
 </script>
 
 <div class="lite-activity-card">
@@ -37,7 +48,11 @@
         </div>
         {#if act.comment}
           <div class="lite-activity-comment">
-            {act.comment}
+            {#if richContent}
+              <div class="lite-activity-rich">{@html body(act.comment)}</div>
+            {:else}
+              {act.comment}
+            {/if}
           </div>
         {/if}
       </li>
@@ -95,4 +110,7 @@
     margin-top: 4px;
     color: #4E5969;
   }
+  .lite-activity-rich :global(p) { margin: 0; }
+  .lite-activity-rich :global(a) { color: #165DFF; }
+  .lite-activity-rich :global(code) { padding: 1px 4px; border-radius: 3px; background: #F2F3F5; font-family: monospace; font-size: 12px; }
 </style>

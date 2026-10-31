@@ -56,6 +56,14 @@ export function escapeHtml(value: string): string {
 
 const INLINE_CODE = /`([^`\n]+)`/u;
 const LINK = /\[([^\]\n]+)\]\(([^)\s]+)\)/u;
+const FOOTNOTE_REF = /\[\^([^\]\s]+)\]/u;
+
+export interface FootnoteContext {
+  /** Footnote label to 1-based number. */
+  numbers: Map<string, number>;
+  /** How many times each number has been referenced, for unique ids. */
+  refs: Map<number, number>;
+}
 
 /** Apply inline emphasis to an already-escaped fragment. */
 function emphasize(value: string): string {
@@ -71,14 +79,24 @@ function emphasize(value: string): string {
  * Inline Markdown for one text run. Code spans and links are tokenized before
  * escaping so their contents never re-enter the emphasis rules.
  */
-export function renderInlineMarkdown(source: string): string {
+function renderFootnoteRef(label: string, footnotes?: FootnoteContext): string | undefined {
+  const number = footnotes?.numbers.get(label);
+  if (!footnotes || number === undefined) return undefined;
+  const seen = (footnotes.refs.get(number) ?? 0) + 1;
+  footnotes.refs.set(number, seen);
+  const id = seen === 1 ? `fnref-${number}` : `fnref-${number}-${seen}`;
+  return `<sup class="lite-footnote-ref"><a href="#fn-${number}" id="${id}">${number}</a></sup>`;
+}
+
+export function renderInlineMarkdown(source: string, footnotes?: FootnoteContext): string {
   let rest = source;
   let output = '';
 
   while (rest.length > 0) {
     const code = INLINE_CODE.exec(rest);
     const link = LINK.exec(rest);
-    const next = [code, link]
+    const footnote = FOOTNOTE_REF.exec(rest);
+    const next = [code, link, footnote]
       .filter((match): match is RegExpExecArray => match !== null)
       .sort((a, b) => a.index - b.index)[0];
 
@@ -91,6 +109,9 @@ export function renderInlineMarkdown(source: string): string {
 
     if (next === code) {
       output += `<code>${escapeHtml(next[1] ?? '')}</code>`;
+    } else if (next === footnote) {
+      const reference = renderFootnoteRef(next[1] ?? '', footnotes);
+      output += reference ?? escapeHtml(next[0]);
     } else {
       const label = emphasize(escapeHtml(next[1] ?? ''));
       const href = toSafeHref(next[2] ?? '');
@@ -106,6 +127,8 @@ export function renderInlineMarkdown(source: string): string {
 }
 
 const TABLE_SEPARATOR = /^\s*\|?\s*:?-{1,}:?\s*(?:\|\s*:?-{1,}:?\s*)+\|?\s*$/u;
+const FOOTNOTE_DEFINITION = /^\s*\[\^([^\]\s]+)\]:\s*(.+)$/u;
+const DEFINITION_LINE = /^\s*:\s+(.+)$/u;
 const TASK_ITEM = /^\s*\[( |x|X)\]\s+(.*)$/u;
 
 function splitTableRow(line: string): string[] {
@@ -175,25 +198,44 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
   const renderOptions = resolveOptions(options);
 
   const lines = source.split('\n');
+
+  // Footnote definitions are lifted out of the body and rendered as a list.
+  const definitions = new Map<string, string>();
+  const numbers = new Map<string, number>();
+  const footnotes: FootnoteContext = { numbers, refs: new Map() };
+  const bodyLines: string[] = [];
+  for (const line of lines) {
+    const definition = FOOTNOTE_DEFINITION.exec(line);
+    if (!definition?.[1] || definition[2] === undefined) {
+      bodyLines.push(line);
+      continue;
+    }
+    if (!definitions.has(definition[1])) {
+      definitions.set(definition[1], definition[2].trim());
+      numbers.set(definition[1], definitions.size);
+    }
+  }
+
   const blocks: string[] = [];
   let paragraph: string[] = [];
 
   const flush = (): void => {
     if (paragraph.length === 0) return;
-    blocks.push(`<p>${paragraph.map((line) => renderInlineMarkdown(line)).join('<br />')}</p>`);
+    blocks.push(`<p>${paragraph.map((line) => renderInlineMarkdown(line, footnotes)).join('<br />')}</p>`);
     paragraph = [];
   };
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index] ?? '';
+  const content = bodyLines;
+  for (let index = 0; index < content.length; index += 1) {
+    const line = content[index] ?? '';
 
     const fence = FENCE.exec(line);
     if (fence) {
       flush();
       const code: string[] = [];
       let cursor = index + 1;
-      while (cursor < lines.length && !FENCE.test(lines[cursor] ?? '')) {
-        code.push(lines[cursor] ?? '');
+      while (cursor < content.length && !FENCE.test(content[cursor] ?? '')) {
+        code.push(content[cursor] ?? '');
         cursor += 1;
       }
       index = cursor;
@@ -227,18 +269,18 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
     if (heading) {
       flush();
       const level = heading[1]?.length ?? 1;
-      blocks.push(`<h${level}>${renderInlineMarkdown(heading[2] ?? '')}</h${level}>`);
+      blocks.push(`<h${level}>${renderInlineMarkdown(heading[2] ?? '', footnotes)}</h${level}>`);
       continue;
     }
 
-    if (line.includes('|') && TABLE_SEPARATOR.test(lines[index + 1] ?? '')) {
+    if (line.includes('|') && TABLE_SEPARATOR.test(content[index + 1] ?? '')) {
       flush();
       const header = splitTableRow(line);
-      const alignments = splitTableRow(lines[index + 1] ?? '').map(tableAlignment);
+      const alignments = splitTableRow(content[index + 1] ?? '').map(tableAlignment);
       const rows: string[][] = [];
       let cursor = index + 2;
-      while (cursor < lines.length) {
-        const candidate = lines[cursor] ?? '';
+      while (cursor < content.length) {
+        const candidate = content[cursor] ?? '';
         if (candidate.trim() === '' || !candidate.includes('|')) break;
         rows.push(splitTableRow(candidate));
         cursor += 1;
@@ -255,17 +297,17 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
       const items: string[] = [];
       let hasTask = false;
       let cursor = index;
-      while (cursor < lines.length) {
-        const item = pattern.exec(lines[cursor] ?? '');
+      while (cursor < content.length) {
+        const item = pattern.exec(content[cursor] ?? '');
         if (!item) break;
-        const content = item[1] ?? '';
-        const task = ordered ? null : TASK_ITEM.exec(content);
+        const itemContent = item[1] ?? '';
+        const task = ordered ? null : TASK_ITEM.exec(itemContent);
         if (task) {
           hasTask = true;
           const checked = task[1] !== ' ';
-          items.push(`<li class="lite-task-item"><input type="checkbox" disabled${checked ? ' checked' : ''} /> ${renderInlineMarkdown(task[2] ?? '')}</li>`);
+          items.push(`<li class="lite-task-item"><input type="checkbox" disabled${checked ? ' checked' : ''} /> ${renderInlineMarkdown(task[2] ?? '', footnotes)}</li>`);
         } else {
-          items.push(`<li>${renderInlineMarkdown(content)}</li>`);
+          items.push(`<li>${renderInlineMarkdown(itemContent, footnotes)}</li>`);
         }
         cursor += 1;
       }
@@ -280,14 +322,33 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
       flush();
       const quoted: string[] = [];
       let cursor = index;
-      while (cursor < lines.length) {
-        const inner = QUOTE.exec(lines[cursor] ?? '');
+      while (cursor < content.length) {
+        const inner = QUOTE.exec(content[cursor] ?? '');
         if (!inner) break;
         quoted.push(inner[1] ?? '');
         cursor += 1;
       }
       index = cursor - 1;
-      blocks.push(`<blockquote><p>${quoted.map((line) => renderInlineMarkdown(line)).join('<br />')}</p></blockquote>`);
+      blocks.push(`<blockquote><p>${quoted.map((line) => renderInlineMarkdown(line, footnotes)).join('<br />')}</p></blockquote>`);
+      continue;
+    }
+
+    const definition = DEFINITION_LINE.exec(content[index + 1] ?? '');
+    if (definition) {
+      flush();
+      const terms: string[] = [];
+      let cursor = index;
+      while (cursor < content.length) {
+        const term = (content[cursor] ?? '').trim();
+        const description = DEFINITION_LINE.exec(content[cursor + 1] ?? '');
+        if (!term || !description?.[1]) break;
+        terms.push(
+          `<dt>${renderInlineMarkdown(term, footnotes)}</dt><dd>${renderInlineMarkdown(description[1], footnotes)}</dd>`,
+        );
+        cursor += 2;
+      }
+      index = cursor - 1;
+      blocks.push(`<dl>${terms.join('')}</dl>`);
       continue;
     }
 
@@ -295,6 +356,22 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
   }
 
   flush();
+
+  if (definitions.size > 0) {
+    const items = [...definitions.entries()]
+      .map(([label, text], index) => {
+        const number = numbers.get(label) ?? index + 1;
+        const backlinks = Math.max(1, footnotes.refs.get(number) ?? 0);
+        const links = Array.from({ length: backlinks }, (_, refIndex) => {
+          const id = refIndex === 0 ? `fnref-${number}` : `fnref-${number}-${refIndex + 1}`;
+          return `<a href="#${id}" class="lite-footnote-backlink" aria-label="Back to reference">↩</a>`;
+        }).join(' ');
+        return `<li id="fn-${number}">${renderInlineMarkdown(text, footnotes)} ${links}</li>`;
+      })
+      .join('');
+    blocks.push(`<section class="lite-footnotes"><hr /><ol>${items}</ol></section>`);
+  }
+
   return blocks.join('\n');
 }
 
@@ -330,6 +407,10 @@ const ALLOWED_TAGS: Record<string, readonly string[]> = {
   th: ['align'],
   td: ['align'],
   input: ['type', 'checked', 'disabled'],
+  sup: [],
+  dl: [],
+  dt: [],
+  dd: [],
 };
 
 const VOID_TAGS = new Set(['br', 'hr', 'img', 'input']);

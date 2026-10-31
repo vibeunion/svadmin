@@ -166,6 +166,17 @@ export { default as LiteSpin } from './components/LiteSpin.svelte';
 export { default as LiteProgress } from './components/LiteProgress.svelte';
 export { default as LiteTree } from './components/LiteTree.svelte';
 
+// Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
+export {
+  configureMarkdownRenderer,
+  escapeHtml,
+  renderInlineMarkdown,
+  renderMarkdown,
+  renderRichContent,
+  sanitizeRichTextHtml,
+} from './rich-content';
+export type { MarkdownRenderOptions } from './rich-content';
+
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';
 

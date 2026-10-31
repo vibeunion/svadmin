@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { renderRichContent, type MarkdownRenderOptions } from '../rich-content.js';
+
   interface NotificationItem {
     id: string;
     title: string;
@@ -14,9 +16,23 @@
     title?: string;
     emptyText?: string;
     markAllHref?: string;
+    /** Render item descriptions as Markdown/allowlisted HTML. Defaults to plain text. */
+    richContent?: boolean;
+    richContentOptions?: MarkdownRenderOptions;
   }
 
-  let { items, title = 'Notifications', emptyText = 'No notifications', markAllHref }: Props = $props();
+  let {
+    items,
+    title = 'Notifications',
+    emptyText = 'No notifications',
+    markAllHref,
+    richContent = false,
+    richContentOptions,
+  }: Props = $props();
+
+  function body(value: string): string {
+    return renderRichContent(value, richContentOptions);
+  }
 </script>
 
 <section class="lite-notification-center lite-card" aria-label={title}>
@@ -32,7 +48,13 @@
         <li data-read={item.read || undefined} data-tone={item.tone ?? 'info'}>
           <span class="lite-notification-center__dot" aria-hidden="true"></span>
           {#if item.href}<a href={item.href}>{item.title}</a>{:else}<strong>{item.title}</strong>{/if}
-          {#if item.description}<p>{item.description}</p>{/if}
+          {#if item.description}
+            {#if richContent}
+              <div class="lite-notification-center__rich">{@html body(item.description)}</div>
+            {:else}
+              <p>{item.description}</p>
+            {/if}
+          {/if}
           {#if item.time}<time>{item.time}</time>{/if}
         </li>
       {/each}
@@ -56,4 +78,7 @@
   .lite-notification-center li a, .lite-notification-center li strong { color: #1D2129; font-size: 13px; }
   .lite-notification-center li p { margin: 0; color: #4E5969; font-size: 12px; line-height: 1.5; }
   .lite-notification-center li time { color: #86909C; font-size: 11px; }
+  .lite-notification-center__rich :global(p) { margin: 0; }
+  .lite-notification-center__rich :global(a) { color: #165DFF; }
+  .lite-notification-center__rich :global(code) { padding: 1px 4px; border-radius: 3px; background: #F2F3F5; font-family: monospace; font-size: 12px; }
 </style>

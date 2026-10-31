@@ -3,6 +3,7 @@ import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import LiteCommentThread from './LiteCommentThread.svelte';
 import LiteInsightCard from './widgets/LiteInsightCard.svelte';
+import LiteActivityFeed from './LiteActivityFeed.svelte';
 import LiteItemList from './LiteItemList.svelte';
 import LiteNotificationCenter from './LiteNotificationCenter.svelte';
 import LiteProgress from './LiteProgress.svelte';
@@ -335,5 +336,43 @@ describe('Lite rich content display surfaces', () => {
     const body = rich.container.querySelector('.lite-comments__rich');
     expect(body?.querySelector('strong')?.textContent).toBe('bold');
     expect(body?.querySelector('em')?.textContent ?? rich.container.querySelector('em')?.textContent).toBe('reply');
+  });
+});
+
+describe('Lite opt-in rich text lists', () => {
+  it('keeps notification descriptions literal by default and renders them on request', () => {
+    const items = [
+      { id: 'n1', title: 'Invoice overdue', description: '**Urgent** — [open](/lite/invoices/1)' },
+    ];
+
+    const literal = render(LiteNotificationCenter, { items });
+    expect(literal.container.querySelector('.lite-notification-center__rich')).toBeNull();
+    expect(literal.getByText('**Urgent** — [open](/lite/invoices/1)')).toBeTruthy();
+
+    const rich = render(LiteNotificationCenter, { items, richContent: true });
+    const body = rich.container.querySelector('.lite-notification-center__rich');
+    expect(body?.querySelector('strong')?.textContent).toBe('Urgent');
+    expect(body?.querySelector('a')?.getAttribute('href')).toBe('/lite/invoices/1');
+  });
+
+  it('keeps activity notes literal by default and renders them on request', () => {
+    const activities = [
+      { id: 'a1', user: { name: 'Ada' }, action: 'approved', timestamp: '09:00', comment: 'LGTM *ship it*' },
+    ];
+
+    const literal = render(LiteActivityFeed, { activities });
+    expect(literal.container.querySelector('.lite-activity-rich')).toBeNull();
+    expect(literal.getByText('LGTM *ship it*')).toBeTruthy();
+
+    const rich = render(LiteActivityFeed, { activities, richContent: true });
+    expect(rich.container.querySelector('.lite-activity-rich em')?.textContent).toBe('ship it');
+  });
+
+  it('sanitizes rich list content instead of trusting it', () => {
+    const items = [{ id: 'n1', title: 'Ping', description: '<img src=x onerror="alert(1)">ok' }];
+    const view = render(LiteNotificationCenter, { items, richContent: true });
+
+    expect(view.container.querySelector('[onerror]')).toBeNull();
+    expect(view.container.querySelector('.lite-notification-center__rich')?.textContent).toContain('ok');
   });
 });

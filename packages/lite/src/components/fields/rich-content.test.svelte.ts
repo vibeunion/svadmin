@@ -95,6 +95,49 @@ describe('Lite markdown renderer', () => {
     expect(html).not.toContain('[x]');
   });
 
+  it('renders footnotes with numbered references and backlinks', () => {
+    const html = renderMarkdown([
+      'Revenue grew[^rev] and churn fell[^churn].',
+      '',
+      'Repeated reference[^rev].',
+      '',
+      '[^rev]: Measured against last quarter.',
+      '[^churn]: Support tickets closed same day.',
+    ].join('\n'));
+
+    expect(html).toContain('<sup class="lite-footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup>');
+    expect(html).toContain('<a href="#fn-1" id="fnref-1-2">1</a>');
+    expect(html).toContain('<section class="lite-footnotes">');
+    expect(html).toContain('<li id="fn-1">Measured against last quarter.');
+    expect(html).toContain('<li id="fn-2">Support tickets closed same day.');
+    // Two references to the same footnote produce two backlinks.
+    expect(html.match(/href="#fnref-1"/gu)?.length).toBe(1);
+    expect(html).toContain('href="#fnref-1-2"');
+    expect(html).not.toContain('[^rev]:');
+  });
+
+  it('leaves an undefined footnote reference literal', () => {
+    const html = renderMarkdown('Missing[^nope] reference.');
+
+    expect(html).toContain('[^nope]');
+    expect(html).not.toContain('lite-footnotes');
+  });
+
+  it('renders definition lists with escaped terms and definitions', () => {
+    const html = renderMarkdown([
+      'Latency',
+      ': Time from request to first byte.',
+      '',
+      'Churn',
+      ': **Voluntary** and involuntary cancellations.',
+    ].join('\n'));
+
+    expect(html).toContain('<dl><dt>Latency</dt><dd>Time from request to first byte.</dd></dl>');
+    expect(html).toContain('<dt>Churn</dt>');
+    expect(html).toContain('<strong>Voluntary</strong>');
+    expect(html).not.toContain('<p>Latency');
+  });
+
   it('keeps unsupported syntax literal instead of dropping content', () => {
     expect(renderMarkdown('| a | b |')).toContain('| a | b |');
     expect(renderMarkdown('')).toBe('');
@@ -142,6 +185,14 @@ describe('Lite rich text sanitizer', () => {
     expect(html).toContain('<input type="checkbox" checked />');
     expect(html).not.toContain('onchange');
     expect(html).not.toContain('type="text"');
+  });
+
+  it('allows superscript, definition lists and footnote sections from stored HTML', () => {
+    const html = sanitizeRichTextHtml(
+      '<dl><dt>Term</dt><dd>Definition <sup>1</sup></dd></dl>',
+    );
+
+    expect(html).toBe('<dl><dt>Term</dt><dd>Definition <sup>1</sup></dd></dl>');
   });
 
   it('escapes stray angle brackets and comments', () => {
