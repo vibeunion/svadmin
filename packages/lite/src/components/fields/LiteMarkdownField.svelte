@@ -9,9 +9,13 @@
     mode?: 'show' | 'edit' | 'create';
     /** Per-field renderer options; app-wide defaults come from configureMarkdownRenderer. */
     renderOptions?: MarkdownRenderOptions;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show', renderOptions }: Props = $props();
+  let { field, value, error = [], mode = 'show', renderOptions,
+    class: className = ''
+  }: Props = $props();
   let hasError = $derived(error.length > 0);
   const preview = $derived(renderMarkdown(value, renderOptions));
 </script>
@@ -19,12 +23,12 @@
 {#if mode === 'show'}
   {#if preview}
     <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderMarkdown 转义，高亮回调仅允许可信服务端实现。 -->
-    <div class="lite-markdown-preview">{@html preview}</div>
+    <div class="lite-markdown-preview {className}">{@html preview}</div>
   {:else}
     <span>—</span>
   {/if}
 {:else}
-  <div>
+  <div class="lite-field-edit {className}">
     <textarea
       name={field.key}
       id={field.key}

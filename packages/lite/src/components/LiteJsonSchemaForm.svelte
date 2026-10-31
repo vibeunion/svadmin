@@ -9,6 +9,8 @@
     action?: string;
     method?: 'get' | 'post' | 'dialog' | 'GET' | 'POST' | 'DIALOG' | null;
     submitText?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -17,6 +19,7 @@
     action = '',
     method = 'POST',
     submitText = 'Submit Form',
+    class: className = ''
   }: Props = $props();
   const instanceId = $props.id();
   const i18n = useTranslation();
@@ -119,7 +122,7 @@
   }
 </script>
 
-<div class="lite-schema-form-card">
+<div class="lite-schema-form-card {className}">
   {#if schema.title}<div class="lite-schema-form-header"><strong>{schema.title}</strong></div>{/if}
   {#if schema.description}<p class="lite-schema-description">{schema.description}</p>{/if}
 

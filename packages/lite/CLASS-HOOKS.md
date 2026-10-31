@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-10-31T01:53:47.012Z
+> 自动生成时间: 2026-10-31T01:57:20.990Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标
@@ -17,21 +17,14 @@
 - 参与统计的 `exact` 条目: **126**
 - 无法唯一定位（需人工确认）: **0**
 - 参考组件暴露 `class` 的条目: **99**
-- Lite 同时接受 `class` 的条目: **85**（**85.9%**）
-- 仍缺样式钩子的条目: **14**
+- Lite 同时接受 `class` 的条目: **92**（**92.9%**）
+- 仍缺样式钩子的条目: **7**
 
 ## 待补齐清单
 
 | 组件 | 分类 | Lite 实现 |
 | --- | --- | --- |
 | `Table` | advanced | `LiteTable.svelte` |
-| `Cascader` | fields | `LiteCascader.svelte` |
-| `ImageCropper` | fields | `LiteImageCropper.svelte` |
-| `ImageField` | fields | `LiteImageField.svelte` |
-| `JsonSchemaForm` | fields | `LiteJsonSchemaForm.svelte` |
-| `MarkdownField` | fields | `LiteMarkdownField.svelte` |
-| `Transfer` | fields | `LiteTransfer.svelte` |
-| `TreeSelect` | fields | `LiteTreeSelect.svelte` |
 | `Layout` | layout | `LiteLayout.svelte` |
 | `Sidebar` | layout | `LiteSidebar.svelte` |
 | `SplitPaneLayout` | layout | `LiteSplitPaneLayout.svelte` |

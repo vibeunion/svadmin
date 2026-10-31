@@ -16,6 +16,8 @@
     disabled?: boolean;
     label?: string;
     description?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -26,6 +28,7 @@
     disabled = false,
     label,
     description,
+    class: className = ''
   }: Props = $props();
 
   const targetKeySet = $derived(new Set(targetKeys.map(String)));
@@ -33,7 +36,7 @@
   const targetItems = $derived(dataSource.filter((item) => targetKeySet.has(String(item.key))));
 </script>
 
-<div class="lite-transfer-container lite-form-group">
+<div class="lite-transfer-container lite-form-group {className}">
   {#if label}
     <span class="lite-label">{label}</span>
   {/if}

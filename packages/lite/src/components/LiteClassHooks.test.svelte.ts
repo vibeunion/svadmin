@@ -46,6 +46,13 @@ import LiteMasterDetailView from './LiteMasterDetailView.svelte';
 import LitePagination from './LitePagination.svelte';
 import LitePrintableBill from './LitePrintableBill.svelte';
 import LiteShowPage from './pages/LiteShowPage.svelte';
+import LiteCascader from './fields/LiteCascader.svelte';
+import LiteImageCropper from './LiteImageCropper.svelte';
+import LiteImageField from './fields/LiteImageField.svelte';
+import LiteJsonSchemaForm from './LiteJsonSchemaForm.svelte';
+import LiteMarkdownField from './fields/LiteMarkdownField.svelte';
+import LiteTransfer from './LiteTransfer.svelte';
+import LiteTreeSelect from './fields/LiteTreeSelect.svelte';
 
 const pageResource = {
   name: 'orders',
@@ -495,6 +502,84 @@ describe('Lite styling hook contract', () => {
     }).container.querySelector('.lite-pagination');
     expect(pagination?.classList.contains('host-surface')).toBe(true);
     expect(pagination?.tagName.toLowerCase()).toBe('nav');
+  });
+
+  it('merges the caller class on the cascader and tree select', () => {
+    const options = [{ value: 'a', label: 'A', children: [{ value: 'a1', label: 'A1' }] }];
+    const cascader = render(LiteCascader, {
+      class: 'host-surface',
+      name: 'location',
+      value: ['a', 'a1'],
+      options,
+      mode: 'edit',
+    }).container.querySelector('.lite-form-group');
+    expect(cascader?.classList.contains('host-surface')).toBe(true);
+    expect(cascader?.classList.contains('lite-form-group')).toBe(true);
+
+    const tree = render(LiteTreeSelect, {
+      class: 'host-surface',
+      value: 'a',
+      options,
+      mode: 'show',
+    }).container.querySelector('.lite-badge');
+    expect(tree?.classList.contains('host-surface')).toBe(true);
+    expect(tree?.textContent).toContain('A');
+  });
+
+  it('merges the caller class on LiteTransfer and LiteJsonSchemaForm', () => {
+    const transfer = render(LiteTransfer, {
+      class: 'host-surface',
+      dataSource: [{ key: '1', title: 'One' }],
+      targetKeys: [],
+    }).container.querySelector('.lite-transfer-container');
+    expect(transfer?.classList.contains('host-surface')).toBe(true);
+    expect(transfer?.classList.contains('lite-form-group')).toBe(true);
+
+    const schema = render(LiteJsonSchemaForm, {
+      class: 'host-surface',
+      schema: { title: 'Form', properties: { name: { type: 'string', title: 'Name' } } },
+    } as never).container.querySelector('.lite-schema-form-card');
+    expect(schema?.classList.contains('host-surface')).toBe(true);
+    expect(schema?.querySelector('form')).toBeTruthy();
+  });
+
+  it('merges the caller class on LiteMarkdownField show and edit roots', () => {
+    const field = { key: 'notes', label: 'Notes', type: 'markdown' as const };
+    const show = render(LiteMarkdownField, {
+      class: 'host-surface',
+      field,
+      value: '## Draft',
+      mode: 'show',
+    }).container.querySelector('.lite-markdown-preview');
+    expect(show?.classList.contains('host-surface')).toBe(true);
+    expect(show?.querySelector('h2')?.textContent).toBe('Draft');
+
+    const edit = render(LiteMarkdownField, {
+      class: 'host-surface',
+      field,
+      value: '## Draft',
+      mode: 'edit',
+    }).container.querySelector('.lite-field-edit');
+    expect(edit?.classList.contains('host-surface')).toBe(true);
+    expect(edit?.querySelector('textarea')).toBeTruthy();
+  });
+
+  it('merges the caller class on LiteImageField and LiteImageCropper', () => {
+    const images = render(LiteImageField, {
+      class: 'host-surface',
+      field: { key: 'gallery', label: 'Gallery', type: 'images' as const },
+      value: '/one.png',
+      mode: 'show',
+    }).container.querySelector('.lite-inline-md');
+    expect(images?.classList.contains('host-surface')).toBe(true);
+    expect(images?.querySelector('img')).toBeTruthy();
+
+    const cropper = render(LiteImageCropper, {
+      class: 'host-surface',
+      imageUrl: '/avatar.png',
+    }).container.querySelector('.lite-cropper-card');
+    expect(cropper?.classList.contains('host-surface')).toBe(true);
+    expect(cropper?.classList.contains('lite-cropper-card')).toBe(true);
   });
 
   it('keeps the default markup unchanged when no class is passed', () => {

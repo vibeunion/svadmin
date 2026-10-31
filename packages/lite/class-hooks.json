@@ -2,48 +2,13 @@
   "reviewedCount": 126,
   "unresolved": [],
   "referenceHookCount": 99,
-  "preservedCount": 85,
-  "coveragePercentage": 85.9,
+  "preservedCount": 92,
+  "coveragePercentage": 92.9,
   "missing": [
     {
       "name": "Table",
       "category": "advanced",
       "liteComponent": "LiteTable.svelte"
-    },
-    {
-      "name": "Cascader",
-      "category": "fields",
-      "liteComponent": "LiteCascader.svelte"
-    },
-    {
-      "name": "ImageCropper",
-      "category": "fields",
-      "liteComponent": "LiteImageCropper.svelte"
-    },
-    {
-      "name": "ImageField",
-      "category": "fields",
-      "liteComponent": "LiteImageField.svelte"
-    },
-    {
-      "name": "JsonSchemaForm",
-      "category": "fields",
-      "liteComponent": "LiteJsonSchemaForm.svelte"
-    },
-    {
-      "name": "MarkdownField",
-      "category": "fields",
-      "liteComponent": "LiteMarkdownField.svelte"
-    },
-    {
-      "name": "Transfer",
-      "category": "fields",
-      "liteComponent": "LiteTransfer.svelte"
-    },
-    {
-      "name": "TreeSelect",
-      "category": "fields",
-      "liteComponent": "LiteTreeSelect.svelte"
     },
     {
       "name": "Layout",
@@ -76,5 +41,5 @@
       "liteComponent": "LiteSkeleton.svelte"
     }
   ],
-  "timestamp": "2026-10-31T01:53:47.012Z"
+  "timestamp": "2026-10-31T01:57:20.990Z"
 }

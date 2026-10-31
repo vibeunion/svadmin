@@ -4,6 +4,8 @@
     aspectRatio?: number;
     action?: string;
     method?: 'get' | 'post' | 'dialog' | 'GET' | 'POST' | 'DIALOG' | null;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -11,10 +13,11 @@
     aspectRatio = 1,
     action = '',
     method = 'POST',
+    class: className = ''
   }: Props = $props();
 </script>
 
-<div class="lite-cropper-card">
+<div class="lite-cropper-card {className}">
   <div class="lite-cropper-header">
     <strong>Image Crop (Aspect Ratio: {aspectRatio}:1)</strong>
   </div>

@@ -24,6 +24,8 @@
     required?: boolean;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -38,6 +40,7 @@
     required = field?.required ?? false,
     error = [],
     mode = 'show',
+    class: className = ''
   }: Props = $props();
 
   const hasError = $derived(error.length > 0);
@@ -84,9 +87,9 @@
 </script>
 
 {#if mode === 'show'}
-  <span class="lite-badge">{formatDisplay(value)}</span>
+  <span class="lite-badge {className}">{formatDisplay(value)}</span>
 {:else}
-  <div class="lite-form-group">
+  <div class="lite-form-group {className}">
     {#if label}
       <label class="lite-label" for={name}>
         {label}

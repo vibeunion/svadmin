@@ -7,9 +7,13 @@
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show',
+    class: className = ''
+  }: Props = $props();
   let hasError = $derived(error.length > 0);
   
   function getUrls(v: unknown): string[] {
@@ -22,7 +26,7 @@
 
 {#if mode === 'show'}
   {@const urls = getUrls(value)}
-  <div class="lite-inline-md lite-flex-wrap">
+  <div class="lite-inline-md lite-flex-wrap {className}">
     {#each urls as url, _i (_i)}
       <LiteMediaThumbnail src={url} alt={field.label} height={100} />
     {:else}
