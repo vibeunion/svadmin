@@ -11,20 +11,27 @@
 
   export const CONFIG_CONTEXT_KEY = Symbol('svadmin-component-config');
 
+  export const DEFAULT_COMPONENT_CONFIG: Required<ComponentConfig> = {
+    theme: 'system',
+    density: 'default',
+    direction: 'ltr',
+    locale: 'en',
+    componentSize: 'md',
+  };
+
+  /** 当前组件是否位于 ConfigProvider 内。只能在组件初始化时调用。 */
+  export function hasComponentConfig(): boolean {
+    return getContext<Required<ComponentConfig> | undefined>(CONFIG_CONTEXT_KEY) !== undefined;
+  }
+
   export function useComponentConfig(): Required<ComponentConfig> {
-    return getContext<Required<ComponentConfig>>(CONFIG_CONTEXT_KEY) ?? {
-      theme: 'system',
-      density: 'default',
-      direction: 'ltr',
-      locale: 'en',
-      componentSize: 'md',
-    };
+    return getContext<Required<ComponentConfig>>(CONFIG_CONTEXT_KEY) ?? DEFAULT_COMPONENT_CONFIG;
   }
 </script>
 
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { setContext, untrack } from 'svelte';
+  import { setContext } from 'svelte';
   import { cn } from '../utils.js';
 
   interface Props extends ComponentConfig {
@@ -42,7 +49,14 @@
     children,
   }: Props = $props();
 
-  setContext(CONFIG_CONTEXT_KEY, untrack(() => ({ theme, density, direction, locale, componentSize })));
+  // 保存读取器而不是初始化快照。子组件在渲染或 $derived 中读取字段时，会跟踪对应 prop。
+  setContext(CONFIG_CONTEXT_KEY, {
+    get theme() { return theme; },
+    get density() { return density; },
+    get direction() { return direction; },
+    get locale() { return locale; },
+    get componentSize() { return componentSize; },
+  } satisfies Required<ComponentConfig>);
 </script>
 
 <div

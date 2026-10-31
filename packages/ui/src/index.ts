@@ -409,7 +409,7 @@ export { default as Tour } from './components/Tour.svelte';
 export type { TourStep } from './components/Tour.svelte';
 export { default as Menu } from './components/Menu.svelte';
 export type { MenuEntry } from './components/Menu.svelte';
-export { default as ConfigProvider, useComponentConfig } from './components/ConfigProvider.svelte';
+export { default as ConfigProvider, useComponentConfig, hasComponentConfig } from './components/ConfigProvider.svelte';
 export type { ComponentConfig } from './components/ConfigProvider.svelte';
 export { toast, toast as message, toast as Message } from '@svadmin/core';
 
