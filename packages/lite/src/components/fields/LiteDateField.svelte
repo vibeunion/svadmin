@@ -7,9 +7,11 @@
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', class: className = '' }: Props = $props();
   const i18n = useTranslation();
   let hasError = $derived(error.length > 0);
 
@@ -60,9 +62,9 @@
 </script>
 
 {#if mode === 'show'}
-  <span>{displayDate(value)}</span>
+  <span class="lite-field-value {className}">{displayDate(value)}</span>
 {:else}
-  <div>
+  <div class="lite-field-edit {className}">
     <input
       type={inputType}
       lang={i18n.locale}

@@ -7,16 +7,18 @@
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', class: className = '' }: Props = $props();
   let hasError = $derived(error.length > 0);
 
   const checked = $derived(isExplicitBooleanTrue(value));
 </script>
 
 {#if mode === 'show'}
-  <div>
+  <div class="lite-field-value {className}">
     <span class="lite-bool {checked ? 'lite-bool-true' : ''}"></span>
     {checked ? '✓ Yes' : '✗ No'}
   </div>

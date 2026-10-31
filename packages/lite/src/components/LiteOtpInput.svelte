@@ -2,6 +2,8 @@
   import type { HTMLInputAttributes } from 'svelte/elements';
 
   interface Props {
+    /** Caller class merged with the built-in class list. */
+    class?: string;
     name?: string;
     label?: string;
     length?: number;
@@ -19,10 +21,11 @@
     disabled = false,
     required = true,
     autocomplete = 'one-time-code',
+    class: className = '',
   }: Props = $props();
 </script>
 
-<label class="lite-form-group lite-otp-input">
+<label class="lite-form-group lite-otp-input {className}">
   <span>{label}</span>
   <input
     class="lite-input"

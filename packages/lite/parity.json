@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-31T01:31:45.802Z",
+  "timestamp": "2026-10-31T01:34:20.337Z",
   "totalComponents": 179,
   "adaptedCount": 126,
   "fallbackCount": 51,
@@ -8,10 +8,10 @@
   "overallCoveragePercentage": 100,
   "exactPercentage": 70.4,
   "fallbackPercentage": 28.5,
-  "behaviorVerifiedCount": 142,
-  "behaviorVerifiedPercentage": 79.3,
-  "behaviorAssertedCount": 142,
-  "behaviorAssertedPercentage": 79.3,
+  "behaviorVerifiedCount": 146,
+  "behaviorVerifiedPercentage": 81.6,
+  "behaviorAssertedCount": 146,
+  "behaviorAssertedPercentage": 81.6,
   "categories": {
     "pages": {
       "category": "pages",
@@ -62,8 +62,8 @@
       "percentage": 100,
       "exactRate": 91.3,
       "fallbackRate": 8.7,
-      "behaviorVerified": 36,
-      "behaviorAsserted": 36
+      "behaviorVerified": 40,
+      "behaviorAsserted": 40
     },
     "layout": {
       "category": "layout",

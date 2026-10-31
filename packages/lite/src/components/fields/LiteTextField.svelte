@@ -6,9 +6,11 @@
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', class: className = '' }: Props = $props();
   let hasError = $derived(error.length > 0);
 
   /**
@@ -32,9 +34,9 @@
 </script>
 
 {#if mode === 'show'}
-  <span>{value == null ? '—' : String(value)}</span>
+  <span class="lite-field-value {className}">{value == null ? '—' : String(value)}</span>
 {:else}
-  <div>
+  <div class="lite-field-edit {className}">
     <input
       type={inputType}
       name={field.key}

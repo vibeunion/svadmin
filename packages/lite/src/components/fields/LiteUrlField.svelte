@@ -7,9 +7,11 @@
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', class: className = '' }: Props = $props();
   let hasError = $derived(error.length > 0);
   let displayValue = $derived(toSafeText(value));
   let safeHref = $derived(toSafeHref(value));
@@ -17,7 +19,7 @@
 </script>
 
 {#if mode === 'show'}
-  <span>
+  <span class="lite-field-value {className}">
     {#if displayValue}
       {#if safeHref}
         <a href={safeHref} target="_blank" rel="noopener noreferrer">{displayValue}</a>
@@ -29,7 +31,7 @@
     {/if}
   </span>
 {:else}
-  <div>
+  <div class="lite-field-edit {className}">
     <input
       type="url"
       name={field.key}

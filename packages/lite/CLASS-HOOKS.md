@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-10-31T01:31:45.810Z
+> 自动生成时间: 2026-10-31T01:34:20.359Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标
@@ -16,8 +16,8 @@
 
 - 参与统计的 `exact` 条目: **111**
 - 参考组件暴露 `class` 的条目: **84**
-- Lite 同时接受 `class` 的条目: **37**（**44%**）
-- 仍缺样式钩子的条目: **47**
+- Lite 同时接受 `class` 的条目: **49**（**58.3%**）
+- 仍缺样式钩子的条目: **35**
 
 ## 待补齐清单
 
@@ -38,25 +38,13 @@
 | `StepForm` | advanced | `LiteStepForm.svelte` |
 | `TableSummary` | advanced | `LiteTableSummary.svelte` |
 | `VersionDiffViewer` | advanced | `LiteVersionDiffViewer.svelte` |
-| `BooleanField` | fields | `LiteBooleanField.svelte` |
 | `Cascader` | fields | `LiteCascader.svelte` |
-| `ColorPicker` | fields | `LiteTextField.svelte` |
-| `DateField` | fields | `LiteDateField.svelte` |
-| `DatePicker` | fields | `LiteDateField.svelte` |
 | `ImageCropper` | fields | `LiteImageCropper.svelte` |
 | `ImageField` | fields | `LiteImageField.svelte` |
 | `JsonSchemaForm` | fields | `LiteJsonSchemaForm.svelte` |
 | `MarkdownField` | fields | `LiteMarkdownField.svelte` |
-| `NumberField` | fields | `LiteNumberField.svelte` |
-| `OtpInput` | fields | `LiteOtpInput.svelte` |
-| `RadioGroup` | fields | `LiteSelectField.svelte` |
-| `RangeSlider` | fields | `LiteNumberField.svelte` |
-| `Slider` | fields | `LiteNumberField.svelte` |
-| `TagField` | fields | `LiteTagField.svelte` |
-| `TagsInput` | fields | `LiteTagField.svelte` |
 | `Transfer` | fields | `LiteTransfer.svelte` |
 | `TreeSelect` | fields | `LiteTreeSelect.svelte` |
-| `UrlField` | fields | `LiteUrlField.svelte` |
 | `Layout` | layout | `LiteLayout.svelte` |
 | `Sidebar` | layout | `LiteSidebar.svelte` |
 | `SplitPaneLayout` | layout | `LiteSplitPaneLayout.svelte` |

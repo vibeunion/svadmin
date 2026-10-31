@@ -6,15 +6,17 @@
     value?: unknown;
     error?: string[];
     mode?: 'show' | 'edit' | 'create';
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { field, value, error = [], mode = 'show' }: Props = $props();
+  let { field, value, error = [], mode = 'show', class: className = '' }: Props = $props();
   let hasError = $derived(error.length > 0);
   const tags = $derived(Array.isArray(value) ? value.map(String) : []);
 </script>
 
 {#if mode === 'show'}
-  <div class="lite-inline-xs lite-flex-wrap">
+  <div class="lite-inline-xs lite-flex-wrap {className}">
     {#each tags as tag, _i (_i)}
       <span class="lite-badge">{tag}</span>
     {:else}
@@ -22,7 +24,7 @@
     {/each}
   </div>
 {:else}
-  <div class="lite-tags-input">
+  <div class="lite-tags-input {className}">
     <!-- SSR 无脚本：每个标签一个同名字段，服务端按 getAll 解析为数组。 -->
     {#each tags as tag, index (index)}
       <label class="lite-tags-input__row">

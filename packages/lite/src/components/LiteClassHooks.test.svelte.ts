@@ -14,6 +14,14 @@ import LiteStatsCard from './LiteStatsCard.svelte';
 import LiteStatusBadge from './LiteStatusBadge.svelte';
 import LiteSteps from './LiteSteps.svelte';
 import LiteTimeline from './LiteTimeline.svelte';
+import LiteBooleanField from './fields/LiteBooleanField.svelte';
+import LiteDateField from './fields/LiteDateField.svelte';
+import LiteNumberField from './fields/LiteNumberField.svelte';
+import LiteSelectField from './fields/LiteSelectField.svelte';
+import LiteTagField from './fields/LiteTagField.svelte';
+import LiteTextField from './fields/LiteTextField.svelte';
+import LiteUrlField from './fields/LiteUrlField.svelte';
+import LiteOtpInput from './LiteOtpInput.svelte';
 
 function snippet(html: string) {
   return createRawSnippet(() => ({ render: () => html }));
@@ -162,6 +170,95 @@ describe('Lite styling hook contract', () => {
     expect(element?.tagName.toLowerCase()).toBe('figure');
     expect(element?.classList.contains('host-surface')).toBe(true);
     expect(element?.classList.contains('lite-qr-code')).toBe(true);
+  });
+
+  it('merges the caller class on LiteTextField show and edit roots', () => {
+    const field = { key: 'title', label: 'Title', type: 'string' as const };
+    const show = render(LiteTextField, { class: 'host-surface', field, value: 'Draft', mode: 'show' });
+    const shown = show.container.querySelector('.lite-field-value');
+    expect(shown?.classList.contains('host-surface')).toBe(true);
+    expect(shown?.textContent).toContain('Draft');
+    show.unmount();
+
+    const edit = render(LiteTextField, { class: 'host-surface', field, value: 'Draft', mode: 'edit' });
+    const editor = edit.container.querySelector('.lite-field-edit');
+    expect(editor?.classList.contains('host-surface')).toBe(true);
+    expect(editor?.querySelector('input')?.getAttribute('name')).toBe('title');
+  });
+
+  it('merges the caller class on LiteNumberField and LiteDateField', () => {
+    const number = render(LiteNumberField, {
+      class: 'host-surface',
+      field: { key: 'qty', label: 'Qty', type: 'number' as const },
+      value: 12,
+      mode: 'edit',
+    }).container.querySelector('.lite-field-edit');
+    expect(number?.classList.contains('host-surface')).toBe(true);
+    expect(number?.querySelector('input')?.getAttribute('type')).toBe('number');
+
+    const date = render(LiteDateField, {
+      class: 'host-surface',
+      field: { key: 'due', label: 'Due', type: 'date' as const },
+      value: '2026-10-31',
+      mode: 'show',
+    }).container.querySelector('.lite-field-value');
+    expect(date?.classList.contains('host-surface')).toBe(true);
+    expect(date?.textContent?.trim().length).toBeGreaterThan(0);
+  });
+
+  it('merges the caller class on LiteSelectField and LiteTagField', () => {
+    const select = render(LiteSelectField, {
+      class: 'host-surface',
+      field: {
+        key: 'status',
+        label: 'Status',
+        type: 'string' as const,
+        options: [{ label: 'Open', value: 'open' }],
+      },
+      value: 'open',
+      mode: 'show',
+    }).container.querySelector('.lite-badge');
+    expect(select?.classList.contains('host-surface')).toBe(true);
+    expect(select?.textContent).toBe('Open');
+
+    const tags = render(LiteTagField, {
+      class: 'host-surface',
+      field: { key: 'tags', label: 'Tags', type: 'tags' as const },
+      value: ['a', 'b'],
+      mode: 'edit',
+    }).container.querySelector('.lite-tags-input');
+    expect(tags?.classList.contains('host-surface')).toBe(true);
+    expect(tags?.querySelectorAll('input').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('merges the caller class on LiteUrlField and LiteBooleanField', () => {
+    const url = render(LiteUrlField, {
+      class: 'host-surface',
+      field: { key: 'site', label: 'Site', type: 'string' as const },
+      value: 'https://example.test',
+      mode: 'show',
+    }).container.querySelector('.lite-field-value');
+    expect(url?.classList.contains('host-surface')).toBe(true);
+    expect(url?.querySelector('a')?.getAttribute('href')).toBe('https://example.test');
+
+    const bool = render(LiteBooleanField, {
+      class: 'host-surface',
+      field: { key: 'active', label: 'Active', type: 'boolean' as const },
+      value: true,
+      mode: 'show',
+    }).container.querySelector('.lite-field-value');
+    expect(bool?.classList.contains('host-surface')).toBe(true);
+    expect(bool?.textContent).toContain('Yes');
+  });
+
+  it('merges the caller class on LiteOtpInput', () => {
+    const element = render(LiteOtpInput, {
+      class: 'host-surface',
+      name: 'code',
+    }).container.querySelector('.lite-otp-input');
+    expect(element?.classList.contains('host-surface')).toBe(true);
+    expect(element?.classList.contains('lite-form-group')).toBe(true);
+    expect(element?.querySelector('input')?.getAttribute('name')).toBe('code');
   });
 
   it('keeps the default markup unchanged when no class is passed', () => {
