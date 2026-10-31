@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.108.3](https://github.com/vibeunion/svadmin/compare/ui-v0.108.2...ui-v0.108.3) (2026-10-31)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** make ConfigProvider reactive and wire date locale + operable templates ([#622](https://github.com/vibeunion/svadmin/issues/622)) ([1aafd28](https://github.com/vibeunion/svadmin/commit/1aafd283b3ceeb8ce41cca0a2262d991572daa6e))
+
 ## [0.108.2](https://github.com/vibeunion/svadmin/compare/ui-v0.108.1...ui-v0.108.2) (2026-10-31)
 
 
