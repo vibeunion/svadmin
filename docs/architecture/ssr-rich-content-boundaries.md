@@ -51,8 +51,8 @@ text-only output by default and expose an opt-in `richContent` prop. Their
 reference components render plain text, so rendering Markdown by default would be
 a capability difference, not parity; hosts opt in per surface.
 
-Markdown support now also covers pipe tables, task lists, footnotes and
-definition lists, and hosts can plug a trusted server-side highlighter through
+Markdown support now also covers pipe tables, task lists, footnotes, definition
+lists, heading anchors and an opt-in `[toc]`, and hosts can plug a trusted server-side highlighter through
 `configureMarkdownRenderer` or per-field `renderOptions`. The hook only receives
 fenced blocks and its HTML is inserted as-is, so it is a documented trust
 boundary rather than a sanitizer.

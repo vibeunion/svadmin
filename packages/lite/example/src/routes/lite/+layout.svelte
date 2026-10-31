@@ -2,6 +2,8 @@
   import type { Snippet } from 'svelte';
   import { LiteLayout } from '@svadmin/lite';
   import '@svadmin/lite/lite.css';
+  // Opt-in variable-driven token palette for the rich content demo.
+  import '@svadmin/lite/lite-code-theme.css';
   import type { LayoutData } from './$types';
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props();

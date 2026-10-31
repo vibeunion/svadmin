@@ -59,6 +59,18 @@ input[type=checkbox][checked|disabled]
 - 被拒属性整体消失，只留下链接文字或图片 alt
 - 渲染出的链接始终带 `rel="noreferrer"`
 
+## 标题锚点与目录
+
+`renderMarkdown` 在需要时可让文档结构可链接：
+
+```ts
+renderMarkdown(source, { headingIds: true, tocLevels: 3 });
+```
+
+- `headingIds` 为标题生成稳定、去重的 `id`（`## Usage`、`### Usage` → `usage`、`usage-2`）；默认关闭，短片段输出保持不变。
+- 仅含 `[toc]` 的一行会被替换为 `<nav class="lite-toc">`，链接到收集到的标题；只要存在该指令，即使未开启 `headingIds` 也会生成 id。
+- `tocLevels`（默认 `3`）限制进入目录的标题层级。
+
 ## 在线示例
 
 Lite 示例应用用一条路由演示全部能力：
@@ -103,7 +115,31 @@ configureMarkdownRenderer({
 - 返回值按原样插入，须视为可信 HTML：不要把未经处理、会回显标签的用户输入交给高亮器。
 - 钩子返回 `undefined` 时，回退为转义代码 + `language-*` 类名。
 
-零依赖的完整示例见示例应用：`packages/lite/example/src/lib/highlight.ts`。它识别注释、字符串、数字与关键字，逐段转义，遇到不支持的语言返回 `undefined`。可直接作为起点，也可替换为 Shiki/Prism 的服务端输出并按请求或构建缓存结果。
+零依赖的完整示例见示例应用：`packages/lite/example/src/lib/highlight.ts`，示例内容位于 `packages/lite/example/src/lib/rich-content-sample.ts`。SSR 验证（`bun run check:lite:ssr`）会断言渲染页面仍包含目录、标题 id、表格对齐、任务列表、脚注、定义列表与高亮 token，防止示例与渲染契约漂移。它识别注释、字符串、数字与关键字，逐段转义，遇到不支持的语言返回 `undefined`。可直接作为起点，也可替换为 Shiki/Prism 的服务端输出并按请求或构建缓存结果。
+
+## 代码 token 主题
+
+高亮输出使用 span 类名（`tok-keyword`、`tok-string`、`tok-number`、`tok-comment`、`tok-function`、`tok-type`）。
+
+`lite.css` 保持 IE11 基线，使用**字面色值**；现代基线可额外引入可选主题，用自定义属性驱动同一套调色板（字面色值作为回退）：
+
+```ts
+import '@svadmin/lite/lite.css';
+import '@svadmin/lite/lite-code-theme.css'; // 可选，需要 CSS 变量支持
+```
+
+```css
+.lite-code-block {
+  --lite-token-keyword: #7FD1FF;
+  --lite-token-string: #9BE39B;
+  --lite-token-number: #FFC17A;
+  --lite-token-comment: #A9AEB8;
+  --lite-token-function: #C4A7FF;
+  --lite-token-type: #7FD1FF;
+}
+```
+
+在任一预览容器（或单个代码块的 `.lite-code-block`）上覆盖变量，所有 token 类名随之生效，无需为每个容器、每个 token 各写一份样式。需要维持 IE11 基线的宿主只引入 `lite.css`，保留字面调色板即可。
 
 ## 编辑面
 
