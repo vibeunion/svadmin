@@ -87,10 +87,18 @@ try {
     '/lite/rich-content',
     /富文本与 Markdown 服务端渲染/u,
   );
-  assert.match(richHtml, /<h1>Release notes<\/h1>/u);
-  assert.match(richHtml, /<table>/u);
+  // The demo sample must keep exercising every supported block feature; if it
+  // regresses, this route check fails before the docs drift.
+  assert.match(richHtml, /<h1 id="release-notes">Release notes<\/h1>/u);
+  assert.match(richHtml, /class="lite-toc"/u);
+  assert.match(richHtml, /<a href="#status-matrix">Status matrix<\/a>/u);
+  assert.match(richHtml, /<table><thead><tr><th align="left">Surface<\/th>/u);
+  assert.match(richHtml, /<ul class="lite-task-list">/u);
   assert.match(richHtml, /class="lite-footnote-ref"/u);
+  assert.match(richHtml, /<section class="lite-footnotes">/u);
+  assert.match(richHtml, /<dl><dt>Latency<\/dt>/u);
   assert.match(richHtml, /<span class="tok-keyword">export<\/span>/u);
+  assert.match(richHtml, /<span class="tok-comment">/u);
   assert.match(richHtml, /class="lite-comments__rich\b/u);
   assert.match(richHtml, /class="lite-notification-center__rich\b/u);
   checkedRoutes += 1;

@@ -7,12 +7,13 @@
   } from '@svadmin/lite';
   import type { FieldDefinition } from '@svadmin/core';
   import { highlightCode } from '#lib/highlight';
+  import { richContentOptions } from '#lib/rich-content-sample';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
 
   const markdownField = { key: 'notes', label: 'Release notes', type: 'markdown' } as FieldDefinition;
-  const renderOptions = { highlight: highlightCode, codeBlockClass: 'lite-code-block' };
+  const renderOptions = { ...richContentOptions, highlight: highlightCode };
 </script>
 
 <svelte:head>
@@ -60,10 +61,19 @@
 </div>
 
 <style>
-  .lite-code-block { margin: 0 0 8px; padding: 10px; border-radius: 4px; background: #1D2129; color: #E5E6EB; overflow-x: auto; }
-  .lite-code-block :global(.tok-keyword) { color: #7FD1FF; }
-  .lite-code-block :global(.tok-string) { color: #9BE39B; }
-  .lite-code-block :global(.tok-comment) { color: #86909C; font-style: italic; }
-  .lite-code-block :global(.tok-number) { color: #FFC17A; }
+  /* Token colours come from the opt-in `lite-code-theme.css` variables, so one
+     override re-themes every rich content surface on this page. */
+  .lite-code-block {
+    --lite-token-keyword: #7FD1FF;
+    --lite-token-string: #9BE39B;
+    --lite-token-number: #FFC17A;
+    --lite-token-comment: #A9AEB8;
+    margin: 0 0 8px;
+    padding: 10px;
+    border-radius: 4px;
+    background: #1D2129;
+    color: #E5E6EB;
+    overflow-x: auto;
+  }
   .lite-grid-tight > * + * { margin-top: 12px; }
 </style>

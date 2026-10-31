@@ -67,6 +67,21 @@ Lite (`toSafeHref`):
 - rejected attributes disappear entirely, leaving the link label or image alt text,
 - rendered links always carry `rel="noreferrer"`.
 
+## Heading anchors and table of contents
+
+`renderMarkdown` keeps document structure linkable when asked:
+
+```ts
+renderMarkdown(source, { headingIds: true, tocLevels: 3 });
+```
+
+- `headingIds` adds stable, deduplicated `id` attributes (`## Usage`, `### Usage`
+  becomes `usage`, `usage-2`). Off by default so short snippets stay unchanged.
+- A line containing only `[toc]` is replaced by
+  `<nav class="lite-toc">` with links to the collected headings. Emitting the TOC
+  forces heading ids even if `headingIds` is off.
+- `tocLevels` (default `3`) limits which heading levels enter the TOC.
+
 ## Live example
 
 The Lite demo app renders every feature on one route:
@@ -121,10 +136,44 @@ configureMarkdownRenderer({
   `language-*` class.
 
 A complete dependency-free example lives in the demo app:
-`packages/lite/example/src/lib/highlight.ts`. It tokenizes comments, strings,
+`packages/lite/example/src/lib/highlight.ts`, with its sample content in
+`packages/lite/example/src/lib/rich-content-sample.ts`. The SSR verification
+(`bun run check:lite:ssr`) asserts the rendered page still contains the TOC,
+heading ids, table alignment, task list, footnotes, definition list and
+highlighted tokens, so the demo cannot drift from the renderer contract. It tokenizes comments, strings,
 numbers and keywords, escapes every fragment and returns `undefined` for
 languages it does not support. Copy it as a starting point, or replace it with
 Shiki/Prism server output and cache the result per request/build.
+
+## Theming code tokens
+
+Highlighted output uses span classes (`tok-keyword`, `tok-string`, `tok-number`,
+`tok-comment`, `tok-function`, `tok-type`).
+
+`lite.css` keeps the IE11 baseline and ships **literal** token colours. For a
+modern baseline, import the opt-in theme, which drives the same palette through
+custom properties with those literals as fallbacks:
+
+```ts
+import '@svadmin/lite/lite.css';
+import '@svadmin/lite/lite-code-theme.css'; // opt-in, needs CSS variables
+```
+
+```css
+.lite-code-block {
+  --lite-token-keyword: #7FD1FF;
+  --lite-token-string: #9BE39B;
+  --lite-token-number: #FFC17A;
+  --lite-token-comment: #A9AEB8;
+  --lite-token-function: #C4A7FF;
+  --lite-token-type: #7FD1FF;
+}
+```
+
+Override the variables on any preview container (or on `.lite-code-block` for one
+block) and every token class follows — no extra CSS per token per surface. Hosts
+that must keep the IE11 baseline import only `lite.css` and keep the literal
+palette.
 
 ## Editing surface
 
