@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-10-31T03:44:16.663Z",
+  "timestamp": "2026-10-31T04:22:32.076Z",
   "totalComponents": 179,
-  "adaptedCount": 126,
-  "fallbackCount": 51,
+  "adaptedCount": 130,
+  "fallbackCount": 47,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 70.4,
-  "fallbackPercentage": 28.5,
-  "behaviorVerifiedCount": 150,
-  "behaviorVerifiedPercentage": 83.8,
-  "behaviorAssertedCount": 150,
-  "behaviorAssertedPercentage": 83.8,
+  "exactPercentage": 72.6,
+  "fallbackPercentage": 26.3,
+  "behaviorVerifiedCount": 152,
+  "behaviorVerifiedPercentage": 84.9,
+  "behaviorAssertedCount": 152,
+  "behaviorAssertedPercentage": 84.9,
   "categories": {
     "pages": {
       "category": "pages",
       "total": 18,
-      "adapted": 13,
-      "fallback": 5,
+      "adapted": 14,
+      "fallback": 4,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 72.2,
-      "fallbackRate": 27.8,
+      "exactRate": 77.8,
+      "fallbackRate": 22.2,
       "behaviorVerified": 14,
       "behaviorAsserted": 14
     },
     "advanced": {
       "category": "advanced",
       "total": 43,
-      "adapted": 26,
-      "fallback": 16,
+      "adapted": 27,
+      "fallback": 15,
       "spaOnly": 1,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 60.5,
-      "fallbackRate": 37.2,
-      "behaviorVerified": 38,
-      "behaviorAsserted": 38
+      "exactRate": 62.8,
+      "fallbackRate": 34.9,
+      "behaviorVerified": 39,
+      "behaviorAsserted": 39
     },
     "widgets": {
       "category": "widgets",
       "total": 37,
-      "adapted": 15,
-      "fallback": 22,
+      "adapted": 16,
+      "fallback": 21,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 40.5,
-      "fallbackRate": 59.5,
+      "exactRate": 43.2,
+      "fallbackRate": 56.8,
       "behaviorVerified": 34,
       "behaviorAsserted": 34
     },
@@ -68,15 +68,15 @@
     "layout": {
       "category": "layout",
       "total": 25,
-      "adapted": 20,
-      "fallback": 4,
+      "adapted": 21,
+      "fallback": 3,
       "spaOnly": 1,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 80,
-      "fallbackRate": 16,
-      "behaviorVerified": 20,
-      "behaviorAsserted": 20
+      "exactRate": 84,
+      "fallbackRate": 12,
+      "behaviorVerified": 21,
+      "behaviorAsserted": 21
     },
     "buttons": {
       "category": "buttons",
@@ -147,7 +147,7 @@
       "liteComponent": "LiteApprovalActionCard.svelte",
       "category": "advanced",
       "status": "fallback",
-      "strategy": "Lite 使用审批列表页与原生 POST 动作；审批规则、事务和审计由宿主承接"
+      "strategy": "单条审批卡片：状态、意见与 approve/reject 原生 POST；审批列表、历史、动态允许动作与事务由宿主承接"
     },
     {
       "name": "PivotExportButton",
@@ -178,8 +178,8 @@
       "uiComponent": "SegmentedControl.svelte",
       "liteComponent": "LiteTabs.svelte",
       "category": "layout",
-      "status": "fallback",
-      "strategy": "Lite 使用原生链接或 tabs 导航；不承诺 SPA 内联状态切换"
+      "status": "exact",
+      "strategy": "URL 驱动的分段选择链接：当前项 aria-current、可访问分组名称与禁用项不可激活"
     },
     {
       "name": "FileUpload",
@@ -818,8 +818,8 @@
       "uiComponent": "AutoSaveIndicator.svelte",
       "liteComponent": "advanced/LiteAutoSaveIndicator.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "服务端保存时间戳展示"
+      "status": "exact",
+      "strategy": "保存状态四态（idle/loading/success/error）、error 详情与 role=status/aria-live 语义"
     },
     {
       "name": "Toast",
@@ -835,7 +835,7 @@
       "liteComponent": "advanced/LiteUndoableNotification.svelte",
       "category": "advanced",
       "status": "fallback",
-      "strategy": "降级为带撤销表单的通知条"
+      "strategy": "通知消息与撤销链接；到期结果、托管边界与动画由宿主承接"
     },
     {
       "name": "Watermark",
@@ -1378,8 +1378,8 @@
       "uiComponent": "PageSkeleton.svelte",
       "liteComponent": "LiteSkeleton.svelte",
       "category": "pages",
-      "status": "fallback",
-      "strategy": "页面级静态骨架"
+      "status": "exact",
+      "strategy": "由 props 决定的页面骨架结构（list/show/form + rows），服务端直接生成"
     },
     {
       "name": "Spin",
@@ -1434,8 +1434,8 @@
       "uiComponent": "LiveIndicator.svelte",
       "liteComponent": "LiteRealtimeStatus.svelte",
       "category": "widgets",
-      "status": "fallback",
-      "strategy": "服务端快照时间与刷新回退"
+      "status": "exact",
+      "strategy": "连接状态徽章（connected/connecting/disconnected）、资源与最近事件详情、可选刷新链接"
     },
     {
       "name": "AreaChart",
