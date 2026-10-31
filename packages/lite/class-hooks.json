@@ -2,24 +2,8 @@
   "reviewedCount": 126,
   "unresolved": [],
   "referenceHookCount": 99,
-  "preservedCount": 96,
-  "coveragePercentage": 97,
-  "missing": [
-    {
-      "name": "Layout",
-      "category": "layout",
-      "liteComponent": "LiteLayout.svelte"
-    },
-    {
-      "name": "Sidebar",
-      "category": "layout",
-      "liteComponent": "LiteSidebar.svelte"
-    },
-    {
-      "name": "SplitPaneLayout",
-      "category": "layout",
-      "liteComponent": "LiteSplitPaneLayout.svelte"
-    }
-  ],
-  "timestamp": "2026-10-31T02:00:34.447Z"
+  "preservedCount": 99,
+  "coveragePercentage": 100,
+  "missing": [],
+  "timestamp": "2026-10-31T02:50:46.185Z"
 }

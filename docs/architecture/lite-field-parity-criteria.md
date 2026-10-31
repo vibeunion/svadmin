@@ -70,6 +70,12 @@ it, `--check` fails on drift) and is deliberately *not* a parity criterion:
 - tracking it separately means the debt is visible and cannot be paid down to
   inflate the number either.
 
+Structural components (`LiteLayout`, `LiteSplitPaneLayout`) take **named** hooks
+(`classSidebar`, `classMain`, `classPane1`, `classDivider`, …) next to the wrapper
+`class`, because a wrapper-only hook would be counted while leaving the part hosts
+actually restyle unreachable — see
+[the layout review](./reviews/layout-class-hooks.md).
+
 `TwoFactorStepper` is the deliberate exception: its reference API is only
 `{ current, steps, class }`, so once `steps` was added the missing `class` was the
 entire remaining difference, and it was implemented rather than deferred

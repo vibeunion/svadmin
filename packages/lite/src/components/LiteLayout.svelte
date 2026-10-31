@@ -19,6 +19,14 @@
     /** Optional server-computed permission check for menu metadata. */
     canAccess?: (resource: string, action: string) => boolean;
     children: Snippet;
+    /** Caller class for the layout wrapper. */
+    class?: string;
+    /** Caller class for the desktop sidebar. */
+    classSidebar?: string;
+    /** Caller class for the mobile navigation. */
+    classMobileNav?: string;
+    /** Caller class for the main region. */
+    classMain?: string;
   }
 
   let {
@@ -30,6 +38,10 @@
     menu,
     canAccess,
     children,
+    class: className = '',
+    classSidebar = '',
+    classMobileNav = '',
+    classMain = '',
   }: Props = $props();
 
   const menuResources = $derived(filterVisibleResources(resources, canAccess));
@@ -63,9 +75,9 @@
   }
 </script>
 
-<div class="lite-wrapper">
+<div class={`lite-wrapper ${className}`.trim()}>
   <!-- Sidebar -->
-  <nav class="lite-sidebar">
+  <nav class={`lite-sidebar ${classSidebar}`.trim()}>
     <div class="lite-sidebar-brand">{brandName}</div>
     {#if hasCustomMenu}
       <LiteMenuList items={visibleMenu} {basePath} {currentResource} />
@@ -89,7 +101,7 @@
     {/if}
   </nav>
 
-  <nav class="lite-mobile-nav" aria-label="Mobile navigation">
+  <nav class={`lite-mobile-nav ${classMobileNav}`.trim()} aria-label="Mobile navigation">
     <div class="lite-mobile-nav-brand">{brandName}</div>
     <div class="lite-mobile-nav-links">
       {#each mobileItems as item (item.name)}
@@ -112,7 +124,7 @@
   </nav>
 
   <!-- Main Content -->
-  <main class="lite-main">
+  <main class={`lite-main ${classMain}`.trim()}>
     {@render children()}
   </main>
 </div>

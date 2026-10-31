@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-10-31T02:00:34.447Z
+> 自动生成时间: 2026-10-31T02:50:46.185Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标
@@ -17,16 +17,14 @@
 - 参与统计的 `exact` 条目: **126**
 - 无法唯一定位（需人工确认）: **0**
 - 参考组件暴露 `class` 的条目: **99**
-- Lite 同时接受 `class` 的条目: **96**（**97%**）
-- 仍缺样式钩子的条目: **3**
+- Lite 同时接受 `class` 的条目: **99**（**100%**）
+- 仍缺样式钩子的条目: **0**
 
 ## 待补齐清单
 
 | 组件 | 分类 | Lite 实现 |
 | --- | --- | --- |
-| `Layout` | layout | `LiteLayout.svelte` |
-| `Sidebar` | layout | `LiteSidebar.svelte` |
-| `SplitPaneLayout` | layout | `LiteSplitPaneLayout.svelte` |
+
 
 ## 未能唯一定位
 

@@ -11,6 +11,8 @@
     basePath?: string;
     menu?: MenuItem[];
     canAccess?: (resource: string, action: string) => boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -21,6 +23,7 @@
     basePath = '/lite',
     menu,
     canAccess,
+    class: className = ''
   }: Props = $props();
 
   const menuResources = $derived(filterVisibleResources(resources, canAccess));
@@ -29,7 +32,7 @@
   const visibleMenu = $derived(menu ? filterVisibleMenu(menu, canAccess) : []);
 </script>
 
-<nav class="lite-sidebar">
+<nav class={`lite-sidebar ${className}`.trim()}>
   <div class="lite-sidebar-brand">{brandName}</div>
   {#if hasCustomMenu}
     <LiteMenuList items={visibleMenu} {basePath} {currentResource} />

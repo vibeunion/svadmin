@@ -5,25 +5,37 @@
     direction?: 'horizontal' | 'vertical';
     pane1?: Snippet;
     pane2?: Snippet;
+    /** Caller class for the outer split container. */
+    class?: string;
+    /** Caller class for the first pane. */
+    classPane1?: string;
+    /** Caller class for the divider. */
+    classDivider?: string;
+    /** Caller class for the second pane. */
+    classPane2?: string;
   }
 
   let {
     direction = 'horizontal',
     pane1,
     pane2,
+    class: className = '',
+    classPane1 = '',
+    classDivider = '',
+    classPane2 = '',
   }: Props = $props();
 </script>
 
-<div class="lite-split-layout lite-split-{direction}">
-  <div class="lite-split-pane-1">
+<div class={`lite-split-layout lite-split-${direction} ${className}`.trim()}>
+  <div class={`lite-split-pane-1 ${classPane1}`.trim()}>
     {#if pane1}
       {@render pane1()}
     {/if}
   </div>
 
-  <div class="lite-split-divider"></div>
+  <div class={`lite-split-divider ${classDivider}`.trim()}></div>
 
-  <div class="lite-split-pane-2">
+  <div class={`lite-split-pane-2 ${classPane2}`.trim()}>
     {#if pane2}
       {@render pane2()}
     {/if}

@@ -57,6 +57,13 @@ import LitePresenceAvatarGroup from './LitePresenceAvatarGroup.svelte';
 import LiteProgress from './LiteProgress.svelte';
 import LiteSkeleton from './LiteSkeleton.svelte';
 import LiteTable from './LiteTable.svelte';
+import LiteLayout from './LiteLayout.svelte';
+import LiteSidebar from './layout/LiteSidebar.svelte';
+import LiteSplitPaneLayout from './LiteSplitPaneLayout.svelte';
+
+const layoutResources = [
+  { name: 'orders', label: 'Orders', fields: [{ key: 'id', label: 'Id', type: 'number' }] },
+] as never;
 
 const pageResource = {
   name: 'orders',
@@ -619,6 +626,61 @@ describe('Lite styling hook contract', () => {
     }).container.querySelector('.lite-presence-container');
     expect(presence?.classList.contains('host-surface')).toBe(true);
     expect(presence?.textContent).toContain('Alice');
+  });
+
+  it('merges the caller class and named hooks on LiteLayout', () => {
+    const wrapper = render(LiteLayout, {
+      class: 'host-wrapper',
+      classSidebar: 'host-sidebar',
+      classMobileNav: 'host-mobile',
+      classMain: 'host-main',
+      resources: layoutResources,
+      children: snippet('<p>Body</p>'),
+    } as never).container;
+
+    expect(wrapper.querySelector('.lite-wrapper')?.classList.contains('host-wrapper')).toBe(true);
+    expect(wrapper.querySelector('.lite-sidebar')?.classList.contains('host-sidebar')).toBe(true);
+    expect(wrapper.querySelector('.lite-mobile-nav')?.classList.contains('host-mobile')).toBe(true);
+    expect(wrapper.querySelector('.lite-main')?.classList.contains('host-main')).toBe(true);
+  });
+
+  it('keeps LiteLayout output unchanged without hooks', () => {
+    const container = render(LiteLayout, {
+      resources: layoutResources,
+      children: snippet('<p>Body</p>'),
+    } as never).container;
+
+    // No trailing spaces and no stray classes when every hook is omitted.
+    expect(container.querySelector('.lite-wrapper')?.getAttribute('class')).toBe('lite-wrapper');
+    expect(container.querySelector('.lite-sidebar')?.getAttribute('class')).toBe('lite-sidebar');
+    expect(container.querySelector('.lite-mobile-nav')?.getAttribute('class')).toBe('lite-mobile-nav');
+    expect(container.querySelector('.lite-main')?.getAttribute('class')).toBe('lite-main');
+  });
+
+  it('merges the caller class on LiteSidebar', () => {
+    const element = render(LiteSidebar, {
+      class: 'host-surface',
+      resources: layoutResources,
+    } as never).container.querySelector('.lite-sidebar');
+
+    expect(element?.classList.contains('host-surface')).toBe(true);
+    expect(element?.tagName.toLowerCase()).toBe('nav');
+  });
+
+  it('merges class and pane hooks on LiteSplitPaneLayout', () => {
+    const container = render(LiteSplitPaneLayout, {
+      class: 'host-surface',
+      classPane1: 'host-pane-1',
+      classDivider: 'host-divider',
+      classPane2: 'host-pane-2',
+    }).container;
+
+    expect(container.querySelector('.lite-split-pane-1')?.classList.contains('host-pane-1')).toBe(true);
+    expect(container.querySelector('.lite-split-divider')?.classList.contains('host-divider')).toBe(true);
+    expect(container.querySelector('.lite-split-pane-2')?.classList.contains('host-pane-2')).toBe(true);
+    const root = container.querySelector('.lite-split-layout');
+    expect(root?.classList.contains('host-surface')).toBe(true);
+    expect(root?.classList.contains('lite-split-horizontal')).toBe(true);
   });
 
   it('keeps the default markup unchanged when no class is passed', () => {
