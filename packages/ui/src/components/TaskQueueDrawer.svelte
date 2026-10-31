@@ -238,6 +238,7 @@
       const handle = await submitTask.mutation.mutateAsync(definedOptions({
         taskName: submitTaskName.trim(),
         taskProvider: activeTaskProvider,
+        errorNotification: false,
         options: definedOptions({
           body,
           idempotencyKey: submitIdempotencyKey.trim() || undefined,

@@ -33,8 +33,8 @@ function fixture(overrides: Partial<TaskProvider> = {}) {
 }
 function mount(provider: TaskProvider, onTask?: (task: TaskRecord) => void, onError?: (error: Error) => void,
   options: { authProvider?: AuthProvider; notificationProvider?: NotificationProvider; notifyReads?: boolean; refetchInterval?: number | false;
-    onSubmitSuccess?: () => void; onSubmitError?: () => void } = {}) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+    onSubmitSuccess?: () => void; onSubmitError?: () => void; mutationRetry?: boolean | number } = {}) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: options.mutationRetry ?? false } } });
   clients.push(queryClient);
   let state: TaskHookState | undefined;
   const view = render(TaskHookHost, {
@@ -73,6 +73,22 @@ afterEach(() => {
 });
 
 describe('task hooks with the actual query runtime', () => {
+  it('never retries an unconfirmed submission through inherited mutation defaults', async () => {
+    const submit = vi.fn(async () => { throw new Error('Response lost after dispatch'); });
+    const notification = { open: vi.fn(), close: vi.fn() };
+    const { provider } = fixture({ submit });
+    const app = mount(provider, undefined, undefined, { mutationRetry: 3, notificationProvider: notification });
+    await waitFor(() => expect(app.read().list.isSuccess).toBe(true));
+    const invalidate = vi.spyOn(app.queryClient, 'invalidateQueries');
+
+    await expect(app.read().submit.mutation.mutateAsync({
+      taskName: 'image.generate', options: { body: { prompt: 'poster' } }, errorNotification: false,
+    })).rejects.toMatchObject({ code: 'TASK_PROVIDER_FAILED', writeMayHaveSucceeded: true });
+    expect(submit).toHaveBeenCalledOnce();
+    expect(invalidate).not.toHaveBeenCalled();
+    expect(notification.open).not.toHaveBeenCalled();
+  });
+
   it('detaches tenant metadata for each dispatch even when a provider mutates its input', async () => {
     const seen: unknown[] = [];
     const { provider } = fixture({

@@ -384,6 +384,7 @@ describe('TaskQueueDrawer', () => {
       expect(mutateAsync).toHaveBeenCalledWith({
         taskName: 'image.generate',
         taskProvider: mockTaskProvider,
+        errorNotification: false,
         options: {
           body: { prompt: 'poster' },
         },
@@ -455,6 +456,7 @@ describe('TaskQueueDrawer', () => {
     expect(mutateAsync).toHaveBeenLastCalledWith({
       taskName: 'image.generate',
       taskProvider: mockTaskProvider,
+      errorNotification: false,
       options: { body: { prompt: 'poster' } },
     });
     await waitFor(() => expect(refetchTasks).toHaveBeenCalledOnce());
@@ -476,6 +478,7 @@ describe('TaskQueueDrawer', () => {
     expect(screen.getByLabelText('Task name')).toHaveProperty('value', 'image.generate');
     expect(refetchTasks).not.toHaveBeenCalled();
     expect(refetchDlq).not.toHaveBeenCalled();
+    expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ errorNotification: false }));
   });
 
   it('retries a failed detail read without exposing cached task content or executing the task', async () => {
