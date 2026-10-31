@@ -19,6 +19,10 @@ export interface MarkdownRenderOptions {
   highlight?: (code: string, language: string) => string | undefined;
   /** Extra class names applied to every fenced `<pre>`. */
   codeBlockClass?: string;
+  /** Emit stable `id` attributes on headings (needed for anchors and the TOC). */
+  headingIds?: boolean;
+  /** Deepest heading level included in a generated `[toc]` (default 3). */
+  tocLevels?: number;
 }
 
 let configuredMarkdownOptions: MarkdownRenderOptions = {};
@@ -79,6 +83,35 @@ function emphasize(value: string): string {
  * Inline Markdown for one text run. Code spans and links are tokenized before
  * escaping so their contents never re-enter the emphasis rules.
  */
+const TOC_PLACEHOLDER = '\u0000lite-toc\u0000';
+const TOC_DIRECTIVE = /^\[toc\]$/iu;
+
+function slugifyHeading(text: string): string {
+  return text
+    .replace(/`([^`]*)`/gu, '$1')
+    .replace(/[*_~]/gu, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/gu, '$1')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/gu, '') || 'section';
+}
+
+function buildToc(
+  headings: ReadonlyArray<{ level: number; id: string; text: string }>,
+  levels: number,
+): string {
+  const items = headings
+    .filter((heading) => heading.level <= levels)
+    .map(
+      (heading) =>
+        `<li data-level="${heading.level}"><a href="#${escapeHtml(heading.id)}">${renderInlineMarkdown(heading.text)}</a></li>`,
+    )
+    .join('');
+  return items
+    ? `<nav class="lite-toc" aria-label="Table of contents"><ol class="lite-toc__list">${items}</ol></nav>`
+    : '';
+}
+
 function renderFootnoteRef(label: string, footnotes?: FootnoteContext): string | undefined {
   const number = footnotes?.numbers.get(label);
   if (!footnotes || number === undefined) return undefined;
@@ -198,6 +231,7 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
   const renderOptions = resolveOptions(options);
 
   const lines = source.split('\n');
+  const declaresToc = lines.some((line) => TOC_DIRECTIVE.test(line.trim()));
 
   // Footnote definitions are lifted out of the body and rendered as a list.
   const definitions = new Map<string, string>();
@@ -218,6 +252,16 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
 
   const blocks: string[] = [];
   let paragraph: string[] = [];
+  const headings: Array<{ level: number; id: string; text: string }> = [];
+  const usedSlugs = new Map<string, number>();
+  let wantsToc = declaresToc;
+
+  const headingId = (text: string): string => {
+    const base = slugifyHeading(text);
+    const seen = (usedSlugs.get(base) ?? 0) + 1;
+    usedSlugs.set(base, seen);
+    return seen === 1 ? base : `${base}-${seen}`;
+  };
 
   const flush = (): void => {
     if (paragraph.length === 0) return;
@@ -259,6 +303,13 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
       continue;
     }
 
+    if (TOC_DIRECTIVE.test(line.trim())) {
+      flush();
+      wantsToc = true;
+      blocks.push(TOC_PLACEHOLDER);
+      continue;
+    }
+
     if (RULE.test(line)) {
       flush();
       blocks.push('<hr />');
@@ -269,7 +320,11 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
     if (heading) {
       flush();
       const level = heading[1]?.length ?? 1;
-      blocks.push(`<h${level}>${renderInlineMarkdown(heading[2] ?? '', footnotes)}</h${level}>`);
+      const text = heading[2] ?? '';
+      const id = headingId(text);
+      headings.push({ level, id, text });
+      const anchor = renderOptions.headingIds || declaresToc ? ` id="${escapeHtml(id)}"` : '';
+      blocks.push(`<h${level}${anchor}>${renderInlineMarkdown(text, footnotes)}</h${level}>`);
       continue;
     }
 
@@ -356,6 +411,15 @@ export function renderMarkdown(value: unknown, options?: MarkdownRenderOptions):
   }
 
   flush();
+
+  if (wantsToc) {
+    const toc = buildToc(headings, renderOptions.tocLevels ?? 3);
+    const index = blocks.indexOf(TOC_PLACEHOLDER);
+    if (index >= 0) {
+      if (toc) blocks[index] = toc;
+      else blocks.splice(index, 1);
+    }
+  }
 
   if (definitions.size > 0) {
     const items = [...definitions.entries()]

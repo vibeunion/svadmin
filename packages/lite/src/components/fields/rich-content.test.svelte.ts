@@ -95,6 +95,37 @@ describe('Lite markdown renderer', () => {
     expect(html).not.toContain('[x]');
   });
 
+  it('emits heading ids only when asked and dedupes repeats', () => {
+    const plain = renderMarkdown('## Usage\n\n### Usage');
+    expect(plain).not.toContain('id=');
+
+    const anchored = renderMarkdown('## Usage\n\n### Usage\n\n## **Bold** heading', { headingIds: true });
+    expect(anchored).toContain('<h2 id="usage">Usage</h2>');
+    expect(anchored).toContain('<h3 id="usage-2">Usage</h3>');
+    expect(anchored).toContain('<h2 id="bold-heading">');
+    expect(anchored).toContain('<strong>Bold</strong> heading');
+  });
+
+  it('replaces a [toc] directive with a linked table of contents', () => {
+    const html = renderMarkdown([
+      '[toc]',
+      '',
+      '## Overview',
+      '### Details',
+      '## Appendix',
+    ].join('\n'));
+
+    expect(html).toContain('<nav class="lite-toc" aria-label="Table of contents">');
+    expect(html).toContain('<li data-level="2"><a href="#overview">Overview</a></li>');
+    expect(html).toContain('<li data-level="3"><a href="#details">Details</a></li>');
+    expect(html).toContain('<h2 id="overview">Overview</h2>');
+    expect(html).not.toContain('[toc]');
+
+    const shallow = renderMarkdown(['[toc]', '', '## Keep', '### Skip'].join('\n'), { tocLevels: 2 });
+    expect(shallow).toContain('href="#keep"');
+    expect(shallow).not.toContain('href="#skip"');
+  });
+
   it('renders footnotes with numbered references and backlinks', () => {
     const html = renderMarkdown([
       'Revenue grew[^rev] and churn fell[^churn].',

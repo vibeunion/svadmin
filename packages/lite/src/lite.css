@@ -1537,3 +1537,87 @@ textarea.lite-input {
     background: #eee !important;
   }
 }
+
+/* ─── Rich content: Markdown previews, TOC and code tokens ────
+   IE11-safe baseline: literal colours, no CSS custom properties. Hosts that can
+   rely on a modern baseline import `lite-code-theme.css` for variable-driven
+   theming instead. */
+.lite-markdown-preview .tok-comment,
+.lite-rich-preview .tok-comment,
+.lite-insight-content .tok-comment,
+.lite-comments__rich .tok-comment,
+.lite-notification-center__rich .tok-comment,
+.lite-activity-rich .tok-comment {
+  color: #86909C;
+  font-style: italic;
+}
+
+.lite-markdown-preview .tok-keyword,
+.lite-rich-preview .tok-keyword,
+.lite-insight-content .tok-keyword,
+.lite-comments__rich .tok-keyword,
+.lite-notification-center__rich .tok-keyword,
+.lite-activity-rich .tok-keyword {
+  color: #165DFF;
+  font-weight: 600;
+}
+
+.lite-markdown-preview .tok-string,
+.lite-rich-preview .tok-string,
+.lite-insight-content .tok-string,
+.lite-comments__rich .tok-string,
+.lite-notification-center__rich .tok-string,
+.lite-activity-rich .tok-string {
+  color: #007A5A;
+}
+
+.lite-markdown-preview .tok-number,
+.lite-rich-preview .tok-number,
+.lite-insight-content .tok-number,
+.lite-comments__rich .tok-number,
+.lite-notification-center__rich .tok-number,
+.lite-activity-rich .tok-number {
+  color: #C2410C;
+}
+
+.lite-markdown-preview .tok-function,
+.lite-rich-preview .tok-function,
+.lite-insight-content .tok-function,
+.lite-comments__rich .tok-function,
+.lite-notification-center__rich .tok-function,
+.lite-activity-rich .tok-function {
+  color: #7A3EA8;
+}
+
+.lite-markdown-preview .tok-type,
+.lite-rich-preview .tok-type,
+.lite-insight-content .tok-type,
+.lite-comments__rich .tok-type,
+.lite-notification-center__rich .tok-type,
+.lite-activity-rich .tok-type {
+  color: #0E7490;
+}
+
+/* Table of contents generated from a `[toc]` directive. */
+.lite-toc {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #E5E6EB;
+  border-radius: 4px;
+  background: #F7F8FA;
+}
+.lite-toc__list {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+.lite-toc__list a {
+  color: #165DFF;
+  font-size: 13px;
+  text-decoration: none;
+}
+.lite-toc__list a:hover {
+  text-decoration: underline;
+}
+.lite-toc__list li[data-level="3"] { margin-left: 12px; }
+.lite-toc__list li[data-level="4"] { margin-left: 24px; }

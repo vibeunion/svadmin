@@ -5,6 +5,7 @@
   "type": "module",
   "sideEffects": [
     "./dist/lite.css",
+    "./dist/lite-code-theme.css",
     "./dist/enhance.js"
   ],
   "files": [
@@ -39,6 +40,12 @@
       "style": "./dist/lite.css",
       "import": "./dist/lite.css",
       "default": "./dist/lite.css"
+    },
+    "./lite-code-theme.css": {
+      "svelte": "./dist/lite-code-theme.css",
+      "style": "./dist/lite-code-theme.css",
+      "import": "./dist/lite-code-theme.css",
+      "default": "./dist/lite-code-theme.css"
     },
     "./src/lite.css": {
       "svelte": "./dist/lite.css",
