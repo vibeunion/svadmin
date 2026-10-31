@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PR 619 sidebar offset verification</title>
+<style>
+body { margin:0; font-family:system-ui,sans-serif; background:var(--background); color:var(--foreground); }
+aside { position:fixed; inset-block:0; inset-inline-start:0; background:var(--card); border-inline-end:1px solid var(--border); padding:24px 12px; box-sizing:border-box; }
+main { box-sizing:border-box; padding:32px; min-height:100vh; }
+.transition-all { transition:margin-left .2s ease,margin-right .2s ease; }
+section { padding:24px; border:1px solid var(--border); border-radius:12px; margin-top:24px; background:var(--card); }
+button { margin:8px 8px 8px 0; padding:10px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--foreground); }
+table { width:100%; border-collapse:collapse; } td, th { padding:14px; text-align:start; border-bottom:1px solid var(--border); }
+@media(max-width:767px){aside {display:none;}main{padding:16px;}}
+</style><link rel="stylesheet" href="/packages/ui/dist/app.css">
+<aside id="sidebar" class="svadmin-sidebar-expanded"><h2>SVAdmin</h2><p>Workspace</p><p>Orders</p><p>Settings</p></aside>
+<main id="content" class="svadmin-sidebar-content-expanded transition-all"><h1>Sidebar content offsets</h1><p>PR #619 · published CSS fixture · responsive layout and transition verification</p>
+<button id="toggle">Toggle sidebar</button><button id="direction">Switch direction</button>
+<section><h2>Orders</h2><p>Desktop content follows the sidebar. Mobile content keeps the full viewport width.</p><table><thead><tr><th>Order</th><th>Customer</th><th>Status</th></tr></thead><tbody><tr><td>FA-001</td><td>Acme</td><td>In progress</td></tr><tr><td>FA-002</td><td>Northstar</td><td>Ready</td></tr></tbody></table></section>
+<section><h2>Verified state matrix</h2><p>LTR / RTL · expanded / collapsed · 390 / 767 / 768 / 1440 / 1920 pixels</p><p>At mobile widths: both margins are zero, transition-property is none, no horizontal overflow.</p></section></main>
+<script>let expanded=true;document.querySelector('#toggle').onclick=()=>{expanded=!expanded;document.querySelector('#content').className=`svadmin-sidebar-content-${expanded?'expanded':'collapsed'} transition-all`;document.querySelector('#sidebar').className=`svadmin-sidebar-${expanded?'expanded':'collapsed'}`};document.querySelector('#direction').onclick=()=>document.documentElement.dir=document.documentElement.dir==='rtl'?'ltr':'rtl';</script></html>
