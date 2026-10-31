@@ -13,8 +13,8 @@
     direction = 'ltr',
     locale = 'en',
     componentSize = 'md',
-    dateLocale = undefined,
-  }: Required<Pick<ComponentConfig, 'density' | 'direction' | 'locale' | 'componentSize'>> & {
+    dateLocale,
+  }: Pick<ComponentConfig, 'density' | 'direction' | 'locale' | 'componentSize'> & {
     dateLocale?: string;
   } = $props();
 </script>
@@ -27,5 +27,10 @@
   <Badge>Status</Badge>
   <Tag>Label</Tag>
   <Calendar value="2026-10-15" />
-  <DatePicker panel value="2026-09-20" locale={dateLocale} />
+  <!-- 未传入时不要把 undefined 写进可选 locale，exactOptionalPropertyTypes 只接受缺省或 string。 -->
+  {#if dateLocale !== undefined}
+    <DatePicker panel value="2026-09-20" locale={dateLocale} />
+  {:else}
+    <DatePicker panel value="2026-09-20" />
+  {/if}
 </ConfigProvider>

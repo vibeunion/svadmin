@@ -25,9 +25,11 @@ export interface ComponentMessageSource {
 }
 
 export function resolveComponentLocale(input: {
-  explicit?: string | null;
-  configLocale?: string | null;
-  i18nLocale?: string | null;
+  // 省略、null、undefined 都表示这一级没有 locale。
+  // Svelte 可选属性读出来是 undefined，不能只接受 null。
+  explicit?: string | null | undefined;
+  configLocale?: string | null | undefined;
+  i18nLocale?: string | null | undefined;
 }): string {
   const explicit = input.explicit?.trim();
   if (explicit) return explicit;
