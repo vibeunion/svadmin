@@ -59,9 +59,11 @@ Use the business page layer as the default customer API:
   pages.
 
 `PagePattern` has a shared `state` contract (`ready`, `loading`, `empty`,
-`filtered-empty`, `error`, `forbidden`) and hides page content while a non-ready
+`filtered-empty`, `error`, `forbidden`) and hides page content while a blocking
 state is active. Use `filtered-empty` when active filters match no records; keep
-it distinct from an initially empty resource.
+it distinct from an initially empty resource. For a background refetch, keep the
+current content mounted and render `DataState state="refreshing"` as an inline,
+non-blocking status.
 This keeps shadcn-svelte as an implementation source while customers receive a
 stable, external UI kits-like product workflow. Prefer these APIs over composing
 primitive `Button`, `Card`, `Dialog`, and `Table` components directly in every

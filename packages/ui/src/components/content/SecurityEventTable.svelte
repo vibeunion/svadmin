@@ -5,9 +5,9 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import StatusBadge from './StatusBadge.svelte';
   import DataState from './DataState.svelte';
-  import type { DataStateKind } from './DataState.svelte';
+  import type { BlockingDataStateKind } from './DataState.svelte';
   export interface SecurityEvent { id: string; event: string; actor?: string; location?: string; createdAt: string; severity: 'info' | 'warning' | 'danger'; }
-  interface Props { events?: SecurityEvent[]; state?: DataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; class?: string; }
+  interface Props { events?: SecurityEvent[]; state?: BlockingDataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; class?: string; }
   const i18n = useTranslation();
   let { events = [], state, stateTitle, stateDescription, emptyTitle, emptyDescription, retry, retryLabel, loadingLabel, class: className = '' }: Props = $props();
   const resolvedState = $derived(state ?? (events.length === 0 ? 'empty' : undefined));

@@ -6,7 +6,7 @@
   import { Badge } from '../ui/badge/index.js';
   import { Button } from '../ui/button/index.js';
   import DataState from './DataState.svelte';
-  import type { DataStateKind } from './DataState.svelte';
+  import type { BlockingDataStateKind } from './DataState.svelte';
   export interface ApiKeySummary {
     id: string;
     name: string;
@@ -16,7 +16,7 @@
     lastUsedAt?: string;
     permissions?: string[];
   }
-  interface Props { keys?: ApiKeySummary[]; state?: DataStateKind; stateTitle?: string; stateDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; copiedKeyId?: string | null; oncopy?: (key: ApiKeySummary) => void; onrevoke?: (key: ApiKeySummary) => void; class?: string; }
+  interface Props { keys?: ApiKeySummary[]; state?: BlockingDataStateKind; stateTitle?: string; stateDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; copiedKeyId?: string | null; oncopy?: (key: ApiKeySummary) => void; onrevoke?: (key: ApiKeySummary) => void; class?: string; }
   const i18n = useTranslation();
   let { keys = [], state, stateTitle, stateDescription, retry, retryLabel, loadingLabel, copiedKeyId = null, oncopy, onrevoke, class: className = '' }: Props = $props();
   const resolvedState = $derived(state ?? (keys.length === 0 ? 'empty' : undefined));

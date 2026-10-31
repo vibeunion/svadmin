@@ -32,6 +32,19 @@ describe('DataState contract', () => {
     expect(view.queryByRole('button')).toBeNull();
   });
 
+  it('renders a non-blocking refreshing status distinct from loading', () => {
+    const view = render(DataState, { state: 'refreshing', loadingLabel: '正在刷新项目' });
+    const surface = view.container.querySelector('[data-svadmin-data-state="refreshing"]');
+
+    expect(surface?.getAttribute('role')).toBe('status');
+    expect(surface?.getAttribute('aria-live')).toBe('polite');
+    expect(surface?.getAttribute('aria-busy')).toBe('true');
+    expect(surface?.getAttribute('aria-label')).toBe('Refreshing…');
+    expect(view.getByText('Refreshing…')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-data-state="loading"]')).toBeNull();
+    expect(view.queryByRole('button')).toBeNull();
+  });
+
   it('offers retry only for a recoverable error', async () => {
     let retries = 0;
     const view = render(DataState, {

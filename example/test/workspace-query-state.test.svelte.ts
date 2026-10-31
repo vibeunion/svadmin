@@ -9,10 +9,11 @@ const children = createRawSnippet(() => ({
   render: () => '<p data-query-content>Loaded records</p>',
 }));
 
-function query(overrides: Partial<{ isLoading: boolean; isError: boolean }> = {}) {
+function query(overrides: Partial<{ isLoading: boolean; isError: boolean; isFetching: boolean }> = {}) {
   return {
     isLoading: false,
     isError: false,
+    isFetching: false,
     refetch: vi.fn(),
     ...overrides,
   };
@@ -63,6 +64,20 @@ describe('WorkspaceQueryState', () => {
       children,
     });
     expect(uncounted.container.querySelector('[data-query-content]')).toBeTruthy();
+  });
+
+  it('keeps loaded content visible while a background refresh is pending', () => {
+    const view = render(WorkspaceQueryState, {
+      query: query({ isFetching: true }),
+      count: 1,
+      children,
+    });
+
+    expect(view.getByText('Loaded records')).toBeTruthy();
+    const status = view.container.querySelector('[data-svadmin-data-state="refreshing"]');
+    expect(status?.getAttribute('role')).toBe('status');
+    expect(status?.getAttribute('aria-busy')).toBe('true');
+    expect(view.queryByText('Refreshing…')).toBeTruthy();
   });
 
   it('keeps query errors recoverable and does not render stale content', () => {

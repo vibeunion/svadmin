@@ -7,9 +7,9 @@
   import { Button } from '../ui/button/index.js';
   import StatusBadge from './StatusBadge.svelte';
   import DataState from './DataState.svelte';
-  import type { DataStateKind } from './DataState.svelte';
+  import type { BlockingDataStateKind } from './DataState.svelte';
   export interface MemberSummary { id: string; name: string; email?: string; role?: string; department?: string; status?: 'success' | 'warning' | 'danger' | 'info' | 'neutral'; avatar?: string; }
-  interface Props { members?: MemberSummary[]; state?: DataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; onaction?: (member: MemberSummary) => void; class?: string; }
+  interface Props { members?: MemberSummary[]; state?: BlockingDataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; onaction?: (member: MemberSummary) => void; class?: string; }
   const i18n = useTranslation();
   let { members = [], state, stateTitle, stateDescription, emptyTitle, emptyDescription, retry, retryLabel, loadingLabel, onaction, class: className = '' }: Props = $props();
   const resolvedState = $derived(state ?? (members.length === 0 ? 'empty' : undefined));

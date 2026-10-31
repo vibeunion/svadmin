@@ -22,7 +22,7 @@ export { default as StatusTabs } from './StatusTabs.svelte';
 export type { StatusTabItem } from './StatusTabs.svelte';
 export { default as FilterToolbar } from './FilterToolbar.svelte';
 export { default as DataState } from './DataState.svelte';
-export type { DataStateKind } from './DataState.svelte';
+export type { BlockingDataStateKind, DataStateKind } from './DataState.svelte';
 export { default as ProjectCard } from './ProjectCard.svelte';
 export type { ProjectSummary, ProjectStatus } from './ProjectCard.svelte';
 export { default as TeamCard } from './TeamCard.svelte';

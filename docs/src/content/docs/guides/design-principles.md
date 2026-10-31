@@ -55,6 +55,7 @@ states must communicate scope and the next step.
 | Situation | Primary surface | Removal condition |
 | --- | --- | --- |
 | Loading | Skeleton or `DataState state="loading"` | Data settles |
+| Background refresh | Inline `DataState state="refreshing"` while content stays mounted | Request settles |
 | Initial empty | `DataState state="empty"` | First record is created or imported |
 | No matching data | `DataState state="filtered-empty"` | Filter changes or is cleared |
 | Recoverable failure | `DataState state="error"` with retry | Retry succeeds |

@@ -20,13 +20,13 @@
   import { cn } from '../../utils.js';
   import StatusBadge from './StatusBadge.svelte';
   import DataState from './DataState.svelte';
-  import type { DataStateKind } from './DataState.svelte';
+  import type { BlockingDataStateKind } from './DataState.svelte';
 
   interface Props {
     items?: TimelineItem[];
     emptyTitle?: string;
     emptyDescription?: string;
-    state?: DataStateKind;
+    state?: BlockingDataStateKind;
     stateTitle?: string;
     stateDescription?: string;
     retry?: () => void;

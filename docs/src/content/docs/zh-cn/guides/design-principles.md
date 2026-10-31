@@ -50,6 +50,7 @@ svadmin 自身的设计原则决定 Admin UI 的视觉方向。中性表面、�
 | 情况 | 主反馈面 | 消失条件 |
 | --- | --- | --- |
 | 加载 | Skeleton 或 `DataState state="loading"` | 数据结束请求 |
+| 后台刷新 | 内容保持挂载，行内显示 `DataState state="refreshing"` | 请求结束 |
 | 初始无数据 | `DataState state="empty"` | 创建、导入或配置首条数据 |
 | 没有匹配数据 | `DataState state="filtered-empty"` | 修改或清除筛选 |
 | 可恢复错误 | 带重试的 `DataState state="error"` | 重试成功 |

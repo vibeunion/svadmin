@@ -1,14 +1,14 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
   import DataState from './DataState.svelte';
-  import type { DataStateKind } from './DataState.svelte';
+  import type { BlockingDataStateKind } from './DataState.svelte';
   import FileListRow from './FileListRow.svelte';
 
   export interface FileItem { id?: string; name: string; size?: string; type?: string; updatedAt?: string; }
   type FileActionHandler = (file: FileItem) => void;
   interface Props {
     files?: FileItem[];
-    state?: DataStateKind;
+    state?: BlockingDataStateKind;
     stateTitle?: string;
     stateDescription?: string;
     emptyTitle?: string;

@@ -4,9 +4,9 @@
   import type { Snippet } from 'svelte';
   import * as Table from '../ui/table/index.js';
   import DataState from './DataState.svelte';
-  import type { DataStateKind } from './DataState.svelte';
+  import type { BlockingDataStateKind } from './DataState.svelte';
   import type { NetworkColumn } from './NetworkTable.types.js';
-  interface Props { rows?: T[]; columns: NetworkColumn<T>[]; row?: Snippet<[T]>; state?: DataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; class?: string; }
+  interface Props { rows?: T[]; columns: NetworkColumn<T>[]; row?: Snippet<[T]>; state?: BlockingDataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; class?: string; }
   let { rows = [], columns, row, state, stateTitle, stateDescription, emptyTitle, emptyDescription, retry, retryLabel, loadingLabel, class: className = '' }: Props = $props();
   const resolvedState = $derived(state ?? (rows.length === 0 ? 'empty' : undefined));
 </script>

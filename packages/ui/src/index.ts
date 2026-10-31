@@ -489,7 +489,7 @@ export { default as StatusTabs } from './components/content/StatusTabs.svelte';
 export type { StatusTabItem } from './components/content/StatusTabs.svelte';
 export { default as FilterToolbar } from './components/content/FilterToolbar.svelte';
 export { default as DataState } from './components/content/DataState.svelte';
-export type { DataStateKind } from './components/content/DataState.svelte';
+export type { BlockingDataStateKind, DataStateKind } from './components/content/DataState.svelte';
 export { default as ProjectCard } from './components/content/ProjectCard.svelte';
 export type { ProjectSummary, ProjectStatus } from './components/content/ProjectCard.svelte';
 export { default as TeamCard } from './components/content/TeamCard.svelte';

@@ -89,8 +89,10 @@ overrides `--svadmin-control-h` once; there is no per-component height override.
 
 ## Data states
 
-Use one `DataState` location for loading, empty, recoverable error, and permission
-states so the page does not jump between unrelated layouts.
+Use one `DataState` location for initial loading, empty, recoverable error, and
+permission states so the page does not jump between unrelated layouts. A
+background refetch is not a blocking state: keep the current content mounted and
+render `DataState state="refreshing"` as an inline status.
 
 ```svelte
 <DataState
@@ -105,6 +107,10 @@ states so the page does not jump between unrelated layouts.
 
 Use `FeedbackNotice` for unresolved partial results or blocking context. Routine
 success belongs in a Toast, not a persistent success banner.
+
+`refreshing` is intentionally non-blocking. It reports that current data is being
+revalidated while the existing rows or detail content remain visible. Do not use
+it for an initial load; use `loading` when there is no current content to keep.
 
 `AuditTimeline` follows the same contract. Pass `state="loading"`, `state="error"`,
 `state="forbidden"`, or `state="filtered-empty"` when the provider knows the

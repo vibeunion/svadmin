@@ -82,8 +82,9 @@ card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格�
 
 ## 数据状态
 
-加载、空、可恢复错误和权限状态应复用同一个 `DataState` 位置，避免页面在
-互不相关的布局之间跳动。
+首次加载、空、可恢复错误和权限状态应复用同一个 `DataState` 位置，避免页面在
+互不相关的布局之间跳动。后台刷新不是阻塞状态：保留当前内容，并用
+`DataState state="refreshing"` 显示行内刷新提示。
 
 ```svelte
 <DataState
@@ -98,6 +99,9 @@ card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格�
 
 未解决的部分结果或阻塞上下文使用 `FeedbackNotice`。普通成功使用 Toast，
 不能使用持久 success banner。
+
+`refreshing` 明确是非阻塞状态：当前数据正在重新校验，但已有列表或详情内容继续
+可见。首次加载没有可保留内容时使用 `loading`，不要用 `refreshing` 伪装首屏加载。
 
 `AuditTimeline` 也遵循同一份状态合同。Provider 已明确知道时间线不可用或被筛选
 为空时，传入 `state="loading"`、`state="error"`、`state="forbidden"` 或

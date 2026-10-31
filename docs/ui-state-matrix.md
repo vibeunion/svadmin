@@ -2,6 +2,20 @@
 
 行为或布局变更必须同时提供状态矩阵、真实视口截图和当前 diff 检查证据。
 
+## DataState / WorkspaceQueryState
+
+| 状态 | 触发条件 | 视觉契约 | 交互契约 |
+| --- | --- | --- | --- |
+| Initial loading | 首次请求且没有可保留内容 | Skeleton，占位高度稳定 | 不渲染业务内容 |
+| Background refresh | 已有内容，`isFetching && !isLoading` | 行内刷新状态，旧内容继续显示 | 不抢焦点，筛选和操作保持可用 |
+| Empty | 首次请求完成但没有记录 | 初始空态 | 提供创建或导入入口 |
+| Filtered empty | 有活动筛选但无匹配 | 筛选空态 | 提供清除或调整筛选 |
+| Error | 请求失败且没有当前结果 | `DataState error` | 只通过 `retry` 恢复 |
+| Forbidden | 权限不足 | `DataState forbidden` | 不展示旧内容，不并列重试 |
+
+`refreshing` 不是阻塞状态，不得清空当前列表或详情；`loading`、`error`、
+`forbidden` 和初始 `empty` 仍然阻止后续业务布局，避免把旧数据伪装成当前结果。
+
 ## MediaThumbnail
 
 | 状态 | 触发条件 | 视觉契约 | 交互契约 |

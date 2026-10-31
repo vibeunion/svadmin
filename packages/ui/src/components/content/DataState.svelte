@@ -5,7 +5,8 @@
   import { Button } from '../ui/button/index.js';
   import * as Alert from '../ui/alert/index.js';
   import { Skeleton } from '../ui/skeleton/index.js';
-  export type DataStateKind = 'loading' | 'empty' | 'filtered-empty' | 'error' | 'forbidden';
+  export type BlockingDataStateKind = 'loading' | 'empty' | 'filtered-empty' | 'error' | 'forbidden';
+  export type DataStateKind = BlockingDataStateKind | 'refreshing';
   interface Props {
     state: DataStateKind;
     title?: string;
@@ -30,6 +31,7 @@
   const isZh = $derived(i18n.locale === 'zh-CN');
   const defaults = $derived({
     loading: [i18n.t('common.loading'), i18n.t('common.loading')],
+    refreshing: [isZh ? '正在刷新…' : 'Refreshing…', ''],
     empty: [i18n.t('empty.title'), i18n.t('empty.description')],
     'filtered-empty': [isZh ? '没有匹配结果' : 'No matching results', isZh ? '请调整或清除筛选条件。' : 'Adjust or clear your filters.'],
     error: [i18n.t('common.error'), i18n.t('common.operationFailed')],
@@ -44,6 +46,11 @@
 {#if state === 'loading'}
   <div data-svadmin-data-state={state} class={'space-y-3 rounded-lg border border-border bg-card p-5 ' + className} role="status" aria-live="polite" aria-label={resolvedLoadingLabel} aria-busy="true">
     <Skeleton class="h-5 w-40" /><Skeleton class="h-4 w-full max-w-md" /><Skeleton class="h-20 w-full" />
+  </div>
+{:else if state === 'refreshing'}
+  <div data-svadmin-data-state={state} class={'inline-flex items-center gap-2 text-xs text-muted-foreground ' + className} role="status" aria-live="polite" aria-label={resolvedTitle} aria-busy="true">
+    <RefreshCw class="size-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+    <span>{resolvedTitle}</span>
   </div>
 {:else if state === 'error' || state === 'forbidden'}
   <Alert.Root data-svadmin-data-state={state} variant={state === 'error' ? 'destructive' : 'warning'} class={className}>

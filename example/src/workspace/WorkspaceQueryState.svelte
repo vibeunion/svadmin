@@ -5,7 +5,7 @@
   import { DataState } from '@svadmin/ui';
 
   let { query, count, hasActiveFilters = false, filteredEmptyAction, children }: {
-    query: { isLoading: boolean; isError: boolean; refetch: () => unknown };
+    query: { isLoading: boolean; isError: boolean; isFetching?: boolean; refetch: () => unknown };
     count?: number;
     hasActiveFilters?: boolean;
     filteredEmptyAction?: Snippet;
@@ -24,6 +24,9 @@
     retry={() => void query.refetch()}
   />
 {:else}
+  {#if query.isFetching}
+    <DataState state="refreshing" class="mb-3" />
+  {/if}
   {#if count === undefined}
     {@render children()}
   {:else if count === 0}
