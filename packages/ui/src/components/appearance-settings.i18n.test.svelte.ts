@@ -8,7 +8,11 @@ vi.mock('@svadmin/core', () => ({
   setTheme: vi.fn(),
   getColorTheme: () => 'violet',
   setColorTheme: vi.fn(),
-  getColorPresets: () => [],
+  getColorPresets: () => [
+    Object.freeze({ name: 'violet', label: 'Violet', color: '#8b5cf6' }),
+    Object.freeze({ name: 'neutral', label: 'Tenant neutral', color: '#123456' }),
+    Object.freeze({ name: 'custom', label: 'Customer brand', color: '#456789' }),
+  ],
 }));
 
 afterEach(cleanup);
@@ -48,6 +52,36 @@ function createProvider(instance: string, initialLocale: string): I18nProvider {
 }
 
 describe('AppearanceSettings locale scope', () => {
+  it('localizes color names per tree and preserves custom preset labels', async () => {
+    render(AppearanceSettingsI18nScopeHost, {
+      instance: 'first', provider: createProvider('first', 'en'),
+    });
+    render(AppearanceSettingsI18nScopeHost, {
+      instance: 'second', provider: createProvider('second', 'zh-CN'),
+    });
+    const first = within(screen.getByTestId('first-appearance-settings'));
+    const second = within(screen.getByTestId('second-appearance-settings'));
+
+    expect(first.getByRole('button', { name: 'first:en:settings.accent.violet' })).not.toBeNull();
+    expect(second.getByRole('button', { name: 'second:zh-CN:settings.accent.violet' })).not.toBeNull();
+    expect(first.getByRole('button', { name: 'Tenant neutral' })).not.toBeNull();
+    expect(first.getByRole('button', { name: 'Customer brand' })).not.toBeNull();
+    await fireEvent.change(first.getByRole('combobox'), { target: { value: 'zh-CN' } });
+    expect(first.getByRole('button', { name: 'first:zh-CN:settings.accent.violet' })).not.toBeNull();
+    expect(second.getByRole('button', { name: 'second:zh-CN:settings.accent.violet' })).not.toBeNull();
+    expect(first.getByRole('button', { name: 'Tenant neutral' })).not.toBeNull();
+    expect(first.getByRole('button', { name: 'Customer brand' })).not.toBeNull();
+  });
+
+  it('keeps the default preset label when the host has no accent translation', () => {
+    const provider = createProvider('fallback', 'en');
+    provider.translate = key => key;
+    const view = render(AppearanceSettingsI18nScopeHost, { instance: 'fallback', provider });
+
+    expect(view.getByRole('button', { name: 'Violet' })).not.toBeNull();
+    expect(view.getByRole('button', { name: 'Tenant neutral' })).not.toBeNull();
+  });
+
   it('changes only the component-tree locale that owns the select event', async () => {
     const firstProvider = createProvider('first', 'en');
     const secondProvider = createProvider('second', 'zh-CN');

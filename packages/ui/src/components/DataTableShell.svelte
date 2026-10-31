@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../utils.js';
+  import { listText } from './list-i18n.js';
+
+  const i18n = useTranslation();
 
   interface Props {
     /** Optional table heading. Omit it when the page already owns the heading. */
@@ -40,7 +44,7 @@
         <div class="svadmin-data-table-shell__heading">
           <h2 class="svadmin-data-table-shell__title">{title}</h2>
           {#if count !== undefined}
-            <span class="svadmin-data-table-shell__count" data-svadmin-data-table-count>{count} 条</span>
+            <span class="svadmin-data-table-shell__count" data-svadmin-data-table-count>{listText(i18n, 'common.total', { total: count })}</span>
           {/if}
         </div>
       {/if}

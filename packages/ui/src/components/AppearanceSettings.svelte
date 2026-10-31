@@ -27,8 +27,25 @@
   const storedPageSize = typeof window !== 'undefined' ? Number(localStorage.getItem(PAGE_SIZE_KEY) ?? '10') : 10;
   let pageSize = $state(pageSizeOptions.includes(storedPageSize) ? storedPageSize : 10);
   const localeNames: Record<string, string> = { 'zh-CN': '中文（简体）', en: 'English', ja: '日本語', ko: '한국어' };
+  const defaultColorLabels: Record<string, string> = {
+    neutral: 'Neutral',
+    indigo: 'Indigo',
+    blue: 'Blue',
+    green: 'Green',
+    rose: 'Rose',
+    orange: 'Orange',
+    violet: 'Violet',
+    default: 'Default',
+    stripe: 'Stripe',
+  };
   function setDensity(value: 'compact' | 'standard') { density = value; if (typeof window !== 'undefined') { localStorage.setItem(DENSITY_KEY, value); window.dispatchEvent(new CustomEvent('svadmin-density-change', { detail: value })); } }
   function setPageSize(size: number) { pageSize = size; if (typeof window !== 'undefined') localStorage.setItem(PAGE_SIZE_KEY, String(size)); }
+  function colorLabel(name: string, label: string): string {
+    if (defaultColorLabels[name] !== label) return label;
+    const key = `settings.accent.${name}`;
+    const translated = i18n.t(key);
+    return translated === key ? label : translated;
+  }
 </script>
 
 <div class="space-y-6">
@@ -49,7 +66,7 @@
     <div class="flex flex-wrap gap-3">
       {#each presets as preset (preset.name)}
         {@const active = currentColor === preset.name}
-        <button class="relative size-9 rounded-full border border-border transition-opacity {active ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-70 hover:opacity-100'}" style="background-color: {preset.color}" onclick={() => setColorTheme(preset.name as Parameters<typeof setColorTheme>[0])} aria-label={preset.label} aria-pressed={active}>{#if active}<Check class="absolute inset-0 m-auto size-4 text-white drop-shadow-sm" />{/if}</button>
+        <button class="relative size-9 rounded-full border border-border transition-opacity {active ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-70 hover:opacity-100'}" style="background-color: {preset.color}" onclick={() => setColorTheme(preset.name as Parameters<typeof setColorTheme>[0])} aria-label={colorLabel(preset.name, preset.label)} aria-pressed={active}>{#if active}<Check class="absolute inset-0 m-auto size-4 text-white drop-shadow-sm" />{/if}</button>
       {/each}
     </div>
   </SettingsGroup>
