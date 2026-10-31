@@ -47,6 +47,55 @@ test('node-server static files cannot bypass path authentication through a secon
   }
 });
 
+test('glob 7 remains compatible with the patched minimatch 11 matcher', async () => {
+  const glob = require('glob') as {
+    hasMagic: (pattern: string) => boolean;
+    sync: (pattern: string, options: { cwd: string; nodir: boolean; dot?: boolean; nonull?: boolean; ignore?: string }) => string[];
+    (pattern: string, options: { cwd: string; nodir: boolean }, callback: (error: Error | null, matches?: string[]) => void): void;
+  };
+  const directory = mkdtempSync(join(tmpdir(), 'svadmin-glob-compat-'));
+  try {
+    mkdirSync(join(directory, 'nested'), { recursive: true });
+    writeFileSync(join(directory, 'root.json'), '{}');
+    writeFileSync(join(directory, '.hidden.json'), '{}');
+    writeFileSync(join(directory, 'literal[1].txt'), 'fixture');
+    writeFileSync(join(directory, 'nested', 'child.json'), '{}');
+    expect(glob.sync('**/*.json', { cwd: directory, nodir: true })).toEqual([
+      'nested/child.json', 'root.json',
+    ]);
+    expect(glob.sync('*.json', { cwd: directory, nodir: true, dot: true })).toEqual([
+      '.hidden.json', 'root.json',
+    ]);
+    expect(glob.sync('**/*.json', { cwd: directory, nodir: true, ignore: 'nested/**' })).toEqual(['root.json']);
+    expect(glob.sync('bar?.{js,ts}', { cwd: directory, nodir: true, nonull: true })).toEqual(['bar?.js', 'bar?.ts']);
+    expect(glob.sync('!(root).json', { cwd: directory, nodir: true })).toEqual([]);
+    expect(glob.sync('literal\\[1\\].txt', { cwd: directory, nodir: true })).toEqual(['literal[1].txt']);
+    expect(glob.hasMagic('[r]oot.json')).toBe(true);
+    expect(glob.hasMagic('literal\\[1\\].txt')).toBe(false);
+    expect(glob.sync('[r]oot.json', { cwd: directory, nodir: true })).toEqual(['root.json']);
+    expect(glob.sync('*.json', { cwd: directory, nodir: true, ignore: '[r]oot.json' })).toEqual([]);
+    expect(glob.sync('[.]hidden.json', { cwd: directory, nodir: true })).toEqual([]);
+    expect(glob.sync('[.]hidden.json', { cwd: directory, nodir: true, dot: true })).toEqual(['.hidden.json']);
+    await new Promise<void>((resolve, reject) => {
+      glob('**/*.json', { cwd: directory, nodir: true }, (error, matches = []) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        expect(matches).toEqual(['nested/child.json', 'root.json']);
+        resolve();
+      });
+    });
+    const archiveUtils: { file: { expand: (options: { cwd: string; nodir: boolean }, pattern: string) => string[] } } = require('archiver-utils');
+    expect(archiveUtils.file.expand({ cwd: directory, nodir: true }, '**/*.json')).toEqual(['nested/child.json', 'root.json']);
+    const rimraf: { sync: (pattern: string) => void } = require('rimraf');
+    rimraf.sync(join(directory, '[r]oot.json'));
+    expect(existsSync(join(directory, 'root.json'))).toBe(false);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 interface Ast { type: string; value?: string; nodes?: Ast[]; depth?: number; invalid?: boolean }
 type BraceMethod = (input: string | Ast, options?: Record<string, unknown>) => unknown;
 interface Braces {

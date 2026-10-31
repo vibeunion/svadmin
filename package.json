@@ -134,7 +134,8 @@
     "zod": "4.6.7",
     "decode-uri-component": "0.5.1",
     "hono": "4.13.13",
-    "follow-redirects": "1.16.1",
+    "follow-redirects": "1.16.2",
+    "minimatch": "11.0.3",
     "svelte-toolbelt": "0.10.6"
   },
   "patchedDependencies": {
@@ -151,7 +152,8 @@
     "@supabase/auth-js@2.117.1": "patches/@supabase%2Fauth-js@2.117.1.patch",
     "braces@3.0.3": "patches/braces@3.0.3.patch",
     "deepmerge@4.3.1": "patches/deepmerge@4.3.1.patch",
-    "http-cache-semantics@4.2.0": "patches/http-cache-semantics@4.2.0.patch"
+    "http-cache-semantics@4.2.0": "patches/http-cache-semantics@4.2.0.patch",
+    "glob@7.2.3": "patches/glob@7.2.3.patch"
   },
   "main": "eslint.config.js",
   "directories": {

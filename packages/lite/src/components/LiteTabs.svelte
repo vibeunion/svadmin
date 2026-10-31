@@ -1,30 +1,47 @@
 <script lang="ts">
   /**
-   * LiteTabs — SSR-compatible tab navigation.
-   * Uses simple <a> tags and flexbox. No JS required.
+   * LiteTabs — SSR-compatible tab/segmented navigation.
+   *
+   * Selection is URL driven: each option is a link and the active one carries
+   * `aria-current="page"`. Disabled options render as plain text so they cannot be
+   * focused or navigated to, matching the reference `disabled` contract without
+   * needing client state.
    */
 
   interface TabItem {
     label: string;
     value: string;
     href: string;
+    disabled?: boolean;
   }
 
   interface Props {
     items: TabItem[];
     activeValue: string;
+    /** Accessible name for the tab list. */
+    label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { items, activeValue }: Props = $props();
+  let { items, activeValue, label, class: className = '' }: Props = $props();
 </script>
 
-<div class="lite-tabs">
+<nav class={`lite-tabs ${className}`.trim()} aria-label={label}>
   {#each items as item, _i (_i)}
-    <a href={item.href} class="lite-tab {activeValue === item.value ? 'active' : ''}">
-      {item.label}
-    </a>
+    {#if item.disabled}
+      <span class="lite-tab" aria-disabled="true">{item.label}</span>
+    {:else}
+      <a
+        href={item.href}
+        class="lite-tab {activeValue === item.value ? 'active' : ''}"
+        aria-current={activeValue === item.value ? 'page' : undefined}
+      >
+        {item.label}
+      </a>
+    {/if}
   {/each}
-</div>
+</nav>
 
 <style>
   .lite-tabs {
@@ -43,15 +60,8 @@
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
     text-decoration: none;
-    transition: color 0.15s ease, border-color 0.15s ease;
   }
-  .lite-tab:hover {
-    color: #1D2129;
-    text-decoration: none;
-  }
-  .lite-tab.active {
-    color: #165DFF;
-    border-bottom-color: #165DFF;
-    font-weight: 600;
-  }
+  .lite-tab:hover { color: #165DFF; text-decoration: none; }
+  .lite-tab.active { color: #165DFF; border-bottom-color: #165DFF; }
+  .lite-tab[aria-disabled='true'] { color: #C9CDD4; cursor: not-allowed; }
 </style>

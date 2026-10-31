@@ -14,6 +14,11 @@ the comma-array fix landed in 6.16.1. deepmerge 4.3.1 still has no upstream
 release, so it is patched locally. braces remains patched even though the current
 registry response no longer reports it:
 
+The current registry fixes for `follow-redirects` and `minimatch` are selected by
+root overrides (`1.16.2` and `11.0.3`). `glob` 7.2.3 is patched only at its
+consumer boundary so its legacy `set`/`globSet` and escape semantics remain stable
+while it uses the fixed minimatch matcher.
+
 | Dependency | Advisory | Local remediation |
 | --- | --- | --- |
 | braces 3.0.3 | GHSA-vfj7-8cjw-p6xm | Hard nesting limit of 128 for braces and parentheses; independent bounds in direct AST compile, expand and stringify walkers. |
@@ -45,7 +50,7 @@ automatically protect downstream consumers' separate installations.
    Any other advisory, source drift, malformed response, timeout, network error
    or inconsistent exit code fails the gate.
 
-Raw `bun audit` still reports deepmerge and http-cache-semantics and exits nonzero.
+Raw `bun audit` still reports deepmerge and exits nonzero.
 Do not describe this as an upstream clean audit. The project gate reports
 verified local remediation, not zero upstream findings.
 

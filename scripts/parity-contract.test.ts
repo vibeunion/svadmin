@@ -188,6 +188,30 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(violations).toEqual([]);
   });
 
+  it('records the second fallback re-audit outcome', () => {
+    const report = buildParityReport();
+    const status = (name: string): string | undefined =>
+      report.items.find((item) => item.name === name)?.status;
+    const strategy = (name: string): string =>
+      report.items.find((item) => item.name === name)?.strategy ?? '';
+
+    // Upgraded: the whole capability is expressible in server HTML.
+    expect(status('AutoSaveIndicator')).toBe('exact');
+    expect(status('LiveIndicator')).toBe('exact');
+    expect(status('PageSkeleton')).toBe('exact');
+    expect(status('SegmentedControl')).toBe('exact');
+
+    // Kept: expiry results and the approval workflow need client/host state.
+    expect(status('UndoableNotification')).toBe('fallback');
+    expect(status('ApprovalCenter')).toBe('fallback');
+
+    // The strategies were wrong before the audit: a "list page" and an "undo form"
+    // are not what the mapped components render.
+    expect(strategy('ApprovalCenter')).toContain('单条审批卡片');
+    expect(strategy('UndoableNotification')).toContain('撤销链接');
+    expect(strategy('UndoableNotification')).not.toContain('表单');
+  });
+
   it('keeps the fallback decisions for NotificationCenter, Tree and Collapse', () => {
     const report = buildParityReport();
     for (const name of ['NotificationCenter', 'Tree', 'Collapse']) {

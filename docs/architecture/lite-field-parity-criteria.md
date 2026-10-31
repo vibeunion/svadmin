@@ -141,3 +141,16 @@ Strategy text is now machine-checked: `scripts/parity-contract.test.ts`
 (`keeps strategy text honest about the markup Lite actually renders`) fails when a
 strategy mentions `details`/`summary`, a checkbox or a `<select>` that the mapped
 Lite component does not actually render.
+### Second re-audit (fallback → exact candidates)
+
+| Component | Was | Now | Why |
+| --- | --- | --- | --- |
+| `AutoSaveIndicator` | fallback | `exact` | The reference state machine is `idle/loading/success/error` with an error detail plus `role="status"`/`aria-live`; all of it is expressible in server HTML. Lite now renders the four states, the error title/detail and keeps the legacy `saved` spelling working. |
+| `LiveIndicator` | fallback | `exact` | Connection state (`connected/connecting/disconnected`), resource label and last-event details are props; only the per-second "time since event" ticker and fade are client extras. Lite now takes `connection`/`resource`/`lastEvent`/`showDetails` and keeps the refresh-link fallback. |
+| `PageSkeleton` | fallback | `exact` | The reference layout is `type` + `rows` driven (`list`/`show`/`form`), with no random or measured dimensions, so the server can generate it exactly. Lite gained `variant` and `rows` while keeping the plain text-line default. |
+| `SegmentedControl` | fallback | `exact` | Choosing an option is preserved by URL links; Lite now marks the active link with `aria-current="page"`, exposes a group name and renders disabled options as inert `span`s so they cannot be activated. Only the in-place state swap and keyboard roving focus stay client-side. |
+| `UndoableNotification` | fallback | `fallback` | The reference expiry fires `onTimeout` and supports `managedExternally`; a link-only Lite chip cannot preserve that result contract. Strategy text was corrected — it claimed an "undo form" while the component renders a link. |
+| `ApprovalCenter` | fallback | `fallback` | The reference owns filters, pagination, history, dynamic `allowedActions`, comment/target input and version/idempotency handling; Lite ships a single approval card with two POST buttons. Strategy text was corrected — it claimed an "approval list page" that the component does not render. |
+
+The outcome is pinned by `scripts/parity-contract.test.ts`
+(`records the second fallback re-audit outcome`).
