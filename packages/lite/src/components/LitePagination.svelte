@@ -12,9 +12,17 @@
     baseUrl?: string;
     /** Additional parameters to preserve (like sort, order, q) */
     preserveParams?: Record<string, string>;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { page, totalPages, baseUrl = '', preserveParams = {} }: Props = $props();
+  let {
+    page,
+    totalPages,
+    baseUrl = '',
+    preserveParams = {},
+    class: className = '',
+  }: Props = $props();
 
   // Show max 7 page links
   const visiblePages = $derived.by(() => {
@@ -43,7 +51,7 @@
 </script>
 
 {#if totalPages > 1}
-  <nav class="lite-pagination">
+  <nav class="lite-pagination {className}">
     {#if page > 1}
       <a href={pageUrl(page - 1)}>← {t('common.prev') || 'Prev'}</a>
     {:else}

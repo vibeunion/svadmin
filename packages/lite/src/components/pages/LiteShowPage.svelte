@@ -13,6 +13,8 @@
     basePath?: string;
     canEdit?: boolean;
     canDelete?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -21,6 +23,7 @@
     basePath = "/lite",
     canEdit,
     canDelete,
+    class: className = '',
   }: Props = $props();
 
   let pk = $derived(resource.primaryKey ?? "id");
@@ -33,7 +36,7 @@
   );
 </script>
 
-<div class="lite-page">
+<div class="lite-page {className}">
   <LiteBreadcrumbs
     items={[
       { label: t("common.dashboard") || "Dashboard", href: basePath },

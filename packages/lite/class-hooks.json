@@ -2,8 +2,8 @@
   "reviewedCount": 126,
   "unresolved": [],
   "referenceHookCount": 99,
-  "preservedCount": 76,
-  "coveragePercentage": 76.8,
+  "preservedCount": 85,
+  "coveragePercentage": 85.9,
   "missing": [
     {
       "name": "Table",
@@ -51,11 +51,6 @@
       "liteComponent": "LiteLayout.svelte"
     },
     {
-      "name": "Pagination",
-      "category": "layout",
-      "liteComponent": "LitePagination.svelte"
-    },
-    {
       "name": "Sidebar",
       "category": "layout",
       "liteComponent": "LiteSidebar.svelte"
@@ -64,46 +59,6 @@
       "name": "SplitPaneLayout",
       "category": "layout",
       "liteComponent": "LiteSplitPaneLayout.svelte"
-    },
-    {
-      "name": "CreatePage",
-      "category": "pages",
-      "liteComponent": "LiteCreatePage.svelte"
-    },
-    {
-      "name": "EditPage",
-      "category": "pages",
-      "liteComponent": "LiteEditPage.svelte"
-    },
-    {
-      "name": "ListPage",
-      "category": "pages",
-      "liteComponent": "LiteListPage.svelte"
-    },
-    {
-      "name": "ListPagination",
-      "category": "pages",
-      "liteComponent": "LitePagination.svelte"
-    },
-    {
-      "name": "LoginPage",
-      "category": "pages",
-      "liteComponent": "LiteLogin.svelte"
-    },
-    {
-      "name": "MasterDetailView",
-      "category": "pages",
-      "liteComponent": "LiteMasterDetailView.svelte"
-    },
-    {
-      "name": "PrintableBill",
-      "category": "pages",
-      "liteComponent": "LitePrintableBill.svelte"
-    },
-    {
-      "name": "ShowPage",
-      "category": "pages",
-      "liteComponent": "LiteShowPage.svelte"
     },
     {
       "name": "PresenceAvatarGroup",
@@ -121,5 +76,5 @@
       "liteComponent": "LiteSkeleton.svelte"
     }
   ],
-  "timestamp": "2026-10-31T01:51:07.740Z"
+  "timestamp": "2026-10-31T01:53:47.012Z"
 }

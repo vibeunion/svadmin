@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-10-31T01:51:07.740Z
+> 自动生成时间: 2026-10-31T01:53:47.012Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标
@@ -17,8 +17,8 @@
 - 参与统计的 `exact` 条目: **126**
 - 无法唯一定位（需人工确认）: **0**
 - 参考组件暴露 `class` 的条目: **99**
-- Lite 同时接受 `class` 的条目: **76**（**76.8%**）
-- 仍缺样式钩子的条目: **23**
+- Lite 同时接受 `class` 的条目: **85**（**85.9%**）
+- 仍缺样式钩子的条目: **14**
 
 ## 待补齐清单
 
@@ -33,17 +33,8 @@
 | `Transfer` | fields | `LiteTransfer.svelte` |
 | `TreeSelect` | fields | `LiteTreeSelect.svelte` |
 | `Layout` | layout | `LiteLayout.svelte` |
-| `Pagination` | layout | `LitePagination.svelte` |
 | `Sidebar` | layout | `LiteSidebar.svelte` |
 | `SplitPaneLayout` | layout | `LiteSplitPaneLayout.svelte` |
-| `CreatePage` | pages | `LiteCreatePage.svelte` |
-| `EditPage` | pages | `LiteEditPage.svelte` |
-| `ListPage` | pages | `LiteListPage.svelte` |
-| `ListPagination` | pages | `LitePagination.svelte` |
-| `LoginPage` | pages | `LiteLogin.svelte` |
-| `MasterDetailView` | pages | `LiteMasterDetailView.svelte` |
-| `PrintableBill` | pages | `LitePrintableBill.svelte` |
-| `ShowPage` | pages | `LiteShowPage.svelte` |
 | `PresenceAvatarGroup` | widgets | `LitePresenceAvatarGroup.svelte` |
 | `Progress` | widgets | `LiteProgress.svelte` |
 | `Skeleton` | widgets | `LiteSkeleton.svelte` |

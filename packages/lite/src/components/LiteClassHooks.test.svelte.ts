@@ -38,6 +38,20 @@ import LiteVersionDiffViewer from './LiteVersionDiffViewer.svelte';
 import LiteDraggableRowTable from './LiteDraggableRowTable.svelte';
 import LiteMediaLibraryModal from './LiteMediaLibraryModal.svelte';
 import LiteAnomalyBadge from './widgets/LiteAnomalyBadge.svelte';
+import LiteCreatePage from './pages/LiteCreatePage.svelte';
+import LiteEditPage from './pages/LiteEditPage.svelte';
+import LiteListPage from './pages/LiteListPage.svelte';
+import LiteLogin from './LiteLogin.svelte';
+import LiteMasterDetailView from './LiteMasterDetailView.svelte';
+import LitePagination from './LitePagination.svelte';
+import LitePrintableBill from './LitePrintableBill.svelte';
+import LiteShowPage from './pages/LiteShowPage.svelte';
+
+const pageResource = {
+  name: 'orders',
+  label: 'Orders',
+  fields: [{ key: 'id', label: 'Id', type: 'number' }],
+} as never;
 
 function snippet(html: string) {
   return createRawSnippet(() => ({ render: () => html }));
@@ -410,6 +424,77 @@ describe('Lite styling hook contract', () => {
     }).container.querySelector('.lite-badge');
     expect(anomaly?.classList.contains('host-surface')).toBe(true);
     expect(anomaly?.textContent).toContain('140');
+  });
+
+  it('merges the caller class on the generated pages', () => {
+    const list = render(LiteListPage, {
+      class: 'host-surface',
+      resource: pageResource,
+      records: [{ id: 1 }],
+      total: 1,
+      pagination: { page: 1, perPage: 10 },
+    }).container.querySelector('.lite-page');
+    expect(list?.classList.contains('host-surface')).toBe(true);
+    expect(list?.classList.contains('lite-page')).toBe(true);
+
+    const show = render(LiteShowPage, {
+      class: 'host-surface',
+      resource: pageResource,
+      record: { id: 1 },
+    }).container.querySelector('.lite-page');
+    expect(show?.classList.contains('host-surface')).toBe(true);
+    expect(show?.classList.contains('lite-page')).toBe(true);
+  });
+
+  it('merges the caller class on the create and edit pages', () => {
+    const create = render(LiteCreatePage, {
+      class: 'host-surface',
+      resource: pageResource,
+    }).container.querySelector('.lite-page');
+    expect(create?.classList.contains('host-surface')).toBe(true);
+    expect(create?.querySelector('form')).toBeTruthy();
+
+    const edit = render(LiteEditPage, {
+      class: 'host-surface',
+      resource: pageResource,
+      record: { id: 1 },
+    }).container.querySelector('.lite-page');
+    expect(edit?.classList.contains('host-surface')).toBe(true);
+    expect(edit?.querySelector('form')).toBeTruthy();
+  });
+
+  it('merges the caller class on LiteLogin and LiteMasterDetailView', () => {
+    const login = render(LiteLogin, { class: 'host-surface' })
+      .container.querySelector('.lite-login-wrapper');
+    expect(login?.classList.contains('host-surface')).toBe(true);
+    expect(login?.querySelector('form')).toBeTruthy();
+
+    const master = render(LiteMasterDetailView, {
+      class: 'host-surface',
+      items: [{ id: 1, title: 'First' }],
+    }).container.querySelector('.lite-master-detail-card');
+    expect(master?.classList.contains('host-surface')).toBe(true);
+    expect(master?.textContent).toContain('First');
+  });
+
+  it('merges the caller class on LitePrintableBill and LitePagination', () => {
+    const bill = render(LitePrintableBill, {
+      class: 'host-surface',
+      billNumber: 'INV-1',
+      date: '2026-10-31',
+      customerName: 'Acme',
+    }).container.querySelector('.lite-bill-card');
+    expect(bill?.classList.contains('host-surface')).toBe(true);
+    expect(bill?.textContent).toContain('INV-1');
+
+    const pagination = render(LitePagination, {
+      class: 'host-surface',
+      page: 2,
+      totalPages: 5,
+      baseUrl: '/lite/orders',
+    }).container.querySelector('.lite-pagination');
+    expect(pagination?.classList.contains('host-surface')).toBe(true);
+    expect(pagination?.tagName.toLowerCase()).toBe('nav');
   });
 
   it('keeps the default markup unchanged when no class is passed', () => {

@@ -10,6 +10,8 @@
     errors?: Record<string, string[]>;
     values?: Record<string, unknown>;
     basePath?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -17,10 +19,11 @@
     errors = {},
     values = {},
     basePath = "/lite",
+    class: className = '',
   }: Props = $props();
 </script>
 
-<div class="lite-page">
+<div class="lite-page {className}">
   <LiteBreadcrumbs
     items={[
       { label: t("common.dashboard") || "Dashboard", href: basePath },

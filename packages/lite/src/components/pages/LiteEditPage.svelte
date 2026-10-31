@@ -14,6 +14,8 @@
     basePath?: string;
     canDelete?: boolean;
     canShow?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -23,6 +25,7 @@
     basePath = "/lite",
     canDelete,
     canShow,
+    class: className = '',
   }: Props = $props();
 
   let pk = $derived(resource.primaryKey ?? "id");
@@ -31,7 +34,7 @@
   const showView = $derived(canShow ?? resource.canShow !== false);
 </script>
 
-<div class="lite-page">
+<div class="lite-page {className}">
   <LiteBreadcrumbs
     items={[
       { label: t("common.dashboard") || "Dashboard", href: basePath },

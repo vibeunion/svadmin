@@ -24,6 +24,8 @@
     canEdit?: boolean;
     canDelete?: boolean;
     enableBatch?: boolean;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -41,6 +43,7 @@
     canEdit,
     canDelete,
     enableBatch = true,
+    class: className = '',
   }: Props = $props();
 
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
@@ -59,7 +62,7 @@
   );
 </script>
 
-<div class="lite-page">
+<div class="lite-page {className}">
   <LiteBreadcrumbs
     items={[
       { label: t("common.dashboard") || "Dashboard", href: basePath },

@@ -9,12 +9,19 @@
     error?: string;
     brandName?: string;
     action?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
-  let { error, brandName = 'Admin', action = '?/login' }: Props = $props();
+  let {
+    error,
+    brandName = 'Admin',
+    action = '?/login',
+    class: className = '',
+  }: Props = $props();
 </script>
 
-<div class="lite-login-wrapper">
+<div class="lite-login-wrapper {className}">
   <div class="lite-login-card">
     <div class="lite-card">
       <h2 style="text-align:center;margin:0 0 20px;font-size:20px;font-weight:600;">{brandName}</h2>

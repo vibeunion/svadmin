@@ -7,6 +7,8 @@
     idKey?: string;
     titleKey?: string;
     detailSnippet?: Snippet<[Record<string, unknown>]>;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -15,6 +17,7 @@
     idKey = 'id',
     titleKey = 'title',
     detailSnippet,
+    class: className = '',
   }: Props = $props();
 
   const activeItem = $derived(
@@ -22,7 +25,7 @@
   );
 </script>
 
-<div class="lite-master-detail-card">
+<div class="lite-master-detail-card {className}">
   <!-- Left Master List -->
   <div class="lite-master-list">
     <div class="lite-master-header">

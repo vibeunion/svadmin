@@ -15,6 +15,8 @@
     customerName: string;
     items?: LiteBillItem[];
     notes?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
   }
 
   let {
@@ -25,6 +27,7 @@
     customerName,
     items = [],
     notes,
+    class: className = '',
   }: Props = $props();
 
   const total = $derived(
@@ -32,7 +35,7 @@
   );
 </script>
 
-<div class="lite-bill-card">
+<div class="lite-bill-card {className}">
   <div class="lite-bill-header">
     <div style="float: left;">
       <h3 style="margin: 0;">{title}</h3>
