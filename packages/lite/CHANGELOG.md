@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/vibeunion/svadmin/compare/lite-v0.19.0...lite-v0.20.0) (2026-10-31)
+
+
+### 🚀 Features
+
+* **lite:** re-audit advanced disclosure fallbacks against the criteria ([aa3fb6b](https://github.com/vibeunion/svadmin/commit/aa3fb6b9cbb6484aee0105671191d45854e5b791))
+
 ## [0.19.0](https://github.com/vibeunion/svadmin/compare/lite-v0.18.0...lite-v0.19.0) (2026-10-31)
 
 

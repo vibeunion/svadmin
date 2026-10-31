@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.108.0](https://github.com/vibeunion/svadmin/compare/ui-v0.107.0...ui-v0.108.0) (2026-10-31)
+
+
+### 🚀 Features
+
+* **ui:** keep content during background refresh ([d9b27bb](https://github.com/vibeunion/svadmin/commit/d9b27bb79fc494d7afd45779778d7772261d6f86))
+
 ## [0.107.0](https://github.com/vibeunion/svadmin/compare/ui-v0.106.1...ui-v0.107.0) (2026-10-31)
 
 
