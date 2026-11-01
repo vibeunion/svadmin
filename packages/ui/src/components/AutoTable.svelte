@@ -1091,6 +1091,7 @@
                   {@const header = col.header}
                   <Table.Head
                     {...dragProps}
+                    data-svadmin-field={header.id}
                     class={cn('border-b border-border bg-muted/25 font-medium tracking-normal text-muted-foreground hover:bg-muted/40', dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
@@ -1189,7 +1190,13 @@
   </DataState>
 {/snippet}
 
-<div class="space-y-3" data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'table' : undefined}>
+<div
+  class="space-y-3"
+  data-svadmin-component="AutoTable"
+  data-svadmin-resource={resourceName}
+  data-svadmin-rendering-resource={activeRendering?.resource.name}
+  data-svadmin-rendering-kind={activeRendering ? 'table' : undefined}
+>
   {#if operationError}<p role="alert">{operationError}</p>{/if}
   {#if detailState.invalid}<p role="alert">{i18n.t('common.operationFailed')}</p>{/if}
   {#if showHeader}
@@ -1545,6 +1552,7 @@
                   {@const header = col.header}
                   <Table.Head
                     {...dragProps}
+                    data-svadmin-field={header.id}
                     class={cn('border-b border-border bg-muted/25 font-medium tracking-normal text-muted-foreground hover:bg-muted/40', dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
@@ -1599,7 +1607,7 @@
                   {#snippet child({ props })}
                     <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {rowIsSelected(row.id) ? 'bg-primary/5' : 'hover:bg-muted/20'}">
                       {#each visibleCells as cell, _i (_i)}
-                        <Table.Cell>
+                        <Table.Cell data-svadmin-field={cell.column.id}>
                           {#if cell.column.id === '_select'}
                             {#if batchActions}
                               <Checkbox

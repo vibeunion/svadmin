@@ -25,6 +25,7 @@ import {
   createDevtoolsSnapshot,
   type DevtoolsDiagnostic,
   type DevtoolsEvent,
+  type DevtoolsLocation,
   type DevtoolsProviderDiagnostic,
   type DevtoolsSnapshot,
   type DevtoolsSource,
@@ -299,5 +300,173 @@ export function buildAdminDiagnostics(
     resources,
     routes,
     health: buildDevtoolsHealthSummary({ diagnostics, providers, resources, routes }),
+  };
+}
+
+// ─── Self-Healing Runtime Diagnostics ────────────────────────
+
+export interface SelfHealingIssue {
+  category: 'PERMISSION_DENIED' | 'SCHEMA_MISMATCH' | 'NETWORK_ERROR' | 'RUNTIME_EXCEPTION';
+  code: string;
+  message: string;
+  resource?: string;
+  operation?: string;
+  suggestedAction: string;
+  location?: DevtoolsLocation;
+}
+
+export interface SelfHealingReport {
+  hasErrors: boolean;
+  errorCount: number;
+  issues: SelfHealingIssue[];
+  agentPrompt: string;
+}
+
+export interface CaptureRuntimeErrorOptions {
+  source?: DevtoolsSource;
+  resource?: string;
+  operation?: string;
+  traceId?: string;
+  requestId?: string;
+  correlationId?: string;
+  location?: DevtoolsLocation;
+}
+
+/**
+ * Normalizes any runtime exception or API failure into a structured DevtoolsDiagnostic
+ * with machine-actionable category and remediation guidance.
+ */
+export function captureRuntimeError(
+  error: unknown,
+  context: CaptureRuntimeErrorOptions = {},
+): DevtoolsDiagnostic {
+  let message = 'Unknown runtime error';
+  let code = 'runtime.error';
+  let category: SelfHealingIssue['category'] = 'RUNTIME_EXCEPTION';
+  let suggestedAction = 'Inspect component logic and error stack trace.';
+
+  if (error instanceof Error) {
+    message = error.message;
+    if (/403|forbidden|permission|unauthorized|access denied/i.test(message)) {
+      code = 'auth.forbidden';
+      category = 'PERMISSION_DENIED';
+      suggestedAction = context.resource
+        ? `Grant permission for operation '${context.operation ?? 'read'}' on resource '${context.resource}' in AccessControlProvider or AuthProvider`
+        : 'Verify user credentials, active permissions, or AccessControlProvider rules';
+    } else if (/404|not found/i.test(message)) {
+      code = 'resource.not_found';
+      category = 'NETWORK_ERROR';
+      suggestedAction = context.resource
+        ? `Verify record ID and endpoint URL for resource '${context.resource}' in DataProvider`
+        : 'Verify endpoint URL and routing configuration';
+    } else if (/schema|invalid|type|validation|must be/i.test(message)) {
+      code = 'schema.mismatch';
+      category = 'SCHEMA_MISMATCH';
+      suggestedAction = context.resource
+        ? `Check field definitions and type validation rules for resource '${context.resource}' in ResourceDefinition`
+        : 'Ensure payload data matches expected schema definition';
+    } else if (/network|failed to fetch|econnrefused|timeout/i.test(message)) {
+      code = 'network.failure';
+      category = 'NETWORK_ERROR';
+      suggestedAction = 'Check backend server health, CORS headers, and network connectivity';
+    }
+  } else if (typeof error === 'string') {
+    message = error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    message = String((error as { message: unknown }).message);
+  }
+
+  return {
+    code,
+    source: context.source ?? 'frontend',
+    severity: 'error',
+    message,
+    ...(context.traceId !== undefined ? { traceId: context.traceId } : {}),
+    ...(context.requestId !== undefined ? { requestId: context.requestId } : {}),
+    ...(context.correlationId !== undefined ? { correlationId: context.correlationId } : {}),
+    ...(context.location !== undefined ? { location: context.location } : {}),
+    fix: {
+      kind: category,
+      safe: false,
+      input: {
+        suggestedAction,
+        ...(context.resource ? { resource: context.resource } : {}),
+        ...(context.operation ? { operation: context.operation } : {}),
+      },
+    },
+  };
+}
+
+/**
+ * Builds an AI-ready self-healing report from captured diagnostics, formatting
+ * the failure root-causes and providing a direct prompt for AI Agent remediation.
+ */
+export function buildSelfHealingReport(
+  diagnostics: readonly DevtoolsDiagnostic[],
+  _events?: readonly DevtoolsEvent[],
+): SelfHealingReport {
+  const errorDiagnostics = diagnostics.filter((d) => d.severity === 'error');
+  const issues: SelfHealingIssue[] = errorDiagnostics.map((d) => {
+    let category: SelfHealingIssue['category'] = 'RUNTIME_EXCEPTION';
+    let suggestedAction = 'Inspect component logic and stack trace.';
+    const resource = d.fix?.input?.['resource'] as string | undefined;
+    const operation = d.fix?.input?.['operation'] as string | undefined;
+
+    if (
+      d.fix?.kind &&
+      ['PERMISSION_DENIED', 'SCHEMA_MISMATCH', 'NETWORK_ERROR', 'RUNTIME_EXCEPTION'].includes(
+        d.fix.kind as string,
+      )
+    ) {
+      category = d.fix.kind as SelfHealingIssue['category'];
+      suggestedAction = (d.fix.input?.['suggestedAction'] as string) || suggestedAction;
+    } else if (/auth|forbidden|permission|403/i.test(d.code + ' ' + d.message)) {
+      category = 'PERMISSION_DENIED';
+      suggestedAction = 'Check AccessControlProvider or AuthProvider permissions.';
+    } else if (/schema|type|validation/i.test(d.code + ' ' + d.message)) {
+      category = 'SCHEMA_MISMATCH';
+      suggestedAction = 'Check field definitions in ResourceDefinition against backend schema.';
+    } else if (/network|404|500|fetch/i.test(d.code + ' ' + d.message)) {
+      category = 'NETWORK_ERROR';
+      suggestedAction = 'Check API endpoint URL and network connectivity.';
+    }
+
+    return {
+      category,
+      code: d.code,
+      message: d.message,
+      ...(resource ? { resource } : {}),
+      ...(operation ? { operation } : {}),
+      suggestedAction,
+      ...(d.location ? { location: d.location } : {}),
+    };
+  });
+
+  const hasErrors = issues.length > 0;
+  let agentPrompt = '';
+
+  if (hasErrors) {
+    const issueLines = issues
+      .map((issue, idx) => {
+        const target = issue.resource
+          ? ` (Resource: ${issue.resource}${issue.operation ? `, Operation: ${issue.operation}` : ''})`
+          : '';
+        const loc = issue.location?.file
+          ? ` at ${issue.location.file}:${issue.location.line ?? 1}`
+          : '';
+        return `${idx + 1}. [${issue.category}] ${issue.code}${target}${loc}: ${issue.message}\n   Suggested Fix: ${issue.suggestedAction}`;
+      })
+      .join('\n');
+
+    agentPrompt = `## SVAdmin Runtime Error Self-Healing Report\n\nThe following ${issues.length} runtime error(s) were captured by SVAdmin DevTools:\n\n${issueLines}\n\nPlease analyze the root causes and generate the exact code fix required to resolve these issues.`;
+  } else {
+    agentPrompt = 'No active runtime errors found in SVAdmin DevTools.';
+  }
+
+  return {
+    hasErrors,
+    errorCount: issues.length,
+    issues,
+    agentPrompt,
   };
 }

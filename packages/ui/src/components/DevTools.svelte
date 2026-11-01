@@ -10,7 +10,12 @@
     getTheme,
     parseQueryKey,
   } from '@svadmin/core';
-  import { buildAdminDiagnostics } from '@svadmin/devtools';
+  import {
+    buildAdminDiagnostics,
+    buildSelfHealingReport,
+    captureRuntimeError,
+    type DevtoolsDiagnostic,
+  } from '@svadmin/devtools';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     attachSvadminDevtoolsQueryClient,
@@ -29,9 +34,10 @@
   import TooltipButton from './TooltipButton.svelte';
   import * as Tabs from './ui/tabs/index.js';
   import { Badge } from './ui/badge/index.js';
+  import { Button } from './ui/button/index.js';
   import { ScrollArea } from './ui/scroll-area/index.js';
   import { Separator } from './ui/separator/index.js';
-  import { X, Bug, ChevronDown, ChevronUp, Wand2 } from '@lucide/svelte';
+  import { X, Bug, ChevronDown, ChevronUp, Wand2, Crosshair, Check, AlertCircle, Copy } from '@lucide/svelte';
   import InferencerPanel from './InferencerPanel.svelte';
 
   import type {
@@ -108,10 +114,99 @@
     visible = !visible;
   }
 
+  let inspecting = $state(false);
+  let hoveredBox = $state<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    component: string;
+    resource?: string;
+    field?: string;
+  } | null>(null);
+  let toastMessage = $state<string | null>(null);
+
+  function showToast(msg: string) {
+    toastMessage = msg;
+    setTimeout(() => {
+      if (toastMessage === msg) toastMessage = null;
+    }, 2500);
+  }
+
+  function toggleInspector() {
+    inspecting = !inspecting;
+    if (!inspecting) hoveredBox = null;
+  }
+
+  function handleDocumentMouseMove(event: MouseEvent) {
+    if (!inspecting) return;
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest('.svadmin-devtools-container') || target.closest('[data-svadmin-inspector-overlay]')) return;
+
+    const compEl = target.closest('[data-svadmin-component]') as HTMLElement | null;
+    const fieldEl = target.closest('[data-svadmin-field]') as HTMLElement | null;
+
+    if (compEl || fieldEl) {
+      const el = fieldEl ?? compEl!;
+      const rect = el.getBoundingClientRect();
+      hoveredBox = {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+        component: compEl?.getAttribute('data-svadmin-component') ?? 'Component',
+        resource: compEl?.getAttribute('data-svadmin-resource') ?? undefined,
+        field: fieldEl?.getAttribute('data-svadmin-field') ?? undefined,
+      };
+    } else {
+      hoveredBox = null;
+    }
+  }
+
+  function handleDocumentClick(event: MouseEvent) {
+    if (!inspecting || !hoveredBox) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.svadmin-devtools-container') || target?.closest('[data-svadmin-inspector-overlay]')) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const prompt = hoveredBox.field && hoveredBox.resource
+      ? `在 svadmin 中修改资源 '${hoveredBox.resource}' 的 <${hoveredBox.component}> 组件：为字段 '${hoveredBox.field}' 定制显示与交互效果。`
+      : hoveredBox.resource
+      ? `在 svadmin 中定制资源 '${hoveredBox.resource}' 的 <${hoveredBox.component}> 组件。`
+      : `在 svadmin 中定制 <${hoveredBox.component}> 组件。`;
+
+    if (navigator?.clipboard?.writeText) {
+      void navigator.clipboard.writeText(prompt);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('svadmin:vibe-inspect', {
+          detail: { ...hoveredBox, prompt },
+        }),
+      );
+    }
+
+    showToast('已复制 AI Prompt！可直接在对话框中粘贴');
+    inspecting = false;
+    hoveredBox = null;
+  }
+
   function handleKeydown(event: KeyboardEvent) {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'd') {
       event.preventDefault();
       toggle();
+    }
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'x') {
+      event.preventDefault();
+      toggleInspector();
+    }
+    if (event.key === 'Escape' && inspecting) {
+      inspecting = false;
+      hoveredBox = null;
     }
   }
 
@@ -385,9 +480,43 @@
   });
 </script>
 
-<svelte:window onkeydown={isDev ? handleKeydown : undefined} />
+<svelte:window
+  onkeydown={isDev ? handleKeydown : undefined}
+  onmousemove={isDev && inspecting ? handleDocumentMouseMove : undefined}
+  onclickcapture={isDev && inspecting ? handleDocumentClick : undefined}
+/>
 
 {#if isDev}
+  {#if inspecting && hoveredBox}
+    <div
+      data-svadmin-inspector-overlay
+      class="pointer-events-none fixed z-[999999] border-2 border-dashed border-primary bg-primary/10 transition-all duration-75"
+      style="left: {hoveredBox.x}px; top: {hoveredBox.y}px; width: {hoveredBox.width}px; height: {hoveredBox.height}px;"
+    >
+      <div class="absolute -top-7 left-0 flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-xs font-mono font-medium text-primary-foreground shadow">
+        <span>&lt;{hoveredBox.component}&gt;</span>
+        {#if hoveredBox.resource}
+          <span class="opacity-80">res: {hoveredBox.resource}</span>
+        {/if}
+        {#if hoveredBox.field}
+          <span class="opacity-80">field: {hoveredBox.field}</span>
+        {/if}
+        <span class="ml-1 text-[10px] opacity-75">(点击复制 AI Prompt)</span>
+      </div>
+    </div>
+  {/if}
+
+  {#if toastMessage}
+    <div
+      in:fly={{ y: 20, duration: 150 }}
+      out:fade={{ duration: 150 }}
+      class="fixed bottom-16 right-6 z-[999999] flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg"
+    >
+      <Check class="h-4 w-4" />
+      <span>{toastMessage}</span>
+    </div>
+  {/if}
+
   {#if visible}
     <div
       class="fixed bottom-0 right-4 z-[9999] w-[560px] max-w-[95vw] rounded-t-xl border border-b-0 bg-card shadow-2xl text-[0.8125rem] overflow-hidden"
@@ -404,6 +533,15 @@
           </Badge>
         </div>
         <div class="flex gap-1">
+          <TooltipButton
+            tooltip={inspecting ? '退出点选检查 (Exit Inspect)' : '🎯 点选检查 / Vibe Inspect (Ctrl+Shift+X)'}
+            variant={inspecting ? 'default' : 'ghost'}
+            size="icon"
+            class="h-6 w-6 {inspecting ? 'bg-primary text-primary-foreground' : ''}"
+            onclick={toggleInspector}
+          >
+            <Crosshair class="h-3.5 w-3.5" />
+          </TooltipButton>
           <TooltipButton tooltip={collapsed ? i18n.t('common.expand') : i18n.t('common.collapse')} variant="ghost" size="icon" class="h-6 w-6" onclick={() => collapsed = !collapsed}>
             {#if collapsed}
               <ChevronUp class="h-3.5 w-3.5" />
@@ -419,12 +557,15 @@
 
       {#if !collapsed}
         <Tabs.Root value="state" class="w-full">
-          <Tabs.List class="grid w-full grid-cols-4 h-8 rounded-none border-b">
+          <Tabs.List class="grid w-full grid-cols-5 h-8 rounded-none border-b">
             <Tabs.Trigger value="state" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">State</Tabs.Trigger>
             <Tabs.Trigger value="providers" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Providers</Tabs.Trigger>
             <Tabs.Trigger value="cache" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Cache</Tabs.Trigger>
             <Tabs.Trigger value="inferencer" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
               <Wand2 class="h-3 w-3 mr-1" /> Inferencer
+            </Tabs.Trigger>
+            <Tabs.Trigger value="selfhealing" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
+              Self-Healing
             </Tabs.Trigger>
           </Tabs.List>
 
@@ -675,6 +816,59 @@
 
           <Tabs.Content value="inferencer" class="p-0">
             <InferencerPanel />
+          </Tabs.Content>
+
+          <Tabs.Content value="selfhealing" class="p-0">
+            <ScrollArea class="max-h-[420px]">
+              <div class="p-3 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Runtime Self-Healing</h4>
+                    <p class="text-xs text-muted-foreground">AI 自动排障诊断报告与一键自愈</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="h-7 text-xs flex items-center gap-1.5"
+                    onclick={() => {
+                      const report = buildSelfHealingReport(appDiagnostics.snapshot.diagnostics);
+                      if (navigator?.clipboard?.writeText) {
+                        void navigator.clipboard.writeText(report.agentPrompt);
+                        showToast('已复制 AI 自愈 Prompt！');
+                      }
+                    }}
+                  >
+                    <Copy class="h-3.5 w-3.5" />
+                    <span>复制自愈 Prompt</span>
+                  </Button>
+                </div>
+
+                <Separator />
+
+                {#if appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error').length === 0}
+                  <div class="flex flex-col items-center justify-center py-6 text-center text-muted-foreground space-y-1">
+                    <Check class="h-8 w-8 text-green-500 mb-1" />
+                    <p class="text-xs font-medium text-foreground">当前应用状态健康，无未解决异常</p>
+                    <p class="text-[0.6875rem]">Provider 与资源契约已正确绑定</p>
+                  </div>
+                {:else}
+                  <div class="space-y-2">
+                    {#each appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error') as diag}
+                      <div class="p-2.5 rounded-lg border bg-muted/30 space-y-1">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                          <AlertCircle class="h-3.5 w-3.5 text-destructive shrink-0" />
+                          <span>[{diag.fix?.kind ?? 'ERROR'}] {diag.code}</span>
+                        </div>
+                        <p class="text-[0.6875rem] font-mono text-muted-foreground break-all">{diag.message}</p>
+                        {#if diag.fix?.input?.suggestedAction}
+                          <p class="text-xs text-foreground font-medium">💡 建议修复：{diag.fix.input.suggestedAction}</p>
+                        {/if}
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+            </ScrollArea>
           </Tabs.Content>
         </Tabs.Root>
       {/if}
