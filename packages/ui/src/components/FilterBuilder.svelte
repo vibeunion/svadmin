@@ -9,7 +9,7 @@
   import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
   import { isNumericFilterField as isNumericField } from '@svadmin/core';
   import FilterCollectionInput from './FilterCollectionInput.svelte';
-  import { readFilterTree, compileFilterTree, filterOperators, parseFilterInput, isCollectionOperator, isNullOperator,
+  import { readFilterTree, compileFilterTree, filterOperators, parseFilterInput, isCollectionOperator, isListOperator, isRangeOperator, isNullOperator,
     FILTER_EDITOR_LIMITS, type FilterGroupNode, type FilterNode, type FilterRuleNode, type FilterEditorIssue, type FilterIssueCode } from './enterprise/filter-tree.js';
 
   export interface FilterRuleItem {
@@ -215,10 +215,10 @@
     const previous = rule.operator;
     rule.operator = operator;
     if (isNullOperator(operator)) rule.value = null;
-    else if (operator === 'between' || operator === 'nbetween') {
-      if (previous !== 'between' && previous !== 'nbetween') rule.value = [null, null];
-    } else if (isCollectionOperator(operator)) {
-      if (previous !== 'in' && previous !== 'nin') rule.value = [null];
+    else if (isRangeOperator(operator)) {
+      if (!isRangeOperator(previous)) rule.value = [null, null];
+    } else if (isListOperator(operator)) {
+      if (!isListOperator(previous)) rule.value = [null];
     } else if (isCollectionOperator(previous) || isNullOperator(previous)) rule.value = undefined;
   }
 </script>
