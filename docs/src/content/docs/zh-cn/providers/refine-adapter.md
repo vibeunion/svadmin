@@ -112,6 +112,23 @@ const directusProvider = createRefineDirectus('https://my-directus.example.com')
 const dataProvider = createRefineAdapter(directusProvider);
 ```
 
+## Parse Provider 迁移
+
+`@svadmin/parse` 专用包已退役，`createParseDataProvider` 工厂与
+`ParseDataProviderArgs` 类型不再提供兼容别名。移除该封装依赖，在宿主应用中按照
+所安装 SDK 版本的文档和类型初始化 Parse Provider，再交给通用适配器：
+
+```typescript
+import { createRefineAdapter } from '@svadmin/refine-adapter';
+
+// parseProvider 是宿主按所用 SDK 版本初始化后的 Provider 实例。
+const dataProvider = createRefineAdapter(parseProvider);
+```
+
+上游依赖由宿主应用直接声明，SVAdmin 不再猜测其导出名称或初始化参数。使用
+`defineResource` 定义 TypeBox 资源契约并调用常规严格 Hook：桥接层校验响应结构，
+资源契约校验记录字段。Parse 后端行为仍需在该宿主的实际接入中验证。
+
 ## 未使用此适配器的提供器
 
 某些 svadmin 提供器直接连接后端，不经过 Refine，因为它们使用非 Refine 后端或提供了更深层的集成：

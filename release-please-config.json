@@ -345,11 +345,6 @@
       "component": "surface",
       "changelog-path": "CHANGELOG.md"
     },
-    "packages/parse": {
-      "release-type": "node",
-      "component": "parse",
-      "changelog-path": "CHANGELOG.md"
-    },
     "packages/strapi-graphql": {
       "release-type": "node",
       "component": "strapi-graphql",

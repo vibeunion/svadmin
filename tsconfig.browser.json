@@ -25,7 +25,6 @@
     "packages/nestjsx-crud/src/**/*.test.ts",
     "packages/pocketbase/src/**/*.test.ts",
     "packages/refine-adapter/src/**/*.test.ts",
-    "packages/parse/src/**/*.test.ts",
     "packages/strapi-graphql/src/**/*.test.ts",
     "packages/rest/src/**/*.test.ts",
     "packages/sanity/src/**/*.test.ts",

@@ -100,7 +100,6 @@
 | `@svadmin/elysia`       | Elysia (auto type inference via Eden Treaty) |
 | `@svadmin/strapi`       | Strapi CMS (REST)                            |
 | `@svadmin/strapi-graphql` | Strapi GraphQL                             |
-| `@svadmin/parse`        | Parse Server                                 |
 | `@svadmin/directus`     | Directus                                     |
 | `@svadmin/firebase`     | Firebase / Firestore                         |
 | `@svadmin/hasura`       | Hasura GraphQL                               |
@@ -109,6 +108,11 @@
 | `@svadmin/medusa`       | Medusa Commerce                              |
 | `@svadmin/nestjs-query` | NestJS GraphQL                               |
 | `@svadmin/nestjsx-crud` | NestJS CRUD                                  |
+
+The dedicated `@svadmin/parse` wrapper has been retired. Host applications can
+initialize a Parse provider and pass it to `createRefineAdapter`; see the
+[migration guide](https://svadmin.nestjs.cn/providers/refine-adapter/#parse-provider-migration).
+Parse 专用封装已退役，需要接入时由宿主初始化 Provider，再使用通用适配器。
 
 ## 🚀 Quick Start / 快速开始
 

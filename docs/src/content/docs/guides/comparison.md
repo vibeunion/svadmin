@@ -37,7 +37,6 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | **Elysia (Bun)** | ✅ `@svadmin/elysia` | ❌ | ❌ |
 | Airtable | ✅ `@svadmin/airtable` | Community | ✅ `ra-data-airtable` |
 | Medusa | ✅ `@svadmin/medusa` | ✅ `@refinedev/medusa` | ❌ |
-| Parse | ✅ `@svadmin/parse` | ✅ `@refinedev/parse` | ❌ |
 | Strapi GraphQL | ✅ `@svadmin/strapi-graphql` | ✅ `@refinedev/strapi-graphql` | Community |
 | Sanity | ✅ `@svadmin/sanity` | Community | Community |
 
