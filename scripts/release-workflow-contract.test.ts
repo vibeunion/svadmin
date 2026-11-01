@@ -142,6 +142,7 @@ describe('npm trusted-publishing workflow contract', () => {
   test('pins one Bun toolchain version across local development and CI', () => {
     const rootPackage = readPackageJson();
     const bunVersion = rootPackage.packageManager?.match(/^bun@(.+)$/)?.[1];
+    expect(readFileSync(resolve(repositoryRoot, '.bun-version'), 'utf8').trim()).toBe(bunVersion);
     expect(bunVersion).toBeDefined();
 
     const ciWorkflow = readWorkflow('ci.yml');

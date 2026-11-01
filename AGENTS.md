@@ -48,5 +48,10 @@
 - If a Codex session hits context pressure, run `agmesh automation inspect-session-context <session-id|session-file>` and continue with a concise handoff summary.
 
 <!-- AGENT:OVERLAY:START -->
-<!-- Project-specific overlay content goes here. -->
+## Cursor Cloud
+
+- Use Bun `1.4.4`, synchronized across `.bun-version` and `package.json#packageManager`. Keep `bun` and `bunx` on the default PATH visible to commit hooks; do not rely on PATH changes that exist only in `~/.bashrc`.
+- Workspace package exports point to `dist/`. Run `bun install`, then `bun run build:packages` before `bun run dev`, example tests, or `bun run --cwd example build`.
+- If the default Node heap is too small for the `packages/ui` build in a cloud environment, set `NODE_OPTIONS=--max-old-space-size=4096` first.
+- The example app uses in-memory data and runs at `http://127.0.0.1:5173/`. The login form is prefilled with `demo@example.com` / `demo`.
 <!-- AGENT:OVERLAY:END -->
