@@ -20,7 +20,8 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "workspace:*"
+    "@svadmin/core": "workspace:*",
+    "@svadmin/devtools": "workspace:*"
   },
   "license": "MIT",
   "publishConfig": {
@@ -39,6 +40,9 @@
   },
   "peerDependenciesMeta": {
     "@svadmin/core": {
+      "optional": true
+    },
+    "@svadmin/devtools": {
       "optional": true
     }
   }
