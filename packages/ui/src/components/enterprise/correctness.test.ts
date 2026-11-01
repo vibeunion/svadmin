@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import { evaluateFormula, safeSpreadsheetCsvText } from './spreadsheet-formula.js';
 import { readSchemaForm, schemaFormValues, validateSchemaForm, schemaFormSnapshot, parseSchemaNumber, enumIndex, enumValue } from './json-schema-form.js';
-import { readFilterTree, compileFilterTree, parseFilterInput, FILTER_EDITOR_LIMITS } from './filter-tree.js';
-import type { FieldDefinition, Filter } from '@svadmin/core';
+import { readFilterTree, compileFilterTree, parseFilterInput, filterOperators, FILTER_EDITOR_LIMITS } from './filter-tree.js';
+import { CRUD_FIELD_OPERATORS, type FieldDefinition, type Filter } from '@svadmin/core';
 
 const cells = { A1: '2', A2: '4', A3: '', A4: 'text', B1: '=A1+A2', B2: '=B1*2', C1: '0' };
 const formulas: Array<[string, number | string]> = [
@@ -185,6 +185,7 @@ describe('lossless recursive filters', () => {
     [{ field: 'missing', operator: 'eq', value: 'x' }],
     [{ field: 'secret', operator: 'eq', value: 'x' }],
     [{ field: 'amount', operator: 'contains', value: '1' }],
+    [{ field: 'amount', operator: 'containss', value: '1' }],
     [{ field: 'amount', operator: 'eq', value: '1' }],
     [{ field: 'enabled', operator: 'eq', value: 'false' }],
     [{ field: 'plan', operator: 'eq', value: '1' }],
@@ -198,6 +199,28 @@ describe('lossless recursive filters', () => {
     if (read.ok) assert.equal(compileFilterTree(read.root, fields).ok, false);
   });
   it('accepts explicit null checks', () => assert.deepEqual(roundtrip([{ field: 'name', operator: 'null', value: null }]), [{ field: 'name', operator: 'null', value: null }]));
+  it('accepts every core field operator and rejects operators outside that set', () => {
+    const offered = new Set([
+      ...filterOperators({ type: 'text' }),
+      ...filterOperators({ type: 'number' }),
+      ...filterOperators({ type: 'select' }),
+    ]);
+    assert.deepEqual([...offered].sort(), [...CRUD_FIELD_OPERATORS].sort());
+    assert.equal(readFilterTree([{ field: 'name', operator: 'containss', value: 'Ada' }]).ok, true);
+    assert.equal(readFilterTree([{ field: 'name', operator: 'like', value: 'Ada' }]).ok, false);
+  });
+  it('roundtrips case-sensitive operators inside keyed groups', () => {
+    const keyed: Filter[] = [{
+      key: 'parent',
+      operator: 'or',
+      value: [
+        { field: 'name', operator: 'containss', value: 'Ada' },
+        { key: 'child', operator: 'and', value: [{ field: 'amount', operator: 'eqs', value: 2 }] },
+      ],
+    }];
+    assert.deepEqual(roundtrip(keyed), keyed);
+    assert.deepEqual(roundtrip([{ field: 'name', operator: 'nstartswith', value: 'x' }]), [{ field: 'name', operator: 'nstartswith', value: 'x' }]);
+  });
   it('rejects unsupported input instead of dropping a branch', () => assert.equal(readFilterTree([leaf, { operator: 'not', value: [leaf] }]).ok, false));
   it('rejects non-JSON filter values', () => assert.equal(readFilterTree([{ field: 'amount', operator: 'eq', value: Infinity }]).ok, false));
   it('rejects cyclic query trees', () => { const cycle: { operator: string; value: unknown[] } = { operator: 'and', value: [] }; cycle.value.push(cycle); assert.equal(readFilterTree([cycle]).ok, false); });

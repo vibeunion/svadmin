@@ -1,4 +1,4 @@
-import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
+import { isCrudFieldOperator, type CrudOperator, type FieldDefinition, type Filter } from '@svadmin/core';
 
 export const FILTER_EDITOR_LIMITS = Object.freeze({ depth: 12, nodes: 256, values: 1000 });
 export interface FilterRuleNode { kind: 'rule'; id: string; field: string; operator: CrudOperator; value: unknown; readonly?: boolean }
@@ -8,16 +8,26 @@ export type FilterIssueCode = 'invalid-filter' | 'limit' | 'unknown-field' | 'op
 export interface FilterEditorIssue { path: string; code: FilterIssueCode }
 export type FilterTreeRead = { ok: true; root: FilterGroupNode } | { ok: false; issues: FilterEditorIssue[] };
 export type FilterTreeCompile = { ok: true; filters: Filter[] } | { ok: false; issues: FilterEditorIssue[] };
-const operators: CrudOperator[] = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'ncontains', 'startswith', 'endswith', 'in', 'nin', 'null', 'nnull', 'between', 'nbetween'];
-const comparison: CrudOperator[] = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'between', 'nbetween', 'null', 'nnull'];
-const selection: CrudOperator[] = ['eq', 'ne', 'in', 'nin', 'null', 'nnull'];
-const text: CrudOperator[] = ['eq', 'ne', 'contains', 'ncontains', 'startswith', 'endswith', 'in', 'nin', 'null', 'nnull'];
+// 与 CRUD_FIELD_OPERATORS 对齐。带 s 的是大小写敏感变体；ina/nina 与 in/nin 一样接收数组值。
+const comparison = ['eq', 'ne', 'eqs', 'nes', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'ina', 'nina', 'between', 'nbetween', 'null', 'nnull'] as const satisfies readonly CrudOperator[];
+const selection = ['eq', 'ne', 'eqs', 'nes', 'in', 'nin', 'ina', 'nina', 'null', 'nnull'] as const satisfies readonly CrudOperator[];
+const text = ['eq', 'ne', 'eqs', 'nes', 'contains', 'ncontains', 'containss', 'ncontainss', 'startswith', 'nstartswith', 'startswiths', 'nstartswiths', 'endswith', 'nendswith', 'endswiths', 'nendswiths', 'in', 'nin', 'ina', 'nina', 'null', 'nnull'] as const satisfies readonly CrudOperator[];
+type OfferedOperator = (typeof comparison)[number] | (typeof selection)[number] | (typeof text)[number];
+type OperatorCoverage = OfferedOperator extends CrudOperator
+  ? CrudOperator extends OfferedOperator ? true : never
+  : never;
+const operatorCoverage: OperatorCoverage = true;
+void operatorCoverage;
 const scalar = (value: unknown): boolean => value === null || typeof value === 'string' || typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value));
 function keyedGroup(node: FilterGroupNode, children: Filter[]): Filter {
   return node.key ? { key: node.key, operator: node.operator, value: children } : { operator: node.operator, value: children };
 }
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
-export const isCollectionOperator = (operator: CrudOperator): boolean => ['in', 'nin', 'between', 'nbetween'].includes(operator);
+const listOperators: readonly CrudOperator[] = ['in', 'nin', 'ina', 'nina'];
+const rangeOperators: readonly CrudOperator[] = ['between', 'nbetween'];
+export const isListOperator = (operator: CrudOperator): boolean => listOperators.includes(operator);
+export const isRangeOperator = (operator: CrudOperator): boolean => rangeOperators.includes(operator);
+export const isCollectionOperator = (operator: CrudOperator): boolean => isListOperator(operator) || isRangeOperator(operator);
 export const isNullOperator = (operator: CrudOperator): boolean => operator === 'null' || operator === 'nnull';
 
 export function filterOperators(field: Pick<FieldDefinition, 'type'> | undefined): CrudOperator[] {
@@ -39,7 +49,7 @@ export function readFilterTree(input: unknown): FilterTreeRead {
     try {
       const id = `node-${count}`;
       if ('field' in raw) {
-        if (typeof raw['field'] !== 'string' || !raw['field'] || !operators.includes(raw['operator'] as CrudOperator)
+        if (typeof raw['field'] !== 'string' || !raw['field'] || !isCrudFieldOperator(raw['operator'])
           || Object.keys(raw).some((key) => !['field', 'operator', 'value'].includes(key))) { issues.push({ path, code: 'invalid-filter' }); return; }
         const value = raw['value'];
         if (!scalar(value) && !(Array.isArray(value) && value.length <= FILTER_EDITOR_LIMITS.values && Array.from(value).every(scalar))) { issues.push({ path, code: 'value' }); return; }
