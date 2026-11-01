@@ -48,5 +48,10 @@
 - If a Codex session hits context pressure, run `agmesh automation inspect-session-context <session-id|session-file>` and continue with a concise handoff summary.
 
 <!-- AGENT:OVERLAY:START -->
-<!-- Project-specific overlay content goes here. -->
+## Cursor Cloud
+
+- 包管理器是 Bun `1.4.2`（`.bun-version`）。`bun` 和 `bunx` 都要放到 `/usr/local/bin`，提交钩子才能找到 `bunx`。不要依赖只写在 `~/.bashrc` 里的 PATH。
+- 工作区包的 `exports` 指向 `dist/`。`bun install` 之后要先跑 `bun run build:packages`，再执行 `bun run dev`、示例测试或 `bun run --cwd example build`。
+- `packages/ui` 的打包在默认 Node 堆上会内存不足。构建前设置 `NODE_OPTIONS=--max-old-space-size=4096`。
+- 示例应用是本地内存数据，开发地址是 `http://127.0.0.1:5173/`。登录页已预填 `demo@example.com` / `demo`。
 <!-- AGENT:OVERLAY:END -->
