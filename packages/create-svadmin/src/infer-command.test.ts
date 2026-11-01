@@ -158,7 +158,10 @@ describe('executeInfer with mock fetch & files', () => {
       expect(writtenSchema).toContain('price: Type.Optional(Type.Number())');
 
       const writtenListPage = await readFile(join(outDir, 'products/ListPage.svelte'), 'utf-8');
-      expect(writtenListPage).toContain('<ListPage resourceName="products">');
+      expect(writtenListPage).toContain("import { productsDefinition } from '../products.resource'");
+      expect(writtenListPage).toContain('const resourceName = productsDefinition.name');
+      expect(writtenListPage).toContain('<ListPage {resourceName}>');
+      expect(writtenListPage).toContain('<AutoTable {resourceName} />');
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
