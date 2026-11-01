@@ -1,6 +1,6 @@
 ---
 title: 核心 Hook 契约
-description: Svelte-only 核心契约与 Query Key v2 迁移说明；0.36 废弃位置式 helper，0.39 移除
+description: Svelte-only 核心契约与 Query Key v2 迁移说明
 ---
 
 从 0.39 开始，`@svadmin/core` 永久只面向 Svelte。公开集成面继续采用 Svelte 5 Hook 与 Svelte Context；路线图明确不再包含框架无关的 `@svadmin/kernel`、Vue 适配器或跨框架兼容层。
@@ -11,9 +11,19 @@ description: Svelte-only 核心契约与 Query Key v2 迁移说明；0.36 废弃
 
 少量适合纯 TypeScript 的内部规则仍保持独立：Query Key 构造与解析、类型化缓存匹配、Provider 解析、租户隔离和 Provider 接口。它们服务于 Svelte Hook，并不构成新的运行时或 kernel。
 
+## 兼容范围
+
+Refine 对比以当前支持的 Svelte 工作流、资源契约和真实 Provider 行为为准。已退役 API 和没有实际迁移需求的旧封装不再补充选项或兼容别名，也不再列为 parity 缺口。显式的 `@svadmin/core/unsafe` 入口不承担保留退役 API 的职责。
+
+| 已移除 API | 当前替代方式 |
+|---|---|
+| `useRelation`（包括 unsafe 入口）及 `UseRelationOptions` | 使用 `defineResource` 定义的资源调用严格 `useList`、`useMany` 或 `useSelect` |
+| `useModalForm` / `useDrawerForm` | `useModal` / `useDrawer` 组合 `useForm` 或 `<AutoForm>` |
+| `appendTenantCacheKey` / `queryKeyMatchesTenant` | `keys({ tenant })` / `queryKeyMatches(queryKey, { tenant })` |
+
 ## 只支持 Query Key v2
 
-0.36 引入类型化的 Query Key v2 builder，并废弃位置式兼容 helper `appendTenantCacheKey` 与 `queryKeyMatchesTenant`。它们会保留到 0.38，并在 0.39 移除。以下形式不会被 v2 识别：
+类型化 Query Key v2 builder 是唯一支持的 key 契约。位置式租户 helper 已移除，以下形式不会被 v2 识别：
 
 ```ts
 ['default', 'posts', 'list', pagination, filters]
@@ -40,9 +50,8 @@ queryKeyMatches(queryKey, {
 
 ## 迁移清单
 
-1. 停止使用 `appendTenantCacheKey` 与 `queryKeyMatchesTenant`：它们在 0.36 废弃，并在 0.39 移除。
-2. 将位置式 key 构造替换为 `keys(...)`。
-3. 将 `queryKey[0]`、`queryKey[1]` 等判断替换为类型化 matcher。
-4. 升级时重建或失效持久化缓存；旧 key 会被有意拒绝，不提供兼容读取。
+1. 将位置式 key 构造替换为 `keys(...)`。
+2. 将 `queryKey[0]`、`queryKey[1]` 等判断替换为类型化 matcher。
+3. 升级时重建或失效持久化缓存；旧 key 会被有意拒绝，不提供兼容读取。
 
 DevTools 对 v2 key 只展示安全操作元数据：Provider、资源、操作、状态、重试次数、请求耗时、缓存年龄和通用失效状态。租户 ID、记录 ID、参数、URL、payload、缓存数据和错误体始终隐藏。

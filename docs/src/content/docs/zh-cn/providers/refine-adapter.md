@@ -79,7 +79,9 @@ Refine 的 `DataProvider` 接口与 svadmin 的 `DataProvider` 高度一致。�
 1. 绑定 5 个必需方法（`getList`、`getOne`、`create`、`update`、`deleteOne`、`getApiUrl`）。
 2. 仅在底层 Refine 数据源实现了可选方法时，才附加它们（`getMany`、`createMany`、`updateMany`、`deleteMany`、`custom`）。
 
-这意味着你可以获得所选 Refine 数据源的完整功能集——包括排序、过滤、分页和批量操作支持。
+桥接层将排序、过滤、分页及可用的批量操作转发给所选 Provider。可执行的运算符和逻辑组取决于该 Provider 与后端版本；完成桥接不代表它支持全部 Core 运算符。
+
+筛选能力矩阵维护 SVAdmin 自己负责翻译协议的数据源，以及有实际接入需求的 Provider。其他外部 Provider 在接入需要、执行语义验证完成后再补充，覆盖整个 Refine 生态不作为 parity 要求。
 
 ## 内置使用
 

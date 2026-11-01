@@ -86,7 +86,9 @@ Refine's `DataProvider` interface closely mirrors svadmin's `DataProvider`. The 
 1. Binds the 5 required methods (`getList`, `getOne`, `create`, `update`, `deleteOne`, `getApiUrl`).
 2. Conditionally attaches optional methods (`getMany`, `createMany`, `updateMany`, `deleteMany`, `custom`) only if the underlying Refine provider implements them.
 
-This means you get the full feature set of whatever Refine provider you choose — including its sorting, filtering, pagination, and bulk operation support.
+The bridge forwards sorting, filters, pagination, and available bulk operations to the selected provider. Executable operators and logical groups depend on that provider and backend version; wrapping a provider does not certify support for every core operator.
+
+The filter capability matrix covers translators maintained in svadmin and providers with actual integration needs. Additional external providers are added when an integration needs them and their execution semantics have been verified. Covering the entire Refine ecosystem is not a parity requirement.
 
 ## Built-in Usage
 

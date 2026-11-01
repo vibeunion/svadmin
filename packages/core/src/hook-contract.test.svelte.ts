@@ -25,24 +25,30 @@ describe('core hook export boundaries', () => {
     expect(core[hookName]).toBeTypeOf('function');
   });
 
-  it.each(['useDataProvider', 'useRelation', 'useCheckboxGroup', 'useRadioGroup', 'useAutocomplete'] as const)(
+  it.each(['useDataProvider', 'useCheckboxGroup', 'useRadioGroup', 'useAutocomplete'] as const)(
     'isolates unchecked %s behind an explicit unsafe entry point', name => {
       expect(unsafe[name]).toBeTypeOf('function');
       expect(name in core).toBe(false);
     },
   );
 
-  it.each(['useModalForm', 'useDrawerForm'] as const)('does not keep retired %s on the public or unsafe surface', name => {
+  it.each(['useModalForm', 'useDrawerForm', 'useRelation'] as const)('does not keep retired %s on the public or unsafe surface', name => {
     expect(name in core).toBe(false);
     expect(name in unsafe).toBe(false);
   });
 
-  it('keeps deprecated positional Query Key helpers until 0.39', () => {
-    const exports = core as Record<string, unknown>;
+  it('uses tenant-scoped Query Key v2 without positional compatibility helpers', () => {
+    expect('appendTenantCacheKey' in core).toBe(false);
+    expect('queryKeyMatchesTenant' in core).toBe(false);
 
-    expect(exports['appendTenantCacheKey']).toBeTypeOf('function');
-    expect(exports['queryKeyMatchesTenant']).toBeTypeOf('function');
-    expect(core.parseQueryKey(['default', 'posts', 'list'])).toBeUndefined();
-    expect(core.parseQueryKey(keys().data.list('posts'))).toBeDefined();
+    const queryKey = keys({ provider: 'cms', tenant: 'tenant-a' }).data.list('posts');
+    const matcher = { provider: 'cms', tenant: 'tenant-a', kind: 'data', resource: 'posts' } as const;
+    expect(core.parseQueryKey(queryKey)).toBeDefined();
+    expect(core.queryKeyMatches(queryKey, matcher)).toBe(true);
+    expect(core.queryKeyMatches(queryKey, { ...matcher, tenant: 'tenant-b' })).toBe(false);
+
+    const positionalKey = ['cms', 'posts', 'list', { __svadminTenant: 'tenant-a' }];
+    expect(core.parseQueryKey(positionalKey)).toBeUndefined();
+    expect(core.queryKeyMatches(positionalKey, matcher)).toBe(false);
   });
 });

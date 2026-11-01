@@ -3,8 +3,7 @@ import { useParsed } from './useParsed.svelte';
 import { captureAdminContext } from './context.svelte';
 import { getAdminOptions } from './options.svelte';
 import { t } from './i18n.svelte';
-import type { BaseRecord,HttpError,Filter,KnownResources,ResourceDefinition } from './types';
-import { useList } from './query-hooks.svelte';
+import type { BaseRecord,ResourceDefinition } from './types';
 import { toast } from './toast.svelte';
 import { createSelectQuery as useSelectImpl, type UseSelectOptions } from './select-query.svelte';
 import { decodeBaseRecord } from './record-decoder';
@@ -169,23 +168,6 @@ export function useBreadcrumb() {
   });
 
   return { get items() { return items; } };
-}
-
-// ─── useRelation ───────────────────────────────────────────
-
-export interface UseRelationOptions<_TData extends BaseRecord=BaseRecord,_TError=HttpError> {
-  resource: KnownResources;
-  id?: string|number;
-  pagination?: { current?: number; pageSize?: number };
-  sorters?: { field: string; order: 'asc'|'desc' }[];
-  filters?: Filter[];
-  queryOptions?: { enabled?: boolean; staleTime?: number };
-}
-
-export function useRelation(options: UseRelationOptions) {
-  return useList({
-    ...options
-  });
 }
 
 // ─── useNotification ────────────────────────────────────────
