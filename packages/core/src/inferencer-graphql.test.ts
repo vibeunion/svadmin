@@ -195,7 +195,10 @@ describe('inferFromGraphQL Introspection',() => {
     expect(typebox).toContain('views: Type.Optional(Type.Number())');
 
     const listPage=generateListPageCode(post);
-    expect(listPage).toContain('<ListPage resourceName="posts">');
+    expect(listPage).toContain("import { postsDefinition } from '../posts.resource'");
+    expect(listPage).toContain('const resourceName = postsDefinition.name');
+    expect(listPage).toContain('<ListPage {resourceName}>');
+    expect(listPage).toContain('<AutoTable {resourceName} />');
   });
 
   test('GRAPHQL_INTROSPECTION_QUERY is exported and contains query',() => {
