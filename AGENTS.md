@@ -50,8 +50,8 @@
 <!-- AGENT:OVERLAY:START -->
 ## Cursor Cloud
 
-- 包管理器是 Bun `1.4.2`（`.bun-version`）。`bun` 和 `bunx` 都要放到 `/usr/local/bin`，提交钩子才能找到 `bunx`。不要依赖只写在 `~/.bashrc` 里的 PATH。
-- 工作区包的 `exports` 指向 `dist/`。`bun install` 之后要先跑 `bun run build:packages`，再执行 `bun run dev`、示例测试或 `bun run --cwd example build`。
-- `packages/ui` 的打包在默认 Node 堆上会内存不足。构建前设置 `NODE_OPTIONS=--max-old-space-size=4096`。
-- 示例应用是本地内存数据，开发地址是 `http://127.0.0.1:5173/`。登录页已预填 `demo@example.com` / `demo`。
+- Use Bun `1.4.4`, synchronized across `.bun-version` and `package.json#packageManager`. Keep `bun` and `bunx` on the default PATH visible to commit hooks; do not rely on PATH changes that exist only in `~/.bashrc`.
+- Workspace package exports point to `dist/`. Run `bun install`, then `bun run build:packages` before `bun run dev`, example tests, or `bun run --cwd example build`.
+- If the default Node heap is too small for the `packages/ui` build in a cloud environment, set `NODE_OPTIONS=--max-old-space-size=4096` first.
+- The example app uses in-memory data and runs at `http://127.0.0.1:5173/`. The login form is prefilled with `demo@example.com` / `demo`.
 <!-- AGENT:OVERLAY:END -->
