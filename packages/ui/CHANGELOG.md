@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.108.5](https://github.com/vibeunion/svadmin/compare/ui-v0.108.4...ui-v0.108.5) (2026-11-01)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** clear strict checks left red on main ([#634](https://github.com/vibeunion/svadmin/issues/634)) ([0e55b57](https://github.com/vibeunion/svadmin/commit/0e55b57d007f532fe7592f684329817c1fecfa1c))
+
 ## [0.108.4](https://github.com/vibeunion/svadmin/compare/ui-v0.108.3...ui-v0.108.4) (2026-11-01)
 
 
