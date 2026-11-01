@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.109.0](https://github.com/vibeunion/svadmin/compare/ui-v0.108.6...ui-v0.109.0) (2026-11-01)
+
+
+### 🚀 Features
+
+* **styles:** migrate example and lite layouts to native svadmin-ui design system ([71c8e5e](https://github.com/vibeunion/svadmin/commit/71c8e5eb422e4d3fbdffd68572c78267620944e1))
+* **vibecoding:** add visual inspector, escape hatches, and devtools mcp self-healing loop ([#641](https://github.com/vibeunion/svadmin/issues/641)) ([73588fb](https://github.com/vibeunion/svadmin/commit/73588fb4e2f1a71c3acd20eea1d3bb9cceda27b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.5.0
+
 ## [0.108.6](https://github.com/vibeunion/svadmin/compare/ui-v0.108.5...ui-v0.108.6) (2026-11-01)
 
 
