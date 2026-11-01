@@ -33,6 +33,17 @@
     columns?: 1 | 2 | 3 | 4;
     showHeader?: boolean;
     fieldRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; onchange: (v: unknown) => void }]>;
+    /** Custom field renderers mapped by field key (Escape Hatch Level 2) */
+    fields?: Record<
+      string,
+      Snippet<[{
+        field: FieldDefinition;
+        value: unknown;
+        onchange: (v: unknown) => void;
+        disabled: boolean;
+        invalid: boolean;
+      }]>
+    >;
     formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     headerContent?: Snippet;
     onSuccess?: () => void;
@@ -50,6 +61,7 @@
     columns = 1,
     showHeader = true,
     fieldRenderer,
+    fields,
     formActions,
     headerContent,
     onSuccess,
@@ -366,7 +378,13 @@
   });
 </script>
 
-<div class="svadmin-u-b3542e058833" data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'form' : undefined}>
+<div
+  class="svadmin-u-b3542e058833"
+  data-svadmin-component="AutoForm"
+  data-svadmin-resource={resourceName}
+  data-svadmin-rendering-resource={activeRendering?.resource.name}
+  data-svadmin-rendering-kind={activeRendering ? 'form' : undefined}
+>
   {#if showHeader}
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-0c3bc98565dd">
       <TooltipButton
@@ -436,8 +454,22 @@
             <Card.Content class="svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-9fcd8a13827e svadmin-u-050494726fba svadmin-u-9335c39f6eff">
               <div class={gridClass}>
                 {#each group.fields as field (field.key)}
-                  <div data-svadmin-form-field data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
-                    {#if fieldRenderer}
+                  <div
+                    data-svadmin-form-field
+                    data-svadmin-field-key={field.key}
+                    data-svadmin-field={field.key}
+                    data-svadmin-field-type={field.type}
+                    class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}
+                  >
+                    {#if fields && fields[field.key]}
+                      {@render fields[field.key]({
+                        field,
+                        value: renderedDraft.values[field.key],
+                        onchange: fieldChange(field.key),
+                        disabled: isReadonly,
+                        invalid: !!form.errors[field.key],
+                      })}
+                    {:else if fieldRenderer}
                       {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                     {:else}
                       <FieldRenderer
@@ -463,8 +495,22 @@
           <Card.Content class="svadmin-u-f0faeb26d656 svadmin-u-52be28846b5f svadmin-u-9fcd8a13827e svadmin-u-7a9aabfcd059 svadmin-u-0a58453f3755 svadmin-u-050494726fba">
               <div class={gridClass} data-svadmin-form-grid data-columns={columns}>
               {#each formFields as field (field.key)}
-                <div data-svadmin-form-field data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
-                  {#if fieldRenderer}
+                <div
+                  data-svadmin-form-field
+                  data-svadmin-field-key={field.key}
+                  data-svadmin-field={field.key}
+                  data-svadmin-field-type={field.type}
+                  class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}
+                >
+                  {#if fields && fields[field.key]}
+                    {@render fields[field.key]({
+                      field,
+                      value: renderedDraft.values[field.key],
+                      onchange: fieldChange(field.key),
+                      disabled: isReadonly,
+                      invalid: !!form.errors[field.key],
+                    })}
+                  {:else if fieldRenderer}
                     {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                   {:else}
                   <FieldRenderer

@@ -25,6 +25,13 @@ import { definedOptions } from '@svadmin/core/options';
  */
 
 import type { DataProvider, ResourceDefinition } from '@svadmin/core';
+import {
+  buildSelfHealingReport,
+  type DevtoolsAppDiagnostics,
+  type DevtoolsCollector,
+  type DevtoolsDiagnostic,
+  type DevtoolsSnapshot,
+} from '@svadmin/devtools';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -41,6 +48,14 @@ export interface MCPServerOptions {
   version?: string;
   /** When true, only expose read operations (getList, getOne, getMany) */
   readOnly?: boolean;
+  /** Optional DevTools collector instance to expose runtime diagnostics to Agent */
+  collector?: DevtoolsCollector;
+  /** Optional custom diagnostics provider function */
+  getDiagnostics?: () =>
+    | DevtoolsAppDiagnostics
+    | DevtoolsSnapshot
+    | DevtoolsDiagnostic[]
+    | Promise<DevtoolsAppDiagnostics | DevtoolsSnapshot | DevtoolsDiagnostic[]>;
 }
 
 /** MCP Tool definition following the Model Context Protocol spec */
@@ -217,6 +232,46 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
     });
   }
 
+  // Diagnostics and self-healing tools
+  tools.push({
+    name: 'svadmin_getDiagnostics',
+    description:
+      'Fetch current SVAdmin runtime diagnostics, including health status, configured providers, active resources, and error events.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  });
+
+  tools.push({
+    name: 'svadmin_getSelfHealingPrompt',
+    description:
+      'Get an AI-ready self-healing diagnosis report from runtime errors captured by SVAdmin DevTools, with structured root causes and suggested code fixes.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  });
+
+  tools.push({
+    name: 'svadmin_getManifest',
+    description:
+      'Get the active SVAdmin application manifest including registered resources, fields, operations, and data provider metadata.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  });
+
   return tools;
 }
 
@@ -294,6 +349,51 @@ async function handleToolCall(
         resource: args['resource'] as string,
         id: args['id'] as string,
       });
+    }
+
+    case 'svadmin_getDiagnostics': {
+      if (options.collector) {
+        return options.collector.snapshot();
+      }
+      if (options.getDiagnostics) {
+        return await options.getDiagnostics();
+      }
+      return {
+        status: 'healthy',
+        resources: options.resources,
+        dataProvider: options.dataProvider.getApiUrl?.() ?? 'configured',
+        message: 'No DevTools collector attached. Basic provider info returned.',
+      };
+    }
+
+    case 'svadmin_getSelfHealingPrompt': {
+      let diags: DevtoolsDiagnostic[] = [];
+      if (options.collector) {
+        diags = options.collector.snapshot().diagnostics;
+      } else if (options.getDiagnostics) {
+        const res = await options.getDiagnostics();
+        if (Array.isArray(res)) {
+          diags = res;
+        } else if (res && typeof res === 'object') {
+          if ('snapshot' in res && res.snapshot) {
+            diags = (res.snapshot as DevtoolsSnapshot).diagnostics;
+          } else if ('diagnostics' in res && Array.isArray((res as { diagnostics: unknown }).diagnostics)) {
+            diags = (res as { diagnostics: DevtoolsDiagnostic[] }).diagnostics;
+          }
+        }
+      }
+      return buildSelfHealingReport(diags);
+    }
+
+    case 'svadmin_getManifest': {
+      return {
+        resources: options.resourceDefinitions ?? options.resources.map((name) => ({ name })),
+        capabilities: {
+          apiUrl: options.dataProvider.getApiUrl?.() ?? undefined,
+          readOnly: !!options.readOnly,
+          hasCollector: !!options.collector,
+        },
+      };
     }
 
     default:

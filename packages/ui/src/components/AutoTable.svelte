@@ -1008,6 +1008,7 @@
                   {@const header = col.header}
                   <Table.Head
                     {...dragProps}
+                    data-svadmin-field={header.id}
                     class={cn('svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-b247a17a0d75 svadmin-u-2689f3958069 svadmin-u-d9256981a032 svadmin-u-bfa603190748 svadmin-u-f6e31b39b8e4', dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
@@ -1101,7 +1102,13 @@
   </DataState>
 {/snippet}
 
-<div class="svadmin-u-6ed543e2fbbb" data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'table' : undefined}>
+<div
+  class="svadmin-u-6ed543e2fbbb"
+  data-svadmin-component="AutoTable"
+  data-svadmin-resource={resourceName}
+  data-svadmin-rendering-resource={activeRendering?.resource.name}
+  data-svadmin-rendering-kind={activeRendering ? 'table' : undefined}
+>
   {#if operationError}<p role="alert">{operationError}</p>{/if}
   {#if detailState.invalid}<p role="alert">{i18n.t('common.operationFailed')}</p>{/if}
   {#if showHeader}
@@ -1657,6 +1664,7 @@
                   {@const header = col.header}
                   <Table.Head
                     {...dragProps}
+                    data-svadmin-field={header.id}
                     class={cn('svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-b247a17a0d75 svadmin-u-2689f3958069 svadmin-u-d9256981a032 svadmin-u-bfa603190748 svadmin-u-f6e31b39b8e4', dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
@@ -1711,7 +1719,7 @@
                   {#snippet child({ props })}
                     <Table.Row {...props} class="svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63 svadmin-u-65fdbade2025 svadmin-u-945ecb9a9005 {rowIsSelected(row.id) ? 'svadmin-u-989c466fdbe7' : 'svadmin-u-c4b5eaba40e3'}">
                       {#each visibleCells as cell, _i (_i)}
-                        <Table.Cell>
+                        <Table.Cell data-svadmin-field={cell.column.id}>
                           {#if cell.column.id === '_select'}
                             {#if batchActions}
                               <Checkbox

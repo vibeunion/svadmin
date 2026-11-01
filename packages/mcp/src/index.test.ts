@@ -73,13 +73,14 @@ describe('createMCPServer', () => {
     resources: ['posts', 'users'],
   });
 
-  test('generates correct number of tools (read + write)', () => {
+  test('generates correct number of tools (read + write + diagnostics)', () => {
     const tools = server.getTools();
-    // getList, getOne, getMany, create, update, delete = 6
-    expect(tools).toHaveLength(6);
+    // getList, getOne, getMany, create, update, delete + getDiagnostics, getSelfHealingPrompt, getManifest = 9
+    expect(tools).toHaveLength(9);
     expect(tools.map(t => t.name)).toEqual([
       'svadmin_getList', 'svadmin_getOne', 'svadmin_getMany',
       'svadmin_create', 'svadmin_update', 'svadmin_delete',
+      'svadmin_getDiagnostics', 'svadmin_getSelfHealingPrompt', 'svadmin_getManifest',
     ]);
   });
 
@@ -90,9 +91,10 @@ describe('createMCPServer', () => {
       readOnly: true,
     });
     const tools = readOnlyServer.getTools();
-    expect(tools).toHaveLength(3);
+    expect(tools).toHaveLength(6);
     expect(tools.map(t => t.name)).toEqual([
       'svadmin_getList', 'svadmin_getOne', 'svadmin_getMany',
+      'svadmin_getDiagnostics', 'svadmin_getSelfHealingPrompt', 'svadmin_getManifest',
     ]);
   });
 
@@ -106,7 +108,7 @@ describe('createMCPServer', () => {
     const info = server.getServerInfo();
     expect(info.name).toBe('@svadmin/mcp');
     expect(info.version).toBe('0.1.0');
-    expect(info.tools).toHaveLength(6);
+    expect(info.tools).toHaveLength(9);
   });
 });
 
@@ -285,5 +287,68 @@ describe('Tool safety and concurrency metadata', () => {
     expect(deleteTool.readOnly).toBe(false);
     expect(deleteTool.concurrent).toBe(false);
     expect(deleteTool.destructive).toBe(true);
+  });
+
+  test('svadmin_getDiagnostics returns status and resources', async () => {
+    const res = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_getDiagnostics',
+        arguments: {},
+      }),
+    );
+    expect(res.error).toBeUndefined();
+    const result = res.result as { status: string; resources: string[] };
+    expect(result.status).toBe('healthy');
+    expect(result.resources).toEqual(['posts', 'users']);
+  });
+
+  test('svadmin_getManifest returns resource definitions and capabilities', async () => {
+    const res = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_getManifest',
+        arguments: {},
+      }),
+    );
+    expect(res.error).toBeUndefined();
+    const result = res.result as { resources: Array<{ name: string }>; capabilities: { apiUrl: string } };
+    expect(result.resources).toHaveLength(2);
+    expect(result.capabilities.apiUrl).toBe('http://localhost:3000/api');
+  });
+
+  test('svadmin_getSelfHealingPrompt returns actionable report with collector', async () => {
+    const serverWithDiagnostics = createMCPServer({
+      dataProvider: mockDataProvider as Parameters<typeof createMCPServer>[0]['dataProvider'],
+      resources: ['posts'],
+      getDiagnostics: () => [
+        {
+          code: 'auth.forbidden',
+          source: 'frontend',
+          severity: 'error',
+          message: 'HTTP 403 Forbidden',
+          fix: {
+            kind: 'PERMISSION_DENIED',
+            safe: false,
+            input: {
+              resource: 'posts',
+              operation: 'update',
+              suggestedAction: 'Add permission for posts.update in AccessControlProvider',
+            },
+          },
+        },
+      ],
+    });
+
+    const res = await serverWithDiagnostics.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_getSelfHealingPrompt',
+        arguments: {},
+      }),
+    );
+    expect(res.error).toBeUndefined();
+    const report = res.result as { hasErrors: boolean; errorCount: number; agentPrompt: string };
+    expect(report.hasErrors).toBe(true);
+    expect(report.errorCount).toBe(1);
+    expect(report.agentPrompt).toContain('posts');
+    expect(report.agentPrompt).toContain('PERMISSION_DENIED');
   });
 });

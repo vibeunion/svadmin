@@ -10,7 +10,12 @@
     getTheme,
     parseQueryKey,
   } from '@svadmin/core';
-  import { buildAdminDiagnostics } from '@svadmin/devtools';
+  import {
+    buildAdminDiagnostics,
+    buildSelfHealingReport,
+    captureRuntimeError,
+    type DevtoolsDiagnostic,
+  } from '@svadmin/devtools';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     attachSvadminDevtoolsQueryClient,
@@ -21,9 +26,10 @@
   import TooltipButton from './TooltipButton.svelte';
   import * as Tabs from './ui/tabs/index.js';
   import { Badge } from './ui/badge/index.js';
+  import { Button } from './ui/button/index.js';
   import { ScrollArea } from './ui/scroll-area/index.js';
   import { Separator } from './ui/separator/index.js';
-  import { X, Bug, ChevronDown, ChevronUp, Wand2 } from '@lucide/svelte';
+  import { X, Bug, ChevronDown, ChevronUp, Wand2, Crosshair, Check, AlertCircle, Copy } from '@lucide/svelte';
   import InferencerPanel from './InferencerPanel.svelte';
 
   import type {
@@ -53,10 +59,99 @@
     visible = !visible;
   }
 
+  let inspecting = $state(false);
+  let hoveredBox = $state<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    component: string;
+    resource?: string;
+    field?: string;
+  } | null>(null);
+  let toastMessage = $state<string | null>(null);
+
+  function showToast(msg: string) {
+    toastMessage = msg;
+    setTimeout(() => {
+      if (toastMessage === msg) toastMessage = null;
+    }, 2500);
+  }
+
+  function toggleInspector() {
+    inspecting = !inspecting;
+    if (!inspecting) hoveredBox = null;
+  }
+
+  function handleDocumentMouseMove(event: MouseEvent) {
+    if (!inspecting) return;
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest('.svadmin-devtools-container') || target.closest('[data-svadmin-inspector-overlay]')) return;
+
+    const compEl = target.closest('[data-svadmin-component]') as HTMLElement | null;
+    const fieldEl = target.closest('[data-svadmin-field]') as HTMLElement | null;
+
+    if (compEl || fieldEl) {
+      const el = fieldEl ?? compEl!;
+      const rect = el.getBoundingClientRect();
+      hoveredBox = {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+        component: compEl?.getAttribute('data-svadmin-component') ?? 'Component',
+        resource: compEl?.getAttribute('data-svadmin-resource') ?? undefined,
+        field: fieldEl?.getAttribute('data-svadmin-field') ?? undefined,
+      };
+    } else {
+      hoveredBox = null;
+    }
+  }
+
+  function handleDocumentClick(event: MouseEvent) {
+    if (!inspecting || !hoveredBox) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.svadmin-devtools-container') || target?.closest('[data-svadmin-inspector-overlay]')) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const prompt = hoveredBox.field && hoveredBox.resource
+      ? `在 svadmin 中修改资源 '${hoveredBox.resource}' 的 <${hoveredBox.component}> 组件：为字段 '${hoveredBox.field}' 定制显示与交互效果。`
+      : hoveredBox.resource
+      ? `在 svadmin 中定制资源 '${hoveredBox.resource}' 的 <${hoveredBox.component}> 组件。`
+      : `在 svadmin 中定制 <${hoveredBox.component}> 组件。`;
+
+    if (navigator?.clipboard?.writeText) {
+      void navigator.clipboard.writeText(prompt);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('svadmin:vibe-inspect', {
+          detail: { ...hoveredBox, prompt },
+        }),
+      );
+    }
+
+    showToast('已复制 AI Prompt！可直接在对话框中粘贴');
+    inspecting = false;
+    hoveredBox = null;
+  }
+
   function handleKeydown(event: KeyboardEvent) {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'd') {
       event.preventDefault();
       toggle();
+    }
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'x') {
+      event.preventDefault();
+      toggleInspector();
+    }
+    if (event.key === 'Escape' && inspecting) {
+      inspecting = false;
+      hoveredBox = null;
     }
   }
 
@@ -249,12 +344,46 @@
   });
 </script>
 
-<svelte:window onkeydown={isDev ? handleKeydown : undefined} />
+<svelte:window
+  onkeydown={isDev ? handleKeydown : undefined}
+  onmousemove={isDev && inspecting ? handleDocumentMouseMove : undefined}
+  onclickcapture={isDev && inspecting ? handleDocumentClick : undefined}
+/>
 
 {#if isDev}
+  {#if inspecting && hoveredBox}
+    <div
+      data-svadmin-inspector-overlay
+      class="pointer-events-none fixed z-[999999] border-2 border-dashed border-primary bg-primary/10 transition-all duration-75"
+      style="left: {hoveredBox.x}px; top: {hoveredBox.y}px; width: {hoveredBox.width}px; height: {hoveredBox.height}px;"
+    >
+      <div class="absolute -top-7 left-0 flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-xs font-mono font-medium text-primary-foreground shadow">
+        <span>&lt;{hoveredBox.component}&gt;</span>
+        {#if hoveredBox.resource}
+          <span class="opacity-80">res: {hoveredBox.resource}</span>
+        {/if}
+        {#if hoveredBox.field}
+          <span class="opacity-80">field: {hoveredBox.field}</span>
+        {/if}
+        <span class="ml-1 text-[10px] opacity-75">(点击复制 AI Prompt)</span>
+      </div>
+    </div>
+  {/if}
+
+  {#if toastMessage}
+    <div
+      in:fly={{ y: 20, duration: 150 }}
+      out:fade={{ duration: 150 }}
+      class="fixed bottom-16 right-6 z-[999999] flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg"
+    >
+      <Check class="h-4 w-4" />
+      <span>{toastMessage}</span>
+    </div>
+  {/if}
+
   {#if visible}
     <div
-      class="svadmin-u-7bc555991dba svadmin-u-189f036c335c svadmin-u-5a438c30beec svadmin-u-f50571addf44 svadmin-u-11863ecc32e7 svadmin-u-c69e21ff5804 svadmin-u-1301e5c1ce71 svadmin-u-ca6bcd4b6f3f svadmin-u-d5e98261a758 svadmin-u-cd0ad9a56558 svadmin-u-14e46609fd68 svadmin-u-1d5904e7e755 svadmin-u-2cd02d11d1af"
+      class="svadmin-devtools-container svadmin-u-7bc555991dba svadmin-u-189f036c335c svadmin-u-5a438c30beec svadmin-u-f50571addf44 svadmin-u-11863ecc32e7 svadmin-u-c69e21ff5804 svadmin-u-1301e5c1ce71 svadmin-u-ca6bcd4b6f3f svadmin-u-d5e98261a758 svadmin-u-cd0ad9a56558 svadmin-u-14e46609fd68 svadmin-u-1d5904e7e755 svadmin-u-2cd02d11d1af"
       class:svadmin-devtools--collapsed-width={collapsed}
       class:svadmin-devtools--collapsed-min-width={collapsed}
       transition:fly={{ y: 400, duration: 300 }}
@@ -268,6 +397,15 @@
           </Badge>
         </div>
         <div class="svadmin-u-60fbb7713999 svadmin-u-44ee8ba0a421">
+          <TooltipButton
+            tooltip={inspecting ? '退出点选检查 (Exit Inspect)' : '🎯 点选检查 / Vibe Inspect (Ctrl+Shift+X)'}
+            variant={inspecting ? 'default' : 'ghost'}
+            size="icon"
+            class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 {inspecting ? 'bg-primary text-primary-foreground' : ''}"
+            onclick={toggleInspector}
+          >
+            <Crosshair class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+          </TooltipButton>
           <TooltipButton tooltip={collapsed ? i18n.t('common.expand') : i18n.t('common.collapse')} variant="ghost" size="icon" class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1" onclick={() => collapsed = !collapsed}>
             {#if collapsed}
               <ChevronUp class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
@@ -289,6 +427,9 @@
             <Tabs.Trigger value="cache" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">Cache</Tabs.Trigger>
             <Tabs.Trigger value="inferencer" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">
               <Wand2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-618162408e7a" /> Inferencer
+            </Tabs.Trigger>
+            <Tabs.Trigger value="selfhealing" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">
+              Self-Healing
             </Tabs.Trigger>
           </Tabs.List>
 
@@ -447,6 +588,59 @@
 
           <Tabs.Content value="inferencer" class="svadmin-u-8a539c7fe216">
             <InferencerPanel />
+          </Tabs.Content>
+
+          <Tabs.Content value="selfhealing" class="svadmin-u-8a539c7fe216">
+            <ScrollArea class="svadmin-u-c6a5b7446421">
+              <div class="svadmin-u-7660b450905a svadmin-u-da7c36cd8867">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-359090c2d529">
+                  <div>
+                    <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748 svadmin-u-65281709dacf">Runtime Self-Healing</h4>
+                    <p class="svadmin-u-76067d04e222 svadmin-u-bfa603190748">AI 自动排障诊断报告与一键自愈</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-359090c2d529"
+                    onclick={() => {
+                      const report = buildSelfHealingReport(appDiagnostics.snapshot.diagnostics);
+                      if (navigator?.clipboard?.writeText) {
+                        void navigator.clipboard.writeText(report.agentPrompt);
+                        showToast('已复制 AI 自愈 Prompt！');
+                      }
+                    }}
+                  >
+                    <Copy class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+                    <span>复制自愈 Prompt</span>
+                  </Button>
+                </div>
+
+                <Separator />
+
+                {#if appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error').length === 0}
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-da7c36cd8867 svadmin-u-3960ffc248d9 svadmin-u-2472e9b81a97 svadmin-u-421ac2be5045 svadmin-u-bfa603190748">
+                    <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 text-green-500" />
+                    <p class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">当前应用状态健康，无未解决异常</p>
+                    <p class="svadmin-u-76067d04e222 svadmin-u-bfa603190748">Provider 与资源契约已正确绑定</p>
+                  </div>
+                {:else}
+                  <div class="svadmin-u-da7c36cd8867">
+                    {#each appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error') as diag}
+                      <div class="svadmin-u-ed8a5df7b2fb svadmin-u-6ee2d41e2d2d svadmin-u-359090c2d529">
+                        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 font-semibold">
+                          <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 text-destructive" />
+                          <span>[{diag.fix?.kind ?? 'ERROR'}] {diag.code}</span>
+                        </div>
+                        <p class="svadmin-u-76067d04e222 font-mono svadmin-u-bfa603190748">{diag.message}</p>
+                        {#if diag.fix?.input?.suggestedAction}
+                          <p class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">💡 建议修复：{diag.fix.input.suggestedAction}</p>
+                        {/if}
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+            </ScrollArea>
           </Tabs.Content>
         </Tabs.Root>
       {/if}

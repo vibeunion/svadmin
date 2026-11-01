@@ -5,6 +5,8 @@ import {
   buildProviderDiagnostics,
   buildResourceDiagnostics,
   buildRouteDiagnostics,
+  buildSelfHealingReport,
+  captureRuntimeError,
   createDevtoolsCollector,
   toPermissionDiagnostic,
 } from './index';
@@ -169,5 +171,39 @@ describe('diagnostic builders', () => {
         { code: 'error', source: 'frontend', severity: 'error', message: 'broken' },
       ],
     }).status).toBe('error');
+  });
+
+  test('captures runtime error into categorized diagnostic', () => {
+    const error = new Error('HTTP 403: Forbidden - Access Denied');
+    const diagnostic = captureRuntimeError(error, {
+      resource: 'posts',
+      operation: 'update',
+      location: { file: 'src/features/posts.ts', line: 42 },
+    });
+
+    expect(diagnostic.severity).toBe('error');
+    expect(diagnostic.code).toBe('auth.forbidden');
+    expect(diagnostic.fix?.kind).toBe('PERMISSION_DENIED');
+    expect(diagnostic.location?.file).toBe('src/features/posts.ts');
+  });
+
+  test('builds self-healing report with AI agent prompt', () => {
+    const diag1 = captureRuntimeError(new Error('HTTP 403 Forbidden'), {
+      resource: 'users',
+      operation: 'delete',
+    });
+    const diag2 = captureRuntimeError(new Error('Schema validation error: field price must be a number'), {
+      resource: 'products',
+      operation: 'create',
+    });
+
+    const report = buildSelfHealingReport([diag1, diag2]);
+    expect(report.hasErrors).toBe(true);
+    expect(report.errorCount).toBe(2);
+    expect(report.issues[0]?.category).toBe('PERMISSION_DENIED');
+    expect(report.issues[1]?.category).toBe('SCHEMA_MISMATCH');
+    expect(report.agentPrompt).toContain('users');
+    expect(report.agentPrompt).toContain('products');
+    expect(report.agentPrompt).toContain('Self-Healing Report');
   });
 });
