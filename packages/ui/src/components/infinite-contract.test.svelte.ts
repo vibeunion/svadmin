@@ -8,7 +8,7 @@ import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resetContext, type DataProvider, type Filter, type GetListParams, type GetListResult, type ResourceDefinition, type useInfiniteList } from '@svadmin/core';
+import { resetContext, type ContractSchemas, type DataProvider, type Filter, type GetListParams, type GetListResult, type ResourceDefinition, type useInfiniteList } from '@svadmin/core';
 import { defineResource, resolveResourceContract, parseContractRecord } from '../../../core/src/resource-contract';
 import { snapshotListParams } from '../../../core/src/query-snapshot';
 import { captureAuthLiveScope, resetLogoutVersion } from '../../../core/src/auth-hooks.svelte';
@@ -669,7 +669,7 @@ describe('contract-bound infinite lists', () => {
     const getList = vi.fn<DataProvider['getList']>(async params => ({
       data: [{ id: params.pagination?.current ?? 1, title: 'Page' }], total: 2,
     }));
-    let result: ReturnType<typeof useInfiniteList> | undefined;
+    let result: ReturnType<typeof useInfiniteList<ContractSchemas>> | undefined;
     render(Host, { provider: provider(getList), resources, onReady: value => { result = value; } });
     await waitFor(() => expect(result?.query.isSuccess).toBe(true));
     if (!result) throw new Error('Expected a mounted infinite query');

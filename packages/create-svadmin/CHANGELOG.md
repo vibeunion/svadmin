@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.50.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.50.2...create-svadmin-v0.50.3) (2026-11-01)
+
+
+### 📝 Documentation
+
+* real-app verification baseline after [#636](https://github.com/vibeunion/svadmin/issues/636) ([#638](https://github.com/vibeunion/svadmin/issues/638)) ([61f4295](https://github.com/vibeunion/svadmin/commit/61f42958622101e558397cdb9d617ae8be2bb847))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.70.0
+
 ## [0.50.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.50.1...create-svadmin-v0.50.2) (2026-11-01)
 
 

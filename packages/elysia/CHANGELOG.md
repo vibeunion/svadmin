@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.14.21](https://github.com/vibeunion/svadmin/compare/elysia-v0.14.20...elysia-v0.14.21) (2026-11-01)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** clear filter-test assertions blocking publish lint ([#639](https://github.com/vibeunion/svadmin/issues/639)) ([4ce50ab](https://github.com/vibeunion/svadmin/commit/4ce50abb25726725eb20202a14ea5052a54e0133))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.70.0
+
 ## [0.14.20](https://github.com/vibeunion/svadmin/compare/elysia-v0.14.19...elysia-v0.14.20) (2026-11-01)
 
 

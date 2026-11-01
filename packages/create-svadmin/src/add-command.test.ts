@@ -125,7 +125,7 @@ test('addCommand --write updates package.json and manifest', async () => {
   const projectDirectory = await makeProject();
   try {
     await mkdir(join(projectDirectory, 'src'), { recursive: true });
-    await writeFile(join(projectDirectory, 'src', 'svadmin.config.ts'), 'export default {};\n');
+    await writeFile(join(projectDirectory, 'src', 'svadmin.config.ts'), '');
     await writeFile(
       join(projectDirectory, ADMIN_AI_MANIFEST_FILENAME),
       `${JSON.stringify(buildAdminAiManifest({ projectName: 'demo', dataProvider: 'simple-rest', authProvider: 'mock' }))}\n`,
