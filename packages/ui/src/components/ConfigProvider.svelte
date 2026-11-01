@@ -18,8 +18,16 @@
     readonly showJumper?: boolean;
   }
 
-  /** 弹出层挂载点。返回元素、选择器，或空值以回退到 document.body。 */
+  /**
+   * 弹出层挂载点。`node` 是触发器或锚点，不是已经挂到 body 上的浮层。
+   * 返回元素、选择器，或空值以回退到 document.body。
+   */
   export type GetPopupContainer = (node?: HTMLElement) => HTMLElement | string | null | undefined;
+
+  /** Node SSR 没有 HTMLElement。typeof 守卫避免 `instanceof` 触发 ReferenceError。 */
+  function isHtmlElement(value: unknown): value is HTMLElement {
+    return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
+  }
 
   export interface ComponentConfig {
     theme?: 'light' | 'dark' | 'system';
@@ -27,7 +35,10 @@
     direction?: 'ltr' | 'rtl';
     locale?: string;
     componentSize?: 'sm' | 'md' | 'lg';
-    /** 按组件名设置的默认参数，例如 `{ Button: { variant: 'outline' } }`。显式 props 优先。 */
+    /**
+     * 按组件名设置的默认参数，例如 `{ Button: { variant: 'outline' } }`。显式 props 优先。
+     * 目前只有 Button、Empty（EmptyState）和 Pagination（ListPagination）会读取。
+     */
     componentDefaults?: ComponentPropDefaults;
     /** 空状态默认文案和插图。 */
     empty?: EmptyStateDefaults;
@@ -56,11 +67,11 @@
     const fallback = defaultGetPopupContainer(node);
     if (!getPopupContainer) return fallback;
     const resolved = getPopupContainer(node);
-    if (resolved instanceof HTMLElement) return resolved;
+    if (isHtmlElement(resolved)) return resolved;
     if (typeof resolved === 'string' && resolved.length > 0) {
       const doc = node?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document);
       const found = doc?.querySelector(resolved);
-      if (found instanceof HTMLElement) return found;
+      if (isHtmlElement(found)) return found;
     }
     return fallback;
   }

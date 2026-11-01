@@ -159,10 +159,10 @@ interface FieldDefinition {
 
 | 属性 | 作用 |
 |------|------|
-| `componentDefaults` | 按组件名提供默认参数，例如 `{ Button: { variant: 'outline' } }`。组件上的显式属性优先。 |
+| `componentDefaults` | 目前会读取这张表的组件：`Button`、`Empty`（EmptyState）和 `Pagination`（ListPagination）。组件上的显式属性优先。Input、Select、Badge、Tag 不读这张表，它们仍跟随 `componentSize` 和 `density`。 |
 | `empty` | 空状态的默认标题、说明和插图。 |
 | `pagination` | 默认页大小、每页条数选项、摘要、简洁模式和跳页。 |
-| `getPopupContainer` | 弹出层和浮层的挂载元素或选择器。默认是 `document.body`。 |
+| `getPopupContainer` | 弹出层和浮层的挂载元素或选择器。回调会收到 Dropdown、Popover、Dialog、Sheet、Tooltip 的触发器或锚点，因此 `node?.closest(...)` 能看到源码树。默认是 `document.body`。 |
 
 ## 自定义路由与直接访问
 
