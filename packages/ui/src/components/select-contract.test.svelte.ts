@@ -329,7 +329,8 @@ describe('contract-bound selection', () => {
   it('retains the receiver and snapshots each dispatch and fallback metadata independently', async () => {
     const seen: GetListParams[] = [];
     const seenMany: GetManyParams[] = [];
-    const settings: SelectSettings = { queryOptions: { enabled: false }, defaultValue: [2],
+    const defaultValue = [2];
+    const settings: SelectSettings = { queryOptions: { enabled: false }, defaultValue,
       meta: { extra: { marker: 'initial' } }, filters: search('original'),
       pagination: { current: 2, pageSize: 4, mode: 'server' }, fetchSize: 6 };
     const source = provider();
@@ -349,7 +350,7 @@ describe('contract-bound selection', () => {
     const app = mount(source, settings);
     flushSync();
     settings.filters?.splice(0);
-    settings.defaultValue?.push(3);
+    defaultValue.push(3);
     Reflect.set(settings.meta ?? {}, 'late', true);
     await app.read().refetch();
     await app.read().refetch();

@@ -84,6 +84,12 @@
   let formOwner = $state('');
   let formDescription = $state('');
   let simulateFailure = $state(false);
+  let stepName = $state('');
+  let stepOwner = $state('');
+  let stepTeam = $state('');
+  let stepVisibility = $state('');
+  let stepError = $state('');
+  let resultSubtitle = $state('Invitations are on the way.');
   type SubmissionStatus = 'idle' | 'draft-saved' | 'failed' | 'published';
   let submission = $state<{ status: SubmissionStatus; message: string }>({ status: 'idle', message: '' });
   const filteredRecords = $derived.by(() => {
@@ -96,11 +102,11 @@
       return matchesQuery && matchesOwner;
     });
   });
-  const cardItems = [
+  const cardItems = $state([
     { id: 'c1', category: 'quality' as const, title: 'Operations handbook', description: 'Ownership, escalation paths and service levels.', badge: 'Updated' },
     { id: 'c2', category: 'service' as const, title: 'Customer onboarding', description: 'Checklist, owners and first-week milestones.', badge: 'Template' },
     { id: 'c3', category: 'quality' as const, title: 'Incident response', description: 'Detection, triage and post-incident review.', badge: 'Critical' },
-  ];
+  ]);
   const visibleCards = $derived.by(() => {
     const query = searchQuery.trim().toLowerCase();
     return cardItems.filter((card) => {
@@ -138,8 +144,51 @@
   ];
 
   function finishStep(): void {
-    active = 'result';
+    const name = stepName.trim();
+    if (!name) {
+      stepError = 'Publish failed: name is required. Enter a workspace name and try again.';
+      return;
+    }
+    const owner = stepOwner.trim() || 'Unassigned';
+    const team = stepTeam.trim() || 'No team';
+    const visibility = stepVisibility.trim() || 'Unspecified';
+    records = [
+      { id: `local-${records.length + 1}`, name, owner, status: 'Approved', amount: '$0' },
+      ...records,
+    ];
+    stepError = '';
+    resultSubtitle = `Published “${name}” · ${owner} · ${team} · ${visibility}.`;
+    submission = { status: 'published', message: resultSubtitle };
+    selectTemplate('result');
   }
+
+  function appendCard(): void {
+    const next = cardItems.length + 1;
+    cardItems.push({
+      id: `local-card-${next}`,
+      category: 'quality',
+      title: `Draft card ${next}`,
+      description: 'Added from the card list. This demo keeps the card in local state.',
+      badge: 'Draft',
+    });
+  }
+
+  const recordPageSize = 2;
+  let recordPage = $state(1);
+  const recordTotalPages = $derived(Math.max(1, Math.ceil(filteredRecords.length / recordPageSize)));
+  const currentRecordPage = $derived(Math.min(recordPage, recordTotalPages));
+  const pagedRecords = $derived(filteredRecords.slice((currentRecordPage - 1) * recordPageSize, currentRecordPage * recordPageSize));
+  const recordRangeStart = $derived(filteredRecords.length === 0 ? 0 : (currentRecordPage - 1) * recordPageSize + 1);
+  const recordRangeEnd = $derived(Math.min(currentRecordPage * recordPageSize, filteredRecords.length));
+
+  let recordFilter = $state('');
+  // 筛选词变化时回到第一页。首次运行只记录当前筛选，不打断用户翻页。
+  $effect(() => {
+    const filter = `${searchQuery}\n${ownerQuery}`;
+    if (filter === recordFilter) return;
+    recordFilter = filter;
+    recordPage = 1;
+  });
 
   // 示例只使用本地状态。业务方仍可替换这些处理函数，这里展示搜索、草稿、失败和重试的完整路径。
   function startCreate(): void {
@@ -177,6 +226,7 @@
       { id: `local-${records.length + 1}`, name, owner: formOwner.trim() || 'Unassigned', status: 'Approved', amount: '$0' },
       ...records,
     ];
+    resultSubtitle = `Published “${name}”.`;
     submission = { status: 'published', message: `Published “${name}”.` };
     selectTemplate('result');
   }
@@ -261,7 +311,7 @@
         <div role="row" class="is-head">
           <span role="columnheader">Record</span><span role="columnheader">Owner</span><span role="columnheader">Amount</span><span role="columnheader">Status</span>
         </div>
-        {#each filteredRecords as record (record.id)}
+        {#each pagedRecords as record (record.id)}
           <div role="row">
             <span role="cell">{record.name}</span><span role="cell">{record.owner}</span><span role="cell">{record.amount}</span><span role="cell">{record.status}</span>
           </div>
@@ -321,14 +371,23 @@
     {/snippet}
     {#snippet stepContent(index: number)}
       <div class="svadmin-template-gallery__form">
+        {#if stepError}
+          <p class="svadmin-template-gallery__status" role="status" data-submission="failed">{stepError}</p>
+        {/if}
         {#if index === 0}
-          <label>Name<Input placeholder="Workspace name" /></label>
-          <label>Owner<Input placeholder="Owner" /></label>
+          <label>Name<Input aria-label="Step workspace name" placeholder="Workspace name" bind:value={stepName} /></label>
+          <label>Owner<Input aria-label="Step workspace owner" placeholder="Owner" bind:value={stepOwner} /></label>
         {:else if index === 1}
-          <label>Team<Input placeholder="Team or group" /></label>
-          <label>Visibility<Input placeholder="Private or company" /></label>
+          <label>Team<Input aria-label="Step team" placeholder="Team or group" bind:value={stepTeam} /></label>
+          <label>Visibility<Input aria-label="Step visibility" placeholder="Private or company" bind:value={stepVisibility} /></label>
         {:else}
           <p>Review the information and publish the workspace.</p>
+          <dl class="svadmin-template-gallery__details">
+            <div><dt>Name</dt><dd>{stepName.trim() || 'Missing name'}</dd></div>
+            <div><dt>Owner</dt><dd>{stepOwner.trim() || 'Unassigned'}</dd></div>
+            <div><dt>Team</dt><dd>{stepTeam.trim() || 'No team'}</dd></div>
+            <div><dt>Visibility</dt><dd>{stepVisibility.trim() || 'Unspecified'}</dd></div>
+          </dl>
         {/if}
       </div>
     {/snippet}
@@ -464,13 +523,21 @@
       <Button variant="outline" size="sm">Export</Button>
     {/snippet}
     {#snippet pagination()}
-      <ListPagination page={1} totalPages={8} total={72} rangeStart={1} rangeEnd={10} label="Records" onPageChange={() => {}} />
+      <ListPagination
+        page={currentRecordPage}
+        totalPages={recordTotalPages}
+        total={filteredRecords.length}
+        rangeStart={recordRangeStart}
+        rangeEnd={recordRangeEnd}
+        label="Records"
+        onPageChange={(page) => { recordPage = page; }}
+      />
     {/snippet}
     {#snippet cardTabs()}
       <SegmentedControl options={cardScopeOptions} bind:value={cardScope} ariaLabel="Card category" />
     {/snippet}
     {#snippet addCard()}
-      <Button variant="outline" size="sm">+ Add card</Button>
+      <Button variant="outline" size="sm" onclick={appendCard}>+ Add card</Button>
     {/snippet}
     {#snippet detailSteps()}
       <Steps current={1} items={approvalSteps} />
@@ -516,7 +583,7 @@
     {:else if active === 'user-settings'}
       <UserSettingsTemplate title="User settings" description="Manage profile, security and identity verification" basic={userBasicSettings} security={userSecuritySettings} verification={userVerificationSettings} />
     {:else if active === 'result'}
-      <ResultTemplate status="success" title="Workspace published" subtitle="Invitations are on the way." actions={resultActions} details={detailsBlock} />
+      <ResultTemplate status="success" title="Workspace published" subtitle={resultSubtitle} actions={resultActions} details={detailsBlock} />
     {:else if active === 'result-error'}
       <ResultTemplate status="failure" title="Publish failed" subtitle="Resolve the validation errors and try again." actions={retryActions} details={detailsBlock} />
     {:else if active === 'exception'}

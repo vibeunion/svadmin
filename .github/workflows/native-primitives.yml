@@ -34,7 +34,7 @@ jobs:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.2'
+          bun-version: '1.4.4'
       - run: bun install --frozen-lockfile
       - run: node --test scripts/no-tailwind-contract.test.mjs
       - run: node scripts/check-no-tailwind.mjs
@@ -53,7 +53,7 @@ jobs:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.2'
+          bun-version: '1.4.4'
       - run: mkdir -p "$RUNNER_TEMP/native-primitives/logs"
       - run: bun install --frozen-lockfile
       - name: Build native component packages

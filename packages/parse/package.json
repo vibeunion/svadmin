@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/parse",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Parse DataProvider adapter — bridge @refinedev/parse to svadmin",
   "type": "module",
   "sideEffects": false,

@@ -86,6 +86,42 @@ describe('url-sync',() => {
     expect(readURLState().filters).toEqual(filters);
   });
 
+  test('round-trips Refine operators and keyed conditional filters',() => {
+    const filters: Filter[]=[
+      { field: 'title',operator: 'containss',value: 'Draft' },
+      { field: 'status',operator: 'eqs',value: 'Open' },
+      { field: 'tags',operator: 'ina',value: ['a','b'] },
+      { field: 'name',operator: 'nstartswith',value: 'x' },
+      {
+        key: 'parent',
+        operator: 'or',
+        value: [
+          { field: 'city',operator: 'ncontainss',value: 'HQ' },
+          {
+            key: 'child',
+            operator: 'and',
+            value: [{ field: 'code',operator: 'endswiths',value: 'Z' }],
+          },
+        ],
+      },
+    ];
+
+    writeURLState({ filters });
+
+    expect(readURLState().filters).toEqual(filters);
+    const sanitized = sanitizeListQueryParams({ filters: JSON.stringify(filters) })['filters'];
+    expect(JSON.parse(sanitized ?? 'null')).toEqual(filters);
+  });
+
+  test('rejects conditional filters with an empty or oversized key',() => {
+    const missingKey={ operator: 'or',key: '',value: [{ field: 'status',operator: 'eq',value: 'open' }] };
+    const hugeKey={ operator: 'or',key: 'k'.repeat(129),value: [{ field: 'status',operator: 'eq',value: 'open' }] };
+    requireValue(mockWindow).setHash(`#/posts?filters=${encodeURIComponent(JSON.stringify([missingKey]))}`);
+    expect(readURLState().filters).toBeUndefined();
+    requireValue(mockWindow).setHash(`#/posts?filters=${encodeURIComponent(JSON.stringify([hugeKey]))}`);
+    expect(readURLState().filters).toBeUndefined();
+  });
+
   test('round-trips a detail drawer id without discarding other resource state',() => {
     requireValue(mockWindow).setHash('#/posts?q=active&records=1');
 

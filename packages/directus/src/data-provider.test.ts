@@ -123,6 +123,29 @@ describe('createDirectusDataProvider', () => {
     });
   });
 
+  it('maps case-sensitive string operators and rejects array-contains operators', async () => {
+    setupMockFetch({ data: [], meta: { total_count: 0 } });
+    await provider.getList({
+      resource: 'posts',
+      filters: [
+        { field: 'title', operator: 'eqs', value: 'Open' },
+        { field: 'title', operator: 'nstartswith', value: 'A' },
+      ],
+    });
+    const [rawUrl] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const filter = JSON.parse(requiredSearchParam(new URL(rawUrl).searchParams, 'filter'));
+    expect(filter).toEqual({
+      _and: [
+        { title: { _eq: 'Open' } },
+        { title: { _nstarts_with: 'A' } },
+      ],
+    });
+    await expect(provider.getList({
+      resource: 'posts',
+      filters: [{ field: 'tags', operator: 'ina', value: ['a'] }],
+    })).rejects.toThrow('Unsupported Directus filter operator: ina');
+  });
+
   it('rejects unsupported runtime filter operators instead of falling back to equality', async () => {
     setupMockFetch({ data: [], meta: { total_count: 0 } });
     const unsupported = {

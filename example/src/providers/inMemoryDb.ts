@@ -1106,7 +1106,6 @@ function matchesBetween(value: unknown, target: unknown, negate: boolean): boole
 function matchesFieldFilter(item: BaseRecord, filter: FieldFilter): boolean {
   const value = item[filter.field];
   const target = filter.value;
-
   switch (filter.operator) {
     case 'eq':
       return String(value) === String(target);
@@ -1141,6 +1140,7 @@ function matchesFieldFilter(item: BaseRecord, filter: FieldFilter): boolean {
     case 'nbetween':
       return matchesBetween(value, target, true);
   }
+  throw new Error(`Unsupported demo filter operator: ${filter.operator}`);
 }
 
 function matchesFilter(item: BaseRecord, filter: Filter): boolean {

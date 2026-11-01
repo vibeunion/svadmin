@@ -276,7 +276,10 @@ test('infer CLI previews in dry-run and generates files on --write', async () =>
     expect(generatedSchema).toContain('export const CustomerSchema = Type.Object({');
 
     const generatedList = await readFile(join(outDir, 'customers/ListPage.svelte'), 'utf8');
-    expect(generatedList).toContain('<ListPage resourceName="customers">');
+    expect(generatedList).toContain("import { customersDefinition } from '../customers.resource'");
+    expect(generatedList).toContain('const resourceName = customersDefinition.name');
+    expect(generatedList).toContain('<ListPage {resourceName}>');
+    expect(generatedList).toContain('<AutoTable {resourceName} />');
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }

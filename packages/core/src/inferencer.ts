@@ -5,6 +5,12 @@
  * Can also generate copy-paste-ready Svelte component code.
  */
 import type { FieldDefinition, ResourceDefinition } from './types';
+import {
+  closedValueExpression,
+  getContractExpression,
+  propertyKey,
+  rememberContractExpression,
+} from './inferencer-contract';
 
 // ─── Field Type Inference ────────────────────────────────────
 
@@ -244,11 +250,21 @@ export function inferResource(
     }
 
     if (field.type === 'json' || field.type === 'richtext') {
-      warnings.push({
-        code: 'unconstrained-field',
-        field: key,
-        message: `Field "${key}" is omitted from the strict ResourceContract because its value is not a closed JSON type.`,
-      });
+      const observed = sampleData.flatMap((row) => (
+        Object.prototype.hasOwnProperty.call(row, key) ? [row[key]] : []
+      ));
+      const expression = closedValueExpression(observed, 0, new WeakSet());
+      if (expression) {
+        rememberContractExpression(field, expression);
+      } else if (field.type === 'richtext') {
+        rememberContractExpression(field, 'Type.String()');
+      } else {
+        warnings.push({
+          code: 'unconstrained-field',
+          field: key,
+          message: `Field "${key}" is omitted from the strict ResourceContract because its sample shape is not a closed JSON value. Author the contract by hand.`,
+        });
+      }
     }
 
     fields.push(field);
@@ -302,10 +318,6 @@ export function inferResource(
 
 // ─── Code Generation ─────────────────────────────────────────
 
-function propertyKey(key: string): string {
-  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
-}
-
 function moduleName(resource: ResourceDefinition): string {
   const safe = resource.name.replace(/[^A-Za-z0-9_$]/g, '_');
   return /^[A-Za-z_$]/.test(safe) ? safe : `resource_${safe}`;
@@ -343,8 +355,9 @@ function contractTypeExpression(field: FieldDefinition): string | null {
     case 'daterange':
       return 'Type.Union([Type.Object({ start: Type.Union([Type.String(), Type.Null()]), end: Type.Union([Type.String(), Type.Null()]) }, { additionalProperties: false }), Type.Null()])';
     case 'json':
+      return getContractExpression(field) ?? null;
     case 'richtext':
-      return null;
+      return getContractExpression(field) ?? 'Type.String()';
     case 'datetime':
     case 'time':
     case 'textarea':
@@ -412,6 +425,17 @@ function definitionFields(resource: ResourceDefinition): FieldDefinition[] {
   return [idDefinition, ...rest];
 }
 
+function handAuthoredContractNotes(resource: ResourceDefinition): string {
+  const notes = resource.fields.flatMap((field) => {
+    if (field.type !== 'json' && field.type !== 'richtext') return [];
+    if (contractTypeExpression(field) !== null) return [];
+    return [
+      `// @svadmin hand-authored-contract ${JSON.stringify(field.key)}: ${field.type} is omitted from the strict contract because its sample shape is not a closed JSON value. Author a closed Type.Object schema before records containing this field can pass validation.`,
+    ];
+  });
+  return notes.length > 0 ? `${notes.join('\n')}\n` : '';
+}
+
 function generateCode(resource: ResourceDefinition): string {
   const name = moduleName(resource);
   const literalName = resource.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -431,7 +455,7 @@ function generateCode(resource: ResourceDefinition): string {
   return `import { Type } from 'typebox';
 import { defineResource, type AdminResourceDefinition } from '@svadmin/core';
 
-${projection}${objectConst(`${name}RecordSchema`, recordProps)}
+${projection}${handAuthoredContractNotes(resource)}${objectConst(`${name}RecordSchema`, recordProps)}
 
 ${objectConst(`${name}CreateSchema`, createProps)}
 
@@ -602,7 +626,7 @@ export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string 
         typeDef = "Type.Array(Type.String({ format: 'uri' }))";
         break;
       case 'json':
-        typeDef = 'Type.Record(Type.String(), Type.Unknown())';
+        typeDef = getContractExpression(f) ?? 'Type.Record(Type.String(), Type.Unknown())';
         break;
       case 'select':
         if (f.options && f.options.length > 0) {
@@ -615,8 +639,10 @@ export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string 
       case 'relation':
         typeDef = 'Type.Union([Type.String(), Type.Number()])';
         break;
-      case 'textarea':
       case 'richtext':
+        typeDef = getContractExpression(f) ?? 'Type.String()';
+        break;
+      case 'textarea':
       case 'text':
       default:
         typeDef = 'Type.String()';

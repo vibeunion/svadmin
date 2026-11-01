@@ -26,10 +26,21 @@
 	import * as Tooltip from "../tooltip/index.js";
 	import { useComponentConfig } from "../../ConfigProvider.svelte";
 
+	const BUTTON_VARIANTS = new Set(["default", "outline", "secondary", "ghost", "destructive", "link", "dashed", "text"]);
+	const BUTTON_SIZES = new Set(["default", "xs", "sm", "lg", "icon", "icon-xs", "icon-sm", "icon-lg"]);
+
+	function readButtonVariant(value: unknown): ButtonVariantValue | undefined {
+		return typeof value === "string" && BUTTON_VARIANTS.has(value) ? value as ButtonVariantValue : undefined;
+	}
+
+	function readButtonSize(value: unknown): ButtonSizeValue | undefined {
+		return typeof value === "string" && BUTTON_SIZES.has(value) ? value as ButtonSizeValue : undefined;
+	}
+
 	const uid = $props.id();
 	let {
 		class: className,
-		variant = "default",
+		variant: variantProp,
 		size: sizeProp,
 		ref = $bindable(null),
 		href = undefined,
@@ -45,7 +56,9 @@
 	}: ButtonProps = $props();
 
 	const config = useComponentConfig();
-	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "sm" : config.componentSize === "lg" ? "lg" : "default"));
+	const buttonDefaults = $derived(config.componentDefaults['Button'] ?? {});
+	const variant = $derived(variantProp ?? readButtonVariant(buttonDefaults['variant']) ?? "default");
+	const size = $derived(sizeProp ?? readButtonSize(buttonDefaults['size']) ?? (config.density === "compact" || config.componentSize === "sm" ? "sm" : config.componentSize === "lg" ? "lg" : "default"));
 
 	const restriction = $derived((disabledReason ?? "").trim());
 	const isDisabled = $derived(Boolean(disabled || restriction));

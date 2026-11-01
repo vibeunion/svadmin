@@ -75,7 +75,7 @@ Complete reference for all `@svadmin/ui` components.
 | ResizeBox | Pointer and keyboard resizable container / 可调整容器 |
 | Tour | Guided step overlay / 引导式步骤 |
 | Menu | Recursive navigation menu / 递归导航菜单 |
-| ConfigProvider | Component size, density, direction and locale defaults / 组件尺寸、密度、方向与语言默认值 |
+| ConfigProvider | Size, density, direction, and locale. `componentDefaults` currently applies to Button, EmptyState, and ListPagination only / 尺寸、密度、方向与语言。`componentDefaults` 目前只作用于 Button、EmptyState、ListPagination |
 | Progress | Determinate progress bar / 进度条 |
 | Popover | Anchored popover primitive / 浮层 |
 | Overflow | Visible slice with dropdown remainder / 自适应溢出列表 |

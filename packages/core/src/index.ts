@@ -56,7 +56,7 @@ export {
   useNavigation, useGo, useBack,
   useGetToPath, useLink,
   useMutationMode, useWarnAboutChange, useSyncWithLocation, useMeta,
-  useResource,
+  useResource, useResourceParams, useKeys,
   useModal, useDrawer,
   useOvertime, useLoadingOvertime,
   useTitle,
@@ -65,7 +65,7 @@ export {
   resetSidebarCollapsed,
 } from './hooks.svelte';
 export {
-  useList, useOne, useShow, useMany, useInfiniteList, useSelect, useTable,
+  useList, useSimpleList, useOne, useShow, useMany, useInfiniteList, useSelect, useTable,
   useCreate, useUpdate, useDelete, useCreateMany, useUpdateMany, useDeleteMany, useForm,
   useInvalidate,
 } from './strict-hooks.svelte';
@@ -225,7 +225,7 @@ export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.s
 export { checkError } from './hook-utils.svelte';
 export type { NotificationConfig, OvertimeOptions, OvertimeResult, LiveSubscriptionParams } from './hook-utils.svelte';
 
-export { DeleteManyPartialError, HttpError, UndoError } from './types';
+export { CRUD_FIELD_OPERATORS, DeleteManyPartialError, HttpError, UndoError, isCrudFieldOperator } from './types';
 export { withResourceSchemas } from './resource-schemas';
 export type { ResourceSchemas, ResourceSchemaMap, InferSchemaResourceMap, InferSchemaInputMap } from './resource-schemas';
 export type {

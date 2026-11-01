@@ -161,6 +161,59 @@ preset id in your own `themeConfig` when you rename a registered preset.
 Use `registerColorPreset()` to add a custom preset, or use
 `setColorTheme()`/`getColorThemes()` for runtime selection.
 
+## App defaults
+
+`ConfigProvider` is the app-level place to set defaults once. Descendants read them
+through `useComponentConfig()`, and later changes flow through like `locale` and
+`componentSize`.
+
+| Prop | Purpose |
+|------|---------|
+| `componentDefaults` | Default props for the components that read this map today: `Button`, `Empty` (`EmptyState`), and `Pagination` (`ListPagination`). An explicit prop wins. Input, Select, Badge, and Tag do not read this map; they still follow `componentSize` and `density`. |
+| `empty` | Default empty-state title, description, and image. |
+| `pagination` | Default page size, page-size options, summary, simple mode, and jumper. |
+| `getPopupContainer` | Element or selector where popups and overlays mount. The callback receives the trigger or anchor node for Dropdown, Popover, Dialog, Sheet, and Tooltip, so `node?.closest(...)` can see the source tree. The default is `document.body`. |
+
+```svelte
+<ConfigProvider
+  componentDefaults={{ Button: { variant: 'outline' } }}
+  empty={{ title: 'Nothing here', description: 'Create the first record.' }}
+  pagination={{ pageSize: 20, showJumper: true }}
+  getPopupContainer={(node) => node?.closest('.workspace') ?? document.body}
+>
+  <AdminApp {dataProvider} {resources} />
+</ConfigProvider>
+```
+
+## Custom routes and direct URLs
+
+Resource list, create, edit, show, and clone routes already pass through
+`ResourceAccessGuard`. A `pageRoutes` entry does not. When the route omits
+`access`, `AdminApp` inherits the most specific menu item whose `href` matches
+the current path and uses that item's `meta.resource` and `meta.action`
+(`list` when the action is omitted). A more specific menu item without
+`meta.resource` stays public. `access: false` keeps the route public even when
+a parent menu item is protected.
+
+```svelte
+<AdminApp
+  {dataProvider}
+  {resources}
+  {accessControlProvider}
+  menu={[
+    { name: 'reports', label: 'Reports', href: '/reports', meta: { resource: 'reports', action: 'list' } },
+  ]}
+  pageRoutes={[
+    { path: '/reports', component: ReportsPage },
+    { path: '/reports/:id', component: ReportPage, access: { resource: 'reports', action: 'show', idParam: 'id' } },
+  ]}
+/>
+```
+
+Opening `#/reports` checks `reports:list`. Opening `#/reports/42` checks
+`reports:show` for id `42`. These checks only affect presentation. The backend
+still has to enforce the same policy.
+
 ## Internationalization (I18n)
 
 `@svadmin/core` includes a lightweight internationalization system via the `useTranslation` hook. In components, keep the returned object intact and access its properties in markup so Svelte reads the latest values during render:

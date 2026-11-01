@@ -1,4 +1,4 @@
-import type { BaseRecord } from './types';
+import type { BaseRecord, Filter } from './types';
 import { HttpError } from './types';
 import type { RecordDecoder } from './record-decoder';
 import { snapshotPlainData, type JsonValue } from './plain-data';
@@ -83,6 +83,40 @@ export function createSelectProjection<T extends BaseRecord, R extends { data: T
     if (!entry.options) throw new HttpError('Invalid select option', 422, undefined, { code: 'INVALID_SELECT_OPTION' });
     return { ...result, options: entry.options.map(option => ({ ...option })) };
   };
+}
+
+export type SelectedOptionsOrder = 'in-place' | 'selected-first';
+
+export function normalizeSelectDefaultValue(
+  value: string | number | readonly (string | number)[] | null | undefined,
+): (string | number)[] {
+  if (typeof value === 'string' || (typeof value === 'number' && Number.isFinite(value))) return [value];
+  if (!Array.isArray(value)) return [];
+  const ids: (string | number)[] = [];
+  for (const item of value) {
+    if (typeof item === 'string' || (typeof item === 'number' && Number.isFinite(item))) ids.push(item);
+  }
+  return ids;
+}
+
+/** onSearch 优先；否则按 searchField 生成 contains 过滤。 */
+export function selectQueryFilters(input: {
+  text: string;
+  searchField?: string;
+  searched?: Filter[] | undefined;
+}): Filter[] {
+  if (!input.text) return [];
+  if (input.searched) return input.searched;
+  if (input.searchField) return [{ field: input.searchField, operator: 'contains', value: input.text }];
+  return [];
+}
+
+export function orderSelectOptions(
+  list: SelectOption[],
+  selected: SelectOption[],
+  order: SelectedOptionsOrder = 'in-place',
+): SelectOption[] {
+  return order === 'selected-first' ? mergeSelectOptions(selected, list) : mergeSelectOptions(list, selected);
 }
 
 export function mergeSelectOptions(...groups: SelectOption[][]): SelectOption[] {
