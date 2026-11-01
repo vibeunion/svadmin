@@ -30,7 +30,7 @@ jobs:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.2'
+          bun-version: '1.4.4'
       - run: bun install --frozen-lockfile
       - name: Build published native UI styles
         run: bun run --cwd packages/devtools-contract build && bun run --cwd packages/devtools build && bun run --cwd packages/ai-elements build && bun run --cwd packages/ui build && bun run --cwd packages/surface build

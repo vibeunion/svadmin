@@ -71,7 +71,7 @@ describe('useEditableTable contract', () => {
     table.setCell(0, 'title', 12);
     await table.submit();
     expect(table.snapshot().errors['1']).toBe('Invalid update input');
-    expect(table.snapshot().rows[0]?.title).toBe(12);
+    expect(table.snapshot().rows[0]?.['title']).toBe(12);
     expect(data.updates).toHaveLength(0);
 
     table.setCell(0, 'title', 'Two');
@@ -82,11 +82,11 @@ describe('useEditableTable contract', () => {
 
     await table.retry();
     expect(table.snapshot().failure).toBeNull();
-    expect(table.snapshot().rows[0]?.title).toBe('Two');
+    expect(table.snapshot().rows[0]?.['title']).toBe('Two');
 
     await table.submitBatch({ title: 'Batch' });
     expect(data.batches).toEqual([{ title: 'Batch' }]);
-    expect(table.snapshot().rows[0]?.title).toBe('Batch');
+    expect(table.snapshot().rows[0]?.['title']).toBe('Batch');
   });
 
   test('creates a new row through the create schema', async () => {
@@ -98,7 +98,7 @@ describe('useEditableTable contract', () => {
     table.setCell(createdIndex, 'title', 'Fresh');
     await table.submit();
     expect(table.snapshot().failure).toBeNull();
-    expect(table.snapshot().rows.some((row) => row.title === 'Fresh' && row.id === '2')).toBe(true);
+    expect(table.snapshot().rows.some((row) => row['title'] === 'Fresh' && row['id'] === '2')).toBe(true);
   });
 
   test('ignores a second submit while the first create is still in flight', async () => {
@@ -135,8 +135,8 @@ describe('useEditableTable contract', () => {
     table.setCell(createdIndex, 'title', 'Fresh');
     await table.submit();
     expect(table.snapshot().failure).toBe('1 row(s) were not saved');
-    expect(table.snapshot().rows.some((row) => row.title === 9 || row.id === 2)).toBe(false);
-    expect(table.snapshot().rows[createdIndex]?.title).toBe('Fresh');
+    expect(table.snapshot().rows.some((row) => row['title'] === 9 || row['id'] === 2)).toBe(false);
+    expect(table.snapshot().rows[createdIndex]?.['title']).toBe('Fresh');
   });
 
   test('loads with the caller filters, sorters, and pagination', async () => {
@@ -172,7 +172,7 @@ describe('useEditableTable contract', () => {
     const retried = createEditableTableController(posts, data, { retry: 1 });
     await retried.load();
     expect(reads).toBe(2);
-    expect(retried.snapshot().rows[0]?.title).toBe('One');
+    expect(retried.snapshot().rows[0]?.['title']).toBe('One');
 
     const invalid = provider();
     invalid.getList = async () => ({ data: [{ id: '1' }], total: 1 });

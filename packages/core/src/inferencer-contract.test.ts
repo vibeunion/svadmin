@@ -3,7 +3,7 @@ import { rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { inferResource } from './inferencer';
-import { getContractFormFields, parseContractCreateInput, parseContractUpdateInput, resolveResourceContract } from './resource-contract';
+import { getContractFormFields, parseContractCreateInput, parseContractRecord, parseContractUpdateInput, resolveResourceContract } from './resource-contract';
 
 describe('inferred ResourceContract', () => {
   test('compiles and satisfies AutoTable and AutoForm resolution', async () => {
@@ -90,7 +90,6 @@ describe('inferred ResourceContract', () => {
         .replace(': AdminResourceDefinition', '');
       await writeFile(file, executable);
       const loaded = await import(`${pathToFileURL(file).href}?t=${Date.now()}`);
-      const { parseContractRecord } = await import('./resource-contract.ts');
       const contract = loaded.articlesResource;
       expect(parseContractRecord(contract, {
         id: 'a1',
@@ -104,7 +103,7 @@ describe('inferred ResourceContract', () => {
         id: 'a2',
         title: 'Second',
         metadata: { source: 'api', flags: { featured: false }, note: 'later' },
-      }).metadata).toMatchObject({ note: 'later' });
+      })['metadata']).toMatchObject({ note: 'later' });
       expect(() => parseContractRecord(contract, {
         id: 'a3',
         title: 'Third',
@@ -129,7 +128,6 @@ describe('inferred ResourceContract', () => {
         .replace(': AdminResourceDefinition', '');
       await writeFile(file, executable);
       const loaded = await import(`${pathToFileURL(file).href}?t=${Date.now()}`);
-      const { parseContractRecord } = await import('./resource-contract.ts');
       expect(parseContractRecord(loaded.blobsResource, { id: 'b1' })).toMatchObject({ id: 'b1' });
       expect(() => parseContractRecord(loaded.blobsResource, { id: 'b1', metadata: [] })).toThrow(/Invalid provider response/);
     } finally {
