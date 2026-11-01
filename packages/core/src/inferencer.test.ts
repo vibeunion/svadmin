@@ -12,6 +12,7 @@ import {
   generateShowPageCode,
   generateComponentCode,
   generateResourceBundle,
+  generateResourceContractCode,
 } from './inferencer';
 
 describe('inferFieldType',() => {
@@ -297,5 +298,16 @@ describe('generateResourceBundle',() => {
     expect(bundle.componentCode.create).toContain('<CreatePage {resourceName}>');
     expect(bundle.componentCode.edit).toContain('<EditPage {resourceName} {id}>');
     expect(bundle.componentCode.show).toContain('<ShowPage {resourceName} {id}>');
+    const richtext = generateResourceContractCode({
+      name: 'articles',
+      label: 'Articles',
+      primaryKey: 'id',
+      fields: [
+        { key: 'id', label: 'ID', type: 'text' },
+        { key: 'body', label: 'Body', type: 'richtext' },
+      ],
+    });
+    expect(richtext).toContain('body: Type.Optional(Type.String())');
+    expect(richtext).not.toContain('@svadmin hand-authored-contract "body"');
   });
 });
