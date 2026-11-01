@@ -57,7 +57,7 @@ function inheritedMenuAccess(menu: readonly MenuItem[] | undefined, pathname: st
   for (const item of menu ?? []) best = consider(item, current, best);
   const resource = best?.item.meta?.resource;
   if (!resource) return undefined;
-  const action = best.item.meta?.action;
+  const action = best?.item.meta?.action;
   return { resource, action: action && action.length > 0 ? action : 'list' };
 }
 

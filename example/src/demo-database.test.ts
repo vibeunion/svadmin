@@ -55,6 +55,13 @@ describe('demo schemas and storage boundary', () => {
     }
   });
 
+  test('rejects unsupported filter operators instead of silently hiding records', async () => {
+    await expect(provider.getList({
+      resource: 'todos',
+      filters: [{ field: 'title', operator: 'containss', value: 'Task' }],
+    })).rejects.toThrow('Unsupported demo filter operator: containss');
+  });
+
   test('rejects missing resources, extra resources and malformed row collections', () => {
     const missing = fixture();
     delete missing['todos'];

@@ -56,9 +56,9 @@
 	}: ButtonProps = $props();
 
 	const config = useComponentConfig();
-	const buttonDefaults = $derived(config.componentDefaults.Button ?? {});
-	const variant = $derived(variantProp ?? readButtonVariant(buttonDefaults.variant) ?? "default");
-	const size = $derived(sizeProp ?? readButtonSize(buttonDefaults.size) ?? (config.density === "compact" || config.componentSize === "sm" ? "sm" : config.componentSize === "lg" ? "lg" : "default"));
+	const buttonDefaults = $derived(config.componentDefaults['Button'] ?? {});
+	const variant = $derived(variantProp ?? readButtonVariant(buttonDefaults['variant']) ?? "default");
+	const size = $derived(sizeProp ?? readButtonSize(buttonDefaults['size']) ?? (config.density === "compact" || config.componentSize === "sm" ? "sm" : config.componentSize === "lg" ? "lg" : "default"));
 
 	const restriction = $derived((disabledReason ?? "").trim());
 	const isDisabled = $derived(Boolean(disabled || restriction));

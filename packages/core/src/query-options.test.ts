@@ -21,7 +21,8 @@ describe('list query options', () => {
     expect(settings.refetchOnWindowFocus).toBe('always');
     expect(settings.placeholderData).toBe(placeholder);
     expect(settings.staleTime).toBe(0);
-    expect(settings.retryDelay?.(2, new Error('x'))).toBe(2);
+    if (typeof settings.retryDelay !== 'function') throw new Error('Expected the retry delay callback');
+    expect(settings.retryDelay(2, new Error('x'))).toBe(2);
 
     const selected = applyListSelect({ data: [{ id: 1 }, { id: 2 }], total: 2 }, (result) => ({
       ...result,

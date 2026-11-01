@@ -109,7 +109,7 @@ describe('url-sync',() => {
     writeURLState({ filters });
 
     expect(readURLState().filters).toEqual(filters);
-    const sanitized = sanitizeListQueryParams({ filters: JSON.stringify(filters) }).filters;
+    const sanitized = sanitizeListQueryParams({ filters: JSON.stringify(filters) })['filters'];
     expect(JSON.parse(sanitized ?? 'null')).toEqual(filters);
   });
 
