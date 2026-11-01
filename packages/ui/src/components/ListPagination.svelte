@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { HTMLAttributes } from 'svelte/elements';
   import { useTranslation } from '@svadmin/core/i18n';
+  import { useComponentConfig, DEFAULT_PAGE_SIZE_OPTIONS } from './ConfigProvider.svelte';
   import { listText } from './list-i18n.js';
   import { listPaginationItems } from './list-pagination.js';
 
@@ -30,11 +31,11 @@
     rangeStart = 0,
     rangeEnd = 0,
     pageSize,
-    pageSizeOptions = [10, 20, 50],
+    pageSizeOptions,
     pageSizeLabel,
-    showSummary = true,
-    simple = false,
-    showJumper = false,
+    showSummary,
+    simple,
+    showJumper,
     onPageChange,
     onPageSizeChange,
     class: className = '',
@@ -42,6 +43,53 @@
   }: Props = $props();
 
   const i18n = useTranslation();
+  const config = useComponentConfig();
+
+  function booleanDefault(value: unknown): boolean | undefined {
+    return typeof value === 'boolean' ? value : undefined;
+  }
+
+  function numberList(value: unknown): readonly number[] | undefined {
+    if (!Array.isArray(value) || value.length === 0) return undefined;
+    if (value.some((item) => typeof item !== 'number' || !Number.isFinite(item))) return undefined;
+    return value;
+  }
+
+  function numberDefault(value: unknown): number | undefined {
+    return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+  }
+
+  const paginationDefaults = $derived(config.pagination);
+  const paginationComponentDefaults = $derived(config.componentDefaults.Pagination ?? {});
+  const resolvedPageSizeOptions = $derived(
+    pageSizeOptions
+      ?? paginationDefaults.pageSizeOptions
+      ?? numberList(paginationComponentDefaults.pageSizeOptions)
+      ?? DEFAULT_PAGE_SIZE_OPTIONS,
+  );
+  const resolvedShowSummary = $derived(
+    showSummary
+      ?? paginationDefaults.showSummary
+      ?? booleanDefault(paginationComponentDefaults.showSummary)
+      ?? true,
+  );
+  const resolvedSimple = $derived(
+    simple
+      ?? paginationDefaults.simple
+      ?? booleanDefault(paginationComponentDefaults.simple)
+      ?? false,
+  );
+  const resolvedShowJumper = $derived(
+    showJumper
+      ?? paginationDefaults.showJumper
+      ?? booleanDefault(paginationComponentDefaults.showJumper)
+      ?? false,
+  );
+  const resolvedPageSize = $derived(
+    pageSize
+      ?? paginationDefaults.pageSize
+      ?? numberDefault(paginationComponentDefaults.pageSize),
+  );
 
   const items = $derived(listPaginationItems(page, totalPages));
   const paginated = $derived(totalPages > 1);
@@ -58,17 +106,17 @@
 
 {#if paginated}
   <div {...restProps} class={`svadmin-list-pagination ${className}`.trim()} role="navigation" aria-label={listText(i18n, 'listPagination.navigation', { label })}>
-    {#if showSummary}
+    {#if resolvedShowSummary}
       <div class="svadmin-list-pagination__info">
         <span>{listText(i18n, 'listPagination.range', { start: rangeStart, end: rangeEnd, total })}</span>
-        {#if onPageSizeChange && pageSize !== undefined}
+        {#if onPageSizeChange && resolvedPageSize !== undefined}
           <span class="svadmin-list-pagination__size">{pageSizeLabel ?? listText(i18n, 'listPagination.pageSizeLabel')}
             <select
               aria-label={listText(i18n, 'listPagination.pageSizeAria', { label })}
-              value={pageSize}
+              value={resolvedPageSize}
               onchange={(event) => onPageSizeChange?.(Number((event.currentTarget as HTMLSelectElement).value))}
             >
-              {#each pageSizeOptions as size (size)}<option value={size}>{listText(i18n, 'listPagination.pageSizeOption', { size })}</option>{/each}
+              {#each resolvedPageSizeOptions as size (size)}<option value={size}>{listText(i18n, 'listPagination.pageSizeOption', { size })}</option>{/each}
             </select>
           </span>
         {/if}
@@ -78,7 +126,7 @@
       <button type="button" class="svadmin-list-pagination__control" disabled={page <= 1}
         title={listText(i18n, page <= 1 ? 'listPagination.firstPage' : 'listPagination.previous')}
         aria-label={listText(i18n, 'listPagination.previousAria', { label })} onclick={() => onPageChange(page - 1)}>{listText(i18n, 'listPagination.previous')}</button>
-      {#if simple}
+      {#if resolvedSimple}
         <span class="svadmin-list-pagination__simple">{listText(i18n, 'listPagination.simplePage', { page, total: totalPages })}</span>
       {:else}
         <div class="svadmin-list-pagination__pages" role="group" aria-label={listText(i18n, 'listPagination.pageList', { label })}>
@@ -95,7 +143,7 @@
             {/if}
           {/each}
         </div>
-        {#if showJumper}
+        {#if resolvedShowJumper}
           <label class="svadmin-list-pagination__jumper">
             <span>{listText(i18n, 'listPagination.jumpTo')}</span>
             <input type="number" min="1" max={totalPages} value={page}
@@ -109,7 +157,7 @@
         aria-label={listText(i18n, 'listPagination.nextAria', { label })} onclick={() => onPageChange(page + 1)}>{listText(i18n, 'listPagination.next')}</button>
     </div>
   </div>
-{:else if showSummary}
+{:else if resolvedShowSummary}
   <p {...restProps} class={`svadmin-list-pagination__summary ${className}`.trim()}>{listText(i18n, 'common.total', { total })}</p>
 {/if}
 

@@ -64,6 +64,7 @@
   });
 
   const pageRoutes = [
+    // 直接打开这些路径时，若菜单项声明了 meta.resource，AdminApp 会按该权限拦截。
     { path: '/workspace', component: LazyWorkspaceTabs, title: 'Multi-tab Workspace' },
     { path: '/workspace/dock', component: LazyWorkspaceDock, title: 'Dock Workspace' },
     { path: '/templates', component: LazyTemplateGallery, title: 'Page Templates' },

@@ -153,6 +153,38 @@ interface FieldDefinition {
 可使用 `registerColorPreset()` 添加自定义预设，或使用
 `setColorTheme()`/`getColorThemes()` 在运行时切换。
 
+## 应用级默认值
+
+`ConfigProvider` 用来一次性设置应用默认值。子组件通过 `useComponentConfig()` 读取，后续变更会像 `locale` 和 `componentSize` 一样继续传递。
+
+| 属性 | 作用 |
+|------|------|
+| `componentDefaults` | 按组件名提供默认参数，例如 `{ Button: { variant: 'outline' } }`。组件上的显式属性优先。 |
+| `empty` | 空状态的默认标题、说明和插图。 |
+| `pagination` | 默认页大小、每页条数选项、摘要、简洁模式和跳页。 |
+| `getPopupContainer` | 弹出层和浮层的挂载元素或选择器。默认是 `document.body`。 |
+
+## 自定义路由与直接访问
+
+资源的列表、新建、编辑、详情和克隆路由已经经过 `ResourceAccessGuard`。`pageRoutes` 默认不会。路由省略 `access` 时，`AdminApp` 继承与当前路径最匹配的菜单项，并使用该项的 `meta.resource` 和 `meta.action`（省略 action 时为 `list`）。更具体的菜单项如果没有 `meta.resource`，则保持公开。`access: false` 让路由保持公开，即使父级菜单受保护。
+
+```svelte
+<AdminApp
+  {dataProvider}
+  {resources}
+  {accessControlProvider}
+  menu={[
+    { name: 'reports', label: 'Reports', href: '/reports', meta: { resource: 'reports', action: 'list' } },
+  ]}
+  pageRoutes={[
+    { path: '/reports', component: ReportsPage },
+    { path: '/reports/:id', component: ReportPage, access: { resource: 'reports', action: 'show', idParam: 'id' } },
+  ]}
+/>
+```
+
+打开 `#/reports` 会检查 `reports:list`。打开 `#/reports/42` 会按 id `42` 检查 `reports:show`。这些检查只影响界面展示，后端仍须执行同一策略。
+
 ## 国际化 (I18n)
 
 `@svadmin/core` 内置了基于 `useTranslation` 的轻量级多语言系统。在组件中建议保留返回对象，并在模板中通过属性访问，让 Svelte 在渲染时读取最新值：
