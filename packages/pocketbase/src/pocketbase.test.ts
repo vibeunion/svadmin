@@ -80,6 +80,35 @@ describe('PocketBase DataProvider', () => {
     expect(opts.filter).toContain("status = 'active'");
   });
 
+  test('executes keyed logical groups and fails closed for unsupported operators', async () => {
+    const { pb, mockCollection } = createMockPB();
+    const dp = createPocketBaseDataProvider({ pb });
+    await dp.getList({
+      resource: 'posts',
+      filters: [{
+        key: 'group',
+        operator: 'or',
+        value: [
+          { field: 'status', operator: 'eq', value: 'active' },
+          { field: 'title', operator: 'startswith', value: 'Hel' },
+          { field: 'title', operator: 'contains', value: "O'Reilly" },
+        ],
+      }],
+    });
+    const opts = requireValue(mockCollection.getList.mock.calls[0]?.[2]);
+    expect(opts.filter).toBe("(status = 'active' || title ~ 'Hel%' || title ~ 'O\\'Reilly')");
+
+    await expect(dp.getList({
+      resource: 'posts',
+      filters: [{ field: 'title', operator: 'containss', value: 'A' }],
+    })).rejects.toThrow('Unsupported pocketbase filter operator: containss');
+    await expect(dp.getList({
+      resource: 'posts',
+      filters: [{ field: 'title', operator: 'regex', value: '^A' } as never],
+    })).rejects.toThrow('Unsupported pocketbase filter operator: regex');
+    expect(mockCollection.getList).toHaveBeenCalledTimes(1);
+  });
+
   test('getOne returns single record', async () => {
     const { pb } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });

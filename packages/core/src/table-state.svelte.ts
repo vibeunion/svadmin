@@ -83,7 +83,9 @@ export class TableState {
           pageSize: urlState.pageSize??initPagination.pageSize,
         });
       }
-      if(urlState.sortField) {
+      if(urlState.sorters?.length) {
+        initSorters=urlState.sorters;
+      } else if(urlState.sortField) {
         initSorters=[{ field: urlState.sortField,order: urlState.sortOrder??'asc' }];
       }
       if(urlState.filters) {
@@ -114,8 +116,7 @@ export class TableState {
         writeURLState({
           page: this.pagination.current,
           pageSize: this.pagination.pageSize,
-          sortField: this.currentSorters[0]?.field,
-          sortOrder: this.currentSorters[0]?.order,
+          sorters: this.currentSorters,
           ...definedOptions({
             filters: this.currentFilters
           })

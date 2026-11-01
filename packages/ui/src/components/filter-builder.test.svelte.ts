@@ -293,6 +293,21 @@ describe('FilterBuilder component', () => {
     expect(onApply).toHaveBeenCalledWith(filters);
   });
 
+  it('round-trips keyed logical groups when applying', async () => {
+    const onApply = vi.fn();
+    const filters = [{
+      key: 'parent',
+      operator: 'or' as const,
+      value: [
+        { field: 'title', operator: 'contains' as const, value: 'Svelte' },
+        { key: 'child', operator: 'and' as const, value: [{ field: 'status', operator: 'eq' as const, value: 'published' }] },
+      ],
+    }];
+    const view = render(FilterBuilder, { fields: testFields, filters, onApply });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledWith(filters);
+  });
+
   it('fails closed on malformed input instead of applying the valid remainder', async () => {
     const onApply = vi.fn();
     const onInvalid = vi.fn();

@@ -160,6 +160,29 @@ describe('url-sync',() => {
     expect(readURLState().filters).toBeUndefined();
   });
 
+  test('round-trips the full sorter list and still reads a legacy single sort',() => {
+    const sorters=[{ field: 'title',order: 'desc' as const },{ field: 'id',order: 'asc' as const }];
+    writeURLState({ sorters });
+    expect(readURLState().sorters).toEqual(sorters);
+    expect(readURLState().sortField).toBe('title');
+    expect(readURLState().sortOrder).toBe('desc');
+    expect(sanitizeListQueryParams({
+      sorters: JSON.stringify(sorters),
+      sort: 'ignored',
+      order: 'asc',
+      token: 'secret',
+    })).toEqual({
+      sorters: JSON.stringify(sorters),
+      sort: 'title',
+      order: 'desc',
+    });
+
+    writeURLState({ sorters: [] });
+    expect(readURLState().sorters).toBeUndefined();
+    requireValue(mockWindow).setHash('#/posts?sort=createdAt&order=desc');
+    expect(readURLState().sorters).toEqual([{ field: 'createdAt', order: 'desc' }]);
+  });
+
   test('sanitizes list query state and drops non-list parameters',() => {
     const filters=[{ field: 'status',operator: 'eq',value: 'open' }];
     expect(sanitizeListQueryParams({

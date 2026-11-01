@@ -19,20 +19,24 @@ import { decodeBaseRecord, decodeListResult, decodeOneResult, decodeManyResult, 
 import { HttpError } from './types';
 import { extendReactiveMembers } from './reactive-projection';
 import { captureQueryProvider, snapshotListParams, snapshotOneParams, snapshotManyParams } from './query-snapshot';
-import { applyListSelect, listQuerySettings, type ResourceQueryOptions } from './query-options';
+import { listQuerySettings, type ResourceQueryOptions } from './query-options';
 
 // ─── useList ───────────────────────────────────────────────────
 
 export type MaybeGetter<T>=T|(() => T);
 
-export interface UseListOptions<_TData extends BaseRecord=BaseRecord,_TError=HttpError> extends ContractOptions {
+export interface UseListOptions<
+  _TData extends BaseRecord=BaseRecord,
+  _TError=HttpError,
+  TSelected=GetListResult<_TData>,
+> extends ContractOptions {
   resource?: KnownResources;
   pagination?: Pagination;
   sorters?: Sort[];
   filters?: Filter[];
   meta?: Record<string,unknown>;
   dataProviderName?: string;
-  queryOptions?: ResourceQueryOptions<GetListResult<_TData>>;
+  queryOptions?: ResourceQueryOptions<GetListResult<_TData>, TSelected>;
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -45,8 +49,8 @@ export function useList(optionsOrGetter: MaybeGetter<UseListOptions>={}) {
   return createListQuery(optionsOrGetter, () => decodeBaseRecord);
 }
 
-export function createListQuery<TData extends BaseRecord>(
-  optionsOrGetter: MaybeGetter<UseListOptions>, getDecoder: () => RecordDecoder<TData>,
+export function createListQuery<TData extends BaseRecord, TSelected = GetListResult<TData>>(
+  optionsOrGetter: MaybeGetter<UseListOptions<TData, HttpError, TSelected>>, getDecoder: () => RecordDecoder<TData>,
 ) {
   const adminContext=captureContractContext(optionsOrGetter);
   const parsed=useParsed();
@@ -55,7 +59,7 @@ export function createListQuery<TData extends BaseRecord>(
   const getOptions=() => typeof optionsOrGetter==='function'? optionsOrGetter():optionsOrGetter;
   const getResource=() => getOptions().resource??parsed.resource??'';
 
-  const query=createSessionQuery<GetListResult<TData>>(adminContext,() => {
+  const query=createSessionQuery<GetListResult<TData>, TSelected>(adminContext,() => {
     const decode=getDecoder();
     const opts=getOptions();
     const checkId=opts.contract!==undefined;
@@ -108,10 +112,11 @@ export function createListQuery<TData extends BaseRecord>(
         });
         return decodeResult(await current.provider.getList(snapshotListParams({ ...params, ...definedOptions({ signal }) })));
       },
-      decode: (value): GetListResult<TData> => applyListSelect(
-        decodeResult(value),
-        queryOptions?.select as ((data: GetListResult<TData>) => GetListResult<TData>) | undefined,
-      ),
+      decode: (value): TSelected => {
+        const decoded=decodeResult(value);
+        const select=queryOptions?.select as ((data: GetListResult<TData>) => TSelected) | undefined;
+        return select ? select(decoded) : decoded as TSelected;
+      },
       enabled: settings.enabled,
       ...definedOptions({
         staleTime: settings.staleTime??adminOptions.reactQuery?.staleTime,
@@ -150,12 +155,16 @@ export function createListQuery<TData extends BaseRecord>(
 
 // ─── useOne ────────────────────────────────────────────────────
 
-export interface UseOneOptions<_TData extends BaseRecord=BaseRecord,_TError=HttpError> extends ContractOptions {
+export interface UseOneOptions<
+  _TData extends BaseRecord=BaseRecord,
+  _TError=HttpError,
+  TSelected=GetOneResult<_TData>,
+> extends ContractOptions {
   resource?: KnownResources;
   id?: string|number;
   meta?: Record<string,unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean; gcTime?: number; refetchOnWindowFocus?: boolean };
+  queryOptions?: ResourceQueryOptions<GetOneResult<_TData>, TSelected>;
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -168,8 +177,8 @@ export function useOne(optionsOrGetter: MaybeGetter<UseOneOptions>={}) {
   return createOneQuery(optionsOrGetter, () => decodeBaseRecord);
 }
 
-export function createOneQuery<TData extends BaseRecord>(
-  optionsOrGetter: MaybeGetter<UseOneOptions>, getDecoder: () => RecordDecoder<TData>,
+export function createOneQuery<TData extends BaseRecord, TSelected = GetOneResult<TData>>(
+  optionsOrGetter: MaybeGetter<UseOneOptions<TData, HttpError, TSelected>>, getDecoder: () => RecordDecoder<TData>,
 ) {
   const adminContext=captureContractContext(optionsOrGetter);
   const parsed=useParsed();
@@ -179,7 +188,7 @@ export function createOneQuery<TData extends BaseRecord>(
   const getResource=() => getOptions().resource??parsed.resource??'';
   const getId=() => getOptions().id??parsed.id;
 
-  const query=createSessionQuery<GetOneResult<TData>>(adminContext,() => {
+  const query=createSessionQuery<GetOneResult<TData>, TSelected>(adminContext,() => {
     const decode=getDecoder();
     const opts=getOptions();
     const resource=opts.resource??parsed.resource??'';
@@ -192,14 +201,17 @@ export function createOneQuery<TData extends BaseRecord>(
       resource,id,...definedOptions({ meta: captured.meta }),
     });
     const queryOptions=opts.queryOptions;
+    const settings=listQuerySettings(queryOptions);
+    const project=(value: unknown): TSelected => {
+      const decoded=decodeOneResult(value,decode);
+      if(checkId && params && decoded.data['id']!==params.id) return rejectProviderResponse();
+      const select=queryOptions?.select as ((data: GetOneResult<TData>) => TSelected) | undefined;
+      return select ? select(decoded) : decoded as TSelected;
+    };
 
     return {
       resource, successNotification: opts.successNotification, errorNotification: opts.errorNotification,
-      decode: value => {
-        const decoded=decodeOneResult(value,decode);
-        if(checkId && params && decoded.data['id']!==params.id) return rejectProviderResponse();
-        return decoded;
-      },
+      decode: project,
       queryKey: adminContext.queryKeys(resource,opts.dataProviderName).data.one(resource,id??'',{
         ...definedOptions({ meta: captured.meta }),
         source: captured.source,
@@ -211,11 +223,16 @@ export function createOneQuery<TData extends BaseRecord>(
         if(checkId && decoded.data['id']!==params.id) return rejectProviderResponse();
         return decoded;
       },
-      enabled: (queryOptions?.enabled??true)&&id!=null,
+      enabled: settings.enabled&&id!=null,
       ...definedOptions({
-        staleTime: queryOptions?.staleTime??adminOptions.reactQuery?.staleTime,
-        gcTime: queryOptions?.gcTime??adminOptions.reactQuery?.gcTime,
-        refetchOnWindowFocus: queryOptions?.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+        staleTime: settings.staleTime??adminOptions.reactQuery?.staleTime,
+        gcTime: settings.gcTime??adminOptions.reactQuery?.gcTime,
+        refetchOnWindowFocus: settings.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+        retry: settings.retry,
+        retryDelay: settings.retryDelay,
+        refetchInterval: settings.refetchInterval,
+        refetchIntervalInBackground: settings.refetchIntervalInBackground,
+        placeholderData: settings.placeholderData as GetOneResult<TData> | ((previousData: GetOneResult<TData> | undefined) => GetOneResult<TData> | undefined) | undefined,
       }),
     };
   });
@@ -244,8 +261,8 @@ export function createOneQuery<TData extends BaseRecord>(
 }
 
 // ─── useShow ──────────────────────────────────────────────────
-export function createShowQuery<TData extends BaseRecord>(
-  optionsOrGetter: MaybeGetter<UseOneOptions>, getDecoder: () => RecordDecoder<TData>,
+export function createShowQuery<TData extends BaseRecord, TSelected = GetOneResult<TData>>(
+  optionsOrGetter: MaybeGetter<UseOneOptions<TData, HttpError, TSelected>>, getDecoder: () => RecordDecoder<TData>,
 ) {
   const parsed=useParsed();
   const getOptions=() => typeof optionsOrGetter==='function'? optionsOrGetter():optionsOrGetter;
@@ -258,7 +275,7 @@ export function createShowQuery<TData extends BaseRecord>(
   function setShowId(id: string|number) { _showId=id; }
 
   // We wrap it in a getter so useOne evaluates it dynamically.
-  const result=createOneQuery(() => ({
+  const result=createOneQuery<TData, TSelected>(() => ({
     ...getOptions(),
     ...definedOptions({ id: showId }),
   }), getDecoder);
@@ -268,12 +285,16 @@ export function createShowQuery<TData extends BaseRecord>(
 
 // ─── useMany ───────────────────────────────────────────────────
 
-export interface UseManyOptions<_TData extends BaseRecord=BaseRecord,_TError=HttpError> extends ContractOptions {
+export interface UseManyOptions<
+  _TData extends BaseRecord=BaseRecord,
+  _TError=HttpError,
+  TSelected=GetManyResult<_TData>,
+> extends ContractOptions {
   resource: KnownResources;
   ids: (string|number)[];
   meta?: Record<string,unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean; gcTime?: number; refetchOnWindowFocus?: boolean };
+  queryOptions?: ResourceQueryOptions<GetManyResult<_TData>, TSelected>;
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -286,18 +307,19 @@ export function useMany(optionsOrGetter: MaybeGetter<UseManyOptions>) {
   return createManyQuery(optionsOrGetter, () => decodeBaseRecord);
 }
 
-export function createManyQuery<TData extends BaseRecord>(
-  optionsOrGetter: MaybeGetter<UseManyOptions>, getDecoder: () => RecordDecoder<TData>,
+export function createManyQuery<TData extends BaseRecord, TSelected = GetManyResult<TData>>(
+  optionsOrGetter: MaybeGetter<UseManyOptions<TData, HttpError, TSelected>>, getDecoder: () => RecordDecoder<TData>,
 ) {
   const adminContext=captureContractContext(optionsOrGetter);
   const adminOptions=getAdminOptions();
   const getOptions=() => typeof optionsOrGetter==='function'? optionsOrGetter():optionsOrGetter;
 
-  const query=createSessionQuery<GetManyResult<TData>>(adminContext,() => {
+  const query=createSessionQuery<GetManyResult<TData>, TSelected>(adminContext,() => {
     const decode=getDecoder();
     const opts=getOptions();
     const checkId=opts.contract!==undefined;
     const { resource,ids,meta,dataProviderName,queryOptions }=opts;
+    const settings=listQuerySettings(queryOptions);
     const captured=captureQueryProvider(adminContext,{
       resource,...definedOptions({ dataProviderName,contract: opts.contract,meta }),
     });
@@ -315,7 +337,11 @@ export function createManyQuery<TData extends BaseRecord>(
 
     return {
       resource, successNotification: opts.successNotification, errorNotification: opts.errorNotification,
-      decode: decodeResult,
+      decode: (value): TSelected => {
+        const decoded=decodeResult(value);
+        const select=queryOptions?.select as ((data: GetManyResult<TData>) => TSelected) | undefined;
+        return select ? select(decoded) : decoded as TSelected;
+      },
       queryKey: adminContext.queryKeys(resource,dataProviderName).data.many(resource,{
         ids: params.ids,
         ...definedOptions({ meta: params.meta }),
@@ -333,11 +359,16 @@ export function createManyQuery<TData extends BaseRecord>(
         })),decode)));
         return decodeResult({ data: results.map(r => r.data) });
       },
-      enabled: (queryOptions?.enabled??true)&&params.ids.length>0,
+      enabled: settings.enabled&&params.ids.length>0,
       ...definedOptions({
-        staleTime: queryOptions?.staleTime??adminOptions.reactQuery?.staleTime,
-        gcTime: queryOptions?.gcTime??adminOptions.reactQuery?.gcTime,
-        refetchOnWindowFocus: queryOptions?.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+        staleTime: settings.staleTime??adminOptions.reactQuery?.staleTime,
+        gcTime: settings.gcTime??adminOptions.reactQuery?.gcTime,
+        refetchOnWindowFocus: settings.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+        retry: settings.retry,
+        retryDelay: settings.retryDelay,
+        refetchInterval: settings.refetchInterval,
+        refetchIntervalInBackground: settings.refetchIntervalInBackground,
+        placeholderData: settings.placeholderData as GetManyResult<TData> | ((previousData: GetManyResult<TData> | undefined) => GetManyResult<TData> | undefined) | undefined,
       }),
     };
   });

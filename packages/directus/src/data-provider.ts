@@ -1,5 +1,6 @@
 import { definedOptions } from '@svadmin/core/options';
 import { withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
 import type {
   CrudOperator,
   DataProvider,
@@ -11,22 +12,20 @@ import type {
 const DIRECTUS_OPERATOR_MAP: Partial<Record<CrudOperator, string>> = {
   eq: '_eq',
   ne: '_neq',
-  eqs: '_eq',
-  nes: '_neq',
   lt: '_lt',
   gt: '_gt',
   lte: '_lte',
   gte: '_gte',
-  contains: '_contains',
-  ncontains: '_ncontains',
+  contains: '_icontains',
+  ncontains: '_nicontains',
   containss: '_contains',
   ncontainss: '_ncontains',
-  startswith: '_starts_with',
-  nstartswith: '_nstarts_with',
+  startswith: '_istarts_with',
+  nstartswith: '_nistarts_with',
   startswiths: '_starts_with',
   nstartswiths: '_nstarts_with',
-  endswith: '_ends_with',
-  nendswith: '_nends_with',
+  endswith: '_iends_with',
+  nendswith: '_niends_with',
   endswiths: '_ends_with',
   nendswiths: '_nends_with',
   in: '_in',
@@ -101,6 +100,7 @@ function buildDirectusRule(filter: Filter): Record<string, unknown> {
 
 function buildDirectusFilter(filters?: Filter[]): Record<string, unknown> {
   if (!filters?.length) return {};
+  assertFiltersExecutable('directus', filters);
   const rules = filters.map(buildDirectusRule);
   const firstRule = rules[0];
   return rules.length === 1 && firstRule ? firstRule : { _and: rules };

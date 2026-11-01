@@ -1,3 +1,4 @@
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
 import { definedOptions } from '@svadmin/core/options';
 import { decodeBaseRecord, decodeOneResult, decodeManyResult, withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
 import type {
@@ -146,6 +147,7 @@ function buildGroqFilterNode(filter: Filter, context: GroqFilterContext): string
 
 function buildGroqFilters(filters?: Filter[]): GroqFilterResult {
   if (!filters?.length) return { expression: '', params: {} };
+  assertFiltersExecutable('sanity', filters);
   const context: GroqFilterContext = { nextParam: 0, params: {} };
   const expression = filters.map(filter => buildGroqFilterNode(filter, context)).join(' && ');
   return { expression, params: context.params };

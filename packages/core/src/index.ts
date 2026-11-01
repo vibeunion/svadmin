@@ -226,6 +226,13 @@ export { checkError } from './hook-utils.svelte';
 export type { NotificationConfig, OvertimeOptions, OvertimeResult, LiveSubscriptionParams } from './hook-utils.svelte';
 
 export { CRUD_FIELD_OPERATORS, DeleteManyPartialError, HttpError, UndoError, isCrudFieldOperator } from './types';
+export {
+  FILTER_PROVIDER_IDS,
+  PROVIDER_FILTER_CAPABILITIES,
+  assertFiltersExecutable,
+  providerSupportsOperator,
+} from './provider-filter-capabilities';
+export type { FilterProviderId, ProviderFilterCapability } from './provider-filter-capabilities';
 export { withResourceSchemas } from './resource-schemas';
 export type { ResourceSchemas, ResourceSchemaMap, InferSchemaResourceMap, InferSchemaInputMap } from './resource-schemas';
 export type {

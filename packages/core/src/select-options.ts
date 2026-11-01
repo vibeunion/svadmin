@@ -8,6 +8,18 @@ export interface SelectOption {
   value: string | number;
 }
 
+/** 点分路径读取记录字段，例如 `nested.title`。不走原型链。 */
+export function readRecordPath(record: BaseRecord, path: string): unknown {
+  if (!path.includes('.')) return record[path];
+  let current: unknown = record;
+  for (const segment of path.split('.')) {
+    if (!segment || current === null || typeof current !== 'object' || Array.isArray(current)) return undefined;
+    if (!Object.hasOwn(current, segment)) return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
+}
+
 export function selectOptionValue(value: unknown): string | number {
   if (typeof value === 'string' || (typeof value === 'number' && Number.isFinite(value))) return value;
   throw new HttpError('Invalid select option', 422, undefined, { code: 'INVALID_SELECT_OPTION' });
@@ -25,13 +37,13 @@ export function mapSelectOptions<T extends BaseRecord>(
     return records.map(record => {
       if (!isCurrent()) throw new Error('Obsolete select mapping');
       const labelRecord = decode(snapshotPlainData(record));
-      const mappedLabel = typeof label === 'function' ? label(labelRecord) : labelRecord[label];
+      const mappedLabel = typeof label === 'function' ? label(labelRecord) : readRecordPath(labelRecord, label);
       if (!isCurrent()) throw new Error('Obsolete select mapping');
       if (typeof label === 'function' && typeof mappedLabel !== 'string') {
         throw new TypeError('Select label callbacks must return strings');
       }
       const valueRecord = decode(snapshotPlainData(record));
-      const mappedValue = typeof value === 'function' ? value(valueRecord) : valueRecord[value];
+      const mappedValue = typeof value === 'function' ? value(valueRecord) : readRecordPath(valueRecord, value);
       if (!isCurrent()) throw new Error('Obsolete select mapping');
       return { label: String(selectOptionValue(mappedLabel)), value: selectOptionValue(mappedValue) };
     });

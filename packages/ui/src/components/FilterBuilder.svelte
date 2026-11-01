@@ -74,8 +74,11 @@
   const full = $derived(nodeCount >= FILTER_EDITOR_LIMITS.nodes);
 
   function snapshotNode(node: FilterNode): Filter {
-    return node.kind === 'group' ? { operator: node.operator, value: node.children.map(snapshotNode) }
-      : { field: node.field, operator: node.operator, value: Array.isArray(node.value) ? [...node.value] : node.value };
+    if (node.kind === 'group') {
+      const value = node.children.map(snapshotNode);
+      return node.key ? { key: node.key, operator: node.operator, value } : { operator: node.operator, value };
+    }
+    return { field: node.field, operator: node.operator, value: Array.isArray(node.value) ? [...node.value] : node.value };
   }
 
   function unsupportedLogic(node: FilterNode, top = false): FilterIssueCode | undefined {

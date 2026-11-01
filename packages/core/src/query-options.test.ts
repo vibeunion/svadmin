@@ -29,5 +29,6 @@ describe('list query options', () => {
     }));
     expect(selected).toEqual({ data: [{ id: 1 }], total: 2 });
     expect(applyListSelect({ data: [], total: 0 }, undefined)).toEqual({ data: [], total: 0 });
+    expect(applyListSelect({ data: [{ id: 1 }], total: 1 }, (result) => result.data.length)).toBe(1);
   });
 });

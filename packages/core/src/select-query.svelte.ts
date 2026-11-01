@@ -9,16 +9,29 @@ import { captureQueryProvider, snapshotListParams, snapshotManyParams } from './
 import { decodeListResult, decodeManyResult, decodeBaseRecord, rejectProviderResponse, type RecordDecoder } from './record-decoder';
 import { createOvertimeTracker } from './hook-utils.svelte';
 import type { NotificationConfig, OvertimeOptions } from './hook-utils.svelte';
+import { listQuerySettings, type ResourceQueryOptions } from './query-options';
 import { createSelectProjection, normalizeSelectDefaultValue, orderSelectOptions, selectQueryFilters, type SelectOption, type SelectedOptionsOrder } from './select-options';
 import { HttpError, type BaseRecord, type KnownResources, type Pagination, type Sort, type Filter } from './types';
 import type { QueryKey } from './query-keys';
+
+function optionEntries(value: unknown): SelectOption[] {
+  if (!value || typeof value !== 'object' || !('options' in value)) return [];
+  const options = value.options;
+  return Array.isArray(options) ? options as SelectOption[] : [];
+}
 
 function withAuthSession(key: QueryKey, authSession: string): QueryKey {
   const descriptor = key[0];
   return [{ ...descriptor, params: { ...decodeBaseRecord(descriptor.params), authSession } }];
 }
 
-export interface UseSelectOptions<TData extends BaseRecord = BaseRecord> extends ContractOptions {
+type SelectListResult<TData extends BaseRecord> = { data: TData[]; total: number; options: SelectOption[] };
+type SelectDefaultsResult<TData extends BaseRecord> = { data: TData[]; options: SelectOption[] };
+
+export interface UseSelectOptions<
+  TData extends BaseRecord = BaseRecord,
+  TSelected = SelectListResult<TData>,
+> extends ContractOptions {
   resource: KnownResources;
   /** @internal Distinguishes consumers that use different projection semantics. */
   projectionKey?: string;
@@ -36,8 +49,8 @@ export interface UseSelectOptions<TData extends BaseRecord = BaseRecord> extends
   debounce?: number;
   /** Optional timeout in milliseconds for list and selected-record reads. */
   requestTimeout?: number;
-  queryOptions?: { staleTime?: number; enabled?: boolean };
-  defaultValueQueryOptions?: { staleTime?: number; enabled?: boolean };
+  queryOptions?: ResourceQueryOptions<SelectListResult<TData>, TSelected>;
+  defaultValueQueryOptions?: ResourceQueryOptions<SelectDefaultsResult<TData>>;
   meta?: Record<string, unknown>;
   dataProviderName?: string;
   onSearch?: (value: string) => Filter[];
@@ -46,8 +59,8 @@ export interface UseSelectOptions<TData extends BaseRecord = BaseRecord> extends
   overtimeOptions?: OvertimeOptions;
 }
 
-export function createSelectQuery<TData extends BaseRecord>(
-  options: UseSelectOptions<TData>, getDecoder: () => RecordDecoder<TData>,
+export function createSelectQuery<TData extends BaseRecord, TSelected = SelectListResult<TData>>(
+  options: UseSelectOptions<TData, TSelected>, getDecoder: () => RecordDecoder<TData>,
 ) {
   const context = captureContractContext(options);
   const adminOptions = getAdminOptions();
@@ -197,7 +210,7 @@ export function createSelectQuery<TData extends BaseRecord>(
   });
   const query = createSessionQuery<
     { data: TData[]; total: number },
-    { data: TData[]; total: number; options: SelectOption[] }
+    TSelected
   >(context, () => {
     const origin = scope;
     const { captured, decode, keys } = origin;
@@ -214,9 +227,15 @@ export function createSelectQuery<TData extends BaseRecord>(
     });
     const requestKey = withAuthSession(queryKey, origin.auth.cacheKey);
     currentListKey = requestKey;
+    const projection = createSelectProjection(decodeResult, label, value, decode, () => sessionCurrent(origin));
+    const settings = listQuerySettings(options.queryOptions);
     return {
       resource: params.resource, successNotification: options.successNotification, errorNotification: options.errorNotification,
-      decode: createSelectProjection(decodeResult, label, value, decode, () => sessionCurrent(origin)),
+      decode: (value: unknown, version: number): TSelected => {
+        const projected = projection(value, version);
+        const select = options.queryOptions?.select;
+        return select ? select(projected) : projected as TSelected;
+      },
       queryKey,
       // 同一 key 的请求可由其他 observer 共享，不能因本实例卸载或切换搜索而丢弃共享结果。
       allowRetiredQueryFn: true,
@@ -226,8 +245,17 @@ export function createSelectQuery<TData extends BaseRecord>(
           captured.provider.getList(snapshotListParams({ ...params, ...definedOptions({ signal: requestSignal }) })),
         ).then(decodeResult);
       },
-      enabled: options.queryOptions?.enabled ?? true,
-      ...definedOptions({ staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime }),
+      enabled: settings.enabled,
+      ...definedOptions({
+        staleTime: settings.staleTime ?? adminOptions.reactQuery?.staleTime,
+        gcTime: settings.gcTime ?? adminOptions.reactQuery?.gcTime,
+        refetchOnWindowFocus: settings.refetchOnWindowFocus ?? adminOptions.reactQuery?.refetchOnWindowFocus,
+        retry: settings.retry,
+        retryDelay: settings.retryDelay,
+        refetchInterval: settings.refetchInterval,
+        refetchIntervalInBackground: settings.refetchIntervalInBackground,
+        placeholderData: settings.placeholderData as { data: TData[]; total: number } | ((previousData: { data: TData[]; total: number } | undefined) => { data: TData[]; total: number } | undefined) | undefined,
+      }),
     };
   });
   const defaultValueQuery = createSessionQuery<
@@ -265,8 +293,16 @@ export function createSelectQuery<TData extends BaseRecord>(
         ).then(decodeResult);
       },
       enabled: (options.queryOptions?.enabled ?? true) &&
-        (options.defaultValueQueryOptions?.enabled ?? true) && params.ids.length > 0,
-      staleTime: options.defaultValueQueryOptions?.staleTime ?? Infinity,
+        (listQuerySettings(options.defaultValueQueryOptions).enabled) && params.ids.length > 0,
+      ...definedOptions({
+        staleTime: options.defaultValueQueryOptions?.staleTime ?? Infinity,
+        gcTime: options.defaultValueQueryOptions?.gcTime,
+        refetchOnWindowFocus: options.defaultValueQueryOptions?.refetchOnWindowFocus,
+        retry: options.defaultValueQueryOptions?.retry,
+        retryDelay: options.defaultValueQueryOptions?.retryDelay,
+        refetchInterval: options.defaultValueQueryOptions?.refetchInterval,
+        refetchIntervalInBackground: options.defaultValueQueryOptions?.refetchIntervalInBackground,
+      }),
     };
   });
   const overtime = createOvertimeTracker(
@@ -302,7 +338,7 @@ export function createSelectQuery<TData extends BaseRecord>(
     query, defaultValueQuery, onSearchChange, cancel: cancelRequests,
     get options() {
       return orderSelectOptions(
-        query.data?.options ?? [],
+        optionEntries(query.data),
         defaultValueQuery.data?.options ?? [],
         options.selectedOptionsOrder ?? 'in-place',
       );
