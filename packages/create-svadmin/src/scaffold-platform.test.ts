@@ -63,6 +63,14 @@ test('every official provider is wired without a TODO stub', () => {
   expect(pocketbase).toContain('createSimpleRestAuthProvider');
 });
 
+test('wireConfigSource refuses to replace a non-svadmin config and still creates a blank one', () => {
+  const custom = 'export default defineConfig({ name: "legacy" });\n';
+  expect(() => wireConfigSource(custom, { projectName: 'demo', dataProvider: 'directus' })).toThrow(/defineAdminConfig/);
+  const created = wireConfigSource('', { projectName: 'demo', dataProvider: 'simple-rest' });
+  expect(created).toContain('defineAdminConfig');
+  expect(created).toContain('createSimpleRestDataProvider');
+});
+
 test('wireConfigSource replaces the data provider and keeps auth', () => {
   const original = buildSvadminConfigSource({
     projectName: 'demo',

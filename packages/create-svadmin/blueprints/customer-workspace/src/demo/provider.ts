@@ -1,3 +1,4 @@
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
 import { HttpError, type BaseRecord, type DataProvider, type Filter } from '@svadmin/core';
 import { parseContractCreateInput, parseContractUpdateInput } from '@svadmin/core/resource-contract';
 import { customers, followups, approvals, type Customer, type Followup, type Approval } from '../features/customers/data';
@@ -21,6 +22,7 @@ const demoApprovals: Approval[] = [
 ];
 
 function matches(row: BaseRecord, filter: Filter): boolean {
+  assertFiltersExecutable('scaffold-memory', [filter]);
   if (!('field' in filter)) {
     return filter.operator === 'or'
       ? filter.value.some(f => matches(row, f))

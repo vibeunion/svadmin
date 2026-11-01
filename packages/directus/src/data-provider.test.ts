@@ -76,10 +76,10 @@ describe('createDirectusDataProvider', () => {
         { gt: { _gt: 2 } },
         { lte: { _lte: 3 } },
         { gte: { _gte: 4 } },
-        { contains: { _contains: '' } },
-        { ncontains: { _ncontains: 'draft' } },
-        { startswith: { _starts_with: 'A' } },
-        { endswith: { _ends_with: 'Z' } },
+        { contains: { _icontains: '' } },
+        { ncontains: { _nicontains: 'draft' } },
+        { startswith: { _istarts_with: 'A' } },
+        { endswith: { _iends_with: 'Z' } },
         { in: { _in: [1, 2] } },
         { nin: { _nin: ['x', 'y'] } },
         { null: { _null: true } },
@@ -123,27 +123,42 @@ describe('createDirectusDataProvider', () => {
     });
   });
 
-  it('maps case-sensitive string operators and rejects array-contains operators', async () => {
+  it('maps case-sensitive string operators and rejects operators Directus cannot execute', async () => {
     setupMockFetch({ data: [], meta: { total_count: 0 } });
     await provider.getList({
       resource: 'posts',
       filters: [
-        { field: 'title', operator: 'eqs', value: 'Open' },
+        { field: 'title', operator: 'containss', value: 'Open' },
         { field: 'title', operator: 'nstartswith', value: 'A' },
+        { field: 'title', operator: 'startswiths', value: 'Op' },
+        { field: 'title', operator: 'nstartswiths', value: 'Z' },
+        {
+          key: 'status-group',
+          operator: 'or',
+          value: [{ field: 'status', operator: 'eq', value: 'open' }],
+        },
       ],
     });
     const [rawUrl] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     const filter = JSON.parse(requiredSearchParam(new URL(rawUrl).searchParams, 'filter'));
     expect(filter).toEqual({
       _and: [
-        { title: { _eq: 'Open' } },
-        { title: { _nstarts_with: 'A' } },
+        { title: { _contains: 'Open' } },
+        { title: { _nistarts_with: 'A' } },
+        { title: { _starts_with: 'Op' } },
+        { title: { _nstarts_with: 'Z' } },
+        { _or: [{ status: { _eq: 'open' } }] },
       ],
     });
     await expect(provider.getList({
       resource: 'posts',
+      filters: [{ field: 'title', operator: 'eqs', value: 'Open' }],
+    })).rejects.toThrow('Unsupported directus filter operator: eqs');
+    await expect(provider.getList({
+      resource: 'posts',
       filters: [{ field: 'tags', operator: 'ina', value: ['a'] }],
-    })).rejects.toThrow('Unsupported Directus filter operator: ina');
+    })).rejects.toThrow('Unsupported directus filter operator: ina');
+    expect(mockFetchFn).toHaveBeenCalledTimes(1);
   });
 
   it('rejects unsupported runtime filter operators instead of falling back to equality', async () => {
@@ -157,7 +172,7 @@ describe('createDirectusDataProvider', () => {
     await expect(provider.getList({
       resource: 'posts',
       filters: [unsupported],
-    })).rejects.toThrow('Unsupported Directus filter operator: regex');
+    })).rejects.toThrow('Unsupported directus filter operator: regex');
     expect(mockFetchFn).not.toHaveBeenCalled();
   });
 

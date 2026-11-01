@@ -59,6 +59,10 @@
       "types": "./src/defined-options.ts",
       "default": "./src/defined-options.ts"
     },
+    "./provider-filters": {
+      "types": "./src/provider-filter-capabilities.ts",
+      "default": "./src/provider-filter-capabilities.ts"
+    },
     "./resource-contract": {
       "types": "./src/resource-contract.ts",
       "default": "./src/resource-contract.ts"

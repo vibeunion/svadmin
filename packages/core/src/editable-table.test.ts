@@ -89,6 +89,27 @@ describe('useEditableTable contract', () => {
     expect(table.snapshot().rows[0]?.['title']).toBe('Batch');
   });
 
+  test('does not mark rows updated when a batch response misses the requested ids', async () => {
+    const data = provider();
+    data.updateMany = async (params) => {
+      data.batches.push(params.variables);
+      return { data: [] };
+    };
+    const table = createEditableTableController(posts, data);
+    await table.load();
+    await table.submitBatch({ title: 'Batch' });
+    expect(table.snapshot().failure).toBe('1 row(s) were not saved');
+    expect(table.snapshot().errors['1']).toBe('Save failed');
+
+    data.updateMany = async (params) => {
+      data.batches.push(params.variables);
+      return { data: [{ id: 'other', title: 'Batch' }] };
+    };
+    await table.submitBatch({ title: 'Batch' });
+    expect(table.snapshot().failure).toBe('1 row(s) were not saved');
+    expect(table.snapshot().errors['1']).toBe('Save failed');
+  });
+
   test('creates a new row through the create schema', async () => {
     const data = provider();
     const table = createEditableTableController(posts, data);

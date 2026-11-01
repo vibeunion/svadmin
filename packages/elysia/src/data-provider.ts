@@ -1,3 +1,4 @@
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
 import { definedOptions } from '@svadmin/core/options';
 // Elysia DataProvider — CRUD convention compatible
 // Expects backend routes following: GET /resource, GET /resource/:id, POST /resource, PATCH /resource/:id, DELETE /resource/:id
@@ -203,6 +204,7 @@ function filterParamValue(filter: FieldFilter): string {
 
 function appendFilters(params: URLSearchParams, filters?: Filter[]): void {
   if (!filters?.length) return;
+  assertFiltersExecutable('elysia', filters);
 
   let hasLogicalFilter = false;
   for (const filter of filters) {

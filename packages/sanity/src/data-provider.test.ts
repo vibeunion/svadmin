@@ -215,7 +215,11 @@ describe('createSanityDataProvider GROQ safety', () => {
     ] as unknown as Filter[];
 
     await expect(provider.getList({ resource: 'post', filters: unknownOperator }))
-      .rejects.toThrow('Unsupported GROQ filter operator');
+      .rejects.toThrow('Unsupported sanity filter operator: unknown');
+    await expect(provider.getList({
+      resource: 'post',
+      filters: [{ field: 'title', operator: 'containss', value: 'Hello' }],
+    })).rejects.toThrow('Unsupported sanity filter operator: containss');
     await expect(provider.getList({
       resource: 'post',
       filters: [{ field: 'tags', operator: 'in', value: 'not-an-array' }],

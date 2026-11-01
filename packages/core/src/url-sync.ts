@@ -1,4 +1,4 @@
-import type { Filter, LogicalFilter } from './types';
+import type { Filter, LogicalFilter, Sort } from './types';
 import { isCrudFieldOperator } from './types';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
@@ -59,6 +59,27 @@ function parseFilters(value: string): Filter[] | undefined {
   }
 }
 
+const MAX_SORTERS = 16;
+
+function parseSorters(value: string): Sort[] | undefined {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length > MAX_SORTERS) return undefined;
+    const sorters: Sort[] = [];
+    for (const entry of parsed) {
+      if (!isRecord(entry) || Object.keys(entry).some((key) => key !== 'field' && key !== 'order')) return undefined;
+      const field = entry['field'];
+      const order = entry['order'];
+      if (typeof field !== 'string' || field.trim().length === 0 || field.length > 256) return undefined;
+      if (order !== 'asc' && order !== 'desc') return undefined;
+      sorters.push({ field, order });
+    }
+    return sorters;
+  } catch {
+    return undefined;
+  }
+}
+
 function positiveIntegerParam(value: string | undefined, max: number): string | undefined {
   if (!value || !/^\d+$/.test(value)) return undefined;
   const parsed = Number(value);
@@ -73,13 +94,21 @@ export function sanitizeListQueryParams(params: Record<string, string>): Record<
   const result: Record<string, string> = {};
   const page = positiveIntegerParam(params['page'], 1_000_000);
   const pageSize = positiveIntegerParam(params['pageSize'], 1_000);
+  const sorters = params['sorters'] ? parseSorters(params['sorters']) : undefined;
   const sort = params['sort']?.trim();
   const search = params['q'];
   const filters = params['filters'] ? parseFilters(params['filters']) : undefined;
 
   if (page) result['page'] = page;
   if (pageSize) result['pageSize'] = pageSize;
-  if (sort && sort.length <= 256) {
+  if (sorters?.length) {
+    const first = sorters[0];
+    if (first) {
+      result['sorters'] = JSON.stringify(sorters);
+      result['sort'] = first.field;
+      result['order'] = first.order;
+    }
+  } else if (sort && sort.length <= 256) {
     result['sort'] = sort;
     if (params['order'] === 'asc' || params['order'] === 'desc') result['order'] = params['order'];
   }
@@ -105,6 +134,7 @@ export function appendListQueryFromPath(path: string, currentPath: string): stri
 export interface URLState {
   page?: number;
   pageSize?: number;
+  sorters?: Sort[];
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   search?: string;
@@ -126,11 +156,24 @@ export function readURLState(adminContext: AdminContextAccessor = captureAdminCo
   const pageSize = params['pageSize'];
   if (pageSize) { const n = parseInt(pageSize, 10); if (!isNaN(n) && n > 0) state.pageSize = n; }
 
-  const sortField = params['sort'];
-  if (sortField) state.sortField = sortField;
-
-  const sortOrder = params['order'];
-  if (sortOrder === 'asc' || sortOrder === 'desc') state.sortOrder = sortOrder;
+  const sorters = params['sorters'] ? parseSorters(params['sorters']) : undefined;
+  if (sorters?.length) {
+    const first = sorters[0];
+    state.sorters = sorters;
+    if (first) {
+      state.sortField = first.field;
+      state.sortOrder = first.order;
+    }
+  } else {
+    const sortField = params['sort'];
+    const sortOrder = params['order'];
+    if (sortField) {
+      state.sortField = sortField;
+      const order = sortOrder === 'desc' ? 'desc' : 'asc';
+      state.sorters = [{ field: sortField, order }];
+    }
+    if (sortOrder === 'asc' || sortOrder === 'desc') state.sortOrder = sortOrder;
+  }
 
   const search = params['q'];
   if (search) state.search = search;
@@ -170,14 +213,28 @@ export function writeURLState(
     else delete params['pageSize'];
   }
 
-  if ('sortField' in state) {
-    if (state.sortField) params['sort'] = state.sortField;
-    else delete params['sort'];
-  }
+  if ('sorters' in state) {
+    const sorters = state.sorters ?? [];
+    const first = sorters[0];
+    if (sorters.length > 0 && first) {
+      params['sorters'] = JSON.stringify(sorters);
+      params['sort'] = first.field;
+      params['order'] = first.order;
+    } else {
+      delete params['sorters'];
+      delete params['sort'];
+      delete params['order'];
+    }
+  } else {
+    if ('sortField' in state) {
+      if (state.sortField) params['sort'] = state.sortField;
+      else delete params['sort'];
+    }
 
-  if ('sortOrder' in state) {
-    if (state.sortOrder) params['order'] = state.sortOrder;
-    else delete params['order'];
+    if ('sortOrder' in state) {
+      if (state.sortOrder) params['order'] = state.sortOrder;
+      else delete params['order'];
+    }
   }
 
   if ('search' in state) {

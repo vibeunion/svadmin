@@ -427,12 +427,23 @@ export interface ConfigWiringPatch {
   authProvider?: AuthProviderChoice;
 }
 
+function isBlankConfig(source: string): boolean {
+  const withoutComments = source
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|\s)\/\/.*$/gm, '$1');
+  return withoutComments.trim().length === 0;
+}
+
 /**
- * Inserts or replaces the data/auth region of an existing config.
- * Configs that are not an svadmin entrypoint are replaced with a runnable one.
+ * Inserts or replaces the data/auth region of an existing svadmin config.
+ * A missing file can be created. An existing config that does not call
+ * defineAdminConfig is left untouched by throwing instead of being replaced.
  */
 export function wireConfigSource(source: string, patch: ConfigWiringPatch): string {
   if (!source.includes('defineAdminConfig')) {
+    if (!isBlankConfig(source)) {
+      throw new Error('Refusing to replace a config file that does not call defineAdminConfig. Migrate it to an svadmin config before wiring providers.');
+    }
     return buildSvadminConfigSource({
       projectName: patch.projectName,
       dataProvider: patch.dataProvider ?? 'simple-rest',

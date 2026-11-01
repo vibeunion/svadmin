@@ -1,5 +1,6 @@
 import { definedOptions } from '@svadmin/core/options';
 import { decodeCustomResult, rejectProviderResponse, type DataTransport } from '@svadmin/core/schema';
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
 import type { DataProvider, Filter } from '@svadmin/core';
 import { createRefineAdapter } from '@svadmin/refine-adapter';
 import { isObject, inputObject, inputRecord, optionalString, optionalBoolean, optionalCount, callSdk, sdkData, executeSupabaseRpc } from './sdk-boundary';
@@ -28,11 +29,15 @@ function applyEqualityQuery(builder: unknown, query: Record<string, unknown> | u
 }
 
 function validateFilters(filters: readonly Filter[] | undefined): void {
+  try {
+    assertFiltersExecutable('supabase-table', filters);
+  } catch {
+    throw new TypeError('Supabase custom table requests support only equality filters');
+  }
   for (const filter of filters ?? []) {
-    if (!('field' in filter) || filter.operator !== 'eq') {
-      throw new TypeError('Supabase custom table requests support only equality filters');
+    if (!('field' in filter) || filter.value === null || filter.value === undefined) {
+      throw new TypeError('Supabase equality filters require a non-null value');
     }
-    if (filter.value === null || filter.value === undefined) throw new TypeError('Supabase equality filters require a non-null value');
   }
 }
 

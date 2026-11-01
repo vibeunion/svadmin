@@ -10,6 +10,7 @@ import { createOvertimeTracker, createLiveSubscription, type NotificationConfig,
   type LiveSubscriptionParams } from './hook-utils.svelte';
 import { HttpError, type BaseRecord, type GetListResult, type Pagination, type Sort, type Filter, type KnownResources } from './types';
 import { decodeBaseRecord, decodeListResult, rejectProviderResponse, type RecordDecoder } from './record-decoder';
+import { listQuerySettings, type ResourceQueryOptions } from './query-options';
 import { captureQueryProvider, snapshotListParams } from './query-snapshot';
 import type { LiveMode, LiveEvent } from './live.svelte';
 import type { QueryKey } from './query-keys';
@@ -19,14 +20,19 @@ import {
   createQuerySession, createQueryResultView, pendingQueryResult, querySessionError, supersededQuerySession,
 } from './query-session.svelte';
 
-export interface UseInfiniteListOptions extends ContractOptions {
+export type InfinitePages<T extends BaseRecord> = InfiniteData<GetListResult<T>, number>;
+
+export interface UseInfiniteListOptions<
+  TData extends BaseRecord = BaseRecord,
+  TSelected = InfinitePages<TData>,
+> extends ContractOptions {
   resource?: KnownResources;
   pagination?: Pagination;
   sorters?: Sort[];
   filters?: Filter[];
   meta?: Record<string, unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean };
+  queryOptions?: ResourceQueryOptions<InfinitePages<TData>, TSelected>;
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -44,7 +50,7 @@ const flagsSchema = Type.Object({
   isFetchPreviousPageError: Type.Boolean(), isFetchingPreviousPage: Type.Boolean(),
 }, { additionalProperties: false });
 
-type Pages<T extends BaseRecord> = InfiniteData<GetListResult<T>, number>;
+type Pages<T extends BaseRecord> = InfinitePages<T>;
 type InfiniteOutcome<T> =
   | { status: 'pending'; data: undefined; error: null; isPending: true; isError: false; isSuccess: false;
       isLoading: boolean; isLoadingError: false; isRefetchError: false; isPlaceholderData: false;
@@ -63,12 +69,12 @@ type InfiniteOutcome<T> =
     ));
 
 /** The installed observer retains data on paging errors without setting isRefetchError. */
-export type InfiniteListResult<T extends BaseRecord> =
-  Omit<InfiniteQueryObserverBaseResult<Pages<T>, unknown>, keyof InfiniteOutcome<Pages<T>> | 'refetch' | 'fetchNextPage' | 'fetchPreviousPage'>
-  & InfiniteOutcome<Pages<T>> & {
-    refetch: (settings?: RefetchOptions) => Promise<InfiniteListResult<T>>;
-    fetchNextPage: (settings?: FetchNextPageOptions) => Promise<InfiniteListResult<T>>;
-    fetchPreviousPage: (settings?: FetchPreviousPageOptions) => Promise<InfiniteListResult<T>>;
+export type InfiniteListResult<T extends BaseRecord, TData = Pages<T>> =
+  Omit<InfiniteQueryObserverBaseResult<TData, unknown>, keyof InfiniteOutcome<TData> | 'refetch' | 'fetchNextPage' | 'fetchPreviousPage'>
+  & InfiniteOutcome<TData> & {
+    refetch: (settings?: RefetchOptions) => Promise<InfiniteListResult<T, TData>>;
+    fetchNextPage: (settings?: FetchNextPageOptions) => Promise<InfiniteListResult<T, TData>>;
+    fetchPreviousPage: (settings?: FetchPreviousPageOptions) => Promise<InfiniteListResult<T, TData>>;
   };
 
 export function decodeInfiniteResult<T extends BaseRecord>(input: unknown, decode: RecordDecoder<T>): InfiniteData<GetListResult<T>, number> {
@@ -88,15 +94,16 @@ export function useInfiniteList(options: UseInfiniteListOptions = {}) {
   return createInfiniteListQuery(options, () => decodeBaseRecord);
 }
 
-export function createInfiniteListQuery<TData extends BaseRecord>(
-  options: UseInfiniteListOptions, getDecoder: () => RecordDecoder<TData>,
+export function createInfiniteListQuery<TData extends BaseRecord, TSelected = Pages<TData>>(
+  options: UseInfiniteListOptions<TData, TSelected>, getDecoder: () => RecordDecoder<TData>,
 ) {
   const context = captureContractContext(options);
   const parsed = useParsed();
   const adminOptions = getAdminOptions();
   type Data = Pages<TData>;
-  type Result = InfiniteListResult<TData>;
+  type Result = InfiniteListResult<TData, TSelected>;
   const session = createQuerySession(context, () => {
+    const querySettings = listQuerySettings(options.queryOptions);
     const resource = options.resource ?? parsed.resource ?? '';
     const captured = captureQueryProvider(context, {
       resource, ...definedOptions({ dataProviderName: options.dataProviderName, contract: options.contract, meta: options.meta }),
@@ -110,8 +117,16 @@ export function createInfiniteListQuery<TData extends BaseRecord>(
     return {
       resource, captured, params, decode: getDecoder(),
       queryKey: context.queryKeys(resource, options.dataProviderName).data.infiniteList(resource, { ...params, source: captured.source }),
-      enabled: options.queryOptions?.enabled ?? true,
-      staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
+      enabled: querySettings.enabled,
+      staleTime: querySettings.staleTime ?? adminOptions.reactQuery?.staleTime,
+      gcTime: querySettings.gcTime ?? adminOptions.reactQuery?.gcTime,
+      refetchOnWindowFocus: querySettings.refetchOnWindowFocus ?? adminOptions.reactQuery?.refetchOnWindowFocus,
+      retry: querySettings.retry,
+      retryDelay: querySettings.retryDelay,
+      refetchInterval: querySettings.refetchInterval,
+      refetchIntervalInBackground: querySettings.refetchIntervalInBackground,
+      placeholderData: querySettings.placeholderData as Data | ((previousData: Data | undefined) => Data | undefined) | undefined,
+      select: options.queryOptions?.select,
       successNotification: options.successNotification, errorNotification: options.errorNotification,
     };
   });
@@ -142,7 +157,16 @@ export function createInfiniteListQuery<TData extends BaseRecord>(
         }
       },
       enabled: origin.enabled && origin.auth.available,
-      ...definedOptions({ staleTime: origin.staleTime }),
+      ...definedOptions({
+        staleTime: origin.staleTime,
+        gcTime: origin.gcTime,
+        refetchOnWindowFocus: origin.refetchOnWindowFocus,
+        retry: origin.retry,
+        retryDelay: origin.retryDelay,
+        refetchInterval: origin.refetchInterval,
+        refetchIntervalInBackground: origin.refetchIntervalInBackground,
+        placeholderData: origin.placeholderData,
+      }),
     };
   });
 
@@ -184,15 +208,19 @@ export function createInfiniteListQuery<TData extends BaseRecord>(
       if (!checkExact(flagsSchema, flags)) return rejectProviderResponse();
       const failureReason = result.failureReason === null ? null : querySessionError(result.failureReason);
       const rawData: unknown = result.data;
+      const projectData = (value: unknown): TSelected => {
+        const pages = decodeInfiniteResult(value, origin.decode);
+        return origin.select ? origin.select(pages) : pages as TSelected;
+      };
       if (result.status === 'success') {
-        const data = decodeInfiniteResult(rawData, origin.decode);
+        const data = projectData(rawData);
         if (!session.current(origin)) return pending(operations);
         return { ...result, ...flags, ...operations, data, failureReason, isFetchNextPageError: false, isFetchPreviousPageError: false };
       }
       if (result.status === 'error') {
         const base = { ...result, ...flags, ...operations, error: querySessionError(result.error), failureReason };
         if (rawData === undefined) return { ...base, data: undefined, isLoadingError: true, isRefetchError: false };
-        const data = decodeInfiniteResult(rawData, origin.decode);
+        const data = projectData(rawData);
         if (!session.current(origin)) return pending(operations);
         if (flags.isFetchNextPageError) return {
           ...base, data, isLoadingError: false, isRefetchError: false, isFetchNextPageError: true, isFetchPreviousPageError: false,

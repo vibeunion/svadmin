@@ -148,6 +148,21 @@ describe('lossless recursive filters', () => {
   it('preserves mixed nested AND/OR without flattening', () => assert.deepEqual(roundtrip(nested), nested));
   it('preserves explicit root AND wrapping', () => assert.deepEqual(roundtrip([{ operator: 'and', value: [leaf] }]), [{ operator: 'and', value: [leaf] }]));
   it('preserves explicit root OR wrapping', () => assert.deepEqual(roundtrip([{ operator: 'or', value: [leaf] }]), [{ operator: 'or', value: [leaf] }]));
+  it('preserves keyed condition groups', () => {
+    const keyed: Filter[] = [{
+      key: 'parent',
+      operator: 'or',
+      value: [
+        leaf,
+        { key: 'child', operator: 'and', value: [{ field: 'amount', operator: 'gt', value: 1 }] },
+      ],
+    }];
+    assert.deepEqual(roundtrip(keyed), keyed);
+  });
+  it('rejects a logical group whose key is not a protocol string', () => {
+    assert.equal(readFilterTree([{ key: '', operator: 'or', value: [leaf] }]).ok, false);
+    assert.equal(readFilterTree([{ key: 1, operator: 'and', value: [leaf] }]).ok, false);
+  });
   it('preserves the empty query', () => assert.deepEqual(roundtrip([]), []));
   it('preserves intentional empty-string equality', () => assert.deepEqual(roundtrip([{ field: 'name', operator: 'eq', value: '' }]), [{ field: 'name', operator: 'eq', value: '' }]));
   it('roundtrips a family of deep trees', () => {

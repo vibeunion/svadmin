@@ -148,6 +148,13 @@ describe('createElysiaDataProvider', () => {
       expect(url).toContain('age_gte=18');
     });
 
+    it('rejects unknown filter operators instead of forwarding them', async () => {
+      setupMockFetch({ items: [], total: 0 });
+      const unsupported = [{ field: 'name', operator: 'regex', value: '^A' }] as unknown as Filter[];
+      await expect(provider.getList({ resource: 'posts', filters: unsupported })).rejects.toThrow('Unsupported elysia filter operator: regex');
+      expect(mockFetchFn).not.toHaveBeenCalled();
+    });
+
     it('should serialize every filter operator and nested logical groups without losing values', async () => {
       setupMockFetch({ items: [], total: 0 });
       const filters: Filter[] = [

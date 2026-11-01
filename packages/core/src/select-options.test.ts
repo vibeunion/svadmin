@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { normalizeSelectDefaultValue, orderSelectOptions, selectQueryFilters } from './select-options';
+import { mapSelectOptions, normalizeSelectDefaultValue, orderSelectOptions, readRecordPath, selectQueryFilters } from './select-options';
+import type { BaseRecord } from './types';
 
 describe('useSelect option helpers', () => {
   test('accepts a scalar default and orders selected options first when asked', () => {
@@ -32,5 +33,20 @@ describe('useSelect option helpers', () => {
       searched: [{ field: 'title', operator: 'eq', value: 'ada' }],
     })).toEqual([{ field: 'title', operator: 'eq', value: 'ada' }]);
     expect(selectQueryFilters({ text: '', searchField: 'email' })).toEqual([]);
+  });
+
+  test('reads nested option labels and values without walking the prototype', () => {
+    const records = [{ id: 1, nested: { title: 'Hello', code: 7 } }];
+    expect(readRecordPath(records[0] ?? {}, 'nested.title')).toBe('Hello');
+    expect(mapSelectOptions(
+      records,
+      'nested.title',
+      'nested.code',
+      (value) => value as BaseRecord,
+      () => true,
+    )).toEqual([{ label: 'Hello', value: 7 }]);
+    const inherited = Object.create({ nested: { title: 'hidden' } }) as BaseRecord;
+    inherited['id'] = 1;
+    expect(readRecordPath(inherited, 'nested.title')).toBeUndefined();
   });
 });

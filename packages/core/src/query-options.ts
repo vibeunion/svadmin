@@ -1,10 +1,10 @@
 import { definedOptions } from './defined-options';
 
 /**
- * useList / useTable 可以安全转发的 TanStack Query 选项。
- * `select` 在解码之后执行，避免改掉缓存里的原始响应。
+ * 查询钩子可以安全转发的 TanStack Query 选项。
+ * `select` 在解码之后执行，可以改变投影类型，且不会改写缓存里的原始响应。
  */
-export interface ResourceQueryOptions<TData = unknown> {
+export interface ResourceQueryOptions<TQueryFnData = unknown, TData = TQueryFnData> {
   staleTime?: number;
   enabled?: boolean;
   gcTime?: number;
@@ -13,8 +13,8 @@ export interface ResourceQueryOptions<TData = unknown> {
   retryDelay?: number | ((failureCount: number, error: unknown) => number);
   refetchInterval?: number | false;
   refetchIntervalInBackground?: boolean;
-  placeholderData?: TData | ((previousData: TData | undefined) => TData | undefined);
-  select?: (data: TData) => TData;
+  placeholderData?: TQueryFnData | ((previousData: TQueryFnData | undefined) => TQueryFnData | undefined);
+  select?: (data: TQueryFnData) => TData;
 }
 
 export interface ListQuerySettings<TData = unknown> {
@@ -29,7 +29,9 @@ export interface ListQuerySettings<TData = unknown> {
   placeholderData?: ResourceQueryOptions<TData>['placeholderData'];
 }
 
-export function listQuerySettings<TData>(options: ResourceQueryOptions<TData> | undefined): ListQuerySettings<TData> {
+export function listQuerySettings<TQueryFnData>(
+  options: ResourceQueryOptions<TQueryFnData, unknown> | undefined,
+): ListQuerySettings<TQueryFnData> {
   return {
     enabled: options?.enabled ?? true,
     ...definedOptions({
@@ -45,6 +47,33 @@ export function listQuerySettings<TData>(options: ResourceQueryOptions<TData> | 
   };
 }
 
-export function applyListSelect<TData>(data: TData, select?: (data: TData) => TData): TData {
+function projectSelected<TQueryFnData, TData>(
+  data: TQueryFnData,
+  select?: (data: TQueryFnData) => TData,
+): TQueryFnData | TData {
   return select ? select(data) : data;
+}
+
+export function applyQuerySelect<TQueryFnData>(data: TQueryFnData, select?: undefined): TQueryFnData;
+export function applyQuerySelect<TQueryFnData, TData>(
+  data: TQueryFnData,
+  select: (data: TQueryFnData) => TData,
+): TData;
+export function applyQuerySelect<TQueryFnData, TData>(
+  data: TQueryFnData,
+  select?: (data: TQueryFnData) => TData,
+): TQueryFnData | TData {
+  return projectSelected(data, select);
+}
+
+export function applyListSelect<TQueryFnData>(data: TQueryFnData, select?: undefined): TQueryFnData;
+export function applyListSelect<TQueryFnData, TData>(
+  data: TQueryFnData,
+  select: (data: TQueryFnData) => TData,
+): TData;
+export function applyListSelect<TQueryFnData, TData>(
+  data: TQueryFnData,
+  select?: (data: TQueryFnData) => TData,
+): TQueryFnData | TData {
+  return projectSelected(data, select);
 }

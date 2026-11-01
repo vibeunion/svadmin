@@ -1,9 +1,8 @@
 // @svadmin/pocketbase — PocketBase DataProvider
 // Maps svadmin CRUD operations to PocketBase SDK
 
-import type {
-  DataProvider,
-} from '@svadmin/core';
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
+import type { DataProvider, Filter } from '@svadmin/core';
 import { definedOptions } from '@svadmin/core/options';
 import { withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
 
@@ -41,27 +40,86 @@ function buildSort(sorters?: { field: string; order: 'asc' | 'desc' }[]): string
   return sorters.map(s => s.order === 'desc' ? `-${s.field}` : s.field).join(',');
 }
 
-function buildFilter(filters?: { field: string; operator: string; value: unknown }[]): string | undefined {
-  if (!filters?.length) return undefined;
-  return filters.map(f => {
-    const v = f.value;
-    switch (f.operator) {
-      case 'eq': return `${f.field} = '${v}'`;
-      case 'ne': return `${f.field} != '${v}'`;
-      case 'contains': return `${f.field} ~ '${v}'`;
-      case 'ncontains': return `${f.field} !~ '${v}'`;
-      case 'gt': return `${f.field} > '${v}'`;
-      case 'gte': return `${f.field} >= '${v}'`;
-      case 'lt': return `${f.field} < '${v}'`;
-      case 'lte': return `${f.field} <= '${v}'`;
-      case 'null': return `${f.field} = ''`;
-      case 'nnull': return `${f.field} != ''`;
-      case 'in':
-        if (!Array.isArray(v)) throw new TypeError('PocketBase in filter requires an array');
-        return `${f.field} ?= '${v.join("' || " + f.field + " ?= '")}'`;
-      default: return `${f.field} = '${v}'`;
+const FIELD_PATH = /^(?:[A-Za-z_][A-Za-z0-9_]*)(?:\.[A-Za-z_][A-Za-z0-9_]*)*$/;
+
+function pocketBaseField(field: string): string {
+  if (!FIELD_PATH.test(field)) throw new TypeError(`Unsupported PocketBase filter field: ${field}`);
+  return field;
+}
+
+function quoteString(value: string): string {
+  return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+}
+
+function pocketBaseLiteral(value: unknown): string {
+  if (value === null) return 'null';
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) throw new TypeError('PocketBase filters reject non-finite numbers');
+    return String(value);
+  }
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'string') return quoteString(value);
+  throw new TypeError('PocketBase filters reject this value');
+}
+
+function likeLiteral(value: unknown): string {
+  if (typeof value !== 'string') throw new TypeError('PocketBase text filters require a string');
+  return value.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_');
+}
+
+function listLiterals(value: unknown, operator: string): string[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new TypeError(`PocketBase ${operator} filter requires a non-empty array`);
+  }
+  return value.map(pocketBaseLiteral);
+}
+
+function compilePocketBaseFilter(filter: Filter): string {
+  if ('field' in filter) {
+    const field = pocketBaseField(filter.field);
+    switch (filter.operator) {
+      case 'eq': return `${field} = ${pocketBaseLiteral(filter.value)}`;
+      case 'ne': return `${field} != ${pocketBaseLiteral(filter.value)}`;
+      case 'gt': return `${field} > ${pocketBaseLiteral(filter.value)}`;
+      case 'gte': return `${field} >= ${pocketBaseLiteral(filter.value)}`;
+      case 'lt': return `${field} < ${pocketBaseLiteral(filter.value)}`;
+      case 'lte': return `${field} <= ${pocketBaseLiteral(filter.value)}`;
+      case 'contains': return `${field} ~ ${quoteString(likeLiteral(filter.value))}`;
+      case 'ncontains': return `${field} !~ ${quoteString(likeLiteral(filter.value))}`;
+      case 'startswith': return `${field} ~ ${quoteString(`${likeLiteral(filter.value)}%`)}`;
+      case 'nstartswith': return `${field} !~ ${quoteString(`${likeLiteral(filter.value)}%`)}`;
+      case 'endswith': return `${field} ~ ${quoteString(`%${likeLiteral(filter.value)}`)}`;
+      case 'nendswith': return `${field} !~ ${quoteString(`%${likeLiteral(filter.value)}`)}`;
+      case 'null': return `${field} = null`;
+      case 'nnull': return `${field} != null`;
+      case 'in': return `(${listLiterals(filter.value, 'in').map((item) => `${field} = ${item}`).join(' || ')})`;
+      case 'nin': return `(${listLiterals(filter.value, 'nin').map((item) => `${field} != ${item}`).join(' && ')})`;
+      case 'between':
+      case 'nbetween': {
+        const bounds = listLiterals(filter.value, filter.operator);
+        if (bounds.length !== 2) throw new TypeError(`PocketBase ${filter.operator} filter requires two values`);
+        const [min, max] = bounds;
+        return filter.operator === 'between'
+          ? `(${field} >= ${min} && ${field} <= ${max})`
+          : `(${field} < ${min} || ${field} > ${max})`;
+      }
+      default:
+        throw new Error(`Unsupported PocketBase filter operator: ${String(filter.operator)}`);
     }
-  }).join(' && ');
+  }
+  if (filter.operator !== 'and' && filter.operator !== 'or') {
+    throw new Error(`Unsupported PocketBase logical operator: ${String(filter.operator)}`);
+  }
+  if (!Array.isArray(filter.value)) throw new TypeError('PocketBase logical filter requires an array');
+  if (filter.value.length === 0) return filter.operator === 'and' ? '(1=1)' : '(1=0)';
+  const joiner = filter.operator === 'and' ? ' && ' : ' || ';
+  return `(${filter.value.map(compilePocketBaseFilter).join(joiner)})`;
+}
+
+function buildFilter(filters?: Filter[]): string | undefined {
+  if (!filters?.length) return undefined;
+  assertFiltersExecutable('pocketbase', filters);
+  return filters.map(compilePocketBaseFilter).join(' && ');
 }
 
 /**
@@ -87,7 +145,7 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
       const perPage = params.pagination?.pageSize ?? 10;
       const result = await pb.collection(params.resource).getList(page, perPage, definedOptions({
         sort: buildSort(params.sorters),
-        filter: buildFilter((params.filters || []).filter((f) => 'field' in f)),
+        filter: buildFilter(params.filters),
       }));
       if (!isObject(result)) return result;
       return {

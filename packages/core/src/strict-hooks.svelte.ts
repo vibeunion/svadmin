@@ -6,7 +6,9 @@ import type { ContractOptions } from './contract-context.svelte';
 import { captureAdminContext } from './context.svelte';
 import { contractKey,validateContractId,parseContractId,parseContractRecord,type ResourceContract,type ContractSchemas,type ContractRecord,type ContractId,type ContractFormAction } from './resource-contract';
 import type { RecordDecoder } from './record-decoder';
-import type { KnownResources,Filter } from './types';
+import type { GetListResult, GetManyResult, GetOneResult, HttpError, KnownResources, Filter } from './types';
+import type { InfinitePages } from './infinite-query.svelte';
+import type { SelectOption } from './select-options';
 import { useQueryClient } from '@tanstack/svelte-query';
 import { replaceReactiveMembers } from './reactive-projection';
 import { snapshotInvalidationParams } from './invalidation-contract';
@@ -72,21 +74,31 @@ function recordDecoder<S extends ContractSchemas>(options: query.MaybeGetter<Bou
   };
 }
 
-export function useList<S extends ContractSchemas>(options: query.MaybeGetter<ListOptions<query.UseListOptions,S>>) {
-  return query.createListQuery(getter(options),recordDecoder(options));
+export function useList<S extends ContractSchemas, TSelected = GetListResult<Row<S>>>(
+  options: query.MaybeGetter<ListOptions<query.UseListOptions<Row<S>, HttpError, TSelected>, S>>,
+) {
+  return query.createListQuery<Row<S>, TSelected>(getter(options), recordDecoder(options));
 }
 /** Refine 迁移别名，契约边界与 useList 相同。 */
-export function useSimpleList<S extends ContractSchemas>(options: query.MaybeGetter<ListOptions<query.UseListOptions,S>>) {
-  return useList(options);
+export function useSimpleList<S extends ContractSchemas, TSelected = GetListResult<Row<S>>>(
+  options: query.MaybeGetter<ListOptions<query.UseListOptions<Row<S>, HttpError, TSelected>, S>>,
+) {
+  return useList<S, TSelected>(options);
 }
-export function useOne<S extends ContractSchemas>(options: query.MaybeGetter<QueryOptions<query.UseOneOptions,S>&{ id: Id<S> }>) {
-  return query.createOneQuery(getter(options),recordDecoder(options));
+export function useOne<S extends ContractSchemas, TSelected = GetOneResult<Row<S>>>(
+  options: query.MaybeGetter<QueryOptions<query.UseOneOptions<Row<S>, HttpError, TSelected>, S> & { id: Id<S> }>,
+) {
+  return query.createOneQuery<Row<S>, TSelected>(getter(options), recordDecoder(options));
 }
-export function useMany<S extends ContractSchemas>(options: query.MaybeGetter<QueryOptions<query.UseManyOptions,S>&{ ids: Id<S>[] }>) {
-  return query.createManyQuery(getter(options),recordDecoder(options));
+export function useMany<S extends ContractSchemas, TSelected = GetManyResult<Row<S>>>(
+  options: query.MaybeGetter<QueryOptions<query.UseManyOptions<Row<S>, HttpError, TSelected>, S> & { ids: Id<S>[] }>,
+) {
+  return query.createManyQuery<Row<S>, TSelected>(getter(options), recordDecoder(options));
 }
-export function useShow<S extends ContractSchemas>(options: query.MaybeGetter<QueryOptions<query.UseOneOptions,S>&{ id: Id<S> }>) {
-  const result=query.createShowQuery(getter(options),recordDecoder(options));
+export function useShow<S extends ContractSchemas, TSelected = GetOneResult<Row<S>>>(
+  options: query.MaybeGetter<QueryOptions<query.UseOneOptions<Row<S>, HttpError, TSelected>, S> & { id: Id<S> }>,
+) {
+  const result=query.createShowQuery<Row<S>, TSelected>(getter(options), recordDecoder(options));
   return replaceReactiveMembers(result,{
     get showId(): Id<S> {
       return parseContractId((typeof options==='function'? options():options).resource,result.showId);
@@ -97,18 +109,20 @@ export function useShow<S extends ContractSchemas>(options: query.MaybeGetter<Qu
     },
   });
 }
-export function useInfiniteList<S extends ContractSchemas>(options: ListOptions<bulk.UseInfiniteListOptions,S>) {
-  return bulk.createInfiniteListQuery(bind(options),recordDecoder(options));
+export function useInfiniteList<S extends ContractSchemas, TSelected = InfinitePages<Row<S>>>(
+  options: ListOptions<bulk.UseInfiniteListOptions<Row<S>, TSelected>, S>,
+) {
+  return bulk.createInfiniteListQuery<Row<S>, TSelected>(bind(options), recordDecoder(options));
 }
-export function useSelect<S extends ContractSchemas>(
-  options: ListOptions<Omit<bulk.UseSelectOptions<Row<S>>,'optionLabel'|'optionValue'|'defaultValue'|'onSearch'>,S>&{
+export function useSelect<S extends ContractSchemas, TSelected = { data: Row<S>[]; total: number; options: SelectOption[] }>(
+  options: ListOptions<Omit<bulk.UseSelectOptions<Row<S>, TSelected>,'optionLabel'|'optionValue'|'defaultValue'|'onSearch'>,S>&{
     optionLabel: Field<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string);
     optionValue: ValueField<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string|number);
     defaultValue?: Id<S> | readonly Id<S>[];
     onSearch?: (value: string) => ContractFilter<NoInfer<Row<S>>>[];
   },
 ) {
-  return bulk.createSelectQuery(bind(options),recordDecoder(options));
+  return bulk.createSelectQuery<Row<S>, TSelected>(bind(options), recordDecoder(options));
 }
 export function useTable<S extends ContractSchemas>(
   options: query.MaybeGetter<QueryOptions<UseTableOptions,S>&{

@@ -1,9 +1,11 @@
+import { assertFiltersExecutable } from '@svadmin/core/provider-filters';
 import { HttpError, type BaseRecord, type DataProvider, type Filter } from '@svadmin/core';
 import { productResources } from './generated/resources';
 
 export type ProductScenario = 'normal' | 'empty' | 'error' | 'loading' | 'denied' | 'readonly';
 
 function matches(row: BaseRecord, filter: Filter): boolean {
+  assertFiltersExecutable('scaffold-memory', [filter]);
   if (!('field' in filter)) {
     return filter.operator === 'or'
       ? filter.value.some(candidate => matches(row, candidate))

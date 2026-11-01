@@ -28,25 +28,47 @@ export function resolveEditableTableQuery(
   url?: {
     page?: number;
     pageSize?: number;
+    sorters?: Sort[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
     filters?: Filter[];
   },
 ): Pick<EditableTableQuery, 'pagination' | 'sorters' | 'filters'> {
   const synced = options.syncWithLocation === true;
+  const syncedSorters = url?.sorters?.length
+    ? url.sorters
+    : url?.sortField
+      ? [{ field: url.sortField, order: url.sortOrder ?? 'asc' }]
+      : undefined;
   return {
     pagination: {
       ...options.pagination,
       current: synced ? url?.page ?? options.pagination?.current ?? 1 : options.pagination?.current ?? 1,
       pageSize: synced ? url?.pageSize ?? options.pagination?.pageSize ?? 50 : options.pagination?.pageSize ?? 50,
     },
-    ...(synced && url?.sortField
-      ? { sorters: [{ field: url.sortField, order: url.sortOrder ?? 'asc' }] }
+    ...(synced && syncedSorters
+      ? { sorters: syncedSorters }
       : options.sorters ? { sorters: options.sorters } : {}),
     ...((synced ? url?.filters ?? options.filters : options.filters) ? {
       filters: synced ? url?.filters ?? options.filters : options.filters,
     } : {}),
   };
+}
+
+function assertBatchReceipt(ids: readonly (string | number)[], records: readonly Record<string, unknown>[]): void {
+  const expected = new Set(ids.map((id) => String(id)));
+  if (expected.size !== ids.length || records.length !== ids.length) {
+    throw new Error('Batch update response did not match the requested records');
+  }
+  const seen = new Set<string>();
+  for (const record of records) {
+    const id = record['id'];
+    const key = typeof id === 'string' || typeof id === 'number' ? String(id) : '';
+    if (!key || !expected.has(key) || seen.has(key)) {
+      throw new Error('Batch update response did not match the requested records');
+    }
+    seen.add(key);
+  }
 }
 
 function retryAttempts(retry: boolean | number | undefined): number {
@@ -282,7 +304,10 @@ export function createEditableTableController(
       try {
         if (provider.updateMany) {
           const result = await provider.updateMany({ resource: contract.name, ids, variables });
-          for (const record of result.data) parseContractRecord(contract, record);
+          const records = Array.isArray(result?.data) ? result.data : undefined;
+          if (!records) throw new Error('Batch update response did not match the requested records');
+          const parsed = records.map((record) => parseContractRecord(contract, record));
+          assertBatchReceipt(ids, parsed);
         } else {
           for (const id of ids) {
             const result = await provider.update({ resource: contract.name, id, variables });

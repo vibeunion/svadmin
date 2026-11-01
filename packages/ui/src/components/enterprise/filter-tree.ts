@@ -2,7 +2,7 @@ import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
 
 export const FILTER_EDITOR_LIMITS = Object.freeze({ depth: 12, nodes: 256, values: 1000 });
 export interface FilterRuleNode { kind: 'rule'; id: string; field: string; operator: CrudOperator; value: unknown; readonly?: boolean }
-export interface FilterGroupNode { kind: 'group'; id: string; operator: 'and' | 'or'; children: FilterNode[]; wrapped?: boolean }
+export interface FilterGroupNode { kind: 'group'; id: string; operator: 'and' | 'or'; children: FilterNode[]; wrapped?: boolean; key?: string }
 export type FilterNode = FilterRuleNode | FilterGroupNode;
 export type FilterIssueCode = 'invalid-filter' | 'limit' | 'unknown-field' | 'operator' | 'logic' | 'value' | 'empty-group';
 export interface FilterEditorIssue { path: string; code: FilterIssueCode }
@@ -13,6 +13,9 @@ const comparison: CrudOperator[] = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 
 const selection: CrudOperator[] = ['eq', 'ne', 'in', 'nin', 'null', 'nnull'];
 const text: CrudOperator[] = ['eq', 'ne', 'contains', 'ncontains', 'startswith', 'endswith', 'in', 'nin', 'null', 'nnull'];
 const scalar = (value: unknown): boolean => value === null || typeof value === 'string' || typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value));
+function keyedGroup(node: FilterGroupNode, children: Filter[]): Filter {
+  return node.key ? { key: node.key, operator: node.operator, value: children } : { operator: node.operator, value: children };
+}
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 export const isCollectionOperator = (operator: CrudOperator): boolean => ['in', 'nin', 'between', 'nbetween'].includes(operator);
 export const isNullOperator = (operator: CrudOperator): boolean => operator === 'null' || operator === 'nnull';
@@ -43,14 +46,19 @@ export function readFilterTree(input: unknown): FilterTreeRead {
         return { kind: 'rule', id, field: raw['field'], operator: raw['operator'] as CrudOperator, value: Array.isArray(value) ? [...value] : value };
       }
       if (!['and', 'or'].includes(String(raw['operator'])) || !Array.isArray(raw['value'])
-        || Object.keys(raw).some((key) => !['operator', 'value'].includes(key))) { issues.push({ path, code: 'invalid-filter' }); return; }
+        || Object.keys(raw).some((key) => !['operator', 'value', 'key'].includes(key))) { issues.push({ path, code: 'invalid-filter' }); return; }
+      let groupKey: string | undefined;
+      if ('key' in raw) {
+        if (typeof raw['key'] !== 'string' || raw['key'].length < 1 || raw['key'].length > 128) { issues.push({ path, code: 'invalid-filter' }); return; }
+        groupKey = raw['key'];
+      }
       if (raw['value'].length > FILTER_EDITOR_LIMITS.nodes) { issues.push({ path, code: 'limit' }); return; }
       const children: FilterNode[] = [];
       for (const [index, child] of raw['value'].entries()) {
         const node = read(child, depth + 1, `${path}/value/${index}`);
         if (node) children.push(node);
       }
-      return { kind: 'group', id, operator: raw['operator'] as 'and' | 'or', children };
+      return { kind: 'group', id, operator: raw['operator'] as 'and' | 'or', children, ...(groupKey ? { key: groupKey } : {}) };
     } finally { active.delete(raw); }
   }
   if (!Array.isArray(input)) return { ok: false, issues: [{ path: '', code: 'invalid-filter' }] };
@@ -88,7 +96,7 @@ export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldD
       }
       if (original && node.kind === 'group' && !('field' in original)
         && !node.children.length && !original.value.length && node.operator === original.operator) {
-        return { operator: node.operator, value: [] };
+        return keyedGroup(node, []);
       }
       if (node.kind === 'group') {
         if (node.operator !== 'and' && node.operator !== 'or') { issue('operator'); return; }
@@ -96,7 +104,7 @@ export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldD
         if (node.children.length > FILTER_EDITOR_LIMITS.nodes) { issue('limit'); return; }
         const children: Filter[] = [];
         for (const child of node.children) { const filter = visit(child, depth + 1); if (filter) children.push(filter); }
-        return { operator: node.operator, value: children };
+        return keyedGroup(node, children);
       }
       const field = fieldMap.get(node.field);
       if (!field || field.filterable === false) { issue('unknown-field'); return; }

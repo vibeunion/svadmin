@@ -1,6 +1,7 @@
 import { definedOptions } from './defined-options';
 import { createListQuery } from './query-hooks.svelte';
 import { decodeBaseRecord, type RecordDecoder } from './record-decoder';
+import { matchClientFilter } from './client-filter';
 import { readURLState,writeURLState } from './url-sync';
 import { captureContractContext } from './contract-context.svelte';
 import { getAdminOptions } from './options.svelte';
@@ -61,7 +62,9 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
         pageSize: urlState.pageSize??initPagination.pageSize,
       });
     }
-    if(urlState.sortField) {
+    if(urlState.sorters?.length) {
+      initSorters=urlState.sorters;
+    } else if(urlState.sortField) {
       initSorters=[{ field: urlState.sortField,order: urlState.sortOrder??'asc' }];
     }
     if(urlState.filters) {
@@ -82,7 +85,7 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
     ? pagination
     :{ current: 1,pageSize: 999999,mode: paginationMode });
 
-  const tableQueryInfo=createListQuery(() => {
+  const tableQueryInfo=createListQuery<TQueryFnData>(() => {
     const currentOpts=getOptions();
     const { meta,syncWithLocation: _swl,dataProviderName,pagination: _p,sorters: _s,filters: _f,...restOptions }=currentOpts;
     return {
@@ -94,7 +97,7 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
         dataProviderName,
       }),
       ...restOptions
-    };
+    } as UseListOptions<TQueryFnData>;
   }, getDecoder);
 
   const query=tableQueryInfo;
@@ -130,8 +133,7 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
       writeURLState({
         page: pagination.current,
         pageSize: pagination.pageSize,
-        sortField: currentSorters[0]?.field,
-        sortOrder: currentSorters[0]?.order,
+        sorters: currentSorters,
         ...definedOptions({
           filters: currentFilters
         })
@@ -149,13 +151,13 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
         if(newPageSize!==pagination.pageSize) {
           pagination={ ...pagination,pageSize: newPageSize };
         }
-        if(urlState.sortField) {
-          const newSorter: Sort={ field: urlState.sortField,order: urlState.sortOrder??'asc' };
-          if(JSON.stringify([newSorter])!==JSON.stringify(currentSorters)) {
-            currentSorters=[newSorter];
-          }
-        } else if(currentSorters.length>0) {
-          currentSorters=[];
+        const nextSorters=urlState.sorters?.length
+          ? urlState.sorters
+          : urlState.sortField
+            ? [{ field: urlState.sortField,order: urlState.sortOrder??'asc' }]
+            : [];
+        if(JSON.stringify(nextSorters)!==JSON.stringify(currentSorters)) {
+          currentSorters=nextSorters;
         }
         if(urlState.filters&&JSON.stringify(urlState.filters)!==JSON.stringify(currentFilters)) {
           currentFilters=urlState.filters;
@@ -176,9 +178,13 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
     const params=new URLSearchParams();
     if(pagination.current) params.set('page',String(pagination.current));
     if(pagination.pageSize) params.set('pageSize',String(pagination.pageSize));
-    if(currentSorters[0]) {
-      params.set('sort',currentSorters[0].field);
-      params.set('order',currentSorters[0].order);
+    if(currentSorters.length>0) {
+      const first=currentSorters[0];
+      if(first) {
+        params.set('sorters',JSON.stringify(currentSorters));
+        params.set('sort',first.field);
+        params.set('order',first.order);
+      }
     }
     if(currentFilters.length>0) {
       params.set('filters',JSON.stringify(currentFilters));
@@ -228,63 +234,7 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
       }
       const activeFilters=filtersMode==='off'? effectiveFilters:[];
       if(activeFilters.length>0) {
-        function matchesFilter(item: Record<string,unknown>,f: Filter): boolean {
-          if(!('field' in f)) {
-            if(f.operator==='and') return f.value.every(sub => matchesFilter(item,sub));
-            if(f.operator==='or') return f.value.length===0||f.value.some(sub => matchesFilter(item,sub));
-            return true;
-          }
-          const val=item[f.field];
-          const fv=f.value;
-          switch(f.operator) {
-            case 'null': return val==null;
-            case 'nnull': return val!=null;
-            default: break;
-          }
-          if(fv==null||fv==='') return true;
-          switch(f.operator) {
-            case 'eq': return val==fv;
-            case 'ne': return val!=fv;
-            case 'eqs': return Object.is(val, fv);
-            case 'nes': return !Object.is(val, fv);
-            case 'lt': return typeof val==='number'&&typeof fv==='number'&&val<fv;
-            case 'gt': return typeof val==='number'&&typeof fv==='number'&&val>fv;
-            case 'lte': return typeof val==='number'&&typeof fv==='number'&&val<=fv;
-            case 'gte': return typeof val==='number'&&typeof fv==='number'&&val>=fv;
-            case 'in': return !Array.isArray(fv)||fv.length===0||fv.includes(val);
-            case 'nin': return !Array.isArray(fv)||fv.length===0||!fv.includes(val);
-            case 'ina': return Array.isArray(val)&&Array.isArray(fv)&&fv.every(item => val.includes(item));
-            case 'nina': return Array.isArray(val)&&Array.isArray(fv)&&fv.some(item => !val.includes(item));
-            case 'contains': return typeof val==='string'&&typeof fv==='string'&&val.includes(fv);
-            case 'ncontains': return typeof val==='string'&&typeof fv==='string'&&!val.includes(fv);
-            case 'containss': return typeof val==='string'&&typeof fv==='string'&&val.includes(fv);
-            case 'ncontainss': return typeof val==='string'&&typeof fv==='string'&&!val.includes(fv);
-            case 'startswith': return typeof val==='string'&&typeof fv==='string'&&val.startsWith(fv);
-            case 'nstartswith': return typeof val==='string'&&typeof fv==='string'&&!val.startsWith(fv);
-            case 'startswiths': return typeof val==='string'&&typeof fv==='string'&&val.startsWith(fv);
-            case 'nstartswiths': return typeof val==='string'&&typeof fv==='string'&&!val.startsWith(fv);
-            case 'endswith': return typeof val==='string'&&typeof fv==='string'&&val.endsWith(fv);
-            case 'nendswith': return typeof val==='string'&&typeof fv==='string'&&!val.endsWith(fv);
-            case 'endswiths': return typeof val==='string'&&typeof fv==='string'&&val.endsWith(fv);
-            case 'nendswiths': return typeof val==='string'&&typeof fv==='string'&&!val.endsWith(fv);
-            case 'between': {
-              if(!Array.isArray(fv)||fv.length!==2) return true;
-              const [min,max]: unknown[]=fv;
-              return typeof val==='number'&&typeof min==='number'&&typeof max==='number'
-                &&val>=min&&val<=max;
-            }
-            case 'nbetween': {
-              if(!Array.isArray(fv)||fv.length!==2) return true;
-              const [min,max]: unknown[]=fv;
-              return typeof val==='number'&&typeof min==='number'&&typeof max==='number'
-                &&(val<min||val>max);
-            }
-            default: return true;
-          }
-        }
-        sorted=sorted.filter((item) => {
-          return activeFilters.every(f => matchesFilter(item,f));
-        });
+        sorted=sorted.filter((item) => activeFilters.every((filter) => matchClientFilter(item,filter)));
       }
       if(paginationMode==='off') return sorted;
       const start=((pagination.current??1)-1)*(pagination.pageSize??10);
