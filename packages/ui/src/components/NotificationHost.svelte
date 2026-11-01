@@ -1,12 +1,13 @@
 <script lang="ts">
   import { X } from '@lucide/svelte';
-  import { closeNotification, getNotifications, type NotificationPlacement } from '../notifications.svelte.js';
+  import { useNotificationController, type NotificationPlacement } from '../notifications.svelte.js';
 
   const placements: NotificationPlacement[] = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
+  const controller = useNotificationController();
   const groups = $derived(placements
     .map((placement) => ({
       placement,
-      items: getNotifications().filter((item) => item.placement === placement),
+      items: controller.items.filter((item) => item.placement === placement),
     }))
     .filter((group) => group.items.length > 0));
 </script>
@@ -24,10 +25,10 @@
           <p class="svadmin-notification-host__title">{item.title}</p>
           {#if item.description}<p class="svadmin-notification-host__description">{item.description}</p>{/if}
           {#if item.actionLabel && item.onAction}
-            <button type="button" class="svadmin-notification-host__action" onclick={() => { item.onAction?.(); closeNotification(item.id); }}>{item.actionLabel}</button>
+            <button type="button" class="svadmin-notification-host__action" onclick={() => { item.onAction?.(); controller.close(item.id); }}>{item.actionLabel}</button>
           {/if}
         </div>
-        <button type="button" class="svadmin-notification-host__close" aria-label="Close notification" onclick={() => closeNotification(item.id)}>
+        <button type="button" class="svadmin-notification-host__close" aria-label="Close notification" onclick={() => controller.close(item.id)}>
           <X size={14} aria-hidden="true" />
         </button>
       </section>

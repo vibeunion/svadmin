@@ -33,7 +33,7 @@
 <script lang="ts">
 /* eslint-disable svelte/no-unused-svelte-ignore */
 	import { tick } from "svelte";
-	import { Portal } from "bits-ui";
+	import PopupPortal from "../popup-portal.svelte";
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import { useTranslation } from "@svadmin/core/i18n";
 	import type { HTMLAttributes } from "svelte/elements";
@@ -163,7 +163,7 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#if open}
-	<Portal>
+	<PopupPortal>
 	<!-- Overlay -->
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
@@ -196,5 +196,5 @@
 			<span class="svadmin-sr-only">{closeLabel}</span>
 		</button>
 	</div>
-	</Portal>
+	</PopupPortal>
 {/if}

@@ -1,10 +1,16 @@
 <script module lang="ts">
   import type { Component as PageComponent } from 'svelte';
+  import type { CustomRouteAccessConfig } from './custom-route-access.js';
 
   export interface AdminPageRoute {
     readonly path: string;
     readonly component: PageComponent<{ route: string; params: Record<string, string | undefined> }>;
     readonly title?: string;
+    /**
+     * 直接 URL 的权限。省略时继承同路径菜单的 `meta.resource` / `meta.action`。
+     * `false` 保持公开，即使菜单项受保护。
+     */
+    readonly access?: CustomRouteAccessConfig | false;
   }
 
   const loadPublicProfilePage = () => import('./profile/PublicProfilePage.svelte');
@@ -92,6 +98,9 @@
   import SystemPageShell from './SystemPageShell.svelte';
   import LazyPage from './LazyPage.svelte';
   import ResourceAccessGuard from './ResourceAccessGuard.svelte';
+  import RouteAccessGuard from './RouteAccessGuard.svelte';
+  import { resolveCustomRouteAccess } from './custom-route-access.js';
+  import { bindNotificationRoot, provideNotificationController } from '../notifications.svelte.js';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import { Badge } from './ui/badge/index.js';
@@ -352,6 +361,7 @@
     get tenant() { return tenant; },
   }));
   const adminContext = captureAdminContext();
+  const appNotifications = provideNotificationController();
 
   // Context must be available synchronously to descendants during their first render.
   syncComponentRegistry();
@@ -576,6 +586,7 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
+  <div class="svadmin-admin-app" style="display: contents" use:bindNotificationRoot={appNotifications}>
   {#if !resolvedDataProvider}
     <ConfigErrorScreen title="{title} — DataProvider is required" />
   {:else if !authChecked || authProviderPending}
@@ -665,7 +676,14 @@
         <SettingsPage {...notificationPreferencesProvider ? { preferencesProvider: notificationPreferencesProvider } : {}} />
       {:else if customRouteMatch}
         {@const CustomPage = customRouteMatch.candidate.component}
-        <CustomPage route={customRouteMatch.candidate.path} params={customRouteMatch.params} />
+        {@const routeAccess = resolveCustomRouteAccess(customRouteMatch.candidate, path, menu, customRouteMatch.params)}
+        {#if routeAccess}
+          <RouteAccessGuard resource={routeAccess.resource} action={routeAccess.action} {...routeAccess.id === undefined ? {} : { id: routeAccess.id }}>
+            <CustomPage route={customRouteMatch.candidate.path} params={customRouteMatch.params} />
+          </RouteAccessGuard>
+        {:else}
+          <CustomPage route={customRouteMatch.candidate.path} params={customRouteMatch.params} />
+        {/if}
       {:else if renderedRoute === '/' || renderedRoute === '' || renderedRoute === '/inventory-dashboard'}
         {#if dashboard}
           {@render dashboard()}
@@ -725,4 +743,5 @@
   {/if}
   <Toast />
   <NotificationHost />
+  </div>
 </QueryClientProvider>

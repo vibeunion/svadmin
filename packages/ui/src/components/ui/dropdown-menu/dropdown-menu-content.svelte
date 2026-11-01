@@ -2,10 +2,11 @@
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { getContext } from "svelte";
+	import { resolvePopupContainer, useComponentConfig } from "../../ConfigProvider.svelte";
 
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		align?: "start" | "center" | "end";
-		/** 挂到 document.body，避免表格等 overflow 容器裁切菜单。 */
+		/** 挂到 getPopupContainer，默认 document.body，避免表格等 overflow 容器裁切菜单。 */
 		portal?: boolean;
 	};
 
@@ -18,6 +19,7 @@
 		...restProps
 	}: Props = $props();
 
+	const config = useComponentConfig();
 	const getOpen = getContext<() => boolean>("svadmin-dropdown-open");
 	const getRoot = getContext<(() => HTMLElement | null) | undefined>("svadmin-dropdown-root");
 	const contentBridge = getContext<{ node: HTMLElement | null } | undefined>("svadmin-dropdown-content");
@@ -55,7 +57,8 @@
 
 	function positionLayer(node: HTMLElement, enabled: boolean) {
 		if (!enabled || typeof document === "undefined") return;
-		document.body.appendChild(node);
+		const target = resolvePopupContainer(config.getPopupContainer, node) ?? document.body;
+		target.appendChild(node);
 		if (contentBridge) contentBridge.node = node;
 		const update = () => place(node);
 		update();
