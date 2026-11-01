@@ -454,7 +454,7 @@ describe('FilterBuilder component', () => {
     });
     const values = [...view.getByTestId('filter-builder-rule').querySelectorAll('select')];
     const labels = values[1] ? [...values[1].options].map(option => option.value) : [];
-    expect(labels).toEqual(['eq', 'ne', 'in', 'nin', 'null', 'nnull']);
+    expect(labels).toEqual(['eq', 'ne', 'eqs', 'nes', 'in', 'nin', 'ina', 'nina', 'null', 'nnull']);
   });
 
   it('changes the default operator when switching from text to numeric fields', async () => {
@@ -482,7 +482,7 @@ describe('FilterBuilder component', () => {
     const input = view.getByRole('spinbutton');
     const operator =requireValue( view.getByTestId('filter-builder-rule').querySelectorAll('select')[1]);
     expect([...operator.options].map(option => option.value))
-      .toEqual(['eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'between', 'nbetween', 'null', 'nnull']);
+      .toEqual(['eq', 'ne', 'eqs', 'nes', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'ina', 'nina', 'between', 'nbetween', 'null', 'nnull']);
     await fireEvent.input(input, { target: { value: '' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).not.toHaveBeenCalled();
@@ -492,6 +492,30 @@ describe('FilterBuilder component', () => {
     await fireEvent.input(input, { target: { value: '-2.75' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).toHaveBeenLastCalledWith([{ field: 'amount', operator: 'gte', value: -2.75 }]);
+  });
+
+  it.each(['containss', 'nstartswith'] as const)('edits the previously missing %s operator without rewriting it', async operator => {
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, {
+      fields: testFields, filters: [{ field: 'title', operator, value: 'Old' }], onApply,
+    });
+    const operatorSelect = view.getByTestId('filter-builder-rule').querySelectorAll('select')[1];
+    expect(operatorSelect?.value).toBe(operator);
+    expect(view.queryByRole('status', { name: /只读|read-only/i })).toBeNull();
+    await fireEvent.input(view.getByRole('textbox'), { target: { value: 'New' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenLastCalledWith([{ field: 'title', operator, value: 'New' }]);
+  });
+
+  it('edits case-sensitive equality on numeric fields', async () => {
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, {
+      fields: testFields, filters: [{ field: 'views', operator: 'eqs', value: 3 }], onApply,
+    });
+    expect(view.queryByRole('status', { name: /只读|read-only/i })).toBeNull();
+    await fireEvent.input(view.getByRole('spinbutton'), { target: { value: '4' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenLastCalledWith([{ field: 'views', operator: 'eqs', value: 4 }]);
   });
 
   it.each(['startswith', 'endswith'] as const)('renders and edits the existing %s operator without changing its meaning', async operator => {
