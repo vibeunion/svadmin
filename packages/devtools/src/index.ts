@@ -443,10 +443,8 @@ export function buildSelfHealingReport(
   });
 
   const hasErrors = issues.length > 0;
-  let agentPrompt = '';
-
-  if (hasErrors) {
-    const issueLines = issues
+  const agentPrompt = hasErrors
+    ? `## SVAdmin Runtime Error Self-Healing Report\n\nThe following ${issues.length} runtime error(s) were captured by SVAdmin DevTools:\n\n${issues
       .map((issue, idx) => {
         const target = issue.resource
           ? ` (Resource: ${issue.resource}${issue.operation ? `, Operation: ${issue.operation}` : ''})`
@@ -456,12 +454,8 @@ export function buildSelfHealingReport(
           : '';
         return `${idx + 1}. [${issue.category}] ${issue.code}${target}${loc}: ${issue.message}\n   Suggested Fix: ${issue.suggestedAction}`;
       })
-      .join('\n');
-
-    agentPrompt = `## SVAdmin Runtime Error Self-Healing Report\n\nThe following ${issues.length} runtime error(s) were captured by SVAdmin DevTools:\n\n${issueLines}\n\nPlease analyze the root causes and generate the exact code fix required to resolve these issues.`;
-  } else {
-    agentPrompt = 'No active runtime errors found in SVAdmin DevTools.';
-  }
+      .join('\n')}\n\nPlease analyze the root causes and generate the exact code fix required to resolve these issues.`
+    : 'No active runtime errors found in SVAdmin DevTools.';
 
   return {
     hasErrors,

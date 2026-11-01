@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { DEV } from 'esm-env';
   import { SvelteMap } from 'svelte/reactivity';
-  import { fly } from 'svelte/transition';
+  import { fade, fly } from 'svelte/transition';
   import { useQueryClient } from '@tanstack/svelte-query';
   import {
     captureAdminContext,
@@ -13,8 +13,6 @@
   import {
     buildAdminDiagnostics,
     buildSelfHealingReport,
-    captureRuntimeError,
-    type DevtoolsDiagnostic,
   } from '@svadmin/devtools';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
@@ -148,17 +146,21 @@
     const fieldEl = target.closest('[data-svadmin-field]') as HTMLElement | null;
 
     if (compEl || fieldEl) {
-      const el = fieldEl ?? compEl!;
+      const el = fieldEl ?? compEl;
+      if (!el) return;
       const rect = el.getBoundingClientRect();
-      hoveredBox = {
+      const resource = compEl ? compEl.getAttribute('data-svadmin-resource') : null;
+      const field = fieldEl ? fieldEl.getAttribute('data-svadmin-field') : null;
+      const nextHoveredBox: NonNullable<typeof hoveredBox> = {
         x: rect.left,
         y: rect.top,
         width: rect.width,
         height: rect.height,
         component: compEl?.getAttribute('data-svadmin-component') ?? 'Component',
-        resource: compEl?.getAttribute('data-svadmin-resource') ?? undefined,
-        field: fieldEl?.getAttribute('data-svadmin-field') ?? undefined,
       };
+      if (resource !== null) nextHoveredBox.resource = resource;
+      if (field !== null) nextHoveredBox.field = field;
+      hoveredBox = nextHoveredBox;
     } else {
       hoveredBox = null;
     }
@@ -847,21 +849,21 @@
 
                 {#if appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error').length === 0}
                   <div class="flex flex-col items-center justify-center py-6 text-center text-muted-foreground space-y-1">
-                    <Check class="h-8 w-8 text-green-500 mb-1" />
+                    <Check class="h-8 w-8 text-success mb-1" />
                     <p class="text-xs font-medium text-foreground">当前应用状态健康，无未解决异常</p>
                     <p class="text-[0.6875rem]">Provider 与资源契约已正确绑定</p>
                   </div>
                 {:else}
                   <div class="space-y-2">
-                    {#each appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error') as diag}
+                    {#each appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error') as diag, index (`${diag.code}:${diag.message}:${index}`)}
                       <div class="p-2.5 rounded-lg border bg-muted/30 space-y-1">
                         <div class="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                           <AlertCircle class="h-3.5 w-3.5 text-destructive shrink-0" />
                           <span>[{diag.fix?.kind ?? 'ERROR'}] {diag.code}</span>
                         </div>
                         <p class="text-[0.6875rem] font-mono text-muted-foreground break-all">{diag.message}</p>
-                        {#if diag.fix?.input?.suggestedAction}
-                          <p class="text-xs text-foreground font-medium">💡 建议修复：{diag.fix.input.suggestedAction}</p>
+                        {#if diag.fix?.input?.['suggestedAction']}
+                          <p class="text-xs text-foreground font-medium">💡 建议修复：{diag.fix.input['suggestedAction']}</p>
                         {/if}
                       </div>
                     {/each}

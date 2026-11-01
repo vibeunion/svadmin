@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/vibeunion/svadmin/compare/devtools-v0.4.4...devtools-v0.5.0) (2026-11-01)
+
+
+### 🚀 Features
+
+* **vibecoding:** add visual inspector, escape hatches, and devtools mcp self-healing loop ([#641](https://github.com/vibeunion/svadmin/issues/641)) ([73588fb](https://github.com/vibeunion/svadmin/commit/73588fb4e2f1a71c3acd20eea1d3bb9cceda27b4))
+
 ## [0.4.4](https://github.com/vibeunion/svadmin/compare/devtools-v0.4.3...devtools-v0.4.4) (2026-11-01)
 
 

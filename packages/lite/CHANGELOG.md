@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/vibeunion/svadmin/compare/lite-v0.22.2...lite-v0.23.0) (2026-11-01)
+
+
+### 🚀 Features
+
+* **styles:** migrate example and lite layouts to native svadmin-ui design system ([71c8e5e](https://github.com/vibeunion/svadmin/commit/71c8e5eb422e4d3fbdffd68572c78267620944e1))
+
 ## [0.22.2](https://github.com/vibeunion/svadmin/compare/lite-v0.22.1...lite-v0.22.2) (2026-11-01)
 
 
