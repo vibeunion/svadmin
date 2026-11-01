@@ -7,6 +7,7 @@
 
 * **ui:** clear strict locale checks and eslint on main ([#626](https://github.com/vibeunion/svadmin/issues/626)) ([02cf1fb](https://github.com/vibeunion/svadmin/commit/02cf1fbf3ae8f61ffeb1d6ea9a9ab8480d20be43))
 * **ui:** apply configured component defaults and popup containers, scope notifications to each AdminApp, and guard direct custom routes with declared access rules ([#630](https://github.com/vibeunion/svadmin/pull/630)) ([5a5e839](https://github.com/vibeunion/svadmin/commit/5a5e8395d159b8fbca8e88b46f0f8411c42198ce))
+* **ui:** make popup containers and anchor nodes safe for SSR and cross-document rendering ([#632](https://github.com/vibeunion/svadmin/pull/632)) ([79d9ea8](https://github.com/vibeunion/svadmin/commit/79d9ea85c811660577f0f090d9eace6b65e8c0ab))
 
 
 ### Dependencies

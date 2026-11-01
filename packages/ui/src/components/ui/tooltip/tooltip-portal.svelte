@@ -2,7 +2,10 @@
 	import { Tooltip as TooltipPrimitive } from "bits-ui";
 	import PopupPortal from "../popup-portal.svelte";
 
-	let { ...restProps }: TooltipPrimitive.PortalProps = $props();
+	let {
+		anchor = null,
+		...restProps
+	}: TooltipPrimitive.PortalProps & { anchor?: HTMLElement | null } = $props();
 </script>
 
-<PopupPortal {...restProps} />
+<PopupPortal {...restProps} kind="tooltip" {anchor} />

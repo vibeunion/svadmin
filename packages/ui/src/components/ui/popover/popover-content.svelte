@@ -10,9 +10,12 @@
 		sideOffset = 4,
 		...restProps
 	}: PopoverPrimitive.ContentProps & { class?: string } = $props();
+
+	const customAnchor = $derived(restProps.customAnchor);
+	const anchor = $derived(typeof HTMLElement !== 'undefined' && customAnchor instanceof HTMLElement ? customAnchor : null);
 </script>
 
-<PopupPortal>
+<PopupPortal kind="popover" {anchor}>
 	<PopoverPrimitive.Content
 		bind:ref
 		{align}
