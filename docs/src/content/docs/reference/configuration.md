@@ -169,10 +169,10 @@ through `useComponentConfig()`, and later changes flow through like `locale` and
 
 | Prop | Purpose |
 |------|---------|
-| `componentDefaults` | Default props by component name, such as `{ Button: { variant: 'outline' } }`. An explicit prop on the component wins. |
+| `componentDefaults` | Default props for the components that read this map today: `Button`, `Empty` (`EmptyState`), and `Pagination` (`ListPagination`). An explicit prop wins. Input, Select, Badge, and Tag do not read this map; they still follow `componentSize` and `density`. |
 | `empty` | Default empty-state title, description, and image. |
 | `pagination` | Default page size, page-size options, summary, simple mode, and jumper. |
-| `getPopupContainer` | Element or selector where popups and overlays mount. The default is `document.body`. |
+| `getPopupContainer` | Element or selector where popups and overlays mount. The callback receives the trigger or anchor node for Dropdown, Popover, Dialog, Sheet, and Tooltip, so `node?.closest(...)` can see the source tree. The default is `document.body`. |
 
 ```svelte
 <ConfigProvider

@@ -5,4 +5,4 @@
 	let { ...restProps }: AlertDialogPrimitive.PortalProps = $props();
 </script>
 
-<PopupPortal {...restProps} />
+<PopupPortal {...restProps} kind="alert-dialog" />

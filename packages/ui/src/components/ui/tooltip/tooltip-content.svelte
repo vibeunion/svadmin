@@ -197,6 +197,10 @@
 	);
 	const wrapperProps = $derived({ style: "display: contents" });
 
+	function htmlPopupAnchor(value: unknown): HTMLElement | null {
+		return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement ? value : null;
+	}
+
 	function getAnchor(): ReferenceElement | null {
 		if (typeof customAnchor === "string") return document.querySelector(customAnchor);
 		return customAnchor ?? tooltip.trigger;
@@ -306,7 +310,7 @@
 </script>
 
 {#if tooltip.shouldRender || forceMount}
-	<TooltipPortal {...portalProps}>
+	<TooltipPortal {...portalProps} anchor={htmlPopupAnchor(customAnchor) ?? tooltip.trigger}>
 		{#if child}
 			{@render child({ props: contentProps, wrapperProps, open: tooltip.open })}
 		{:else}

@@ -1,6 +1,6 @@
 # Component / Pro parity audit
 
-Status date: 2026-10-30
+Status date: 2026-11-01
 
 This audit compares the current `@svadmin/ui` surface with:
 
@@ -11,6 +11,11 @@ This audit compares the current `@svadmin/ui` surface with:
 The goal is migration compatibility and missing admin capability, not pixel
 copying. The default visual style is already represented by the `default` color
 preset and the `clean-flat` layout preset.
+
+Parity here means capability, interaction, and feedback on the Svelte 5
+boundary. It does not mean Arco or Arco Pro component API compatibility.
+Published SVAdmin props stay as they are: reference `props`, `events`, and
+`Form.Item` call shapes are not part of this contract.
 
 Legend: ✅ direct capability · 🔁 compatibility alias · ⚠️ partial or different
 API shape · ❌ missing · ➖ internal / not a public contract.
@@ -39,7 +44,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Collapse | `Collapse` | ✅ | aligned expansion behavior |
 | ColorPicker | `ColorPicker` | ✅ | |
 | Comment | `CommentThread`, alias `Comment` | 🔁 | |
-| ConfigProvider | `ConfigProvider` | ✅ | Defaults for size, density, direction, locale |
+| ConfigProvider | `ConfigProvider` | ✅ | Size, density, direction, and locale. `componentDefaults` is read only by Button, EmptyState, and ListPagination. `getPopupContainer` receives the trigger or anchor for overlays. Not reference prop/event compatibility |
 | DatePicker | `DatePicker`, `DateRangePicker`, `DateTimePicker` | ✅ | |
 | Descriptions | `DescriptionList`, alias `Descriptions` | 🔁 | |
 | Divider | `Separator`, alias `Divider` | ✅ | |
@@ -187,7 +192,7 @@ tracked separately so the route/component coverage remains honest.
 | Table | Selection, expandable rows, tree data and virtualization in one table API | Split across `AutoTable`, `TreeTable`, `VirtualTable`, `GroupedTable` | Keep the split; add composition examples instead of a mega-table |
 | Upload | Drag/drop, directory upload, custom request | `FileUpload` has drag/drop, progress, cancel and retry | Directory upload remains host-owned |
 | Select | Remote search and virtualized option list | Native `Select` plus `ComboboxField` with remote search/virtualization | Prefer `ComboboxField` for large remote lists |
-| ConfigProvider | Component size/density cascades broadly | `Button`, `Input`, `Select`, `Badge`, `Tag` consume size/density; `DatePicker` and `Calendar` consume locale through `component-messages.ts` | Extend size contracts only where a component already has a size prop |
+| ConfigProvider | Reference defaults cascade into every component's props and events | `componentSize` / `density` reach Button, Input, Select, Badge, and Tag. `componentDefaults` is read only by Button (`Button`), EmptyState (`Empty`), and ListPagination (`Pagination`). `getPopupContainer(node)` receives the trigger or anchor for Dropdown, Popover, Dialog, Sheet, and Tooltip | Do not treat `componentDefaults` as a general prop injector. Do not extend it to Input, Select, Badge, or Tag unless that wiring is trivial and tested. Do not claim full reference component API compatibility |
 | DatePicker | Timezone, recurrence and business calendars | Date/range/time pickers without timezone ownership | Keep timezone and recurrence in the host domain layer |
 | Modal / Drawer / Dropdown | Compound call shape | Namespace aliases to `Dialog`, `Sheet`, `DropdownMenu` | Do not fake the reference compound API |
 | Form | `Form.Item` compound validation | Schema-first `AutoForm` / `JsonSchemaForm` | Non-goal: keep one validation owner |
@@ -215,6 +220,27 @@ tracked separately so the route/component coverage remains honest.
 - Added Refine router and i18n provider adapters, completing the Refine-style
   provider bridge without moving UI depth into core.
 
+## Recorded after #630
+
+#630 added app-level defaults (`componentDefaults`, `empty`, `pagination`,
+`getPopupContainer`), isolated notification queues per `AdminApp`, and
+menu-derived permission checks for custom routes. The popup follow-up keeps
+server rendering from throwing when a portal resolves its container, and passes
+the trigger or anchor node into `getPopupContainer` for Popover, Dialog, Sheet,
+and Tooltip. Dropdown already passed its source node.
+
+`componentDefaults` is not a blanket prop map. The keys that components read
+today are:
+
+| Map key | Component | Examples |
+| --- | --- | --- |
+| `Button` | `Button` | `variant`, `size` |
+| `Empty` | `EmptyState` | `title`, `description`, `image`, `imageAlt` |
+| `Pagination` | `ListPagination` | `pageSize`, `pageSizeOptions`, `showSummary`, `simple`, `showJumper` |
+
+Input, Select, Badge, and Tag still read `componentSize` and `density`. They do
+not read `componentDefaults`. Explicit props continue to win.
+
 ## Remaining non-goals
 
 ### P2 — not recommended
@@ -223,6 +249,9 @@ tracked separately so the route/component coverage remains honest.
    forms; adding a parallel compound API would fragment validation ownership.
 2. **`Trigger` / `Portal` public parity.** These are internal implementation
    seams in bits-ui and should stay out of the public contract.
+3. **Full Arco / Arco Pro component API compatibility.** Matching capability,
+   interaction, and feedback does not include copying reference props, events,
+   or `Form.Item`. Published SVAdmin APIs stay stable.
 
 ## What changed in this round
 
