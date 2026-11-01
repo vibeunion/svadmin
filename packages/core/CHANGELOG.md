@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.70.0](https://github.com/vibeunion/svadmin/compare/core-v0.69.3...core-v0.70.0) (2026-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** Remove useRelation, UseRelationOptions, appendTenantCacheKey, and queryKeyMatchesTenant. Use contract-bound list/many/select hooks and Query Key v2.
+
+### 💅 Elegance & Refactoring
+
+* **core:** retire unused compatibility APIs ([727cd5a](https://github.com/vibeunion/svadmin/commit/727cd5a4d3a0c5265f977bbb676e0aff6804095c))
+
+
+### 📝 Documentation
+
+* real-app verification baseline after [#636](https://github.com/vibeunion/svadmin/issues/636) ([#638](https://github.com/vibeunion/svadmin/issues/638)) ([61f4295](https://github.com/vibeunion/svadmin/commit/61f42958622101e558397cdb9d617ae8be2bb847))
+
 ## [0.69.3](https://github.com/vibeunion/svadmin/compare/core-v0.69.2...core-v0.69.3) (2026-11-01)
 
 

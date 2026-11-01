@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.18](https://github.com/vibeunion/svadmin/compare/pocketbase-v0.13.17...pocketbase-v0.13.18) (2026-11-01)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** clear filter-test assertions blocking publish lint ([#639](https://github.com/vibeunion/svadmin/issues/639)) ([4ce50ab](https://github.com/vibeunion/svadmin/commit/4ce50abb25726725eb20202a14ea5052a54e0133))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.70.0
+
 ## [0.13.17](https://github.com/vibeunion/svadmin/compare/pocketbase-v0.13.16...pocketbase-v0.13.17) (2026-11-01)
 
 
