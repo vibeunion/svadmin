@@ -849,7 +849,7 @@
 
                 {#if appDiagnostics.snapshot.diagnostics.filter(d => d.severity === 'error').length === 0}
                   <div class="flex flex-col items-center justify-center py-6 text-center text-muted-foreground space-y-1">
-                    <Check class="h-8 w-8 text-green-500 mb-1" />
+                    <Check class="h-8 w-8 text-success mb-1" />
                     <p class="text-xs font-medium text-foreground">当前应用状态健康，无未解决异常</p>
                     <p class="text-[0.6875rem]">Provider 与资源契约已正确绑定</p>
                   </div>

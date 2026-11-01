@@ -3,6 +3,7 @@
   "maxSourceLines": 800,
   "largeFileBaseline": {
     "packages/ui/src/components/AutoTable.svelte": 2743,
+    "packages/ui/src/components/DevTools.svelte": 890,
     "packages/ui/src/components/SpreadsheetView.svelte": 1280,
     "example/src/features/resource/ExampleResourcePage.svelte": 981,
     "example/src/providers/inMemoryDb.ts": 1399,
