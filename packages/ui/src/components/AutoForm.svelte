@@ -644,6 +644,7 @@
             <Card.Content class="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
               <div class={gridClass}>
                 {#each group.fields as field (field.key)}
+                  {@const customField = fields?.[field.key]}
                   <div
                     data-svadmin-form-field
                     data-svadmin-field-key={field.key}
@@ -651,8 +652,8 @@
                     data-svadmin-field-type={field.type}
                     class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}
                   >
-                    {#if fields && fields[field.key]}
-                      {@render fields[field.key]({
+                    {#if customField}
+                      {@render customField({
                         field,
                         value: renderedDraft.values[field.key],
                         onchange: fieldChange(field.key),
@@ -689,6 +690,7 @@
           <Card.Content class="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-6">
               <div class={gridClass} data-svadmin-form-grid data-columns={columns}>
               {#each formFields as field (field.key)}
+                {@const customField = fields?.[field.key]}
                 <div
                   data-svadmin-form-field
                   data-svadmin-field-key={field.key}
@@ -696,8 +698,8 @@
                   data-svadmin-field-type={field.type}
                   class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}
                 >
-                  {#if fields && fields[field.key]}
-                    {@render fields[field.key]({
+                  {#if customField}
+                    {@render customField({
                       field,
                       value: renderedDraft.values[field.key],
                       onchange: fieldChange(field.key),

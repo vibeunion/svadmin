@@ -241,13 +241,12 @@ describe('PM business acceptance', () => {
     const requests = vi.mocked(inMemoryDataProvider.getList);
     const before = requests.mock.calls.length;
     const failedRequests = () => requests.mock.calls.filter(([params]) => params.resource === resource && params.pagination?.pageSize !== 10).length;
-    // DashboardWorkspace 会额外读取库存移动、销售订单和待办，不能算进页面分区的重试次数。
-    const workspaceFetch = resource === 'stock_movements' || resource === 'sales_orders' || resource === 'todos' ? 1 : 0;
-    expect(failedRequests()).toBe(1 + workspaceFetch);
+    // DashboardWorkspace 复用页面列表结果，不应增加页面分区的请求计数。
+    expect(failedRequests()).toBe(1);
 
     requireValue(target.querySelector<HTMLButtonElement>('[data-svadmin-data-state="error"] button')).click();
     await waitFor(() => {
-      expect(failedRequests()).toBe(2 + workspaceFetch);
+      expect(failedRequests()).toBe(2);
       expectFailure();
     });
     expect(requests.mock.calls.slice(before).map(([params]) => params.resource)).toEqual([resource]);
@@ -255,7 +254,7 @@ describe('PM business acceptance', () => {
     requests.mockImplementation(getList);
     requireValue(target.querySelector<HTMLButtonElement>('[data-svadmin-data-state="error"] button')).click();
     await waitFor(() => {
-      expect(failedRequests()).toBe(3 + workspaceFetch);
+      expect(failedRequests()).toBe(3);
       expect(target.textContent).not.toContain('Some data could not be updated');
     });
     expect(requests.mock.calls.slice(before).map(([params]) => params.resource)).toEqual([resource, resource]);
