@@ -6,6 +6,7 @@
 ### 🐛 Bug Fixes
 
 * **ci:** bind generated resourceName and keep lazy pages out of startup JS ([#628](https://github.com/vibeunion/svadmin/issues/628)) ([f008ad0](https://github.com/vibeunion/svadmin/commit/f008ad00e5784d3aed3e8d56997f9ff8f1cb5380))
+* **create:** keep Hasura admin secrets and Drizzle connection strings out of client templates, and require a real Drizzle schema before enabling the generated provider ([#629](https://github.com/vibeunion/svadmin/pull/629)) ([f332b7f](https://github.com/vibeunion/svadmin/commit/f332b7f0e36ffacbacad9bbeb9a4f45926d8cd34))
 
 
 ### Dependencies

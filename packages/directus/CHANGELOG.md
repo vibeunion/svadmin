@@ -3,6 +3,11 @@
 ## [0.11.20](https://github.com/vibeunion/svadmin/compare/directus-v0.11.19...directus-v0.11.20) (2026-11-01)
 
 
+### 🐛 Bug Fixes
+
+* **directus:** map additional Refine filter operators and reject unsupported operators explicitly ([#629](https://github.com/vibeunion/svadmin/pull/629)) ([f332b7f](https://github.com/vibeunion/svadmin/commit/f332b7f0e36ffacbacad9bbeb9a4f45926d8cd34))
+
+
 ### Dependencies
 
 * The following workspace dependencies were updated
