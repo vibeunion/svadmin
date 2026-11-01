@@ -9,7 +9,7 @@ import { captureQueryProvider, snapshotListParams, snapshotManyParams } from './
 import { decodeListResult, decodeManyResult, decodeBaseRecord, rejectProviderResponse, type RecordDecoder } from './record-decoder';
 import { createOvertimeTracker } from './hook-utils.svelte';
 import type { NotificationConfig, OvertimeOptions } from './hook-utils.svelte';
-import { createSelectProjection, mergeSelectOptions, type SelectOption } from './select-options';
+import { createSelectProjection, normalizeSelectDefaultValue, orderSelectOptions, selectQueryFilters, type SelectOption, type SelectedOptionsOrder } from './select-options';
 import { HttpError, type BaseRecord, type KnownResources, type Pagination, type Sort, type Filter } from './types';
 import type { QueryKey } from './query-keys';
 
@@ -26,7 +26,11 @@ export interface UseSelectOptions<TData extends BaseRecord = BaseRecord> extends
   optionValue?: string | ((item: TData) => string | number);
   sorters?: Sort[];
   filters?: Filter[];
-  defaultValue?: (string | number)[];
+  defaultValue?: string | number | readonly (string | number)[];
+  /** 未提供 onSearch 时，用该字段生成 contains 过滤。 */
+  searchField?: string;
+  /** selected-first 把已选记录放在选项前面；默认保持列表原顺序。 */
+  selectedOptionsOrder?: SelectedOptionsOrder;
   fetchSize?: number;
   pagination?: Pagination;
   debounce?: number;
@@ -160,6 +164,7 @@ export function createSelectQuery<TData extends BaseRecord>(
         typeof options.optionValue === 'string' ? options.optionValue : 'callback',
       ].join(':'),
       onSearch: options.onSearch,
+      searchField: options.searchField,
       checkIds: contract !== undefined,
       authProvider,
       auth: captureAuthLiveScope(authProvider),
@@ -174,9 +179,13 @@ export function createSelectQuery<TData extends BaseRecord>(
     const text = search?.scope === current && sessionCurrent(current) ? search.value : '';
     try {
       // Validate callback output before spreading it or giving it to the provider.
+      const searched = text && current.onSearch ? untrack(() => current.onSearch?.(text)) ?? [] : undefined;
       const extra = snapshotListParams({
         resource: current.params.resource,
-        filters: text && current.onSearch ? untrack(() => current.onSearch?.(text)) : [],
+        filters: selectQueryFilters({
+          text,
+          ...definedOptions({ searchField: current.searchField, searched }),
+        }),
       });
       return { params: snapshotListParams({
         ...current.params, filters: [...(current.params.filters ?? []), ...(extra.filters ?? [])],
@@ -227,7 +236,7 @@ export function createSelectQuery<TData extends BaseRecord>(
     const origin = scope;
     const { captured, decode, keys, params: base } = origin;
     const params = snapshotManyParams({
-      resource: base.resource, ids: options.defaultValue ?? [], ...definedOptions({ meta: base.meta }),
+      resource: base.resource, ids: normalizeSelectDefaultValue(options.defaultValue), ...definedOptions({ meta: base.meta }),
     });
     const label = origin.optionLabel ?? 'title';
     const value = origin.optionValue ?? 'id';
@@ -291,7 +300,13 @@ export function createSelectQuery<TData extends BaseRecord>(
 
   return {
     query, defaultValueQuery, onSearchChange, cancel: cancelRequests,
-    get options() { return mergeSelectOptions(query.data?.options ?? [], defaultValueQuery.data?.options ?? []); },
+    get options() {
+      return orderSelectOptions(
+        query.data?.options ?? [],
+        defaultValueQuery.data?.options ?? [],
+        options.selectedOptionsOrder ?? 'in-place',
+      );
+    },
     get overtime() { return overtime; },
     get isLoading() { return query.isLoading || defaultValueQuery.isLoading; },
     get isFetching() { return query.isFetching || defaultValueQuery.isFetching; },

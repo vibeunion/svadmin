@@ -1,12 +1,23 @@
 import { captureAdminContext } from './context.svelte';
-import { createEditableTableController } from './editable-table';
-import type { DataProvider } from './types';
+import { getAdminOptions } from './options.svelte';
+import { createEditableTableController, resolveEditableTableQuery, type EditableTableQuery } from './editable-table';
+import { readURLState } from './url-sync';
+import type { DataProvider, Filter, Pagination, Sort } from './types';
 import type { ResourceContract } from './resource-contract';
 
 export interface UseEditableTableOptions {
   resource: ResourceContract;
   dataProviderName?: string;
   provider?: DataProvider;
+  pagination?: Pagination;
+  sorters?: Sort[];
+  filters?: Filter[];
+  syncWithLocation?: boolean;
+  /**
+   * enabled 与 retry 会作用到这次加载。
+   * refetchInterval、select、placeholderData 仍由 useList / useTable 提供，这里的加载是命令式的。
+   */
+  queryOptions?: { enabled?: boolean; retry?: EditableTableQuery['retry'] };
 }
 
 /**
@@ -15,11 +26,19 @@ export interface UseEditableTableOptions {
  */
 export function useEditableTable(options: UseEditableTableOptions) {
   const provider = options.provider ?? captureAdminContext().getDataProvider(options.dataProviderName);
-  const controller = createEditableTableController(options.resource, provider);
+  const syncWithLocation = options.syncWithLocation ?? getAdminOptions().syncWithLocation ?? false;
+  const url = syncWithLocation && typeof window !== 'undefined' ? readURLState() : undefined;
+  const controller = createEditableTableController(options.resource, provider, {
+    ...resolveEditableTableQuery({ ...options, syncWithLocation }, url),
+    ...(options.queryOptions?.retry === undefined ? {} : { retry: options.queryOptions.retry }),
+  });
   let version = $state(0);
 
   $effect(() => {
+    if (options.queryOptions?.enabled === false) return;
     void controller.load().then(() => {
+      version += 1;
+    }, () => {
       version += 1;
     });
   });

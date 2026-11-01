@@ -8,17 +8,27 @@ import type {
   Sort,
 } from '@svadmin/core';
 
-const DIRECTUS_OPERATOR_MAP: Record<CrudOperator, string> = {
+const DIRECTUS_OPERATOR_MAP: Partial<Record<CrudOperator, string>> = {
   eq: '_eq',
   ne: '_neq',
+  eqs: '_eq',
+  nes: '_neq',
   lt: '_lt',
   gt: '_gt',
   lte: '_lte',
   gte: '_gte',
   contains: '_contains',
   ncontains: '_ncontains',
+  containss: '_contains',
+  ncontainss: '_ncontains',
   startswith: '_starts_with',
+  nstartswith: '_nstarts_with',
+  startswiths: '_starts_with',
+  nstartswiths: '_nstarts_with',
   endswith: '_ends_with',
+  nendswith: '_nends_with',
+  endswiths: '_ends_with',
+  nendswiths: '_nends_with',
   in: '_in',
   nin: '_nin',
   null: '_null',
@@ -74,10 +84,10 @@ function directusValue(filter: FieldFilter): unknown {
 
 function buildDirectusRule(filter: Filter): Record<string, unknown> {
   if ('field' in filter) {
-    if (!Object.prototype.hasOwnProperty.call(DIRECTUS_OPERATOR_MAP, filter.operator)) {
+    const operator = DIRECTUS_OPERATOR_MAP[filter.operator];
+    if (!operator) {
       throw new Error(`Unsupported Directus filter operator: ${String(filter.operator)}`);
     }
-    const operator = DIRECTUS_OPERATOR_MAP[filter.operator];
     return { [filter.field]: { [operator]: directusValue(filter) } };
   }
 

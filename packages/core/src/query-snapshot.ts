@@ -1,6 +1,7 @@
 import { Type, type Static, type TSchema } from 'typebox';
 import type { AdminContextAccessor } from './context.svelte';
 import type { DataProvider, GetListParams, GetOneParams, GetManyParams } from './types';
+import { crudFieldOperatorSchema } from './crud-operator-schema';
 import { HttpError } from './types';
 import { contractProvider, type ResourceContract } from './resource-contract';
 import { definedOptions } from './defined-options';
@@ -12,13 +13,11 @@ const filters = Type.Cyclic({
   Filters: Type.Union([
     Type.Object({
       field: Type.String(),
-      operator: Type.Union(([
-        'eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'contains', 'ncontains',
-        'startswith', 'endswith', 'null', 'nnull', 'between', 'nbetween',
-      ] as const).map(value => Type.Literal(value))),
+      operator: crudFieldOperatorSchema,
       value: Type.Unknown(),
     }, { additionalProperties: false }),
     Type.Object({
+      key: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
       operator: Type.Union([Type.Literal('and'), Type.Literal('or')]),
       value: Type.Array(Type.Ref('Filters')),
     }, { additionalProperties: false }),

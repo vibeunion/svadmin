@@ -500,6 +500,7 @@ export function validateContractMutationParams(contract: ResourceContract | unde
 }
 
 const filterGroup = Type.Object({
+  key: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
   operator: Type.Union([Type.Literal('and'), Type.Literal('or')]),
   value: Type.Array(Type.Unknown()),
 }, { additionalProperties: false });
@@ -532,10 +533,12 @@ function checkFilters(filters: unknown, record: TObject, depth = 0): void {
     }
     const scalar = Type.Exclude(field, Type.Null());
     switch (filter.operator) {
-      case 'eq': case 'ne': check(field, filter.value, filter.field); break;
-      case 'in': case 'nin': check(Type.Array(field), filter.value, filter.field); break;
+      case 'eq': case 'ne': case 'eqs': case 'nes': check(field, filter.value, filter.field); break;
+      case 'in': case 'nin': case 'ina': case 'nina': check(Type.Array(field), filter.value, filter.field); break;
       case 'null': case 'nnull': check(Type.Null(), filter.value, filter.field); break;
-      case 'contains': case 'ncontains': case 'startswith': case 'endswith':
+      case 'contains': case 'ncontains': case 'containss': case 'ncontainss':
+      case 'startswith': case 'nstartswith': case 'startswiths': case 'nstartswiths':
+      case 'endswith': case 'nendswith': case 'endswiths': case 'nendswiths':
         check(Type.Intersect([scalar, Type.String()]), filter.value, filter.field); break;
       case 'lt': case 'lte': case 'gt': case 'gte':
         check(Type.Intersect([scalar, Type.Union([Type.String(), Type.Number()])]), filter.value, filter.field); break;

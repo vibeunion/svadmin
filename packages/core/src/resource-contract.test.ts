@@ -252,6 +252,25 @@ describe('strict resource contracts', () => {
     expect(calls).toHaveLength(1);
   });
 
+  test('accepts Refine operators and keyed conditional filters', async () => {
+    const { provider, calls, setResponse } = fixture();
+    setResponse({ data: [row], total: 1 });
+    await provider.getList({
+      resource: 'posts',
+      filters: [
+        { field: 'title', operator: 'containss', value: 'Hello' },
+        { field: 'count', operator: 'eqs', value: 2 },
+        { field: 'title', operator: 'ina', value: ['Hello'] },
+        {
+          key: 'parent',
+          operator: 'or',
+          value: [{ field: 'count', operator: 'nes', value: 0 }],
+        },
+      ],
+    });
+    expect(calls).toHaveLength(1);
+  });
+
   test('validates a complete fallback batch before the first write', async () => {
     const { provider, calls } = fixture();
     await expect(provider.createMany?.({

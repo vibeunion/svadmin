@@ -1,31 +1,45 @@
-import type { Filter } from './types';
+import type { Filter, LogicalFilter } from './types';
+import { isCrudFieldOperator } from './types';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
 import { getAdminOptions } from './options.svelte';
-
-const CRUD_OPERATORS = new Set([
-  'eq', 'ne', 'lt', 'gt', 'lte', 'gte',
-  'contains', 'ncontains', 'startswith', 'endswith',
-  'in', 'nin', 'null', 'nnull', 'between', 'nbetween',
-]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isFilter(value: unknown, depth: number, budget: { remaining: number }): value is Filter {
-  if (depth > 20 || budget.remaining-- <= 0 || !isRecord(value)) return false;
+function readFilterKey(value: Record<string, unknown>): string | undefined | null {
+  if (!('key' in value)) return undefined;
+  const key = value['key'];
+  if (typeof key !== 'string' || key.length < 1 || key.length > 128) return null;
+  return key;
+}
+
+/** 重新构造过滤器，只保留协议字段，避免把 URL 里的多余属性写回路由状态。 */
+function readFilter(value: unknown, depth: number, budget: { remaining: number }): Filter | undefined {
+  if (depth > 20 || budget.remaining-- <= 0 || !isRecord(value)) return undefined;
 
   if (typeof value['field'] === 'string') {
-    return value['field'].trim().length > 0
-      && typeof value['operator'] === 'string'
-      && CRUD_OPERATORS.has(value['operator'])
-      && 'value' in value;
+    if (value['field'].trim().length === 0 || !isCrudFieldOperator(value['operator']) || !('value' in value)) {
+      return undefined;
+    }
+    return { field: value['field'], operator: value['operator'], value: value['value'] };
   }
 
-  return (value['operator'] === 'and' || value['operator'] === 'or')
-    && Array.isArray(value['value'])
-    && value['value'].every((entry) => isFilter(entry, depth + 1, budget));
+  if ((value['operator'] !== 'and' && value['operator'] !== 'or') || !Array.isArray(value['value'])) {
+    return undefined;
+  }
+  const key = readFilterKey(value);
+  if (key === null) return undefined;
+  const children: Filter[] = [];
+  for (const entry of value['value']) {
+    const child = readFilter(entry, depth + 1, budget);
+    if (!child) return undefined;
+    children.push(child);
+  }
+  const filter: LogicalFilter = { operator: value['operator'], value: children };
+  if (key !== undefined) filter.key = key;
+  return filter;
 }
 
 function parseFilters(value: string): Filter[] | undefined {
@@ -33,7 +47,13 @@ function parseFilters(value: string): Filter[] | undefined {
     const parsed: unknown = JSON.parse(value);
     if (!Array.isArray(parsed)) return undefined;
     const budget = { remaining: 200 };
-    return parsed.every((entry) => isFilter(entry, 0, budget)) ? parsed : undefined;
+    const filters: Filter[] = [];
+    for (const entry of parsed) {
+      const filter = readFilter(entry, 0, budget);
+      if (!filter) return undefined;
+      filters.push(filter);
+    }
+    return filters;
   } catch {
     return undefined;
   }

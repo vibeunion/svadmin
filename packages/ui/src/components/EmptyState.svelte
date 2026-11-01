@@ -2,12 +2,14 @@
   import type { Snippet } from 'svelte';
   import { PackageOpen } from '@lucide/svelte';
   import { useTranslation } from '@svadmin/core';
+  import { useComponentConfig } from './ConfigProvider.svelte';
 
   const i18n = useTranslation();
+  const config = useComponentConfig();
 
   let {
-    title = i18n.t('empty.title'),
-    description = i18n.t('empty.description'),
+    title,
+    description,
     image,
     imageAlt,
     icon,
@@ -22,6 +24,17 @@
     icon?: Snippet;
     children?: Snippet;
   }>();
+
+  function textDefault(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  const emptyDefaults = $derived(config.empty);
+  const componentEmpty = $derived(config.componentDefaults.Empty ?? {});
+  const resolvedTitle = $derived(title ?? emptyDefaults.title ?? textDefault(componentEmpty.title) ?? i18n.t('empty.title'));
+  const resolvedDescription = $derived(description ?? emptyDefaults.description ?? textDefault(componentEmpty.description) ?? i18n.t('empty.description'));
+  const resolvedImage = $derived(image ?? emptyDefaults.image ?? textDefault(componentEmpty.image));
+  const resolvedImageAlt = $derived(imageAlt ?? emptyDefaults.imageAlt ?? textDefault(componentEmpty.imageAlt) ?? '');
 </script>
 
 <div
@@ -30,8 +43,8 @@
   aria-live="polite"
 >
   <span class="empty-state__icon" aria-hidden="true">
-    {#if image}
-      <img class="empty-state__image" src={image} alt={imageAlt ?? ''} loading="lazy" decoding="async" />
+    {#if resolvedImage}
+      <img class="empty-state__image" src={resolvedImage} alt={resolvedImageAlt} loading="lazy" decoding="async" />
     {:else if icon}
       {@render icon()}
     {:else}
@@ -39,8 +52,8 @@
     {/if}
   </span>
   <div class="empty-state__body">
-    <h3>{title}</h3>
-    {#if description}<p>{description}</p>{/if}
+    <h3>{resolvedTitle}</h3>
+    {#if resolvedDescription}<p>{resolvedDescription}</p>{/if}
     {#if children}
       <div class="empty-state__action">
         {@render children()}

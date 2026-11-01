@@ -1,4 +1,4 @@
-import type { CrudOperator, Filter, Pagination, Sort } from '@svadmin/core';
+import { CRUD_FIELD_OPERATORS, type CrudOperator, type Filter, type Pagination, type Sort } from '@svadmin/core';
 import type {
   ListStateSnapshot,
   WorkspaceTab,
@@ -45,12 +45,6 @@ export const DRAFT_BASELINE_KEY = '__workspaceDraftBaseline';
 export const EDITOR_DRAFT_FIELDS: Record<EditableResource, readonly string[]> = {
   crm_accounts: ['accountName'],
 };
-
-const LIST_FILTER_OPERATORS = new Set<string>([
-  'eq', 'ne', 'lt', 'gt', 'lte', 'gte',
-  'contains', 'ncontains', 'startswith', 'endswith',
-  'in', 'nin', 'null', 'nnull', 'between', 'nbetween',
-]);
 
 export interface StoredWorkspaceTabs {
   tabIds: string[];
@@ -141,7 +135,7 @@ export function editorTabId(resource: EditableResource, recordId: string): strin
 }
 
 export function isCrudOperator(value: unknown): value is CrudOperator {
-  return typeof value === 'string' && LIST_FILTER_OPERATORS.has(value);
+  return typeof value === 'string' && (CRUD_FIELD_OPERATORS as readonly string[]).includes(value);
 }
 
 function isPositiveInteger(value: unknown, max: number): value is number {
@@ -163,9 +157,17 @@ function decodeListFilter(
   if ((value['operator'] !== 'and' && value['operator'] !== 'or') || !Array.isArray(value['value'])) {
     return undefined;
   }
+  if ('key' in value) {
+    const key = value['key'];
+    if (typeof key !== 'string' || key.length < 1 || key.length > 128) return undefined;
+  }
   const children = value['value'].map((child) => decodeListFilter(child, budget, depth + 1));
   if (children.some((child) => child === undefined)) return undefined;
-  return { operator: value['operator'], value: children as Filter[] };
+  return {
+    operator: value['operator'],
+    value: children as Filter[],
+    ...(typeof value['key'] === 'string' ? { key: value['key'] } : {}),
+  };
 }
 
 function decodeListSorters(value: unknown): Sort[] | undefined {

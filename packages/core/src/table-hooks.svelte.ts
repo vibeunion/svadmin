@@ -245,16 +245,28 @@ export function createTableQuery<TQueryFnData extends BaseRecord>(
           switch(f.operator) {
             case 'eq': return val==fv;
             case 'ne': return val!=fv;
+            case 'eqs': return Object.is(val, fv);
+            case 'nes': return !Object.is(val, fv);
             case 'lt': return typeof val==='number'&&typeof fv==='number'&&val<fv;
             case 'gt': return typeof val==='number'&&typeof fv==='number'&&val>fv;
             case 'lte': return typeof val==='number'&&typeof fv==='number'&&val<=fv;
             case 'gte': return typeof val==='number'&&typeof fv==='number'&&val>=fv;
             case 'in': return !Array.isArray(fv)||fv.length===0||fv.includes(val);
             case 'nin': return !Array.isArray(fv)||fv.length===0||!fv.includes(val);
+            case 'ina': return Array.isArray(val)&&Array.isArray(fv)&&fv.every(item => val.includes(item));
+            case 'nina': return Array.isArray(val)&&Array.isArray(fv)&&fv.some(item => !val.includes(item));
             case 'contains': return typeof val==='string'&&typeof fv==='string'&&val.includes(fv);
             case 'ncontains': return typeof val==='string'&&typeof fv==='string'&&!val.includes(fv);
+            case 'containss': return typeof val==='string'&&typeof fv==='string'&&val.includes(fv);
+            case 'ncontainss': return typeof val==='string'&&typeof fv==='string'&&!val.includes(fv);
             case 'startswith': return typeof val==='string'&&typeof fv==='string'&&val.startsWith(fv);
+            case 'nstartswith': return typeof val==='string'&&typeof fv==='string'&&!val.startsWith(fv);
+            case 'startswiths': return typeof val==='string'&&typeof fv==='string'&&val.startsWith(fv);
+            case 'nstartswiths': return typeof val==='string'&&typeof fv==='string'&&!val.startsWith(fv);
             case 'endswith': return typeof val==='string'&&typeof fv==='string'&&val.endsWith(fv);
+            case 'nendswith': return typeof val==='string'&&typeof fv==='string'&&!val.endsWith(fv);
+            case 'endswiths': return typeof val==='string'&&typeof fv==='string'&&val.endsWith(fv);
+            case 'nendswiths': return typeof val==='string'&&typeof fv==='string'&&!val.endsWith(fv);
             case 'between': {
               if(!Array.isArray(fv)||fv.length!==2) return true;
               const [min,max]: unknown[]=fv;
