@@ -1466,7 +1466,7 @@ main {
 }
 
 [data-svadmin-form-field],
-[data-svadmin-field] {
+[data-svadmin-field]:not([data-slot="table-head"]):not([data-slot="table-cell"]) {
   display: flex;
   flex-direction: column;
   align-items: stretch;

@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Build Lite package used by the docs demo
+        run: bun run --cwd packages/lite build
+
       - name: Build docs
         run: cd docs && bun run build
 
