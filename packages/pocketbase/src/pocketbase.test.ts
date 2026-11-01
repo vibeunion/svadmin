@@ -102,9 +102,13 @@ describe('PocketBase DataProvider', () => {
       resource: 'posts',
       filters: [{ field: 'title', operator: 'containss', value: 'A' }],
     })).rejects.toThrow('Unsupported pocketbase filter operator: containss');
+    // regex 不在 CrudOperator 中。严格 lint 禁止类型断言，先放入合法过滤器，再改写运行时运算符。
+    const unsupported = [{ field: 'title', operator: 'eq', value: '^A' }];
+    const rule = unsupported[0];
+    if (rule) Reflect.set(rule, 'operator', 'regex');
     await expect(dp.getList({
       resource: 'posts',
-      filters: [{ field: 'title', operator: 'regex', value: '^A' } as never],
+      filters: unsupported,
     })).rejects.toThrow('Unsupported pocketbase filter operator: regex');
     expect(mockCollection.getList).toHaveBeenCalledTimes(1);
   });
