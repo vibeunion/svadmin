@@ -45,6 +45,21 @@ const retry: Promise<void> = select.refetch();
 void option;
 void retry;
 useSelect({ resource: posts, optionLabel: row => row.title, optionValue: row => row.id });
+const nestedPosts = defineResource('nested-posts', { record: Type.Object({
+  id: Type.Number(),
+  title: Type.String(),
+  nested: Type.Object({ title: Type.String(), child: Type.Object({ name: Type.String() }) }),
+  tags: Type.Array(Type.String()),
+}) });
+useSelect({ resource: nestedPosts, optionLabel: 'title', optionValue: 'id' });
+useSelect({ resource: nestedPosts, optionLabel: 'nested', optionValue: 'id' });
+useSelect({ resource: nestedPosts, optionLabel: 'nested.title', optionValue: 'id' });
+useSelect({ resource: nestedPosts, optionLabel: 'nested.child.name', optionValue: 'id' });
+useSelect({ resource: nestedPosts, optionLabel: row => row.nested.title, optionValue: 'id' });
+// @ts-expect-error Nested label paths must name a real field.
+useSelect({ resource: nestedPosts, optionLabel: 'nested.missing', optionValue: 'id' });
+// @ts-expect-error Array indexes are not record paths.
+useSelect({ resource: nestedPosts, optionLabel: 'tags.0', optionValue: 'id' });
 // @ts-expect-error A raw string is not a runtime resource contract.
 useSelect({ resource: 'posts', optionLabel: 'title', optionValue: 'id' });
 // @ts-expect-error An absent label field is forbidden.

@@ -27,6 +27,21 @@ import { useContractCreate, type ContractCreateOptions } from './create-hooks.sv
 
 type Field<T>=Extract<keyof T,string>;
 type ValueField<T>={ [K in Field<T>]-?: T[K] extends string|number? K:never }[Field<T>];
+type CallableMember<T>=true extends { [K in keyof T]: T[K] extends (...args: never)=>unknown? true:never }[keyof T]? true:false;
+/** 与 readRecordPath 一致：点分路径只进入普通对象，不进入数组、字典或方法。 */
+type JsonObject<T>=T extends object
+  ? T extends readonly unknown[]? false
+  : CallableMember<T>extends true? false
+  : string extends keyof T? false
+  : true
+  : false;
+type LabelPaths<T,Depth extends readonly unknown[]= []>=Depth['length']extends 4? Extract<keyof T,string>
+  : T extends unknown? JsonObject<T>extends true? {
+    [K in Extract<keyof T,string>]: JsonObject<NonNullable<T[K]>>extends true
+      ? K|`${K}.${LabelPaths<NonNullable<T[K]>,[...Depth,unknown]> & string}`
+      : K
+  }[Extract<keyof T,string>]: never: never;
+type OptionLabel<T>=string extends Field<T>? string: Field<T>|(LabelPaths<T>extends string? LabelPaths<T>: never);
 type FieldPredicate<T>=
   |{ operator: 'eq'|'ne'|'eqs'|'nes'; value: Exclude<T,undefined> }
   |{ operator: 'in'|'nin'|'ina'|'nina'; value: Exclude<T,undefined>[] }
@@ -116,7 +131,7 @@ export function useInfiniteList<S extends ContractSchemas, TSelected = InfiniteP
 }
 export function useSelect<S extends ContractSchemas, TSelected = { data: Row<S>[]; total: number; options: SelectOption[] }>(
   options: ListOptions<Omit<bulk.UseSelectOptions<Row<S>, TSelected>,'optionLabel'|'optionValue'|'defaultValue'|'onSearch'>,S>&{
-    optionLabel: Field<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string);
+    optionLabel: OptionLabel<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string);
     optionValue: ValueField<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string|number);
     defaultValue?: Id<S> | readonly Id<S>[];
     onSearch?: (value: string) => ContractFilter<NoInfer<Row<S>>>[];

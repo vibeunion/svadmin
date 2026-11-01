@@ -147,6 +147,22 @@ export function strictQueries() {
   table.setSorters([{ field: 'count', order: 'desc' }]);
   table.setFilters([{ field: 'count', operator: 'between', value: [1, 10] }]);
   const select = useSelect({ resource: users, optionLabel: 'name', optionValue: 'id', defaultValue: ['u1'] });
+  const nested = defineResource('nested-posts', {
+    record: Type.Object({
+      id: Type.Number(),
+      title: Type.String(),
+      nested: Type.Object({ title: Type.String(), child: Type.Object({ name: Type.String() }) }),
+      tags: Type.Array(Type.String()),
+    }),
+  });
+  useSelect({ resource: nested, optionLabel: 'title', optionValue: 'id' });
+  useSelect({ resource: nested, optionLabel: 'nested.title', optionValue: 'id' });
+  useSelect({ resource: nested, optionLabel: 'nested.child.name', optionValue: 'id' });
+  useSelect({ resource: nested, optionLabel: row => row.nested.child.name, optionValue: 'id' });
+  // @ts-expect-error Nested label paths must name a real field.
+  useSelect({ resource: nested, optionLabel: 'nested.missing', optionValue: 'id' });
+  // @ts-expect-error Array indexes are not record paths.
+  useSelect({ resource: nested, optionLabel: 'tags.0', optionValue: 'id' });
   expectType<Equal<typeof select.query.data, { data: { id: string; name: string }[]; total: number; options: { label: string; value: string | number }[] } | undefined>>();
   expectType<Equal<typeof select.options, { label: string; value: string | number }[]>>();
   useInfiniteList({ resource: posts });
