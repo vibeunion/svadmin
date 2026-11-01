@@ -4,6 +4,7 @@ import { requireValue } from '../../../scripts/test-assertions';
 import { createPocketBaseDataProvider } from './data-provider';
 import { createPocketBaseAuthProvider } from './auth-provider';
 import { createPocketBaseLiveProvider } from './live-provider';
+import type { Filter } from '@svadmin/core';
 
 // ─── Mock PocketBase Client ─────────────────────────────────
 
@@ -102,9 +103,10 @@ describe('PocketBase DataProvider', () => {
       resource: 'posts',
       filters: [{ field: 'title', operator: 'containss', value: 'A' }],
     })).rejects.toThrow('Unsupported pocketbase filter operator: containss');
+    const unsupported: Filter[] = JSON.parse('[{"field":"title","operator":"regex","value":"^A"}]');
     await expect(dp.getList({
       resource: 'posts',
-      filters: [{ field: 'title', operator: 'regex', value: '^A' } as never],
+      filters: unsupported,
     })).rejects.toThrow('Unsupported pocketbase filter operator: regex');
     expect(mockCollection.getList).toHaveBeenCalledTimes(1);
   });

@@ -785,6 +785,7 @@ describe('ordinary query authentication ownership', () => {
     expect(app.read().query.data).toEqual({ data: { id: 1, title: 'First' } });
     const refreshed = await app.read().query.refetch();
     if (!refreshed.isSuccess) throw new Error('Expected a refetch success');
+    if (typeof refreshed.data !== 'object' || refreshed.data === null) throw new Error('Expected object data');
     Reflect.set(refreshed.data, 'data', { id: 999, title: 'Refetch mutation' });
     expect(app.read().query.data).toEqual({ data: { id: 1, title: 'First' } });
     expect(app.queryClient.getQueryCache().getAll()[0]?.state.data).toEqual({ data: { id: 1, title: 'First' } });

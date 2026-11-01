@@ -150,7 +150,7 @@ describe('createElysiaDataProvider', () => {
 
     it('rejects unknown filter operators instead of forwarding them', async () => {
       setupMockFetch({ items: [], total: 0 });
-      const unsupported = [{ field: 'name', operator: 'regex', value: '^A' }] as unknown as Filter[];
+      const unsupported: Filter[] = JSON.parse('[{"field":"name","operator":"regex","value":"^A"}]');
       await expect(provider.getList({ resource: 'posts', filters: unsupported })).rejects.toThrow('Unsupported elysia filter operator: regex');
       expect(mockFetchFn).not.toHaveBeenCalled();
     });

@@ -769,7 +769,6 @@ export function checkAdminManifest(
     manifest.providers.auth.package,
   ].filter((name): name is string => name !== null);
   const declaredCore = project.dependencies?.['@svadmin/core'] ?? project.devDependencies?.['@svadmin/core'];
-
   for (const packageName of new Set(providerPackages)) {
     if (!dependencies.has(packageName)) {
       issues.push({
@@ -796,6 +795,5 @@ export function checkAdminManifest(
       });
     }
   }
-
   return issues;
 }
