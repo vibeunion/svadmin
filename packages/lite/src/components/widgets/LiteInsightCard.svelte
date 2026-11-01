@@ -16,16 +16,18 @@
   const displayContent = $derived(toSafeText(content));
 </script>
 
-<div class="lite-card" style="margin-bottom: 16px;">
-  <div class="lite-inline-md" style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; color: #0f172a; align-items: center;">
-    <span style="color: #f59e0b;">✦</span>
-    {title}
+<div class="lite-card lite-card-flush">
+  <div class="lite-card-header">
+    <h2 class="lite-card-title lite-inline-xs" style="align-items: center;">
+      <span style="color: #d97706;">✦</span>
+      <span>{title}</span>
+    </h2>
   </div>
-  <div style="padding: 16px; font-size: 14px; color: #334155; line-height: 1.6;">
+  <div class="lite-card-body" style="font-size: 14px; color: #334155; line-height: 1.6;">
     {#if displayContent}
       <p style="white-space: pre-wrap; margin: 0;">{displayContent}</p>
     {:else}
-      <p style="color: #94a3b8; font-style: italic;">No insights available. AI analysis requires JavaScript.</p>
+      <p style="color: #94a3b8; font-style: italic; margin: 0;">No insights available. AI analysis requires JavaScript.</p>
     {/if}
   </div>
 </div>

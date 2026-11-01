@@ -20,26 +20,26 @@
   const maxValue = $derived(Math.max(...data.map(d => d.value), 1));
 </script>
 
-<div class="lite-card" style="margin-bottom: 16px;">
+<div class="lite-card lite-card-flush">
   {#if title}
-    <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; color: #0f172a;">
-      {title}
+    <div class="lite-card-header">
+      <h2 class="lite-card-title">{title}</h2>
     </div>
   {/if}
-  <div class="lite-stack-md" style="padding: 16px;">
+  <div class="lite-card-body lite-stack-md">
     {#each data as point, _i (_i)}
       <div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px;">
+        <div class="lite-kv-row" style="margin-bottom: 4px; padding: 0;">
           <span style="color: #334155;">{point.label}</span>
-          <span style="color: #64748b; font-weight: 500;">{point.value}</span>
+          <span style="color: #425466; font-weight: 500;">{point.value}</span>
         </div>
-        <div style="height: 20px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-          <div style="height: 100%; width: {(point.value / maxValue) * 100}%; background: {point.color ?? '#6366f1'}; border-radius: 4px; transition: width 0.3s;"></div>
+        <div style="height: 20px; background: #f1f4f8; border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: {(point.value / maxValue) * 100}%; background: {point.color ?? '#635bff'}; border-radius: 4px; transition: width 0.3s;"></div>
         </div>
       </div>
     {/each}
     {#if data.length === 0}
-      <p style="color: #94a3b8; font-style: italic; text-align: center;">No data</p>
+      <p style="color: #94a3b8; font-style: italic; text-align: center; margin: 0;">No data</p>
     {/if}
   </div>
 </div>

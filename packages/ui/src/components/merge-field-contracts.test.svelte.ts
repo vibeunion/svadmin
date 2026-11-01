@@ -72,7 +72,11 @@ describe('nullable field boundary regressions', () => {
     const input = view.container.querySelector('input');
     if (!input) throw new Error('Expected a file input');
     await fireEvent.change(input, { target: { files: [new File(['test'], 'test.txt', { type: 'text/plain' })] } });
-    await waitFor(() => expect(view.getByRole('alert').textContent).toBe('temporary upload failure'));
+    // 界面上只暴露本地化的通用错误文案，原始异常消息仅进入 onChange 契约。
+    await waitFor(() => expect(view.getByRole('alert').textContent).toBe('Upload failed.'));
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ status: 'error', error: 'temporary upload failure' }),
+    ]);
     await fireEvent.click(view.getByRole('button', { name: 'Retry upload' }));
     await waitFor(() => {
       const items = onChange.mock.calls.at(-1)?.[0];

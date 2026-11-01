@@ -28,6 +28,10 @@
     "mode": "query-rendering"
   },
   {
+    "file": "features/dashboard/DashboardWorkspace.svelte",
+    "mode": "workspace-helper"
+  },
+  {
     "file": "features/showcase/DesignPrinciplesPage.svelte",
     "mode": "static-showcase"
   },

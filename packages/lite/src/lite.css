@@ -251,6 +251,145 @@ a:hover {
 .lite-card[data-interactive="true"]:hover {
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 8px 24px -6px rgba(0, 0, 0, 0.04);
 }
+.lite-card-flush {
+  padding: 0;
+}
+.lite-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e6ebf1;
+}
+.lite-card-header-start {
+  align-items: flex-start;
+}
+.lite-card-title {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #0a2540;
+}
+.lite-card-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #425466;
+}
+.lite-card-body {
+  padding: 16px;
+}
+.lite-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #e6ebf1;
+  background: #fcfdfe;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+}
+.lite-card-action {
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+.lite-card-flush > .lite-table,
+.lite-card-flush > .lite-table-scroll > .lite-table {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0;
+}
+
+/* ─── Key-Value Rows ───────────────────────────────────────── */
+.lite-kv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lite-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 0;
+}
+.lite-kv-row + .lite-kv-row {
+  border-top: 1px solid #f1f4f8;
+}
+.lite-kv-label {
+  color: #425466;
+}
+.lite-kv-value {
+  color: #0a2540;
+  font-weight: 600;
+}
+
+/* ─── Resource Links / Cards ───────────────────────────────── */
+.lite-resource-card {
+  display: block;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid #e6ebf1;
+  border-radius: 6px;
+  background: #fff;
+  color: #0a2540;
+  text-decoration: none;
+  transition: background 0.15s ease-out, border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+.lite-resource-card:hover {
+  background: #f8f7fd;
+  border-color: #cbd5e1;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.lite-resource-card-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #0a2540;
+}
+.lite-resource-card-desc {
+  display: block;
+  font-size: 12px;
+  color: #425466;
+}
+
+/* ─── Category Progress Grid (Parity Dashboard) ────────────── */
+.lite-category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -8px;
+  margin-right: -8px;
+}
+.lite-category-card {
+  flex: 1 1 260px;
+  margin: 8px;
+  padding: 12px 14px;
+  border: 1px solid #e6ebf1;
+  border-radius: 6px;
+  background: #fff;
+}
+.lite-category-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.lite-category-card-header strong {
+  text-transform: capitalize;
+  color: #0a2540;
+  font-size: 13px;
+}
+.lite-category-card-footer {
+  font-size: 11px;
+  color: #425466;
+  display: flex;
+  justify-content: space-between;
+}
 
 /* ─── Table ────────────────────────────────────────────────── */
 .lite-table {

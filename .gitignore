@@ -15,6 +15,7 @@ dist/
 .svelte-check/
 .astro/
 packages/ui/svelte-check-output.txt
+.enterprise-ui-dist/
 
 # Editor
 .idea/

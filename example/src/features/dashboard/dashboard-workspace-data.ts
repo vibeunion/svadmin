@@ -1,5 +1,5 @@
 import {
-  decodeDashboardQuery, type DashboardQuery, type DashboardSnapshot, type DataProvider,
+  decodeDashboardQuery, type BaseRecord, type DashboardQuery, type DashboardSnapshot, type DataProvider,
 } from '@svadmin/core';
 import { demoRenderers } from '../../resource-rendering';
 import type { DemoRow } from '../../resource-schemas';
@@ -68,20 +68,47 @@ export async function loadDashboardWorkspace(
   query: DashboardQuery,
   options: { isZh?: boolean } = {},
 ): Promise<DashboardWorkspaceResult> {
+  // 先校验查询再读取数据，非法区域/时间范围不得触发任何请求。
   const decoded = decodeWorkspaceQuery(query);
-  const region = readRegion(decoded);
-  const { fromDate, toDate } = readRange(decoded);
+  readRegion(decoded);
+  readRange(decoded);
   const [movementResult, orderResult, todoResult] = await Promise.all([
     provider.getList({ resource: 'stock_movements', pagination: { mode: 'off' } }),
     provider.getList({ resource: 'sales_orders', pagination: { mode: 'off' } }),
     provider.getList({ resource: 'todos', pagination: { mode: 'off' } }),
   ]);
+  return buildDashboardWorkspace({
+    movements: movementResult.data,
+    orders: orderResult.data,
+    todos: todoResult.data,
+  }, decoded, options);
+}
+
+/** 已由页面查询加载的行集合；用于避免同一资源重复请求。 */
+export interface DashboardWorkspaceRows {
+  movements: readonly BaseRecord[];
+  orders: readonly BaseRecord[];
+  todos: readonly BaseRecord[];
+}
+
+/**
+ * 仅使用页面已经拿到的行构建工作区快照。
+ * Dashboard 页面对同一资源只发起一次列表请求，工作区复用其结果。
+ */
+export function buildDashboardWorkspace(
+  rows: DashboardWorkspaceRows,
+  query: DashboardQuery,
+  options: { isZh?: boolean } = {},
+): DashboardWorkspaceResult {
+  const decoded = decodeWorkspaceQuery(query);
+  const region = readRegion(decoded);
+  const { fromDate, toDate } = readRange(decoded);
   const warehouseId = region === 'east' ? 1 : region === 'west' ? 2 : undefined;
-  const movements = demoRenderers.stock_movements.records(movementResult.data)
+  const movements = demoRenderers.stock_movements.records(rows.movements)
     .filter(row => (warehouseId === undefined || row.warehouseId === warehouseId) && inRange(row.date, fromDate, toDate));
-  const orders = demoRenderers.sales_orders.records(orderResult.data)
+  const orders = demoRenderers.sales_orders.records(rows.orders)
     .filter(row => inRange(row.orderDate, fromDate, toDate));
-  const openTodos = demoRenderers.todos.records(todoResult.data).filter(row => !row.completed);
+  const openTodos = demoRenderers.todos.records(rows.todos).filter(row => !row.completed);
   const unitsMoved = movements.reduce((sum, row) => sum + row.quantity, 0);
   const data: DashboardWorkspaceData = {
     region, ...(warehouseId === undefined ? {} : { warehouseId }),

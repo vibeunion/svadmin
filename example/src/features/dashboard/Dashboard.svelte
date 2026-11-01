@@ -29,7 +29,7 @@
   import { recordLink } from '../../workspace/workspace-links';
   import DashboardWorkspace from './DashboardWorkspace.svelte';
   import {
-    loadDashboardWorkspace, loadWorkspaceDrilldownRecords, type WorkspaceDrilldownTarget,
+    buildDashboardWorkspace, loadWorkspaceDrilldownRecords, type WorkspaceDrilldownTarget,
   } from './dashboard-workspace-data';
   let declarativeSurfacePromise = $state(import('../../components/DeclarativeSurfaceExample.svelte'));
 
@@ -97,9 +97,19 @@
     tenantId: 'example-tenant', requestId: 'example-dashboard-workspace', traceId: 'example-dashboard-workspace',
   });
   const workspaceDataProvider = adminContext.getDataProvider();
-  const workspaceProvider: DashboardProvider = {
-    get: async (_context, query) => (await loadDashboardWorkspace(workspaceDataProvider, query, { isZh })).snapshot,
-  };
+  // 页面的列表查询已覆盖同一批资源，工作区快照复用这些行，避免同一资源重复请求。
+  const workspaceRows = $derived({
+    movements: movementsQuery.data?.data ?? [],
+    orders: salesOrdersQuery.data?.data ?? [],
+    todos: todosQuery.data?.data ?? [],
+  });
+  const workspaceUnavailable = $derived(movementsQuery.isError || salesOrdersQuery.isError || todosQuery.isError);
+  const workspaceProvider = $derived<DashboardProvider>({
+    get: async (_context, query) => {
+      if (workspaceUnavailable) throw new Error('Dashboard workspace data is unavailable');
+      return buildDashboardWorkspace(workspaceRows, query, { isZh }).snapshot;
+    },
+  });
   async function loadWorkspaceRecords(target: WorkspaceDrilldownTarget) {
     const records = await loadWorkspaceDrilldownRecords(workspaceDataProvider, target, { isZh });
     return records.map(record => ({
@@ -315,7 +325,7 @@
   </section>
   {#snippet metrics()}
     <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
-      class={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'dashboard-risk' : ''}
+      trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
       detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} out of stock`)}
       loading={productsQuery.isLoading} />
     <MetricBlock label={isZh ? '待处理' : 'Open work'}
@@ -371,7 +381,7 @@
   </div>
 
   <details class="svadmin-collapsible dashboard-secondary" data-dashboard-summary>
-    <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
+    <summary>{isZh ? '资源概览' : 'Resource overview'}</summary>
     <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
       {#each stats as stat (stat.label)}
         <a href={stat.href} class="block py-2 hover:text-primary">
