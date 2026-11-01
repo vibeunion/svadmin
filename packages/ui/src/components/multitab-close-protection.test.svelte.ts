@@ -269,6 +269,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const oncloseall = vi.fn();
+    // 显式声明 tab 参数，让 mock.calls 能以元组类型安全断言。
     const onbeforeclose = vi.fn((_tab: WorkspaceTab) => pending.promise);
 
     const view = render(MultiTabKeepAlive, {

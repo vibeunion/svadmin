@@ -49,7 +49,7 @@ describe('business rendering migration inventory', () => {
     expect(inventory.map(entry => entry.file).sort()).toEqual(files);
     expect(new Set(inventory.map(entry => entry.file)).size).toBe(files.length);
     expect(inventory.filter(entry => entry.mode === 'workspace-helper').map(entry => entry.file).sort())
-      .toEqual(['workspace/WorkspaceQueryState.svelte', 'workspace/WorkspaceRecordLinks.svelte']);
+      .toEqual(['features/dashboard/DashboardWorkspace.svelte', 'workspace/WorkspaceQueryState.svelte', 'workspace/WorkspaceRecordLinks.svelte']);
     for (const entry of inventory) {
       const text = source(`../src/${entry.file}`);
       if (entry.mode === 'query-rendering') {

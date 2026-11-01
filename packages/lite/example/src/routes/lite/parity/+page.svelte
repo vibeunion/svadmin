@@ -102,22 +102,22 @@
 
   <!-- Category progress panel -->
   <div class="lite-card" style="margin-bottom: 24px;">
-    <h2>模块分类适配进度</h2>
-    <p class="lite-muted" style="margin-bottom: 16px;">
+    <h2 class="lite-card-title" style="font-size: 16px; margin-bottom: 4px;">模块分类适配进度</h2>
+    <p class="lite-card-subtitle" style="margin-bottom: 16px;">
       各功能模块的对齐状态与降级承接情况。
     </p>
 
-    <div style="margin-left: -8px; margin-right: -8px; display: flex; flex-wrap: wrap;">
+    <div class="lite-category-grid">
       {#each Object.entries(report.categories) as [catName, cat] (catName)}
-        <div style="flex: 1 1 280px; margin: 8px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="text-transform: capitalize; color: #0f172a;">{catName}</strong>
+        <div class="lite-category-card">
+          <div class="lite-category-card-header">
+            <strong>{catName}</strong>
             <span class="lite-badge lite-badge-success">{cat.percentage}%</span>
           </div>
           <div class="lite-progress-track" style="width: 100%; margin-left: 0; margin-bottom: 8px;">
             <div class="lite-progress-fill lite-progress-success" style="width: {cat.percentage}%;"></div>
           </div>
-          <div style="font-size: 11px; color: #64748b; display: flex; justify-content: space-between;">
+          <div class="lite-category-card-footer">
             <span>1:1: {cat.adapted} | 降级: {cat.fallback}</span>
             <span>总计: {cat.total}</span>
           </div>
@@ -128,8 +128,8 @@
 
   <!-- Interactive showcase for newly added components -->
   <div class="lite-card" style="margin-bottom: 24px;">
-    <h2>SSR 组件现场展示与验证 (Showcase)</h2>
-    <p class="lite-muted" style="margin-bottom: 16px;">
+    <h2 class="lite-card-title" style="font-size: 16px; margin-bottom: 4px;">SSR 组件现场展示与验证 (Showcase)</h2>
+    <p class="lite-card-subtitle" style="margin-bottom: 16px;">
       以下展示所有字段组件在纯服务端渲染（Zero-JS SSR）模式下的视觉呈现与原生表单控件：
     </p>
 
@@ -326,8 +326,8 @@
   <!-- Detailed component parity checklist -->
   {#if report.items && report.items.length > 0}
     <div class="lite-card">
-      <h2>详细组件对齐清单 (Parity Matrix)</h2>
-      <p class="lite-muted" style="margin-bottom: 16px;">
+      <h2 class="lite-card-title" style="font-size: 16px; margin-bottom: 4px;">详细组件对齐清单 (Parity Matrix)</h2>
+      <p class="lite-card-subtitle" style="margin-bottom: 16px;">
         完整映射 <code>@svadmin/ui</code> 与 <code>@svadmin/lite</code> 组件目录。
       </p>
 

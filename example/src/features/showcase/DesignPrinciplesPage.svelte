@@ -23,6 +23,8 @@ import { definedOptions } from '@svadmin/core/options';
     DataState,
     FeedbackNotice,
     FilterToolbar,
+    Input,
+    Label,
     MediaThumbnail,
     MetricStrip,
     PageToolbar,
@@ -423,13 +425,13 @@ import { definedOptions } from '@svadmin/core/options';
           <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'}>{isZh ? '提交订单' : 'Submit order'}</Button>
         </div>
       </section>
-      <section class="example-section-stack" aria-labelledby="enterprise-components-heading" data-enterprise-component-fixture>
+      <section class="space-y-3" aria-labelledby="enterprise-components-heading" data-enterprise-component-fixture>
         <SectionHeader
           id="enterprise-components-heading"
           title={isZh ? '企业组件组合示例' : 'Enterprise component composition'}
           description={isZh ? '这里演示 UI 包的 Provider 接入方式；示例数据不代表真实后端能力。' : 'This demonstrates UI package Provider wiring; example data is not real backend capability.'}
         />
-        <div class="example-card-grid">
+        <div class="grid gap-3 md:grid-cols-2">
           <DashboardView
             provider={dashboardProvider}
             dashboardId="design-principles"
@@ -443,13 +445,13 @@ import { definedOptions } from '@svadmin/core/options';
           />
         </div>
       </section>
-      <section class="example-section-stack" aria-labelledby="enterprise-inputs-heading" data-enterprise-input-fixture>
+      <section class="space-y-3" aria-labelledby="enterprise-inputs-heading" data-enterprise-input-fixture>
         <SectionHeader
           id="enterprise-inputs-heading"
           title={isZh ? '企业输入组件组合' : 'Enterprise input composition'}
           description={isZh ? '这些控件来自 UI 包；状态只存在于示例页面。' : 'These controls come from the UI package; state belongs only to this example page.'}
         />
-        <div class="example-control-grid">
+        <div class="grid gap-3 sm:grid-cols-2">
           <RadioGroup
             legend={isZh ? '可见范围' : 'Visibility'}
             ariaLabel={isZh ? '可见范围' : 'Visibility'}
@@ -511,22 +513,22 @@ import { definedOptions } from '@svadmin/core/options';
           />
         </div>
       </section>
-      <section class="example-section-stack" aria-labelledby="enterprise-errors-heading" data-enterprise-error-fixture>
+      <section class="space-y-3" aria-labelledby="enterprise-errors-heading" data-enterprise-error-fixture>
         <SectionHeader
           id="enterprise-errors-heading"
           title={isZh ? '表单错误汇总' : 'Form error summary'}
           description={isZh ? 'ErrorSummary 来自 UI 包，输入值和聚焦状态只属于 example。' : 'ErrorSummary comes from the UI package; input values and focus state belong only to this example.'}
         />
-        <div class="example-control-grid">
-          <div class="example-section-stack">
-            <label class="example-field" for="demo-name">
-              <span>{isZh ? '名称' : 'Name'}</span>
-              <input id="demo-name" class="example-field-control" placeholder={isZh ? '示例名称' : 'Example name'} />
-            </label>
-            <label class="example-field" for="demo-owner">
-              <span>{isZh ? '负责人' : 'Owner'}</span>
-              <input id="demo-owner" class="example-field-control" placeholder={isZh ? '示例负责人' : 'Example owner'} />
-            </label>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="space-y-3">
+            <div class="grid gap-1">
+              <Label for="demo-name">{isZh ? '名称' : 'Name'}</Label>
+              <Input id="demo-name" placeholder={isZh ? '示例名称' : 'Example name'} />
+            </div>
+            <div class="grid gap-1">
+              <Label for="demo-owner">{isZh ? '负责人' : 'Owner'}</Label>
+              <Input id="demo-owner" placeholder={isZh ? '示例负责人' : 'Example owner'} />
+            </div>
             {#if focusedDemoField}
               <p class="text-xs text-muted-foreground" data-focused-demo-field>
                 {isZh ? `最近定位：${focusedDemoField}` : `Focused: ${focusedDemoField}`}

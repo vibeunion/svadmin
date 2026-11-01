@@ -19,17 +19,19 @@
   const renderedContent = $derived(renderRichContent(toSafeText(content), renderOptions));
 </script>
 
-<div class="lite-card lite-insight-card" style="margin-bottom: 16px;">
-  <div class="lite-insight-card__header" style="padding: 12px 16px; border-bottom: 1px solid #E5E6EB; font-weight: 600; font-size: 14px; color: #1D2129;">
-    <span style="color: #FF7D00;">✦</span>
-    {title}
+<div class="lite-card lite-card-flush">
+  <div class="lite-card-header">
+    <h2 class="lite-card-title lite-inline-xs" style="align-items: center;">
+      <span style="color: #d97706;">✦</span>
+      <span>{title}</span>
+    </h2>
   </div>
-  <div class="lite-insight-card__body" style="padding: 16px; font-size: 14px; color: #1D2129; line-height: 1.6;">
+  <div class="lite-card-body" style="font-size: 14px; color: #334155; line-height: 1.6;">
     {#if renderedContent}
       <!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容由 renderRichContent 转义或白名单过滤，高亮回调仅允许可信服务端实现。 -->
       <div class="lite-insight-content">{@html renderedContent}</div>
     {:else}
-      <p style="color: #86909C; font-style: italic; margin: 0;">No insights available. AI analysis requires JavaScript.</p>
+      <p style="color: #94a3b8; font-style: italic; margin: 0;">No insights available. AI analysis requires JavaScript.</p>
     {/if}
   </div>
 </div>

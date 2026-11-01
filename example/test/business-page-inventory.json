@@ -33,7 +33,14 @@
   },
   {
     "file": "features/dashboard/DashboardWorkspace.svelte",
+  {
+    "file": "features/dashboard/DashboardWorkspace.svelte",
     "mode": "local-state"
+  },
+  {
+    "file": "features/showcase/DesignPrinciplesPage.svelte",
+    "mode": "static-showcase"
+  },
   },
   {
     "file": "features/domain/DomainWorkspacePage.svelte",

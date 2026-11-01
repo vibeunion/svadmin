@@ -59,13 +59,14 @@ async function rows(resource: string) { return (await inMemoryDataProvider.getLi
 
 async function waitForDashboardSurface() {
   // Surface 异步挂载且独立读取两个资源，重试基线必须等这两次请求已经发起。
+  // 动态导入在冷缓存下可能超过默认 1s 轮询上限，因此显式放宽等待时间，断言强度不变。
   await waitFor(() => {
     expect(target.querySelector('[data-declarative-surface-example]')).not.toBeNull();
     const calls = vi.mocked(inMemoryDataProvider.getList).mock.calls;
     for (const resource of ['products', 'sales_orders']) {
       expect(calls.some(([params]) => params.resource === resource && params.pagination?.pageSize === 10)).toBe(true);
     }
-  });
+  }, { timeout: 10_000 });
 }
 
 describe('PM business acceptance', () => {

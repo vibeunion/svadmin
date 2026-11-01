@@ -12,27 +12,12 @@
   }
   .dashboard-secondary {
     min-width: 0;
-    border-block-end: 1px solid var(--border);
-  }
-  .dashboard-secondary > summary {
-    min-height: 44px;
-    padding-block: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  .dashboard-secondary > summary:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
   }
   .dashboard-secondary[open] > :not(summary) {
     margin-block-end: 1rem;
   }
   [data-svadmin-content-page="operations-dashboard"] .svadmin-audit-section__body > .divide-y > div {
     padding: 0.75rem 1rem;
-  }
-  [data-svadmin-content-page="operations-dashboard"] .svadmin-audit-section__header {
-    flex-wrap: wrap;
   }
   [data-svadmin-content-page="operations-dashboard"] [data-dashboard-queue],
   .dashboard-sales {
@@ -57,119 +42,4 @@
     .dashboard-primary-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
     .dashboard-support-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
-  /* 列表区域由标题和数据行管理间距，避免 Card 默认留白重复叠加。 */
-  [data-slot="card"][data-dashboard-panel] {
-    gap: 0;
-    padding-block: 0;
-  }
-
-  [data-dashboard-panel] > [data-slot="card-header"] {
-    min-height: 3.5rem;
-    padding: 1rem 1.25rem;
-  }
-
-  [data-dashboard-panel] > [data-slot="card-content"] > .divide-y > div {
-    padding-inline: 1.25rem;
-  }
-
-  .example-section-stack {
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  .example-card-grid {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .example-card {
-    min-width: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    padding: 1rem;
-    box-shadow: var(--shadow-surface);
-  }
-
-  .example-control-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .example-field {
-    display: grid;
-    gap: 0.25rem;
-    font-size: 0.875rem;
-  }
-
-  .example-field-control {
-    min-width: 0;
-    width: 100%;
-    height: 2.25rem;
-    border: 1px solid var(--input);
-    border-radius: var(--radius-md);
-    background: var(--background);
-    padding-inline: 0.75rem;
-    color: var(--foreground);
-    transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
-  }
-
-  .example-field-control:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: var(--svadmin-focus-offset);
-  }
-
-  .example-field-control[aria-invalid="true"] {
-    border-color: var(--destructive);
-  }
-
-  .example-field-control[aria-invalid="true"]:focus-visible {
-    outline-color: var(--destructive);
-  }
-
-  .example-field-control:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  .example-table-shell {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-
-  .example-muted {
-    color: var(--muted-foreground);
-  }
-
-  .layout-clean-flat[data-theme="default"] .example-card,
-  .layout-clean-flat[data-theme="default"] .example-table-shell,
-  .layout-clean-flat[data-theme="stripe"] .example-card,
-  .layout-clean-flat[data-theme="stripe"] .example-table-shell {
-    box-shadow: var(--shadow-surface);
-  }
-
-  .example-table-shell:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: var(--svadmin-focus-offset, 2px);
-  }
-
-  @media (max-width: 767px) {
-    .example-card-grid,
-    .example-control-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-}
-
-/* 包的兼容主题规则未分层，这些仅限首页的覆盖也必须保持同层。 */
-.layout-clean-flat [data-svadmin-content-page="operations-dashboard"] [data-svadmin-metric-card] {
-  border-radius: 0;
-  border-inline-start: 4px solid var(--border);
-  box-shadow: none;
-}
-.layout-clean-flat [data-svadmin-content-page="operations-dashboard"] .dashboard-risk {
-  border-inline-start-color: var(--warning);
 }
