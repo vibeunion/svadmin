@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.108.4](https://github.com/vibeunion/svadmin/compare/ui-v0.108.3...ui-v0.108.4) (2026-11-01)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** clear strict locale checks and eslint on main ([#626](https://github.com/vibeunion/svadmin/issues/626)) ([02cf1fb](https://github.com/vibeunion/svadmin/commit/02cf1fbf3ae8f61ffeb1d6ea9a9ab8480d20be43))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.4.3
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.69.3
+
 ## [0.108.3](https://github.com/vibeunion/svadmin/compare/ui-v0.108.2...ui-v0.108.3) (2026-10-31)
 
 

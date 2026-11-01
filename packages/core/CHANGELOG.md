@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.3](https://github.com/vibeunion/svadmin/compare/core-v0.69.2...core-v0.69.3) (2026-11-01)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** bind generated resourceName and keep lazy pages out of startup JS ([#628](https://github.com/vibeunion/svadmin/issues/628)) ([f008ad0](https://github.com/vibeunion/svadmin/commit/f008ad00e5784d3aed3e8d56997f9ff8f1cb5380))
+
 ## [0.69.2](https://github.com/vibeunion/svadmin/compare/core-v0.69.1...core-v0.69.2) (2026-10-31)
 
 
