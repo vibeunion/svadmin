@@ -1,8 +1,8 @@
-import type { useDelete, useList, useOne, useLogin, useLogout, useIsAuthenticated } from '@svadmin/core';
+import type { ContractSchemas, useDelete, useList, useOne, useLogin, useLogout, useIsAuthenticated } from '@svadmin/core';
 export interface DeleteState {
-  remove: ReturnType<typeof useDelete>;
-  list: ReturnType<typeof useList>;
-  one: ReturnType<typeof useOne>;
+  remove: ReturnType<typeof useDelete<ContractSchemas>>;
+  list: ReturnType<typeof useList<ContractSchemas>>;
+  one: ReturnType<typeof useOne<ContractSchemas>>;
 }
 export interface DeleteAuthActions {
   login: ReturnType<typeof useLogin>;
