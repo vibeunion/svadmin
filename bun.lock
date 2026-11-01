@@ -554,21 +554,6 @@
         "@svadmin/core",
       ],
     },
-    "packages/parse": {
-      "name": "@svadmin/parse",
-      "version": "0.2.3",
-      "dependencies": {
-        "@svadmin/refine-adapter": "workspace:*",
-      },
-      "peerDependencies": {
-        "@refinedev/parse": "^2.0.0",
-        "@svadmin/core": "workspace:*",
-      },
-      "optionalPeers": [
-        "@refinedev/parse",
-        "@svadmin/core",
-      ],
-    },
     "packages/pocketbase": {
       "name": "@svadmin/pocketbase",
       "version": "0.13.17",
@@ -1606,8 +1591,6 @@
     "@svadmin/nestjs-query": ["@svadmin/nestjs-query@workspace:packages/nestjs-query"],
 
     "@svadmin/nestjsx-crud": ["@svadmin/nestjsx-crud@workspace:packages/nestjsx-crud"],
-
-    "@svadmin/parse": ["@svadmin/parse@workspace:packages/parse"],
 
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 

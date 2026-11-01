@@ -106,7 +106,6 @@ You don't need to use this package directly if you're already using one of the `
 | `@svadmin/nestjs-query` | NestJS GraphQL | `@refinedev/nestjs-query` |
 | `@svadmin/nestjsx-crud` | NestJS CRUD | `@refinedev/nestjsx-crud` |
 | `@svadmin/simple-rest` | REST API | `@refinedev/simple-rest` |
-| `@svadmin/parse` | Parse Server | `@refinedev/parse` |
 | `@svadmin/strapi-graphql` | Strapi GraphQL | `@refinedev/strapi-graphql` |
 
 ## Direct Usage
@@ -120,6 +119,27 @@ import { dataProvider as createRefineDirectus } from '@tspvivek/refine-directus'
 const directusProvider = createRefineDirectus('https://my-directus.example.com');
 const dataProvider = createRefineAdapter(directusProvider);
 ```
+
+## Parse provider migration
+
+The dedicated `@svadmin/parse` package has been retired. The
+`createParseDataProvider` factory and `ParseDataProviderArgs` type have no
+compatibility aliases. Remove the wrapper dependency and initialize the Parse
+provider in the host application using the API and types documented by the
+installed SDK version. Pass that initialized provider to the universal adapter:
+
+```typescript
+import { createRefineAdapter } from '@svadmin/refine-adapter';
+
+// parseProvider is the provider instance initialized by the host application.
+const dataProvider = createRefineAdapter(parseProvider);
+```
+
+Keep the chosen upstream dependency in the host application. SVAdmin no longer
+guesses its exports or initialization arguments. Define a TypeBox resource
+contract with `defineResource` and use the regular contract-bound hooks; the
+bridge validates transport responses, while the resource contract validates
+record fields. Parse backend behavior requires validation in that host integration.
 
 ## Providers Not Using This Adapter
 

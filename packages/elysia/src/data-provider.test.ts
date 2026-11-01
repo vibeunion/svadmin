@@ -150,7 +150,10 @@ describe('createElysiaDataProvider', () => {
 
     it('rejects unknown filter operators instead of forwarding them', async () => {
       setupMockFetch({ items: [], total: 0 });
-      const unsupported: Filter[] = JSON.parse('[{"field":"name","operator":"regex","value":"^A"}]');
+      // regex 不在 CrudOperator 中。严格 lint 禁止类型断言，先放入合法过滤器，再改写运行时运算符。
+      const unsupported: Filter[] = [{ field: 'name', operator: 'eq', value: '^A' }];
+      const rule = unsupported[0];
+      if (rule && 'field' in rule) Reflect.set(rule, 'operator', 'regex');
       await expect(provider.getList({ resource: 'posts', filters: unsupported })).rejects.toThrow('Unsupported elysia filter operator: regex');
       expect(mockFetchFn).not.toHaveBeenCalled();
     });

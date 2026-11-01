@@ -32,6 +32,5 @@
   "packages/app": "0.2.19",
   "packages/devtools": "0.4.3",
   "packages/rest": "0.2.19",
-  "packages/parse": "0.2.3",
   "packages/strapi-graphql": "0.2.3"
 }
