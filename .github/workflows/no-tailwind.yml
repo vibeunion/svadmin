@@ -27,7 +27,7 @@ jobs:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.2'
+          bun-version: '1.4.4'
       - run: bun install --frozen-lockfile
       # 所有目标为 main 的 PR 都扫描，包括非 UI 包和脚手架。
       - name: Verify regression tests and repository compiler boundary

@@ -30,7 +30,7 @@ jobs:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.2'
+          bun-version: '1.4.4'
       - run: bun install --frozen-lockfile
       - name: Generate current UI recipe runtime before source checks
         run: bun run --cwd packages/ui build:styles
@@ -73,7 +73,7 @@ jobs:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.2'
+          bun-version: '1.4.4'
       - run: bun install --frozen-lockfile
       - name: Build workspace and production example
         run: bun run build:packages && bun run --cwd example build && bun run bundle:check

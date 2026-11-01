@@ -17,7 +17,7 @@
         "@storybook/svelte-vite": "10.6.3",
         "@sveltejs/kit": "3.0.0",
         "@sveltejs/package": "^2.5.8",
-        "@types/bun": "^1.4.2",
+        "@types/bun": "^1.4.4",
         "@types/papaparse": "^5.5.2",
         "@typescript/native": "npm:typescript@^7.0.2",
         "cac": "^7.0.0",
@@ -117,7 +117,7 @@
         "@testing-library/dom": "^10.4.1",
         "@testing-library/svelte": "^5.4.2",
         "@testing-library/user-event": "^14.6.6",
-        "@types/bun": "^1.4.2",
+        "@types/bun": "^1.4.4",
         "happy-dom": "^21.0.4",
         "vitest": "^4.1.11",
       },
@@ -225,7 +225,7 @@
         "@testing-library/dom": "^10.4.1",
         "@testing-library/svelte": "^5.4.2",
         "@testing-library/user-event": "^14.6.6",
-        "@types/bun": "^1.4.2",
+        "@types/bun": "^1.4.4",
         "@types/jsdom": "^30.0.0",
         "exceljs": "4.4.0",
         "happy-dom": "^21.0.4",
@@ -484,7 +484,7 @@
         "@sveltejs/vite-plugin-svelte": "^7.3.0",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/svelte": "^5.4.2",
-        "@types/bun": "^1.4.2",
+        "@types/bun": "^1.4.4",
         "@types/qrcode": "^1.5.6",
         "happy-dom": "^21.0.4",
         "vitest": "^4.1.11",
@@ -1841,7 +1841,7 @@
 
     "@types/braces": ["@types/braces@3.0.5", "https://registry.npmmirror.com/@types/braces/-/braces-3.0.5.tgz", {}, "sha512-SQFof9H+LXeWNz8wDe7oN5zu7ket0qwMu5vZubW4GCJ8Kkeh6nBWUz87+KTz/G3Kqsrp0j/W253XJb3KMEeg3w=="],
 
-    "@types/bun": ["@types/bun@1.4.2", "https://registry.npmmirror.com/@types/bun/-/bun-1.4.2.tgz", { "dependencies": { "bun-types": "1.4.2" } }, "sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ=="],
+    "@types/bun": ["@types/bun@1.4.4", "https://registry.npmmirror.com/@types/bun/-/bun-1.4.4.tgz", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
 
     "@types/chai": ["@types/chai@5.2.3", "https://registry.npmmirror.com/@types/chai/-/chai-5.2.3.tgz", { "dependencies": { "@types/deep-eql": "*", "assertion-error": "^2.0.1" } }, "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA=="],
 
@@ -2159,7 +2159,7 @@
 
     "buffers": ["buffers@0.1.1", "https://registry.npmmirror.com/buffers/-/buffers-0.1.1.tgz", {}, "sha512-9q/rDEGSb/Qsvv2qvzIzdluL5k7AaJOTrw23z9reQthrbF7is4CtlT0DXyO1oei2DCp4uojjzQ7igaSHp1kAEQ=="],
 
-    "bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
+    "bun-types": ["bun-types@1.4.4", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.4.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-yjrJh5oGX7mMPKGd19YXyIjmEuj4G4zNC30bs7PM9Az7NQ3ndF3j6hbeRdvJTRQEhJ/FYQwW0a2moweEi2hMxQ=="],
 
     "bundle-name": ["bundle-name@4.1.0", "https://registry.npmmirror.com/bundle-name/-/bundle-name-4.1.0.tgz", { "dependencies": { "run-applescript": "^7.0.0" } }, "sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q=="],
 
