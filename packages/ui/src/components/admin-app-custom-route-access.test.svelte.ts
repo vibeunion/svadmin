@@ -2,7 +2,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { AccessControlProvider, CanParams, DataProvider, MenuItem, ResourceDefinition } from '@svadmin/core';
 import { resetContext } from '@svadmin/core';
-import AdminApp from './AdminApp.svelte';
+import AdminApp, { type AdminPageRoute } from './AdminApp.svelte';
 import ProtectedReport from './admin-app-custom-route.test-page.svelte';
 
 const resources = [{ name: 'posts', label: 'Posts', fields: [] }] satisfies ResourceDefinition[];
@@ -38,7 +38,7 @@ afterEach(() => {
   window.location.hash = '#/';
 });
 
-function renderAt(path: string, accessControlProvider?: AccessControlProvider, pageRoutes = [
+function renderAt(path: string, accessControlProvider?: AccessControlProvider, pageRoutes: readonly AdminPageRoute[] = [
   { path: '/reports', component: ProtectedReport, title: 'Reports' },
   { path: '/notes', component: ProtectedReport, title: 'Notes' },
 ]) {
