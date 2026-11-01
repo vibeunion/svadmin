@@ -30,11 +30,11 @@
   }
 
   const emptyDefaults = $derived(config.empty);
-  const componentEmpty = $derived(config.componentDefaults.Empty ?? {});
-  const resolvedTitle = $derived(title ?? emptyDefaults.title ?? textDefault(componentEmpty.title) ?? i18n.t('empty.title'));
-  const resolvedDescription = $derived(description ?? emptyDefaults.description ?? textDefault(componentEmpty.description) ?? i18n.t('empty.description'));
-  const resolvedImage = $derived(image ?? emptyDefaults.image ?? textDefault(componentEmpty.image));
-  const resolvedImageAlt = $derived(imageAlt ?? emptyDefaults.imageAlt ?? textDefault(componentEmpty.imageAlt) ?? '');
+  const componentEmpty = $derived(config.componentDefaults['Empty'] ?? {});
+  const resolvedTitle = $derived(title ?? emptyDefaults.title ?? textDefault(componentEmpty['title']) ?? i18n.t('empty.title'));
+  const resolvedDescription = $derived(description ?? emptyDefaults.description ?? textDefault(componentEmpty['description']) ?? i18n.t('empty.description'));
+  const resolvedImage = $derived(image ?? emptyDefaults.image ?? textDefault(componentEmpty['image']));
+  const resolvedImageAlt = $derived(imageAlt ?? emptyDefaults.imageAlt ?? textDefault(componentEmpty['imageAlt']) ?? '');
 </script>
 
 <div

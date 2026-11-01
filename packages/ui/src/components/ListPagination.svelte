@@ -60,35 +60,35 @@
   }
 
   const paginationDefaults = $derived(config.pagination);
-  const paginationComponentDefaults = $derived(config.componentDefaults.Pagination ?? {});
+  const paginationComponentDefaults = $derived(config.componentDefaults['Pagination'] ?? {});
   const resolvedPageSizeOptions = $derived(
     pageSizeOptions
       ?? paginationDefaults.pageSizeOptions
-      ?? numberList(paginationComponentDefaults.pageSizeOptions)
+      ?? numberList(paginationComponentDefaults['pageSizeOptions'])
       ?? DEFAULT_PAGE_SIZE_OPTIONS,
   );
   const resolvedShowSummary = $derived(
     showSummary
       ?? paginationDefaults.showSummary
-      ?? booleanDefault(paginationComponentDefaults.showSummary)
+      ?? booleanDefault(paginationComponentDefaults['showSummary'])
       ?? true,
   );
   const resolvedSimple = $derived(
     simple
       ?? paginationDefaults.simple
-      ?? booleanDefault(paginationComponentDefaults.simple)
+      ?? booleanDefault(paginationComponentDefaults['simple'])
       ?? false,
   );
   const resolvedShowJumper = $derived(
     showJumper
       ?? paginationDefaults.showJumper
-      ?? booleanDefault(paginationComponentDefaults.showJumper)
+      ?? booleanDefault(paginationComponentDefaults['showJumper'])
       ?? false,
   );
   const resolvedPageSize = $derived(
     pageSize
       ?? paginationDefaults.pageSize
-      ?? numberDefault(paginationComponentDefaults.pageSize),
+      ?? numberDefault(paginationComponentDefaults['pageSize']),
   );
 
   const items = $derived(listPaginationItems(page, totalPages));

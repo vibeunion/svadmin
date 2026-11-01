@@ -20,7 +20,7 @@
   };
 </script>
 
-<ConfigProvider getPopupContainer={useCustomContainer ? getPopupContainer : undefined}>
+<ConfigProvider {...useCustomContainer ? { getPopupContainer } : {}}>
   <div class="workspace" data-testid="workspace-a">
     <Dialog.Root open>
       <Dialog.Trigger>Open dialog</Dialog.Trigger>

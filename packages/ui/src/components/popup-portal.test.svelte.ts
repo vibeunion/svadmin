@@ -17,7 +17,7 @@ describe('generic popup anchors', () => {
 
     const dialog = await screen.findByText('Dialog body');
     const popover = await screen.findByText('Popover body');
-    const tooltip = await screen.findByText('Tooltip body', {}, { timeout: 1000 }).catch(() => screen.getByText('Tooltip body', { hidden: true }));
+    const tooltip = await screen.findByText('Tooltip body', {}, { timeout: 1000 }).catch(() => screen.getByText('Tooltip body'));
     const sheet = await screen.findByText('Sheet body');
 
     expect(dialog.closest('[data-testid="workspace-a"]')).toBeTruthy();
