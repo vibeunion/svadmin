@@ -26,17 +26,17 @@ import { useContractCreate, type ContractCreateOptions } from './create-hooks.sv
 type Field<T>=Extract<keyof T,string>;
 type ValueField<T>={ [K in Field<T>]-?: T[K] extends string|number? K:never }[Field<T>];
 type FieldPredicate<T>=
-  |{ operator: 'eq'|'ne'; value: Exclude<T,undefined> }
-  |{ operator: 'in'|'nin'; value: Exclude<T,undefined>[] }
+  |{ operator: 'eq'|'ne'|'eqs'|'nes'; value: Exclude<T,undefined> }
+  |{ operator: 'in'|'nin'|'ina'|'nina'; value: Exclude<T,undefined>[] }
   |{ operator: 'null'|'nnull'; value: null }
-  |(NonNullable<T> extends string? { operator: 'contains'|'ncontains'|'startswith'|'endswith'; value: NonNullable<T> }:never)
+  |(NonNullable<T> extends string? { operator: 'contains'|'ncontains'|'containss'|'ncontainss'|'startswith'|'nstartswith'|'startswiths'|'nstartswiths'|'endswith'|'nendswith'|'endswiths'|'nendswiths'; value: NonNullable<T> }:never)
   |(NonNullable<T> extends string|number? (
     |{ operator: 'lt'|'lte'|'gt'|'gte'; value: NonNullable<T> }
     |{ operator: 'between'|'nbetween'; value: [NonNullable<T>,NonNullable<T>] }
   ):never);
 export type ContractFilter<T>=string extends keyof T ? Filter : Filter&(
   |{ [K in Field<T>]: { field: K }&FieldPredicate<T[K]> }[Field<T>]
-  |{ operator: 'and'|'or'; value: ContractFilter<T>[] });
+  |{ key?: string; operator: 'and'|'or'; value: ContractFilter<T>[] });
 export type ContractSort<T>={ field: Field<T>; order: 'asc'|'desc' };
 type Bound<S extends ContractSchemas>={ resource: ResourceContract<S> };
 type QueryOptions<O,S extends ContractSchemas>=
@@ -75,6 +75,10 @@ function recordDecoder<S extends ContractSchemas>(options: query.MaybeGetter<Bou
 export function useList<S extends ContractSchemas>(options: query.MaybeGetter<ListOptions<query.UseListOptions,S>>) {
   return query.createListQuery(getter(options),recordDecoder(options));
 }
+/** Refine 迁移别名，契约边界与 useList 相同。 */
+export function useSimpleList<S extends ContractSchemas>(options: query.MaybeGetter<ListOptions<query.UseListOptions,S>>) {
+  return useList(options);
+}
 export function useOne<S extends ContractSchemas>(options: query.MaybeGetter<QueryOptions<query.UseOneOptions,S>&{ id: Id<S> }>) {
   return query.createOneQuery(getter(options),recordDecoder(options));
 }
@@ -100,7 +104,7 @@ export function useSelect<S extends ContractSchemas>(
   options: ListOptions<Omit<bulk.UseSelectOptions<Row<S>>,'optionLabel'|'optionValue'|'defaultValue'|'onSearch'>,S>&{
     optionLabel: Field<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string);
     optionValue: ValueField<NoInfer<Row<S>>>|((row: NoInfer<Row<S>>) => string|number);
-    defaultValue?: Id<S>[];
+    defaultValue?: Id<S> | readonly Id<S>[];
     onSearch?: (value: string) => ContractFilter<NoInfer<Row<S>>>[];
   },
 ) {

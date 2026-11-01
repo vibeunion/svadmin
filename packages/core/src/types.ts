@@ -88,13 +88,26 @@ export interface Sort {
   order: 'asc' | 'desc';
 }
 
-export type CrudOperator =
-  | 'eq' | 'ne' | 'lt' | 'gt' | 'lte' | 'gte'
-  | 'contains' | 'ncontains'
-  | 'startswith' | 'endswith'
-  | 'in' | 'nin'
-  | 'null' | 'nnull'
-  | 'between' | 'nbetween';
+/**
+ * Refine v5 字段运算符。`and` / `or` 不在这里，它们属于可带 key 的条件过滤器。
+ * 带 s 的是大小写敏感变体；`ina` / `nina` 表示数组包含 / 不包含全部给定值。
+ */
+export const CRUD_FIELD_OPERATORS = [
+  'eq', 'ne', 'eqs', 'nes',
+  'lt', 'gt', 'lte', 'gte',
+  'in', 'nin', 'ina', 'nina',
+  'contains', 'ncontains', 'containss', 'ncontainss',
+  'startswith', 'nstartswith', 'startswiths', 'nstartswiths',
+  'endswith', 'nendswith', 'endswiths', 'nendswiths',
+  'null', 'nnull',
+  'between', 'nbetween',
+] as const;
+
+export type CrudOperator = (typeof CRUD_FIELD_OPERATORS)[number];
+
+export function isCrudFieldOperator(value: unknown): value is CrudOperator {
+  return typeof value === 'string' && (CRUD_FIELD_OPERATORS as readonly string[]).includes(value);
+}
 
 export interface FieldFilter {
   field: string;
@@ -105,6 +118,8 @@ export interface FieldFilter {
 export type Filter = FieldFilter | LogicalFilter;
 
 export interface LogicalFilter {
+  /** 顶层多个条件过滤器用 key 区分，避免被合并成同一组。 */
+  key?: string;
   operator: 'or' | 'and';
   value: Filter[];
 }

@@ -67,7 +67,7 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | CSV import/export | ✅ Built-in | ✅ `useImport` / `useExport` | Community |
 | Auto-save | ✅ Component | ✅ `useForm` autoSave + AutoSaveIndicator | ❌ DIY |
 | Field inferencer | ✅ Sample data + OpenAPI | ✅ Sample data | ❌ |
-| Filter operators | 16 operators | 16 operators | Backend-dependent |
+| Filter operators | 28 field operators + keyed and/or | 28 field operators + keyed and/or | Backend-dependent |
 
 ### UI Components
 

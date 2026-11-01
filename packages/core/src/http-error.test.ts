@@ -3,7 +3,7 @@ import { requireValue } from '../test/assertions';
 
 import { describe,test,expect } from 'bun:test';
 import { HttpError } from './types';
-import type { CrudOperator,Filter,LogicalFilter } from './types';
+import { CRUD_FIELD_OPERATORS,type CrudOperator,type Filter,type LogicalFilter } from './types';
 
 describe('HttpError',() => {
   test('creates with message and statusCode',() => {
@@ -49,15 +49,17 @@ describe('HttpError',() => {
 
 describe('CrudOperator types',() => {
   test('all operators are valid',() => {
-    const operators: CrudOperator[]=[
-      'eq','ne','lt','gt','lte','gte',
-      'contains','ncontains',
-      'startswith','endswith',
-      'in','nin',
-      'null','nnull',
-      'between','nbetween',
-    ];
-    expect(operators).toHaveLength(16);
+    const operators = [
+      'eq', 'ne', 'eqs', 'nes',
+      'lt', 'gt', 'lte', 'gte',
+      'in', 'nin', 'ina', 'nina',
+      'contains', 'ncontains', 'containss', 'ncontainss',
+      'startswith', 'nstartswith', 'startswiths', 'nstartswiths',
+      'endswith', 'nendswith', 'endswiths', 'nendswiths',
+      'null', 'nnull',
+      'between', 'nbetween',
+    ] as const satisfies readonly CrudOperator[];
+    expect(operators).toEqual(CRUD_FIELD_OPERATORS);
   });
 
   test('Filter uses CrudOperator',() => {

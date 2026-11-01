@@ -11,6 +11,7 @@ import type {
   ResourceInputOperation,
   GetOneResult, GetManyResult, GetListResult,
 } from './types';
+import { crudFieldOperatorSchema } from './crud-operator-schema';
 
 export interface ResourceSchemas {
   /** Schema for complete records returned by standard CRUD operations. */
@@ -46,17 +47,13 @@ const common = {
 const filter = Type.Cyclic({
   Filter: Type.Union([
     Type.Object({
+      key: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
       operator: Type.Union([Type.Literal('or'), Type.Literal('and')]),
       value: Type.Array(Type.Ref('Filter')),
     }, { additionalProperties: false }),
     Type.Object({
       field: Type.String(),
-      operator: Type.Union([
-        Type.Literal('eq'), Type.Literal('ne'), Type.Literal('lt'), Type.Literal('gt'),
-        Type.Literal('lte'), Type.Literal('gte'), Type.Literal('contains'), Type.Literal('ncontains'),
-        Type.Literal('startswith'), Type.Literal('endswith'), Type.Literal('in'), Type.Literal('nin'),
-        Type.Literal('null'), Type.Literal('nnull'), Type.Literal('between'), Type.Literal('nbetween'),
-      ]),
+      operator: crudFieldOperatorSchema,
       value: Type.Unknown(),
     }, { additionalProperties: false }),
   ]),

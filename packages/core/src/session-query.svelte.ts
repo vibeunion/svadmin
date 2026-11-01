@@ -13,9 +13,12 @@ interface SessionQueryOptions<TQuery, T> extends QuerySessionOptions {
   enabled: boolean;
   staleTime?: number;
   gcTime?: number;
-  refetchOnWindowFocus?: boolean;
+  refetchOnWindowFocus?: boolean | 'always';
+  retry?: boolean | number;
+  retryDelay?: number | ((failureCount: number, error: unknown) => number);
   refetchInterval?: number | false;
   refetchIntervalInBackground?: boolean;
+  placeholderData?: TQuery | ((previousData: TQuery | undefined) => TQuery | undefined);
 }
 
 // 只有显式提供错误归一化器的内部领域查询才承诺 Error；普通查询保留 unknown 契约。
@@ -56,7 +59,9 @@ export function createSessionQuery<TQuery, T = TQuery>(
       enabled: origin.enabled && origin.auth.available,
       ...definedOptions({
         staleTime: origin.staleTime, gcTime: origin.gcTime, refetchOnWindowFocus: origin.refetchOnWindowFocus,
+        retry: origin.retry, retryDelay: origin.retryDelay,
         refetchInterval: origin.refetchInterval, refetchIntervalInBackground: origin.refetchIntervalInBackground,
+        placeholderData: origin.placeholderData,
       }),
     };
   });

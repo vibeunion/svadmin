@@ -19,6 +19,7 @@ import { decodeBaseRecord, decodeListResult, decodeOneResult, decodeManyResult, 
 import { HttpError } from './types';
 import { extendReactiveMembers } from './reactive-projection';
 import { captureQueryProvider, snapshotListParams, snapshotOneParams, snapshotManyParams } from './query-snapshot';
+import { applyListSelect, listQuerySettings, type ResourceQueryOptions } from './query-options';
 
 // ─── useList ───────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ export interface UseListOptions<_TData extends BaseRecord=BaseRecord,_TError=Htt
   filters?: Filter[];
   meta?: Record<string,unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean; gcTime?: number; refetchOnWindowFocus?: boolean };
+  queryOptions?: ResourceQueryOptions<GetListResult<_TData>>;
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -63,6 +64,7 @@ export function createListQuery<TData extends BaseRecord>(
       resource,...definedOptions({ dataProviderName: opts.dataProviderName,contract: opts.contract,meta: opts.meta }),
     });
     const queryOptions=opts.queryOptions;
+    const settings=listQuerySettings(queryOptions);
 
     // Inject a parent filter for nested resources.
     // Consume only parentParams parsed from the path, such as teamId in /teams/123/users,
@@ -94,7 +96,6 @@ export function createListQuery<TData extends BaseRecord>(
 
     return {
       resource, successNotification: opts.successNotification, errorNotification: opts.errorNotification,
-      decode: decodeResult,
       queryKey: adminContext.queryKeys(resource,opts.dataProviderName).data.list(resource,{
         ...definedOptions({
           pagination: params.pagination,sorters: params.sorters,filters: params.filters,meta: params.meta,
@@ -107,11 +108,20 @@ export function createListQuery<TData extends BaseRecord>(
         });
         return decodeResult(await current.provider.getList(snapshotListParams({ ...params, ...definedOptions({ signal }) })));
       },
-      enabled: queryOptions?.enabled??true,
+      decode: (value): GetListResult<TData> => applyListSelect(
+        decodeResult(value),
+        queryOptions?.select as ((data: GetListResult<TData>) => GetListResult<TData>) | undefined,
+      ),
+      enabled: settings.enabled,
       ...definedOptions({
-        staleTime: queryOptions?.staleTime??adminOptions.reactQuery?.staleTime,
-        gcTime: queryOptions?.gcTime??adminOptions.reactQuery?.gcTime,
-        refetchOnWindowFocus: queryOptions?.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+        staleTime: settings.staleTime??adminOptions.reactQuery?.staleTime,
+        gcTime: settings.gcTime??adminOptions.reactQuery?.gcTime,
+        refetchOnWindowFocus: settings.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+        retry: settings.retry,
+        retryDelay: settings.retryDelay,
+        refetchInterval: settings.refetchInterval,
+        refetchIntervalInBackground: settings.refetchIntervalInBackground,
+        placeholderData: settings.placeholderData as GetListResult<TData> | ((previousData: GetListResult<TData> | undefined) => GetListResult<TData> | undefined) | undefined,
       }),
     };
   });

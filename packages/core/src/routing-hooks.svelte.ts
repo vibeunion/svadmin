@@ -83,6 +83,24 @@ export function useSyncWithLocation() {
   };
 }
 
+/** Refine 迁移别名：当前资源的 query key 工厂。 */
+export function useKeys(resourceName?: string, dataProviderName?: string) {
+  return captureAdminContext().queryKeys(resourceName, dataProviderName);
+}
+
+/** Refine 迁移别名：路由上的资源、动作和 id。 */
+export function useResourceParams(resourceName?: string) {
+  const resourceState = useResource(resourceName);
+  const parsed = useParsed();
+  return {
+    get id() { return parsed.id; },
+    get action() { return parsed.action; },
+    get resource() { return resourceState.resource; },
+    get identifier() { return resourceState.identifier; },
+    get params() { return parsed.params; },
+  };
+}
+
 /** Refine migration hook: resource meta merged with the current route. */
 export function useMeta(resourceName?: string) {
   const resourceState = useResource(resourceName);

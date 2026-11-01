@@ -50,8 +50,19 @@ Official data providers: `simple-rest`, `supabase`, `graphql`, `rest`, `airtable
 `appwrite`, `directus`, `drizzle`, `elysia`, `firebase`, `hasura`, `medusa`,
 `nestjs-query`, `nestjsx-crud`, `pocketbase`, `sanity`, `strapi`. `add provider`
 updates `package.json` + `svadmin.ai.json` and prints the remaining
-`src/svadmin.config.ts` wiring step; the generated config leaves a clearly marked
-TODO placeholder for non-golden providers.
+`src/svadmin.config.ts` wiring step.
+
+### Provider secrets
+
+`VITE_*` variables are inlined into the browser bundle. The Hasura template does
+not read an admin secret on the client. Point `VITE_HASURA_GRAPHQL_URL` at a
+same-origin proxy that adds `x-hasura-admin-secret` from the server-only
+`HASURA_ADMIN_SECRET`, or send a user JWT in `VITE_HASURA_JWT`.
+
+The Drizzle template is a non-runnable stub until you add `src/db/schema.ts` and
+call `createDrizzleDataProvider` with that schema. Do not pass `schema: {}`, and
+do not put the database URL in a `VITE_` variable. Use server-only
+`DRIZZLE_DATABASE_URL`.
 
 ## What's Included
 
