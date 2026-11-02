@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.24.0](https://github.com/vibeunion/svadmin/compare/lite-v0.23.2...lite-v0.24.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.73.0 to >=0.34.2 <0.74.0
+
 ## [0.23.2](https://github.com/vibeunion/svadmin/compare/lite-v0.23.1...lite-v0.23.2) (2026-11-02)
 
 

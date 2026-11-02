@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.0](https://github.com/vibeunion/svadmin/compare/core-v0.72.0...core-v0.73.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+
 ## [0.72.0](https://github.com/vibeunion/svadmin/compare/core-v0.71.0...core-v0.72.0) (2026-11-02)
 
 
