@@ -1,9 +1,10 @@
 /**
  * `svadmin add` — idempotent platform additions.
  *
- * Adds a business feature module (`add resource`) or a provider dependency pack
- * (`add provider` / `add auth`). Every plan is dry-run by default and preserves
- * existing files; `--write` applies only the missing pieces.
+ * Adds a business feature module (`add resource`), a provider dependency pack
+ * (`add provider` / `add auth`), or a page material (`add block`).
+ * Every plan is dry-run by default and preserves existing files; `--write`
+ * applies only the missing pieces.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,8 +30,9 @@ import {
   readMaintainedPackageJson,
   type MaintainedPackageJson,
 } from './project-maintenance';
+import { listBlocks, planAddBlock, writeAddBlock } from './blocks';
 
-export type AddKind = 'resource' | 'provider' | 'auth';
+export type AddKind = 'resource' | 'provider' | 'auth' | 'block';
 
 export interface AddCommandArguments {
   kind: AddKind;
@@ -85,8 +87,8 @@ const RESOURCE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 export function parseAddArguments(args: string[]): AddCommandArguments {
   const [kind, ...rest] = args;
-  if (kind !== 'resource' && kind !== 'provider' && kind !== 'auth') {
-    throw new Error('Usage: create-svadmin add <resource|provider|auth> <name> [--project-dir <dir>] [--write]');
+  if (kind !== 'resource' && kind !== 'provider' && kind !== 'auth' && kind !== 'block') {
+    throw new Error('Usage: create-svadmin add <resource|provider|auth|block> <name> [--project-dir <dir>] [--write] [--list]');
   }
   let projectDirectory = process.cwd();
   let write = false;
@@ -352,8 +354,32 @@ function printAddResult(wrote: boolean, result: AddWriteResult, hint?: string): 
 }
 
 export function addCommand(args: string[], scaffold: ScaffoldManifest): void {
+  if (args.includes('--list')) {
+    console.log('\nAvailable page blocks:\n');
+    for (const block of listBlocks()) {
+      console.log(`  ${pc.cyan(block.name.padEnd(20))} ${block.title}`);
+      console.log(pc.dim(`  ${''.padEnd(20)} ${block.description}`));
+    }
+    console.log('\nInstall with `svadmin add block <name> --write`.\n');
+    return;
+  }
+
   const options = parseAddArguments(args);
   console.log(`\nsvadmin add ${options.kind} ${options.target} — ${options.projectDirectory}`);
+
+  if (options.kind === 'block') {
+    const plan = planAddBlock(options.projectDirectory, options.target);
+    for (const entry of plan.entries) {
+      console.log(`  ${entry.exists ? 'preserve' : 'add'} ${entry.relativePath}`);
+    }
+    if (!options.write) {
+      console.log('\nDry run only; re-run with --write to create missing block files.');
+      printAddResult(false, { written: [], preserved: [] }, plan.registrationHint);
+      return;
+    }
+    printAddResult(true, writeAddBlock(plan), plan.registrationHint);
+    return;
+  }
 
   if (options.kind === 'resource') {
     const plan = planAddResource(options.projectDirectory, options.target);

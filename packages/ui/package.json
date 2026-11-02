@@ -81,6 +81,11 @@
     "./component-registry": {
       "types": "./dist/component-registry.d.ts",
       "default": "./dist/component-registry.js"
+    },
+    "./icons": {
+      "types": "./dist/icons.d.ts",
+      "svelte": "./dist/icons.js",
+      "default": "./dist/icons.js"
     }
   },
   "peerDependencies": {

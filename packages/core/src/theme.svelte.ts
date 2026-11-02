@@ -1,4 +1,11 @@
 import { definedOptions } from './defined-options';
+import {
+  deriveColorPreset,
+  exportThemeTokens,
+  parseThemeTokens,
+  type DerivedColorPreset,
+  type ThemeTokenDocument,
+} from './color-scale';
 // Theme — dark/light/system mode + color theme management (Svelte 5 runes)
 //
 // Supports two class strategies:
@@ -6,7 +13,9 @@ import { definedOptions } from './defined-options';
 //   - 'dark-first': adds 'light' class for light mode (dark-first)
 
 export type ThemeMode='light'|'dark'|'system';
-export type ColorTheme='default'|'blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
+/** Built-in preset names keep editor autocomplete; registered presets are any string. */
+export type BuiltinColorTheme='default'|'blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
+export type ColorTheme=BuiltinColorTheme|(string&{});
 
 /** Controls how the theme class is applied to <html> */
 export type ThemeStrategy='standard'|'dark-first';
@@ -347,9 +356,10 @@ function readStoredTheme(): ThemeMode|undefined {
 }
 
 function readStoredColorTheme(): ColorTheme {
-  const stored=getStorage()?.getItem(COLOR_STORAGE_KEY);
-  // The built-in preset is the product default; an existing persisted preset remains authoritative.
-  return stored&&builtinPresets[stored]? stored as ColorTheme:'default';
+  const stored=getStorage()?.getItem(COLOR_STORAGE_KEY)?.trim();
+  // A registered preset may be re-created after this module loads, so any
+  // non-empty stored id stays authoritative; unknown ids fall back at apply time.
+  return stored? stored:'default';
 }
 
 function persistSelection(key: string,value: string): void {
@@ -580,6 +590,44 @@ export function unregisterThemeOwner(token: ThemeOwnerToken|undefined): void {
     colorSelectionOverridesConfig=false;
   }
   if(removed&&(isExplicitOwner(removed.options)||removed.options.fallbackThemeConfig)) applyEffectiveTheme();
+}
+
+/**
+ * Derive a full tonal palette from one brand color and register it.
+ * Mirrors the Arco `@arco-design/color` capability without a Less variable layer.
+ */
+export function registerColorTheme(input: { name: string; label?: string; color: string }): ColorPreset {
+  const derived=deriveColorPreset(input);
+  const preset: ColorPreset={
+    name: derived.name,
+    label: derived.label,
+    color: derived.color,
+    light: { ...derived.light },
+    dark: { ...derived.dark },
+  };
+  registerColorPreset(preset);
+  return preset;
+}
+
+/** Serialize every registered preset (built-in + custom) as a portable document. */
+export function exportColorThemes(): ThemeTokenDocument {
+  return exportThemeTokens(getColorPresets() as readonly DerivedColorPreset[]);
+}
+
+/**
+ * Validate and register a token document. Invalid payloads throw before any
+ * preset is written, so importing never leaves the registry half-updated.
+ */
+export function importColorThemes(payload: unknown): ColorPreset[] {
+  const presets=parseThemeTokens(payload);
+  for(const preset of presets) registerColorPreset(preset);
+  return presets.map((preset) => ({
+    name: preset.name,
+    label: preset.label,
+    color: preset.color,
+    light: { ...preset.light },
+    dark: { ...preset.dark },
+  }));
 }
 
 export function resetTheme(): void {

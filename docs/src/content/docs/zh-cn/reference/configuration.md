@@ -153,6 +153,15 @@ interface FieldDefinition {
 可使用 `registerColorPreset()` 添加自定义预设，或使用
 `setColorTheme()`/`getColorThemes()` 在运行时切换。
 
+`registerColorTheme({ name, label, color })` 会从一个品牌色推导 10 级 OKLCH 色阶，
+并注册明暗两套 token（primary、ring、sidebar、chart-1…5），前景色按对比度自动选择。
+需要持久化或分享配色时使用 `exportColorThemes()` 与 `importColorThemes(document)`；
+文档带版本号并严格校验：非颜色值、未知 CSS 变量、重名和不支持的版本都会在写入前被拒绝。
+
+`MenuItem.icon` 与资源定义中的图标名通过图标注册表解析。默认集合来自
+`@lucide/svelte`，可用 `@svadmin/ui/icons` 的 `registerIcons()` 扩展或覆盖，
+并用 `setIconMissHandler()` 观察未注册的名称，而不是静默渲染为空。
+
 ## 应用级默认值
 
 `ConfigProvider` 用来一次性设置应用默认值。子组件通过 `useComponentConfig()` 读取，后续变更会像 `locale` 和 `componentSize` 一样继续传递。

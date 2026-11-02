@@ -7,6 +7,12 @@
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import {
+  ECOSYSTEM_MATRIX_END,
+  ECOSYSTEM_MATRIX_START,
+  ecosystemDrift,
+  renderEcosystemSection,
+} from './ecosystem-parity';
 
 export type ParityStatus = 'exact' | 'fallback' | 'spa_only' | 'missing';
 
@@ -763,6 +769,33 @@ export function classHookArtifactDrift(
   return drift;
 }
 
+export const ECOSYSTEM_DOC_PATH = 'docs/components/parity.md';
+
+/**
+ * Rewrite only the delimited ecosystem block. Everything outside the markers is
+ * hand-written and must survive `--write` untouched.
+ */
+export function writeEcosystemSection(
+  repositoryRoot = resolve(import.meta.dir, '..'),
+): string {
+  const documentPath = resolve(repositoryRoot, ECOSYSTEM_DOC_PATH);
+  const current = existsSync(documentPath) ? readFileSync(documentPath, 'utf8') : '';
+  const section = renderEcosystemSection();
+  const start = current.indexOf(ECOSYSTEM_MATRIX_START);
+  const end = current.indexOf(ECOSYSTEM_MATRIX_END);
+  let next: string;
+  if (start !== -1 && end > start) {
+    next = `${current.slice(0, start)}${section}${current.slice(end + ECOSYSTEM_MATRIX_END.length)}`;
+  } else {
+    const anchor = current.indexOf('## Refine alignment');
+    next = anchor === -1
+      ? `${current.trimEnd()}\n\n${section}\n`
+      : `${current.slice(0, anchor)}${section}\n\n${current.slice(anchor)}`;
+  }
+  writeFileSync(documentPath, next, 'utf8');
+  return documentPath;
+}
+
 // ─── Main Execution ──────────────────────────────────────────────────────────
 if (import.meta.main) {
   const report = buildParityReport();
@@ -785,7 +818,8 @@ if (import.meta.main) {
     const { markdownPath: hooksPath, jsonPath: hooksJsonPath } = classHookOutputPaths();
     writeFileSync(hooksPath, `${generateClassHookMarkdown(audit).trimEnd()}\n`, 'utf8');
     writeFileSync(hooksJsonPath, JSON.stringify(audit, null, 2), 'utf8');
-    console.info(`[OK] Generated ${mdPath}, ${jsonPath}, ${hooksPath} and ${hooksJsonPath}`);
+    const ecosystemDoc = writeEcosystemSection();
+    console.info(`[OK] Generated ${mdPath}, ${jsonPath}, ${hooksPath}, ${hooksJsonPath} and ${ecosystemDoc}`);
     console.info(
       `[OK] Styling hook coverage: ${audit.preservedCount}/${audit.referenceHookCount} (${audit.coveragePercentage}%), ${audit.missing.length} pending`,
     );
@@ -797,7 +831,7 @@ if (import.meta.main) {
   }
 
   if (isCheck) {
-    const drift = [...parityArtifactDrift(), ...classHookArtifactDrift()];
+    const drift = [...parityArtifactDrift(), ...classHookArtifactDrift(), ...ecosystemDrift()];
     if (drift.length > 0) {
       console.error('[FAIL] Parity artifacts are out of date:');
       for (const entry of drift) console.error(`  - ${entry}`);

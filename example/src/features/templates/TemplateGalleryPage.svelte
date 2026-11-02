@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppearanceSettings, Badge, Button, Grid, Input, ListPagination, Menu, NotificationsSettings, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
+  import { AppearanceSettings, Badge, Button, Grid, Input, JsonSchemaForm, ListPagination, Menu, NotificationsSettings, PageHeader, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
   import {
     AdvancedDetailTemplate,
     AdvancedFormTemplate,
@@ -20,6 +20,7 @@
   } from '@svadmin/ui';
   import { untrack } from 'svelte';
   import type { FormStep } from '@svadmin/ui/components/StepForm.svelte';
+  import type { JsonSchemaFormSchema } from '@svadmin/ui';
 
   const navItems = [
     { id: 'workplace', label: 'Workplace' },
@@ -31,6 +32,7 @@
     { id: 'group-form', label: 'Group form' },
     { id: 'step-form', label: 'Step form' },
     { id: 'advanced-form', label: 'Advanced form' },
+    { id: 'schema-form', label: 'Schema form' },
     { id: 'basic-detail', label: 'Basic detail' },
     { id: 'advanced-detail', label: 'Advanced detail' },
     { id: 'profile', label: 'Profile' },
@@ -45,6 +47,28 @@
   let { route = '/templates', standalone = false }: { route?: string; standalone?: boolean } = $props();
   const routeTemplate = untrack(() => route.split('/').filter(Boolean).pop() ?? (typeof window === 'undefined' ? '' : window.location.hash.split('?')[0]?.split('/').filter(Boolean).pop()) ?? '');
   let active = $state<string>(untrack(() => navItems.some((item) => item.id === routeTemplate) ? routeTemplate : 'workplace'));
+  // 派生字段（computed）与组合条件（all/not + equalsField）的演示 schema。
+  const orderSchema: JsonSchemaFormSchema = {
+    type: 'object',
+    required: ['kind', 'tier', 'basePrice', 'serviceFee', 'shippingFee', 'limit'],
+    properties: {
+      kind: { enum: ['standard', 'priority'], default: 'standard', title: 'Order kind' },
+      tier: { enum: ['gold', 'silver'], default: 'gold', title: 'Customer tier' },
+      basePrice: { type: 'number', default: 120, minimum: 0, title: 'Base price' },
+      serviceFee: { type: 'number', default: 8, minimum: 0, title: 'Service fee' },
+      shippingFee: { type: 'number', default: 12, minimum: 0, title: 'Shipping fee' },
+      limit: { type: 'number', default: 140, minimum: 0, title: 'Approval limit' },
+      prepaid: { type: 'boolean', default: false, title: 'Prepaid' },
+      amount: { type: 'number', title: 'Order amount', computed: { from: ['basePrice', 'serviceFee', 'shippingFee'], op: 'sum' } },
+      summary: { type: 'string', title: 'Summary', computed: { from: ['kind', 'tier'], op: 'concat', separator: ' / ' } },
+      atLimit: { type: 'string', default: 'Matches the approval limit', title: 'Limit check', visibleWhen: { path: ['amount'], equalsField: ['limit'] } },
+      priorityNote: {
+        type: 'string',
+        title: 'Priority note',
+        visibleWhen: { all: [{ path: ['kind'], equals: 'priority' }, { not: { path: ['prepaid'], equals: true } }] },
+      },
+    },
+  };
   let dimension = $state<'region' | 'product' | 'channel'>('region');
   const dimensionOptions = [
     { value: 'region' as const, label: 'Region' },
@@ -572,6 +596,11 @@
       <StepFormTemplate title="Create workspace" description="Collect information in reviewable steps" {steps} stepContent={stepContent} onfinish={finishStep} oncancel={() => (active = 'workplace')} submitText="Publish" />
     {:else if active === 'advanced-form'}
       <AdvancedFormTemplate title="Advanced request" description="Form, summary and activity side by side" actions={actions} form={form} summary={summary} footer={footer} />
+    {:else if active === 'schema-form'}
+      <div class="svadmin-template-gallery__panel">
+        <PageHeader title="Order request" description="Derived totals and conditional fields come from one schema" />
+        <JsonSchemaForm schema={orderSchema} submitText="Review request" onsubmit={() => {}} />
+      </div>
     {:else if active === 'basic-detail'}
       <BasicDetailTemplate title="Request detail" description="Read-only record summary" actions={actions} steps={detailSteps} details={detailsBlock} summary={summary} comparison={comparison} history={history} footer={footer} />
     {:else if active === 'advanced-detail'}
@@ -597,6 +626,7 @@
 </div>
 
 <style>
+  .svadmin-template-gallery__panel { max-width: 40rem; display: grid; gap: var(--svadmin-space-3); border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: var(--svadmin-space-4); }
   .svadmin-template-gallery { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); gap: var(--svadmin-space-5); padding: var(--svadmin-space-4); }
   .svadmin-template-gallery.is-standalone { grid-template-columns: minmax(0, 1fr); }
   .svadmin-template-gallery__standalone-nav { display: grid; gap: var(--svadmin-space-2); margin-block-end: var(--svadmin-space-3); }

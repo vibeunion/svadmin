@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { assertSchemaFormSchema, isSchemaFormNodeVisible, prepareSchemaFormValue, type SchemaFormSchema } from '@svadmin/core/schema-form';
+  import {
+    applySchemaFormComputed,
+    assertSchemaFormSchema,
+    isSchemaFormNodeVisible,
+    prepareSchemaFormValue,
+    type SchemaFormSchema,
+  } from '@svadmin/core/schema-form';
   import { tick } from 'svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Button } from './ui/button/index.js';
@@ -156,6 +162,19 @@
       return { ok: false as const };
     }
   });
+  // Computed fields are derived from the projected value; they render read-only
+  // and are recomputed on submit instead of being trusted from local input.
+  const computedValue = $derived.by(() => {
+    if (!coreSchema || !prepared.ok) return undefined;
+    try {
+      const result = applySchemaFormComputed(coreSchema, prepared.value);
+      return result !== null && typeof result === 'object' && !Array.isArray(result)
+        ? result as Record<string, unknown>
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  });
   const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);
   let reportedConfiguration = '';
   let reportedSchema: JsonSchema | undefined;
@@ -290,7 +309,7 @@
   function readPath(path: string[]): unknown {
     return path.reduce<unknown>((current, key) => (
       current && typeof current === 'object' && Object.hasOwn(current, key) ? (current as Record<string, unknown>)[key] : undefined
-    ), prepared.ok ? prepared.value : {});
+    ), computedValue ?? (prepared.ok ? prepared.value : {}));
   }
   function recordValue(current: unknown, key: string): unknown {
     if (current === null || typeof current !== 'object' || Array.isArray(current) || !Object.hasOwn(current, key)) return undefined;
@@ -362,7 +381,10 @@
     let payload: Record<string, unknown>;
     try {
       // 分支切换后只提交当前 discriminator 对应分支；旧分支字段不会随草稿误提交。
-      const submittedValue = pruneRecursiveSchemaFormValue(model, prepared.value);
+      const pruned = pruneRecursiveSchemaFormValue(model, prepared.value);
+      const submittedValue = coreSchema
+        ? applySchemaFormComputed(coreSchema, pruned) as Record<string, unknown>
+        : pruned;
       const result = coreSchema ? prepareSchemaFormValue(coreSchema, submittedValue) : undefined;
       const detailedIssues = model.issues.length ? [] : validateRecursiveSchemaForm(model, submittedValue);
       // 隐藏字段暂不参与校验，但保留解析错误，重新显示时仍需修正。
@@ -427,7 +449,7 @@
     {@const current = readPath(path)}
     {@const id = `${prefix}_${path.map(encodeURIComponent).join('/')}`}
     {@const type = nodeType(node)}
-    {@const fieldLocked = locked || pathReadonly(path)}
+    {@const fieldLocked = locked || pathReadonly(path) || Boolean(coreSchema && (node as SchemaFormSchema).computed)}
     {@const error = fieldInvalid(path)}
     {@const options = choices(node)}
     {@const descriptionId = node.description ? `${id}:description` : undefined}

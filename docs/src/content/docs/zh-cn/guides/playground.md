@@ -27,6 +27,6 @@ bun run dev
 - `packages/create-svadmin/blueprints/customer-workspace` — 客户列表、详情与 provider 接线
 - `packages/create-svadmin/blueprints/product-workspace` — 产品工作区组合
 
-`create-svadmin init` 会生成可运行应用。`create-svadmin add provider <name> --write` 会写入 `src/svadmin.config.ts`、`.env.example` 和 `src/examples/<name>-smoke.ts`。用 Bun 运行这个 smoke 文件即可检查 provider。托管后端仍然需要真实凭据；缺少变量时 smoke 会报出变量名，而不是留下 TODO 占位。
+`create-svadmin init` 会生成可运行应用。`create-svadmin add block --list` 列出内置页面物料，`create-svadmin add block search-table --write` 会把物料安装到 `src/features/`。`create-svadmin add provider <name> --write` 会写入 `src/svadmin.config.ts`、`.env.example` 和 `src/examples/<name>-smoke.ts`。用 Bun 运行这个 smoke 文件即可检查 provider。托管后端仍然需要真实凭据；缺少变量时 smoke 会报出变量名，而不是留下 TODO 占位。
 
 `create-svadmin infer` 会生成 AutoTable 与 AutoForm 可通过 `defineResource()` 解析的严格资源契约。

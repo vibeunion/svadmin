@@ -64,7 +64,7 @@ export default defineAdminConfig({
 | `buildAdminManifest` AI manifest 生成 | 已落地 |
 | CLI 生成 `src/svadmin.config.ts` / `svadmin.ai.json`，模板 `App.svelte` 消费 config | 已在 `@svadmin/create` 落地 |
 | `doctor` 校验 AI manifest 与 provider 依赖一致性 | 已落地 |
-| `svadmin add resource\|provider\|auth` 幂等命令 + `src/features/*` 模块模板 | 已落地 |
+| `svadmin add resource\|provider\|auth\|block` 幂等命令 + `src/features/*` 模块与页面物料模板 | 已落地 |
 | `svadmin.schema.json` JSON Schema + `migrate` 别名 | 已落地 |
 | `@svadmin/app` 应用层包（含 `createAdminApp`），脚手架已消费 | 已落地 |
 | 黄金路径 preset（`init --preset supabase\|rest\|graphql`） | 已落地 |
@@ -145,7 +145,7 @@ CLI 提供预设：`svadmin init my-app --preset supabase|rest|graphql`（已落
 | 命令 | 要求 |
 | --- | --- |
 | `svadmin init` | 生成 `svadmin.config.ts`、AI manifest 与 ready-to-run 工程 |
-| `svadmin add resource\|provider\|auth` | 幂等，dry-run 默认，`--write` 只补缺失文件；不覆盖已有文件 |
+| `svadmin add resource\|provider\|auth\|block` | 幂等，dry-run 默认，`--write` 只补缺失文件；不覆盖已有文件；`block` 物料随 CLI 发布，`--list` 与安装共用同一注册表 |
 | `svadmin generate crud\|page` | 输出稳定、可读、可修改的源码 |
 | `svadmin doctor` | 检查配置、包版本、导出路径、Provider 能力、AI manifest 漂移 |
 | `svadmin upgrade` | 提供迁移说明与备份 |

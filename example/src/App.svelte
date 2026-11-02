@@ -68,7 +68,7 @@
     { path: '/workspace', component: LazyWorkspaceTabs, title: 'Multi-tab Workspace' },
     { path: '/workspace/dock', component: LazyWorkspaceDock, title: 'Dock Workspace' },
     { path: '/templates', component: LazyTemplateGallery, title: 'Page Templates' },
-    ...['workplace', 'monitor', 'analysis', 'analysis-multi', 'search-table', 'card-list', 'group-form', 'step-form', 'advanced-form', 'basic-detail', 'advanced-detail', 'profile', 'user-info', 'user-settings', 'result', 'result-error', 'exception', 'exception-404', 'exception-500']
+    ...['workplace', 'monitor', 'analysis', 'analysis-multi', 'search-table', 'card-list', 'group-form', 'step-form', 'advanced-form', 'schema-form', 'basic-detail', 'advanced-detail', 'profile', 'user-info', 'user-settings', 'result', 'result-error', 'exception', 'exception-404', 'exception-500']
       .map((template) => ({ path: `/templates/${template}`, component: LazyTemplatePage, title: `Page Template: ${template}` })),
   ];
 </script>

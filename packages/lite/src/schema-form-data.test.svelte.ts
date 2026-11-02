@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeSchemaFormData, schemaFormFieldName } from './schema-form-data';
+import { decodeSchemaFormData, schemaFormFieldName, type SchemaFormSchema } from './schema-form-data';
 
 describe('schema form server decoder', () => {
   const schema = {
@@ -21,6 +21,43 @@ describe('schema form server decoder', () => {
     form.set(schemaFormFieldName(['rows', '1']), 'b');
     expect(decodeSchemaFormData(schema, form)).toEqual({
       count: 3, enabled: false, choice: '2', rows: ['a', 'b'],
+    });
+  });
+
+
+  it('decodes combinator conditions and equalsField controllers before visibility', () => {
+    const conditional: SchemaFormSchema = {
+      properties: {
+        mode: { enum: ['basic', 'advanced'] },
+        threshold: { type: 'integer' },
+        amount: { type: 'integer' },
+        detail: {
+          type: 'string',
+          visibleWhen: {
+            all: [
+              { path: ['mode'], equals: 'advanced' },
+              { not: { path: ['amount'], equals: 0 } },
+              { path: ['threshold'], equalsField: ['amount'] },
+            ],
+          },
+        },
+      },
+    };
+    const form = new FormData();
+    form.set(schemaFormFieldName(['mode']), '__json_enum_1');
+    form.set(schemaFormFieldName(['threshold']), '5');
+    form.set(schemaFormFieldName(['amount']), '5');
+    form.set(schemaFormFieldName(['detail']), 'kept');
+    expect(decodeSchemaFormData(conditional, form)).toEqual({
+      mode: 'advanced', threshold: 5, amount: 5, detail: 'kept',
+    });
+
+    const hidden = new FormData();
+    hidden.set(schemaFormFieldName(['mode']), '__json_enum_1');
+    hidden.set(schemaFormFieldName(['threshold']), '4');
+    hidden.set(schemaFormFieldName(['amount']), '5');
+    expect(decodeSchemaFormData(conditional, hidden)).toEqual({
+      mode: 'advanced', threshold: 4, amount: 5,
     });
   });
 

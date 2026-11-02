@@ -1,3 +1,5 @@
+import type { SchemaFormComputed, SchemaFormCondition } from '@svadmin/core/schema-form';
+
 /** 嵌套表单的草稿与传输语义；不是替代服务端的 JSON Schema 校验器。 */
 export interface JsonSchemaFormSchema {
   $schema?: string;
@@ -31,12 +33,8 @@ export interface JsonSchemaFormSchema {
   enum?: Array<string | number | boolean | null>;
   default?: unknown;
   required?: string[];
-  visibleWhen?: {
-    path: readonly string[];
-    equals?: string | number | boolean | null;
-    notEquals?: string | number | boolean | null;
-    exists?: boolean;
-  };
+  visibleWhen?: SchemaFormCondition;
+  computed?: SchemaFormComputed;
 }
 
 export const SCHEMA_FORM_LIMITS = Object.freeze({ depth: 32, nodes: 10_000, characters: 1_048_576 });

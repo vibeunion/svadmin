@@ -112,6 +112,12 @@ npx @svadmin/create add provider supabase --write
 # Add the JWT auth dependency pack
 npx @svadmin/create add auth jwt --write
 
+# Install a page material (search table, record detail, settings section)
+npx @svadmin/create add block search-table --write
+
+# List the shipped page materials
+npx @svadmin/create add --list
+
 # Target a project directory other than the current one
 npx @svadmin/create add resource orders --project-dir ./my-admin-app --write
 ```
@@ -119,6 +125,9 @@ npx @svadmin/create add resource orders --project-dir ./my-admin-app --write
 `add provider` / `add auth` update `package.json` and `svadmin.ai.json` and print
 the remaining step: wire the provider in `src/svadmin.config.ts`. `add resource`
 creates the module and prints the `src/resources.ts` registration snippet.
+`add block` installs a page material under `src/features/<name>/`; the registry
+ships with the CLI, so `--list` and installation always agree and no network
+fetch is involved.
 
 ## Start Developing
 

@@ -27,6 +27,6 @@ bun run dev
 - `packages/create-svadmin/blueprints/customer-workspace` — customer list, detail, and provider wiring
 - `packages/create-svadmin/blueprints/product-workspace` — product workspace composition
 
-`create-svadmin init` writes a runnable app. `create-svadmin add provider <name> --write` wires `src/svadmin.config.ts`, `.env.example`, and `src/examples/<name>-smoke.ts`. Run that smoke file with Bun to exercise the provider. Hosted backends still need real credentials; the smoke command reports the missing variable instead of leaving a TODO stub.
+`create-svadmin init` writes a runnable app. `create-svadmin add block --list` shows the shipped page materials, and `create-svadmin add block search-table --write` installs one under `src/features/`. `create-svadmin add provider <name> --write` wires `src/svadmin.config.ts`, `.env.example`, and `src/examples/<name>-smoke.ts`. Run that smoke file with Bun to exercise the provider. Hosted backends still need real credentials; the smoke command reports the missing variable instead of leaving a TODO stub.
 
 `create-svadmin infer` writes a strict `defineResource()` contract that AutoTable and AutoForm can resolve.
