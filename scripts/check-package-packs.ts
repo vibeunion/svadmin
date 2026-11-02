@@ -125,6 +125,7 @@ const expectations: PackageExpectation[] = [
       'dist/index.d.ts',
       'dist/components/AdminApp.svelte',
       'dist/components/AdminApp.svelte.d.ts',
+      'dist/component-registry.d.svelte.ts',
       'dist/components/LazyPage.svelte',
       'dist/components/LazyPage.svelte.d.ts',
       'dist/components/AboutSettings.svelte',
@@ -132,6 +133,10 @@ const expectations: PackageExpectation[] = [
       'dist/app.theme.css',
     ],
     contentAssertions: [
+      {
+        path: 'dist/component-registry.d.svelte.ts',
+        includes: ["export * from './component-registry.svelte.js';"],
+      },
       {
         path: 'dist/components/AboutSettings.svelte',
         includes: ['const buildVersion = ', 'const version = $derived(suppliedVersion ?? ('],
