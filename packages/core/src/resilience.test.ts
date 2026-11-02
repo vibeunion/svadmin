@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { createConcurrencyLimiter, withRetry, wrapDataProviderWithResult } from './resilience';
-import type { DataProvider, GetListResult } from './types';
+import type { DataProvider } from './types';
 
 describe('Resilience Utilities', () => {
   describe('createConcurrencyLimiter', () => {

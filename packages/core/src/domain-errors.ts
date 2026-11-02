@@ -215,8 +215,9 @@ export function matchError<E extends { readonly _tag: string }, R>(
   if (typeof handler === 'function') {
     return handler(error);
   }
-  if (typeof (patterns as { _?: (err: E) => R })._ === 'function') {
-    return (patterns as { _?: (err: E) => R })._!(error);
+  const fallback = patterns._;
+  if (typeof fallback === 'function') {
+    return fallback(error);
   }
   throw new Error(`Unhandled domain error tag: ${tag}`);
 }

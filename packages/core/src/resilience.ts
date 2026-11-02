@@ -45,9 +45,11 @@ export function createConcurrencyLimiter(concurrency: number): ConcurrencyLimite
 
   const next = () => {
     if (active < concurrency && queue.length > 0) {
-      active++;
-      const run = queue.shift()!;
-      run();
+      const run = queue.shift();
+      if (run) {
+        active++;
+        run();
+      }
     }
   };
 
@@ -139,6 +141,12 @@ export interface SafeDataProvider {
  * Wraps an existing DataProvider into a SafeDataProvider returning Result<T, DomainError>.
  */
 export function wrapDataProviderWithResult(provider: DataProvider): SafeDataProvider {
+  const getMany = provider.getMany?.bind(provider);
+  const createMany = provider.createMany?.bind(provider);
+  const updateMany = provider.updateMany?.bind(provider);
+  const deleteMany = provider.deleteMany?.bind(provider);
+  const custom = provider.custom?.bind(provider);
+
   return {
     raw: provider,
     getApiUrl: () => provider.getApiUrl(),
@@ -147,20 +155,10 @@ export function wrapDataProviderWithResult(provider: DataProvider): SafeDataProv
     create: (params) => fromPromise(provider.create(params), toDomainError),
     update: (params) => fromPromise(provider.update(params), toDomainError),
     deleteOne: (params) => fromPromise(provider.deleteOne(params), toDomainError),
-    getMany: provider.getMany
-      ? (params) => fromPromise(provider.getMany!(params), toDomainError)
-      : undefined,
-    createMany: provider.createMany
-      ? (params) => fromPromise(provider.createMany!(params), toDomainError)
-      : undefined,
-    updateMany: provider.updateMany
-      ? (params) => fromPromise(provider.updateMany!(params), toDomainError)
-      : undefined,
-    deleteMany: provider.deleteMany
-      ? (params) => fromPromise(provider.deleteMany!(params), toDomainError)
-      : undefined,
-    custom: provider.custom
-      ? (params) => fromPromise(provider.custom!(params), toDomainError)
-      : undefined,
+    getMany: getMany ? (params) => fromPromise(getMany(params), toDomainError) : undefined,
+    createMany: createMany ? (params) => fromPromise(createMany(params), toDomainError) : undefined,
+    updateMany: updateMany ? (params) => fromPromise(updateMany(params), toDomainError) : undefined,
+    deleteMany: deleteMany ? (params) => fromPromise(deleteMany(params), toDomainError) : undefined,
+    custom: custom ? (params) => fromPromise(custom(params), toDomainError) : undefined,
   };
 }

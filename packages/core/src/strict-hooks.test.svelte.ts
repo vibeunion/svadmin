@@ -185,11 +185,11 @@ describe('public strict hooks enforce their actual transport boundary', () => {
         expect(success.value).toEqual({ id: 1, title: 'Updated' });
       }
 
-      const fail = await mutation.safeMutate({ variables: { title: 'Updated' }, id: 2 } as any);
-      expect(fail.ok).toBe(false);
-      if (!fail.ok) {
-        expect(fail.error.statusCode).toBe(422);
-        expect(fail.error.code).toBe('INVALID_RESOURCE_INPUT');
+      const fail: unknown = await Reflect.apply(mutation.safeMutate, mutation, [{ variables: { title: 'Updated' }, id: 2 }]);
+      expect(typeof fail === 'object' && fail !== null && 'ok' in fail && fail.ok === false).toBe(true);
+      if (typeof fail === 'object' && fail !== null && 'error' in fail && typeof fail.error === 'object' && fail.error !== null) {
+        expect(Reflect.get(fail.error, 'statusCode')).toBe(422);
+        expect(Reflect.get(fail.error, 'code')).toBe('INVALID_RESOURCE_INPUT');
       }
     });
   });
