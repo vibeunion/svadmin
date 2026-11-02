@@ -150,6 +150,18 @@
     "./contracts": {
       "types": "./src/contracts.ts",
       "default": "./src/contracts.ts"
+    },
+    "./result": {
+      "types": "./src/result.ts",
+      "default": "./src/result.ts"
+    },
+    "./domain-errors": {
+      "types": "./src/domain-errors.ts",
+      "default": "./src/domain-errors.ts"
+    },
+    "./resilience": {
+      "types": "./src/resilience.ts",
+      "default": "./src/resilience.ts"
     }
   },
   "bugs": {
