@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/pocketbase",
-  "version": "0.13.19",
+  "version": "0.13.20",
   "description": "PocketBase adapters — DataProvider, AuthProvider, LiveProvider for svadmin",
   "type": "module",
   "sideEffects": false,
