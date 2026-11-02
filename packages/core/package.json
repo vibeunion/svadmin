@@ -107,6 +107,14 @@
       "types": "./src/inferencer.ts",
       "default": "./src/inferencer.ts"
     },
+    "./inferencer-schema": {
+      "types": "./src/inferencer-schema.ts",
+      "default": "./src/inferencer-schema.ts"
+    },
+    "./mock-provider": {
+      "types": "./src/mock-provider.ts",
+      "default": "./src/mock-provider.ts"
+    },
     "./inferencer-openapi": {
       "types": "./src/inferencer-openapi.ts",
       "default": "./src/inferencer-openapi.ts"

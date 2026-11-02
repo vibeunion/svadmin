@@ -25,12 +25,17 @@ import { definedOptions } from '@svadmin/core/options';
  */
 
 import type { DataProvider, ResourceDefinition } from '@svadmin/core';
+import { inferResource } from '@svadmin/core/inferencer';
+import { scanVibeGovernance, type GovernanceSource } from './governance';
+import { inferFromJSONSchema, inferFromDatabaseColumns } from '@svadmin/core/inferencer-schema';
 import {
+  buildResourcePatch,
   buildSelfHealingReport,
   type DevtoolsAppDiagnostics,
   type DevtoolsCollector,
   type DevtoolsDiagnostic,
   type DevtoolsSnapshot,
+  type ResourcePatchAction,
 } from '@svadmin/devtools';
 
 // ─── Types ───────────────────────────────────────────────────
@@ -272,6 +277,78 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
     },
   });
 
+  tools.push({
+    name: 'svadmin_generateResource',
+    description:
+      'Zero-hallucination code generator for SVAdmin. Infers ResourceDefinition, TypeBox validation, and complete Svelte 5 AutoTable/AutoForm component snippets from sample records, JSON Schema, or database column definitions.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        resource: { type: 'string', description: 'Name of the resource to generate (e.g. "orders", "users")' },
+        sourceType: {
+          type: 'string',
+          enum: ['sampleData', 'jsonSchema', 'databaseColumns'],
+          description: 'Type of input payload',
+        },
+        payload: { type: 'string', description: 'JSON-serialized payload matching the sourceType' },
+        idKey: { type: 'string', description: 'Primary key name (defaults to "id")' },
+        label: { type: 'string', description: 'Human-readable resource label' },
+      },
+      required: ['resource', 'sourceType', 'payload'],
+    },
+  });
+
+  tools.push({
+    name: 'svadmin_applyResourcePatch',
+    description:
+      'Applies a structured writeback patch derived from the Visual Inspector (Click-to-Edit), generating verified code snippets and agent prompts to update ResourceDefinitions, column visibility, or field properties.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        resource: { type: 'string', description: 'Resource name to patch' },
+        action: {
+          type: 'string',
+          enum: ['updateField', 'toggleColumnVisibility', 'updateColumnTitle', 'updatePageSize', 'reorderColumns'],
+          description: 'Patch action to perform',
+        },
+        field: { type: 'string', description: 'Field name targeted' },
+        column: { type: 'string', description: 'Column name targeted' },
+        value: { type: 'string', description: 'JSON-serialized or string patch value' },
+        targetComponent: { type: 'string', description: 'Component context (e.g. AutoTable, AutoForm)' },
+      },
+      required: ['resource', 'action'],
+    },
+  });
+
+  tools.push({
+    name: 'svadmin_verifyGovernance',
+    description:
+      'Runs the SVAdmin Vibe Coding architectural governance check on the supplied sources, verifying data provider isolation (no unmanaged fetch/axios) and escape-hatch annotation discipline. Returns the same verdict as `bun run check:vibe-governance`.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'string',
+          description: 'JSON-serialized array of { path, content } sources to scan (for example the files an agent just edited).',
+        },
+        strict: {
+          type: 'boolean',
+          description: 'Require every @vibe-escape annotation to carry a non-empty reason before it suppresses a violation.',
+        },
+      },
+      required: ['files'],
+    },
+  });
+
   return tools;
 }
 
@@ -283,7 +360,15 @@ async function handleToolCall(
   options: MCPServerOptions,
 ): Promise<unknown> {
   const resource = args['resource'] as string;
-  if (resource && !options.resources.includes(resource)) {
+  const dataCrudTools = [
+    'svadmin_getList',
+    'svadmin_getOne',
+    'svadmin_getMany',
+    'svadmin_create',
+    'svadmin_update',
+    'svadmin_delete',
+  ];
+  if (dataCrudTools.includes(toolName) && resource && !options.resources.includes(resource)) {
     throw new Error(`Unauthorized resource access: ${resource} is not exposed.`);
   }
   const dp = options.dataProvider;
@@ -396,6 +481,104 @@ async function handleToolCall(
       };
     }
 
+    case 'svadmin_generateResource': {
+      const resource = args['resource'] as string;
+      const sourceType = args['sourceType'] as 'sampleData' | 'jsonSchema' | 'databaseColumns';
+      const rawPayload = args['payload'] as string;
+      const idKey = (args['idKey'] as string) ?? 'id';
+      const label = args['label'] as string | undefined;
+
+      const parsedPayload = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+      let result;
+
+      if (sourceType === 'sampleData') {
+        result = inferResource(resource, Array.isArray(parsedPayload) ? parsedPayload : [parsedPayload], definedOptions({
+          primaryKey: idKey,
+          label,
+        }));
+      } else if (sourceType === 'jsonSchema') {
+        result = inferFromJSONSchema(resource, parsedPayload, definedOptions({
+          primaryKey: idKey,
+          label,
+        }));
+      } else if (sourceType === 'databaseColumns') {
+        result = inferFromDatabaseColumns(resource, parsedPayload, definedOptions({
+          primaryKey: idKey,
+          label,
+        }));
+      } else {
+        throw new Error(`Invalid sourceType: ${sourceType}`);
+      }
+
+      return {
+        resource: result.resource,
+        code: result.code,
+        typeboxCode: result.typeboxCode,
+        componentCode: result.componentCode,
+        review: result.review,
+      };
+    }
+
+    case 'svadmin_applyResourcePatch': {
+      const resource = args['resource'] as string;
+      const action = args['action'] as ResourcePatchAction;
+      const field = args['field'] as string | undefined;
+      const column = args['column'] as string | undefined;
+      const targetComponent = args['targetComponent'] as string | undefined;
+      let value = args['value'];
+      if (typeof value === 'string') {
+        try {
+          value = JSON.parse(value);
+        } catch {
+          // Keep as string
+        }
+      }
+
+      return buildResourcePatch({
+        resource,
+        action,
+        value,
+        ...definedOptions({
+          field,
+          column,
+          targetComponent,
+        }),
+      });
+    }
+
+    case 'svadmin_verifyGovernance': {
+      const strict = Boolean(args['strict']);
+      const rawFiles = args['files'];
+      const parsed: unknown = typeof rawFiles === 'string' ? JSON.parse(rawFiles) : rawFiles;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error('svadmin_verifyGovernance requires a non-empty files array of { path, content } sources.');
+      }
+
+      const sources: GovernanceSource[] = parsed.map((entry: unknown, index: number) => {
+        const candidate = entry as { path?: unknown; content?: unknown } | null;
+        if (
+          candidate === null ||
+          typeof candidate !== 'object' ||
+          typeof candidate.path !== 'string' ||
+          typeof candidate.content !== 'string'
+        ) {
+          throw new Error(`svadmin_verifyGovernance: files[${index}] must be an object with string path and content.`);
+        }
+        return { path: candidate.path, content: candidate.content };
+      });
+
+      const report = scanVibeGovernance(sources, { strict });
+      return {
+        governancePassed: report.passed,
+        status: report.passed ? 'compliant' : 'violations',
+        strictMode: strict,
+        rulesChecked: report.rulesChecked,
+        filesScanned: report.totalFilesScanned,
+        violations: report.violations,
+        summary: report.summary,
+      };
+    }
+
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -426,6 +609,15 @@ async function handleToolCall(
 /**
  * Projects an MCP tool into the standard allowlisted schema while preserving metadata and safety flags.
  */
+export { scanVibeGovernance } from './governance';
+export type {
+  GovernanceRuleId,
+  GovernanceSource,
+  GovernanceViolation,
+  VibeGovernanceOptions,
+  VibeGovernanceReport,
+} from './governance';
+
 export function projectMCPToolSchema(tool: MCPTool): MCPTool {
   return {
     name: tool.name,

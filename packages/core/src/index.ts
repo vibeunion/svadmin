@@ -333,12 +333,16 @@ export {
   generateResourceBundle,
 } from './inferencer';
 export type { InferResult, InferReview, InferReviewWarning, InferReviewWarningCode } from './inferencer';
+export { createMockDataProvider } from './mock-provider';
+export type { MockDataProviderOptions, MockDataProviderInstance } from './mock-provider';
 export { createWebSocketLiveProvider } from './live-websocket';
 export type { WebSocketLiveProviderOptions } from './live-websocket';
 export { createSSELiveProvider } from './live-sse';
 export type { SSELiveProviderOptions } from './live-sse';
 export { inferFromOpenAPI } from './inferencer-openapi';
 export type { InferFromOpenAPIOptions } from './inferencer-openapi';
+export { inferFromDatabaseColumns, inferFromJSONSchema } from './inferencer-schema';
+export type { DatabaseColumnMeta, InferFromDatabaseOptions, JSONSchemaInput, JSONSchemaProperty } from './inferencer-schema';
 export { inferFromGraphQL, GRAPHQL_INTROSPECTION_QUERY } from './inferencer-graphql';
 export type { InferFromGraphQLOptions, GraphQLIntrospectionSchema, GraphQLTypeDescriptor } from './inferencer-graphql';
 export {
