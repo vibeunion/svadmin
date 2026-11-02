@@ -7,11 +7,17 @@ import {
   ContractDecodingError,
   NotFoundError,
   ServerInternalError,
+  BadRequestError,
+  RateLimitError,
+  UnavailableError,
+  CancelledError,
+  AbortedError,
+  UndoneError,
   matchError,
   toDomainError,
   type DomainError,
 } from './domain-errors';
-import { HttpError } from './types';
+import { HttpError, UndoError } from './types';
 
 describe('Domain Errors', () => {
   it('instantiates specific domain errors with tags and statusCodes', () => {
@@ -59,7 +65,7 @@ describe('Domain Errors', () => {
   it('matches errors with matchError', () => {
     const valErr: DomainError = new ValidationError('Bad request', { email: 'Invalid' });
 
-    const message = matchError(valErr, {
+    const message = matchError<DomainError, string>(valErr, {
       ValidationError: (err) => `Validation: ${Object.keys(err.fieldErrors).join(',')}`,
       ConflictError: () => 'Conflict',
       AuthError: () => 'Auth',
@@ -67,13 +73,22 @@ describe('Domain Errors', () => {
       ContractDecodingError: () => 'Decoding',
       NotFoundError: () => 'Not found',
       ServerInternalError: () => 'Server',
+      BadRequestError: () => 'Bad request',
+      RateLimitError: () => 'Rate limit',
+      UnavailableError: () => 'Unavailable',
+      CancelledError: () => 'Cancelled',
+      AbortedError: () => 'Aborted',
+      UndoneError: () => 'Undone',
     });
+
+    // @ts-expect-error 缺少分支且没有兜底时必须在编译期失败
+    void matchError<DomainError, string>(valErr, { ValidationError: () => 'incomplete' });
 
     expect(message).toBe('Validation: email');
 
     // With wildcard fallback
     const notFoundErr: DomainError = new NotFoundError('Gone');
-    const fallbackMessage = matchError(notFoundErr, {
+    const fallbackMessage = matchError<DomainError, string>(notFoundErr, {
       ValidationError: () => 'Validation',
       _: (err) => `Handled by fallback: ${err._tag}`,
     });
@@ -98,11 +113,86 @@ describe('Domain Errors', () => {
     const abortErr = new Error('The operation was aborted');
     abortErr.name = 'AbortError';
     const normalizedAbort = toDomainError(abortErr);
-    expect(normalizedAbort._tag).toBe('NetworkError');
-    expect((normalizedAbort as NetworkError).isTimeout).toBe(true);
+    expect(normalizedAbort._tag).toBe('AbortedError');
+    expect(normalizedAbort).toBeInstanceOf(AbortedError);
+    expect((normalizedAbort as AbortedError).retryable).toBe(false);
+
+    const timeoutErr = new Error('timed out');
+    timeoutErr.name = 'TimeoutError';
+    const normalizedTimeout = toDomainError(timeoutErr);
+    expect(normalizedTimeout._tag).toBe('NetworkError');
+    expect((normalizedTimeout as NetworkError).isTimeout).toBe(true);
 
     const unknownString = toDomainError('Unknown crash');
     expect(unknownString._tag).toBe('ServerInternalError');
     expect(unknownString.message).toBe('Unknown crash');
+  });
+
+  it('preserves transport metadata and does not relabel control flow', () => {
+    const conflict = new HttpError('Version conflict', 409, undefined, {
+      code: 'RESOURCE_CONFLICT',
+      details: { currentVersion: 2 },
+      body: { ok: false },
+    });
+    const normalizedConflict = toDomainError(conflict);
+    expect(normalizedConflict).toBeInstanceOf(ConflictError);
+    if (!(normalizedConflict instanceof ConflictError)) throw new Error('expected conflict');
+    expect(normalizedConflict.details).toEqual({ currentVersion: 2 });
+    expect(normalizedConflict.body).toEqual({ ok: false });
+    expect(normalizedConflict.code).toBe('RESOURCE_CONFLICT');
+
+    const cancelled = new HttpError('Update scope changed', 409, undefined, {
+      code: 'UPDATE_CANCELLED',
+      details: { writeMayHaveSucceeded: true, id: 7 },
+    });
+    const normalizedCancel = toDomainError(cancelled);
+    expect(normalizedCancel).toBeInstanceOf(CancelledError);
+    if (normalizedCancel instanceof CancelledError) {
+      expect(normalizedCancel.writeMayHaveSucceeded).toBe(true);
+      expect(normalizedCancel.code).toBe('UPDATE_CANCELLED');
+      expect(normalizedCancel.details).toEqual({ writeMayHaveSucceeded: true, id: 7 });
+      expect(normalizedCancel.statusCode).toBe(409);
+    }
+
+    const undone = toDomainError(new UndoError());
+    expect(undone).toBeInstanceOf(UndoneError);
+    expect(undone._tag).toBe('UndoneError');
+    expect(undone.message).toBe('Mutation undone');
+
+    const rate = new HttpError('slow down', 429, undefined, {
+      code: 'RATE_LIMIT',
+      details: { retryAfter: 3 },
+      body: { a: 1 },
+    });
+    const normalizedRate = toDomainError(rate);
+    expect(normalizedRate).toBeInstanceOf(RateLimitError);
+    if (!(normalizedRate instanceof RateLimitError)) throw new Error('expected rate limit');
+    expect(normalizedRate.statusCode).toBe(429);
+    expect(normalizedRate.code).toBe('RATE_LIMIT');
+    expect(normalizedRate.details).toEqual({ retryAfter: 3 });
+    expect(normalizedRate.body).toEqual({ a: 1 });
+
+    const bad = new HttpError('missing field', 400, { title: 'Required' }, { details: { field: 'title' } });
+    const normalizedBad = toDomainError(bad);
+    expect(normalizedBad).toBeInstanceOf(BadRequestError);
+    if (!(normalizedBad instanceof BadRequestError)) throw new Error('expected bad request');
+    expect(normalizedBad.fieldErrors).toEqual({ title: 'Required' });
+    expect(normalizedBad.details).toEqual({ field: 'title' });
+
+    const timedOut = new HttpError('request timeout', 408, undefined, { details: { attempt: 2 } });
+    const normalizedTimedOut = toDomainError(timedOut);
+    expect(normalizedTimedOut).toBeInstanceOf(NetworkError);
+    if (normalizedTimedOut instanceof NetworkError) {
+      expect(normalizedTimedOut.isTimeout).toBe(true);
+      expect(normalizedTimedOut.statusCode).toBe(408);
+      expect(normalizedTimedOut.details).toEqual({ attempt: 2 });
+    }
+
+    const unavailable = new HttpError('down', 503, undefined, { body: { maintenance: true } });
+    const normalizedUnavailable = toDomainError(unavailable);
+    expect(normalizedUnavailable).toBeInstanceOf(UnavailableError);
+    if (!(normalizedUnavailable instanceof UnavailableError)) throw new Error('expected unavailable');
+    expect(normalizedUnavailable.statusCode).toBe(503);
+    expect(normalizedUnavailable.body).toEqual({ maintenance: true });
   });
 });

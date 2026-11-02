@@ -440,6 +440,12 @@ export {
   ContractDecodingError,
   NotFoundError,
   ServerInternalError,
+  BadRequestError,
+  RateLimitError,
+  UnavailableError,
+  CancelledError,
+  AbortedError,
+  UndoneError,
   matchError,
   toDomainError,
 } from './domain-errors';
@@ -456,6 +462,7 @@ export type {
 } from './domain-errors';
 
 export {
+  ConcurrencyLimitClearedError,
   createConcurrencyLimiter,
   withRetry,
   wrapDataProviderWithResult,
