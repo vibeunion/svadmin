@@ -470,3 +470,85 @@ export function buildSelfHealingReport(
     agentPrompt,
   };
 }
+
+// ─── Visual Writeback & Live Patching ─────────────────────────
+
+export type ResourcePatchAction =
+  | 'updateField'
+  | 'toggleColumnVisibility'
+  | 'updateColumnTitle'
+  | 'updatePageSize'
+  | 'reorderColumns';
+
+export interface ResourcePatch {
+  resource: string;
+  action: ResourcePatchAction;
+  field?: string;
+  column?: string;
+  value: unknown;
+  targetComponent?: string;
+}
+
+export interface ResourcePatchResult {
+  success: boolean;
+  patch: ResourcePatch;
+  summary: string;
+  suggestedPatchCode: string;
+  agentPrompt: string;
+}
+
+/**
+ * Builds a structured writeback patch from visual inspector interactions,
+ * generating actionable code snippets and an Agent-executable prompt.
+ */
+export function buildResourcePatch(patch: ResourcePatch): ResourcePatchResult {
+  const resource = patch.resource;
+  let summary = '';
+  let suggestedPatchCode = '';
+  let agentPrompt = '';
+
+  switch (patch.action) {
+    case 'toggleColumnVisibility': {
+      const col = patch.column ?? patch.field ?? 'unknown';
+      const isHidden = Boolean(patch.value);
+      summary = `${isHidden ? 'Hide' : 'Show'} column '${col}' in resource '${resource}' AutoTable`;
+      suggestedPatchCode = `// In resource definition for '${resource}':\ncolumns: [\n  // ...\n  { key: '${col}', hidden: ${isHidden} },\n]`;
+      agentPrompt = `[SVADMIN_WRITEBACK_PATCH]\nResource: ${resource}\nAction: toggleColumnVisibility\nTarget: column '${col}'\nSet hidden: ${isHidden}\nPlease update the ResourceDefinition or AutoTable columns in ${resource} page accordingly.`;
+      break;
+    }
+    case 'updateField': {
+      const field = patch.field ?? 'unknown';
+      const valStr = typeof patch.value === 'object' ? JSON.stringify(patch.value) : String(patch.value);
+      summary = `Update field '${field}' properties in resource '${resource}'`;
+      suggestedPatchCode = `// In resource definition for '${resource}':\nfields: [\n  // ...\n  { key: '${field}', ...${valStr} },\n]`;
+      agentPrompt = `[SVADMIN_WRITEBACK_PATCH]\nResource: ${resource}\nAction: updateField\nField: '${field}'\nPatch: ${valStr}\nPlease apply this field property change to resource '${resource}'.`;
+      break;
+    }
+    case 'updateColumnTitle': {
+      const col = patch.column ?? patch.field ?? 'unknown';
+      summary = `Change column '${col}' header title to '${patch.value}' in resource '${resource}'`;
+      suggestedPatchCode = `// In resource definition for '${resource}':\ncolumns: [\n  // ...\n  { key: '${col}', title: '${patch.value}' },\n]`;
+      agentPrompt = `[SVADMIN_WRITEBACK_PATCH]\nResource: ${resource}\nAction: updateColumnTitle\nColumn: '${col}'\nNew title: '${patch.value}'\nPlease update the column title in resource '${resource}'.`;
+      break;
+    }
+    case 'updatePageSize': {
+      summary = `Update default page size for resource '${resource}' to ${patch.value}`;
+      suggestedPatchCode = `// In resource definition for '${resource}':\npagination: { defaultPageSize: ${patch.value} }`;
+      agentPrompt = `[SVADMIN_WRITEBACK_PATCH]\nResource: ${resource}\nAction: updatePageSize\nPageSize: ${patch.value}\nPlease update pagination defaultPageSize to ${patch.value} for resource '${resource}'.`;
+      break;
+    }
+    default: {
+      summary = `Apply ${patch.action} to resource '${resource}'`;
+      suggestedPatchCode = `// Patch ${JSON.stringify(patch)}`;
+      agentPrompt = `[SVADMIN_WRITEBACK_PATCH]\n${JSON.stringify(patch, null, 2)}`;
+    }
+  }
+
+  return {
+    success: true,
+    patch,
+    summary,
+    suggestedPatchCode,
+    agentPrompt,
+  };
+}

@@ -178,19 +178,31 @@
       ? `在 svadmin 中定制资源 '${hoveredBox.resource}' 的 <${hoveredBox.component}> 组件。`
       : `在 svadmin 中定制 <${hoveredBox.component}> 组件。`;
 
+    const patchPayload = {
+      resource: hoveredBox.resource,
+      component: hoveredBox.component,
+      field: hoveredBox.field,
+    };
+    const structuredPrompt = `${prompt}\n\n[SVADMIN_WRITEBACK_PATCH]\n${JSON.stringify(patchPayload, null, 2)}`;
+
     if (navigator?.clipboard?.writeText) {
-      void navigator.clipboard.writeText(prompt);
+      void navigator.clipboard.writeText(structuredPrompt);
     }
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('svadmin:vibe-inspect', {
-          detail: { ...hoveredBox, prompt },
+          detail: { ...hoveredBox, prompt: structuredPrompt, patch: patchPayload },
+        }),
+      );
+      window.dispatchEvent(
+        new CustomEvent('svadmin:vibe-patch', {
+          detail: { patch: patchPayload, prompt: structuredPrompt },
         }),
       );
     }
 
-    showToast('已复制 AI Prompt！可直接在对话框中粘贴');
+    showToast('已复制 AI Prompt 与 Writeback Patch！可在对话框中直接粘贴');
     inspecting = false;
     hoveredBox = null;
   }
