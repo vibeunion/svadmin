@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.72.0](https://github.com/vibeunion/svadmin/compare/core-v0.71.0...core-v0.72.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **core:** integrate safeMutate with typed Result into mutation hooks ([0f17bad](https://github.com/vibeunion/svadmin/commit/0f17badd9f9740c0ac17a69174d70c94dc6eb692))
+* **core:** introduce typed Result, domain errors, and resilience primitives ([bdcd2a6](https://github.com/vibeunion/svadmin/commit/bdcd2a62baec9790eb4cb968b53748e1cb3fd3c3))
+* **core:** introduce typed Result, domain errors, and resilience primitives ([02a7a96](https://github.com/vibeunion/svadmin/commit/02a7a9634fa8caaac3839b195a52743781450197))
+
+
+### 🐛 Bug Fixes
+
+* **core:** preserve cancellation, undo, and transport metadata ([1deac96](https://github.com/vibeunion/svadmin/commit/1deac960252937da1fb711c12caa72dd252c60cc))
+* **core:** preserve cancellation, undo, and transport metadata ([12a56ba](https://github.com/vibeunion/svadmin/commit/12a56bafbe62c9c852c6d9181cecf6ffbb51bdec))
+* **core:** resolve linter assertions and EOF whitespace in core ([b994c97](https://github.com/vibeunion/svadmin/commit/b994c9713170922bf65d31bb5a81d07d67efb55a))
+
 ## [0.71.0](https://github.com/vibeunion/svadmin/compare/core-v0.70.0...core-v0.71.0) (2026-11-02)
 
 
