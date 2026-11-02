@@ -19,6 +19,8 @@ export interface WorkspaceScrollControllerOptions {
   getAdapter: () => WorkspaceTabStateAdapter | undefined;
   isDisposed: () => boolean;
   afterRender: () => Promise<unknown>;
+  requestAnimationFrame: (callback: FrameRequestCallback) => number;
+  cancelAnimationFrame: (handle: number) => void;
 }
 
 export function createWorkspaceScrollController(
@@ -123,7 +125,7 @@ export function createWorkspaceScrollController(
     const stop = () => {
       if (stopped) return;
       stopped = true;
-      if (rafId !== undefined) cancelAnimationFrame(rafId);
+      if (rafId !== undefined) options.cancelAnimationFrame(rafId);
       observer?.disconnect();
       observedTargets.clear();
       mutationObserver?.disconnect();
@@ -200,11 +202,7 @@ export function createWorkspaceScrollController(
 
     const schedule = () => {
       if (stopped || rafId !== undefined) return;
-      if (typeof requestAnimationFrame !== 'function') {
-        stop();
-        return;
-      }
-      rafId = requestAnimationFrame(attempt);
+      rafId = options.requestAnimationFrame(attempt);
     };
 
     const attempt = () => {

@@ -428,6 +428,8 @@
     getAdapter: () => currentAdapter(),
     isDisposed: () => disposed,
     afterRender: tick,
+    requestAnimationFrame: (callback) => requestAnimationFrame(callback),
+    cancelAnimationFrame: (handle) => cancelAnimationFrame(handle),
   });
   function replaceWithEmptyWorkspace(): void {
     if (typeof window === 'undefined') return;
