@@ -423,3 +423,46 @@ export { formatProductPreview, runProductPipeline } from './product-pipeline';
 export type { ProductPipelineInput, ProductPipelineOutput } from './product-pipeline';
 export { reviewProductPlan } from './product-review';
 export type { ProductReviewIssue, ProductReviewMetrics, ProductReviewReport, ProductReviewSeverity } from './product-review';
+
+// High-Rigor Typed Result, Domain Errors & Resilience
+export {
+  ok, err, isOk, isErr, unwrapResult, unwrapOr,
+  mapResult, mapErr, flatMapResult, matchResult,
+  fromThrowable, fromPromise,
+} from './result';
+export type { Result, Ok, Err } from './result';
+
+export {
+  ValidationError,
+  ConflictError,
+  AuthError,
+  NetworkError,
+  ContractDecodingError,
+  NotFoundError,
+  ServerInternalError,
+  matchError,
+  toDomainError,
+} from './domain-errors';
+export type {
+  DomainError,
+  DomainErrorTag,
+  ErrorPattern,
+  ConflictErrorOptions,
+  AuthErrorOptions,
+  NetworkErrorOptions,
+  ContractDecodingErrorOptions,
+  NotFoundErrorOptions,
+  ServerInternalErrorOptions,
+} from './domain-errors';
+
+export {
+  createConcurrencyLimiter,
+  withRetry,
+  wrapDataProviderWithResult,
+} from './resilience';
+export type {
+  ConcurrencyLimiter,
+  RetryOptions,
+  SafeDataProvider,
+} from './resilience';
+
