@@ -443,7 +443,55 @@ describe('Tool safety and concurrency metadata', () => {
     expect(patch.agentPrompt).toContain('[SVADMIN_WRITEBACK_PATCH]');
   });
 
-  test('svadmin_verifyGovernance returns architectural invariants report', async () => {
+  test('svadmin_verifyGovernance scans supplied sources and reports real violations', async () => {
+    const compliant = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_verifyGovernance',
+        arguments: {
+          files: JSON.stringify([
+            { path: 'example/src/features/posts/List.svelte', content: 'const rows = useList({ resource: "posts" });' },
+          ]),
+        },
+      }),
+    );
+
+    expect(compliant.error).toBeUndefined();
+    const compliantBody = compliant.result as { content: { type: string; text: string }[] };
+    const compliantReport = JSON.parse(requireValue(compliantBody.content[0]).text) as {
+      governancePassed: boolean;
+      status: string;
+      rulesChecked: string[];
+      filesScanned: number;
+    };
+    expect(compliantReport.governancePassed).toBe(true);
+    expect(compliantReport.status).toBe('compliant');
+    expect(compliantReport.filesScanned).toBe(1);
+    expect(compliantReport.rulesChecked).toContain('no-unmanaged-fetch');
+
+    const violating = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_verifyGovernance',
+        arguments: {
+          files: JSON.stringify([
+            { path: 'example/src/features/posts/List.svelte', content: 'const res = await fetch("/api/posts");' },
+          ]),
+        },
+      }),
+    );
+
+    const violatingBody = violating.result as { content: { type: string; text: string }[] };
+    const violatingReport = JSON.parse(requireValue(violatingBody.content[0]).text) as {
+      governancePassed: boolean;
+      status: string;
+      violations: { rule: string; line: number }[];
+    };
+    expect(violatingReport.governancePassed).toBe(false);
+    expect(violatingReport.status).toBe('violations');
+    expect(requireValue(violatingReport.violations[0]).rule).toBe('no-unmanaged-fetch');
+    expect(requireValue(violatingReport.violations[0]).line).toBe(1);
+  });
+
+  test('svadmin_verifyGovernance rejects calls without sources', async () => {
     const res = await server.handleRequest(
       makeRequest('tools/call', {
         name: 'svadmin_verifyGovernance',
@@ -451,15 +499,6 @@ describe('Tool safety and concurrency metadata', () => {
       }),
     );
 
-    expect(res.error).toBeUndefined();
-    const result = res.result as { content: { type: string; text: string }[] };
-    const gov = JSON.parse(requireValue(result.content[0]).text) as {
-      governancePassed: boolean;
-      principles: string[];
-      status: string;
-    };
-    expect(gov.governancePassed).toBe(true);
-    expect(gov.status).toBe('compliant');
-    expect(gov.principles.length).toBeGreaterThanOrEqual(4);
+    expect(res.error?.message).toContain('requires a non-empty files array');
   });
 });

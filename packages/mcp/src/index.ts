@@ -26,6 +26,7 @@ import { definedOptions } from '@svadmin/core/options';
 
 import type { DataProvider, ResourceDefinition } from '@svadmin/core';
 import { inferResource } from '@svadmin/core/inferencer';
+import { scanVibeGovernance, type GovernanceSource } from './governance';
 import { inferFromJSONSchema, inferFromDatabaseColumns } from '@svadmin/core/inferencer-schema';
 import {
   buildResourcePatch,
@@ -328,15 +329,23 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
   tools.push({
     name: 'svadmin_verifyGovernance',
     description:
-      'Runs the SVAdmin Vibe Coding architectural governance check, verifying data provider isolation (no unmanaged fetches) and escape-hatch discipline across the project.',
+      'Runs the SVAdmin Vibe Coding architectural governance check on the supplied sources, verifying data provider isolation (no unmanaged fetch/axios) and escape-hatch annotation discipline. Returns the same verdict as `bun run check:vibe-governance`.',
     readOnly: true,
     concurrent: true,
     destructive: false,
     inputSchema: {
       type: 'object',
       properties: {
-        strict: { type: 'boolean', description: 'Whether to enforce strict warnings as errors' },
+        files: {
+          type: 'string',
+          description: 'JSON-serialized array of { path, content } sources to scan (for example the files an agent just edited).',
+        },
+        strict: {
+          type: 'boolean',
+          description: 'Require every @vibe-escape annotation to carry a non-empty reason before it suppresses a violation.',
+        },
       },
+      required: ['files'],
     },
   });
 
@@ -539,16 +548,34 @@ async function handleToolCall(
 
     case 'svadmin_verifyGovernance': {
       const strict = Boolean(args['strict']);
+      const rawFiles = args['files'];
+      const parsed: unknown = typeof rawFiles === 'string' ? JSON.parse(rawFiles) : rawFiles;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error('svadmin_verifyGovernance requires a non-empty files array of { path, content } sources.');
+      }
+
+      const sources: GovernanceSource[] = parsed.map((entry: unknown, index: number) => {
+        const candidate = entry as { path?: unknown; content?: unknown } | null;
+        if (
+          candidate === null ||
+          typeof candidate !== 'object' ||
+          typeof candidate.path !== 'string' ||
+          typeof candidate.content !== 'string'
+        ) {
+          throw new Error(`svadmin_verifyGovernance: files[${index}] must be an object with string path and content.`);
+        }
+        return { path: candidate.path, content: candidate.content };
+      });
+
+      const report = scanVibeGovernance(sources, { strict });
       return {
-        governancePassed: true,
-        principles: [
-          'DataProvider Isolation: All business queries/mutations must flow through DataProvider (no unmanaged fetch).',
-          'Escape Hatch Discipline: Any Level 3/4 custom hooks or tables must include // @vibe-escape: <reason>.',
-          'Schema Contract: ResourceDefinition must declare primaryKey and valid field types.',
-          'Runtime Verification: Run svadmin_getDiagnostics and svadmin_getSelfHealingPrompt after code mutations.',
-        ],
+        governancePassed: report.passed,
+        status: report.passed ? 'compliant' : 'violations',
         strictMode: strict,
-        status: 'compliant',
+        rulesChecked: report.rulesChecked,
+        filesScanned: report.totalFilesScanned,
+        violations: report.violations,
+        summary: report.summary,
       };
     }
 
@@ -582,6 +609,15 @@ async function handleToolCall(
 /**
  * Projects an MCP tool into the standard allowlisted schema while preserving metadata and safety flags.
  */
+export { scanVibeGovernance } from './governance';
+export type {
+  GovernanceRuleId,
+  GovernanceSource,
+  GovernanceViolation,
+  VibeGovernanceOptions,
+  VibeGovernanceReport,
+} from './governance';
+
 export function projectMCPToolSchema(tool: MCPTool): MCPTool {
   return {
     name: tool.name,

@@ -8,7 +8,7 @@ describe('createMockDataProvider', () => {
 
     expect(result.total).toBe(4);
     expect(result.data.length).toBe(4);
-    expect(result.data[0].name).toBe('Alice Chen');
+    expect(result.data[0]?.['name']).toBe('Alice Chen');
     expect(provider.getApiUrl()).toBe('mock://local');
   });
 
@@ -28,7 +28,7 @@ describe('createMockDataProvider', () => {
       resource: 'posts',
       sorters: [{ field: 'views', order: 'desc' }],
     });
-    expect(sorted.data[0]['views']).toBe(3420);
+    expect(sorted.data[0]?.['views']).toBe(3420);
 
     // Pagination
     const page = await provider.getList({

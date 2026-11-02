@@ -110,3 +110,50 @@ describe('inferFromJSONSchema', () => {
     expect(createdAtField.type).toBe('date');
   });
 });
+
+describe('inference review warnings', () => {
+  it('flags unconstrained database columns instead of claiming high confidence', () => {
+    const result = inferFromDatabaseColumns('events', [
+      { name: 'code', type: 'citext' },
+      { name: 'payload', type: 'jsonb' },
+    ]);
+
+    expect(result.resource.primaryKey).toBe('id');
+    expect(result.review.needsReview).toBe(true);
+    expect(result.review.confidence).toBe('medium');
+    expect(result.review.warnings.map(warning => warning.code)).toContain('unconstrained-field');
+    expect(
+      result.review.warnings.some(warning => warning.message.includes('No primary key column detected')),
+    ).toBe(true);
+    expect(
+      result.review.warnings.some(warning => warning.message.includes('unrecognized SQL type "citext"')),
+    ).toBe(true);
+    expect(
+      result.review.warnings.some(warning => warning.message.includes('unrecognized SQL type "jsonb"')),
+    ).toBe(false);
+  });
+
+  it('flags relation targets inferred from column names', () => {
+    const result = inferFromDatabaseColumns('comments', [
+      { name: 'id', type: 'bigint', isPrimary: true },
+      { name: 'post_id', type: 'bigint' },
+    ]);
+
+    const relationWarning = result.review.warnings.find(warning => warning.code === 'heuristic-relation');
+    expect(relationWarning?.field).toBe('post_id');
+    expect(result.review.confidence).toBe('medium');
+  });
+
+  it('flags schemas without properties and missing primary keys', () => {
+    const empty = inferFromJSONSchema('blank', { type: 'object' });
+    expect(empty.review.warnings.map(warning => warning.code)).toContain('empty-sample');
+    expect(empty.review.confidence).toBe('medium');
+
+    const withoutId = inferFromJSONSchema('notes', {
+      type: 'object',
+      properties: { body: { type: 'string' } },
+    });
+    expect(withoutId.review.warnings.map(warning => warning.code)).toContain('unconstrained-field');
+    expect(withoutId.review.needsReview).toBe(true);
+  });
+});

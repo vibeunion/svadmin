@@ -48,7 +48,7 @@ flowchart TD
   - **Level 3 (Headless 拼装)**：`useTable` / `useForm` 纯逻辑拼装。
   - **Level 4 (纯底层 Hooks)**：`useList` / `useOne` 原生状态。
 - **架构守卫（Governance Linter）**：
-  - 脚本：`bun run check:vibe-governance`（或 MCP 工具 `svadmin_verifyGovernance`）。
+  - 脚本：`bun run check:vibe-governance`（或 MCP 工具 `svadmin_verifyGovernance`，两者共用 `@svadmin/mcp` 中的同一规则引擎，`--strict` 要求逃生舱注解必须写明理由）。
   - 强制规约：严禁在视图层直连 `fetch`，严格隔离 Data Provider；对 Level 3/4 逃生舱要求提供 `// @vibe-escape` 理由注解。
 
 ### 3. 后链路：Visual Inspector 与修改直接写回（Writeback Protocol）
@@ -73,7 +73,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | `svadmin_generateResource` | Read-only | 从 Sample / JSON Schema / SQL 列元数据生成完整 Resource 定义与 UI 代码 |
 | `svadmin_applyResourcePatch` | Read-only | 计算视觉 Inspector 点选操作的代码变更 Patch 与 Agent 提示词 |
-| `svadmin_verifyGovernance` | Read-only | 执行 Vibe Coding 架构合规性自审（数据流隔离与逃生舱纪律） |
+| `svadmin_verifyGovernance` | Read-only | 对 Agent 传入的 `files: [{ path, content }]` 源码执行与 `bun run check:vibe-governance` 完全一致的架构合规自审（数据流隔离与逃生舱纪律），返回真实违规位置 |
 | `svadmin_getDiagnostics` | Read-only | 获取运行时 Provider 状态、资源注册矩阵与错误事件 |
 | `svadmin_getSelfHealingPrompt`| Read-only | 提取运行时报错，输出结构化根因分析与代码自愈提示词 |
 | `svadmin_getManifest` | Read-only | 获取当前应用架构全貌清单与能力集 |

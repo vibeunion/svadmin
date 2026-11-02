@@ -65,6 +65,17 @@ function humanize(key: string): string {
 
 const RELATION_SUFFIXES = ['_id', 'Id', '_ID'];
 
+/** SQL type families we can map without falling back to name heuristics. */
+const RECOGNIZED_SQL_TYPES =
+  /(?:^|[\s_])(?:bool|boolean|int|integer|smallint|bigint|serial|bigserial|numeric|decimal|real|float|double|money|timestamp|timestamptz|date|time|json|jsonb|char|character|varchar|text|uuid|enum|string)(?=$|[\s_(])/;
+
+function reviewConfidence(warnings: readonly InferReviewWarning[]): 'high' | 'medium' | 'low' {
+  if (warnings.length === 0) return 'high';
+  return warnings.some(warning => warning.code === 'mixed-types' || warning.code === 'nullable-field')
+    ? 'low'
+    : 'medium';
+}
+
 function isLikelyRelation(key: string): string | null {
   for (const suffix of RELATION_SUFFIXES) {
     if (key.endsWith(suffix)) {
@@ -90,9 +101,24 @@ export function inferFromDatabaseColumns(
   const fields: FieldDefinition[] = [];
   const warnings: InferReviewWarning[] = [];
 
+  if (options.primaryKey === undefined && !columns.some(c => c.isPrimary)) {
+    warnings.push({
+      code: 'unconstrained-field',
+      message: `No primary key column detected; defaulted to "${primaryKey}". Verify the column list before shipping.`,
+    });
+  }
+
   for (const col of columns) {
     const rawType = (col.type ?? '').toLowerCase().replace(/\(.*\)/, '').trim();
     let type: FieldDefinition['type'];
+
+    if (rawType !== '' && !RECOGNIZED_SQL_TYPES.test(rawType)) {
+      warnings.push({
+        code: 'unconstrained-field',
+        field: col.name,
+        message: `Column "${col.name}" has unrecognized SQL type "${col.type}"; field type was inferred from its name.`,
+      });
+    }
 
     if (col.isPrimary || col.name === primaryKey) {
       type = /int|serial|numeric|decimal|float|bigint/.test(rawType) ? 'number' : 'text';
@@ -145,6 +171,13 @@ export function inferFromDatabaseColumns(
       if (relTarget) {
         field.resource = relTarget;
       }
+      if (!col.referencesResource) {
+        warnings.push({
+          code: 'heuristic-relation',
+          field: col.name,
+          message: `Relation target for "${col.name}" was inferred from its column name; confirm it points at the right resource.`,
+        });
+      }
       field.optionLabel = 'title';
       field.sortable = true;
       field.filterable = true;
@@ -163,7 +196,7 @@ export function inferFromDatabaseColumns(
   const bundle = generateResourceBundle(resource);
   bundle.review = {
     needsReview: warnings.length > 0,
-    confidence: 'high',
+    confidence: reviewConfidence(warnings),
     sampleSize: columns.length,
     warnings,
   };
@@ -186,6 +219,18 @@ export function inferFromJSONSchema(
   const warnings: InferReviewWarning[] = [];
   const requiredSet = new Set(schema.required ?? []);
   const properties = schema.properties ?? {};
+
+  if (Object.keys(properties).length === 0) {
+    warnings.push({
+      code: 'empty-sample',
+      message: 'Schema declares no properties; the generated resource has no fields.',
+    });
+  } else if (!Object.hasOwn(properties, primaryKey)) {
+    warnings.push({
+      code: 'unconstrained-field',
+      message: `Primary key "${primaryKey}" is not declared in the schema properties. Verify the identifier field before shipping.`,
+    });
+  }
 
   for (const [key, prop] of Object.entries(properties)) {
     const rawType = Array.isArray(prop.type) ? prop.type[0] : prop.type;
@@ -249,6 +294,11 @@ export function inferFromJSONSchema(
       if (relTarget) {
         field.resource = relTarget;
       }
+      warnings.push({
+        code: 'heuristic-relation',
+        field: key,
+        message: `Relation target for "${key}" was inferred from its property name; confirm it points at the right resource.`,
+      });
       field.optionLabel = 'title';
       field.sortable = true;
       field.filterable = true;
@@ -267,7 +317,7 @@ export function inferFromJSONSchema(
   const bundle = generateResourceBundle(resource);
   bundle.review = {
     needsReview: warnings.length > 0,
-    confidence: 'high',
+    confidence: reviewConfidence(warnings),
     sampleSize: Object.keys(properties).length,
     warnings,
   };
