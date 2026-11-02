@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.24](https://github.com/vibeunion/svadmin/compare/directus-v0.11.23...directus-v0.11.24) (2026-11-02)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.73.0
+
 ## [0.11.23](https://github.com/vibeunion/svadmin/compare/directus-v0.11.22...directus-v0.11.23) (2026-11-02)
 
 

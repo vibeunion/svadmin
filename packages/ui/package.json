@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/ui",
-  "version": "0.110.1",
+  "version": "0.111.0",
   "description": "Pre-built admin UI components — AdminApp, AutoTable, AutoForm, Sidebar, Layout",
   "type": "module",
   "sideEffects": [
@@ -81,11 +81,6 @@
     "./component-registry": {
       "types": "./dist/component-registry.d.ts",
       "default": "./dist/component-registry.js"
-    },
-    "./icons": {
-      "types": "./dist/icons.d.ts",
-      "svelte": "./dist/icons.js",
-      "default": "./dist/icons.js"
     }
   },
   "peerDependencies": {

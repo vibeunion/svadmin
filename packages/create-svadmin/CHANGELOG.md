@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.51.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.50.6...create-svadmin-v0.51.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.73.0
+
 ## [0.50.6](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.50.5...create-svadmin-v0.50.6) (2026-11-02)
 
 

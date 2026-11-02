@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.111.0](https://github.com/vibeunion/svadmin/compare/ui-v0.110.1...ui-v0.111.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.2
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.9
+  * peerDependencies
+    * @svadmin/core bumped to 0.73.0
+
 ## [0.110.1](https://github.com/vibeunion/svadmin/compare/ui-v0.110.0...ui-v0.110.1) (2026-11-02)
 
 
