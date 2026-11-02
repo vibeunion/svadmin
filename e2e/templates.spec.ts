@@ -13,6 +13,7 @@ const templates: { nav: string; heading: string; path?: string }[] = [
   { nav: 'Group form', heading: 'Create workspace' },
   { nav: 'Step form', heading: 'Create workspace' },
   { nav: 'Advanced form', heading: 'Advanced request' },
+  { nav: 'Schema form', heading: 'Order request' },
   { nav: 'Basic detail', heading: 'Request detail' },
   { nav: 'Advanced detail', heading: 'Case detail' },
   { nav: 'Profile', heading: 'Public profile' },
