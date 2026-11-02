@@ -1,4 +1,4 @@
-import { fromPromise, type Result } from './result';
+import { err, fromPromise, type Result } from './result';
 import { toDomainError, type DomainError } from './domain-errors';
 import type {
   DataProvider,
@@ -24,11 +24,23 @@ import type {
   CustomResult,
 } from './types';
 
+export class ConcurrencyLimitClearedError extends Error {
+  constructor() {
+    super('Concurrency limiter cleared');
+    this.name = 'ConcurrencyLimitClearedError';
+  }
+}
+
 export interface ConcurrencyLimiter {
   <T>(fn: () => Promise<T>): Promise<T>;
   readonly activeCount: number;
   readonly pendingCount: number;
   clear(): void;
+}
+
+interface LimitWaiter {
+  resolve: () => void;
+  reject: (error: unknown) => void;
 }
 
 /**
@@ -41,21 +53,21 @@ export function createConcurrencyLimiter(concurrency: number): ConcurrencyLimite
   }
 
   let active = 0;
-  const queue: Array<() => void> = [];
+  const queue: LimitWaiter[] = [];
 
   const next = () => {
     if (active < concurrency && queue.length > 0) {
       const run = queue.shift();
       if (run) {
         active++;
-        run();
+        run.resolve();
       }
     }
   };
 
   const limiter = async <T>(fn: () => Promise<T>): Promise<T> => {
-    await new Promise<void>((resolve) => {
-      queue.push(resolve);
+    await new Promise<void>((resolve, reject) => {
+      queue.push({ resolve, reject });
       next();
     });
 
@@ -73,7 +85,8 @@ export function createConcurrencyLimiter(concurrency: number): ConcurrencyLimite
   });
 
   limiter.clear = () => {
-    queue.length = 0;
+    const dropped = queue.splice(0);
+    for (const waiter of dropped) waiter.reject(new ConcurrencyLimitClearedError());
   };
 
   return limiter as ConcurrencyLimiter;
@@ -147,18 +160,26 @@ export function wrapDataProviderWithResult(provider: DataProvider): SafeDataProv
   const deleteMany = provider.deleteMany?.bind(provider);
   const custom = provider.custom?.bind(provider);
 
+  const asResult = <T>(run: () => Promise<T>): Promise<Result<T, DomainError>> => {
+    try {
+      return fromPromise(Promise.resolve(run()), toDomainError);
+    } catch (cause) {
+      return Promise.resolve(err(toDomainError(cause)));
+    }
+  };
+
   return {
     raw: provider,
     getApiUrl: () => provider.getApiUrl(),
-    getList: (params) => fromPromise(provider.getList(params), toDomainError),
-    getOne: (params) => fromPromise(provider.getOne(params), toDomainError),
-    create: (params) => fromPromise(provider.create(params), toDomainError),
-    update: (params) => fromPromise(provider.update(params), toDomainError),
-    deleteOne: (params) => fromPromise(provider.deleteOne(params), toDomainError),
-    getMany: getMany ? (params) => fromPromise(getMany(params), toDomainError) : undefined,
-    createMany: createMany ? (params) => fromPromise(createMany(params), toDomainError) : undefined,
-    updateMany: updateMany ? (params) => fromPromise(updateMany(params), toDomainError) : undefined,
-    deleteMany: deleteMany ? (params) => fromPromise(deleteMany(params), toDomainError) : undefined,
-    custom: custom ? (params) => fromPromise(custom(params), toDomainError) : undefined,
+    getList: (params) => asResult(() => provider.getList(params)),
+    getOne: (params) => asResult(() => provider.getOne(params)),
+    create: (params) => asResult(() => provider.create(params)),
+    update: (params) => asResult(() => provider.update(params)),
+    deleteOne: (params) => asResult(() => provider.deleteOne(params)),
+    getMany: getMany ? (params) => asResult(() => getMany(params)) : undefined,
+    createMany: createMany ? (params) => asResult(() => createMany(params)) : undefined,
+    updateMany: updateMany ? (params) => asResult(() => updateMany(params)) : undefined,
+    deleteMany: deleteMany ? (params) => asResult(() => deleteMany(params)) : undefined,
+    custom: custom ? (params) => asResult(() => custom(params)) : undefined,
   };
 }

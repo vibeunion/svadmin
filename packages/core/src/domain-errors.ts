@@ -1,4 +1,4 @@
-import { HttpError, type ValidationErrors, type HttpErrorOptions } from './types';
+import { HttpError, UndoError, type ValidationErrors, type HttpErrorOptions } from './types';
 import { definedOptions } from './defined-options';
 
 export class ValidationError extends HttpError {
@@ -87,6 +87,7 @@ export class AuthError extends HttpError {
 export interface NetworkErrorOptions extends HttpErrorOptions {
   isTimeout?: boolean | undefined;
   isOffline?: boolean | undefined;
+  statusCode?: number | undefined;
 }
 
 export class NetworkError extends HttpError {
@@ -99,14 +100,15 @@ export class NetworkError extends HttpError {
     message: string = 'Network communication failure',
     options: NetworkErrorOptions = {},
   ) {
-    super(message, options.isTimeout ? 504 : 0, undefined, definedOptions({
-      code: options.code ?? (options.isTimeout ? 'NETWORK_TIMEOUT' : 'NETWORK_ERROR'),
+    const isTimeout = options.isTimeout ?? false;
+    super(message, options.statusCode ?? (isTimeout ? 504 : 0), undefined, definedOptions({
+      code: options.code ?? (isTimeout ? 'NETWORK_TIMEOUT' : 'NETWORK_ERROR'),
       details: options.details,
       body: options.body,
       cause: options.cause,
     }));
     this.name = 'NetworkError';
-    this.isTimeout = options.isTimeout ?? false;
+    this.isTimeout = isTimeout;
     this.isOffline = options.isOffline ?? false;
   }
 }
@@ -187,6 +189,114 @@ export class ServerInternalError extends HttpError {
   }
 }
 
+export class BadRequestError extends HttpError {
+  readonly _tag = 'BadRequestError' as const;
+  readonly fieldErrors: ValidationErrors;
+
+  constructor(
+    message: string = 'Bad request',
+    fieldErrors: ValidationErrors = {},
+    options: HttpErrorOptions = {},
+  ) {
+    super(message, 400, fieldErrors, definedOptions({
+      code: options.code ?? 'BAD_REQUEST',
+      details: options.details,
+      body: options.body,
+      cause: options.cause,
+    }));
+    this.name = 'BadRequestError';
+    this.fieldErrors = fieldErrors;
+  }
+}
+
+export class RateLimitError extends HttpError {
+  readonly _tag = 'RateLimitError' as const;
+  readonly retryable = true as const;
+
+  constructor(
+    message: string = 'Rate limit exceeded',
+    options: HttpErrorOptions = {},
+  ) {
+    super(message, 429, undefined, definedOptions({
+      code: options.code ?? 'RATE_LIMITED',
+      details: options.details,
+      body: options.body,
+      cause: options.cause,
+    }));
+    this.name = 'RateLimitError';
+  }
+}
+
+export class UnavailableError extends HttpError {
+  readonly _tag = 'UnavailableError' as const;
+  readonly retryable = true as const;
+
+  constructor(
+    message: string = 'Service unavailable',
+    statusCode: number = 503,
+    options: HttpErrorOptions = {},
+  ) {
+    super(message, statusCode, undefined, definedOptions({
+      code: options.code ?? 'SERVICE_UNAVAILABLE',
+      details: options.details,
+      body: options.body,
+      cause: options.cause,
+    }));
+    this.name = 'UnavailableError';
+  }
+}
+
+export class CancelledError extends HttpError {
+  readonly _tag = 'CancelledError' as const;
+  readonly writeMayHaveSucceeded: boolean;
+
+  constructor(
+    message: string = 'Operation cancelled',
+    statusCode: number = 409,
+    options: HttpErrorOptions = {},
+  ) {
+    super(message, statusCode, undefined, definedOptions({
+      code: options.code ?? 'OPERATION_CANCELLED',
+      details: options.details,
+      body: options.body,
+      cause: options.cause,
+    }));
+    this.name = 'CancelledError';
+    this.writeMayHaveSucceeded = writeMayHaveSucceeded(options.details);
+  }
+}
+
+export class AbortedError extends HttpError {
+  readonly _tag = 'AbortedError' as const;
+  readonly retryable = false as const;
+
+  constructor(
+    message: string = 'Operation aborted',
+    options: HttpErrorOptions = {},
+  ) {
+    super(message, 0, undefined, definedOptions({
+      code: options.code ?? 'ABORTED',
+      details: options.details,
+      body: options.body,
+      cause: options.cause,
+    }));
+    this.name = 'AbortedError';
+  }
+}
+
+/** 用户撤销不是服务器失败，不能伪装成 500。 */
+export class UndoneError extends Error {
+  readonly _tag = 'UndoneError' as const;
+
+  constructor(
+    message: string = 'Mutation undone',
+    options: { cause?: unknown } = {},
+  ) {
+    super(message, options.cause === undefined ? undefined : { cause: options.cause });
+    this.name = 'UndoneError';
+  }
+}
+
 export type DomainError =
   | ValidationError
   | ConflictError
@@ -194,74 +304,113 @@ export type DomainError =
   | NetworkError
   | ContractDecodingError
   | NotFoundError
-  | ServerInternalError;
+  | ServerInternalError
+  | BadRequestError
+  | RateLimitError
+  | UnavailableError
+  | CancelledError
+  | AbortedError
+  | UndoneError;
 
 export type DomainErrorTag = DomainError['_tag'];
 
-export type ErrorPattern<E extends { readonly _tag: string }, R> = {
-  [K in E['_tag']]?: (error: Extract<E, { readonly _tag: K }>) => R;
-} & {
-  [key: string]: ((error: never) => R) | undefined;
-} & {
-  _?: (error: E) => R;
+type ErrorHandlers<E extends { readonly _tag: string }, R> = {
+  [K in E['_tag']]: (error: Extract<E, { readonly _tag: K }>) => R;
 };
+
+/** 要么覆盖全部分支，要么提供 `_` 兜底。缺分支在编译期失败。 */
+export type ErrorPattern<E extends { readonly _tag: string }, R> =
+  | ErrorHandlers<E, R>
+  | (Partial<ErrorHandlers<E, R>> & { _: (error: E) => R });
 
 export function matchError<E extends { readonly _tag: string }, R>(
   error: E,
   patterns: ErrorPattern<E, R>,
 ): R {
-  const tag = error._tag as string;
-  const handler = (patterns as Record<string, ((err: unknown) => R) | undefined>)[tag];
+  const tag = error._tag as E['_tag'];
+  const handler = (patterns as Partial<ErrorHandlers<E, R>>)[tag];
   if (typeof handler === 'function') {
-    return handler(error);
+    return handler(error as never);
   }
-  const fallback = patterns._;
-  if (typeof fallback === 'function') {
-    return fallback(error);
+  if ('_' in patterns && typeof patterns._ === 'function') {
+    return patterns._(error);
   }
   throw new Error(`Unhandled domain error tag: ${tag}`);
 }
 
-export function toDomainError(cause: unknown): DomainError {
-  if (
-    cause instanceof ValidationError
+function writeMayHaveSucceeded(details: unknown): boolean {
+  return typeof details === 'object'
+    && details !== null
+    && 'writeMayHaveSucceeded' in details
+    && details.writeMayHaveSucceeded === true;
+}
+
+function carried(cause: HttpError): HttpErrorOptions {
+  return definedOptions({
+    code: cause.code,
+    details: cause.details,
+    body: cause.body,
+    cause,
+  });
+}
+
+function isDomainError(cause: unknown): cause is DomainError {
+  return cause instanceof ValidationError
     || cause instanceof ConflictError
     || cause instanceof AuthError
     || cause instanceof NetworkError
     || cause instanceof ContractDecodingError
     || cause instanceof NotFoundError
     || cause instanceof ServerInternalError
-  ) {
-    return cause;
+    || cause instanceof BadRequestError
+    || cause instanceof RateLimitError
+    || cause instanceof UnavailableError
+    || cause instanceof CancelledError
+    || cause instanceof AbortedError
+    || cause instanceof UndoneError;
+}
+
+/**
+ * 保留 HttpError 的 code、details、body。
+ * 取消和撤销不能改写成冲突或 500，否则 safeMutate 会丢掉 writeMayHaveSucceeded。
+ */
+export function toDomainError(cause: unknown): DomainError {
+  if (isDomainError(cause)) return cause;
+
+  if (cause instanceof UndoError) {
+    return new UndoneError(cause.message, { cause });
   }
 
   if (cause instanceof HttpError) {
+    const options = carried(cause);
+    if (typeof cause.code === 'string' && cause.code.endsWith('_CANCELLED')) {
+      return new CancelledError(cause.message, cause.statusCode, options);
+    }
     const status = cause.statusCode;
-    if (status === 422) {
-      return new ValidationError(cause.message, cause.errors ?? {}, definedOptions({ code: cause.code, cause }));
+    if (status === 422) return new ValidationError(cause.message, cause.errors ?? {}, options);
+    if (status === 409) return new ConflictError(cause.message, options);
+    if (status === 401) return new AuthError('unauthorized', cause.message, options);
+    if (status === 403) return new AuthError('forbidden', cause.message, options);
+    if (status === 404) return new NotFoundError(cause.message, options);
+    if (status === 400) return new BadRequestError(cause.message, cause.errors ?? {}, options);
+    if (status === 408 || status === 504 || status === 0) {
+      return new NetworkError(cause.message, definedOptions({
+        isTimeout: status === 408 || status === 504,
+        statusCode: status,
+        code: cause.code,
+        details: cause.details,
+        body: cause.body,
+        cause,
+      }));
     }
-    if (status === 409) {
-      return new ConflictError(cause.message, definedOptions({ code: cause.code, cause }));
-    }
-    if (status === 401) {
-      return new AuthError('unauthorized', cause.message, definedOptions({ code: cause.code, cause }));
-    }
-    if (status === 403) {
-      return new AuthError('forbidden', cause.message, definedOptions({ code: cause.code, cause }));
-    }
-    if (status === 404) {
-      return new NotFoundError(cause.message, definedOptions({ code: cause.code, cause }));
-    }
-    if (status === 504 || status === 0) {
-      return new NetworkError(cause.message, definedOptions({ isTimeout: status === 504, code: cause.code, cause }));
-    }
-    return new ServerInternalError(cause.message, status, definedOptions({ code: cause.code, cause }));
+    if (status === 429) return new RateLimitError(cause.message, options);
+    if (status === 503) return new UnavailableError(cause.message, status, options);
+    return new ServerInternalError(cause.message, status, options);
   }
 
   if (cause instanceof Error) {
-    if (cause.name === 'AbortError' || cause.name === 'TimeoutError') {
-      return new NetworkError(cause.message, { isTimeout: true, cause });
-    }
+    if (cause.name === 'AbortError') return new AbortedError(cause.message, { cause });
+    if (cause.name === 'TimeoutError') return new NetworkError(cause.message, { isTimeout: true, cause });
     return new ServerInternalError(cause.message, 500, { cause });
   }
 

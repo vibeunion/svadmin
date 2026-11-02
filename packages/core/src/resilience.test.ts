@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { createConcurrencyLimiter, withRetry, wrapDataProviderWithResult } from './resilience';
+import { ConcurrencyLimitClearedError, createConcurrencyLimiter, withRetry, wrapDataProviderWithResult } from './resilience';
 import type { DataProvider } from './types';
 
 describe('Resilience Utilities', () => {
@@ -31,6 +31,24 @@ describe('Resilience Utilities', () => {
 
     it('rejects invalid concurrency count', () => {
       expect(() => createConcurrencyLimiter(0)).toThrow(RangeError);
+    });
+
+    it('rejects queued work when cleared', async () => {
+      const limit = createConcurrencyLimiter(1);
+      let releaseFirst: ((value: string) => void) | undefined;
+      const first = limit(() => new Promise<string>((resolve) => { releaseFirst = resolve; }));
+      await Promise.resolve();
+      let secondStarted = false;
+      const second = limit(async () => { secondStarted = true; return 'second'; });
+      const cleared = second.then(() => undefined, (error: unknown) => error);
+      limit.clear();
+      if (!releaseFirst) throw new Error('first task did not start');
+      releaseFirst('first');
+      await expect(first).resolves.toBe('first');
+      await expect(cleared).resolves.toBeInstanceOf(ConcurrencyLimitClearedError);
+      expect(secondStarted).toBe(false);
+      expect(limit.pendingCount).toBe(0);
+      expect(limit.activeCount).toBe(0);
     });
   });
 
@@ -93,6 +111,24 @@ describe('Resilience Utilities', () => {
       if (!oneResult.ok) {
         expect(oneResult.error._tag).toBe('ServerInternalError');
         expect(oneResult.error.message).toBe('Not found');
+      }
+    });
+
+    it('captures synchronous provider throws as Result.err', async () => {
+      const mockProvider: DataProvider = {
+        getApiUrl: () => 'https://api.example.com',
+        getList: () => { throw new Error('sync boom'); },
+        getOne: async () => ({ data: { id: 1 } }),
+        create: async () => ({ data: { id: 2 } }),
+        update: async () => ({ data: { id: 2 } }),
+        deleteOne: async () => ({ data: { id: 2 } }),
+      };
+      const safeProvider = wrapDataProviderWithResult(mockProvider);
+      const listResult = await safeProvider.getList({ resource: 'users' });
+      expect(listResult.ok).toBe(false);
+      if (!listResult.ok) {
+        expect(listResult.error._tag).toBe('ServerInternalError');
+        expect(listResult.error.message).toBe('sync boom');
       }
     });
   });
