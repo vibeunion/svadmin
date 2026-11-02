@@ -118,9 +118,10 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): M
       }
 
       // 2. Sorters
-      if (params.sorters && params.sorters.length > 0) {
+      const sorters = params.sorters ?? [];
+      if (sorters.length > 0) {
         records.sort((a, b) => {
-          for (const sorter of params.sorters!) {
+          for (const sorter of sorters) {
             const valA = a[sorter.field];
             const valB = b[sorter.field];
             if (valA === valB) continue;

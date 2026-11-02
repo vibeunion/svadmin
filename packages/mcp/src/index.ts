@@ -483,20 +483,20 @@ async function handleToolCall(
       let result;
 
       if (sourceType === 'sampleData') {
-        result = inferResource(resource, Array.isArray(parsedPayload) ? parsedPayload : [parsedPayload], {
+        result = inferResource(resource, Array.isArray(parsedPayload) ? parsedPayload : [parsedPayload], definedOptions({
           primaryKey: idKey,
           label,
-        });
+        }));
       } else if (sourceType === 'jsonSchema') {
-        result = inferFromJSONSchema(resource, parsedPayload, {
+        result = inferFromJSONSchema(resource, parsedPayload, definedOptions({
           primaryKey: idKey,
           label,
-        });
+        }));
       } else if (sourceType === 'databaseColumns') {
-        result = inferFromDatabaseColumns(resource, parsedPayload, {
+        result = inferFromDatabaseColumns(resource, parsedPayload, definedOptions({
           primaryKey: idKey,
           label,
-        });
+        }));
       } else {
         throw new Error(`Invalid sourceType: ${sourceType}`);
       }
@@ -528,10 +528,12 @@ async function handleToolCall(
       return buildResourcePatch({
         resource,
         action,
-        field,
-        column,
         value,
-        targetComponent,
+        ...definedOptions({
+          field,
+          column,
+          targetComponent,
+        }),
       });
     }
 

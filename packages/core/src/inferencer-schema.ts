@@ -92,7 +92,7 @@ export function inferFromDatabaseColumns(
 
   for (const col of columns) {
     const rawType = (col.type ?? '').toLowerCase().replace(/\(.*\)/, '').trim();
-    let type: FieldDefinition['type'] = 'text';
+    let type: FieldDefinition['type'];
 
     if (col.isPrimary || col.name === primaryKey) {
       type = /int|serial|numeric|decimal|float|bigint/.test(rawType) ? 'number' : 'text';
@@ -189,7 +189,7 @@ export function inferFromJSONSchema(
 
   for (const [key, prop] of Object.entries(properties)) {
     const rawType = Array.isArray(prop.type) ? prop.type[0] : prop.type;
-    let type: FieldDefinition['type'] = 'text';
+    let type: FieldDefinition['type'];
     let fieldOptions: { label: string; value: string | number }[] | undefined;
 
     if (prop.enum && Array.isArray(prop.enum) && prop.enum.length > 0) {

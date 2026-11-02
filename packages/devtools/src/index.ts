@@ -497,9 +497,9 @@ export interface ResourcePatchResult {
  */
 export function buildResourcePatch(patch: ResourcePatch): ResourcePatchResult {
   const resource = patch.resource;
-  let summary = '';
-  let suggestedPatchCode = '';
-  let agentPrompt = '';
+  let summary: string;
+  let suggestedPatchCode: string;
+  let agentPrompt: string;
 
   switch (patch.action) {
     case 'toggleColumnVisibility': {

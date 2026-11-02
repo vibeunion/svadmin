@@ -100,9 +100,9 @@ if (import.meta.main) {
   const report = runVibeGovernanceCheck();
 
   if (isJson) {
-    console.log(JSON.stringify(report, null, 2));
+    console.info(JSON.stringify(report, null, 2));
   } else {
-    console.log(report.summary);
+    console.info(report.summary);
     if (!report.passed) {
       for (const v of report.violations) {
         console.error(`❌ [${v.rule}] ${v.file}:${v.line} - ${v.message}\n   👉 Fix: ${v.remediation}`);

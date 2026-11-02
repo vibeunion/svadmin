@@ -6,6 +6,14 @@ import {
   type JSONSchemaInput,
 } from './inferencer-schema';
 
+function fieldByKey<T extends { key: string }>(fields: readonly T[], key: string): T {
+  const field = fields.find((item) => item.key === key);
+  if (!field) {
+    throw new Error(`Missing inferred field: ${key}`);
+  }
+  return field;
+}
+
 describe('inferFromDatabaseColumns', () => {
   it('infers field types, primary key, and relations from SQL columns', () => {
     const columns: DatabaseColumnMeta[] = [
@@ -24,29 +32,29 @@ describe('inferFromDatabaseColumns', () => {
     expect(result.resource.primaryKey).toBe('id');
     expect(result.fields.length).toBe(7);
 
-    const idField = result.fields.find(f => f.key === 'id')!;
+    const idField = fieldByKey(result.fields, 'id');
     expect(idField.type).toBe('number');
     expect(idField.showInCreate).toBe(false);
 
-    const titleField = result.fields.find(f => f.key === 'title')!;
+    const titleField = fieldByKey(result.fields, 'title');
     expect(titleField.type).toBe('text');
     expect(titleField.required).toBe(true);
 
-    const contentField = result.fields.find(f => f.key === 'content')!;
+    const contentField = fieldByKey(result.fields, 'content');
     expect(contentField.type).toBe('textarea');
 
-    const userField = result.fields.find(f => f.key === 'user_id')!;
+    const userField = fieldByKey(result.fields, 'user_id');
     expect(userField.type).toBe('relation');
     expect(userField.resource).toBe('users');
 
-    const activeField = result.fields.find(f => f.key === 'is_active')!;
+    const activeField = fieldByKey(result.fields, 'is_active');
     expect(activeField.type).toBe('boolean');
     expect(activeField.defaultValue).toBe(true);
 
-    const createdAtField = result.fields.find(f => f.key === 'created_at')!;
+    const createdAtField = fieldByKey(result.fields, 'created_at');
     expect(createdAtField.type).toBe('date');
 
-    const metaField = result.fields.find(f => f.key === 'metadata')!;
+    const metaField = fieldByKey(result.fields, 'metadata');
     expect(metaField.type).toBe('json');
 
     // Code and Svelte snippets generated
@@ -79,26 +87,26 @@ describe('inferFromJSONSchema', () => {
     expect(result.resource.label).toBe('Customer Profile');
     expect(result.fields.length).toBe(8);
 
-    const nameField = result.fields.find(f => f.key === 'name')!;
+    const nameField = fieldByKey(result.fields, 'name');
     expect(nameField.label).toBe('Full Name');
     expect(nameField.required).toBe(true);
 
-    const emailField = result.fields.find(f => f.key === 'email')!;
+    const emailField = fieldByKey(result.fields, 'email');
     expect(emailField.type).toBe('email');
     expect(emailField.required).toBe(true);
 
-    const websiteField = result.fields.find(f => f.key === 'website')!;
+    const websiteField = fieldByKey(result.fields, 'website');
     expect(websiteField.type).toBe('url');
 
-    const tierField = result.fields.find(f => f.key === 'tier')!;
+    const tierField = fieldByKey(result.fields, 'tier');
     expect(tierField.type).toBe('select');
     expect(tierField.options?.length).toBe(3);
 
-    const creditsField = result.fields.find(f => f.key === 'credits')!;
+    const creditsField = fieldByKey(result.fields, 'credits');
     expect(creditsField.type).toBe('number');
     expect(creditsField.defaultValue).toBe(100);
 
-    const createdAtField = result.fields.find(f => f.key === 'created_at')!;
+    const createdAtField = fieldByKey(result.fields, 'created_at');
     expect(createdAtField.type).toBe('date');
   });
 });
