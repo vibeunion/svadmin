@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.109.1](https://github.com/vibeunion/svadmin/compare/ui-v0.109.0...ui-v0.109.1) (2026-11-02)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** restore workspace scroll and build docs dependencies ([c325d57](https://github.com/vibeunion/svadmin/commit/c325d57f9a211bbd27e85b50814cdeb8c9d6f006))
+
 ## [0.109.0](https://github.com/vibeunion/svadmin/compare/ui-v0.108.6...ui-v0.109.0) (2026-11-01)
 
 
