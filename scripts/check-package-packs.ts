@@ -1402,7 +1402,6 @@ console.info('consumer imports passed');
     join(consumerDirectory, 'smoke.ts'),
     `import { createSessionManager } from '@svadmin/auth-utils';
 import type { PasswordOptions } from '@svadmin/auth-utils/password';
-import type { ComponentRegistry } from '@svadmin/ui';
 import { createGoogleAuth, SSOAuthError } from '@svadmin/sso';
 import type {
   GetAccessTokenOptions,
@@ -1414,8 +1413,6 @@ import type {
 
 type PublishedTypes = PasswordOptions | SSOConfig | SSOSession | GetAccessTokenOptions;
 
-declare const componentRegistry: ComponentRegistry | undefined;
-void componentRegistry;
 void createSessionManager;
 const provider: SSOAuthProvider = createGoogleAuth('pack-check', {
   redirectUri: 'https://app.example/callback',
