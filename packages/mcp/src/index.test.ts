@@ -73,14 +73,14 @@ describe('createMCPServer', () => {
     resources: ['posts', 'users'],
   });
 
-  test('generates correct number of tools (read + write + diagnostics)', () => {
+  test('generates correct number of tools (read + write + diagnostics + vibe tools)', () => {
     const tools = server.getTools();
-    // getList, getOne, getMany, create, update, delete + getDiagnostics, getSelfHealingPrompt, getManifest = 9
-    expect(tools).toHaveLength(9);
+    expect(tools).toHaveLength(12);
     expect(tools.map(t => t.name)).toEqual([
       'svadmin_getList', 'svadmin_getOne', 'svadmin_getMany',
       'svadmin_create', 'svadmin_update', 'svadmin_delete',
       'svadmin_getDiagnostics', 'svadmin_getSelfHealingPrompt', 'svadmin_getManifest',
+      'svadmin_generateResource', 'svadmin_applyResourcePatch', 'svadmin_verifyGovernance',
     ]);
   });
 
@@ -91,16 +91,17 @@ describe('createMCPServer', () => {
       readOnly: true,
     });
     const tools = readOnlyServer.getTools();
-    expect(tools).toHaveLength(6);
+    expect(tools).toHaveLength(9);
     expect(tools.map(t => t.name)).toEqual([
       'svadmin_getList', 'svadmin_getOne', 'svadmin_getMany',
       'svadmin_getDiagnostics', 'svadmin_getSelfHealingPrompt', 'svadmin_getManifest',
+      'svadmin_generateResource', 'svadmin_applyResourcePatch', 'svadmin_verifyGovernance',
     ]);
   });
 
   test('tool resource enum matches configured resources', () => {
     const tools = server.getTools();
-    const getListTool =requireValue( tools.find(t => t.name === 'svadmin_getList'));
+    const getListTool = requireValue(tools.find(t => t.name === 'svadmin_getList'));
     expect(requireValue(getListTool.inputSchema.properties['resource']).enum).toEqual(['posts', 'users']);
   });
 
@@ -108,7 +109,7 @@ describe('createMCPServer', () => {
     const info = server.getServerInfo();
     expect(info.name).toBe('@svadmin/mcp');
     expect(info.version).toBe('0.1.0');
-    expect(info.tools).toHaveLength(9);
+    expect(info.tools).toHaveLength(12);
   });
 });
 
@@ -130,7 +131,7 @@ describe('MCP JSON-RPC handling', () => {
     const res = await server.handleRequest(makeRequest('tools/list'));
     expect(res.error).toBeUndefined();
     const result = res.result as { tools: unknown[] };
-    expect(result.tools).toHaveLength(9);
+    expect(result.tools).toHaveLength(12);
   });
 
   test('tools/call getList returns paginated data', async () => {
@@ -353,5 +354,112 @@ describe('Tool safety and concurrency metadata', () => {
     expect(report.errorCount).toBe(1);
     expect(report.agentPrompt).toContain('posts');
     expect(report.agentPrompt).toContain('PERMISSION_DENIED');
+  });
+
+  test('svadmin_generateResource infers resource code from schema and columns', async () => {
+    // 1. JSON Schema mode
+    const schemaPayload = {
+      type: 'object',
+      required: ['title'],
+      properties: {
+        id: { type: 'number' },
+        title: { type: 'string' },
+        category: { type: 'string', enum: ['tech', 'news'] },
+      },
+    };
+
+    const res = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_generateResource',
+        arguments: {
+          resource: 'articles',
+          sourceType: 'jsonSchema',
+          payload: JSON.stringify(schemaPayload),
+        },
+      }),
+    );
+
+    expect(res.error).toBeUndefined();
+    const result = res.result as { content: { type: string; text: string }[] };
+    const generated = JSON.parse(requireValue(result.content[0]).text) as {
+      resource: { name: string; fields: unknown[] };
+      code: string;
+      componentCode: { list: string };
+    };
+    expect(generated.resource.name).toBe('articles');
+    expect(generated.code).toContain("name: 'articles'");
+    expect(generated.componentCode.list).toContain('<AutoTable');
+
+    // 2. Database columns mode
+    const columnsPayload = [
+      { name: 'id', type: 'bigint', isPrimary: true },
+      { name: 'order_number', type: 'varchar(64)', nullable: false },
+      { name: 'total_amount', type: 'numeric(10,2)', nullable: false },
+      { name: 'user_id', type: 'bigint', isForeignKey: true, referencesResource: 'users' },
+    ];
+
+    const resDb = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_generateResource',
+        arguments: {
+          resource: 'orders',
+          sourceType: 'databaseColumns',
+          payload: JSON.stringify(columnsPayload),
+        },
+      }),
+    );
+
+    expect(resDb.error).toBeUndefined();
+    const resultDb = resDb.result as { content: { type: string; text: string }[] };
+    const generatedDb = JSON.parse(requireValue(resultDb.content[0]).text) as {
+      resource: { name: string; fields: Array<{ key: string; type: string }> };
+    };
+    expect(generatedDb.resource.name).toBe('orders');
+    expect(generatedDb.resource.fields.find(f => f.key === 'user_id')?.type).toBe('relation');
+  });
+
+  test('svadmin_applyResourcePatch builds writeback patch and agent prompt', async () => {
+    const res = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_applyResourcePatch',
+        arguments: {
+          resource: 'posts',
+          action: 'toggleColumnVisibility',
+          column: 'views',
+          value: 'true',
+        },
+      }),
+    );
+
+    expect(res.error).toBeUndefined();
+    const result = res.result as { content: { type: string; text: string }[] };
+    const patch = JSON.parse(requireValue(result.content[0]).text) as {
+      success: boolean;
+      summary: string;
+      agentPrompt: string;
+    };
+    expect(patch.success).toBe(true);
+    expect(patch.summary).toContain("Hide column 'views'");
+    expect(patch.agentPrompt).toContain('[SVADMIN_WRITEBACK_PATCH]');
+  });
+
+  test('svadmin_verifyGovernance returns architectural invariants report', async () => {
+    const res = await server.handleRequest(
+      makeRequest('tools/call', {
+        name: 'svadmin_verifyGovernance',
+        arguments: { strict: true },
+      }),
+    );
+
+    expect(res.error).toBeUndefined();
+    const result = res.result as { content: { type: string; text: string }[] };
+    const gov = JSON.parse(requireValue(result.content[0]).text) as {
+      governancePassed: boolean;
+      principles: string[];
+      status: string;
+    };
+    expect(gov.governancePassed).toBe(true);
+    expect(gov.status).toBe('compliant');
+    expect(gov.principles.length).toBeGreaterThanOrEqual(4);
   });
 });

@@ -6,6 +6,7 @@ import {
   buildResourceDiagnostics,
   buildRouteDiagnostics,
   buildSelfHealingReport,
+  buildResourcePatch,
   captureRuntimeError,
   createDevtoolsCollector,
   toPermissionDiagnostic,
@@ -205,5 +206,20 @@ describe('diagnostic builders', () => {
     expect(report.agentPrompt).toContain('users');
     expect(report.agentPrompt).toContain('products');
     expect(report.agentPrompt).toContain('Self-Healing Report');
+  });
+
+  test('builds visual writeback patch and agent prompt', () => {
+    const patch = buildResourcePatch({
+      resource: 'posts',
+      action: 'toggleColumnVisibility',
+      column: 'views',
+      value: true,
+    });
+
+    expect(patch.success).toBe(true);
+    expect(patch.summary).toContain("Hide column 'views' in resource 'posts'");
+    expect(patch.suggestedPatchCode).toContain("hidden: true");
+    expect(patch.agentPrompt).toContain('[SVADMIN_WRITEBACK_PATCH]');
+    expect(patch.agentPrompt).toContain("Resource: posts");
   });
 });

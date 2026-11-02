@@ -47,6 +47,14 @@
 - Keep visual evidence path-based. Inspect images only when visual judgement is essential, summarize the observation, and continue from paths.
 - If a Codex session hits context pressure, run `agmesh automation inspect-session-context <session-id|session-file>` and continue with a concise handoff summary.
 
+## SVAdmin Vibe Coding Engineering Law
+
+- **1. Schema Generation First**: Use `svadmin_generateResource` or `inferFromDatabaseColumns` / `inferFromJSONSchema` for zero-hallucination ResourceDefinitions; do not manually assemble schema fields from imagination.
+- **2. Visual Grounding & Writeback**: Target UI components via `data-svadmin-component` / `data-svadmin-resource` / `data-svadmin-field`; apply writeback patches matching `[SVADMIN_WRITEBACK_PATCH]`.
+- **3. 4-Tier Escape Hatch Ladder**: Level 1 (Schema) -> Level 2 (Snippet Slots: `AutoForm.fields`, `AutoTable.columns`) -> Level 3 (Headless: `useTable`/`useForm`) -> Level 4 (Hooks). Any Level 3/4 escape hatch must declare `// @vibe-escape: <reason>`.
+- **4. DataProvider Isolation**: Never use raw `fetch()` or `axios` in views; all queries and mutations must flow through DataProvider hooks.
+- **5. Closed-Loop Verification**: Run `bun run check:vibe-governance` and `svadmin_getDiagnostics` to verify zero runtime or architectural regressions.
+
 <!-- AGENT:OVERLAY:START -->
 ## Cursor Cloud
 
