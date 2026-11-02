@@ -138,6 +138,26 @@ forcing one fixed mock layout.
 | User settings | Basic info, security, verified identity | `UserSettingsTemplate` with `basic`, `security`, `verification` tabs | Identity-verification provider and document upload |
 | User info | Header, projects, news, team | `UserInfoTemplate` with `header`, `projects`, `news`, `team` | News feed and social graph provider |
 
+## Ecosystem matrix
+
+Component and page coverage is not the whole reference ecosystem. This matrix
+tracks the engineering layer (theming, icons, CLI materials, schema reactions)
+and records the two deliberate non-goals. Each `adopted` / `partial` row is
+verified by `scripts/ecosystem-parity.ts`: the evidence file must exist and
+still contain the claimed symbol, and `check:parity --check` fails when this
+table drifts. Regenerate it with `bun run check:parity`.
+
+<!-- ecosystem-matrix:start -->
+| Reference ecosystem | Capability | svadmin surface | Status | Decision |
+| --- | --- | --- | --- | --- |
+| @arco-design/color, arco-theme editor | Derive a tonal palette from one brand color, emit light/dark tokens, exchange them as data | `generateColorScale`, `deriveColorPreset`, `exportColorThemes`, `importColorThemes` | ✅ adopted | OKLCH scale + versioned token document. No Less variable layer; values are CSS custom properties. |
+| arco-cli, `arco add`, material market | List and install page materials into an existing project idempotently | `svadmin add block <name>` / `--list` | ✅ adopted | Registry is shipped in the CLI, so `--list` and installation cannot disagree. No network fetch. |
+| @arco-design/web-react/icon | Resolve an icon by name, with host/plugin override and a predictable fallback | `registerIcons`, `resolveIcon`, `setIconMissHandler` from `@svadmin/ui/icons` | ✅ adopted | Keeps `@lucide/svelte` as the default vocabulary instead of porting an icon package. |
+| @formily/arco | Schema-driven conditional visibility and derived field values | `visibleWhen` combinators, `equalsField`, `computed`, `applySchemaFormComputed` | ⚠️ partial | Condition graph and a closed set of derivations (sum/count/first/concat). Arbitrary expression evaluation stays a non-goal; `Form.Item` parity stays rejected. |
+| @arco-plugins/vite-react, @arco-plugins/webpack-react, unplugin-react, babel-plugin-import | On-demand component/style imports, Less variable replacement, lazy loading, icon substitution | Not ported | ➖ non-goal | ESM tree-shaking and CSS variables replace import-on-demand and `modifyVars`. `pack:check` and `bundle:check` guard the real risk (exports and bundle shape). |
+| @arco-design/mobile-react | Mobile-first component set with touch gestures | `@svadmin/lite` SSR + responsive table/form layouts | ➖ non-goal | Admin consoles are covered by responsive surfaces and SSR parity. A gesture component library is a separate product with its own accessibility budget. |
+<!-- ecosystem-matrix:end -->
+
 ## Refine alignment
 
 svadmin follows Refine's split rather than emulating every reference component API:

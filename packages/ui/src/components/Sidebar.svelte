@@ -17,13 +17,10 @@
   import * as Collapsible from './ui/collapsible/index.js';
   import { Avatar } from './ui/avatar/index.js';
   import {
-    LayoutDashboard, FileText, Users, Settings, Home,
+    LayoutDashboard, Settings,
     ChevronLeft, ChevronRight, ChevronDown, LogOut, Sun, Moon, Palette,
-    Image as ImageIcon, Layout, Folder, Type, Video,
-    Download, ListTodo, TrendingUp, Sparkles, Images, Bot, Key, KeyRound, CreditCard, BookOpen, Wrench,
-    Repeat, ClipboardCheck, SlidersHorizontal, AlertTriangle, Mail, Map as MapIcon, MessageSquare, Send, ShoppingBag, Star, Briefcase, Building2,
-    Calendar, Bell, Clock, Tag, Trash2, Shield
   } from '@lucide/svelte';
+  import { resolveIcon, type IconComponent } from '../icons.js';
 
   const i18n = useTranslation();
 
@@ -50,54 +47,10 @@
     return effectiveRouteMode === 'hash' ? `#${path}` : path;
   }
 
-  const iconMap: Record<string, typeof LayoutDashboard> = {
-    'dashboard': LayoutDashboard,
-    'posts': FileText,
-    'file': FileText,
-    'users': Users,
-    'settings': Settings,
-    'home': Home,
-    'palette': Palette,
-    'image': ImageIcon,
-    'layout': Layout,
-    'folder': Folder,
-    'type': Type,
-    'video': Video,
-    'download': Download,
-    'list-todo': ListTodo,
-    'trending-up': TrendingUp,
-    'sparkles': Sparkles,
-    'images': Images,
-    'bot': Bot,
-    'key': Key,
-    'key-round': KeyRound,
-    'credit-card': CreditCard,
-    'book-open': BookOpen,
-    'wrench': Wrench,
-    'repeat': Repeat,
-    'clipboard-check': ClipboardCheck,
-    'sliders-horizontal': SlidersHorizontal,
-    'alert-triangle': AlertTriangle,
-    'mail': Mail,
-    'map': MapIcon,
-    'message-square': MessageSquare,
-    'send': Send,
-    'shopping-bag': ShoppingBag,
-    'star': Star,
-    'briefcase': Briefcase,
-    'building': Building2,
-    'calendar': Calendar,
-    'bell': Bell,
-    'clock': Clock,
-    'tag': Tag,
-    'trash': Trash2,
-    'shield': Shield,
-  };
-
   interface NavItem {
     path: string;
     label: string;
-    Icon: typeof LayoutDashboard;
+    Icon: IconComponent;
     group?: string;
   }
 
@@ -193,7 +146,9 @@
           items.push(definedOptions({
             path: `/${r.name}`,
             label: r.label,
-            Icon: (typeof r.icon === 'string' ? iconMap[r.icon] : r.icon) ?? iconMap[r.name] ?? Settings,
+            Icon: (typeof r.icon === 'string' ? resolveIcon(r.icon, Settings) : r.icon)
+              ?? resolveIcon(r.name, Settings)
+              ?? Settings,
             group: r.group,
           }));
         }

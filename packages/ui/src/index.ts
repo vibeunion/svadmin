@@ -9,6 +9,18 @@ export {
 	type DesignComponentState,
 } from "./design-system-components.js";
 export { metricSurfaceClasses, tableSurfaceClasses } from "./design-system.js";
+export {
+  builtinIcons,
+  getIconNames,
+  hasIcon,
+  registerIcons,
+  replaceIcons,
+  resetIconRegistry,
+  resolveIcon,
+  setIconFallback,
+  setIconMissHandler,
+} from "./icons.js";
+export type { IconComponent, IconMissHandler, IconRegistry } from "./icons.js";
 
 // Entry component
 export { default as AdminApp } from './components/AdminApp.svelte';

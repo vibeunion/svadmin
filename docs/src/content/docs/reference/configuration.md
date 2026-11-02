@@ -161,6 +161,18 @@ preset id in your own `themeConfig` when you rename a registered preset.
 Use `registerColorPreset()` to add a custom preset, or use
 `setColorTheme()`/`getColorThemes()` for runtime selection.
 
+`registerColorTheme({ name, label, color })` derives a full 10-step OKLCH scale
+from one brand hex and registers light/dark tokens (primary, ring, sidebar,
+chart-1…5) with contrast-checked foregrounds. Persist or share palettes with
+`exportColorThemes()` and `importColorThemes(document)`. The document is
+versioned and validated: non-color values, unknown CSS variables, duplicate
+names, and unsupported versions are rejected before anything is registered.
+
+Icon names in `MenuItem.icon` and resource definitions resolve through the icon
+registry. `@lucide/svelte` supplies the defaults; add or override names with
+`registerIcons()` from `@svadmin/ui/icons`, and observe unknown names with
+`setIconMissHandler()` instead of silently rendering nothing.
+
 ## App defaults
 
 `ConfigProvider` is the app-level place to set defaults once. Descendants read them

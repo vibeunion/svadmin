@@ -94,7 +94,9 @@ describe('@svadmin/ui native stylesheet contract', () => {
     const css = readRepositoryFile('packages/ui/src/app.css');
     expect(css).toContain('--primary: oklch(0.54 0.24 293);');
     expect(css).toContain('--ring: oklch(0.54 0.24 293);');
-    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("? stored as ColorTheme:'default'");
+    // 已注册的自定义预设可能在模块加载后才注册，因此持久化 id 一律保留；
+    // 未知 id 在 applyEffectiveTheme 回退到 default，而不是在读取时丢弃。
+    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("return stored? stored:'default';");
     expect(css).toContain('.layout-clean-flat[data-theme="default"]');
     expect(css).toContain('--primary: #165DFF;');
     expect(css).toContain('.layout-clean-flat[data-theme="stripe"]');

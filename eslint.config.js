@@ -233,6 +233,9 @@ export default ts.config(
   },
   {
     ignores: [
+      // 本地 git worktree 是其他分支的完整副本，不是本仓库的源码；
+      // 每个副本都有自己的 tsconfig，会让 typed lint 无法确定 root。
+      '.wt/**',
       '**/node_modules/**',
       '**/dist/**',
       '**/.svelte-kit/**',

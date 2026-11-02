@@ -215,8 +215,10 @@ export type {
   MessageStatus, ToolState, AgentProvider, AgentEvent, AgentOptions, ApprovalResponseOptions,
   AdminTool, ToolResult,
 } from './chatProvider.svelte';
-export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
-export type { ThemeMode, ColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';
+export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerColorTheme, exportColorThemes, importColorThemes, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
+export { deriveColorPreset, exportThemeTokens, generateColorScale, hexToOklch, parseThemeTokens, pickReadableForeground } from './color-scale';
+export type { ColorScaleStep, DerivedColorPreset, ThemeTokenDocument } from './color-scale';
+export type { ThemeMode, ColorTheme, BuiltinColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';
 export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier, resetUnsavedChanges } from './unsaved-changes.svelte';
 export { setAdminOptions, getAdminOptions, getTextTransformers } from './options.svelte';
 export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.svelte';

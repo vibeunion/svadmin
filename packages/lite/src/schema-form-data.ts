@@ -1,5 +1,5 @@
 import { assertSchemaFormSchema, isSchemaFormNodeVisible, prepareSchemaFormValue, validateSchemaFormValue } from '@svadmin/core/schema-form';
-import type { SchemaFormSchema } from '@svadmin/core/schema-form';
+import type { SchemaFormCondition, SchemaFormSchema } from '@svadmin/core/schema-form';
 
 export type { SchemaFormSchema } from '@svadmin/core/schema-form';
 
@@ -131,9 +131,24 @@ function decodeFields(schema: SchemaFormSchema, form: FormData, validate: boolea
   }
   if (schema.type !== 'object' && !schema.properties) return fail();
   // 控制字段只允许无条件标量，因此可先解码，不依赖属性声明顺序。
+  // 组合器条件可能引用多个控制字段（含 equalsField），必须全部预解码。
+  function conditionPaths(condition: SchemaFormCondition | undefined, paths: string[][]): void {
+    if (!condition) return;
+    if (condition.path) paths.push([...condition.path]);
+    if (condition.equalsField) paths.push([...condition.equalsField]);
+    for (const child of condition.all ?? []) conditionPaths(child, paths);
+    for (const child of condition.any ?? []) conditionPaths(child, paths);
+    conditionPaths(condition.not, paths);
+  }
   function collectControllers(node: SchemaFormSchema): void {
-    const path = node.visibleWhen?.path;
-    if (path && !controllerValues.has(JSON.stringify(path))) {
+    const paths: string[][] = [];
+    conditionPaths(node.visibleWhen, paths);
+    for (const path of paths) collectControllerPath(path);
+    for (const child of Object.values(node.properties ?? {})) collectControllers(child);
+    if (node.items) collectControllers(node.items);
+  }
+  function collectControllerPath(path: readonly string[]): void {
+    if (!controllerValues.has(JSON.stringify(path))) {
       let definition = schema;
       for (const key of path) {
         const next = definition.properties?.[key];
@@ -154,8 +169,6 @@ function decodeFields(schema: SchemaFormSchema, form: FormData, validate: boolea
         }
       });
     }
-    for (const child of Object.values(node.properties ?? {})) collectControllers(child);
-    if (node.items) collectControllers(node.items);
   }
   collectControllers(schema);
   const result = visit(schema, [], 0) as Record<string, unknown>;
