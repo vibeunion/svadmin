@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.0](https://github.com/vibeunion/svadmin/compare/devtools-v0.5.0...devtools-v0.6.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **vibecoding:** add schema generator, visual writeback protocol, mock sandbox, and governance guard ([d72fe89](https://github.com/vibeunion/svadmin/commit/d72fe89b09fb213b17f6a83bb7dcce360bd49380))
+* **vibecoding:** add schema generator, writeback patch protocol, mock sandbox, and governance guard ([8d654ee](https://github.com/vibeunion/svadmin/commit/8d654ee88966047198133f8d41a05765243857c3))
+
+
+### 🐛 Bug Fixes
+
+* **vibecoding:** clear lint, exact optional types, and UI evidence ([6c9fee5](https://github.com/vibeunion/svadmin/commit/6c9fee5dc53f2b6a84115796376e7c44628ec657))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.71.0
+
 ## [0.5.0](https://github.com/vibeunion/svadmin/compare/devtools-v0.4.4...devtools-v0.5.0) (2026-11-01)
 
 

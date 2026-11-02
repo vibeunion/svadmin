@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.110.0](https://github.com/vibeunion/svadmin/compare/ui-v0.109.0...ui-v0.110.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **vibecoding:** add schema generator, visual writeback protocol, mock sandbox, and governance guard ([d72fe89](https://github.com/vibeunion/svadmin/commit/d72fe89b09fb213b17f6a83bb7dcce360bd49380))
+* **vibecoding:** add schema generator, writeback patch protocol, mock sandbox, and governance guard ([8d654ee](https://github.com/vibeunion/svadmin/commit/8d654ee88966047198133f8d41a05765243857c3))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** restore workspace scroll and build docs dependencies ([c325d57](https://github.com/vibeunion/svadmin/commit/c325d57f9a211bbd27e85b50814cdeb8c9d6f006))
+* **ui:** emit declaration bridges for svelte rune modules ([a307ae1](https://github.com/vibeunion/svadmin/commit/a307ae1bb25f621fad00aa839c9c7dae9b88e14c))
+* **ui:** emit declaration bridges for svelte rune modules ([29ad5af](https://github.com/vibeunion/svadmin/commit/29ad5afcc8e80e2a4471ac5f960c8362092d0393))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.0
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.7
+  * peerDependencies
+    * @svadmin/core bumped to 0.71.0
+
 ## [0.109.0](https://github.com/vibeunion/svadmin/compare/ui-v0.108.6...ui-v0.109.0) (2026-11-01)
 
 

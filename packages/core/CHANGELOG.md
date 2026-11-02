@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.71.0](https://github.com/vibeunion/svadmin/compare/core-v0.70.0...core-v0.71.0) (2026-11-02)
+
+
+### 🚀 Features
+
+* **vibecoding:** add schema generator, visual writeback protocol, mock sandbox, and governance guard ([d72fe89](https://github.com/vibeunion/svadmin/commit/d72fe89b09fb213b17f6a83bb7dcce360bd49380))
+* **vibecoding:** add schema generator, writeback patch protocol, mock sandbox, and governance guard ([8d654ee](https://github.com/vibeunion/svadmin/commit/8d654ee88966047198133f8d41a05765243857c3))
+
+
+### 🐛 Bug Fixes
+
+* **vibecoding:** clear lint, exact optional types, and UI evidence ([6c9fee5](https://github.com/vibeunion/svadmin/commit/6c9fee5dc53f2b6a84115796376e7c44628ec657))
+* **vibecoding:** enforce real governance checks and strict type safety ([3a7ed9d](https://github.com/vibeunion/svadmin/commit/3a7ed9d98a1be870ea7468aafd7793548eaabcce))
+
 ## [0.70.0](https://github.com/vibeunion/svadmin/compare/core-v0.69.3...core-v0.70.0) (2026-11-01)
 
 
