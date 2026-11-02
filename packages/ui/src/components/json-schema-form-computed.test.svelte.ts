@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import JsonSchemaForm from './JsonSchemaForm.svelte';
+import type { JsonSchemaFormSchema } from './json-schema-form-state.js';
 
 const form = (view: { container: HTMLElement }): HTMLFormElement => {
   const element = view.container.querySelector('form');
@@ -8,7 +9,7 @@ const form = (view: { container: HTMLElement }): HTMLFormElement => {
   return element;
 };
 
-const schema = {
+const schema: JsonSchemaFormSchema = {
   properties: {
     quantity: { type: 'number', title: 'Quantity', default: 2 },
     price: { type: 'number', title: 'Price', default: 3 },
