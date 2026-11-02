@@ -18,6 +18,8 @@ import { auditWithProvider } from './audit';
 import { HttpError } from './types';
 import { useTranslation } from './i18n.svelte';
 import { toast } from './toast.svelte';
+import { ok, err, type Result as SafeResult } from './result';
+import { toDomainError, type DomainError } from './domain-errors';
 
 export interface ContractCreateOptions<S extends ContractSchemas> {
   resource: ResourceContract<S>;
@@ -331,13 +333,21 @@ export function useContractCreate<S extends ContractSchemas>(options: ContractCr
     mutate(params: ContractCreateParams<S>, callbacks?: Callbacks<S>): void {
       void mutateAsync(params, callbacks).catch(() => {});
     },
+    async safeMutate(params: ContractCreateParams<S>, callbacks?: Callbacks<S>): Promise<SafeResult<ContractRecord<S>, DomainError>> {
+      try {
+        const res = await mutateAsync(params, callbacks);
+        return ok(res.data);
+      } catch (cause) {
+        return err(toDomainError(cause));
+      }
+    },
     reset() { active = undefined; latest = undefined; latestToken = undefined; mutation.reset(); },
   });
   const idle: typeof result = {
     context: undefined, data: undefined, error: null, failureCount: 0, failureReason: null,
     isError: false, isIdle: true, isPending: false, isPaused: false, isSuccess: false,
     status: 'idle', submittedAt: 0, variables: undefined,
-    mutate: result.mutate, mutateAsync: result.mutateAsync, reset: result.reset,
+    mutate: result.mutate, mutateAsync: result.mutateAsync, safeMutate: result.safeMutate, reset: result.reset,
   };
   const view = createQueryResultView(() => {
     const invocation = mutation.variables;

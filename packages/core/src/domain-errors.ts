@@ -201,7 +201,7 @@ export type DomainErrorTag = DomainError['_tag'];
 export type ErrorPattern<E extends { readonly _tag: string }, R> = {
   [K in E['_tag']]?: (error: Extract<E, { readonly _tag: K }>) => R;
 } & {
-  [key: string]: ((error: any) => R) | undefined;
+  [key: string]: ((error: never) => R) | undefined;
 } & {
   _?: (error: E) => R;
 };
@@ -211,7 +211,7 @@ export function matchError<E extends { readonly _tag: string }, R>(
   patterns: ErrorPattern<E, R>,
 ): R {
   const tag = error._tag as string;
-  const handler = (patterns as Record<string, ((err: any) => R) | undefined>)[tag];
+  const handler = (patterns as Record<string, ((err: unknown) => R) | undefined>)[tag];
   if (typeof handler === 'function') {
     return handler(error);
   }
