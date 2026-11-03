@@ -10,7 +10,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import type { AddPlanEntry, AddWriteResult } from './add-command';
+import { loadScaffoldManifest } from './project-manifest';
 
 export const MATERIAL_STATE_FILENAME = 'svadmin.materials.json';
 export const MATERIAL_STATE_VERSION = 1;
@@ -18,7 +20,7 @@ export const MATERIAL_STATE_VERSION = 1;
 export interface BlockMaterial {
   name: string;
   version: string;
-  /** Minimum svadmin UI version the block was authored against. */
+  /** UI range copied from scaffold-manifest.json dependencies["@svadmin/ui"]. */
   peerRange: string;
   /** Packages the generated page imports. Kept aligned with scaffold-manifest.json. */
   requires: readonly string[];
@@ -59,6 +61,16 @@ export interface AddBlockPlan {
   registrationHint: string;
 }
 
+function scaffoldUiPeerRange(): string {
+  const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const manifest = loadScaffoldManifest(path.join(packageRoot, 'scaffold-manifest.json'));
+  const range = manifest.dependencies['@svadmin/ui'];
+  if (range === undefined) throw new Error('scaffold-manifest.json is missing @svadmin/ui');
+  return range;
+}
+
+const UI_PEER_RANGE = scaffoldUiPeerRange();
+
 const BLOCK_NAME_PATTERN = /^[a-z][a-z0-9-]{0,39}$/;
 
 function pageSource(body: string, imports: string, script = ''): string {
@@ -73,7 +85,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
   {
     name: 'search-table',
     version: '1.0.0',
-    peerRange: '^0.111.0',
+    peerRange: UI_PEER_RANGE,
     requires: ['@svadmin/ui'],
     title: 'Search table',
     description: 'Filter form + bulk actions + paginated resource table (Pro "search table" shape).',
@@ -97,7 +109,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
   {
     name: 'record-detail',
     version: '1.0.0',
-    peerRange: '^0.111.0',
+    peerRange: UI_PEER_RANGE,
     requires: ['@svadmin/ui'],
     title: 'Record detail',
     description: 'Read-only record detail with header actions and audit drawer.',
@@ -119,7 +131,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
   {
     name: 'settings-section',
     version: '1.0.0',
-    peerRange: '^0.111.0',
+    peerRange: UI_PEER_RANGE,
     requires: ['@svadmin/ui'],
     title: 'Settings section',
     description: 'Tabbed settings composition with basic, security, and notification panes.',
