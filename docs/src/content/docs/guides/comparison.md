@@ -39,6 +39,10 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | Medusa | ✅ `@svadmin/medusa` | ✅ `@refinedev/medusa` | ❌ |
 | Strapi GraphQL | ✅ `@svadmin/strapi-graphql` | ✅ `@refinedev/strapi-graphql` | Community |
 | Sanity | ✅ `@svadmin/sanity` | Community | Community |
+| Elasticsearch | ✅ `@svadmin/elasticsearch` | Community | Community |
+| Cloud Storage (S3/R2) | ✅ `@svadmin/storage` | Community | Community |
+| Realtime (Pusher) | ✅ `@svadmin/pusher` | Community | ❌ |
+| Clerk Authentication | ✅ `@svadmin/clerk` | Community | Community |
 
 ## Feature Comparison
 
@@ -92,6 +96,8 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | CLI scaffolding | ✅ `@svadmin/create` | ✅ `create-refine-app` | ✅ `create-react-admin` |
 | Overtime tracking | ✅ Built-in hooks | ✅ `useLoadingOvertime` | ❌ |
 | Steps form | ✅ `useStepsForm` | ✅ | ❌ |
+| Component swizzling | ✅ `svadmin swizzle` | ✅ `refine swizzle` | ❌ |
+| Code & Schema inference | ✅ `svadmin infer` | ✅ `@refinedev/inferencer` | ❌ |
 
 ### AI & Intelligence
 

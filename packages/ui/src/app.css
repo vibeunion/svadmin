@@ -387,6 +387,28 @@
     --chart-1: oklch(0.72 0.19 293);
   }
 
+  /* Arco Design preset (matches @svadmin/core builtinPresets.arco). */
+  [data-theme="arco"] {
+    --primary: #165DFF;
+    --primary-foreground: #FFFFFF;
+    --ring: #165DFF;
+    --sidebar-primary: #165DFF;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-ring: #165DFF;
+    --chart-1: #165DFF;
+  }
+  .dark[data-theme="arco"],
+  .dark [data-theme="arco"],
+  [data-theme="arco"][data-theme-mode="dark"] {
+    --primary: #3C7EFF;
+    --primary-foreground: #FFFFFF;
+    --ring: #3C7EFF;
+    --sidebar-primary: #3C7EFF;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-ring: #3C7EFF;
+    --chart-1: #3C7EFF;
+  }
+
   /* Blue */
   [data-theme="blue"] {
     --primary: oklch(0.546 0.245 262.881);

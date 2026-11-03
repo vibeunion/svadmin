@@ -4,6 +4,7 @@ import { definedOptions } from './defined-options';
 
 import { createContext } from 'svelte';
 import type { DataProvider,AuthProvider,ResourceDefinition,TaskProvider } from './types';
+import type { StorageProvider } from './storage-contract';
 import type { RouterProvider } from './router-provider';
 import type { LiveProvider } from './live.svelte';
 import type { RegisteredAccessControlProvider } from './permissions.svelte';
@@ -90,6 +91,7 @@ export interface AdminContextValue {
   readonly identityGovernanceProvider: ProviderBundle['identityGovernanceProvider'];
   readonly sessionProvider: ProviderBundle['sessionProvider'];
   readonly credentialProvider: ProviderBundle['credentialProvider'];
+  readonly storageProvider?: StorageProvider|null;
   readonly tenant: TenantContext|undefined;
   readonly tenantAdapter: TenantAdapter|undefined;
 }
@@ -119,6 +121,7 @@ export interface AdminContextAccessor {
   readonly identityGovernanceProvider: ProviderBundle['identityGovernanceProvider'];
   readonly sessionProvider: ProviderBundle['sessionProvider'];
   readonly credentialProvider: ProviderBundle['credentialProvider'];
+  readonly storageProvider?: StorageProvider|null;
   readonly tenant: TenantContext|undefined;
   readonly tenantAdapter: TenantAdapter|undefined;
   readonly tenantCacheKey: TenantCacheKey|undefined;
@@ -196,6 +199,9 @@ function resolveProviderBundle(source: AdminContextSource): ResolvedProviderBund
     credentialProvider: source.credentialProvider!==undefined
       ? source.credentialProvider
       :bundled?.credentialProvider,
+    storageProvider: source.storageProvider!==undefined
+      ? source.storageProvider
+      :bundled?.storageProvider,
   }));
 }
 
@@ -218,6 +224,7 @@ export function createAdminContext(source: AdminContextSource): AdminContextValu
     get identityGovernanceProvider() { return resolveProviderBundle(source).identityGovernanceProvider??null; },
     get sessionProvider() { return resolveProviderBundle(source).sessionProvider??null; },
     get credentialProvider() { return resolveProviderBundle(source).credentialProvider??null; },
+    get storageProvider() { return resolveProviderBundle(source).storageProvider??null; },
     get tenant() { return source.tenant??inheritedTenant; },
     get tenantAdapter() { return resolveProviderBundle(source).tenantAdapter; },
   });
@@ -270,6 +277,7 @@ export function captureAdminContext(): AdminContextAccessor {
         chatProvider: getLegacyChatProvider(),
         agentProvider: getLegacyAgentProvider(),
         taskProvider: taskProviderState,
+        storageProvider: storageProviderState,
         routerProvider,
       }));
     },
@@ -292,6 +300,7 @@ export function captureAdminContext(): AdminContextAccessor {
     get identityGovernanceProvider() { return scopedContext?.identityGovernanceProvider??null; },
     get sessionProvider() { return scopedContext?.sessionProvider??null; },
     get credentialProvider() { return scopedContext?.credentialProvider??null; },
+    get storageProvider() { return scopedContext? scopedContext.storageProvider:storageProviderState; },
     get tenant() { return scopedContext?.tenant; },
     get tenantAdapter() { return scopedContext?.tenantAdapter; },
     get tenantCacheKey() {
@@ -518,6 +527,24 @@ export function getTaskProvider(options?: { optional?: boolean }): TaskProvider|
   return activeTaskProvider;
 }
 
+// ─── Storage Provider ───────────────────────────────────────────
+
+let storageProviderState=$state<StorageProvider|undefined>(undefined);
+
+export function setStorageProvider(provider: StorageProvider|undefined): void {
+  storageProviderState=provider;
+}
+
+export function getStorageProvider(): StorageProvider;
+export function getStorageProvider(options: { optional: true }): StorageProvider|undefined;
+export function getStorageProvider(options?: { optional?: boolean }): StorageProvider|undefined {
+  const activeStorageProvider=captureAdminContext().storageProvider;
+  if(!activeStorageProvider&&!options?.optional) {
+    throw new Error('StorageProvider not found. Did you call setStorageProvider in App.svelte?');
+  }
+  return activeStorageProvider??undefined;
+}
+
 // ─── Reset — for testing / HMR ─────────────────────────────────
 
 export function resetContext(): void {
@@ -527,6 +554,7 @@ export function resetContext(): void {
   routerProvider=undefined;
   liveProviderState=undefined;
   taskProviderState=undefined;
+  storageProviderState=undefined;
   resetNotificationProvider();
   resetAuditLogProvider();
   resetAccessControlProvider();

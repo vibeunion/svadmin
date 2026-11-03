@@ -86,6 +86,7 @@
 | `@svadmin/flow`          | Optional draggable node canvas / 可选拖拽节点画布           |
 | `@svadmin/charts`        | Optional LayerChart statistical charts / 可选高级统计图表   |
 | `@svadmin/dock`          | Optional split and dockable workspaces / 可选分栏与停靠工作区 |
+| `@svadmin/storage`       | Storage provider and S3/R2/Memory drivers / 云存储与预签名上传套件 |
 
 ### Data Providers / 数据适配器
 
@@ -108,6 +109,9 @@
 | `@svadmin/medusa`       | Medusa Commerce                              |
 | `@svadmin/nestjs-query` | NestJS GraphQL                               |
 | `@svadmin/nestjsx-crud` | NestJS CRUD                                  |
+| `@svadmin/elasticsearch`| Elasticsearch & OpenSearch                   |
+| `@svadmin/pusher`       | Pusher Realtime LiveProvider                 |
+| `@svadmin/clerk`        | Clerk Authentication Provider                |
 
 The dedicated `@svadmin/parse` wrapper has been retired. Host applications can
 initialize a Parse provider and pass it to `createRefineAdapter`; see the

@@ -37,6 +37,7 @@
     violet: 'Violet',
     default: 'Default',
     stripe: 'Stripe',
+    arco: 'Arco Design',
   };
   function setDensity(value: 'compact' | 'standard') { density = value; if (typeof window !== 'undefined') { localStorage.setItem(DENSITY_KEY, value); window.dispatchEvent(new CustomEvent('svadmin-density-change', { detail: value })); } }
   function setPageSize(size: number) { pageSize = size; if (typeof window !== 'undefined') localStorage.setItem(PAGE_SIZE_KEY, String(size)); }
