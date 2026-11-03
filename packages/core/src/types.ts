@@ -485,6 +485,18 @@ export interface FieldDefinition {
   validate?: (value: unknown) => string | null;
   // Grouping
   group?: string;
+  /**
+   * 声明式排版，与 schema `layout` 使用同一投影规则。
+   * 只影响 AutoForm 呈现，不参与校验和提交。
+   */
+  layout?: {
+    type: 'grid' | 'section' | 'steps';
+    title?: string;
+    description?: string;
+    columns?: 1 | 2 | 3 | 4;
+    span?: 1 | 2 | 3 | 4;
+    step?: number;
+  };
 }
 
 // ─── Resource Type Registry ───────────────────────────────────

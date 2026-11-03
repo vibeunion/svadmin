@@ -1,0 +1,1055 @@
+{
+  "generatedBy": "scripts/audit-theme-contrast.ts",
+  "brands": [
+    {
+      "color": "#165DFF",
+      "name": "brand-1",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#155DFF",
+          "ratio": 5.2,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#155DFF",
+          "background": "#FFFFFF",
+          "ratio": 5.2,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#155DFF",
+          "ratio": 5.2,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#155DFF",
+          "background": "#FFFFFF",
+          "ratio": 5.2,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#823AEF",
+          "background": "#FFFFFF",
+          "ratio": 5.53,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#007CA6",
+          "background": "#FFFFFF",
+          "ratio": 4.74,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#B50CBA",
+          "background": "#FFFFFF",
+          "ratio": 5.64,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#008186",
+          "background": "#FFFFFF",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#5A90FF",
+          "ratio": 6.18,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#5A90FF",
+          "background": "#111111",
+          "ratio": 6.18,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#5A90FF",
+          "ratio": 6.18,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#5A90FF",
+          "background": "#111111",
+          "ratio": 6.18,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#A075FF",
+          "background": "#111111",
+          "ratio": 5.83,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#00A2D8",
+          "background": "#111111",
+          "ratio": 6.44,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#E241E6",
+          "background": "#111111",
+          "ratio": 5.51,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#00AAAF",
+          "background": "#111111",
+          "ratio": 6.63,
+          "aa": true,
+          "aaa": true
+        }
+      ]
+    },
+    {
+      "color": "#0EA5E9",
+      "name": "brand-2",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#007CB2",
+          "ratio": 4.64,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#007CB2",
+          "background": "#FFFFFF",
+          "ratio": 4.64,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#007CB2",
+          "ratio": 4.64,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#009BDC",
+          "background": "#FFFFFF",
+          "ratio": 3.12,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#6E8CED",
+          "background": "#FFFFFF",
+          "ratio": 3.16,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#00A0AE",
+          "background": "#FFFFFF",
+          "ratio": 3.16,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#A57DE0",
+          "background": "#FFFFFF",
+          "ratio": 3.18,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#00A587",
+          "background": "#FFFFFF",
+          "ratio": 3.12,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#74CAFF",
+          "ratio": 10.46,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#74CAFF",
+          "background": "#111111",
+          "ratio": 10.46,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#74CAFF",
+          "ratio": 10.46,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#74CAFF",
+          "background": "#111111",
+          "ratio": 10.46,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#A6BDFF",
+          "background": "#111111",
+          "ratio": 10.2,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#00D8EA",
+          "background": "#111111",
+          "ratio": 10.8,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#CCADFF",
+          "background": "#111111",
+          "ratio": 9.88,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#00DFB6",
+          "background": "#111111",
+          "ratio": 11,
+          "aa": true,
+          "aaa": true
+        }
+      ]
+    },
+    {
+      "color": "#22C55E",
+      "name": "brand-3",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#00853A",
+          "ratio": 4.76,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#00853A",
+          "background": "#FFFFFF",
+          "ratio": 4.76,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#00853A",
+          "ratio": 4.76,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#00A74A",
+          "background": "#FFFFFF",
+          "ratio": 3.17,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#00A392",
+          "background": "#FFFFFF",
+          "ratio": 3.16,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#899B00",
+          "background": "#FFFFFF",
+          "ratio": 3.11,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#009EB6",
+          "background": "#FFFFFF",
+          "ratio": 3.2,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#B78A00",
+          "background": "#FFFFFF",
+          "ratio": 3.16,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#51E57D",
+          "ratio": 11.56,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#51E57D",
+          "background": "#111111",
+          "ratio": 11.56,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#51E57D",
+          "ratio": 11.56,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#45E778",
+          "background": "#111111",
+          "ratio": 11.65,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#00E2CB",
+          "background": "#111111",
+          "ratio": 11.46,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#BBD300",
+          "background": "#111111",
+          "ratio": 11.18,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#00DBFC",
+          "background": "#111111",
+          "ratio": 11.27,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#F5BA00",
+          "background": "#111111",
+          "ratio": 10.71,
+          "aa": true,
+          "aaa": true
+        }
+      ]
+    },
+    {
+      "color": "#F97316",
+      "name": "brand-4",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#BD5300",
+          "ratio": 4.77,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#BD5300",
+          "background": "#FFFFFF",
+          "ratio": 4.77,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#BD5300",
+          "ratio": 4.77,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#ED6A00",
+          "background": "#FFFFFF",
+          "ratio": 3.15,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#C08800",
+          "background": "#FFFFFF",
+          "ratio": 3.11,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#F55D71",
+          "background": "#FFFFFF",
+          "ratio": 3.14,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#929600",
+          "background": "#FFFFFF",
+          "ratio": 3.19,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#E461B5",
+          "background": "#FFFFFF",
+          "ratio": 3.15,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FFAE85",
+          "ratio": 10.47,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#FFAE85",
+          "background": "#111111",
+          "ratio": 10.47,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FFAE85",
+          "ratio": 10.47,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#FFAE85",
+          "background": "#111111",
+          "ratio": 10.47,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#FDB500",
+          "background": "#111111",
+          "ratio": 10.6,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#FFA9AE",
+          "background": "#111111",
+          "ratio": 10.38,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#C9CE00",
+          "background": "#111111",
+          "ratio": 11.07,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#FFA1D9",
+          "background": "#111111",
+          "ratio": 10.21,
+          "aa": true,
+          "aaa": true
+        }
+      ]
+    },
+    {
+      "color": "#F43F5E",
+      "name": "brand-5",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#DF274E",
+          "ratio": 4.63,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#DF274E",
+          "background": "#FFFFFF",
+          "ratio": 4.63,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#DF274E",
+          "ratio": 4.63,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#F43F5E",
+          "background": "#FFFFFF",
+          "ratio": 3.67,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#DE6500",
+          "background": "#FFFFFF",
+          "ratio": 3.52,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#E147AC",
+          "background": "#FFFFFF",
+          "ratio": 3.69,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#B78300",
+          "background": "#FFFFFF",
+          "ratio": 3.35,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#B95BE9",
+          "background": "#FFFFFF",
+          "ratio": 3.66,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FF8B93",
+          "ratio": 8.42,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#FF8B93",
+          "background": "#111111",
+          "ratio": 8.42,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FF8B93",
+          "ratio": 8.42,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#FF8B93",
+          "background": "#111111",
+          "ratio": 8.42,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#FF9255",
+          "background": "#111111",
+          "ratio": 8.54,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#FF7FCE",
+          "background": "#111111",
+          "ratio": 8.25,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#E6A500",
+          "background": "#111111",
+          "ratio": 8.76,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#D790FF",
+          "background": "#111111",
+          "ratio": 8.38,
+          "aa": true,
+          "aaa": true
+        }
+      ]
+    },
+    {
+      "color": "#8B5CF6",
+      "name": "brand-6",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#8454EE",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#8454EE",
+          "background": "#FFFFFF",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#8454EE",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#8B5CF6",
+          "background": "#FFFFFF",
+          "ratio": 4.23,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#BF43C9",
+          "background": "#FFFFFF",
+          "ratio": 4.32,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#2B79FF",
+          "background": "#FFFFFF",
+          "ratio": 3.98,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#DE2E84",
+          "background": "#FFFFFF",
+          "ratio": 4.35,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#008EBA",
+          "background": "#FFFFFF",
+          "ratio": 3.76,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#AB91FF",
+          "ratio": 7.4,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#AB91FF",
+          "background": "#111111",
+          "ratio": 7.4,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#AB91FF",
+          "ratio": 7.4,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#AB91FF",
+          "background": "#111111",
+          "ratio": 7.4,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#EA67F4",
+          "background": "#111111",
+          "ratio": 6.96,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#72A6FF",
+          "background": "#111111",
+          "ratio": 7.75,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#FF6AA9",
+          "background": "#111111",
+          "ratio": 7.09,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#00B6ED",
+          "background": "#111111",
+          "ratio": 8.02,
+          "aa": true,
+          "aaa": true
+        }
+      ]
+    },
+    {
+      "color": "#111827",
+      "name": "brand-7",
+      "checks": [
+        {
+          "pair": "primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#111827",
+          "ratio": 17.74,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "light",
+          "foreground": "#111827",
+          "background": "#FFFFFF",
+          "ratio": 17.74,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#111827",
+          "ratio": 17.74,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "light",
+          "foreground": "#111827",
+          "background": "#FFFFFF",
+          "ratio": 17.74,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "light",
+          "foreground": "#1A1525",
+          "background": "#FFFFFF",
+          "ratio": 17.83,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "light",
+          "foreground": "#071B25",
+          "background": "#FFFFFF",
+          "ratio": 17.61,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "light",
+          "foreground": "#201320",
+          "background": "#FFFFFF",
+          "ratio": 17.87,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "light",
+          "foreground": "#031D1E",
+          "background": "#FFFFFF",
+          "ratio": 17.52,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#757F92",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary on surface",
+          "mode": "dark",
+          "foreground": "#757F92",
+          "background": "#111111",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "sidebar primary text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#757F92",
+          "ratio": 4.68,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-1 on surface",
+          "mode": "dark",
+          "foreground": "#596376",
+          "background": "#111111",
+          "ratio": 3.12,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-2 on surface",
+          "mode": "dark",
+          "foreground": "#666176",
+          "background": "#111111",
+          "ratio": 3.18,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-3 on surface",
+          "mode": "dark",
+          "foreground": "#506673",
+          "background": "#111111",
+          "ratio": 3.14,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-4 on surface",
+          "mode": "dark",
+          "foreground": "#705E6E",
+          "background": "#111111",
+          "ratio": 3.16,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "chart-5 on surface",
+          "mode": "dark",
+          "foreground": "#4D696A",
+          "background": "#111111",
+          "ratio": 3.19,
+          "aa": true,
+          "aaa": false
+        }
+      ]
+    }
+  ]
+}

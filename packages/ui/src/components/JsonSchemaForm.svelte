@@ -4,6 +4,9 @@
     assertSchemaFormSchema,
     isSchemaFormNodeVisible,
     prepareSchemaFormValue,
+    resolveSchemaFormLayout,
+    type SchemaFormLayoutGroup,
+    type SchemaFormLayoutPlan,
     type SchemaFormSchema,
   } from '@svadmin/core/schema-form';
   import { tick } from 'svelte';
@@ -175,6 +178,48 @@
       return undefined;
     }
   });
+  // Layout plans are pure and per-node; cache so re-renders stay cheap.
+  const layoutPlans = new WeakMap<SchemaFormSchema, SchemaFormLayoutPlan>();
+  function layoutPlan(node: JsonSchema): SchemaFormLayoutPlan | undefined {
+    if (!coreSchema) return undefined;
+    const key = node as SchemaFormSchema;
+    const cached = layoutPlans.get(key);
+    if (cached) return cached;
+    try {
+      const plan = resolveSchemaFormLayout(key);
+      layoutPlans.set(key, plan);
+      return plan;
+    } catch {
+      return undefined;
+    }
+  }
+  const gridClasses: Record<1 | 2 | 3 | 4, string> = {
+    1: 'space-y-3.5',
+    2: 'grid grid-cols-1 gap-3.5 md:grid-cols-2',
+    3: 'grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-3',
+    4: 'grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-4',
+  };
+  const spanClasses: Record<1 | 2 | 3 | 4, string> = {
+    1: '',
+    2: 'md:col-span-2',
+    3: 'md:col-span-2 lg:col-span-3',
+    4: 'md:col-span-2 lg:col-span-4',
+  };
+  function layoutGroups(node: JsonSchema): readonly SchemaFormLayoutGroup[] {
+    const plan = layoutPlan(node);
+    if (plan) return plan.groups;
+    return [{
+      key: '',
+      columns: 1,
+      fields: Object.keys(node.properties ?? {}).map((fieldKey) => ({ key: fieldKey, span: 1 })),
+    }];
+  }
+  function columnsClass(columns: number): string {
+    return gridClasses[(columns as 1 | 2 | 3 | 4)] ?? gridClasses[1];
+  }
+  function spanClass(span: number): string {
+    return spanClasses[(span as 1 | 2 | 3 | 4)] ?? '';
+  }
   const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);
   let reportedConfiguration = '';
   let reportedSchema: JsonSchema | undefined;
@@ -520,11 +565,7 @@
         <legend class="block font-medium">{title}</legend>
         {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
         {#if node.description}<p id={descriptionId} class="text-[11px] text-muted-foreground">{node.description}</p>{/if}
-        <div class="space-y-3.5">
-          {#each Object.entries(node.properties ?? {}) as [key, child] (key)}
-            {@render renderField(child, compiled?.kind === 'object' ? compiled.properties[key] : undefined, [...path, key], child.title ?? key, node.required?.includes(key) ?? false)}
-          {/each}
-        </div>
+        {@render renderObjectGroups(node, compiled, path)}
       </fieldset>
     {:else if type === 'array'}
       {@const items = Array.isArray(current) ? current : []}
@@ -569,16 +610,33 @@
     {/if}
   {/snippet}
 
+  {#snippet renderObjectGroups(node: JsonSchema, compiled: RecursiveSchemaFormNode | undefined, path: string[])}
+    {#each layoutGroups(node) as group (group.key)}
+      <div class="space-y-2">
+        {#if group.title}
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.title}</h3>
+          {#if group.description}<p class="text-[11px] text-muted-foreground">{group.description}</p>{/if}
+        {/if}
+        <div class={columnsClass(group.columns)} data-svadmin-form-group={group.key}>
+          {#each group.fields as field (field.key)}
+            {@const child = node.properties?.[field.key]}
+            {#if child}
+              <div class={spanClass(field.span)}>
+                {@render renderField(child, compiled?.kind === 'object' ? compiled.properties[field.key] : undefined, [...path, field.key], child.title ?? field.key, node.required?.includes(field.key) ?? false)}
+              </div>
+            {/if}
+          {/each}
+        </div>
+      </div>
+    {/each}
+  {/snippet}
+
   <fieldset class="schema-form-fields space-y-4" disabled={locked}>
   {#if prepared.ok}
     {#if model.node?.kind === 'oneOf'}
       {@render renderField(resolvedSchema as JsonSchema, model.node, [], resolvedSchema?.title ?? '', false)}
     {:else}
-      <div class="space-y-3.5">
-        {#each Object.entries(resolvedSchema?.properties ?? {}) as [key, node] (key)}
-          {@render renderField(node, model.node?.kind === 'object' ? model.node.properties[key] : undefined, [key], node.title ?? key, resolvedSchema?.required?.includes(key) ?? false)}
-        {/each}
-      </div>
+      {@render renderObjectGroups(resolvedSchema as JsonSchema, model.node?.kind === 'object' ? model.node : undefined, [])}
     {/if}
   {/if}
   <div class="pt-4 border-t border-border/60 flex justify-end">

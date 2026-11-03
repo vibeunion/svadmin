@@ -27,6 +27,8 @@
     "verify": "bun scripts/verify.ts",
     "test:e2e": "bun run playwright test",
     "audit": "bun scripts/audit-dependencies.ts",
+    "theme:audit": "bun scripts/audit-theme-contrast.ts --check",
+    "docs:components": "bun scripts/component-docs.ts --check",
     "docs:dev": "cd docs && bun run dev",
     "docs:build": "cd docs && bun run build",
     "storybook": "storybook dev -p 6006",

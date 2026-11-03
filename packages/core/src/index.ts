@@ -216,7 +216,7 @@ export type {
   AdminTool, ToolResult,
 } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerColorTheme, exportColorThemes, importColorThemes, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
-export { deriveColorPreset, exportThemeTokens, generateColorScale, hexToOklch, parseThemeTokens, pickReadableForeground } from './color-scale';
+export { deriveColorPreset, exportThemeTokens, generateColorScale, hexContrastRatio, hexLuminance, hexToOklch, oklchToHex, parseThemeTokens, pickReadableForeground } from './color-scale';
 export type { ColorScaleStep, DerivedColorPreset, ThemeTokenDocument } from './color-scale';
 export type { ThemeMode, ColorTheme, BuiltinColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';
 export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier, resetUnsavedChanges } from './unsaved-changes.svelte';
@@ -277,10 +277,16 @@ export { FILTER_COLLECTION_LIMIT, isNumericFilterField, isCollectionFilterOperat
 export {
   assertSchemaFormSchema, prepareSchemaFormValue, readSchemaFormPath,
   matchesSchemaFormCondition, isSchemaFormNodeVisible, validateSchemaFormValue,
+  resolveDeclaredFieldLayout, resolveSchemaFormLayout,
 } from './schema-form';
 export type {
-  SchemaFormScalar, SchemaFormCondition, SchemaFormSchema, SchemaFormValidationError,
+  SchemaFormScalar, SchemaFormCondition, SchemaFormLayout, SchemaFormLayoutPlan, SchemaFormSchema,
+  SchemaFormValidationError,
 } from './schema-form';
+export {
+  auditThemeContrast, failingContrastChecks, parseDtcgTheme, presetFromDtcg,
+} from './theme-dtcg';
+export type { ContrastCheck, DtcgIssue, DtcgTheme } from './theme-dtcg';
 export { useExport } from './export-hooks.svelte';
 export { snapshotExportTaskResult, downloadExportArtifact, safeArtifactUrl } from './export-format';
 export type { ExportTaskResult } from './export-format';

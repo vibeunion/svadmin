@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { assertSchemaFormSchema, isSchemaFormNodeVisible, type SchemaFormSchema as JsonSchema } from '@svadmin/core/schema-form';
+  import { assertSchemaFormSchema, isSchemaFormNodeVisible, resolveSchemaFormLayout, type SchemaFormLayoutGroup, type SchemaFormSchema as JsonSchema } from '@svadmin/core/schema-form';
   import { useTranslation } from '@svadmin/core/i18n';
   import { encodeSchemaFormArrayAction, schemaFormActionName, schemaFormFieldName } from '../schema-form-data';
 
@@ -95,6 +95,21 @@
     return schemaFormFieldName(path);
   }
 
+  function groupsFor(node: JsonSchema): readonly SchemaFormLayoutGroup[] {
+    if (resolved.invalid) return [];
+    try {
+      const plan = resolveSchemaFormLayout(node);
+      if (plan.groups.length > 0) return plan.groups;
+    } catch {
+      // 嵌套节点若超出封闭 schema，退回按字段顺序平铺。
+    }
+    return [{
+      key: '',
+      columns: 1,
+      fields: Object.keys(node.properties ?? {}).map((key) => ({ key, span: 1 })),
+    }];
+  }
+
   function enumToken(index: number): string {
     return `__json_enum_${index}`;
   }
@@ -137,9 +152,7 @@
         <fieldset class="lite-schema-fieldset">
           <legend>{title}</legend>
           {#if node.description}<p class="lite-schema-description">{node.description}</p>{/if}
-          {#each Object.entries(node.properties ?? {}) as [key, child] (key)}
-            {@render renderField(child, [...path, key], child.title ?? key, node.required?.includes(key) ?? false)}
-          {/each}
+          {@render renderGroups(node, path)}
         </fieldset>
       {:else if node.type === 'array'}
         {@const items = Array.isArray(current) ? current : []}
@@ -194,9 +207,32 @@
       {/if}
     {/snippet}
 
-    {#each Object.entries(resolved.invalid ? {} : schema.properties ?? {}) as [key, node] (key)}
-      {@render renderField(node, [key], node.title ?? key, schema.required?.includes(key) ?? false)}
+    {@render renderGroups(schema, [])}
+
+  {#snippet renderGroups(node: JsonSchema, path: string[])}
+    {#each groupsFor(node) as group (group.key)}
+      <div class="lite-schema-group" data-svadmin-form-group={group.key}>
+        {#if group.title}
+          <h3 class="lite-schema-group-title">{group.step !== undefined ? `${group.step}. ${group.title}` : group.title}</h3>
+          {#if group.description}<p class="lite-schema-description">{group.description}</p>{/if}
+        {/if}
+        <div
+          class={group.columns > 1 ? 'lite-schema-grid' : 'lite-schema-stack'}
+          style:grid-template-columns={group.columns > 1 ? `repeat(${group.columns}, minmax(0, 1fr))` : undefined}
+        >
+          {#each group.fields as field (field.key)}
+            {@const child = node.properties?.[field.key]}
+            {#if child}
+              <div style:grid-column={field.span > 1 ? `span ${field.span}` : undefined}>
+                {@render renderField(child, [...path, field.key], child.title ?? field.key, node.required?.includes(field.key) ?? false)}
+              </div>
+            {/if}
+          {/each}
+        </div>
+      </div>
     {/each}
+  {/snippet}
+
     <div class="lite-schema-footer">
       <button type="submit" disabled={resolved.invalid} class="lite-btn lite-btn-primary lite-btn-sm">{submitText}</button>
     </div>
@@ -208,6 +244,9 @@
   .lite-schema-form-header { padding-bottom: 8px; border-bottom: 1px solid #E5E6EB; margin-bottom: 12px; font-size: 14px; }
   .lite-schema-fieldset { border: 1px solid #E5E6EB; border-radius: 4px; padding: 12px; margin: 0 0 12px; }
   .lite-schema-field { margin-bottom: 12px; }
+  .lite-schema-group { margin-bottom: 12px; }
+  .lite-schema-group-title { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #4E5969; }
+  .lite-schema-grid { display: grid; gap: 12px; }
   .lite-schema-fieldset > .lite-schema-field:last-child { margin-bottom: 0; }
   .lite-schema-footer { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid #E5E6EB; }
   .lite-label { display: block; font-size: 12px; color: #4E5969; margin-bottom: 4px; }
