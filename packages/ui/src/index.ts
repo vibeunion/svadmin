@@ -13,14 +13,18 @@ export {
   builtinIcons,
   getIconNames,
   hasIcon,
+  getIconSourceNames,
+  registerIconSource,
+  registerIconSources,
   registerIcons,
   replaceIcons,
   resetIconRegistry,
   resolveIcon,
+  resolveIconSource,
   setIconFallback,
   setIconMissHandler,
 } from "./icons.js";
-export type { IconComponent, IconMissHandler, IconRegistry } from "./icons.js";
+export type { IconComponent, IconMissHandler, IconRegistry, IconSource, IconSourceInput } from "./icons.js";
 
 // Entry component
 export { default as AdminApp } from './components/AdminApp.svelte';
@@ -66,6 +70,7 @@ export type { ListStateSnapshot } from './components/list-state.svelte.js';
 export { default as AutoForm } from './components/AutoForm.svelte';
 export { default as ShowPage } from './components/ShowPage.svelte';
 export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
+export { default as Icon } from './components/Icon.svelte';
 export { default as Sidebar } from './components/Sidebar.svelte';
 export { default as Layout } from './components/Layout.svelte';
 export type { LayoutAIAssistantProps } from './components/Layout.svelte';
@@ -445,6 +450,8 @@ export type { FieldComponentMap, FieldDisplayProps } from './components/fieldCom
 
 // Svelte Actions
 export { clickOutside, shortcut, intersect, copyOnClick } from './actions';
+export { intentPreload, preloadModule, resetIntentPreloads, INTENT_PRELOAD_BUDGET } from './intent-preload';
+export type { IntentPreloadParams } from './intent-preload';
 
 // Public Profile
 export { default as ProfileCard } from './components/profile/ProfileCard.svelte';

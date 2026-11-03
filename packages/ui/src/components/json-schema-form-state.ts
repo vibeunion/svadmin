@@ -1,4 +1,4 @@
-import type { SchemaFormComputed, SchemaFormCondition } from '@svadmin/core/schema-form';
+import type { SchemaFormComputed, SchemaFormCondition, SchemaFormLayout } from '@svadmin/core/schema-form';
 
 /** 嵌套表单的草稿与传输语义；不是替代服务端的 JSON Schema 校验器。 */
 export interface JsonSchemaFormSchema {
@@ -35,6 +35,8 @@ export interface JsonSchemaFormSchema {
   required?: string[];
   visibleWhen?: SchemaFormCondition;
   computed?: SchemaFormComputed;
+  /** 呈现分组。不参与草稿、传输或校验。 */
+  layout?: SchemaFormLayout;
 }
 
 export const SCHEMA_FORM_LIMITS = Object.freeze({ depth: 32, nodes: 10_000, characters: 1_048_576 });

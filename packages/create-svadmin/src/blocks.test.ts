@@ -3,7 +3,13 @@ import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { listBlocks, planAddBlock, writeAddBlock } from './blocks';
+import {
+  listBlocks,
+  planAddBlock,
+  readMaterialState,
+  serializeAddBlockPlan,
+  writeAddBlock,
+} from './blocks';
 import { parseAddArguments } from './add-command';
 
 async function project(): Promise<string> {
@@ -12,61 +18,148 @@ async function project(): Promise<string> {
   return directory;
 }
 
-test('block registry lists installable materials with descriptions', () => {
+test('block registry exposes version and peer range', () => {
   const blocks = listBlocks();
-  expect(blocks.length).toBeGreaterThanOrEqual(3);
   expect(blocks.map((block) => block.name)).toContain('search-table');
   for (const block of blocks) {
-    expect(block.title.length).toBeGreaterThan(0);
-    expect(block.description.length).toBeGreaterThan(0);
+    expect(block.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(block.peerRange.length).toBeGreaterThan(0);
+    expect(block.requires).toContain('@svadmin/ui');
   }
 });
 
-test('planAddBlock is dry-run by default and never writes', async () => {
+test('install records a hash ledger and is idempotent', async () => {
   const directory = await project();
   try {
     const plan = planAddBlock(directory, 'search-table');
-    expect(plan.entries).toHaveLength(1);
-    expect(plan.entries[0]?.relativePath).toBe('src/features/search-table/SearchTable.svelte');
-    expect(plan.entries[0]?.exists).toBe(false);
-    expect(plan.registrationHint).toContain('SearchTable.svelte');
+    expect(plan.mode).toBe('install');
+    expect(plan.entries[0]?.action).toBe('create');
     expect(existsSync(join(directory, 'src/features/search-table/SearchTable.svelte'))).toBe(false);
+
+    const result = writeAddBlock(plan);
+    expect(result.conflicts).toEqual([]);
+    const state = readMaterialState(directory);
+    expect(state.blocks['search-table']?.version).toBe('1.0.0');
+    expect(Object.keys(state.blocks['search-table']?.files ?? {})).toHaveLength(1);
+
+    const again = planAddBlock(directory, 'search-table', { mode: 'upgrade' });
+    expect(again.entries[0]?.action).toBe('skip');
+    expect(writeAddBlock(again).written).toEqual([]);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
 });
 
-test('writeAddBlock installs the block once and preserves existing files', async () => {
+test('locally edited files are conflicts and are never overwritten', async () => {
   const directory = await project();
   try {
-    const first = writeAddBlock(planAddBlock(directory, 'settings-section'));
-    expect(first.written).toEqual(['src/features/settings-section/SettingsSection.svelte']);
-    expect(first.preserved).toEqual([]);
-
+    writeAddBlock(planAddBlock(directory, 'settings-section'));
     const file = join(directory, 'src/features/settings-section/SettingsSection.svelte');
-    expect(await readFile(file, 'utf8')).toContain('SettingsPage');
+    await writeFile(file, '<!-- local change -->\n');
 
-    const second = writeAddBlock(planAddBlock(directory, 'settings-section'));
-    expect(second.written).toEqual([]);
-    expect(second.preserved).toEqual(['src/features/settings-section/SettingsSection.svelte']);
+    const plan = planAddBlock(directory, 'settings-section', { mode: 'upgrade' });
+    expect(plan.entries[0]?.action).toBe('conflict');
+    const result = writeAddBlock(plan);
+    expect(result.conflicts).toEqual(['src/features/settings-section/SettingsSection.svelte']);
+    expect(await readFile(file, 'utf8')).toBe('<!-- local change -->\n');
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
 });
 
-test('planAddBlock rejects unknown blocks and unsafe names', async () => {
+test('unmanaged files at the target path are conflicts, not silent overwrites', async () => {
   const directory = await project();
   try {
-    expect(() => planAddBlock(directory, 'nope')).toThrow(/Unknown block/);
-    expect(() => planAddBlock(directory, '../escape')).toThrow(/Invalid block name/);
+    const file = join(directory, 'src/features/record-detail/RecordDetail.svelte');
+    await writeFile(file, '<!-- pre-existing -->\n', { encoding: 'utf8' }).catch(async () => {
+      const { mkdir } = await import('node:fs/promises');
+      await mkdir(join(directory, 'src/features/record-detail'), { recursive: true });
+      await writeFile(file, '<!-- pre-existing -->\n');
+    });
+    const plan = planAddBlock(directory, 'record-detail');
+    expect(plan.entries[0]?.action).toBe('conflict');
+    expect(writeAddBlock(plan).written).toEqual([]);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
 });
 
-test('parseAddArguments accepts the block kind', () => {
-  const options = parseAddArguments(['block', 'search-table', '--write']);
-  expect(options.kind).toBe('block');
-  expect(options.target).toBe('search-table');
-  expect(options.write).toBe(true);
+test('remove deletes only unmodified owned files and clears the ledger', async () => {
+  const directory = await project();
+  try {
+    writeAddBlock(planAddBlock(directory, 'search-table'));
+    const plan = planAddBlock(directory, 'search-table', { mode: 'remove' });
+    expect(plan.entries[0]?.action).toBe('update');
+    const result = writeAddBlock(plan);
+    expect(result.written).toEqual(['src/features/search-table/SearchTable.svelte']);
+    expect(readMaterialState(directory).blocks['search-table']).toBeUndefined();
+
+    expect(() => planAddBlock(directory, 'search-table', { mode: 'remove' })).toThrow(/not installed/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('json plan is serializable and contains no file contents', async () => {
+  const directory = await project();
+  try {
+    writeAddBlock(planAddBlock(directory, 'search-table'));
+    const payload = serializeAddBlockPlan(planAddBlock(directory, 'search-table', { mode: 'upgrade' }));
+    expect(payload.mode).toBe('upgrade');
+    expect(payload.requires).toContain('@svadmin/ui');
+    expect(payload.entries[0]?.action).toBe('skip');
+    expect(payload.entries[0]?.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(JSON.stringify(payload)).not.toContain('<script');
+    expect(JSON.stringify(payload)).not.toContain('pageSource');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('a malformed material ledger fails loudly', async () => {
+  const directory = await project();
+  try {
+    await writeFile(join(directory, 'svadmin.materials.json'), JSON.stringify({ version: 2, blocks: {} }));
+    expect(() => planAddBlock(directory, 'search-table')).toThrow(/unsupported or malformed/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('parseAddArguments understands lifecycle flags and rejects invalid combinations', () => {
+  const options = parseAddArguments(['block', 'search-table', '--upgrade', '--json', '--write']);
+  expect(options).toMatchObject({ kind: 'block', upgrade: true, json: true, write: true, remove: false });
+  expect(() => parseAddArguments(['block', 'x', '--upgrade', '--remove'])).toThrow(/mutually exclusive/);
+  expect(() => parseAddArguments(['resource', 'orders', '--remove'])).toThrow(/only apply to/);
+  expect(() => parseAddArguments(['block', 'search-table', '--dry-run', '--write'])).toThrow(/mutually exclusive/);
+  const dryRun = parseAddArguments(['block', 'search-table', '--dry-run', '--json']);
+  expect(dryRun.write).toBe(false);
+  expect(dryRun.json).toBe(true);
+});
+
+test('a conflict does not drop the installed hash or claim the upgrade', async () => {
+  const directory = await project();
+  try {
+    writeAddBlock(planAddBlock(directory, 'search-table'));
+    const before = readMaterialState(directory).blocks['search-table'];
+    const file = join(directory, 'src/features/search-table/SearchTable.svelte');
+    await writeFile(file, '<!-- local change -->\n');
+    const plan = planAddBlock(directory, 'search-table', { mode: 'upgrade' });
+    writeAddBlock(plan);
+    const after = readMaterialState(directory).blocks['search-table'];
+    expect(after?.version).toBe(before?.version);
+    expect(after?.files['src/features/search-table/SearchTable.svelte']).toBe(
+      before?.files['src/features/search-table/SearchTable.svelte'],
+    );
+    expect(await readFile(file, 'utf8')).toBe('<!-- local change -->\n');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('block peer ranges match the scaffold UI dependency', async () => {
+  const manifest = JSON.parse(await readFile(join(import.meta.dir, '..', 'scaffold-manifest.json'), 'utf8')) as {
+    dependencies: Record<string, string>;
+  };
+  for (const block of listBlocks()) expect(block.peerRange).toBe(manifest.dependencies['@svadmin/ui']);
 });

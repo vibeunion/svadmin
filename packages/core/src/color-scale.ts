@@ -148,6 +148,20 @@ function contrastRatio(a: string, b: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/** Convert an OKLCH triple to a clamped sRGB hex string. */
+export function oklchToHex(l: number, c: number, h: number): string {
+  return toHex(oklchToRgb(l, c, h));
+}
+
+/** Contrast helpers shared by the token audit. */
+export function hexLuminance(hex: string): number {
+  return relativeLuminance(hex);
+}
+
+export function hexContrastRatio(a: string, b: string): number {
+  return contrastRatio(a, b);
+}
+
 /** Pick the foreground with the higher contrast ratio (WCAG relative luminance). */
 export function pickReadableForeground(backgroundHex: string): string {
   return contrastRatio(backgroundHex, '#FFFFFF') >= contrastRatio(backgroundHex, '#111111')
@@ -175,12 +189,45 @@ export function generateColorScale(color: string): ColorScaleStep[] {
   return steps;
 }
 
-function chartPalette(scale: ColorScaleStep[], hue: number, chroma: number, lightness: number): Record<string, string> {
+/**
+ * Nudge lightness until the color reaches `minimum` contrast against a surface.
+ * Direction is chosen so the adjustment moves away from the surface, keeping the
+ * hue and chroma intact (only the lightness dimension changes).
+ */
+function contrastAdjusted(
+  lightness: number,
+  chroma: number,
+  hue: number,
+  surfaceHex: string,
+  minimum: number,
+): { value: string; hex: string } {
+  const step = hexLuminance(surfaceHex) > 0.5 ? -0.008 : 0.008;
+  let current = clamp01(lightness);
+  let hex = toHex(oklchToRgb(current, chroma, hue));
+  // Rounding to `oklch(L C H)` loses precision, so aim above the threshold
+  // instead of landing on 2.99.
+  const target = minimum + 0.1;
+  for (let index = 0; index < 80 && contrastRatio(hex, surfaceHex) < target; index += 1) {
+    const next = clamp01(current + step);
+    if (next === current) break;
+    current = next;
+    hex = toHex(oklchToRgb(current, chroma, hue));
+  }
+  return { value: formatOklch(current, chroma, hue), hex };
+}
+
+function chartPalette(
+  scale: ColorScaleStep[],
+  hue: number,
+  chroma: number,
+  lightness: number,
+  surfaceHex: string,
+): Record<string, string> {
   const offsets = [0, 32, -32, 64, -64];
-  return Object.fromEntries(offsets.map((offset, index) => [
-    `--chart-${index + 1}`,
-    index === 0 ? scale[5]?.value as string : formatOklch(lightness, chroma, hue + offset),
-  ]));
+  return Object.fromEntries(offsets.map((offset, index) => {
+    if (index === 0) return ['--chart-1', contrastAdjusted(lightness, chroma, hue, surfaceHex, 3).value];
+    return [`--chart-${index + 1}`, contrastAdjusted(lightness, chroma, hue + offset, surfaceHex, 3).value];
+  }));
 }
 
 /**
@@ -193,10 +240,12 @@ export function deriveColorPreset(input: { name: string; label?: string; color: 
   const color = input.color?.trim();
   const source = hexToOklch(color);
   const scale = generateColorScale(color);
-  const lightPrimary = scale[5] as ColorScaleStep;
-  const darkPrimary = scale[3] as ColorScaleStep;
-  const lightForeground = pickReadableForeground(lightPrimary.hex);
-  const darkForeground = pickReadableForeground(darkPrimary.hex);
+  // One foreground per mode keeps `primary` usable both as a fill and as text on
+  // the mode surface: white on a light-mode primary, near-black on a dark one.
+  const lightForeground = '#FFFFFF';
+  const darkForeground = '#111111';
+  const lightPrimary = contrastAdjusted(source.l, source.c, source.h, '#FFFFFF', 4.5);
+  const darkPrimary = contrastAdjusted(Math.min(0.82, source.l + 0.12), source.c, source.h, '#111111', 4.5);
 
   return {
     name,
@@ -209,7 +258,7 @@ export function deriveColorPreset(input: { name: string; label?: string; color: 
       '--sidebar-primary': lightPrimary.value,
       '--sidebar-primary-foreground': lightForeground,
       '--sidebar-ring': lightPrimary.value,
-      ...chartPalette(scale, source.h, source.c, source.l),
+      ...chartPalette(scale, source.h, source.c, source.l, '#FFFFFF'),
     },
     dark: {
       '--primary': darkPrimary.value,
@@ -218,7 +267,7 @@ export function deriveColorPreset(input: { name: string; label?: string; color: 
       '--sidebar-primary': darkPrimary.value,
       '--sidebar-primary-foreground': darkForeground,
       '--sidebar-ring': scale[4]?.value as string,
-      ...chartPalette(scale, source.h, source.c * 1.05, Math.min(0.82, source.l + 0.12)),
+      ...chartPalette(scale, source.h, source.c * 1.05, Math.min(0.82, source.l + 0.12), '#111111'),
     },
   };
 }

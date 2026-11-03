@@ -20,6 +20,21 @@ export interface SchemaFormCondition {
   not?: SchemaFormCondition;
 }
 
+/** 声明式排版：只描述呈现分组，不参与校验与提交投影。 */
+export type SchemaFormLayoutType='grid'|'section'|'steps';
+
+export interface SchemaFormLayout {
+  type: SchemaFormLayoutType;
+  title?: string;
+  description?: string;
+  /** 仅 grid：1-4 列。 */
+  columns?: 1|2|3|4;
+  /** 仅 grid：字段跨列数。 */
+  span?: 1|2|3|4;
+  /** 仅 steps：有序分组序号。 */
+  step?: number;
+}
+
 /** 封闭集合的派生规则；不编译表达式，避免把 schema 变成代码执行入口。 */
 export type SchemaFormComputedOp='sum'|'count'|'first'|'concat';
 
@@ -41,6 +56,7 @@ export interface SchemaFormSchema {
   required?: string[];
   visibleWhen?: SchemaFormCondition;
   computed?: SchemaFormComputed;
+  layout?: SchemaFormLayout;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
@@ -52,9 +68,10 @@ export interface SchemaFormSchema {
 
 const keys = new Set([
   'type', 'title', 'description', 'properties', 'items', 'enum', 'default', 'required',
-  'visibleWhen', 'computed', 'minLength', 'maxLength', 'pattern', 'minimum', 'maximum', 'minItems', 'maxItems',
+  'visibleWhen', 'computed', 'layout', 'minLength', 'maxLength', 'pattern', 'minimum', 'maximum', 'minItems', 'maxItems',
 ]);
 const COMPUTED_OPS=new Set<SchemaFormComputedOp>(['sum','count','first','concat']);
+const LAYOUT_TYPES=new Set<SchemaFormLayoutType>(['grid','section','steps']);
 const scalar = (value: unknown): value is SchemaFormScalar => value === null ||
   typeof value === 'string' || typeof value === 'boolean' ||
   (typeof value === 'number' && Number.isFinite(value));
@@ -128,7 +145,13 @@ export function assertSchemaFormSchema(schema: SchemaFormSchema): void {
     if (kind !== undefined && !['object', 'array', 'string', 'number', 'integer', 'boolean', 'null'].includes(kind)) fail();
     if (node.properties !== undefined) {
       if (kind !== 'object' || !node.properties || typeof node.properties !== 'object' || Array.isArray(node.properties)) fail();
-      for (const child of Object.values(node.properties)) visit(child, depth + 1);
+      const structural = new Set<string>();
+      for (const child of Object.values(node.properties)) {
+        visit(child, depth + 1);
+        const layoutType = child.layout?.type;
+        if (layoutType === 'section' || layoutType === 'steps') structural.add(layoutType);
+      }
+      if (structural.size > 1) fail();
     }
     if (node.items !== undefined) {
       if (kind !== 'array') fail();
@@ -158,6 +181,24 @@ export function assertSchemaFormSchema(schema: SchemaFormSchema): void {
     if (condition !== undefined) {
       assertCondition(condition, schema, 0);
       assertConditionPaths(condition, schema);
+    }
+    const layout = node.layout;
+    if (layout !== undefined) {
+      if (!layout || typeof layout !== 'object' || Array.isArray(layout) ||
+          Object.keys(layout).some(key => !['type', 'title', 'description', 'columns', 'span', 'step'].includes(key)) ||
+          !LAYOUT_TYPES.has(layout.type)) fail();
+      if (layout.title !== undefined && (typeof layout.title !== 'string' || layout.title.trim() === '' || layout.title.length > 120)) fail();
+      if (layout.description !== undefined && (typeof layout.description !== 'string' || layout.description.length > 400)) fail();
+      if (layout.columns !== undefined &&
+          (layout.type !== 'grid' || ![1, 2, 3, 4].includes(layout.columns))) fail();
+      if (layout.span !== undefined &&
+          (layout.type !== 'grid' || ![1, 2, 3, 4].includes(layout.span))) fail();
+      if (layout.step !== undefined &&
+          (layout.type !== 'steps' || !Number.isSafeInteger(layout.step) || layout.step < 1 || layout.step > 12)) fail();
+      if (layout.type === 'section' || layout.type === 'steps') {
+        if (layout.title === undefined) fail();
+      }
+      if (layout.type === 'grid' && layout.step !== undefined) fail();
     }
     const computed = node.computed;
     if (computed !== undefined) {
@@ -203,6 +244,106 @@ export function matchesSchemaFormCondition(condition: SchemaFormCondition | unde
 
 export function isSchemaFormNodeVisible(schema: SchemaFormSchema, rootValue: unknown): boolean {
   return matchesSchemaFormCondition(schema.visibleWhen, rootValue);
+}
+
+export interface SchemaFormLayoutField {
+  key: string;
+  /** 1-4；仅 grid 分组会大于 1。 */
+  span: number;
+}
+
+export interface SchemaFormLayoutGroup {
+  /** 稳定的渲染 key；默认分组为空字符串。 */
+  key: string;
+  title?: string;
+  description?: string;
+  step?: number;
+  columns: 1|2|3|4;
+  fields: readonly SchemaFormLayoutField[];
+}
+
+export interface SchemaFormLayoutPlan {
+  kind: 'flat'|'sections'|'steps';
+  columns: 1|2|3|4;
+  groups: readonly SchemaFormLayoutGroup[];
+}
+
+/**
+ * 把 `layout` 关键字折叠成渲染器可直接消费的分组计划。
+ * 纯函数：不读取表单值，因此隐藏字段仍由 `visibleWhen` 在渲染时过滤。
+ */
+export function resolveSchemaFormLayout(schema: SchemaFormSchema): SchemaFormLayoutPlan {
+  assertSchemaFormSchema(schema);
+  const entries=Object.entries(schema.properties ?? {});
+  let columns: 1|2|3|4=1;
+  let sawSection=false;
+  let sawSteps=false;
+  for (const [, child] of entries) {
+    const layout=child.layout;
+    if (!layout) continue;
+    if (layout.type === 'grid') columns=Math.max(columns, layout.columns ?? 1) as 1|2|3|4;
+    if (layout.type === 'section') sawSection=true;
+    if (layout.type === 'steps') sawSteps=true;
+  }
+  const kind: SchemaFormLayoutPlan['kind']=sawSteps ? 'steps' : sawSection ? 'sections' : 'flat';
+
+  const groups: Array<{ key: string; title?: string; description?: string; step?: number; columns: 1|2|3|4; fields: Array<SchemaFormLayoutField> }>=[];
+  let currentKey: string|undefined;
+  for (const [key, child] of entries) {
+    const layout=child.layout;
+    const grouped=layout !== undefined && (layout.type === 'section' || layout.type === 'steps');
+    const groupKey=grouped ? `${layout.type}:${layout.step ?? ''}:${layout.title ?? ''}` : '';
+    if (currentKey !== groupKey) {
+      currentKey=groupKey;
+      groups.push({
+        key: groupKey,
+        columns: grouped ? 1 : columns,
+        fields: [],
+        ...(grouped && layout.title !== undefined ? { title: layout.title } : {}),
+        ...(grouped && layout.description !== undefined ? { description: layout.description } : {}),
+        ...(grouped && layout.type === 'steps' && layout.step !== undefined ? { step: layout.step } : {}),
+      });
+    }
+    groups.at(-1)?.fields.push({
+      key,
+      span: layout?.type === 'grid' ? Math.min(layout.span ?? 1, columns) : 1,
+    });
+    if (layout?.type === 'grid' && layout.columns !== undefined) {
+      const group=groups.at(-1);
+      if (group) group.columns=Math.max(group.columns, layout.columns) as 1|2|3|4;
+    }
+  }
+
+  return {
+    kind,
+    columns,
+    groups: groups.map((group) => ({
+      key: group.key,
+      columns: group.columns,
+      fields: group.fields,
+      ...(group.title === undefined ? {} : { title: group.title }),
+      ...(group.description === undefined ? {} : { description: group.description }),
+      ...(group.step === undefined ? {} : { step: group.step }),
+    })),
+  };
+}
+
+
+/**
+ * AutoForm 字段上的 `layout` 与 schema 关键字走同一投影。
+ * 没有声明时返回 undefined，调用方保持原有 `group` / `columns` 行为。
+ */
+export function resolveDeclaredFieldLayout(
+  fields: readonly { key: string; layout?: SchemaFormLayout }[],
+): SchemaFormLayoutPlan | undefined {
+  if (!fields.some((field) => field.layout !== undefined)) return undefined;
+  const properties: Record<string, SchemaFormSchema> = {};
+  for (const field of fields) {
+    properties[field.key] = field.layout === undefined
+      ? { type: 'string' }
+      : { type: 'string', layout: field.layout };
+  }
+  return resolveSchemaFormLayout({ type: 'object', properties });
 }
 
 export interface SchemaFormValidationError {

@@ -14,6 +14,23 @@ import type { Component } from 'svelte';
 /** Minimal icon component contract used by navigation surfaces. */
 export type IconComponent = Component<Record<string, unknown>>;
 
+/**
+ * Non-component icon sources. Design systems that ship a sprite sheet or a CDN
+ * set can register names without generating one component per icon.
+ */
+export type IconSource =
+  | { type: 'sprite'; url: string; symbolPrefix?: string }
+  | { type: 'remote-svg'; urlTemplate: string };
+
+/** Public registration shape. `url` is a sprite URL or a `{name}` template. */
+export interface IconSourceInput {
+  type: 'sprite' | 'remote-svg';
+  url: string;
+  symbolPrefix?: string;
+  /** Omit to use this source for every name that has no component. */
+  names?: readonly string[];
+}
+
 /** Handler invoked once per missing icon name. Keep it cheap: no throwing. */
 export type IconMissHandler = (name: string) => void;
 
@@ -22,6 +39,13 @@ export interface IconRegistry {
   registerIcons(icons: Readonly<Record<string, IconComponent>>, options?: { replace?: boolean }): void;
   /** Replace the built-in vocabulary as well as registrations (design-system swap). */
   replaceIcons(icons: Readonly<Record<string, IconComponent>>): void;
+  /** Register sprite/remote sources for names that have no component. */
+  registerIconSources(sources: Readonly<Record<string, IconSource>>): void;
+  /** Register one sprite sheet or remote template, optionally limited to `names`. */
+  registerIconSource(source: IconSourceInput): void;
+  /** Last registered source wins; components always take precedence at render time. */
+  resolveIconSource(name: string | undefined): IconSource | undefined;
+  getIconSourceNames(): string[];
   /** Resolve a name, optionally falling back to a caller-provided component. */
   resolveIcon(name: string | undefined, fallback?: IconComponent): IconComponent | undefined;
   hasIcon(name: string): boolean;
@@ -35,10 +59,27 @@ export interface IconRegistry {
   resetIconRegistry(): void;
 }
 
+function isIconSource(value: unknown): value is IconSource {
+  if (typeof value !== 'object' || value === null) return false;
+  const type = Reflect.get(value, 'type');
+  if (type === 'sprite') {
+    const url = Reflect.get(value, 'url');
+    const prefix = Reflect.get(value, 'symbolPrefix');
+    return typeof url === 'string' && url.length > 0 && (prefix === undefined || typeof prefix === 'string');
+  }
+  if (type === 'remote-svg') {
+    const template = Reflect.get(value, 'urlTemplate');
+    return typeof template === 'string' && template.includes('{name}');
+  }
+  return false;
+}
+
 export function createIconRegistry(builtinIcons: Readonly<Record<string, IconComponent>> = {}): IconRegistry {
   const original = new Map(Object.entries(builtinIcons));
   let builtin = new Map(original);
   const registered = new Map<string, IconComponent>();
+  const sources = new Map<string, IconSource>();
+  let defaultSource: IconSource | undefined;
   const missing = new Set<string>();
   let fallback: IconComponent | undefined;
   let onMiss: IconMissHandler | undefined;
@@ -77,6 +118,35 @@ export function createIconRegistry(builtinIcons: Readonly<Record<string, IconCom
       );
       registered.clear();
     },
+    registerIconSources(next) {
+      for (const [name, source] of Object.entries(next)) {
+        if (name.trim() === '' || !isIconSource(source)) continue;
+        sources.set(name, source);
+      }
+    },
+    registerIconSource(source) {
+      const normalized: IconSource | undefined = source.type === 'sprite'
+        ? (source.url.length > 0 ? {
+            type: 'sprite',
+            url: source.url,
+            ...(source.symbolPrefix !== undefined ? { symbolPrefix: source.symbolPrefix } : {}),
+          } : undefined)
+        : (source.url.includes('{name}') ? { type: 'remote-svg', urlTemplate: source.url } : undefined);
+      if (normalized === undefined || !isIconSource(normalized)) return;
+      const names = source.names?.filter((name) => name.trim() !== '') ?? [];
+      if (names.length === 0) {
+        defaultSource = normalized;
+        return;
+      }
+      for (const name of names) sources.set(name, normalized);
+    },
+    resolveIconSource(name) {
+      if (name === undefined || name === '') return undefined;
+      return sources.get(name) ?? defaultSource;
+    },
+    getIconSourceNames() {
+      return [...sources.keys()];
+    },
     resolveIcon(name, fallbackIcon) {
       if (name === undefined || name === '') return fallbackIcon ?? fallback;
       const direct = registered.get(name) ?? builtin.get(name);
@@ -101,6 +171,8 @@ export function createIconRegistry(builtinIcons: Readonly<Record<string, IconCom
     resetIconRegistry() {
       builtin = new Map(original);
       registered.clear();
+      sources.clear();
+      defaultSource = undefined;
       fallback = undefined;
       onMiss = undefined;
       missing.clear();

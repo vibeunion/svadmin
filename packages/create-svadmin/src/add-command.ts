@@ -30,7 +30,7 @@ import {
   readMaintainedPackageJson,
   type MaintainedPackageJson,
 } from './project-maintenance';
-import { listBlocks, planAddBlock, writeAddBlock } from './blocks';
+import { listBlocks, planAddBlock, serializeAddBlockPlan, writeAddBlock } from './blocks';
 
 export type AddKind = 'resource' | 'provider' | 'auth' | 'block';
 
@@ -39,6 +39,10 @@ export interface AddCommandArguments {
   target: string;
   projectDirectory: string;
   write: boolean;
+  /** `block` lifecycle flags. */
+  json: boolean;
+  upgrade: boolean;
+  remove: boolean;
 }
 
 export interface AddPlanEntry {
@@ -88,15 +92,27 @@ const RESOURCE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
 export function parseAddArguments(args: string[]): AddCommandArguments {
   const [kind, ...rest] = args;
   if (kind !== 'resource' && kind !== 'provider' && kind !== 'auth' && kind !== 'block') {
-    throw new Error('Usage: create-svadmin add <resource|provider|auth|block> <name> [--project-dir <dir>] [--write] [--list]');
+    throw new Error('Usage: create-svadmin add <resource|provider|auth|block> <name> [--project-dir <dir>] [--dry-run] [--json] [--upgrade] [--remove] [--write] [--list]');
   }
   let projectDirectory = process.cwd();
   let write = false;
+  let json = false;
+  let upgrade = false;
+  let remove = false;
+  let explicitDryRun = false;
   const positional: string[] = [];
   for (let index = 0; index < rest.length; index++) {
     const argument = rest[index];
-    if (argument === '--write') {
+    if (argument === '--dry-run') {
+      explicitDryRun = true;
+    } else if (argument === '--write') {
       write = true;
+    } else if (argument === '--json') {
+      json = true;
+    } else if (argument === '--upgrade') {
+      upgrade = true;
+    } else if (argument === '--remove') {
+      remove = true;
     } else if (argument === '--project-dir') {
       const value = rest[index + 1];
       if (value === undefined) throw new Error('--project-dir requires a value');
@@ -113,7 +129,10 @@ export function parseAddArguments(args: string[]): AddCommandArguments {
   if (positional.length !== 1) {
     throw new Error(`Expected exactly one target, received: ${positional.join(', ') || '(none)'}`);
   }
-  return { kind, target: positional[0] as string, projectDirectory, write };
+  if (explicitDryRun && write) throw new Error('--dry-run and --write are mutually exclusive');
+  if (upgrade && remove) throw new Error('--upgrade and --remove are mutually exclusive');
+  if ((upgrade || remove) && kind !== 'block') throw new Error('--upgrade/--remove only apply to `add block`');
+  return { kind, target: positional[0] as string, projectDirectory, write, json, upgrade, remove };
 }
 
 function humanize(name: string): string {
@@ -357,10 +376,10 @@ export function addCommand(args: string[], scaffold: ScaffoldManifest): void {
   if (args.includes('--list')) {
     console.log('\nAvailable page blocks:\n');
     for (const block of listBlocks()) {
-      console.log(`  ${pc.cyan(block.name.padEnd(20))} ${block.title}`);
+      console.log(`  ${pc.cyan(block.name.padEnd(20))} ${block.title} ${pc.dim(`v${block.version} (ui ${block.peerRange})`)}`);
       console.log(pc.dim(`  ${''.padEnd(20)} ${block.description}`));
     }
-    console.log('\nInstall with `svadmin add block <name> --write`.\n');
+    console.log('\nInstall with `svadmin add block <name> [--dry-run|--write] [--json] [--upgrade|--remove]`.\n');
     return;
   }
 
@@ -368,16 +387,37 @@ export function addCommand(args: string[], scaffold: ScaffoldManifest): void {
   console.log(`\nsvadmin add ${options.kind} ${options.target} — ${options.projectDirectory}`);
 
   if (options.kind === 'block') {
-    const plan = planAddBlock(options.projectDirectory, options.target);
-    for (const entry of plan.entries) {
-      console.log(`  ${entry.exists ? 'preserve' : 'add'} ${entry.relativePath}`);
+    const mode = options.remove ? 'remove' : options.upgrade ? 'upgrade' : undefined;
+    const plan = planAddBlock(options.projectDirectory, options.target, mode ? { mode } : {});
+    if (options.json) {
+      console.log(JSON.stringify(serializeAddBlockPlan(plan), null, 2));
+      if (!options.write) return;
+    } else {
+      console.log(`  ${pc.dim(`mode: ${plan.mode}, material v${plan.version}, ui ${plan.peerRange}`)}`);
+      for (const entry of plan.entries) {
+        const marker = entry.action === 'conflict'
+          ? pc.red('conflict')
+          : entry.action === 'skip'
+            ? pc.dim('skip    ')
+            : pc.green(entry.action.padEnd(8));
+        console.log(`  ${marker} ${entry.relativePath}`);
+      }
+      if (plan.entries.some((entry) => entry.action === 'conflict')) {
+        console.log(pc.yellow('\n  Locally modified files are never overwritten. Revert them or move the change into your own file.'));
+      }
+      if (!options.write) {
+        console.log('\nDry run only; re-run with --write to apply.');
+        if (plan.mode !== 'remove') printAddResult(false, { written: [], preserved: [] }, plan.registrationHint);
+        return;
+      }
     }
-    if (!options.write) {
-      console.log('\nDry run only; re-run with --write to create missing block files.');
-      printAddResult(false, { written: [], preserved: [] }, plan.registrationHint);
-      return;
+    const result = writeAddBlock(plan);
+    if (!options.json) {
+      printAddResult(true, result, plan.mode === 'remove' ? undefined : plan.registrationHint);
+      if (result.conflicts.length > 0) {
+        console.log(pc.yellow(`  ${result.conflicts.length} file(s) left untouched: ${result.conflicts.join(', ')}`));
+      }
     }
-    printAddResult(true, writeAddBlock(plan), plan.registrationHint);
     return;
   }
 

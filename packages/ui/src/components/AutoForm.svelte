@@ -5,6 +5,7 @@
   import { definedOptions } from '@svadmin/core/options';
 
   import { captureAdminContext, captureAuthSession, useResourceContract, getContractFormFields, deriveValidator, useNavigation, useCan, useForm, parseQueryKey } from '@svadmin/core';
+  import { resolveDeclaredFieldLayout } from '@svadmin/core/schema-form';
   import { useQueryClient } from '@tanstack/svelte-query';
   import { slide } from 'svelte/transition';
   import { untrack } from 'svelte';
@@ -132,28 +133,69 @@
     return true;
   }));
 
-  const hasGroups = $derived(formFields.some(f => f.group));
-  const groups = $derived((() => {
-    if (!hasGroups) return [];
+  const declarativeLayout = $derived(resolveDeclaredFieldLayout(formFields));
+  const spanByKey = $derived.by(() => {
+    const spans = new Map<string, number>();
+    for (const group of declarativeLayout?.groups ?? []) {
+      for (const field of group.fields) spans.set(field.key, field.span);
+    }
+    return spans;
+  });
+  const effectiveColumns = $derived(declarativeLayout?.kind === 'flat' ? declarativeLayout.columns : columns);
+
+  function gridClassFor(count: number): string {
+    if (count === 4) return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4';
+    if (count === 3) return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+    if (count === 2) return 'grid grid-cols-1 md:grid-cols-2 gap-4';
+    return 'space-y-5';
+  }
+
+  function spanClass(span: number | undefined): string {
+    if (span === 2) return 'md:col-span-2';
+    if (span === 3) return 'md:col-span-2 lg:col-span-3';
+    if (span !== undefined && span >= 4) return 'md:col-span-2 lg:col-span-4';
+    return '';
+  }
+
+  interface FormLayoutGroup {
+    name: string;
+    description: string | undefined;
+    columns: number;
+    fields: FieldDefinition[];
+  }
+
+  const groups = $derived.by((): FormLayoutGroup[] => {
+    if (declarativeLayout && (declarativeLayout.kind === 'sections' || declarativeLayout.kind === 'steps')) {
+      return declarativeLayout.groups.map((group) => ({
+        name: group.step !== undefined ? `${group.step}. ${group.title ?? ''}`.trim() : (group.title ?? ''),
+        description: group.description,
+        columns: group.columns,
+        fields: group.fields.flatMap((item) => {
+          const field = formFields.find((candidate) => candidate.key === item.key);
+          return field ? [field] : [];
+        }),
+      }));
+    }
+    if (!formFields.some((field) => field.group)) return [];
     const order: string[] = [];
     const map = new Map<string, FieldDefinition[]>();
-    for (const f of formFields) {
-      const g = f.group ?? '';
-      if (!map.has(g)) { order.push(g); map.set(g, []); }
-      (map.get(g) ?? []).push(f);
+    for (const field of formFields) {
+      const name = field.group ?? '';
+      if (!map.has(name)) {
+        order.push(name);
+        map.set(name, []);
+      }
+      (map.get(name) ?? []).push(field);
     }
-    return order.map(g => ({ name: g, fields: map.get(g) ?? [] }));
-  })());
-
-  const gridClass = $derived(
-    columns === 4
-      ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'
-      : columns === 3
-        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
-        : columns === 2
-          ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
-          : 'space-y-5'
-  );
+    return order.map((name) => ({
+      name,
+      description: undefined,
+      columns,
+      fields: map.get(name) ?? [],
+    }));
+  });
+  const hasGroups = $derived(groups.length > 0);
+  const gridClass = $derived(gridClassFor(effectiveColumns));
 
   function isFullWidthField(field: FieldDefinition): boolean {
     return (
@@ -639,10 +681,11 @@
             {#if group.name}
               <Card.Header>
                 <Card.Title class="text-lg">{group.name}</Card.Title>
+                {#if group.description}<p class="text-[11px] text-muted-foreground">{group.description}</p>{/if}
               </Card.Header>
             {/if}
             <Card.Content class="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
-              <div class={gridClass}>
+              <div class={gridClassFor(group.columns)} data-svadmin-form-grid data-columns={group.columns}>
                 {#each group.fields as field (field.key)}
                   {@const customField = fields?.[field.key]}
                   <div
@@ -650,7 +693,7 @@
                     data-svadmin-field-key={field.key}
                     data-svadmin-field={field.key}
                     data-svadmin-field-type={field.type}
-                    class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}
+                    class={cn(group.columns > 1 && isFullWidthField(field) && 'col-span-full', spanClass(spanByKey.get(field.key)), !!form.errors[field.key] && 'border-destructive')}
                   >
                     {#if customField}
                       {@render customField({
@@ -688,7 +731,7 @@
       {:else}
         <Card.Root class="border-border/40 shadow-sm">
           <Card.Content class="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-6">
-              <div class={gridClass} data-svadmin-form-grid data-columns={columns}>
+              <div class={gridClass} data-svadmin-form-grid data-columns={effectiveColumns}>
               {#each formFields as field (field.key)}
                 {@const customField = fields?.[field.key]}
                 <div
@@ -696,7 +739,7 @@
                   data-svadmin-field-key={field.key}
                   data-svadmin-field={field.key}
                   data-svadmin-field-type={field.type}
-                  class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}
+                  class={cn(effectiveColumns > 1 && isFullWidthField(field) && 'col-span-full', spanClass(spanByKey.get(field.key)), !!form.errors[field.key] && 'border-destructive')}
                 >
                   {#if customField}
                     {@render customField({

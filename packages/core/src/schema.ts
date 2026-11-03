@@ -1,10 +1,11 @@
 export { createExactSchemaValidator, checkExact } from './schema-validation';
 export {
   readSchemaFormPath, matchesSchemaFormCondition, isSchemaFormNodeVisible, validateSchemaFormValue,
-  assertSchemaFormSchema, prepareSchemaFormValue,
+  assertSchemaFormSchema, prepareSchemaFormValue, resolveDeclaredFieldLayout, resolveSchemaFormLayout,
 } from './schema-form';
 export type {
-  SchemaFormScalar, SchemaFormCondition, SchemaFormSchema, SchemaFormValidationError,
+  SchemaFormScalar, SchemaFormCondition, SchemaFormLayout, SchemaFormLayoutPlan, SchemaFormSchema,
+  SchemaFormValidationError,
 } from './schema-form';
 export { snapshotPlainData } from './plain-data';
 export type { JsonValue } from './plain-data';
