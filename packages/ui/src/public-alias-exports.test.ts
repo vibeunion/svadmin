@@ -21,6 +21,14 @@ import {
   TagsInput,
   VerificationCode,
   OtpInput,
+  TabBar,
+  WorkspaceTabBar,
+  Mention,
+  MentionsInput,
+  Paragraph,
+  TypographyText,
+  Typography,
+  Title,
   message,
   notification,
   toast,
@@ -36,6 +44,10 @@ describe('public compatibility aliases', () => {
     expect(Radio).toBe(RadioGroup);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);
+    expect(TabBar).toBe(WorkspaceTabBar);
+    expect(Mention).toBe(MentionsInput);
+    expect(Paragraph).toBe(TypographyText);
+    expect(Typography).toBe(Title);
   });
 
   it('keeps compound namespace aliases bound to canonical namespaces', () => {

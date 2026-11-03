@@ -40,6 +40,7 @@ import type {
   UpdateParams,
   UpdateResult,
 } from './types';
+import type { StorageProvider } from './storage-contract';
 
 export type DataProviderInput=DataProvider|Record<string,DataProvider>;
 
@@ -63,6 +64,7 @@ export interface ProviderBundle {
   readonly identityGovernanceProvider?: IdentityGovernanceProvider|null;
   readonly sessionProvider?: SessionProvider|null;
   readonly credentialProvider?: CredentialProvider|null;
+  readonly storageProvider?: StorageProvider|null;
 }
 
 /** Preserves the input object's exact type while applying compile-time ProviderBundle validation. */

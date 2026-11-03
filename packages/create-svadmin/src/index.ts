@@ -16,6 +16,7 @@ import {
 } from './project-manifest';
 import { inferCommand } from "./infer-command";
 import { generateCommand } from './generate-command';
+import { swizzleCommand } from './swizzle-command';
 import { liteInitCommand } from './lite-init';
 import { parseInitArguments, resolvePresetSelections } from './init-arguments';
 import { addCommand } from './add-command';
@@ -589,6 +590,8 @@ if (subcommand === 'eject') {
   runCommand(() => vibeCommand(rest, path.join(__dirname, '..'), loadShippedScaffoldManifest()));
 } else if (subcommand === 'infer') {
   runCommand(() => inferCommand(rest));
+} else if (subcommand === 'swizzle') {
+  runCommand(() => swizzleCommand(rest));
 } else if (subcommand === 'add') {
   runCommand(() => addCommand(rest, loadShippedScaffoldManifest()));
 } else if (subcommand === 'generate' || subcommand === 'gen') {

@@ -349,6 +349,26 @@
       "release-type": "node",
       "component": "strapi-graphql",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/clerk": {
+      "release-type": "node",
+      "component": "clerk",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/elasticsearch": {
+      "release-type": "node",
+      "component": "elasticsearch",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/pusher": {
+      "release-type": "node",
+      "component": "pusher",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/storage": {
+      "release-type": "node",
+      "component": "storage",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

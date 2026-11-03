@@ -32,5 +32,9 @@
   "packages/app": "0.2.24",
   "packages/devtools": "0.6.3",
   "packages/rest": "0.2.24",
-  "packages/strapi-graphql": "0.2.8"
+  "packages/strapi-graphql": "0.2.8",
+  "packages/clerk": "0.1.0",
+  "packages/elasticsearch": "0.1.0",
+  "packages/pusher": "0.1.0",
+  "packages/storage": "0.1.0"
 }

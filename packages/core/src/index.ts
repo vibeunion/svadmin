@@ -9,6 +9,7 @@ export {
   setRouterProvider, getRouterProvider,
   setLiveProvider, getLiveProvider,
   setTaskProvider, getTaskProvider,
+  setStorageProvider, getStorageProvider,
   createAdminContext, provideAdminContext, getAdminContext, captureAdminContext,
   provideTenantContext, getTenantContext, getProviderBundle,
   resetContext,
@@ -480,3 +481,13 @@ export type {
   RetryOptions,
   SafeDataProvider,
 } from './resilience';
+
+export { useStorage } from './storage-hooks.svelte';
+export type {
+  StorageProvider,
+  StorageUploadOptions,
+  StorageUploadResult,
+  StoragePresignedUrlOptions,
+  StorageFileItem,
+  StorageListOptions,
+} from './storage-contract';
