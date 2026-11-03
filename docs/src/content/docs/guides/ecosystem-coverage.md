@@ -28,7 +28,9 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | Responsive | react-responsive | `useMediaQuery`, `useDeviceDetect` | runed | ✅ |
 | Clipboard | react-copy-to-clipboard | `CopyField`, ai-elements `CopyButton` | — | ✅ |
 | Document meta | react-helmet-async | SvelteKit `<svelte:head>` | SvelteKit | 🔶 framework-provided |
-| Icons | react-icons / fontawesome | `@lucide/svelte` | lucide-svelte, phosphor-svelte | ✅ |
+| Icons | react-icons / fontawesome | `@lucide/svelte` + built-in enterprise admin business icons (`IconAudit`, `IconWorkflow`, `IconSeal`, `IconTenant`, `IconMonitor`, etc.) | lucide-svelte, phosphor-svelte | ✅ |
+| Role simulation | — | `RoleSwitcher` developer role simulation component | — | ✅ |
+| Realtime monitor | — | `RealtimeMonitorView` live stream & cluster metrics dashboard | — | ✅ |
 | QR code | qrcode.react | `QRCode` opt-in adapter (`@svadmin/ui/qr-code`) over `qrcode` | svelte-qrcode, qrcode | ✅ |
 | Top progress bar | nprogress | `TopProgressBar` | — | ✅ |
 | i18n | FormatJS / react-i18next | `@svadmin/core` i18n, `useTranslation` | svelte-i18n, inlang | ✅ |

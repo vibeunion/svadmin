@@ -336,6 +336,8 @@ export { default as UrlField } from './components/fields/UrlField.svelte';
 export { default as BooleanField } from './components/fields/BooleanField.svelte';
 export { default as TagField } from './components/fields/TagField.svelte';
 export { default as FileField } from './components/fields/FileField.svelte';
+export { default as UploadField } from './components/fields/UploadField.svelte';
+export type { UploadFieldProps } from './components/fields/UploadField.svelte';
 export { default as MarkdownField } from './components/fields/MarkdownField.svelte';
 export { default as TextField } from './components/fields/TextField.svelte';
 export { default as ImageField } from './components/fields/ImageField.svelte';
@@ -663,3 +665,12 @@ export { default as FormDependency } from './components/FormDependency.svelte';
 export type { FormDependencyProps } from './components/FormDependency.svelte';
 export { default as WorkflowDesigner } from './components/WorkflowDesigner.svelte';
 export type { WorkflowDesignerProps, WorkflowNode } from './components/WorkflowDesigner.svelte';
+
+// Enterprise role simulation and operational telemetry components
+export { default as RoleSwitcher } from './components/RoleSwitcher.svelte';
+export type { RoleSwitcherProps, RoleItem } from './components/RoleSwitcher.svelte';
+export { default as RealtimeMonitorView } from './components/RealtimeMonitorView.svelte';
+export type { RealtimeMonitorViewProps, MetricCardItem } from './components/RealtimeMonitorView.svelte';
+
+// Enterprise business icons suite
+export * from './components/icons/index.js';
