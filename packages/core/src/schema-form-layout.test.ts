@@ -50,7 +50,8 @@ describe('schema form layout validation', () => {
     ['unknown layout type', { type: 'string', layout: { type: 'columns' } }],
     ['unknown layout key', { type: 'string', layout: { type: 'grid', gap: 2 } }],
   ])('rejects %s', (_label, field) => {
-    expect(() => assertSchemaFormSchema({ type: 'object', properties: { field } })).toThrow(/Invalid schema form configuration/);
+    const invalid = field as SchemaFormSchema;
+    expect(() => assertSchemaFormSchema({ type: 'object', properties: { field: invalid } })).toThrow(/Invalid schema form configuration/);
   });
 });
 
