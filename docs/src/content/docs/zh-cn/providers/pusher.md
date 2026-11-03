@@ -1,6 +1,6 @@
 ---
-title: Pusher 实时提供器
-description: 基于 Pusher 托管 WebSocket 的实时数据流订阅
+title: 实时事件提供器
+description: 基于托管频道客户端的实时数据流订阅
 ---
 
 `@svadmin/pusher` 实现 svadmin `LiveProvider` 契约，支持在后端触发事件时，自动让前台关联页面的 TanStack Query 缓存失效并重新拉取。

@@ -1,9 +1,9 @@
 ---
-title: Elasticsearch Data Provider
-description: Full-text search, audit logging, and document querying with Elasticsearch & OpenSearch
+title: Full-text Search Data Provider
+description: Full-text search, audit logging, and document querying through a search REST API
 ---
 
-`@svadmin/elasticsearch` provides an Elasticsearch & OpenSearch REST API DataProvider translating svadmin CRUD queries into Elasticsearch Query DSL.
+`@svadmin/elasticsearch` provides a search REST API DataProvider that translates svadmin CRUD queries into a query DSL.
 
 ## Installation
 

@@ -1,9 +1,9 @@
 ---
-title: Clerk 认证提供器
-description: 将 Clerk 现代身份服务接入 svadmin
+title: 外部身份认证提供器
+description: 将外部身份服务接入 svadmin
 ---
 
-`@svadmin/clerk` 将 Clerk 完整的用户认证体系桥接为标准的 svadmin `AuthProvider`。
+`@svadmin/clerk` 将外部用户认证客户端桥接为标准的 svadmin `AuthProvider`。
 
 ## 安装
 

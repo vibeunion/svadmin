@@ -1,6 +1,6 @@
 ---
-title: Pusher Live Provider
-description: Real-time live event streaming with Pusher Channels
+title: Realtime Live Provider
+description: Real-time event streaming through a hosted channel client
 ---
 
 `@svadmin/pusher` implements the svadmin `LiveProvider` contract to automatically invalidate and refetch TanStack Query caches when backend records change.

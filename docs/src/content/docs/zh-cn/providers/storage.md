@@ -1,9 +1,9 @@
 ---
 title: 云存储提供器
-description: AWS S3、Cloudflare R2 与对象存储服务集成
+description: 带签名上传后端的云对象存储集成
 ---
 
-`@svadmin/storage` 提供了统一的云存储抽象与驱动，支持 S3 协议、Cloudflare R2 以及用于本地开发测试的内存存储驱动，并深度联动 `@svadmin/ui` 中的 `<UploadField>` 组件。
+`@svadmin/storage` 提供统一的云对象存储抽象与内存测试驱动，并联动 `@svadmin/ui` 中的 `<UploadField>` 组件。
 
 ## 安装
 

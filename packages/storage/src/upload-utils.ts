@@ -47,21 +47,23 @@ export async function uploadBatch(
   const total = files.length;
   if (total === 0) return [];
 
-  const concurrency = Math.max(1, options.concurrency ?? 3);
+  const { concurrency: requestedConcurrency, onOverallProgress, ...uploadOptions } = options;
+  const concurrency = Math.max(1, requestedConcurrency ?? 3);
   const results: StorageUploadResult[] = new Array(total);
   let completed = 0;
 
   async function uploadWorker(startIndex: number, step: number) {
     for (let i = startIndex; i < total; i += step) {
       const file = files[i];
-      const filename = file instanceof File ? file.name : `file-${i}.bin`;
+      if (!file) throw new Error(`Missing file at batch index ${i}`);
+      const filename = typeof File !== 'undefined' && file instanceof File ? file.name : `file-${i}.bin`;
       const res = await storage.upload(file, {
-        ...options,
-        filename: options.filename ? `${i}-${options.filename}` : filename,
+        ...uploadOptions,
+        filename: uploadOptions.filename ? `${i}-${uploadOptions.filename}` : filename,
       });
       results[i] = res;
       completed++;
-      options.onOverallProgress?.({
+      onOverallProgress?.({
         completed,
         total,
         percentage: Math.round((completed / total) * 100),

@@ -1,9 +1,9 @@
 ---
-title: Clerk Auth Provider
-description: Connect Clerk modern identity service to svadmin
+title: External Auth Provider
+description: Connect an external identity service to svadmin
 ---
 
-`@svadmin/clerk` bridges Clerk user authentication into svadmin's standard `AuthProvider`.
+`@svadmin/clerk` bridges an external user authentication client into svadmin's standard `AuthProvider`.
 
 ## Installation
 

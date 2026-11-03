@@ -1,6 +1,6 @@
 <script lang="ts">
   import { useStorage } from '@svadmin/core';
-  import { Upload, X, FileText, CheckCircle2, AlertCircle, Loader2 } from '@lucide/svelte';
+  import { Upload, X, FileText, AlertCircle, Loader2 } from '@lucide/svelte';
 
   export interface UploadFieldProps {
     value?: string | string[] | null;
@@ -11,7 +11,7 @@
     disabled?: boolean;
     label?: string;
     description?: string;
-    onchange?: (value: string | string[]) => void;
+    onchange?: (value: string | string[] | null) => void;
   }
 
   let {
@@ -26,6 +26,7 @@
     onchange,
   }: UploadFieldProps = $props();
 
+  const inputId = $props.id();
   const storage = useStorage();
 
   let isDragging = $state(false);
@@ -42,9 +43,7 @@
   function updateValue(newList: string[]) {
     const nextVal = multiple ? newList : (newList[0] ?? null);
     value = nextVal;
-    if (nextVal !== null) {
-      onchange?.(nextVal);
-    }
+    onchange?.(nextVal);
   }
 
   async function handleFiles(files: FileList | File[]) {
@@ -72,7 +71,7 @@
           path,
           filename: file.name,
           onProgress: (p) => {
-            queueItem.progress = p.percentage;
+            uploadQueue = uploadQueue.map((item) => item === queueItem ? { ...item, progress: p.percentage } : item);
           },
         });
 
@@ -126,7 +125,7 @@
 
 <div class="svadmin-upload-field space-y-2">
   {#if label}
-    <label class="block text-sm font-medium text-foreground">{label}</label>
+    <label for={inputId} class="block text-sm font-medium text-foreground">{label}</label>
   {/if}
 
   <!-- Drop Zone -->
@@ -141,6 +140,7 @@
     aria-label="File upload dropzone"
   >
     <input
+      id={inputId}
       type="file"
       {accept}
       {multiple}

@@ -1,9 +1,9 @@
 ---
 title: Storage Provider
-description: Cloud storage integration for AWS S3, Cloudflare R2, and S3-compatible backends
+description: Cloud object storage integration for signed upload backends
 ---
 
-`@svadmin/storage` provides unified cloud object storage adapters and drivers for S3, Cloudflare R2, and in-memory mock testing, paired with `@svadmin/ui`'s `<UploadField>`.
+`@svadmin/storage` provides unified cloud object storage adapters and an in-memory test driver, paired with `@svadmin/ui`'s `<UploadField>`.
 
 ## Installation
 

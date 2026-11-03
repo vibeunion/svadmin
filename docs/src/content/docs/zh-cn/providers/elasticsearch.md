@@ -1,9 +1,9 @@
 ---
-title: Elasticsearch 数据提供器
-description: Elasticsearch 与 OpenSearch 全文检索、日志审计后台接入
+title: 全文检索数据提供器
+description: 通过检索 REST API 接入全文检索、日志审计与文档查询
 ---
 
-`@svadmin/elasticsearch` 提供基于 Elasticsearch REST API 的数据适配器，将 svadmin 的统一 CRUD 契约映射为 Elasticsearch 查询 DSL。
+`@svadmin/elasticsearch` 提供基于检索 REST API 的数据适配器，将 svadmin 的统一 CRUD 契约映射为查询 DSL。
 
 ## 安装
 
