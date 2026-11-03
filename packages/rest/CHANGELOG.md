@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.25](https://github.com/vibeunion/svadmin/compare/rest-v0.2.24...rest-v0.2.25) (2026-11-03)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.75.0
+
 ## [0.2.24](https://github.com/vibeunion/svadmin/compare/rest-v0.2.23...rest-v0.2.24) (2026-11-03)
 
 
