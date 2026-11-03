@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.74.0](https://github.com/vibeunion/svadmin/compare/core-v0.73.0...core-v0.74.0) (2026-11-03)
+
+
+### 🚀 Features
+
+* **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
+* **ecosystem:** govern materials, theme contrast, and schema layout ([2690dc8](https://github.com/vibeunion/svadmin/commit/2690dc8abc4a33a2bd780d1191ad1235624eed3f))
+
+
+### 🐛 Bug Fixes
+
+* **core:** keep DTCG preset colors assignable ([0bfdc26](https://github.com/vibeunion/svadmin/commit/0bfdc265c2f7930546e1a0767269344a45786372))
+* **core:** keep DTCG preset colors assignable ([af73bdd](https://github.com/vibeunion/svadmin/commit/af73bdd6132c084e114a31f8d7d7cf41759add98))
+
 ## [0.73.0](https://github.com/vibeunion/svadmin/compare/core-v0.72.0...core-v0.73.0) (2026-11-02)
 
 

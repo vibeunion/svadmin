@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.25.0](https://github.com/vibeunion/svadmin/compare/lite-v0.24.0...lite-v0.25.0) (2026-11-03)
+
+
+### 🚀 Features
+
+* **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
+* **ecosystem:** govern materials, theme contrast, and schema layout ([2690dc8](https://github.com/vibeunion/svadmin/commit/2690dc8abc4a33a2bd780d1191ad1235624eed3f))
+
+
+### 🐛 Bug Fixes
+
+* **ecosystem:** repair main checks and document lifecycle ([41b2d62](https://github.com/vibeunion/svadmin/commit/41b2d62748610ef4da8071a901c9485a541e2b89))
+* **ecosystem:** repair main checks and document lifecycle ([c6bc3a2](https://github.com/vibeunion/svadmin/commit/c6bc3a2d2456cddef20610251fb155daef47cd0a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.74.0 to >=0.34.2 <0.75.0
+
 ## [0.24.0](https://github.com/vibeunion/svadmin/compare/lite-v0.23.2...lite-v0.24.0) (2026-11-02)
 
 

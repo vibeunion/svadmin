@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.112.0](https://github.com/vibeunion/svadmin/compare/ui-v0.111.0...ui-v0.112.0) (2026-11-03)
+
+
+### 🚀 Features
+
+* **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
+* **ecosystem:** govern materials, theme contrast, and schema layout ([2690dc8](https://github.com/vibeunion/svadmin/commit/2690dc8abc4a33a2bd780d1191ad1235624eed3f))
+
+
+### 🐛 Bug Fixes
+
+* **ecosystem:** repair main checks and document lifecycle ([41b2d62](https://github.com/vibeunion/svadmin/commit/41b2d62748610ef4da8071a901c9485a541e2b89))
+* **ecosystem:** repair main checks and document lifecycle ([c6bc3a2](https://github.com/vibeunion/svadmin/commit/c6bc3a2d2456cddef20610251fb155daef47cd0a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.3
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.10
+  * peerDependencies
+    * @svadmin/core bumped to 0.74.0
+
 ## [0.111.0](https://github.com/vibeunion/svadmin/compare/ui-v0.110.1...ui-v0.111.0) (2026-11-02)
 
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.25](https://github.com/vibeunion/svadmin/compare/airtable-v0.12.24...airtable-v0.12.25) (2026-11-03)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.4
+  * peerDependencies
+    * @svadmin/core bumped to 0.74.0
+
 ## [0.12.24](https://github.com/vibeunion/svadmin/compare/airtable-v0.12.23...airtable-v0.12.24) (2026-11-02)
 
 
