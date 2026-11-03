@@ -168,10 +168,32 @@ chart-1…5) with contrast-checked foregrounds. Persist or share palettes with
 versioned and validated: non-color values, unknown CSS variables, duplicate
 names, and unsupported versions are rejected before anything is registered.
 
+Design-tool tokens are supported too: `parseDtcgTheme(document)` reads DTCG
+(`$value` / `$type`, nested groups, `{alias}` references), and
+`presetFromDtcg({ name, color, document })` merges them over a generated
+palette. `auditThemeContrast(preset)` returns WCAG AA/AAA ratios for the pairs
+that decide readability; `bun run check:theme-contrast` fails when generated
+palettes regress or the committed snapshot drifts.
+
 Icon names in `MenuItem.icon` and resource definitions resolve through the icon
 registry. `@lucide/svelte` supplies the defaults; add or override names with
 `registerIcons()` from `@svadmin/ui/icons`, and observe unknown names with
-`setIconMissHandler()` instead of silently rendering nothing.
+`setIconMissHandler()` instead of silently rendering nothing. Sprite sheets and
+remote SVG sets use `registerIconSources()` and render through `<Icon name>`:
+
+```svelte
+<script>
+  import { Icon, registerIconSources } from '@svadmin/ui';
+  registerIconSources({ report: { type: 'sprite', url: '/icons/sprite.svg', symbolPrefix: 'ui-' } });
+</script>
+
+<Icon name="report" label="Report" />
+```
+
+Schema forms declare layout without host components: `layout: { type: 'grid',
+columns: 2 }` on a field, or `{ type: 'section', title }` / `{ type: 'steps',
+step, title }` on the first field of each group. `resolveSchemaFormLayout(schema)`
+exposes the resulting plan; layout never changes validation or submitted data.
 
 ## App defaults
 

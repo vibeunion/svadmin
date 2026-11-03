@@ -73,7 +73,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
   {
     name: 'search-table',
     version: '1.0.0',
-    peerRange: '^0.110.0',
+    peerRange: '^0.111.0',
     requires: ['@svadmin/ui'],
     title: 'Search table',
     description: 'Filter form + bulk actions + paginated resource table (Pro "search table" shape).',
@@ -97,7 +97,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
   {
     name: 'record-detail',
     version: '1.0.0',
-    peerRange: '^0.110.0',
+    peerRange: '^0.111.0',
     requires: ['@svadmin/ui'],
     title: 'Record detail',
     description: 'Read-only record detail with header actions and audit drawer.',
@@ -119,7 +119,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
   {
     name: 'settings-section',
     version: '1.0.0',
-    peerRange: '^0.110.0',
+    peerRange: '^0.111.0',
     requires: ['@svadmin/ui'],
     title: 'Settings section',
     description: 'Tabbed settings composition with basic, security, and notification panes.',

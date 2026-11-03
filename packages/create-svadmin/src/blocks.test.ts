@@ -161,5 +161,7 @@ test('block peer ranges match the scaffold UI dependency', async () => {
   const manifest = JSON.parse(await readFile(join(import.meta.dir, '..', 'scaffold-manifest.json'), 'utf8')) as {
     dependencies: Record<string, string>;
   };
-  for (const block of listBlocks()) expect(block.peerRange).toBe(manifest.dependencies['@svadmin/ui']);
+  const uiVersion = manifest.dependencies['@svadmin/ui'];
+  if (uiVersion === undefined) throw new Error('scaffold-manifest.json is missing @svadmin/ui');
+  for (const block of listBlocks()) expect(block.peerRange).toBe(uiVersion);
 });

@@ -158,9 +158,28 @@ interface FieldDefinition {
 需要持久化或分享配色时使用 `exportColorThemes()` 与 `importColorThemes(document)`；
 文档带版本号并严格校验：非颜色值、未知 CSS 变量、重名和不支持的版本都会在写入前被拒绝。
 
+设计工具的 token 也能直接接入：`parseDtcgTheme(document)` 支持 DTCG
+（`$value` / `$type`、嵌套分组、`{alias}` 引用），`presetFromDtcg({ name, color, document })`
+会把文档合并到生成的色板上。`auditThemeContrast(preset)` 返回决定可读性的
+WCAG AA/AAA 对比度；`bun run check:theme-contrast` 会在色板回退或快照漂移时失败。
+
 `MenuItem.icon` 与资源定义中的图标名通过图标注册表解析。默认集合来自
 `@lucide/svelte`，可用 `@svadmin/ui/icons` 的 `registerIcons()` 扩展或覆盖，
-并用 `setIconMissHandler()` 观察未注册的名称，而不是静默渲染为空。
+并用 `setIconMissHandler()` 观察未注册的名称，而不是静默渲染为空。雪碧图与
+远程 SVG 通过 `registerIconSources()` 注册，并用 `<Icon name>` 渲染：
+
+```svelte
+<script>
+  import { Icon, registerIconSources } from '@svadmin/ui';
+  registerIconSources({ report: { type: 'sprite', url: '/icons/sprite.svg', symbolPrefix: 'ui-' } });
+</script>
+
+<Icon name="report" label="Report" />
+```
+
+Schema 表单可以直接声明排版：字段上的 `layout: { type: 'grid', columns: 2 }`，
+或每个分组首个字段上的 `{ type: 'section', title }` / `{ type: 'steps', step, title }`。
+`resolveSchemaFormLayout(schema)` 返回分组计划；排版不影响校验与提交数据。
 
 ## 应用级默认值
 
