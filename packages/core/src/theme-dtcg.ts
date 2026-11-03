@@ -179,8 +179,10 @@ export function presetFromDtcg(input: {
     name: generated.name,
     label: generated.label,
     color: generated.color,
-    light: { ...generated.light, ...dtcg.light, '--primary': dtcg.light['--primary'] ?? generated.light['--primary'] },
-    dark: { ...generated.dark, ...dtcg.dark, '--primary': dtcg.dark['--primary'] ?? generated.dark['--primary'] },
+    // Overlay wins key-by-key. Do not re-read `--primary`: indexed access is
+    // `string | undefined` under noUncheckedIndexedAccess.
+    light: { ...generated.light, ...dtcg.light },
+    dark: { ...generated.dark, ...dtcg.dark },
   };
 }
 
