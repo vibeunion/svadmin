@@ -92,22 +92,22 @@
           <span
             class={cn(
               'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border font-mono tracking-wider uppercase',
-              liveStatus === 'live' && 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-              liveStatus === 'buffering' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-              liveStatus === 'paused' && 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+              liveStatus === 'live' && 'bg-success/10 text-success border-success/20',
+              liveStatus === 'buffering' && 'bg-warning/10 text-warning border-warning/20',
+              liveStatus === 'paused' && 'bg-info/10 text-info border-info/20',
               liveStatus === 'offline' && 'bg-muted text-muted-foreground border-border'
             )}
           >
             <span class="relative flex h-1.5 w-1.5">
               {#if liveStatus === 'live'}
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
               {/if}
               <span
                 class={cn(
                   'relative inline-flex rounded-full h-1.5 w-1.5',
-                  liveStatus === 'live' && 'bg-emerald-500',
-                  liveStatus === 'buffering' && 'bg-amber-500',
-                  liveStatus === 'paused' && 'bg-blue-500',
+                  liveStatus === 'live' && 'bg-success',
+                  liveStatus === 'buffering' && 'bg-warning',
+                  liveStatus === 'paused' && 'bg-info',
                   liveStatus === 'offline' && 'bg-muted-foreground'
                 )}
               ></span>
@@ -135,9 +135,9 @@
         <div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
           <span>{metric.label}</span>
           {#if metric.trend === 'up'}
-            <span class="text-xs text-emerald-600 font-medium flex items-center">↑ 升高</span>
+            <span class="text-xs text-success font-medium flex items-center">↑ 升高</span>
           {:else if metric.trend === 'down'}
-            <span class="text-xs text-rose-600 font-medium flex items-center">↓ 降低</span>
+            <span class="text-xs text-destructive font-medium flex items-center">↓ 降低</span>
           {/if}
         </div>
         <div class="text-xl sm:text-2xl font-bold tracking-tight text-foreground my-1 font-mono">
@@ -226,8 +226,8 @@
               <span
                 class={cn(
                   'text-[10px] uppercase font-mono px-1 rounded-[2px]',
-                  log.level === 'warn' && 'bg-amber-500/10 text-amber-600',
-                  log.level === 'error' && 'bg-rose-500/10 text-rose-600',
+                  log.level === 'warn' && 'bg-warning/10 text-warning',
+                  log.level === 'error' && 'bg-destructive/10 text-destructive',
                   log.level === 'info' && 'bg-primary/10 text-primary'
                 )}
               >
