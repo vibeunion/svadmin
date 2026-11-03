@@ -85,6 +85,8 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/content/MediaThumbnail.svelte',
   'packages/ui/src/components/EmptyState.svelte',
   'packages/ui/src/components/Image.svelte',
+  // 图标资源是装饰性且尺寸固定；远程 SVG 不回退到占位状态，加载失败由 alt/空图呈现。
+  'packages/ui/src/components/Icon.svelte',
   'packages/ui/src/components/ImageCropper.svelte',
   'packages/ui/src/components/ImagePreview.svelte',
   'packages/ui/src/components/MediaLibraryModal.svelte',

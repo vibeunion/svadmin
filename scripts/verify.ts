@@ -11,6 +11,7 @@ const checks = [
   ['build:example', []],
   ['check:lite:ssr', []],
   ['check:parity:verify', []],
+  ['check:theme-contrast', []],
   ['pack:check', []],
   ['bundle:check', []],
   ['docs:build', []],

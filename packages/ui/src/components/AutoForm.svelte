@@ -18,6 +18,14 @@
   import { Badge } from './ui/badge/index.js';
   import { Save, ArrowLeft, Loader2, AlertCircle } from '@lucide/svelte';
   import FieldRenderer from './FieldRenderer.svelte';
+  import {
+    buildFormGroups,
+    buildSpanByKey,
+    gridClassFor,
+    isFullWidthField,
+    spanClass,
+    type FormLayoutGroup,
+  } from './auto-form-layout.js';
   import type { UploadCancelHandler, UploadHandler } from './file-upload-types.js';
   import * as Alert from './ui/alert/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
@@ -134,78 +142,16 @@
   }));
 
   const declarativeLayout = $derived(resolveDeclaredFieldLayout(formFields));
-  const spanByKey = $derived.by(() => {
-    const spans = new Map<string, number>();
-    for (const group of declarativeLayout?.groups ?? []) {
-      for (const field of group.fields) spans.set(field.key, field.span);
-    }
-    return spans;
-  });
+  const spanByKey = $derived(buildSpanByKey(declarativeLayout));
   const effectiveColumns = $derived(declarativeLayout?.kind === 'flat' ? declarativeLayout.columns : columns);
 
-  function gridClassFor(count: number): string {
-    if (count === 4) return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4';
-    if (count === 3) return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
-    if (count === 2) return 'grid grid-cols-1 md:grid-cols-2 gap-4';
-    return 'space-y-5';
-  }
-
-  function spanClass(span: number | undefined): string {
-    if (span === 2) return 'md:col-span-2';
-    if (span === 3) return 'md:col-span-2 lg:col-span-3';
-    if (span !== undefined && span >= 4) return 'md:col-span-2 lg:col-span-4';
-    return '';
-  }
-
-  interface FormLayoutGroup {
-    name: string;
-    description: string | undefined;
-    columns: number;
-    fields: FieldDefinition[];
-  }
-
-  const groups = $derived.by((): FormLayoutGroup[] => {
-    if (declarativeLayout && (declarativeLayout.kind === 'sections' || declarativeLayout.kind === 'steps')) {
-      return declarativeLayout.groups.map((group) => ({
-        name: group.step !== undefined ? `${group.step}. ${group.title ?? ''}`.trim() : (group.title ?? ''),
-        description: group.description,
-        columns: group.columns,
-        fields: group.fields.flatMap((item) => {
-          const field = formFields.find((candidate) => candidate.key === item.key);
-          return field ? [field] : [];
-        }),
-      }));
-    }
-    if (!formFields.some((field) => field.group)) return [];
-    const order: string[] = [];
-    const map = new Map<string, FieldDefinition[]>();
-    for (const field of formFields) {
-      const name = field.group ?? '';
-      if (!map.has(name)) {
-        order.push(name);
-        map.set(name, []);
-      }
-      (map.get(name) ?? []).push(field);
-    }
-    return order.map((name) => ({
-      name,
-      description: undefined,
-      columns,
-      fields: map.get(name) ?? [],
-    }));
-  });
+  const groups = $derived.by((): FormLayoutGroup[] => buildFormGroups({
+    layout: declarativeLayout,
+    fields: formFields,
+    columns,
+  }));
   const hasGroups = $derived(groups.length > 0);
   const gridClass = $derived(gridClassFor(effectiveColumns));
-
-  function isFullWidthField(field: FieldDefinition): boolean {
-    return (
-      field.type === 'textarea' ||
-      field.type === 'richtext' ||
-      field.type === 'json' ||
-      field.type === 'array' ||
-      field.type === 'images'
-    );
-  }
 
   // ─── Default values from field metadata ───────────────────────────
   function getDefaultForType(field: FieldDefinition): unknown {

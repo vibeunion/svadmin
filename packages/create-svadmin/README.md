@@ -115,8 +115,12 @@ npx @svadmin/create add auth jwt --write
 # Install a page material (search table, record detail, settings section)
 npx @svadmin/create add block search-table --write
 
-# List the shipped page materials
+# List the shipped page materials (version + peer range)
 npx @svadmin/create add --list
+
+# Preview a machine-readable plan, then upgrade or remove
+npx @svadmin/create add block search-table --upgrade --json
+npx @svadmin/create add block search-table --remove --write
 
 # Target a project directory other than the current one
 npx @svadmin/create add resource orders --project-dir ./my-admin-app --write
@@ -127,7 +131,10 @@ the remaining step: wire the provider in `src/svadmin.config.ts`. `add resource`
 creates the module and prints the `src/resources.ts` registration snippet.
 `add block` installs a page material under `src/features/<name>/`; the registry
 ships with the CLI, so `--list` and installation always agree and no network
-fetch is involved.
+fetch is involved. Installs are recorded in `svadmin.materials.json` with a
+per-file SHA-256: `--upgrade` replaces only unmodified files, `--remove` deletes
+only files you have not edited, and any locally modified file is reported as a
+conflict instead of being overwritten. Use `--json` for a dry-run plan in CI.
 
 ## Start Developing
 

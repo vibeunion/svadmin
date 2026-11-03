@@ -216,14 +216,14 @@
           <h3 class="lite-schema-group-title">{group.step !== undefined ? `${group.step}. ${group.title}` : group.title}</h3>
           {#if group.description}<p class="lite-schema-description">{group.description}</p>{/if}
         {/if}
-        <div
-          class={group.columns > 1 ? 'lite-schema-grid' : 'lite-schema-stack'}
-          style:grid-template-columns={group.columns > 1 ? `repeat(${group.columns}, minmax(0, 1fr))` : undefined}
-        >
+        <div class={group.columns > 1 ? 'lite-schema-row' : 'lite-schema-stack'}>
           {#each group.fields as field (field.key)}
             {@const child = node.properties?.[field.key]}
             {#if child}
-              <div style:grid-column={field.span > 1 ? `span ${field.span}` : undefined}>
+              <div
+                class="lite-schema-col"
+                style:width={group.columns > 1 ? `${Math.min(100, (field.span / group.columns) * 100)}%` : undefined}
+              >
                 {@render renderField(child, [...path, field.key], child.title ?? field.key, node.required?.includes(field.key) ?? false)}
               </div>
             {/if}
@@ -246,7 +246,10 @@
   .lite-schema-field { margin-bottom: 12px; }
   .lite-schema-group { margin-bottom: 12px; }
   .lite-schema-group-title { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #4E5969; }
-  .lite-schema-grid { display: grid; gap: 12px; }
+  /* IE11 基线：用 inline-block 栅格替代 CSS Grid/flex gap。 */
+  .lite-schema-row { font-size: 0; }
+  .lite-schema-col { display: inline-block; vertical-align: top; box-sizing: border-box; padding-right: 12px; font-size: 13px; }
+  .lite-schema-col:last-child { padding-right: 0; }
   .lite-schema-fieldset > .lite-schema-field:last-child { margin-bottom: 0; }
   .lite-schema-footer { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid #E5E6EB; }
   .lite-label { display: block; font-size: 12px; color: #4E5969; margin-bottom: 4px; }
