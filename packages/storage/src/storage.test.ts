@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { createMemoryStorageProvider } from './memory-storage';
 import { createS3StorageProvider, type FetchLike } from './s3-storage';
+import { validateFile, uploadBatch } from './upload-utils';
 
 describe('@svadmin/storage Memory Provider', () => {
   it('handles uploads, signed URLs, listing, and deletion', async () => {
@@ -82,5 +83,45 @@ describe('@svadmin/storage S3 Provider', () => {
 
     await expect(storage.getPresignedUrl?.('docs/a.txt')).resolves.toBe('https://signed.example/docs/a.txt?operation=get');
     await expect(storage.delete('docs/a.txt')).rejects.toThrow('403 Forbidden');
+  });
+});
+
+describe('@svadmin/storage Utilities', () => {
+  it('validates file size and mime types', () => {
+    const file = new Blob(['hello world'], { type: 'text/plain' });
+
+    const sizeCheck = validateFile(file, { maxSizeBytes: 5 });
+    expect(sizeCheck.valid).toBe(false);
+    expect(sizeCheck.error).toContain('maximum limit');
+
+    const mimeCheck = validateFile(file, { allowedMimeTypes: ['image/*', 'application/pdf'] });
+    expect(mimeCheck.valid).toBe(false);
+    expect(mimeCheck.error).toContain('not allowed');
+
+    const validCheck = validateFile(file, { maxSizeBytes: 100, allowedMimeTypes: ['text/*'] });
+    expect(validCheck.valid).toBe(true);
+  });
+
+  it('uploads a batch of files with progress tracking', async () => {
+    const storage = createMemoryStorageProvider();
+    const files = [
+      new Blob(['file 1'], { type: 'text/plain' }),
+      new Blob(['file 2'], { type: 'text/plain' }),
+      new Blob(['file 3'], { type: 'text/plain' }),
+    ];
+
+    let progressCalls = 0;
+    const results = await uploadBatch(storage, files, {
+      path: 'batch-test',
+      concurrency: 2,
+      onOverallProgress: (p) => {
+        progressCalls++;
+        expect(p.total).toBe(3);
+      },
+    });
+
+    expect(results.length).toBe(3);
+    expect(progressCalls).toBeGreaterThanOrEqual(3);
+    expect(results[0].path).toContain('batch-test');
   });
 });

@@ -336,6 +336,8 @@ export { default as UrlField } from './components/fields/UrlField.svelte';
 export { default as BooleanField } from './components/fields/BooleanField.svelte';
 export { default as TagField } from './components/fields/TagField.svelte';
 export { default as FileField } from './components/fields/FileField.svelte';
+export { default as UploadField } from './components/fields/UploadField.svelte';
+export type { UploadFieldProps } from './components/fields/UploadField.svelte';
 export { default as MarkdownField } from './components/fields/MarkdownField.svelte';
 export { default as TextField } from './components/fields/TextField.svelte';
 export { default as ImageField } from './components/fields/ImageField.svelte';
