@@ -95,12 +95,14 @@
   }: RoleSwitcherProps = $props();
 
   let isOpen = $state(false);
-  let selectedRoleKey = $state(activeRole);
-  $effect(() => {
-    selectedRoleKey = activeRole;
-  });
+  let selectedRoleKey = $derived(activeRole);
 
-  const currentRole = $derived(roles.find((r) => r.key === selectedRoleKey) || roles[0]);
+  const fallbackRole: RoleItem = {
+    key: 'none',
+    label: '未选择角色',
+    description: '当前没有可用的角色配置。',
+  };
+  const currentRole = $derived(roles.find((r) => r.key === selectedRoleKey) ?? roles[0] ?? fallbackRole);
 
   function handleSelect(role: RoleItem) {
     if (role.disabled) return;
@@ -190,7 +192,7 @@
 
       <!-- Role Items List -->
       <div class="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
-        {#each roles as role}
+        {#each roles as role (role.key)}
           {@const isSelected = role.key === selectedRoleKey}
           <button
             type="button"
@@ -238,7 +240,7 @@
 
             {#if role.permissions && role.permissions.length > 0}
               <div class="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-border/40 w-full">
-                {#each role.permissions.slice(0, 4) as perm}
+                {#each role.permissions.slice(0, 4) as perm (perm)}
                   <span class="px-1 py-0.2 rounded-[2px] bg-muted text-[10px] text-muted-foreground font-mono">
                     {perm}
                   </span>

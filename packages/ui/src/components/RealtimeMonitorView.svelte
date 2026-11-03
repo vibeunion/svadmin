@@ -130,7 +130,7 @@
 
   <!-- Metric Cards Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    {#each metrics as metric}
+    {#each metrics as metric (metric.label)}
       <div class="flex flex-col justify-between p-4 rounded-[4px] border border-border bg-card shadow-sm hover:border-primary/40 transition-colors">
         <div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
           <span>{metric.label}</span>
@@ -189,7 +189,7 @@
           <span>应急熔断与主动限流控制</span>
         </div>
         <div class="flex flex-col sm:flex-row gap-3">
-          {#each emergencySwitches as sw}
+          {#each emergencySwitches as sw (sw.key)}
             <button
               type="button"
               onclick={() => toggleSwitch(sw.key)}
@@ -219,7 +219,7 @@
       </div>
 
       <div class="flex flex-col gap-2.5 text-xs overflow-y-auto max-h-64">
-        {#each logs as log}
+        {#each logs as log (log.id)}
           <div class="flex flex-col gap-0.5 p-2 rounded-[4px] bg-muted/40 border border-border/40">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-mono text-muted-foreground">{log.time}</span>

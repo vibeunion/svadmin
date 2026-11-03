@@ -122,6 +122,9 @@ describe('@svadmin/storage Utilities', () => {
 
     expect(results.length).toBe(3);
     expect(progressCalls).toBeGreaterThanOrEqual(3);
-    expect(results[0].path).toContain('batch-test');
+    const firstResult = results[0];
+    expect(firstResult).toBeDefined();
+    if (!firstResult) throw new Error('Expected a result for the first batch item');
+    expect(firstResult.path).toContain('batch-test');
   });
 });
