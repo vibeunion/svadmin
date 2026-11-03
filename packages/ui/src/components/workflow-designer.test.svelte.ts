@@ -45,7 +45,9 @@ describe('WorkflowDesigner', () => {
     render(WorkflowDesigner, { nodes, onaddnode });
 
     const addButtons = screen.getAllByRole('button', { name: '添加节点' });
-    await fireEvent.click(addButtons[0]);
+    const firstAddButton = addButtons[0];
+    if (!firstAddButton) throw new Error('Expected an add-node button');
+    await fireEvent.click(firstAddButton);
 
     const addApprover = screen.getByText('审批人节点');
     await fireEvent.click(addApprover);

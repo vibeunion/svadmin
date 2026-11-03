@@ -14,7 +14,7 @@ describe('FormDependency', () => {
     const snippet = createRawSnippet((getWatched: () => Record<string, unknown>) => ({
       render: () => {
         const w = getWatched();
-        return `<div>Watched Role: ${w.role}, HasSecret: ${Boolean(w.secret)}</div>`;
+        return `<div>Watched Role: ${w['role']}, HasSecret: ${Boolean(w['secret'])}</div>`;
       },
     }));
 
