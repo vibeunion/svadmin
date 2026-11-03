@@ -210,6 +210,13 @@
         "svelte",
       ],
     },
+    "packages/clerk": {
+      "name": "@svadmin/clerk",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/core": {
       "name": "@svadmin/core",
       "version": "0.74.0",
@@ -383,6 +390,13 @@
         "@svadmin/core",
         "svelte",
       ],
+    },
+    "packages/elasticsearch": {
+      "name": "@svadmin/elasticsearch",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
     },
     "packages/elysia": {
       "name": "@svadmin/elysia",
@@ -574,6 +588,13 @@
         "pocketbase",
       ],
     },
+    "packages/pusher": {
+      "name": "@svadmin/pusher",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/refine-adapter": {
       "name": "@svadmin/refine-adapter",
       "version": "0.15.4",
@@ -645,6 +666,13 @@
       "optionalPeers": [
         "@svadmin/core",
       ],
+    },
+    "packages/storage": {
+      "name": "@svadmin/storage",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
     },
     "packages/strapi": {
       "name": "@svadmin/strapi",
@@ -1556,6 +1584,8 @@
 
     "@svadmin/charts": ["@svadmin/charts@workspace:packages/charts"],
 
+    "@svadmin/clerk": ["@svadmin/clerk@workspace:packages/clerk"],
+
     "@svadmin/core": ["@svadmin/core@workspace:packages/core"],
 
     "@svadmin/create": ["@svadmin/create@workspace:packages/create-svadmin"],
@@ -1573,6 +1603,8 @@
     "@svadmin/drizzle": ["@svadmin/drizzle@workspace:packages/drizzle"],
 
     "@svadmin/editor": ["@svadmin/editor@workspace:packages/editor"],
+
+    "@svadmin/elasticsearch": ["@svadmin/elasticsearch@workspace:packages/elasticsearch"],
 
     "@svadmin/elysia": ["@svadmin/elysia@workspace:packages/elysia"],
 
@@ -1596,6 +1628,8 @@
 
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 
+    "@svadmin/pusher": ["@svadmin/pusher@workspace:packages/pusher"],
+
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
 
     "@svadmin/rest": ["@svadmin/rest@workspace:packages/rest"],
@@ -1605,6 +1639,8 @@
     "@svadmin/simple-rest": ["@svadmin/simple-rest@workspace:packages/simple-rest"],
 
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
+
+    "@svadmin/storage": ["@svadmin/storage@workspace:packages/storage"],
 
     "@svadmin/strapi": ["@svadmin/strapi@workspace:packages/strapi"],
 

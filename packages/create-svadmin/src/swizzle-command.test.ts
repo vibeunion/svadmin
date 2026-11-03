@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { compile } from 'svelte/compiler';
 import { planSwizzle, SWIZZLE_CATALOG } from './swizzle-command';
 
 describe('svadmin swizzle', () => {
@@ -28,6 +29,7 @@ describe('svadmin swizzle', () => {
       expect(plan.targetFilePath).toBe(path.join(tempDir, 'src/components/svadmin/AutoTable.svelte'));
       expect(plan.exists).toBe(false);
       expect(plan.content).toContain("import { AutoTable as BaseAutoTable } from '@svadmin/ui'");
+      expect(() => compile(plan.content, { generate: 'client' })).not.toThrow();
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }

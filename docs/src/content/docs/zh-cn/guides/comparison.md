@@ -38,10 +38,10 @@ svadmin 是编译时 admin 框架 — 无虚拟 DOM、无运行时 diff，直接
 | Airtable | ✅ `@svadmin/airtable` | 社区 | ✅ `ra-data-airtable` |
 | Medusa | ✅ `@svadmin/medusa` | ✅ `@refinedev/medusa` | ❌ |
 | Sanity | ✅ `@svadmin/sanity` | 社区 | 社区 |
-| Elasticsearch | ✅ `@svadmin/elasticsearch` | 社区 | 社区 |
-| 云存储 (S3/R2) | ✅ `@svadmin/storage` | 社区 | 社区 |
-| 实时推送 (Pusher) | ✅ `@svadmin/pusher` | 社区 | ❌ |
-| Clerk 身份认证 | ✅ `@svadmin/clerk` | 社区 | 社区 |
+| 全文检索 | ✅ `@svadmin/elasticsearch` | 社区 | 社区 |
+| 云存储 | ✅ `@svadmin/storage` | 社区 | 社区 |
+| 实时事件 | ✅ `@svadmin/pusher` | 社区 | ❌ |
+| 外部身份认证 | ✅ `@svadmin/clerk` | 社区 | 社区 |
 
 ## 功能对比
 
@@ -94,8 +94,8 @@ svadmin 是编译时 admin 框架 — 无虚拟 DOM、无运行时 diff，直接
 | CLI 脚手架 | ✅ `@svadmin/create` | ✅ `create-refine-app` | ✅ `create-react-admin` |
 | 超时跟踪 | ✅ 内置 hooks | ❌ | ❌ |
 | 步骤表单 | ✅ `useStepsForm` | ✅ | ❌ |
-| 组件弹射定制 | ✅ `svadmin swizzle` | ✅ `refine swizzle` | ❌ |
-| 代码与 Schema 推断 | ✅ `svadmin infer` | ✅ `@refinedev/inferencer` | ❌ |
+| 组件定制 | ✅ `svadmin swizzle` | 社区 | ❌ |
+| 代码与 Schema 推断 | ✅ `svadmin infer` | 社区 | ❌ |
 
 ### AI 与智能化
 

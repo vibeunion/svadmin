@@ -51,13 +51,7 @@
   }: QueryFilterProps = $props();
 
   // Internal collapsed state if not externally controlled
-  let internalCollapsed = $state(collapsed !== undefined ? collapsed : defaultCollapsed);
-
-  $effect(() => {
-    if (collapsed !== undefined) {
-      internalCollapsed = collapsed;
-    }
-  });
+  let internalCollapsed = $derived(collapsed ?? defaultCollapsed);
 
   function toggleCollapse() {
     const next = !internalCollapsed;
@@ -109,7 +103,7 @@
       layout === 'inline' && 'flex flex-wrap items-center'
     )}
   >
-    {#if children}
+    {#if !internalCollapsed && children}
       {@render children()}
     {/if}
 
@@ -127,7 +121,7 @@
         <button
           type="button"
           aria-label={resetBtnText}
-          class="svadmin-btn-reset inline-flex h-8 items-center justify-center rounded-[4px] border border-[#E5E6EB] bg-transparent px-3 text-xs font-normal text-[#4E5969] transition-colors hover:bg-[#F2F3F5] active:bg-[#E5E6EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#165DFF]/20 dark:border-border dark:text-muted-foreground dark:hover:bg-muted"
+          class="svadmin-btn-reset inline-flex h-8 items-center justify-center rounded-[4px] border border-border bg-transparent px-3 text-xs font-normal text-muted-foreground transition-colors hover:bg-muted active:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
           onclick={handleReset}
         >
           <svg
@@ -149,7 +143,7 @@
       <button
         type="submit"
         aria-label={searchBtnText}
-        class="svadmin-btn-search inline-flex h-8 items-center justify-center rounded-[4px] bg-[#165DFF] px-3.5 text-xs font-medium text-white shadow-xs transition-colors hover:bg-[#4080FF] active:bg-[#0E42D2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#165DFF]/40"
+        class="svadmin-btn-search inline-flex h-8 items-center justify-center rounded-[4px] bg-primary px-3.5 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 active:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       >
         <svg
           class="mr-1.5 h-3.5 w-3.5"
@@ -175,7 +169,7 @@
           type="button"
           aria-expanded={!internalCollapsed}
           aria-label={internalCollapsed ? '展开筛选' : '收起筛选'}
-          class="svadmin-btn-collapse ml-1 inline-flex items-center text-xs font-normal text-[#165DFF] transition-colors hover:text-[#4080FF] focus-visible:outline-none"
+          class="svadmin-btn-collapse ml-1 inline-flex items-center text-xs font-normal text-primary transition-colors hover:text-primary/80 focus-visible:outline-none"
           onclick={toggleCollapse}
         >
           <span>{internalCollapsed ? '展开' : '收起'}</span>

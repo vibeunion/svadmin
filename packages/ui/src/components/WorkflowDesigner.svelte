@@ -49,32 +49,32 @@
     switch (type) {
       case 'start':
         return {
-          headerBg: 'bg-[#165DFF]',
-          headerText: 'text-white',
+          headerBg: 'bg-primary',
+          headerText: 'text-primary-foreground',
           badge: '发起',
         };
       case 'approver':
         return {
-          headerBg: 'bg-[#FF7D00]',
-          headerText: 'text-white',
+          headerBg: 'bg-warning',
+          headerText: 'text-warning-foreground',
           badge: '审批人',
         };
       case 'condition':
         return {
-          headerBg: 'bg-[#00B42A]',
-          headerText: 'text-white',
+          headerBg: 'bg-success',
+          headerText: 'text-success-foreground',
           badge: '条件分支',
         };
       case 'notifier':
         return {
-          headerBg: 'bg-[#0FC6C2]',
-          headerText: 'text-white',
+          headerBg: 'bg-info',
+          headerText: 'text-info-foreground',
           badge: '抄送人',
         };
       default:
         return {
-          headerBg: 'bg-[#4E5969]',
-          headerText: 'text-white',
+          headerBg: 'bg-muted-foreground',
+          headerText: 'text-background',
           badge: '节点',
         };
     }
@@ -83,14 +83,14 @@
   function getStatusTone(status?: WorkflowNode['status']) {
     switch (status) {
       case 'completed':
-        return 'bg-[#E8FFEA] text-[#00B42A] border-[#AFF0B5]';
+        return 'bg-success/10 text-success border-success/30';
       case 'active':
-        return 'bg-[#E8F3FF] text-[#165DFF] border-[#BEDAFF]';
+        return 'bg-primary/10 text-primary border-primary/30';
       case 'rejected':
-        return 'bg-[#FFECE8] text-[#F53F3F] border-[#FBACA3]';
+        return 'bg-destructive/10 text-destructive border-destructive/30';
       case 'pending':
       default:
-        return 'bg-[#F2F3F5] text-[#86909C] border-[#E5E6EB]';
+        return 'bg-muted text-muted-foreground border-border';
     }
   }
 
@@ -103,7 +103,7 @@
 <div
   data-svadmin-component="WorkflowDesigner"
   class={cn(
-    'svadmin-workflow-designer relative flex w-full flex-col items-center justify-start py-6 bg-[#F7F8FA] dark:bg-background',
+    'svadmin-workflow-designer relative flex w-full flex-col items-center justify-start bg-background py-6',
     className
   )}
 >
@@ -114,7 +114,7 @@
   {/if}
 
   <div class="relative flex flex-col items-center gap-0">
-    {#each nodes as node, index}
+    {#each nodes as node, index (node.id)}
       {@const colors = getNodeTypeColor(node.type)}
       <!-- Node Card -->
       <div class="group/node relative flex w-72 flex-col rounded-[4px] border border-border bg-card shadow-xs transition-all hover:shadow-md">
@@ -156,14 +156,14 @@
           class="flex w-full flex-col items-start p-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none"
           onclick={() => onnodeclick?.(node)}
         >
-          <div class="text-xs text-[#1D2129] dark:text-foreground line-clamp-2">
+          <div class="text-xs text-foreground line-clamp-2">
             {node.content || '请设置节点属性'}
           </div>
 
           {#if node.assignees && node.assignees.length > 0}
             <div class="mt-2 flex flex-wrap gap-1">
-              {#each node.assignees as assignee}
-                <span class="rounded-[2px] bg-[#F2F3F5] px-1.5 py-0.5 text-[10px] text-[#4E5969] dark:bg-muted dark:text-muted-foreground">
+              {#each node.assignees as assignee (assignee)}
+                <span class="rounded-[2px] bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                   {assignee}
                 </span>
               {/each}
@@ -171,7 +171,7 @@
           {/if}
 
           {#if node.error}
-            <span class="mt-1 text-[11px] text-[#F53F3F]">
+            <span class="mt-1 text-[11px] text-destructive">
               {node.error}
             </span>
           {/if}
@@ -181,14 +181,14 @@
       <!-- Connecting line and Add Button -->
       {#if index < nodes.length - 1 || !readonly}
         <div class="relative flex h-14 w-full flex-col items-center justify-center">
-          <div class="h-full w-[1.5px] bg-[#C9CDD4] dark:bg-border"></div>
+          <div class="h-full w-[1.5px] bg-border"></div>
 
           {#if !readonly}
             <div class="absolute inset-auto flex items-center justify-center">
               <button
                 type="button"
                 aria-label="添加节点"
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#165DFF] text-white shadow-xs transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none"
+                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xs transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none"
                 onclick={() => {
                   activeAddMenuId = activeAddMenuId === node.id ? null : node.id;
                 }}
@@ -201,29 +201,29 @@
 
               {#if activeAddMenuId === node.id}
                 <!-- Add Node Menu Modal/Popover -->
-                <div class="absolute top-8 z-30 flex w-48 flex-col rounded-[4px] border border-border bg-white p-1.5 shadow-lg dark:bg-card">
+                <div class="absolute top-8 z-30 flex w-48 flex-col rounded-[4px] border border-border bg-card p-1.5 shadow-lg">
                   <button
                     type="button"
-                    class="flex items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-xs text-[#1D2129] transition-colors hover:bg-[#F2F3F5] dark:text-foreground dark:hover:bg-muted"
+                    class="flex items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-xs text-foreground transition-colors hover:bg-muted"
                     onclick={() => handleAdd(node.id, 'approver')}
                   >
-                    <span class="h-2 w-2 rounded-full bg-[#FF7D00]"></span>
+                    <span class="h-2 w-2 rounded-full bg-warning"></span>
                     <span>审批人节点</span>
                   </button>
                   <button
                     type="button"
-                    class="flex items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-xs text-[#1D2129] transition-colors hover:bg-[#F2F3F5] dark:text-foreground dark:hover:bg-muted"
+                    class="flex items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-xs text-foreground transition-colors hover:bg-muted"
                     onclick={() => handleAdd(node.id, 'notifier')}
                   >
-                    <span class="h-2 w-2 rounded-full bg-[#0FC6C2]"></span>
+                    <span class="h-2 w-2 rounded-full bg-info"></span>
                     <span>抄送人节点</span>
                   </button>
                   <button
                     type="button"
-                    class="flex items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-xs text-[#1D2129] transition-colors hover:bg-[#F2F3F5] dark:text-foreground dark:hover:bg-muted"
+                    class="flex items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-xs text-foreground transition-colors hover:bg-muted"
                     onclick={() => handleAdd(node.id, 'condition')}
                   >
-                    <span class="h-2 w-2 rounded-full bg-[#00B42A]"></span>
+                    <span class="h-2 w-2 rounded-full bg-success"></span>
                     <span>条件分支</span>
                   </button>
                 </div>
@@ -236,7 +236,7 @@
 
     <!-- End Node -->
     <div class="flex items-center justify-center">
-      <div class="rounded-full bg-[#C9CDD4] px-4 py-1 text-xs text-white dark:bg-muted dark:text-muted-foreground select-none">
+      <div class="rounded-full bg-muted px-4 py-1 text-xs text-muted-foreground select-none">
         流程结束
       </div>
     </div>

@@ -1,9 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
+import { createRawSnippet } from 'svelte';
 import QueryFilter from './QueryFilter.svelte';
 
 describe('QueryFilter', () => {
-  it('renders search and reset buttons with Arco default text', () => {
+  it('renders search and reset buttons with the default text', () => {
     render(QueryFilter);
 
     expect(screen.getByRole('search')).toBeTruthy();
@@ -43,6 +44,15 @@ describe('QueryFilter', () => {
 
     expect(oncollapse).toHaveBeenCalledWith(false);
     expect(screen.getByText('收起')).toBeTruthy();
+  });
+
+  it('hides filter content while collapsed and reveals it when expanded', async () => {
+    render(QueryFilter, {
+      children: createRawSnippet(() => ({ render: () => '<span>filter content</span>' })),
+    });
+    expect(screen.queryByText('filter content')).toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: '展开筛选' }));
+    expect(screen.getByText('filter content')).toBeTruthy();
   });
 
   it('honors showResetButton and custom button labels', () => {

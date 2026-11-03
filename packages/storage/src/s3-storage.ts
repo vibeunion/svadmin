@@ -7,6 +7,8 @@ import type {
   StoragePresignedUrlOptions,
 } from '@svadmin/core';
 
+export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
 export interface S3StorageOptions {
   /** S3 or S3-compatible (Cloudflare R2, MinIO, Wasabi) bucket name */
   bucket: string;
@@ -17,10 +19,14 @@ export interface S3StorageOptions {
    * Enables direct client-to-storage uploads without exposing credentials.
    */
   getPresignedUploadUrl?: (params: { path: string; contentType?: string }) => Promise<{ uploadUrl: string; downloadUrl?: string }>;
+  /** Request a signed download or upload URL from the backend. */
+  getPresignedUrl?: (params: { path: string; operation: 'get' | 'put'; expiresInSeconds: number }) => Promise<string>;
+  /** List objects through a backend endpoint; direct bucket listing is not exposed to browsers. */
+  listFiles?: (options?: StorageListOptions) => Promise<StorageFileItem[]>;
   /**
    * Custom fetch implementation
    */
-  fetch?: typeof fetch;
+  fetch?: FetchLike;
 }
 
 export function createS3StorageProvider(options: S3StorageOptions): StorageProvider {
@@ -29,10 +35,10 @@ export function createS3StorageProvider(options: S3StorageOptions): StorageProvi
 
   return {
     async upload(file: File | Blob | ArrayBuffer | Uint8Array, uploadOptions?: StorageUploadOptions): Promise<StorageUploadResult> {
-      const filename = uploadOptions?.filename ?? (file instanceof File ? file.name : 'upload.bin');
+      const filename = uploadOptions?.filename ?? (typeof File !== 'undefined' && file instanceof File ? file.name : 'upload.bin');
       const dir = uploadOptions?.path ? uploadOptions.path.replace(/^\/+|\/+$/g, '') : '';
       const fullPath = dir ? `${dir}/${filename}` : filename;
-      const contentType = uploadOptions?.contentType ?? (file instanceof File ? file.type : 'application/octet-stream');
+      const contentType = uploadOptions?.contentType ?? (typeof File !== 'undefined' && file instanceof File ? file.type : 'application/octet-stream');
 
       let bodyData: BodyInit;
       let byteSize: number | undefined;
@@ -74,51 +80,33 @@ export function createS3StorageProvider(options: S3StorageOptions): StorageProvi
           path: fullPath,
           size: byteSize,
           contentType,
-          metadata: uploadOptions?.metadata,
+          ...(uploadOptions?.metadata === undefined ? {} : { metadata: uploadOptions.metadata }),
         };
       }
 
-      uploadOptions?.onProgress?.({
-        loaded: byteSize ?? 100,
-        total: byteSize ?? 100,
-        percentage: 100,
-      });
-
-      return {
-        url: `${publicBaseUrl}/${fullPath}`,
-        path: fullPath,
-        size: byteSize,
-        contentType,
-        metadata: uploadOptions?.metadata,
-      };
+      throw new Error('S3 storage upload requires getPresignedUploadUrl');
     },
 
     async delete(path: string): Promise<void> {
       // In client mode, delete operations typically call the backend API
       const cleanPath = path.replace(/^\/+/, '');
-      await customFetch(`${publicBaseUrl}/${cleanPath}`, {
+      const response = await customFetch(`${publicBaseUrl}/${cleanPath}`, {
         method: 'DELETE',
-      }).catch(() => {
-        // Silently handle if unpermitted or route not mounted
       });
+      if (!response.ok) throw new Error(`Failed to delete storage object: ${response.status} ${response.statusText}`);
     },
 
     async getPresignedUrl(path: string, presignedOptions?: StoragePresignedUrlOptions): Promise<string> {
       const cleanPath = path.replace(/^\/+/, '');
       const op = presignedOptions?.operation ?? 'get';
       const expires = presignedOptions?.expiresInSeconds ?? 3600;
-      return `${publicBaseUrl}/${cleanPath}?op=${op}&expires=${expires}`;
+      if (!options.getPresignedUrl) throw new Error('S3 storage presigned URLs require getPresignedUrl');
+      return options.getPresignedUrl({ path: cleanPath, operation: op, expiresInSeconds: expires });
     },
 
     async list(listOptions?: StorageListOptions): Promise<StorageFileItem[]> {
-      const prefix = listOptions?.prefix ? listOptions.prefix.replace(/^\/+/, '') : '';
-      return [
-        {
-          name: prefix.split('/').pop() ?? prefix,
-          path: prefix,
-          url: `${publicBaseUrl}/${prefix}`,
-        },
-      ];
+      if (!options.listFiles) throw new Error('S3 storage listing requires listFiles');
+      return options.listFiles(listOptions);
     },
   };
 }

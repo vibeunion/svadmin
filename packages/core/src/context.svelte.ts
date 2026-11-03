@@ -91,7 +91,7 @@ export interface AdminContextValue {
   readonly identityGovernanceProvider: ProviderBundle['identityGovernanceProvider'];
   readonly sessionProvider: ProviderBundle['sessionProvider'];
   readonly credentialProvider: ProviderBundle['credentialProvider'];
-  readonly storageProvider?: StorageProvider|null;
+  readonly storageProvider: StorageProvider|null|undefined;
   readonly tenant: TenantContext|undefined;
   readonly tenantAdapter: TenantAdapter|undefined;
 }
@@ -121,7 +121,7 @@ export interface AdminContextAccessor {
   readonly identityGovernanceProvider: ProviderBundle['identityGovernanceProvider'];
   readonly sessionProvider: ProviderBundle['sessionProvider'];
   readonly credentialProvider: ProviderBundle['credentialProvider'];
-  readonly storageProvider?: StorageProvider|null;
+  readonly storageProvider: StorageProvider|null|undefined;
   readonly tenant: TenantContext|undefined;
   readonly tenantAdapter: TenantAdapter|undefined;
   readonly tenantCacheKey: TenantCacheKey|undefined;

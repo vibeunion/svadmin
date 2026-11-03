@@ -29,11 +29,11 @@ describe('@svadmin/pusher LiveProvider', () => {
 
     const liveProvider = createPusherLiveProvider(mockPusher, { channelPrefix: 'app' });
 
-    let receivedEvent: LiveEvent | null = null;
+    const received = { event: undefined as LiveEvent | undefined };
     const unsubscribe = liveProvider.subscribe({
       resource: 'posts',
       callback: (event) => {
-        receivedEvent = event;
+        received.event = event;
       },
     });
 
@@ -45,10 +45,13 @@ describe('@svadmin/pusher LiveProvider', () => {
     // Trigger an update event
     boundEvents.get('updated')?.({ id: 101, title: 'Realtime Title' });
 
-    expect(receivedEvent).not.toBeNull();
-    expect(receivedEvent?.type).toBe('updated');
-    expect(receivedEvent?.payload.ids).toEqual(['101']);
-    expect(receivedEvent?.payload.data.title).toBe('Realtime Title');
+    expect(received.event).not.toBeUndefined();
+    const receivedEvent = received.event;
+    if (receivedEvent === undefined) throw new Error('Expected a live event');
+    expect(receivedEvent.type).toBe('UPDATE');
+    expect(receivedEvent.resource).toBe('posts');
+    expect(receivedEvent.payload['id']).toBe(101);
+    expect(receivedEvent.payload['title']).toBe('Realtime Title');
 
     // Unsubscribe
     unsubscribe();

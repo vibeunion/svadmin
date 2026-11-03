@@ -652,7 +652,7 @@ export { default as FloatButton } from './components/FloatButton.svelte';
 export { default as Steps } from './components/Steps.svelte';
 export type { StepItem } from './components/Steps.svelte';
 
-// Arco Design & Pro Components parity suite
+// Enterprise page, form, description, and workflow components
 export { default as QueryFilter } from './components/QueryFilter.svelte';
 export type { QueryFilterProps } from './components/QueryFilter.svelte';
 export { default as PageContainer } from './components/PageContainer.svelte';

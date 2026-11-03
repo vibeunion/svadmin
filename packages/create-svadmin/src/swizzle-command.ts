@@ -49,11 +49,6 @@ export const SWIZZLE_CATALOG: SwizzleCatalogEntry[] = [
     sourceFile: 'Sidebar.svelte',
   },
   {
-    name: 'ThemeSwitcher',
-    description: 'Theme mode toggle (light, dark, system) and color palette picker',
-    sourceFile: 'ThemeSwitcher.svelte',
-  },
-  {
     name: 'RecordDetailDrawer',
     description: 'High-density record preview and detail drawer',
     sourceFile: 'RecordDetailDrawer.svelte',
@@ -73,8 +68,9 @@ export function planSwizzle(options: SwizzleCommandOptions): SwizzlePlan {
     throw new Error('Component name is required. Use --list to see available components.');
   }
 
+  const component = options.component;
   const catalogEntry = SWIZZLE_CATALOG.find(
-    (c) => c.name.toLowerCase() === options.component!.toLowerCase(),
+    (c) => c.name.toLowerCase() === component.toLowerCase(),
   );
 
   if (!catalogEntry) {
@@ -88,22 +84,15 @@ export function planSwizzle(options: SwizzleCommandOptions): SwizzlePlan {
   const targetFilePath = path.join(projectDir, targetSubDir, targetFileName);
   const relativePath = path.relative(projectDir, targetFilePath);
 
-  // Eject template: wrapping or direct source stub that imports from @svadmin/ui while exposing full markup
+  // Generate a valid wrapper that users can customize in their own project.
   const content = `<script lang="ts">
   // Swizzled from @svadmin/ui: ${catalogEntry.name}
-  // Customize this component directly to match your custom design system.
+  // Customize this wrapper to match your application design system.
   import { ${catalogEntry.name} as Base${catalogEntry.name} } from '@svadmin/ui';
-  let { ...props } = $props();
+  let props = $props();
 </script>
 
-<!-- Custom markup override hook -->
-<div class="svadmin-swizzled-${catalogEntry.name.toLowerCase()}">
-  <Base${catalogEntry.name} {...props}>
-    {#snippet children?.(slotProps)}
-      {@render props.children?.(slotProps)}
-    {/snippet}
-  </Base${catalogEntry.name}>
-</div>
+<Base${catalogEntry.name} {...props} />
 `;
 
   return {
@@ -124,6 +113,7 @@ export async function swizzleCommand(args: string[]): Promise<void> {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (arg === undefined) continue;
     if (arg === '--list' || arg === '-l') {
       list = true;
     } else if (arg === '--write' || arg === '-w') {
@@ -152,12 +142,10 @@ export async function swizzleCommand(args: string[]): Promise<void> {
     return;
   }
 
-  const plan = planSwizzle({
-    component,
-    projectDirectory,
-    targetDir,
-    write,
-  });
+  const planOptions: SwizzleCommandOptions = { component, write };
+  if (projectDirectory !== undefined) planOptions.projectDirectory = projectDirectory;
+  if (targetDir !== undefined) planOptions.targetDir = targetDir;
+  const plan = planSwizzle(planOptions);
 
   console.log(pc.cyan(`\nSwizzle Plan for <${plan.component}>:`));
   console.log(`  Target: ${pc.bold(plan.relativePath)}`);

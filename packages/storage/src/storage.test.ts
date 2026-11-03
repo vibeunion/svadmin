@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { createMemoryStorageProvider } from './memory-storage';
-import { createS3StorageProvider } from './s3-storage';
+import { createS3StorageProvider, type FetchLike } from './s3-storage';
 
 describe('@svadmin/storage Memory Provider', () => {
   it('handles uploads, signed URLs, listing, and deletion', async () => {
@@ -17,14 +17,14 @@ describe('@svadmin/storage Memory Provider', () => {
     expect(uploadRes.path).toBe('documents/sample.txt');
     expect(uploadRes.url).toBe('https://cdn.example.com/documents/sample.txt');
     expect(uploadRes.size).toBe(3);
-    expect(uploadRes.metadata?.author).toBe('admin');
+    expect(uploadRes.metadata?.['author']).toBe('admin');
 
     const signed = await storage.getPresignedUrl?.('documents/sample.txt');
     expect(signed).toContain('https://cdn.example.com/documents/sample.txt?op=get');
 
     const list = await storage.list?.({ prefix: 'documents' });
     expect(list?.length).toBe(1);
-    expect(list?.[0].name).toBe('sample.txt');
+    expect(list?.[0]?.name).toBe('sample.txt');
 
     await storage.delete('documents/sample.txt');
     const afterDelete = await storage.list?.({ prefix: 'documents' });
@@ -37,7 +37,7 @@ describe('@svadmin/storage S3 Provider', () => {
     let putCalled = false;
     let putHeaders: Record<string, string> = {};
 
-    const mockFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const mockFetch: FetchLike = async (input, init) => {
       if (init?.method === 'PUT') {
         putCalled = true;
         putHeaders = (init.headers as Record<string, string>) ?? {};
@@ -49,11 +49,11 @@ describe('@svadmin/storage S3 Provider', () => {
     const s3 = createS3StorageProvider({
       bucket: 'my-bucket',
       publicUrl: 'https://cdn.my-bucket.com',
-      getPresignedUploadUrl: async ({ path, contentType }) => ({
+      getPresignedUploadUrl: async ({ path, contentType: _contentType }) => ({
         uploadUrl: `https://my-bucket.s3.amazonaws.com/${path}?signed=true`,
         downloadUrl: `https://cdn.my-bucket.com/${path}`,
       }),
-      fetch: mockFetch as any,
+      fetch: mockFetch,
     });
 
     const data = new Uint8Array([1, 2, 3, 4]);
@@ -66,5 +66,21 @@ describe('@svadmin/storage S3 Provider', () => {
     expect(putHeaders['Content-Type']).toBe('image/png');
     expect(res.url).toBe('https://cdn.my-bucket.com/image.png');
     expect(res.path).toBe('image.png');
+  });
+
+  it('fails closed when upload signing is not configured', async () => {
+    const storage = createS3StorageProvider({ bucket: 'my-bucket' });
+    await expect(storage.upload(new Uint8Array([1]))).rejects.toThrow('getPresignedUploadUrl');
+  });
+
+  it('uses backend signing and surfaces delete failures', async () => {
+    const storage = createS3StorageProvider({
+      bucket: 'my-bucket',
+      getPresignedUrl: async ({ path, operation }) => `https://signed.example/${path}?operation=${operation}`,
+      fetch: async (): Promise<Response> => new Response('', { status: 403, statusText: 'Forbidden' }),
+    });
+
+    await expect(storage.getPresignedUrl?.('docs/a.txt')).resolves.toBe('https://signed.example/docs/a.txt?operation=get');
+    await expect(storage.delete('docs/a.txt')).rejects.toThrow('403 Forbidden');
   });
 });

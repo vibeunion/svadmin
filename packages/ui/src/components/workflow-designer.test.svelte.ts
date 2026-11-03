@@ -24,7 +24,7 @@ describe('WorkflowDesigner', () => {
     const onnodeclick = vi.fn();
     render(WorkflowDesigner, { nodes, onnodeclick });
 
-    const approverNode = screen.getByText('直属主管审批');
+    const approverNode = screen.getByText('由一级主管审批');
     await fireEvent.click(approverNode);
 
     expect(onnodeclick).toHaveBeenCalledWith(expect.objectContaining({ id: '2', title: '直属主管审批' }));

@@ -20,6 +20,25 @@ export interface PusherLiveOptions {
   channelPrefix?: string;
 }
 
+type PusherEventType = 'created' | 'updated' | 'deleted';
+const eventTypes: Record<PusherEventType, LiveEvent['type']> = {
+  created: 'INSERT',
+  updated: 'UPDATE',
+  deleted: 'DELETE',
+};
+const pusherEventTypes: Record<LiveEvent['type'], PusherEventType> = {
+  INSERT: 'created',
+  UPDATE: 'updated',
+  DELETE: 'deleted',
+};
+
+function toPayload(data: unknown): Record<string, unknown> {
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    return data as Record<string, unknown>;
+  }
+  return { value: data };
+}
+
 export function createPusherLiveProvider(
   pusher: PusherClientLike,
   options: PusherLiveOptions = {},
@@ -31,16 +50,11 @@ export function createPusherLiveProvider(
       const channelName = `${prefix}-${resource}`;
       const channel = pusher.subscribe(channelName);
 
-      const handler = (type: 'created' | 'updated' | 'deleted') => (data: unknown) => {
-        const payload = data && typeof data === 'object' ? data : {};
+      const handler = (type: PusherEventType) => (data: unknown) => {
         const event: LiveEvent = {
-          channel: channelName,
-          type,
-          payload: {
-            ids: 'id' in payload && payload.id !== undefined ? [String(payload.id)] : [],
-            data: payload as Record<string, unknown>,
-          },
-          date: new Date(),
+          type: eventTypes[type],
+          resource,
+          payload: toPayload(data),
         };
         callback(event);
       };
@@ -68,8 +82,8 @@ export function createPusherLiveProvider(
 
     publish(event: LiveEvent): void {
       if (!pusher.trigger) return;
-      const channelName = event.channel;
-      pusher.trigger(channelName, event.type, event.payload);
+      const channelName = `${prefix}-${event.resource}`;
+      pusher.trigger(channelName, pusherEventTypes[event.type], event.payload);
     },
   };
 }

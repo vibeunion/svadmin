@@ -14,9 +14,9 @@ export interface ClerkClientLike {
   user?: ClerkUserLike | null;
   session?: { id: string } | null;
   loaded?: boolean;
-  openSignIn?: (options?: Record<string, unknown>) => void;
-  signOut?: (options?: Record<string, unknown>) => Promise<void>;
-  redirectToSignIn?: (options?: Record<string, unknown>) => Promise<unknown> | void;
+  openSignIn?: (options?: Record<string, unknown>) => unknown;
+  signOut?: (options?: Record<string, unknown>) => Promise<unknown>;
+  redirectToSignIn?: (options?: Record<string, unknown>) => unknown;
 }
 
 export interface ClerkAuthOptions {
@@ -45,7 +45,7 @@ export function createClerkAuthProvider(
         window.location.href = options.signInUrl;
         return { success: true };
       }
-      return { success: true };
+      return { success: false, error: { name: 'AUTH_NOT_CONFIGURED', message: 'Authentication sign-in is not configured.' } };
     },
 
     async logout(params?: Record<string, unknown>): Promise<AuthActionResult> {
@@ -56,11 +56,11 @@ export function createClerkAuthProvider(
     },
 
     async check(): Promise<CheckResult> {
+      if (clerk.loaded === false) return { authenticated: false };
       const authenticated = Boolean(clerk.user && clerk.session);
-      return {
-        authenticated,
-        redirectTo: authenticated ? undefined : (options.signInUrl ?? '/login'),
-      };
+      return authenticated
+        ? { authenticated: true }
+        : { authenticated: false, ...(options.signInUrl === undefined ? {} : { redirectTo: options.signInUrl }) };
     },
 
     async getIdentity(): Promise<Identity | null> {
@@ -69,9 +69,9 @@ export function createClerkAuthProvider(
       const computedName = user.fullName ?? [user.firstName, user.lastName].filter(Boolean).join(' ');
       return {
         id: user.id,
-        name: computedName || undefined,
-        email: user.primaryEmailAddress?.emailAddress,
-        avatar: user.imageUrl ?? undefined,
+        ...(computedName ? { name: computedName } : {}),
+        ...(user.primaryEmailAddress?.emailAddress ? { email: user.primaryEmailAddress.emailAddress } : {}),
+        ...(user.imageUrl ? { avatar: user.imageUrl } : {}),
       };
     },
 

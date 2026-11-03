@@ -11,7 +11,7 @@ describe('FormDependency', () => {
       secret: 'hidden-token',
     };
 
-    const snippet = createRawSnippet((getWatched: () => Record<string, any>) => ({
+    const snippet = createRawSnippet((getWatched: () => Record<string, unknown>) => ({
       render: () => {
         const w = getWatched();
         return `<div>Watched Role: ${w.role}, HasSecret: ${Boolean(w.secret)}</div>`;

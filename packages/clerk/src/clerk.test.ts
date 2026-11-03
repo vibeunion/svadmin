@@ -18,6 +18,16 @@ describe('@svadmin/clerk AuthProvider', () => {
     expect(identity).toBeNull();
   });
 
+  it('does not redirect while the client is still loading', async () => {
+    const provider = createClerkAuthProvider({ loaded: false }, { signInUrl: '/auth/signin' });
+    await expect(provider.check()).resolves.toEqual({ authenticated: false });
+  });
+
+  it('rejects login when no sign-in action is configured', async () => {
+    const provider = createClerkAuthProvider({ loaded: true });
+    await expect(provider.login({})).resolves.toMatchObject({ success: false });
+  });
+
   it('reports authenticated and identity when user and session exist', async () => {
     const clerk: ClerkClientLike = {
       user: {

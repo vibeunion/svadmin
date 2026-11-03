@@ -75,13 +75,7 @@
     class: className = '',
   }: PageContainerProps = $props();
 
-  let internalActiveTab = $state(activeTab || (tabs && tabs[0]?.key) || '');
-
-  $effect(() => {
-    if (activeTab !== undefined) {
-      internalActiveTab = activeTab;
-    }
-  });
+  let internalActiveTab = $derived(activeTab ?? tabs?.[0]?.key ?? '');
 
   function handleTabClick(tab: PageContainerTab) {
     if (tab.disabled) return;
@@ -97,16 +91,16 @@
   function getTagToneClasses(tone?: PageContainerTag['tone']): string {
     switch (tone) {
       case 'success':
-        return 'bg-[#E8FFEA] text-[#00B42A] border-[#AFF0B5] dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800';
+        return 'bg-success/10 text-success border-success/30';
       case 'warning':
-        return 'bg-[#FFF7E8] text-[#FF7D00] border-[#FFD8A8] dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800';
+        return 'bg-warning/10 text-warning border-warning/30';
       case 'danger':
-        return 'bg-[#FFECE8] text-[#F53F3F] border-[#FBACA3] dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800';
+        return 'bg-destructive/10 text-destructive border-destructive/30';
       case 'primary':
-        return 'bg-[#E8F3FF] text-[#165DFF] border-[#BEDAFF] dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800';
+        return 'bg-primary/10 text-primary border-primary/30';
       case 'neutral':
       default:
-        return 'bg-[#F2F3F5] text-[#4E5969] border-[#E5E6EB] dark:bg-muted dark:text-muted-foreground dark:border-border';
+        return 'bg-muted text-muted-foreground border-border';
     }
   }
 </script>
@@ -114,7 +108,7 @@
 <div
   data-svadmin-component="PageContainer"
   class={cn(
-    'svadmin-page-container min-h-full w-full bg-[#F7F8FA] dark:bg-background',
+    'svadmin-page-container min-h-full w-full bg-background',
     className
   )}
 >
@@ -124,7 +118,7 @@
   {:else if title || breadcrumbs || extra || tabs}
     <header
       class={cn(
-        'svadmin-page-header border-b border-border bg-white px-6 pt-4 pb-0 transition-all dark:bg-card',
+        'svadmin-page-header border-b border-border bg-card px-6 pt-4 pb-0 transition-all',
         fixedHeader && 'sticky top-0 z-20 shadow-xs'
       )}
     >
@@ -136,20 +130,20 @@
       >
         <!-- Breadcrumb row -->
         {#if breadcrumbs && breadcrumbs.length > 0}
-          <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-1.5 text-xs text-[#86909C] dark:text-muted-foreground">
-            {#each breadcrumbs as item, index}
+          <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            {#each breadcrumbs as item, index (item.href ?? `${item.label}-${index}`)}
               {#if index > 0}
-                <span class="text-[#C9CDD4] select-none dark:text-muted">/</span>
+                <span class="text-muted select-none">/</span>
               {/if}
               {#if item.href}
                 <a
                   href={item.href}
-                  class="transition-colors hover:text-[#165DFF] focus-visible:outline-none"
+                  class="transition-colors hover:text-primary focus-visible:outline-none"
                 >
                   {item.label}
                 </a>
               {:else}
-                <span class="text-[#4E5969] font-normal dark:text-foreground">{item.label}</span>
+                <span class="text-foreground font-normal">{item.label}</span>
               {/if}
             {/each}
           </nav>
@@ -162,7 +156,7 @@
               <button
                 type="button"
                 aria-label="返回上一页"
-                class="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-border text-[#4E5969] transition-colors hover:bg-[#F2F3F5] hover:text-[#165DFF] active:bg-[#E5E6EB] dark:hover:bg-muted"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-primary active:bg-accent"
                 onclick={handleBack}
               >
                 <svg
@@ -180,20 +174,20 @@
             {/if}
 
             {#if title}
-              <h1 class="text-lg font-semibold tracking-tight text-[#1D2129] dark:text-foreground">
+              <h1 class="text-lg font-semibold tracking-tight text-foreground">
                 {title}
               </h1>
             {/if}
 
             {#if subTitle}
-              <span class="hidden sm:inline-block border-l border-border pl-2.5 text-xs text-[#86909C] dark:text-muted-foreground">
+              <span class="hidden sm:inline-block border-l border-border pl-2.5 text-xs text-muted-foreground">
                 {subTitle}
               </span>
             {/if}
 
             {#if tags && tags.length > 0}
               <div class="ml-1 flex items-center gap-1.5">
-                {#each tags as tag}
+                {#each tags as tag (tag.label)}
                   <span
                     class={cn(
                       'inline-flex items-center rounded-[2px] border px-2 py-0.5 text-[11px] font-medium leading-none select-none',
@@ -217,7 +211,7 @@
         <!-- Header Tabs -->
         {#if tabs && tabs.length > 0}
           <div role="tablist" class="flex items-center gap-6 border-t border-border/60 -mb-[1px]">
-            {#each tabs as tab}
+            {#each tabs as tab (tab.key)}
               <button
                 type="button"
                 role="tab"
@@ -226,8 +220,8 @@
                 class={cn(
                   'relative py-2.5 text-xs font-medium transition-colors focus-visible:outline-none',
                   internalActiveTab === tab.key
-                    ? 'text-[#165DFF] font-semibold dark:text-primary'
-                    : 'text-[#4E5969] hover:text-[#165DFF] dark:text-muted-foreground dark:hover:text-foreground',
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground hover:text-primary',
                   tab.disabled && 'cursor-not-allowed opacity-40 hover:text-inherit'
                 )}
                 onclick={() => handleTabClick(tab)}
@@ -235,7 +229,7 @@
                 {tab.label}
                 {#if internalActiveTab === tab.key}
                   <span
-                    class="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-[#165DFF] dark:bg-primary"
+                    class="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-primary"
                   ></span>
                 {/if}
               </button>
@@ -258,7 +252,7 @@
       class={cn(
         'mx-auto w-full transition-all',
         contentWidth === 'fixed' && 'max-w-7xl',
-        !ghost && 'rounded-[4px] border border-border bg-white p-5 shadow-xs dark:bg-card'
+        !ghost && 'rounded-[4px] border border-border bg-card p-5 shadow-xs'
       )}
     >
       {#if children}

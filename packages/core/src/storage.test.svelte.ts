@@ -24,14 +24,17 @@ class MockStorageProvider implements StorageProvider {
     } else {
       bytes = new Uint8Array(await file.arrayBuffer());
     }
-    this.files.set(path, { content: bytes, metadata: options?.metadata });
+    this.files.set(path, {
+      content: bytes,
+      ...(options?.metadata === undefined ? {} : { metadata: options.metadata }),
+    });
     options?.onProgress?.({ loaded: bytes.byteLength, total: bytes.byteLength, percentage: 100 });
     return {
       url: `https://mock.storage/${path}`,
       path,
       size: bytes.byteLength,
       contentType: options?.contentType ?? 'application/octet-stream',
-      metadata: options?.metadata,
+      ...(options?.metadata === undefined ? {} : { metadata: options.metadata }),
     };
   }
 
@@ -88,7 +91,7 @@ describe('StorageProvider Contract & useStorage', () => {
 
     const list = await storage.listFiles();
     expect(list.length).toBe(1);
-    expect(list[0].name).toBe('avatar.png');
+    expect(list[0]?.name).toBe('avatar.png');
 
     await storage.deleteFile('uploads/avatar.png');
     const afterDelete = await storage.listFiles();

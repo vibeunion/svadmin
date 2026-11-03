@@ -30,12 +30,12 @@ export function createMemoryStorageProvider(options: MemoryStorageOptions = {}):
         bytes = new Uint8Array(await file.arrayBuffer());
       }
 
-      const contentType = uploadOptions?.contentType ?? (file instanceof File ? file.type : 'application/octet-stream');
+      const contentType = uploadOptions?.contentType ?? (typeof File !== 'undefined' && file instanceof File ? file.type : 'application/octet-stream');
       files.set(fullPath, {
         bytes,
         contentType: contentType || 'application/octet-stream',
-        metadata: uploadOptions?.metadata,
         updatedAt: new Date(),
+        ...(uploadOptions?.metadata === undefined ? {} : { metadata: uploadOptions.metadata }),
       });
 
       uploadOptions?.onProgress?.({
@@ -49,7 +49,7 @@ export function createMemoryStorageProvider(options: MemoryStorageOptions = {}):
         path: fullPath,
         size: bytes.byteLength,
         contentType,
-        metadata: uploadOptions?.metadata,
+        ...(uploadOptions?.metadata === undefined ? {} : { metadata: uploadOptions.metadata }),
       };
     },
 

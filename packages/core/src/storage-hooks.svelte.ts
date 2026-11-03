@@ -1,6 +1,5 @@
 import { captureAdminContext } from './context.svelte';
 import type {
-  StorageProvider,
   StorageUploadOptions,
   StorageUploadResult,
   StorageFileItem,

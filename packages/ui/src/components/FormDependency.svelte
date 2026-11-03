@@ -5,9 +5,9 @@
     /** Field name or list of field names to observe */
     name: string | string[];
     /** Form values dictionary containing monitored field keys */
-    values?: Record<string, any>;
+    values?: Record<string, unknown>;
     /** Render snippet invoked with the watched subset of values */
-    children?: Snippet<[Record<string, any>]>;
+    children?: Snippet<[Record<string, unknown>]>;
   }
 
   let {
@@ -18,7 +18,7 @@
 
   let watched = $derived.by(() => {
     const names = Array.isArray(name) ? name : [name];
-    const subset: Record<string, any> = {};
+    const subset: Record<string, unknown> = {};
     for (const key of names) {
       subset[key] = values[key];
     }

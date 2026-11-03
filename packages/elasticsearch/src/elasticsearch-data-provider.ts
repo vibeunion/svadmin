@@ -10,11 +10,13 @@ import type {
   CreateResult,
   UpdateParams,
   UpdateResult,
-  DeleteOneParams,
-  DeleteOneResult,
+  DeleteParams,
+  DeleteResult,
   BaseRecord,
   Filter,
 } from '@svadmin/core';
+
+export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 export interface ElasticsearchOptions {
   node: string;
@@ -23,7 +25,7 @@ export interface ElasticsearchOptions {
   password?: string;
   headers?: Record<string, string>;
   indexMap?: Record<string, string>;
-  fetch?: typeof fetch;
+  fetch?: FetchLike;
 }
 
 function buildQuery(filters?: Filter[]): Record<string, unknown> {
@@ -33,6 +35,7 @@ function buildQuery(filters?: Filter[]): Record<string, unknown> {
 
   const must: Record<string, unknown>[] = [];
   const mustNot: Record<string, unknown>[] = [];
+  const should: Record<string, unknown>[] = [];
 
   for (const filter of filters) {
     if ('field' in filter) {
@@ -62,12 +65,20 @@ function buildQuery(filters?: Filter[]): Record<string, unknown> {
         default:
           must.push({ match: { [field]: value } });
       }
+    } else {
+      const nested = filter.value.map((child) => buildQuery([child]));
+      if (filter.operator === 'or') should.push(...nested);
+      else must.push(...nested);
     }
   }
 
   const boolQuery: Record<string, unknown> = {};
-  if (must.length > 0) boolQuery.must = must;
-  if (mustNot.length > 0) boolQuery.must_not = mustNot;
+  if (must.length > 0) boolQuery['must'] = must;
+  if (mustNot.length > 0) boolQuery['must_not'] = mustNot;
+  if (should.length > 0) {
+    boolQuery['should'] = should;
+    boolQuery['minimum_should_match'] = 1;
+  }
 
   return Object.keys(boolQuery).length > 0 ? { bool: boolQuery } : { match_all: {} };
 }
@@ -82,10 +93,10 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       ...(options.headers ?? {}),
     };
     if (options.apiKey) {
-      headers.Authorization = `ApiKey ${options.apiKey}`;
+      headers['Authorization'] = `ApiKey ${options.apiKey}`;
     } else if (options.username && options.password) {
       const creds = btoa(`${options.username}:${options.password}`);
-      headers.Authorization = `Basic ${creds}`;
+      headers['Authorization'] = `Basic ${creds}`;
     }
     return headers;
   }
@@ -94,7 +105,18 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
     return options.indexMap?.[resource] ?? resource;
   }
 
+  function withId<TData extends BaseRecord>(id: string | number, source: Record<string, unknown> = {}): TData {
+    return { id, ...source } as unknown as TData;
+  }
+
+  function variablesRecord(value: unknown): Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? value as Record<string, unknown>
+      : {};
+  }
+
   return {
+    getApiUrl: () => nodeUrl,
     async getList<TData extends BaseRecord = BaseRecord>(params: GetListParams): Promise<GetListResult<TData>> {
       const index = resolveIndex(params.resource);
       const page = params.pagination?.current ?? 1;
@@ -108,7 +130,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       };
 
       if (params.sorters && params.sorters.length > 0) {
-        body.sort = params.sorters.map((s) => ({
+        body['sort'] = params.sorters.map((s) => ({
           [s.field]: { order: s.order.toLowerCase() },
         }));
       }
@@ -131,10 +153,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       };
 
       const total = typeof json.hits.total === 'number' ? json.hits.total : (json.hits.total?.value ?? 0);
-      const data = json.hits.hits.map((hit) => ({
-        id: hit._id,
-        ...hit._source,
-      })) as TData[];
+      const data = json.hits.hits.map((hit) => withId<TData>(hit._id, hit._source));
 
       return { data, total };
     },
@@ -151,7 +170,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       }
 
       const json = await res.json() as { _id: string; _source: Record<string, unknown> };
-      const data = { id: json._id, ...json._source } as TData;
+      const data = withId<TData>(json._id, json._source);
 
       return { data };
     },
@@ -174,7 +193,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
 
       const data = json.docs
         .filter((doc) => doc.found && doc._source)
-        .map((doc) => ({ id: doc._id, ...doc._source })) as TData[];
+        .map((doc) => withId<TData>(doc._id, doc._source));
 
       return { data };
     },
@@ -186,7 +205,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       const res = await customFetch(`${nodeUrl}/${index}/_doc`, {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify(params.variables),
+        body: JSON.stringify(variablesRecord(params.variables)),
       });
 
       if (!res.ok) {
@@ -194,7 +213,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       }
 
       const json = await res.json() as { _id: string };
-      const data = { id: json._id, ...(params.variables as object) } as TData;
+      const data = withId<TData>(json._id, variablesRecord(params.variables));
 
       return { data };
     },
@@ -206,18 +225,18 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
       const res = await customFetch(`${nodeUrl}/${index}/_update/${params.id}`, {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({ doc: params.variables }),
+        body: JSON.stringify({ doc: variablesRecord(params.variables) }),
       });
 
       if (!res.ok) {
         throw new Error(`Elasticsearch update error: ${res.status}`);
       }
 
-      const data = { id: params.id, ...(params.variables as object) } as TData;
+      const data = withId<TData>(params.id, variablesRecord(params.variables));
       return { data };
     },
 
-    async deleteOne<TData extends BaseRecord = BaseRecord>(params: DeleteOneParams): Promise<DeleteOneResult<TData>> {
+    async deleteOne<TData extends BaseRecord = BaseRecord>(params: DeleteParams): Promise<DeleteResult<TData>> {
       const index = resolveIndex(params.resource);
       const res = await customFetch(`${nodeUrl}/${index}/_doc/${params.id}`, {
         method: 'DELETE',
@@ -228,7 +247,7 @@ export function createElasticsearchDataProvider(options: ElasticsearchOptions): 
         throw new Error(`Elasticsearch delete error: ${res.status}`);
       }
 
-      const data = { id: params.id } as TData;
+      const data = withId<TData>(params.id);
       return { data };
     },
   };

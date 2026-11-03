@@ -1,8 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../core/tsconfig.contracts.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "declaration": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }

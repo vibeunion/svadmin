@@ -5,7 +5,7 @@
   export interface ProDescriptionItem {
     key: string;
     label: string;
-    value?: any;
+    value?: unknown;
     span?: number;
     editable?: boolean;
     type?: 'text' | 'number' | 'tag' | 'badge';
@@ -28,7 +28,7 @@
     /** Whether inline editing is enabled globally */
     editable?: boolean;
     /** Callback triggered when a field value is saved */
-    onedit?: (key: string, value: any) => void | Promise<void>;
+    onedit?: (key: string, value: unknown) => void | Promise<void>;
     /** Extra actions slot on the top right */
     extra?: Snippet;
     /** Children slot */
@@ -52,7 +52,7 @@
   }: ProDescriptionsProps = $props();
 
   let editingKey = $state<string | null>(null);
-  let editValue = $state<any>('');
+  let editValue = $state<unknown>('');
   let isSaving = $state(false);
 
   function startEdit(item: ProDescriptionItem) {
@@ -94,16 +94,16 @@
   function getTagToneClasses(tone?: ProDescriptionItem['tone']): string {
     switch (tone) {
       case 'success':
-        return 'bg-[#E8FFEA] text-[#00B42A] border-[#AFF0B5] dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800';
+        return 'bg-success/10 text-success border-success/30';
       case 'warning':
-        return 'bg-[#FFF7E8] text-[#FF7D00] border-[#FFD8A8] dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800';
+        return 'bg-warning/10 text-warning border-warning/30';
       case 'danger':
-        return 'bg-[#FFECE8] text-[#F53F3F] border-[#FBACA3] dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800';
+        return 'bg-destructive/10 text-destructive border-destructive/30';
       case 'primary':
-        return 'bg-[#E8F3FF] text-[#165DFF] border-[#BEDAFF] dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800';
+        return 'bg-primary/10 text-primary border-primary/30';
       case 'neutral':
       default:
-        return 'bg-[#F2F3F5] text-[#4E5969] border-[#E5E6EB] dark:bg-muted dark:text-muted-foreground dark:border-border';
+        return 'bg-muted text-muted-foreground border-border';
     }
   }
 
@@ -132,7 +132,7 @@
   {#if title || extra}
     <div class="mb-3 flex items-center justify-between gap-3">
       {#if title}
-        <h3 class="text-sm font-semibold tracking-tight text-[#1D2129] dark:text-foreground">
+        <h3 class="text-sm font-semibold tracking-tight text-foreground">
           {title}
         </h3>
       {/if}
@@ -152,7 +152,7 @@
         gridColsClass
       )}
     >
-      {#each items as item}
+      {#each items as item (item.key)}
         {@const span = Math.min(item.span || 1, columns)}
         {@const isItemEditable = editable || item.editable}
         <div
@@ -168,10 +168,10 @@
           <!-- Label -->
           <div
             class={cn(
-              'font-medium text-[#4E5969] select-none dark:text-muted-foreground',
+              'font-medium text-muted-foreground select-none',
               getPaddingClass(size),
               bordered
-                ? 'bg-[#F7F8FA] border-border dark:bg-muted/40'
+                ? 'bg-muted/40 border-border'
                 : 'bg-transparent text-muted-foreground',
               layout === 'horizontal' ? 'sm:w-36 shrink-0 sm:border-r' : 'border-b'
             )}
@@ -182,9 +182,9 @@
           <!-- Value -->
           <div
             class={cn(
-              'group/cell relative flex flex-1 items-center justify-between gap-2 text-[#1D2129] dark:text-foreground',
+              'group/cell relative flex flex-1 items-center justify-between gap-2 text-foreground',
               getPaddingClass(size),
-              bordered ? 'bg-white dark:bg-card' : 'bg-transparent'
+              bordered ? 'bg-card' : 'bg-transparent'
             )}
           >
             {#if editingKey === item.key}
@@ -193,7 +193,7 @@
                 <input
                   type={item.type === 'number' ? 'number' : 'text'}
                   bind:value={editValue}
-                  class="h-7 w-full rounded-[2px] border border-[#165DFF] bg-background px-2 text-xs focus:outline-none"
+                  class="h-7 w-full rounded-[2px] border border-primary bg-background px-2 text-xs focus:outline-none"
                   disabled={isSaving}
                   onkeydown={(e) => {
                     if (e.key === 'Enter') saveEdit(item.key);
@@ -203,7 +203,7 @@
                 <button
                   type="button"
                   aria-label="保存"
-                  class="inline-flex h-6 w-6 items-center justify-center rounded-[2px] bg-[#165DFF] text-white hover:bg-[#4080FF]"
+                  class="inline-flex h-6 w-6 items-center justify-center rounded-[2px] bg-primary text-primary-foreground hover:bg-primary/90"
                   onclick={() => saveEdit(item.key)}
                 >
                   <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -239,10 +239,10 @@
                     <span
                       class={cn(
                         'h-1.5 w-1.5 rounded-full',
-                        item.tone === 'success' && 'bg-[#00B42A]',
-                        item.tone === 'warning' && 'bg-[#FF7D00]',
-                        item.tone === 'danger' && 'bg-[#F53F3F]',
-                        (!item.tone || item.tone === 'primary') && 'bg-[#165DFF]'
+                        item.tone === 'success' && 'bg-success',
+                        item.tone === 'warning' && 'bg-warning',
+                        item.tone === 'danger' && 'bg-destructive',
+                        (!item.tone || item.tone === 'primary') && 'bg-primary'
                       )}
                     ></span>
                     <span>{item.value ?? '-'}</span>
@@ -256,7 +256,7 @@
                 <button
                   type="button"
                   aria-label={`编辑 ${item.label}`}
-                  class="opacity-0 transition-opacity group-hover/cell:opacity-100 p-1 text-[#86909C] hover:text-[#165DFF]"
+                  class="opacity-0 transition-opacity group-hover/cell:opacity-100 p-1 text-muted-foreground hover:text-primary"
                   onclick={() => startEdit(item)}
                 >
                   <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

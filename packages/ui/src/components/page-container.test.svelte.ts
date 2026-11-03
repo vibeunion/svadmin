@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import PageContainer from './PageContainer.svelte';
 
 describe('PageContainer', () => {
-  it('renders title, subtitle, breadcrumbs and tags with Arco design classes', () => {
+  it('renders title, subtitle, breadcrumbs and status tags', () => {
     render(PageContainer, {
       title: '用户列表',
       subTitle: '管理系统中的所有用户账户',
