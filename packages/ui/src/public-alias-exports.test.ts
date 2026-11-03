@@ -29,6 +29,18 @@ import {
   TypographyText,
   Typography,
   Title,
+  RoleSwitcher,
+  RealtimeMonitorView,
+  IconAudit,
+  IconWorkflow,
+  IconSeal,
+  IconTenant,
+  IconMonitor,
+  IconSecurity,
+  IconBilling,
+  IconCluster,
+  IconApprove,
+  IconReject,
   message,
   notification,
   toast,
@@ -54,6 +66,21 @@ describe('public compatibility aliases', () => {
     expect(Modal.Root).toBeDefined();
     expect(Drawer.Root).toBeDefined();
     expect(Dropdown.Root).toBeDefined();
+  });
+
+  it('exports enterprise pro suite components and business icons', () => {
+    expect(RoleSwitcher).toBeDefined();
+    expect(RealtimeMonitorView).toBeDefined();
+    expect(IconAudit).toBeDefined();
+    expect(IconWorkflow).toBeDefined();
+    expect(IconSeal).toBeDefined();
+    expect(IconTenant).toBeDefined();
+    expect(IconMonitor).toBeDefined();
+    expect(IconSecurity).toBeDefined();
+    expect(IconBilling).toBeDefined();
+    expect(IconCluster).toBeDefined();
+    expect(IconApprove).toBeDefined();
+    expect(IconReject).toBeDefined();
   });
 
   it('keeps service aliases bound to canonical services', () => {

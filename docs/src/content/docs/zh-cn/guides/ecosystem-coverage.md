@@ -26,7 +26,9 @@ external UI kits 为 React 生态维护了一份[推荐库清单](https://ant.de
 | 响应式 | react-responsive | `useMediaQuery`、`useDeviceDetect` | runed | ✅ |
 | 复制到剪贴板 | react-copy-to-clipboard | `CopyField`、ai-elements `CopyButton` | — | ✅ |
 | 页面 meta | react-helmet-async | SvelteKit `<svelte:head>` | SvelteKit | 🔶 框架提供 |
-| 图标 | react-icons / fontawesome | `@lucide/svelte` | lucide-svelte、phosphor-svelte | ✅ |
+| 图标 | react-icons / fontawesome | `@lucide/svelte` + 内置中后台业务图标套件（`IconAudit`、`IconWorkflow`、`IconSeal`、`IconTenant`、`IconMonitor` 等） | lucide-svelte、phosphor-svelte | ✅ |
+| 角色模拟切换 | — | `RoleSwitcher` 角色模拟器与调试切换组件 | — | ✅ |
+| 实时运维大屏 | — | `RealtimeMonitorView` / `MonitorTemplate` 实时流与集群指标大屏 | — | ✅ |
 | 二维码 | qrcode.react | `QRCode` 按需适配器（`@svadmin/ui/qr-code`，基于 `qrcode`） | svelte-qrcode、qrcode | ✅ |
 | 顶部进度条 | nprogress | `TopProgressBar` | — | ✅ |
 | 应用国际化 | FormatJS / react-i18next | `@svadmin/core` i18n、`useTranslation` | svelte-i18n、inlang | ✅ |

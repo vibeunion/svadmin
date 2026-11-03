@@ -665,3 +665,12 @@ export { default as FormDependency } from './components/FormDependency.svelte';
 export type { FormDependencyProps } from './components/FormDependency.svelte';
 export { default as WorkflowDesigner } from './components/WorkflowDesigner.svelte';
 export type { WorkflowDesignerProps, WorkflowNode } from './components/WorkflowDesigner.svelte';
+
+// Enterprise role simulation and operational telemetry components
+export { default as RoleSwitcher } from './components/RoleSwitcher.svelte';
+export type { RoleSwitcherProps, RoleItem } from './components/RoleSwitcher.svelte';
+export { default as RealtimeMonitorView } from './components/RealtimeMonitorView.svelte';
+export type { RealtimeMonitorViewProps, MetricCardItem } from './components/RealtimeMonitorView.svelte';
+
+// Enterprise business icons suite
+export * from './components/icons/index.js';
