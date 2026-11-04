@@ -13,6 +13,7 @@ export interface AIWorkspaceCapability {
     | 'sender'
     | 'streaming'
     | 'reasoning'
+    | 'model-comparison'
     | 'tool-calling'
     | 'approval'
     | 'task-progress'
@@ -30,6 +31,7 @@ export const AI_WORKSPACE_CAPABILITIES: readonly AIWorkspaceCapability[] = [
   { id: 'sender', stage: 'stable', localSurfaces: ['PromptInput', 'PromptInputTextarea', 'PromptInputSubmit'], acceptance: ['发送、附件、停止和失败重试可被键盘和屏幕阅读器操作'] },
   { id: 'streaming', stage: 'stable', localSurfaces: ['ChatProvider', 'ChatDialog', 'Response'], acceptance: ['流式输出可中断，过期响应不得写回新会话'] },
   { id: 'reasoning', stage: 'stable', localSurfaces: ['Reasoning', 'ChainOfThought'], acceptance: ['推理过程可折叠，最终回答与中间过程视觉区分'] },
+  { id: 'model-comparison', stage: 'stable', localSurfaces: ['ModelComparisonCard', 'ModelSelector'], acceptance: ['多个模型响应可并列查看，并可明确选择一个结果继续工作'] },
   { id: 'tool-calling', stage: 'stable', localSurfaces: ['AgentProvider', 'Tool', 'AdminTool'], acceptance: ['工具参数经 TypeBox 校验且服务端重新授权'] },
   { id: 'approval', stage: 'stable', localSurfaces: ['Confirmation', 'needsApproval', 'executeAdminTool'], acceptance: ['破坏性、权限、计费和批量写操作确认后才执行'] },
   { id: 'task-progress', stage: 'experimental', localSurfaces: ['Task', 'Plan', 'Queue', 'Checkpoint'], acceptance: ['长任务展示进度、失败原因和可恢复入口'] },

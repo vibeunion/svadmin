@@ -12,6 +12,12 @@ export type {
 export { default as CopilotPanel } from "./components/CopilotPanel.svelte";
 export { default as AICommandBar } from "./components/AICommandBar.svelte";
 export { default as InsightCard } from "./components/InsightCard.svelte";
+export { default as ModelComparisonCard } from "./components/ModelComparisonCard.svelte";
+export type {
+  ModelComparisonCardProps,
+  ModelComparisonResult,
+  ModelComparisonStatus,
+} from "./components/ModelComparisonCard.svelte";
 export { default as SmartSuggest } from "./components/SmartSuggest.svelte";
 export { default as VoiceInput } from "./components/VoiceInput.svelte";
 export { default as Response } from "./components/Response.svelte";
@@ -376,9 +382,11 @@ export {
 export {
   useReasoning,
   Reasoning,
+  Reasoning as ReasoningCollapse,
   ReasoningTrigger,
   ReasoningContent,
 } from "./components/reasoning/index.js";
+export type { ReasoningProps as ReasoningCollapseProps } from "./components/reasoning/index.js";
 export {
   Sandbox,
   SandboxHeader,

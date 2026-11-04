@@ -1409,6 +1409,53 @@ main {
   gap: 1rem;
 }
 
+/* Narrow screens use the full viewport for detail work and keep touch scrolling
+ * inside the content region instead of forcing a desktop-width side panel. */
+@media (max-width: 26.25rem) {
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"] {
+    width: 100%;
+    max-width: none;
+    gap: .75rem;
+    padding: 1rem;
+  }
+
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"][data-side="right"],
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"][data-side="left"] {
+    inset-inline: 0;
+    border-inline: 0;
+  }
+
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"] .svadmin-detail-drawer__header,
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"] .svadmin-detail-drawer__content,
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"] .svadmin-detail-drawer__footer {
+    padding-inline: .75rem;
+  }
+
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"] .svadmin-detail-drawer__header {
+    padding-block: .75rem;
+  }
+
+  .svadmin-sheet-panel[data-svadmin-component="DetailDrawer"] .svadmin-detail-drawer__content {
+    overscroll-behavior: contain;
+  }
+}
+
+.svadmin-virtual-table__viewport {
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 26.25rem) {
+  .svadmin-virtual-table {
+    border-radius: var(--radius-sm);
+  }
+
+  .svadmin-virtual-table__viewport {
+    min-height: 8rem;
+  }
+}
+
 .svadmin-sheet-close {
   position: absolute;
   top: 1rem;

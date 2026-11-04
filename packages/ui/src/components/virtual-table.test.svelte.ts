@@ -32,6 +32,8 @@ describe('VirtualTable Component', () => {
     const view = render(VirtualTable, { items, columns, itemHeight: 20, height: 100, overscan: 2 });
     const table = view.getByRole('table');
     const viewport = view.getByTestId('virtual-table-viewport');
+    expect(table.classList.contains('svadmin-virtual-table')).toBe(true);
+    expect(viewport.classList.contains('svadmin-virtual-table__viewport')).toBe(true);
     expect(table.getAttribute('aria-rowcount')).toBe('10001');
     expect(table.getAttribute('aria-colcount')).toBe('1');
     expect(view.getAllByRole('columnheader')).toHaveLength(1);
