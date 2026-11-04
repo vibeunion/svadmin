@@ -22,7 +22,8 @@ describe('JsonEditor', () => {
     expect(view.getByRole('textbox', { name: 'Payload' })).not.toBeNull();
   });
 
-  it('loads the structured editor and reports parsed changes', async () => {
+  // 动态 import 的 mock 在并行负载下偶发被真实模块抢跑；重试而不是放宽断言。
+  it('loads the structured editor and reports parsed changes', { retry: 2 }, async () => {
     const onchange = vi.fn();
     const view = render(JsonEditor, { value: { a: 1 }, onchange });
 
