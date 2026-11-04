@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.3](https://github.com/vibeunion/svadmin/compare/lite-v0.25.2...lite-v0.25.3) (2026-11-04)
+
+
+### 🐛 Bug Fixes
+
+* **release:** sync lockfile and preserve peer compatibility ([f9aa3d2](https://github.com/vibeunion/svadmin/commit/f9aa3d255011db05b7a25a794f5205a0c08ec7dc))
+
 ## [0.25.2](https://github.com/vibeunion/svadmin/compare/lite-v0.25.1...lite-v0.25.2) (2026-11-04)
 
 

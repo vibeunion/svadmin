@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.25](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.13.24...sveltekit-v0.13.25) (2026-11-04)
+
+
+### 🐛 Bug Fixes
+
+* **release:** sync lockfile and preserve peer compatibility ([f9aa3d2](https://github.com/vibeunion/svadmin/commit/f9aa3d255011db05b7a25a794f5205a0c08ec7dc))
+
 ## [0.13.24](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.13.23...sveltekit-v0.13.24) (2026-11-04)
 
 

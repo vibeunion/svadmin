@@ -1,9 +1,16 @@
 {
   "name": "@svadmin/charts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Advanced statistical charts for svadmin based on LayerChart",
   "type": "module",
-  "files": ["dist", "README.md", "!dist/**/*.test.*", "!dist/**/*.test-*", "!dist/**/*.spec.*", "!dist/**/*.spec-*"],
+  "files": [
+    "dist",
+    "README.md",
+    "!dist/**/*.test.*",
+    "!dist/**/*.test-*",
+    "!dist/**/*.spec.*",
+    "!dist/**/*.spec-*"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "svelte": "./dist/index.js",

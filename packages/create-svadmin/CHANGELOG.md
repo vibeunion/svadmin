@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.54.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.54.0...create-svadmin-v0.54.1) (2026-11-04)
+
+
+### 🐛 Bug Fixes
+
+* **release:** register charts and dock, repair the verify gate ([f66ca03](https://github.com/vibeunion/svadmin/commit/f66ca038b69db5d1e7018d2ba9d101b7759fe63d))
+* **release:** register charts and dock, repair the verify gate ([f4266b4](https://github.com/vibeunion/svadmin/commit/f4266b41e8f86a850fc1b9aa80bac865169d4255))
+
 ## [0.54.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.53.0...create-svadmin-v0.54.0) (2026-11-04)
 
 
