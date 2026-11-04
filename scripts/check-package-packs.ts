@@ -873,10 +873,14 @@ export function packedRuntimeOverrides(
 async function configurePackedPnpmConsumer(
   consumerDirectory: string,
   manifests: ReadonlyMap<string, PackageManifest>,
+  peerOverrides: Readonly<Record<string, string>> = {},
 ): Promise<void> {
   const consumer = JSON.parse(await readFile(join(consumerDirectory, 'package.json'), 'utf8')) as PackageManifest;
   await writeFile(join(consumerDirectory, 'pnpm-workspace.yaml'), `${JSON.stringify({
-    overrides: packedRuntimeOverrides(consumer.dependencies ?? {}, manifests),
+    overrides: {
+      ...peerOverrides,
+      ...packedRuntimeOverrides(consumer.dependencies ?? {}, manifests),
+    },
   }, null, 2)}\n`);
 }
 
@@ -1033,7 +1037,10 @@ async function verifyUiPnpmPeerTree(
     }, null, 2)}\n`,
   );
 
-  await configurePackedPnpmConsumer(consumerDirectory, manifests);
+  // `@xyflow/system` → d3-zoom declares `d3-transition: "2 - 3"`; pnpm's strict
+  // peer resolver can pick v2, whose peer requires d3-selection 2. Pin the
+  // compatible major so the packed consumer installs deterministically.
+  await configurePackedPnpmConsumer(consumerDirectory, manifests, { 'd3-transition': '^3.0.1' });
   run(
     'npx',
     [
@@ -1182,7 +1189,10 @@ async function verifyAiElementsPnpmConsumer(
     }, null, 2)}\n`,
   );
 
-  await configurePackedPnpmConsumer(consumerDirectory, manifests);
+  // `@xyflow/system` → d3-zoom declares `d3-transition: "2 - 3"`; pnpm's strict
+  // peer resolver can pick v2, whose peer requires d3-selection 2. Pin the
+  // compatible major so the packed consumer installs deterministically.
+  await configurePackedPnpmConsumer(consumerDirectory, manifests, { 'd3-transition': '^3.0.1' });
   run(
     'npx',
     [
