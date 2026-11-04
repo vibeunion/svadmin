@@ -504,7 +504,7 @@
         "vitest": "^4.1.11",
       },
       "peerDependencies": {
-        "@svadmin/core": ">=0.76.0",
+        "@svadmin/core": ">=0.34.2 <0.77.0",
         "@sveltejs/kit": "^3.0.0",
         "qrcode": "^1.5.4",
         "svelte": "^5.57.1",
@@ -747,8 +747,8 @@
         "vitest": "^4.1.11",
       },
       "peerDependencies": {
-        "@svadmin/core": ">=0.76.0",
-        "@svadmin/ui": ">=0.114.0",
+        "@svadmin/core": ">=0.53.0 <0.77.0",
+        "@svadmin/ui": ">=0.73.0 <0.115.0",
         "svelte": "^5.56.10",
       },
     },
@@ -756,7 +756,7 @@
       "name": "@svadmin/sveltekit",
       "version": "0.13.24",
       "peerDependencies": {
-        "@svadmin/core": ">=0.76.0",
+        "@svadmin/core": ">=0.32.2 <0.77.0",
         "@sveltejs/kit": "^3.0.0",
         "svelte": "^5.57.1",
       },
