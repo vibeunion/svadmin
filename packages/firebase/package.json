@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/firebase",
-  "version": "0.12.25",
+  "version": "0.12.27",
   "description": "Firebase DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

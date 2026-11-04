@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/strapi-graphql",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "Strapi GraphQL DataProvider adapter — bridge @refinedev/strapi-graphql to svadmin",
   "type": "module",
   "sideEffects": false,

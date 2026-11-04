@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.12.27](https://github.com/vibeunion/svadmin/compare/medusa-v0.12.26...medusa-v0.12.27) (2026-11-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.6
+  * peerDependencies
+    * @svadmin/core bumped to 0.76.0
+
+## [0.12.26](https://github.com/vibeunion/svadmin/compare/medusa-v0.12.25...medusa-v0.12.26) (2026-11-03)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.75.0
+
 ## [0.12.25](https://github.com/vibeunion/svadmin/compare/medusa-v0.12.24...medusa-v0.12.25) (2026-11-03)
 
 

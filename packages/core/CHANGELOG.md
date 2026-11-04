@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.76.0](https://github.com/vibeunion/svadmin/compare/core-v0.75.0...core-v0.76.0) (2026-11-04)
+
+
+### 🚀 Features
+
+* **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
+
+## [0.75.0](https://github.com/vibeunion/svadmin/compare/core-v0.74.0...core-v0.75.0) (2026-11-03)
+
+
+### 🚀 Features
+
+* **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
+
 ## [0.74.0](https://github.com/vibeunion/svadmin/compare/core-v0.73.0...core-v0.74.0) (2026-11-03)
 
 

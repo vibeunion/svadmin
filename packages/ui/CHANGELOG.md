@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.114.0](https://github.com/vibeunion/svadmin/compare/ui-v0.113.0...ui-v0.114.0) (2026-11-04)
+
+
+### 🚀 Features
+
+* **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.5
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.76.0
+
+## [0.113.0](https://github.com/vibeunion/svadmin/compare/ui-v0.112.0...ui-v0.113.0) (2026-11-03)
+
+
+### 🚀 Features
+
+* **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
+* **ui:** complete upload, role, realtime, icon, and provider capabilities ([e990b57](https://github.com/vibeunion/svadmin/commit/e990b57dd6250a33c01be80a4b8227ee96acaf2a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.4
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.13.11
+  * peerDependencies
+    * @svadmin/core bumped to 0.75.0
+
 ## [0.112.0](https://github.com/vibeunion/svadmin/compare/ui-v0.111.0...ui-v0.112.0) (2026-11-03)
 
 
