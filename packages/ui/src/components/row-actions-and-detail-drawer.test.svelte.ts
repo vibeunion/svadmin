@@ -85,6 +85,7 @@ describe('RowActions and DetailDrawer', () => {
     expect(document.body.contains(dialog)).toBe(true);
     expect(dialog.getAttribute('aria-labelledby')).toBe('record-details-title');
     expect(dialog.getAttribute('aria-describedby')).toBe('record-details-description');
+    expect(dialog.getAttribute('data-svadmin-component')).toBe('DetailDrawer');
     expect(within(dialog).getByTestId('drawer-extra-badge').textContent).toBe('Active');
     expect(within(dialog).getByText('Active record')).toBeTruthy();
     expect(within(dialog).getByText('Record content')).toBeTruthy();

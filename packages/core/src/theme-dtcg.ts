@@ -27,6 +27,18 @@ export interface DtcgTheme {
   issues: DtcgIssue[];
 }
 
+export interface DtcgColorToken {
+  $type: 'color';
+  $value: string;
+}
+
+export interface DtcgThemeDocument {
+  color: {
+    light: Record<string, DtcgColorToken>;
+    dark: Record<string, DtcgColorToken>;
+  };
+}
+
 const MAX_DEPTH = 32;
 const MAX_TOKENS = 2000;
 const CSS_VAR_PATTERN = /^--[a-z0-9-]{1,64}$/i;
@@ -161,6 +173,44 @@ export function parseDtcgTheme(document: unknown): DtcgTheme {
   if (Object.keys(result.dark).length === 0) result.dark = { ...result.light };
   if (Object.keys(result.light).length === 0) result.light = { ...result.dark };
   return result;
+}
+
+function cssVarToDtcgName(variable: string): string {
+  if (!CSS_VAR_PATTERN.test(variable)) {
+    throw new TypeError(`Invalid CSS variable name: ${variable}`);
+  }
+  const segments = variable.slice(2).split('-').filter(Boolean);
+  if (segments.length === 0) throw new TypeError(`Invalid CSS variable name: ${variable}`);
+  return segments.map((segment, index) => (
+    index === 0 ? segment : `${segment[0]?.toUpperCase() ?? ''}${segment.slice(1)}`
+  )).join('');
+}
+
+function exportDtcgMode(tokens: Record<string, string>, mode: 'light' | 'dark'): Record<string, DtcgColorToken> {
+  const result: Record<string, DtcgColorToken> = {};
+  for (const [variable, rawValue] of Object.entries(tokens)) {
+    const value = rawValue.trim();
+    if (!COLOR_VALUE_PATTERN.test(value) || /[;{}]/.test(value)) {
+      throw new TypeError(`${mode}.${variable} is not a portable color token value`);
+    }
+    const name = cssVarToDtcgName(variable);
+    if (result[name] !== undefined) {
+      throw new TypeError(`${mode} contains duplicate DTCG token name: ${name}`);
+    }
+    result[name] = { $type: 'color', $value: value };
+  }
+  if (Object.keys(result).length === 0) throw new TypeError(`${mode} must declare at least one color token`);
+  return result;
+}
+
+/** Serialize CSS color variables into a portable W3C DTCG token document. */
+export function exportDtcgTheme(input: Pick<DtcgTheme, 'light' | 'dark'>): DtcgThemeDocument {
+  return {
+    color: {
+      light: exportDtcgMode(input.light, 'light'),
+      dark: exportDtcgMode(input.dark, 'dark'),
+    },
+  };
 }
 
 /**

@@ -1,7 +1,7 @@
 /**
  * `svadmin add block` — installable page materials with lifecycle management.
  *
- * Capability parity with the Arco CLI material workflow, extended to the parts
+ * Material registry workflow with lifecycle management, extended to the parts
  * that matter once a project has more than one material:
  * - a versioned manifest with content hashes and peer ranges;
  * - dry-run/JSON plans that CI can consume;
@@ -82,6 +82,115 @@ ${body}
 }
 
 export const BLOCKS: readonly BlockMaterial[] = [
+  {
+    name: 'dashboard',
+    version: '1.0.0',
+    peerRange: UI_PEER_RANGE,
+    requires: ['@svadmin/ui'],
+    title: 'Dashboard',
+    description: 'Metric-led operations dashboard with primary and secondary content slots.',
+    registrationHint:
+      'Mount the page from your app shell or add a route:\n  import Dashboard from \'./features/dashboard/Dashboard.svelte\';',
+    files: (target) => ({
+      [`src/features/${target}/Dashboard.svelte`]: pageSource(
+        `<DashboardPage title="Operations dashboard" description="Track the signals that need attention first.">
+  {#snippet metrics()}
+    <MetricBlock label="Active records" value="1,284" trend="+8.4%" />
+    <MetricBlock label="Pending review" value="32" trend="-4.1%" trendTone="positive" />
+    <MetricBlock label="Service health" value="99.98%" />
+  {/snippet}
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="rounded-lg border border-border bg-card p-4">Primary dashboard content</div>
+    <div class="rounded-lg border border-border bg-card p-4">Secondary dashboard content</div>
+  </div>
+</DashboardPage>`,
+        `  import { DashboardPage, MetricBlock } from '@svadmin/ui';`,
+      ),
+    }),
+  },
+  {
+    name: 'monitor',
+    version: '1.0.0',
+    peerRange: UI_PEER_RANGE,
+    requires: ['@svadmin/ui'],
+    title: 'Monitor',
+    description: 'Live monitor layout with metrics, a primary chart slot, and operational context.',
+    registrationHint:
+      'Mount the page from your app shell or add a route:\n  import Monitor from \'./features/monitor/Monitor.svelte\';',
+    files: (target) => ({
+      [`src/features/${target}/Monitor.svelte`]: pageSource(
+        `<MonitorTemplate title="Operations monitor" description="Follow live service signals and recent activity.">
+  {#snippet metrics()}
+    <MetricBlock label="Requests / min" value="18,420" trend="+12.3%" />
+    <MetricBlock label="Error rate" value="0.08%" trend="-0.4%" trendTone="positive" />
+  {/snippet}
+  {#snippet chart()}
+    <div class="min-h-64 rounded-lg border border-border bg-card p-4">Connect a live chart here.</div>
+  {/snippet}
+  {#snippet activity()}
+    <div class="rounded-lg border border-border bg-card p-4">Recent activity</div>
+  {/snippet}
+</MonitorTemplate>`,
+        `  import { MetricBlock, MonitorTemplate } from '@svadmin/ui';`,
+      ),
+    }),
+  },
+  {
+    name: 'settings',
+    version: '1.0.0',
+    peerRange: UI_PEER_RANGE,
+    requires: ['@svadmin/ui'],
+    title: 'Settings',
+    description: 'Ready-to-mount settings surface with the shared account navigation and state handling.',
+    registrationHint:
+      'Mount the page from your app shell or add a route:\n  import Settings from \'./features/settings/Settings.svelte\';',
+    files: (target) => ({
+      [`src/features/${target}/Settings.svelte`]: pageSource(
+        `<SettingsPage />`,
+        `  import { SettingsPage } from '@svadmin/ui';`,
+      ),
+    }),
+  },
+  {
+    name: 'crud',
+    version: '1.0.0',
+    peerRange: UI_PEER_RANGE,
+    requires: ['@svadmin/ui'],
+    title: 'CRUD workspace',
+    description: 'Schema-first resource list and form composition for create, read, update, and delete flows.',
+    registrationHint:
+      'Mount the page from your app shell or add a route:\n  import Crud from \'./features/crud/Crud.svelte\';',
+    files: (target) => ({
+      [`src/features/${target}/Crud.svelte`]: pageSource(
+        `<div class="flex flex-col gap-4">
+  <PageHeader title="Resource workspace" description="Use the generated resource contract as the single source of truth." />
+  <AutoForm resourceName="records" mode="filter" submitLabel="Apply filters" />
+  <AutoTable resourceName="records" syncWithLocation selectable showBulkActions />
+</div>`,
+        `  import { AutoForm, AutoTable, PageHeader } from '@svadmin/ui';`,
+      ),
+    }),
+  },
+  {
+    name: 'workflow',
+    version: '1.0.0',
+    peerRange: UI_PEER_RANGE,
+    requires: ['@svadmin/ui'],
+    title: 'Workflow',
+    description: 'Workflow designer surface for approval steps, conditions, and notifications.',
+    registrationHint:
+      'Mount the page from your app shell or add a route:\n  import Workflow from \'./features/workflow/Workflow.svelte\';',
+    files: (target) => ({
+      [`src/features/${target}/Workflow.svelte`]: pageSource(
+        `<div class="flex flex-col gap-4">
+  <PageHeader title="Workflow" description="Compose and inspect the steps in a business process." />
+  <WorkflowDesigner />
+</div>`,
+        `  import { PageHeader, WorkflowDesigner } from '@svadmin/ui';`,
+      ),
+    }),
+  },
   {
     name: 'search-table',
     version: '1.0.0',

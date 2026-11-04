@@ -20,11 +20,32 @@ async function project(): Promise<string> {
 
 test('block registry exposes version and peer range', () => {
   const blocks = listBlocks();
-  expect(blocks.map((block) => block.name)).toContain('search-table');
+  expect(blocks.map((block) => block.name)).toEqual(expect.arrayContaining([
+    'dashboard',
+    'monitor',
+    'settings',
+    'crud',
+    'workflow',
+    'search-table',
+  ]));
   for (const block of blocks) {
     expect(block.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(block.peerRange.length).toBeGreaterThan(0);
     expect(block.requires).toContain('@svadmin/ui');
+  }
+});
+
+test('core page materials generate a public component import and a feature page', async () => {
+  const directory = await project();
+  try {
+    for (const name of ['dashboard', 'monitor', 'settings', 'crud', 'workflow'] as const) {
+      const plan = planAddBlock(directory, name);
+      expect(plan.entries).toHaveLength(1);
+      expect(plan.entries[0]?.content).toContain("from '@svadmin/ui'");
+      expect(plan.entries[0]?.relativePath).toMatch(new RegExp(`src/features/${name}/`));
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
   }
 });
 

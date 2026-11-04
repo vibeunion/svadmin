@@ -3,6 +3,7 @@ import { deriveColorPreset } from './color-scale';
 import {
   auditThemeContrast,
   dtcgPathToCssVar,
+  exportDtcgTheme,
   failingContrastChecks,
   formatContrastReport,
   parseDtcgTheme,
@@ -69,6 +70,21 @@ describe('dtcg theme parsing', () => {
     expect(preset.light['--primary']).toBe('#1D4ED8');
     expect(preset.light['--chart-1']).toBeTruthy();
     expect(preset.dark['--chart-5']).toBeTruthy();
+  });
+
+  it('exports CSS variables as standard DTCG color tokens', () => {
+    const exported = exportDtcgTheme({
+      light: { '--primary': '#1D4ED8', '--primary-foreground': '#FFFFFF' },
+      dark: { '--primary': '#93C5FD', '--primary-foreground': '#0B1120' },
+    });
+    expect(exported.color.light['primary']).toEqual({ $type: 'color', $value: '#1D4ED8' });
+    expect(exported.color.light['primaryForeground']).toEqual({ $type: 'color', $value: '#FFFFFF' });
+    expect(parseDtcgTheme(exported).dark['--primary']).toBe('#93C5FD');
+  });
+
+  it('rejects empty or unsafe token maps before exporting', () => {
+    expect(() => exportDtcgTheme({ light: {}, dark: { '--primary': '#123456' } })).toThrow(/light/);
+    expect(() => exportDtcgTheme({ light: { '--primary': 'red; color: blue' }, dark: { '--primary': '#123456' } })).toThrow(/portable color/);
   });
 });
 

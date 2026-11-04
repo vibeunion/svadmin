@@ -285,9 +285,9 @@ export type {
   SchemaFormValidationError,
 } from './schema-form';
 export {
-  auditThemeContrast, failingContrastChecks, parseDtcgTheme, presetFromDtcg,
+  auditThemeContrast, exportDtcgTheme, failingContrastChecks, parseDtcgTheme, presetFromDtcg,
 } from './theme-dtcg';
-export type { ContrastCheck, DtcgIssue, DtcgTheme } from './theme-dtcg';
+export type { ContrastCheck, DtcgColorToken, DtcgIssue, DtcgTheme, DtcgThemeDocument } from './theme-dtcg';
 export { useExport } from './export-hooks.svelte';
 export { snapshotExportTaskResult, downloadExportArtifact, safeArtifactUrl } from './export-format';
 export type { ExportTaskResult } from './export-format';

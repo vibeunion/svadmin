@@ -8,7 +8,7 @@ describe('AI workspace contract', () => {
   it('keeps the AI workspace core loop explicit', () => {
     expect(AI_WORKSPACE_STABLE_CAPABILITIES.map(({ id }) => id)).toEqual([
       'welcome', 'suggestion', 'conversation', 'sender', 'streaming',
-      'reasoning', 'tool-calling', 'approval', 'command-bar', 'persistence',
+      'reasoning', 'model-comparison', 'tool-calling', 'approval', 'command-bar', 'persistence',
     ]);
   });
 

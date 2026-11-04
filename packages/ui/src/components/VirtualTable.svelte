@@ -125,7 +125,7 @@
 
 <div role="table" aria-label={ariaLabel ?? i18n.t('virtualTable.label')}
   aria-rowcount={(available ? items.length : 0) + 1} aria-colcount={columns.length} aria-busy={loading}
-  class={cn('w-full rounded-xl border border-border bg-card shadow-xs overflow-hidden flex flex-col text-xs', className)}>
+  class={cn('svadmin-virtual-table w-full rounded-xl border border-border bg-card shadow-xs overflow-hidden flex flex-col text-xs', className)}>
   <!-- Sticky Header -->
   <div role="row" aria-rowindex="1" class="border-b border-border/80 bg-muted/40 font-semibold text-muted-foreground flex items-center h-10 px-4 select-none shrink-0">
     {#each columns as col (col.key)}
@@ -149,7 +149,7 @@
     tabindex="0"
     aria-label={ariaLabel ?? i18n.t('virtualTable.label')}
     data-testid="virtual-table-viewport"
-    class="overflow-y-auto relative w-full"
+    class="svadmin-virtual-table__viewport overflow-y-auto relative w-full"
     style="height: {normalizedHeight}px; min-height: 0; flex-shrink: 0; overflow: auto;"
     onscroll={handleScroll}
     onkeydown={handleKeydown}
