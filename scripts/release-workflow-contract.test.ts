@@ -423,8 +423,39 @@ describe('npm trusted-publishing workflow contract', () => {
       ciWorkflow.match(/bun install\n\s+git diff --exit-code -- bun\.lock/g) ?? [];
 
     expect(ciWorkflow).not.toContain('bun install --frozen-lockfile');
-    expect(guardedInstalls).toHaveLength(3);
-    expect(allInstalls).toHaveLength(guardedInstalls.length);
+    expect(guardedInstalls).toHaveLength(2);
+    expect(allInstalls).toHaveLength(guardedInstalls.length + 1);
+  });
+
+  test('publishes from a normalized lockfile instead of refusing stale release metadata', () => {
+    const ciWorkflow = readWorkflow('ci.yml');
+    const publishJob = ciWorkflow.slice(ciWorkflow.indexOf('\n  publish:\n'));
+
+    expect(publishJob).toContain('bun scripts/verify-workspace-lockfile.ts');
+    expect(publishJob).toContain("echo '::error::Publishing worktree changed outside bun.lock'");
+    expect(publishJob).not.toContain('git diff --exit-code -- bun.lock');
+  });
+
+  test('repairs previously unpublished versions during the next release', () => {
+    const ciWorkflow = readWorkflow('ci.yml');
+
+    expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts --include-missing');
+  });
+
+  test('explains how to bootstrap a package that is not on npm yet', () => {
+    const ciWorkflow = readWorkflow('ci.yml');
+    const publishStep = ciWorkflow.slice(ciWorkflow.indexOf('      - name: Publish released packages'));
+
+    expect(publishStep).toContain('E404');
+    expect(publishStep).toContain('either the package does not exist on npm yet');
+    expect(publishStep).toContain('is not its trusted publisher');
+    expect(publishStep).toContain('npm publish --access public');
+  });
+
+  test('verifies the synchronized release lockfile before the release pull request merges', () => {
+    const releaseWorkflow = readWorkflow('release.yml');
+
+    expect(releaseWorkflow).toContain('bun scripts/verify-workspace-lockfile.ts');
   });
 });
 

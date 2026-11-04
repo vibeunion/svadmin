@@ -12,8 +12,21 @@ interface FixturePackage {
   devDependencies?: Record<string, string>;
 }
 
-function createRepositoryFixture(packages: FixturePackage[]): string {
+function createRepositoryFixture(
+  packages: FixturePackage[],
+  releaseConfigPackages?: string[],
+): string {
   const root = mkdtempSync(join(tmpdir(), 'svadmin-release-publication-'));
+  if (releaseConfigPackages) {
+    writeFileSync(
+      join(root, 'release-please-config.json'),
+      JSON.stringify({
+        packages: Object.fromEntries(
+          releaseConfigPackages.map((packagePath) => [packagePath, { 'release-type': 'node' }]),
+        ),
+      }),
+    );
+  }
   for (const packageDefinition of packages) {
     const packageDirectory = join(root, packageDefinition.path);
     mkdirSync(packageDirectory, { recursive: true });
@@ -144,8 +157,7 @@ describe('release publication planning', () => {
     }
   });
 
-  test('rejects circular workspace dependencies in the release batch', () => {
-    const cyclicAdapter: FixturePackage = {
+  test('rejects circular workspace dependencies in the release batch', () => {    const cyclicAdapter: FixturePackage = {
       ...refineAdapter,
       dependencies: { '@svadmin/supabase': 'workspace:*' },
     };
@@ -161,6 +173,71 @@ describe('release publication planning', () => {
           isPackageVersionPublished: () => true,
         }),
       ).toThrow('Circular workspace dependencies in release manifest');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('repairs versions that were released but never published', () => {
+    const missingPackage: FixturePackage = {
+      path: 'packages/lite',
+      name: '@svadmin/lite',
+      version: '0.25.3',
+      dependencies: { '@svadmin/supabase': 'workspace:*' },
+    };
+    const root = createRepositoryFixture(
+      [refineAdapter, { ...supabase, version: '0.11.9' }, missingPackage],
+      [refineAdapter.path, supabase.path, missingPackage.path],
+    );
+    const published = new Set([
+      '@svadmin/refine-adapter@0.10.0',
+      '@svadmin/supabase@0.11.9',
+    ]);
+    try {
+      expect(
+        planReleasePublication({
+          repositoryRoot: root,
+          releaseManifest: JSON.stringify([{ path: supabase.path, tag: 'supabase-v0.11.9' }]),
+          includeMissingVersions: true,
+          isPackageVersionPublished: (name, version) => published.has(`${name}@${version}`),
+        }),
+      ).toEqual([supabase.path, missingPackage.path]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('repairs missing versions even without a fresh release manifest', () => {
+    const missingPackage: FixturePackage = {
+      path: 'packages/dock',
+      name: '@svadmin/dock',
+      version: '0.2.0',
+    };
+    const root = createRepositoryFixture([missingPackage], [missingPackage.path]);
+    try {
+      expect(
+        planReleasePublication({
+          repositoryRoot: root,
+          releaseManifest: '[]',
+          includeMissingVersions: true,
+          isPackageVersionPublished: () => false,
+        }),
+      ).toEqual([missingPackage.path]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('still requires a release manifest when version repair is disabled', () => {
+    const root = createRepositoryFixture([supabase], [supabase.path]);
+    try {
+      expect(() =>
+        planReleasePublication({
+          repositoryRoot: root,
+          releaseManifest: '[]',
+          isPackageVersionPublished: () => false,
+        }),
+      ).toThrow('release-please returned no release manifest');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

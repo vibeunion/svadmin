@@ -26,6 +26,11 @@ interface PlanReleasePublicationOptions {
   repositoryRoot: string;
   releaseManifest: string;
   isPackageVersionPublished?: (name: string, version: string) => boolean;
+  /**
+   * 把「npm 上还没有的版本」并入发布计划。release-please 打完 tag 之后若发布任务失败，
+   * 下一次发布可以自动补齐历史缺口，而不是永久缺失一个版本。
+   */
+  includeMissingVersions?: boolean;
 }
 
 interface DependencyClosureContext {
@@ -86,9 +91,13 @@ function releasePathFromManifestEntry(manifestEntry: unknown): string {
   return packagePath;
 }
 
-function parseReleasePaths(releaseManifest: string): string[] {
+function parseReleasePaths(releaseManifest: string, allowEmpty = false): string[] {
   const parsedManifest: unknown = JSON.parse(releaseManifest || '[]');
-  if (!Array.isArray(parsedManifest) || parsedManifest.length === 0) {
+  if (!Array.isArray(parsedManifest)) {
+    throw new Error('release-please returned an invalid release manifest');
+  }
+  if (parsedManifest.length === 0) {
+    if (allowEmpty) return [];
     throw new Error('release-please returned no release manifest');
   }
 
@@ -248,12 +257,55 @@ function orderReleasePaths(
   return orderedPaths;
 }
 
+function configuredReleasePaths(repositoryRoot: string): string[] {
+  const configPath = resolve(repositoryRoot, 'release-please-config.json');
+  if (!existsSync(configPath)) return [];
+  const config: unknown = JSON.parse(readFileSync(configPath, 'utf8'));
+  const packages =
+    config && typeof config === 'object' && !Array.isArray(config)
+      ? (config as { packages?: unknown }).packages
+      : undefined;
+  if (!packages || typeof packages !== 'object' || Array.isArray(packages)) return [];
+  return Object.keys(packages).filter((packagePath) => isReleasePackagePath(packagePath));
+}
+
+/** 当前仓库版本尚未出现在 npm 上的发布包路径。 */
+export function discoverMissingReleasePaths({
+  repositoryRoot,
+  releasePaths = configuredReleasePaths(repositoryRoot),
+  isPackageVersionPublished = defaultIsPackageVersionPublished,
+}: {
+  repositoryRoot: string;
+  releasePaths?: string[];
+  isPackageVersionPublished?: (name: string, version: string) => boolean;
+}): string[] {
+  const { packagesByPath } = indexWorkspacePackages(discoverWorkspacePackages(repositoryRoot));
+  return releasePaths.filter((releasePath) => {
+    const workspacePackage = packagesByPath.get(releasePath);
+    if (!workspacePackage) return false;
+    return !isPackageVersionPublished(workspacePackage.manifest.name, workspacePackage.manifest.version);
+  });
+}
+
 export function planReleasePublication({
   repositoryRoot,
   releaseManifest,
   isPackageVersionPublished = defaultIsPackageVersionPublished,
+  includeMissingVersions = false,
 }: PlanReleasePublicationOptions): string[] {
-  const releasePaths = parseReleasePaths(releaseManifest);
+  const plannedReleasePaths = parseReleasePaths(releaseManifest, includeMissingVersions);
+  const releasePaths = includeMissingVersions
+    ? [...new Set([
+        ...plannedReleasePaths,
+        ...discoverMissingReleasePaths({
+          repositoryRoot,
+          isPackageVersionPublished,
+        }),
+      ])]
+    : plannedReleasePaths;
+  if (releasePaths.length === 0) {
+    throw new Error('release publication plan is empty');
+  }
   const { packagesByPath, packagesByName } = indexWorkspacePackages(
     discoverWorkspacePackages(repositoryRoot),
   );
@@ -269,9 +321,12 @@ export function planReleasePublication({
 
 if (import.meta.main) {
   try {
+    const includeMissingVersions =
+      process.argv.includes('--include-missing') || process.env.RELEASE_INCLUDE_MISSING === 'true';
     const releasePaths = planReleasePublication({
       repositoryRoot: resolve(import.meta.dir, '..'),
       releaseManifest: process.env.RELEASE_MANIFEST ?? '[]',
+      includeMissingVersions,
     });
     for (const releasePath of releasePaths) {
       console.info(releasePath);
