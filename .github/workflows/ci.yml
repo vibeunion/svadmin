@@ -251,7 +251,15 @@ jobs:
       - name: Install dependencies
         run: |
           bun install
-          git diff --exit-code -- bun.lock
+          # 历史发布提交可能带着过期的 workspace 版本。发布只需要最终锁文件与
+          # package.json 一致，因此这里做一致性校验，而不是拒绝依赖解析的归一化。
+          bun scripts/verify-workspace-lockfile.ts
+          changed_outside_lockfile=$(git status --porcelain | grep -v ' bun\.lock$' || true)
+          if [ -n "$changed_outside_lockfile" ]; then
+            echo "$changed_outside_lockfile"
+            echo '::error::Publishing worktree changed outside bun.lock'
+            exit 1
+          fi
 
       - name: Build publishable packages
         run: bun run build:packages
@@ -264,7 +272,9 @@ jobs:
           set -euo pipefail
           {
             echo 'paths<<SVADMIN_RELEASE_PATHS'
-            bun scripts/plan-release-publication.ts
+            # --include-missing 会把「已经打了 tag 但 npm 上没有」的版本并入计划，
+            # 这样一次失败的发布不会留下永久缺口。
+            bun scripts/plan-release-publication.ts --include-missing
             echo 'SVADMIN_RELEASE_PATHS'
           } >> "$GITHUB_OUTPUT"
 
@@ -342,11 +352,17 @@ jobs:
 
               if [ "$NPM_STATUS" = "missing" ]; then
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
-                if ! (cd "$pkg_dir" && npm publish --provenance --access public); then
+                PUBLISH_LOG="$RUNNER_TEMP/npm-publish-$(echo "$pkg_dir" | tr '/' '-').log"
+                if ! (cd "$pkg_dir" && npm publish --provenance --access public) > "$PUBLISH_LOG" 2>&1; then
+                  cat "$PUBLISH_LOG"
+                  if grep -q 'E404' "$PUBLISH_LOG"; then
+                    echo "::error::npm rejected $NAME with E404: either the package does not exist on npm yet, or this repository is not its trusted publisher. OIDC trusted publishing can only release packages that already exist and trust this workflow. Publish it once as a scope owner (npm publish --access public) and add vibeunion/svadmin as a trusted publisher, then re-run the release."
+                  fi
                   echo "❌ Publish FAILED for $NAME"
                   failed=1
                   continue
                 fi
+                cat "$PUBLISH_LOG"
               elif [ "$NPM_STATUS" = "published" ]; then
                 echo "⏭️ $NAME@$LOCAL_VER already on npm, skipping"
               else

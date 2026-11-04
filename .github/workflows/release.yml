@@ -87,6 +87,9 @@ jobs:
           git checkout origin/main -- bun.lock
           bun scripts/sync-release-pr.ts --base-ref origin/main
           bun install --ignore-scripts
+          # 同步后 workspace 版本必须与 package.json 一致，否则发布任务会在
+          # `bun install` 时重写锁文件，发布 tag 与锁文件就会不一致。
+          bun scripts/verify-workspace-lockfile.ts
 
       - name: Commit synchronized release artifacts
         id: release-sync
