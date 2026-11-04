@@ -250,7 +250,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
       [`src/features/${target}/SettingsSection.svelte`]: pageSource(
         `<SettingsPage title="Workspace settings" description="Profile, security, and notification preferences.">
   {#snippet basic()}
-    <NotificationSettings />
+    <NotificationsSettings />
   {/snippet}
   {#snippet security()}
     <SecuritySettings />
@@ -259,12 +259,7 @@ export const BLOCKS: readonly BlockMaterial[] = [
     <NotificationsSettings />
   {/snippet}
 </SettingsPage>`,
-        `  import {
-    NotificationSettings,
-    NotificationsSettings,
-    SecuritySettings,
-    SettingsPage,
-  } from '@svadmin/ui';`,
+        `  import { NotificationsSettings, SecuritySettings, SettingsPage } from '@svadmin/ui';`,
       ),
     }),
   },

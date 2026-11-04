@@ -93,6 +93,7 @@ export type { PagePatternKind, PagePatternState } from './components/PagePattern
 export { default as AppShellPage } from './components/AppShellPage.svelte';
 export { default as ResourceOperationsPage } from './components/ResourceOperationsPage.svelte';
 export { default as RecordDetailDrawer } from './components/RecordDetailDrawer.svelte';
+export { default as AuditLogDrawer } from './components/AuditLogDrawer.svelte';
 export { default as ResourceAccessGuard } from './components/ResourceAccessGuard.svelte';
 export { default as RouteAccessGuard } from './components/RouteAccessGuard.svelte';
 export { default as LoginPage } from './components/LoginPage.svelte';

@@ -49,6 +49,20 @@ test('core page materials generate a public component import and a feature page'
   }
 });
 
+test('generated long-tail blocks only import public UI components', async () => {
+  const directory = await project();
+  try {
+    for (const name of ['monitor', 'record-detail', 'settings-section'] as const) {
+      const plan = planAddBlock(directory, name);
+      const content = plan.entries[0]?.content ?? '';
+      expect(content).not.toContain('NotificationSettings');
+      expect(content).toContain("from '@svadmin/ui'");
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('install records a hash ledger and is idempotent', async () => {
   const directory = await project();
   try {
