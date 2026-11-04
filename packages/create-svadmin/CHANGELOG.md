@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.53.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.52.0...create-svadmin-v0.53.0) (2026-11-03)
+
+
+### 🚀 Features
+
+* **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.75.0
+
 ## [0.52.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.51.0...create-svadmin-v0.52.0) (2026-11-03)
 
 
