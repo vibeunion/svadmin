@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.54.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.53.0...create-svadmin-v0.54.0) (2026-11-04)
+
+
+### 🚀 Features
+
+* **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.76.0
+
 ## [0.53.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.52.0...create-svadmin-v0.53.0) (2026-11-03)
 
 
