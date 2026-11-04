@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.15](https://github.com/vibeunion/svadmin/compare/surface-v0.20.14...surface-v0.20.15) (2026-11-04)
+
+
+### 🐛 Bug Fixes
+
+* **release:** sync lockfile and preserve peer compatibility ([f9aa3d2](https://github.com/vibeunion/svadmin/commit/f9aa3d255011db05b7a25a794f5205a0c08ec7dc))
+
 ## [0.20.14](https://github.com/vibeunion/svadmin/compare/surface-v0.20.13...surface-v0.20.14) (2026-11-04)
 
 
