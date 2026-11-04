@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.114.0](https://github.com/vibeunion/svadmin/compare/ui-v0.113.0...ui-v0.114.0) (2026-11-04)
+
+
+### 🚀 Features
+
+* **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.5
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.76.0
+
 ## [0.113.0](https://github.com/vibeunion/svadmin/compare/ui-v0.112.0...ui-v0.113.0) (2026-11-03)
 
 

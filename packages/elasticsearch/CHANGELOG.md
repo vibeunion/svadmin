@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/vibeunion/svadmin/compare/elasticsearch-v0.2.0...elasticsearch-v0.2.1) (2026-11-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.76.0
+
 ## [0.2.0](https://github.com/vibeunion/svadmin/compare/elasticsearch-v0.1.0...elasticsearch-v0.2.0) (2026-11-03)
 
 
