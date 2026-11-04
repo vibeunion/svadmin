@@ -100,17 +100,28 @@ export async function verifyPrimitiveFallbacks(browser, stylesheets, output) {
             assert.ok(sample.contrast >= report.minimumTextContrast, `${name}/${sample.sample}: contrast ${sample.contrast}`);
           }
           await page.mouse.move(0, 0);
+          // 新页面尚未被指针激活时，第一次 Tab 可能停在文档外，只留下 UA 默认描边。
+          // 先点不可聚焦的标题，再 Tab 到 destructive 按钮，确认回退描边使用 --ring。
+          await page.locator('h1').click();
           await page.keyboard.press('Tab');
+          // 焦点描边在下一帧才从 UA 默认色切到 --ring；读早了会把灰色默认描边当成结果。
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
           diagnostics.focused = await button.evaluate(element => document.activeElement === element);
-          assert.equal(diagnostics.focused, true);
+          assert.equal(diagnostics.focused, true, `${name}: Tab did not focus the destructive button`);
           const outline = await button.evaluate(element => {
             const style = getComputedStyle(element);
+            const probe = document.createElement('span');
+            probe.style.color = 'var(--ring)';
+            element.append(probe);
+            const ring = getComputedStyle(probe).color;
+            probe.remove();
             return { style: style.outlineStyle, width: parseFloat(style.outlineWidth),
-              color: style.outlineColor, shadow: style.boxShadow, focusVisible: element.matches(':focus-visible') };
+              color: style.outlineColor, ring, shadow: style.boxShadow, focusVisible: element.matches(':focus-visible') };
           });
           diagnostics.outline = outline;
           assert.notEqual(outline.style, 'none', `${name}: keyboard focus outline is absent without color-mix`);
           assert.ok(outline.width >= 2, `${name}: keyboard focus outline must be at least 2px`);
+          assert.equal(outline.color, outline.ring, `${name}: keyboard focus outline must use --ring`);
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
           assert.deepEqual(pageErrors, []);
           writeFileSync(resolve(output, `${name}.png`), await stableScreenshot(() => page.screenshot({ animations: 'disabled', caret: 'hide' })));
