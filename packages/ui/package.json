@@ -215,7 +215,7 @@
     "shadcn": "shadcn-svelte --help",
     "shadcn:add": "shadcn-svelte add --cwd shadcn --no-deps-install",
     "test": "vitest run --config ./vitest.config.ts",
-    "test:css": "node --experimental-strip-types --test scripts/static-css.test.mjs scripts/conditional-css.test.mjs scripts/native-css-entries.test.mjs scripts/tailwind-recipes.test.mjs ../../scripts/no-tailwind-contract.test.mjs",
+    "test:css": "node --experimental-strip-types --test --test-concurrency=1 scripts/static-css.test.mjs scripts/conditional-css.test.mjs scripts/native-css-entries.test.mjs scripts/tailwind-recipes.test.mjs ../../scripts/no-tailwind-contract.test.mjs",
     "build:styles": "bun run build:tailwind && node ../../scripts/build-native-classnames.mjs ui",
     "build:tailwind": "tailwindcss -i styles/tailwind.css -o src/styles/tailwind.generated.css"
   }
