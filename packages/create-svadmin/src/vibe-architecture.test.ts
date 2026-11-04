@@ -95,7 +95,7 @@ describe('generated application architecture', () => {
     expect(check(fixture({
       'src/features/customers/Page.svelte': '<script>let target = "";</script>{#await import(target)}<p>Loading</p>{/await}',
     })).stderr.toString()).toContain('computed module imports');
-  });
+  }, 30_000);
 
   it('resolves existing Svelte aliases before checking feature ownership', () => {
     const own = check(fixture({

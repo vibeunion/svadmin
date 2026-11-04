@@ -369,6 +369,16 @@
       "release-type": "node",
       "component": "storage",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/charts": {
+      "release-type": "node",
+      "component": "charts",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/dock": {
+      "release-type": "node",
+      "component": "dock",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

@@ -36,5 +36,7 @@
   "packages/clerk": "0.2.1",
   "packages/elasticsearch": "0.2.1",
   "packages/pusher": "0.2.1",
-  "packages/storage": "0.2.1"
+  "packages/storage": "0.2.1",
+  "packages/charts": "0.1.0",
+  "packages/dock": "0.1.0"
 }

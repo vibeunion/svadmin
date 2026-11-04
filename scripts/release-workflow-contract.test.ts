@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { verifyReleaseManifest } from './verify-release-manifest';
@@ -516,5 +516,34 @@ describe('release manifest verification', () => {
       type: 'node-workspace',
       updatePeerDependencies: true,
     });
+  });
+
+  test('registers every public workspace package for release', () => {
+    const config = JSON.parse(
+      readFileSync(resolve(repositoryRoot, 'release-please-config.json'), 'utf8'),
+    ) as { packages: Record<string, unknown> };
+    const manifest = JSON.parse(
+      readFileSync(resolve(repositoryRoot, '.release-please-manifest.json'), 'utf8'),
+    ) as Record<string, string>;
+    const packagesDirectory = resolve(repositoryRoot, 'packages');
+    const publicPackages = readdirSync(packagesDirectory, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `packages/${entry.name}`)
+      .filter((path) => {
+        const manifestPath = resolve(repositoryRoot, path, 'package.json');
+        if (!existsSync(manifestPath)) return false;
+        const pkg = JSON.parse(readFileSync(manifestPath, 'utf8')) as { private?: boolean };
+        return pkg.private !== true;
+      });
+
+    const missingConfig = publicPackages.filter((path) => config.packages[path] === undefined);
+    const missingManifest = publicPackages.filter((path) => manifest[path] === undefined);
+    expect({ missingConfig, missingManifest }).toEqual({ missingConfig: [], missingManifest: [] });
+
+    // release-please 以 manifest 版本作为下一个 minor 的基线；偏离 package.json 会算错版本。
+    for (const path of publicPackages) {
+      const pkg = JSON.parse(readFileSync(resolve(repositoryRoot, path, 'package.json'), 'utf8')) as { version?: string };
+      expect(manifest[path], path).toBe(pkg.version);
+    }
   });
 });
