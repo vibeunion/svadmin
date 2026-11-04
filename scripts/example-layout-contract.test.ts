@@ -64,6 +64,7 @@ test('the Svelte AST gate detects directives rather than strings or comments', (
   expect(classDirectives('<div class:w-[70px]={true} class:md:ml-[70px]={true}></div>').filter(isLegacy)).toHaveLength(2);
   expect(classDirectives('<!-- class:w-[70px]={true} --><div class:svadmin-sidebar--collapsed={true}></div>').filter(isLegacy)).toEqual([]);
 });
+// 递归扫描整个工作区，冷启动（首次读盘 + AST）在慢机器上会超过默认 5s。
 test('every production Svelte class directive uses owned native classes', () => {
   const problems: string[] = [];
   for (const directory of ['example/src', ...['ui', 'ai-elements', 'surface', 'flow', 'editor', 'lite'].map(name => `packages/${name}/src`)]) {
@@ -75,4 +76,4 @@ test('every production Svelte class directive uses owned native classes', () => 
     }
   }
   expect(problems).toEqual([]);
-});
+}, 30_000);
