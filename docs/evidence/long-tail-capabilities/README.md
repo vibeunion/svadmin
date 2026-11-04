@@ -4,6 +4,8 @@ This evidence was generated from the current branch with
 `scripts/fixtures/enterprise-ui/playwright.detail-drawer-status.spec.ts`.
 The fixture mounts the real `DetailDrawer` component and checks the status,
 extra content, and footer before capturing the two desktop viewports.
+The capture is kept with this change so the PR links to evidence produced from
+the submitted source tree rather than a historical baseline.
 
 ## State matrix
 
