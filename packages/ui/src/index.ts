@@ -665,7 +665,7 @@ export type { ProDescriptionsProps, ProDescriptionItem } from './components/ProD
 export { default as FormDependency } from './components/FormDependency.svelte';
 export type { FormDependencyProps } from './components/FormDependency.svelte';
 export { default as WorkflowDesigner } from './components/WorkflowDesigner.svelte';
-export type { WorkflowDesignerProps, WorkflowNode } from './components/WorkflowDesigner.svelte';
+export type { WorkflowDesignerProps, WorkflowNode, WorkflowNodeRenderer } from './components/WorkflowDesigner.svelte';
 
 // Enterprise role simulation and operational telemetry components
 export { default as RoleSwitcher } from './components/RoleSwitcher.svelte';

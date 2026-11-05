@@ -123,7 +123,40 @@
       {@const colors = getNodeTypeColor(node.type)}
       {@const customNode = nodeTypes?.[node.type]}
       {#if customNode}
-        {@render customNode(node)}
+        <div class="group/node relative flex w-72 flex-col rounded-[4px] border border-border bg-card shadow-xs transition-all hover:shadow-md">
+          <div
+            role="button"
+            tabindex="0"
+            class="w-full text-left focus-visible:outline-none"
+            aria-label={`编辑 ${node.title}`}
+            onclick={() => onnodeclick?.(node)}
+            onkeydown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onnodeclick?.(node);
+              }
+            }}
+          >
+            {@render customNode(node)}
+          </div>
+
+          {#if !readonly && node.type !== 'start'}
+            <button
+              type="button"
+              aria-label={`删除 ${node.title}`}
+              class="absolute right-2 top-2 p-0.5 text-muted-foreground transition-colors hover:text-destructive"
+              onclick={(event) => {
+                event.stopPropagation();
+                ondeletenode?.(node.id);
+              }}
+            >
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          {/if}
+        </div>
       {:else}
         <!-- Node Card -->
         <div class="group/node relative flex w-72 flex-col rounded-[4px] border border-border bg-card shadow-xs transition-all hover:shadow-md">

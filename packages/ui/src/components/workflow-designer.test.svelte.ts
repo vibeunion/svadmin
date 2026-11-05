@@ -36,6 +36,23 @@ describe('WorkflowDesigner', () => {
     expect(screen.getByText('发起人')).toBeTruthy();
     expect(screen.queryByText('由一级主管审批')).toBeNull();
   });
+
+  it('keeps node click and delete actions for custom renderers', async () => {
+    const onnodeclick = vi.fn();
+    const ondeletenode = vi.fn();
+    const customApprover = createRawSnippet((getNode: () => WorkflowNode) => ({
+      render: () => `<div data-testid="custom-approver-actions">Custom ${getNode().title}</div>`,
+    }));
+
+    render(WorkflowDesigner, { nodes, nodeTypes: { approver: customApprover }, onnodeclick, ondeletenode });
+
+    await fireEvent.click(screen.getByTestId('custom-approver-actions'));
+    expect(onnodeclick).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
+
+    await fireEvent.click(screen.getByRole('button', { name: '删除 直属主管审批' }));
+    expect(ondeletenode).toHaveBeenCalledWith('2');
+  });
+
   it('triggers onnodeclick when a node is clicked', async () => {
     const onnodeclick = vi.fn();
     render(WorkflowDesigner, { nodes, onnodeclick });
