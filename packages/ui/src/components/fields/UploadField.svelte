@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useStorage } from '@svadmin/core';
+  import { useStorage, type StorageProvider } from '@svadmin/core';
   import { Upload, X, FileText, AlertCircle, Loader2 } from '@lucide/svelte';
 
   export interface UploadFieldProps {
@@ -11,6 +11,8 @@
     disabled?: boolean;
     label?: string;
     description?: string;
+    /** Optional storage adapter; defaults to the StorageProvider from AdminContext. */
+    storage?: StorageProvider;
     onchange?: (value: string | string[] | null) => void;
   }
 
@@ -23,15 +25,29 @@
     disabled = false,
     label,
     description,
+    storage,
     onchange,
   }: UploadFieldProps = $props();
 
   const inputId = $props.id();
-  const storage = useStorage();
+  const contextStorage = useStorage();
 
   let isDragging = $state(false);
   let errorMessage = $state<string | null>(null);
   let uploadQueue = $state<Array<{ name: string; size: number; progress: number }>>([]);
+  let isUploading = $state(false);
+  let uploadProgress = $state(0);
+  let uploadedPaths = $state<Record<string, string>>({});
+
+  async function uploadFile(file: File, options: Parameters<StorageProvider['upload']>[1]) {
+    if (storage) return storage.upload(file, options);
+    return contextStorage.upload(file, options);
+  }
+
+  async function deleteFile(path: string): Promise<void> {
+    if (storage) return storage.delete(path);
+    return contextStorage.deleteFile(path);
+  }
 
   // Normalize initial value to array for uniform internal rendering
   let fileList = $derived.by<string[]>(() => {
@@ -66,11 +82,14 @@
       const queueItem = { name: file.name, size: file.size, progress: 0 };
       uploadQueue = [...uploadQueue, queueItem];
 
+      isUploading = true;
+      uploadProgress = 0;
       try {
-        const res = await storage.upload(file, {
+        const res = await uploadFile(file, {
           path,
           filename: file.name,
           onProgress: (p) => {
+            uploadProgress = p.percentage;
             uploadQueue = uploadQueue.map((item) => item === queueItem ? { ...item, progress: p.percentage } : item);
           },
         });
@@ -80,9 +99,12 @@
         } else {
           currentUrls.splice(0, currentUrls.length, res.url);
         }
+        uploadedPaths = { ...uploadedPaths, [res.url]: res.path };
       } catch (err) {
         errorMessage = err instanceof Error ? err.message : 'Upload failed';
       } finally {
+        isUploading = false;
+        uploadProgress = 0;
         uploadQueue = uploadQueue.filter((q) => q !== queueItem);
       }
     }
@@ -114,11 +136,17 @@
 
     // Attempt backend delete if path is extractable
     try {
+      const trackedPath = uploadedPaths[urlToRemove];
       const urlObj = new URL(urlToRemove, 'https://dummy.local');
-      const cleanPath = urlObj.pathname.replace(/^\/+/, '');
-      await storage.deleteFile(cleanPath);
+      const cleanPath = trackedPath ?? urlObj.pathname.replace(/^\/+/, '');
+      await deleteFile(cleanPath);
     } catch {
       // Best-effort cleanup
+    } finally {
+      if (uploadedPaths[urlToRemove]) {
+        const { [urlToRemove]: _removed, ...remainingPaths } = uploadedPaths;
+        uploadedPaths = remainingPaths;
+      }
     }
   }
 </script>
@@ -151,9 +179,9 @@
     />
 
     <div class="flex flex-col items-center justify-center gap-1.5 py-2 pointer-events-none">
-      {#if storage.isUploading}
+      {#if isUploading}
         <Loader2 class="h-6 w-6 text-primary animate-spin" />
-        <span class="text-xs font-medium text-muted-foreground">Uploading... ({storage.uploadProgress}%)</span>
+        <span class="text-xs font-medium text-muted-foreground">Uploading... ({uploadProgress}%)</span>
       {:else}
         <Upload class="h-6 w-6 text-muted-foreground/80" />
         <div class="text-xs text-foreground font-medium">
