@@ -1,7 +1,7 @@
 {
   "packages/core": "0.76.0",
   "packages/ai-elements": "0.14.0",
-  "packages/ui": "0.114.0",
+  "packages/ui": "0.115.0",
   "packages/editor": "0.7.17",
   "packages/flow": "0.7.0",
   "packages/sveltekit": "0.13.25",
@@ -28,7 +28,7 @@
   "packages/lite": "0.25.3",
   "packages/mcp": "0.6.5",
   "packages/devtools-contract": "0.3.1",
-  "packages/surface": "0.20.15",
+  "packages/surface": "0.20.16",
   "packages/app": "0.2.26",
   "packages/devtools": "0.6.5",
   "packages/rest": "0.2.26",
