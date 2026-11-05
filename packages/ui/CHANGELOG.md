@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.115.0](https://github.com/vibeunion/svadmin/compare/ui-v0.114.0...ui-v0.115.0) (2026-11-05)
+
+
+### 🚀 Features
+
+* **ui:** allow AuditLogDrawer to use a custom entry loader ([#675](https://github.com/vibeunion/svadmin/issues/675)) ([ba9f60e](https://github.com/vibeunion/svadmin/commit/ba9f60ead10b7d89b8d088468e8b11e3ee552e30))
+* **ui:** allow UploadField to use an injected storage adapter ([#674](https://github.com/vibeunion/svadmin/issues/674)) ([445fd03](https://github.com/vibeunion/svadmin/commit/445fd03241901523dd1ea7a9ebe0d3be99c0d7a7))
+* **ui:** allow WorkflowDesigner custom node renderers ([#676](https://github.com/vibeunion/svadmin/issues/676)) ([8ed68e1](https://github.com/vibeunion/svadmin/commit/8ed68e105fa70f6445612108b6579de5c57e1641))
+
 ## [0.114.0](https://github.com/vibeunion/svadmin/compare/ui-v0.113.0...ui-v0.114.0) (2026-11-04)
 
 
