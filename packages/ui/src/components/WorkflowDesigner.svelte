@@ -12,6 +12,8 @@
     assignees?: string[];
   }
 
+  export type WorkflowNodeRenderer = Snippet<[WorkflowNode]>;
+
   export interface WorkflowDesignerProps {
     /** List of workflow steps in linear or branching order */
     nodes?: WorkflowNode[];
@@ -23,6 +25,8 @@
     onaddnode?: (targetNodeId: string, type: 'approver' | 'condition' | 'notifier') => void;
     /** Callback when a node is removed */
     ondeletenode?: (nodeId: string) => void;
+    /** Optional renderer per node type; defaults to the built-in node card. */
+    nodeTypes?: Partial<Record<WorkflowNode['type'], WorkflowNodeRenderer>>;
     /** Extra header or toolbar slot */
     extra?: Snippet;
     /** Additional CSS classes */
@@ -39,6 +43,7 @@
     onnodeclick,
     onaddnode,
     ondeletenode,
+    nodeTypes,
     extra,
     class: className = '',
   }: WorkflowDesignerProps = $props();
@@ -116,67 +121,105 @@
   <div class="relative flex flex-col items-center gap-0">
     {#each nodes as node, index (node.id)}
       {@const colors = getNodeTypeColor(node.type)}
-      <!-- Node Card -->
-      <div class="group/node relative flex w-72 flex-col rounded-[4px] border border-border bg-card shadow-xs transition-all hover:shadow-md">
-        <!-- Node Header -->
-        <div class={cn('flex items-center justify-between px-3 py-1.5 rounded-t-[3px]', colors.headerBg, colors.headerText)}>
-          <div class="flex items-center gap-1.5 text-xs font-medium">
-            <span>{node.title}</span>
+      {@const customNode = nodeTypes?.[node.type]}
+      {#if customNode}
+        <div class="group/node relative flex w-72 flex-col rounded-[4px] border border-border bg-card shadow-xs transition-all hover:shadow-md">
+          <div
+            role="button"
+            tabindex="0"
+            class="w-full text-left focus-visible:outline-none"
+            aria-label={`编辑 ${node.title}`}
+            onclick={() => onnodeclick?.(node)}
+            onkeydown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onnodeclick?.(node);
+              }
+            }}
+          >
+            {@render customNode(node)}
           </div>
 
-          <div class="flex items-center gap-1">
-            {#if node.status}
-              <span class={cn('rounded-[2px] border px-1.5 py-0.2 text-[10px] font-normal leading-tight', getStatusTone(node.status))}>
-                {node.status}
+          {#if !readonly && node.type !== 'start'}
+            <button
+              type="button"
+              aria-label={`删除 ${node.title}`}
+              class="absolute right-2 top-2 p-0.5 text-muted-foreground transition-colors hover:text-destructive"
+              onclick={(event) => {
+                event.stopPropagation();
+                ondeletenode?.(node.id);
+              }}
+            >
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          {/if}
+        </div>
+      {:else}
+        <!-- Node Card -->
+        <div class="group/node relative flex w-72 flex-col rounded-[4px] border border-border bg-card shadow-xs transition-all hover:shadow-md">
+          <!-- Node Header -->
+          <div class={cn('flex items-center justify-between px-3 py-1.5 rounded-t-[3px]', colors.headerBg, colors.headerText)}>
+            <div class="flex items-center gap-1.5 text-xs font-medium">
+              <span>{node.title}</span>
+            </div>
+
+            <div class="flex items-center gap-1">
+              {#if node.status}
+                <span class={cn('rounded-[2px] border px-1.5 py-0.2 text-[10px] font-normal leading-tight', getStatusTone(node.status))}>
+                  {node.status}
+                </span>
+              {/if}
+
+              {#if !readonly && node.type !== 'start'}
+                <button
+                  type="button"
+                  aria-label={`删除 ${node.title}`}
+                  class="opacity-0 transition-opacity group-hover/node:opacity-100 p-0.5 text-white/80 hover:text-white"
+                  onclick={(e) => {
+                    e.stopPropagation();
+                    ondeletenode?.(node.id);
+                  }}
+                >
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              {/if}
+            </div>
+          </div>
+
+          <!-- Node Body -->
+          <button
+            type="button"
+            class="flex w-full flex-col items-start p-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none"
+            onclick={() => onnodeclick?.(node)}
+          >
+            <div class="text-xs text-foreground line-clamp-2">
+              {node.content || '请设置节点属性'}
+            </div>
+
+            {#if node.assignees && node.assignees.length > 0}
+              <div class="mt-2 flex flex-wrap gap-1">
+                {#each node.assignees as assignee (assignee)}
+                  <span class="rounded-[2px] bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    {assignee}
+                  </span>
+                {/each}
+              </div>
+            {/if}
+
+            {#if node.error}
+              <span class="mt-1 text-[11px] text-destructive">
+                {node.error}
               </span>
             {/if}
-
-            {#if !readonly && node.type !== 'start'}
-              <button
-                type="button"
-                aria-label={`删除 ${node.title}`}
-                class="opacity-0 transition-opacity group-hover/node:opacity-100 p-0.5 text-white/80 hover:text-white"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  ondeletenode?.(node.id);
-                }}
-              >
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            {/if}
-          </div>
+          </button>
         </div>
-
-        <!-- Node Body -->
-        <button
-          type="button"
-          class="flex w-full flex-col items-start p-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none"
-          onclick={() => onnodeclick?.(node)}
-        >
-          <div class="text-xs text-foreground line-clamp-2">
-            {node.content || '请设置节点属性'}
-          </div>
-
-          {#if node.assignees && node.assignees.length > 0}
-            <div class="mt-2 flex flex-wrap gap-1">
-              {#each node.assignees as assignee (assignee)}
-                <span class="rounded-[2px] bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                  {assignee}
-                </span>
-              {/each}
-            </div>
-          {/if}
-
-          {#if node.error}
-            <span class="mt-1 text-[11px] text-destructive">
-              {node.error}
-            </span>
-          {/if}
-        </button>
-      </div>
+      {/if}
 
       <!-- Connecting line and Add Button -->
       {#if index < nodes.length - 1 || !readonly}
