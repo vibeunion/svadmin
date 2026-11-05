@@ -77,7 +77,10 @@
     const epoch = requestEpoch;
     isLoading = true;
     try {
-      const entries = await loader(params);
+      const entries = await withValidatedAuditProvider({
+        create: async (createParams) => createParams,
+        get: loader,
+      }).get(params);
       if (epoch === requestEpoch) logs = entries;
     } catch (error) {
       if (epoch === requestEpoch) {

@@ -48,4 +48,16 @@ describe('AuditLogDrawer custom loader', () => {
 
     expect(await screen.findByRole('alert')).toBeTruthy();
   });
+
+  it('rejects malformed entries from the injected loader', async () => {
+    const loadEntries = vi.fn(async () => [{ action: 'update' }]);
+
+    render(AuditLogDrawer, {
+      open: true,
+      resource: 'orders',
+      loadEntries,
+    });
+
+    expect(await screen.findByRole('alert')).toBeTruthy();
+  });
 });
