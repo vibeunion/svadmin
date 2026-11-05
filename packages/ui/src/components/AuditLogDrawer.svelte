@@ -67,20 +67,24 @@
     return loadAuditLogsWithLoader(
       params => withValidatedAuditProvider(scopedProvider).get(params),
       definedOptions({ resource: scopedResource, meta: providerMeta }),
+      false,
     );
   }
 
   async function loadAuditLogsWithLoader(
     loader: AuditLogDrawerLoader,
     params: AuditQueryParams,
+    validateResponse = true,
   ) {
     const epoch = requestEpoch;
     isLoading = true;
     try {
-      const entries = await withValidatedAuditProvider({
-        create: async (createParams) => createParams,
-        get: loader,
-      }).get(params);
+      const entries = validateResponse
+        ? await withValidatedAuditProvider({
+          create: async (createParams) => createParams,
+          get: loader,
+        }).get(params)
+        : await loader(params);
       if (epoch === requestEpoch) logs = entries;
     } catch (error) {
       if (epoch === requestEpoch) {
