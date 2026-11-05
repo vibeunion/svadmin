@@ -266,7 +266,9 @@ jobs:
           # 历史发布提交可能带着过期的 workspace 版本。发布只需要最终锁文件与
           # package.json 一致，因此这里做一致性校验，而不是拒绝依赖解析的归一化。
           bun scripts/verify-workspace-lockfile.ts
-          changed_outside_lockfile=$(git status --porcelain | grep -v ' bun\.lock$' || true)
+          # 允许 bun.lock 的归一化，以及上一步从工作流提交恢复的校验脚本。
+          allowed='^(bun\.lock|scripts/(verify-workspace-lockfile|plan-release-publication|npm-package-version)\.ts)$'
+          changed_outside_lockfile=$(git status --porcelain | awk '{print $NF}' | grep -Ev "$allowed" || true)
           if [ -n "$changed_outside_lockfile" ]; then
             echo "$changed_outside_lockfile"
             echo '::error::Publishing worktree changed outside bun.lock'

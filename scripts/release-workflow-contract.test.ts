@@ -434,6 +434,11 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishJob).toContain('bun scripts/verify-workspace-lockfile.ts');
     expect(publishJob).toContain("echo '::error::Publishing worktree changed outside bun.lock'");
     expect(publishJob).not.toContain('git diff --exit-code -- bun.lock');
+    // 恢复的校验脚本本身会出现在 git status 里，必须排除，否则回填会自己挡住自己。
+    expect(publishJob).toContain(
+      "allowed='^(bun\\.lock|scripts/(verify-workspace-lockfile|plan-release-publication|npm-package-version)\\.ts)$'",
+    );
+    expect(publishJob).not.toContain("grep -v ' bun\\.lock$'");
   });
 
   test('repairs previously unpublished versions during the next release', () => {
