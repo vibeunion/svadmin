@@ -1,11 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { describe, expect, it, vi } from 'vitest';
 import { setStorageProvider, resetContext } from '@svadmin/core';
 import type { StorageProvider, StorageUploadOptions, StorageUploadResult } from '@svadmin/core';
 import UploadField from './UploadField.svelte';
 
 class MockStorageProvider implements StorageProvider {
   uploads: string[] = [];
+  deleted: string[] = [];
   async upload(file: File | Blob | ArrayBuffer | Uint8Array, _options?: StorageUploadOptions): Promise<StorageUploadResult> {
     const fileRecord = typeof File !== 'undefined' && file instanceof File ? file : undefined;
     const name = fileRecord?.name ?? 'test.bin';
@@ -14,6 +15,7 @@ class MockStorageProvider implements StorageProvider {
     return { url, path: name, size: 100 };
   }
   async delete(path: string): Promise<void> {
+    this.deleted.push(path);
     this.uploads = this.uploads.filter((u) => !u.endsWith(path));
   }
 }
@@ -31,6 +33,37 @@ describe('UploadField.svelte', () => {
     expect(screen.getByText('Attachment')).toBeDefined();
     expect(screen.getByText('contract.pdf')).toBeDefined();
     expect(screen.getByText(/Click to upload/)).toBeDefined();
+  });
+
+
+  it('uses an injected storage adapter without a context provider', async () => {
+    resetContext();
+    const storage = new MockStorageProvider();
+    const onchange = vi.fn();
+
+    const view = render(UploadField, { storage, onchange });
+    const input = view.container.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error('Expected a file input');
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['contract'], 'contract.txt', { type: 'text/plain' }));
+    await fireEvent.change(input, { target: { files: transfer.files } });
+
+    await waitFor(() => expect(storage.uploads).toEqual(['https://storage.mock/contract.txt']));
+    expect(onchange).toHaveBeenCalledWith('https://storage.mock/contract.txt');
+    expect(screen.getByRole('link', { name: 'contract.txt' })).toBeDefined();
+  });
+
+  it('uses the injected adapter for removal', async () => {
+    resetContext();
+    const storage = new MockStorageProvider();
+
+    render(UploadField, {
+      storage,
+      value: ['https://storage.mock/contract.txt'],
+    });
+
+    await fireEvent.click(screen.getByRole('button', { name: 'Remove contract.txt' }));
+    await waitFor(() => expect(storage.deleted).toEqual(['contract.txt']));
   });
 
   it('allows removing an uploaded item', async () => {
