@@ -3,17 +3,21 @@
 
   import { captureAdminContext, useTranslation, withValidatedAuditProvider } from '@svadmin/core';
 
-  import type { AuditEntry, AuditLogProvider } from '@svadmin/core';
+  import type { AuditEntry, AuditLogProvider, AuditQueryParams } from '@svadmin/core';
   import * as Sheet from './ui/sheet/index.js';
   import { History, Loader2 } from '@lucide/svelte';
+
+  export type AuditLogDrawerLoader = (params: AuditQueryParams) => Promise<AuditEntry[]>;
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
 
-  let { open = $bindable(false), resource, recordId } = $props<{
+  let { open = $bindable(false), resource, recordId, loadEntries } = $props<{
     open: boolean;
     resource: string;
     recordId?: string | number;
+    /** Optional loader; defaults to the AdminContext auditLogProvider. */
+    loadEntries?: AuditLogDrawerLoader;
   }>();
 
   let logs = $state<AuditEntry[]>([]);
@@ -23,6 +27,7 @@
 
   $effect(() => {
     const scopedProvider = adminContext.auditLogProvider;
+    const scopedLoader = loadEntries;
     const scopedResource = resource;
     const scopedRecordId = recordId;
     const shouldLoad = open;
@@ -32,8 +37,12 @@
     );
 
     clearAuditScope();
-    if (shouldLoad && scopedProvider) {
-      void loadAuditLogs(scopedProvider, scopedResource, providerMeta);
+    if (shouldLoad) {
+      if (scopedLoader) {
+        void loadAuditLogsWithLoader(scopedLoader, definedOptions({ resource: scopedResource, meta: providerMeta }));
+      } else if (scopedProvider) {
+        void loadAuditLogs(scopedProvider, scopedResource, providerMeta);
+      }
     }
 
     return cancelAuditRequest;
@@ -55,12 +64,20 @@
     scopedResource: string,
     providerMeta: Record<string, unknown> | undefined,
   ) {
+    return loadAuditLogsWithLoader(
+      params => withValidatedAuditProvider(scopedProvider).get(params),
+      definedOptions({ resource: scopedResource, meta: providerMeta }),
+    );
+  }
+
+  async function loadAuditLogsWithLoader(
+    loader: AuditLogDrawerLoader,
+    params: AuditQueryParams,
+  ) {
     const epoch = requestEpoch;
     isLoading = true;
     try {
-      const entries = await withValidatedAuditProvider(scopedProvider).get(
-        definedOptions({ resource: scopedResource, meta: providerMeta }),
-      );
+      const entries = await loader(params);
       if (epoch === requestEpoch) logs = entries;
     } catch (error) {
       if (epoch === requestEpoch) {
