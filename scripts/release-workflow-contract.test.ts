@@ -452,6 +452,20 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishStep).toContain('npm publish --access public');
   });
 
+  test('restores publication verifiers from the workflow revision before publishing', () => {
+    const ciWorkflow = readWorkflow('ci.yml');
+    const publishJob = ciWorkflow.slice(ciWorkflow.indexOf('\n  publish:\n'));
+
+    expect(publishJob).toContain('name: Use workflow revision publication verifiers');
+    expect(publishJob).toContain('git fetch --no-tags origin "$VERIFIER_SHA"');
+    expect(publishJob).toContain('scripts/verify-workspace-lockfile.ts');
+    expect(publishJob).toContain('scripts/plan-release-publication.ts');
+    expect(publishJob).toContain('scripts/npm-package-version.ts');
+    expect(publishJob.indexOf('Use workflow revision publication verifiers')).toBeLessThan(
+      publishJob.indexOf('bun scripts/verify-workspace-lockfile.ts'),
+    );
+  });
+
   test('verifies the synchronized release lockfile before the release pull request merges', () => {
     const releaseWorkflow = readWorkflow('release.yml');
 

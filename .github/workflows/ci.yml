@@ -243,6 +243,18 @@ jobs:
         with:
           ref: ${{ inputs.release_sha }}
 
+      # 回填旧 release SHA 时，发布校验脚本要使用工作流所在提交的版本，
+      # 否则旧提交里根本没有这些脚本。
+      - name: Use workflow revision publication verifiers
+        env:
+          VERIFIER_SHA: ${{ github.sha }}
+        run: |
+          git fetch --no-tags origin "$VERIFIER_SHA"
+          git restore --source="$VERIFIER_SHA" --worktree -- \
+            scripts/verify-workspace-lockfile.ts \
+            scripts/plan-release-publication.ts \
+            scripts/npm-package-version.ts
+
       - uses: actions/setup-node@v7
         with:
           node-version: "26"
