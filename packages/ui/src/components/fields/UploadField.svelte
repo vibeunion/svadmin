@@ -37,6 +37,7 @@
   let uploadQueue = $state<Array<{ name: string; size: number; progress: number }>>([]);
   let isUploading = $state(false);
   let uploadProgress = $state(0);
+  let uploadedPaths = $state<Record<string, string>>({});
 
   async function uploadFile(file: File, options: Parameters<StorageProvider['upload']>[1]) {
     if (storage) return storage.upload(file, options);
@@ -98,6 +99,7 @@
         } else {
           currentUrls.splice(0, currentUrls.length, res.url);
         }
+        uploadedPaths = { ...uploadedPaths, [res.url]: res.path };
       } catch (err) {
         errorMessage = err instanceof Error ? err.message : 'Upload failed';
       } finally {
@@ -134,11 +136,17 @@
 
     // Attempt backend delete if path is extractable
     try {
+      const trackedPath = uploadedPaths[urlToRemove];
       const urlObj = new URL(urlToRemove, 'https://dummy.local');
-      const cleanPath = urlObj.pathname.replace(/^\/+/, '');
+      const cleanPath = trackedPath ?? urlObj.pathname.replace(/^\/+/, '');
       await deleteFile(cleanPath);
     } catch {
       // Best-effort cleanup
+    } finally {
+      if (uploadedPaths[urlToRemove]) {
+        const { [urlToRemove]: _removed, ...remainingPaths } = uploadedPaths;
+        uploadedPaths = remainingPaths;
+      }
     }
   }
 </script>

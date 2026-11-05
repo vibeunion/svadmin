@@ -12,7 +12,7 @@ class MockStorageProvider implements StorageProvider {
     const name = fileRecord?.name ?? 'test.bin';
     const url = `https://storage.mock/${name}`;
     this.uploads.push(url);
-    return { url, path: name, size: 100 };
+    return { url, path: `objects/${name}`, size: 100 };
   }
   async delete(path: string): Promise<void> {
     this.deleted.push(path);
@@ -57,13 +57,17 @@ describe('UploadField.svelte', () => {
     resetContext();
     const storage = new MockStorageProvider();
 
-    render(UploadField, {
-      storage,
-      value: ['https://storage.mock/contract.txt'],
-    });
+    const view = render(UploadField, { storage });
+    const input = view.container.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error('Expected a file input');
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['contract'], 'contract.txt', { type: 'text/plain' }));
+    await fireEvent.change(input, { target: { files: transfer.files } });
+
+    await waitFor(() => expect(storage.uploads).toEqual(['https://storage.mock/contract.txt']));
 
     await fireEvent.click(screen.getByRole('button', { name: 'Remove contract.txt' }));
-    await waitFor(() => expect(storage.deleted).toEqual(['contract.txt']));
+    await waitFor(() => expect(storage.deleted).toEqual(['objects/contract.txt']));
   });
 
   it('allows removing an uploaded item', async () => {
