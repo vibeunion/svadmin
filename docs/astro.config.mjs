@@ -27,14 +27,25 @@ export default defineConfig({
       description: 'Headless admin framework for Svelte 5',
       head: [
         {
+          tag: 'style',
+          attrs: { is: 'inline' },
+          content: `
+            html:not([data-theme-ready]) { visibility: hidden; }
+            @media (scripting: none) { html:not([data-theme-ready]) { visibility: visible; } }
+          `,
+        },
+        {
           tag: 'script',
           attrs: { is: 'inline' },
           content: `
             (function() {
+              var root = document.documentElement;
               var theme = typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
               var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
               var resolvedTheme = theme === 'dark' || (!theme && prefersDark) ? 'dark' : 'light';
-              document.documentElement.dataset.theme = resolvedTheme;
+              root.dataset.theme = resolvedTheme;
+              // 主题确定后再显示页面，避免浅色/深色之间的闪屏。
+              root.dataset.themeReady = 'true';
             })();
           `,
         },
