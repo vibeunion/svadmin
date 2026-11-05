@@ -1,6 +1,7 @@
+import { createRawSnippet } from 'svelte';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import WorkflowDesigner from './WorkflowDesigner.svelte';
+import WorkflowDesigner, { type WorkflowNode } from './WorkflowDesigner.svelte';
 
 describe('WorkflowDesigner', () => {
   const nodes = [
@@ -20,6 +21,21 @@ describe('WorkflowDesigner', () => {
     expect(screen.getByText('流程结束')).toBeTruthy();
   });
 
+
+  it('renders a custom node type snippet while keeping default cards for other types', () => {
+    const customApprover = createRawSnippet((getNode: () => WorkflowNode) => ({
+      render: () => `<div data-testid="custom-approver">Custom ${getNode().title}</div>`,
+    }));
+
+    render(WorkflowDesigner, {
+      nodes,
+      nodeTypes: { approver: customApprover },
+    });
+
+    expect(screen.getByTestId('custom-approver').textContent).toContain('Custom 直属主管审批');
+    expect(screen.getByText('发起人')).toBeTruthy();
+    expect(screen.queryByText('由一级主管审批')).toBeNull();
+  });
   it('triggers onnodeclick when a node is clicked', async () => {
     const onnodeclick = vi.fn();
     render(WorkflowDesigner, { nodes, onnodeclick });
