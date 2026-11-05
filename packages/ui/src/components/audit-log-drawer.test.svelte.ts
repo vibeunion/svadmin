@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetContext, setAuditLogProvider } from '@svadmin/core';
+import type { AuditEntry } from '@svadmin/core';
 import AuditLogDrawer from './AuditLogDrawer.svelte';
 
 const entry = {
@@ -50,7 +51,7 @@ describe('AuditLogDrawer custom loader', () => {
   });
 
   it('rejects malformed entries from the injected loader', async () => {
-    const loadEntries = vi.fn(async () => [{ action: 'update' }]);
+    const loadEntries = vi.fn(async () => [{ action: 'update' }] as unknown as AuditEntry[]);
 
     render(AuditLogDrawer, {
       open: true,
