@@ -55,7 +55,7 @@
     status === 'critical'
       ? 'bg-destructive'
       : status === 'warning'
-        ? 'bg-amber-500'
+        ? 'bg-warning'
         : 'bg-primary',
   );
 
@@ -63,7 +63,7 @@
     status === 'critical'
       ? 'bg-destructive/10 text-destructive'
       : status === 'warning'
-        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+        ? 'bg-warning/10 text-warning'
         : 'bg-primary/10 text-primary',
   );
 </script>

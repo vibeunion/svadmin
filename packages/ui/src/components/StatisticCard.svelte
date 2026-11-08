@@ -124,7 +124,7 @@
             <span
               class={cn(
                 'inline-flex items-center text-xs font-medium font-mono',
-                trend.direction === 'up' ? 'text-emerald-600' : 'text-rose-600'
+                trend.direction === 'up' ? 'text-success' : 'text-destructive'
               )}
             >
               {#if trend.direction === 'up'}
