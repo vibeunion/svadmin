@@ -43,6 +43,8 @@ import {
   IconReject,
   CheckCard,
   StatisticCard,
+  PricingCard,
+  QuotaProgressBar,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -89,6 +91,8 @@ describe('public compatibility aliases', () => {
     expect(IconReject).toBeDefined();
     expect(CheckCard).toBeDefined();
     expect(StatisticCard).toBeDefined();
+    expect(PricingCard).toBeDefined();
+    expect(QuotaProgressBar).toBeDefined();
     expect(MaskedText).toBe(SensitiveDataMask);
     expect(WaterMark).toBe(Watermark);
   });
