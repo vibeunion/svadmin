@@ -45,6 +45,8 @@ import {
   StatisticCard,
   PricingCard,
   QuotaProgressBar,
+  PricingTable,
+  UsageCard,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -97,6 +99,8 @@ describe('public compatibility aliases', () => {
     expect(StatisticCard).toBeDefined();
     expect(PricingCard).toBeDefined();
     expect(QuotaProgressBar).toBeDefined();
+    expect(PricingTable).toBeDefined();
+    expect(UsageCard).toBeDefined();
     expect(MaskedText).toBe(SensitiveDataMask);
     expect(WaterMark).toBe(Watermark);
     expect(EllipsisText).toBeDefined();

@@ -384,6 +384,21 @@
       "release-type": "node",
       "component": "dock",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/clickhouse": {
+      "release-type": "node",
+      "component": "clickhouse",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/kinde": {
+      "release-type": "node",
+      "component": "kinde",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/openfga": {
+      "release-type": "node",
+      "component": "openfga",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [
