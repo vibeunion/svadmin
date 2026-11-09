@@ -3,6 +3,7 @@
   import { Lock, Unlock, Eye, EyeOff, ShieldCheck, Clock } from '@lucide/svelte';
   import { useTranslation } from '@svadmin/core';
   import { cn } from '../utils.js';
+  import MediaThumbnail from './content/MediaThumbnail.svelte';
 
   export interface LockScreenUser {
     name?: string;
@@ -218,7 +219,14 @@
       <div class="flex flex-col items-center gap-2">
         <div class="relative flex h-20 w-20 items-center justify-center rounded-full bg-muted border-2 border-primary/20 shadow-sm overflow-hidden">
           {#if user?.avatar}
-            <img src={user.avatar} alt={user.name || 'User'} class="h-full w-full object-cover" />
+            <MediaThumbnail
+              src={user.avatar}
+              alt={user.name || 'User'}
+              size="full"
+              fit="cover"
+              showOverlay={false}
+              class="h-full w-full rounded-full border-0"
+            />
           {:else}
             <div class="text-2xl font-semibold text-primary">{initial}</div>
           {/if}
