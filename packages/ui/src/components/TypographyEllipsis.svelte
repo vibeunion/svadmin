@@ -8,16 +8,16 @@
 
   interface Props {
     /** 折叠时保留的行数，对齐参考排版的 ellipsis.rows。 */
-    rows?: number;
+    rows?: number | undefined;
     /** 内容超出时显示“展开 / 收起”，对齐参考排版的 ellipsis.expandable。 */
-    expandable?: boolean;
-    expanded?: boolean;
-    expandText?: string;
-    collapseText?: string;
+    expandable?: boolean | undefined;
+    expanded?: boolean | undefined;
+    expandText?: string | undefined;
+    collapseText?: string | undefined;
     /** 展开按钮的附加说明，例如“展开全部 12 条”。 */
-    expandLabel?: string;
-    class?: string;
-    onExpand?: (expanded: boolean) => void;
+    expandLabel?: string | undefined;
+    class?: string | undefined;
+    onExpand?: ((expanded: boolean) => void) | undefined;
     children: Snippet;
   }
 

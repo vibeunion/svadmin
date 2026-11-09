@@ -141,8 +141,8 @@
   {:else}
     {#if multiEllipsis}
       <TypographyEllipsis
-        rows={multiEllipsis.rows}
-        expandable={multiEllipsis.expandable}
+        rows={multiEllipsis.rows ?? 1}
+        expandable={multiEllipsis.expandable ?? false}
         expandText={multiEllipsis.expandText}
         collapseText={multiEllipsis.collapseText}
       >
