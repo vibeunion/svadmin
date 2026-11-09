@@ -1,10 +1,11 @@
 import { describe, expect, it, mock } from 'bun:test';
-import { createCasbinAccessControl } from './casbin-access-control.js';
+import { createCasbinAccessControl, type CasbinEnforcerLike } from './casbin-access-control.js';
 
 describe('createCasbinAccessControl', () => {
   it('checks standard RBAC permission using local enforcer', async () => {
-    const fakeEnforcer = {
-      enforce: mock((sub: string, obj: string, act: string) => {
+    const fakeEnforcer: CasbinEnforcerLike = {
+      enforce: mock((...args: unknown[]) => {
+        const [sub, obj, act] = args;
         return sub === 'alice' && obj === 'posts' && act === 'read';
       }),
     };
@@ -32,8 +33,9 @@ describe('createCasbinAccessControl', () => {
   });
 
   it('supports domain-based multi-tenant RBAC enforcement', async () => {
-    const fakeEnforcer = {
-      enforce: mock((sub: string, dom: string, obj: string, act: string) => {
+    const fakeEnforcer: CasbinEnforcerLike = {
+      enforce: mock((...args: unknown[]) => {
+        const [sub, dom, obj, act] = args;
         return sub === 'bob' && dom === 'tenant_a' && obj === 'users' && act === 'write';
       }),
     };
@@ -78,8 +80,9 @@ describe('createCasbinAccessControl', () => {
     expect(result.can).toBe(true);
     expect(fakeFetch).toHaveBeenCalledTimes(1);
     const callArgs = fakeFetch.mock.calls[0];
-    expect(String(callArgs[0])).toBe('https://casbin.company.internal/api/enforce');
-    const requestBody = JSON.parse(callArgs[1]?.body as string);
+    expect(callArgs).toBeDefined();
+    expect(String(callArgs?.[0])).toBe('https://casbin.company.internal/api/enforce');
+    const requestBody = JSON.parse(callArgs?.[1]?.body as string);
     expect(requestBody.params).toEqual(['carol', 'orders', 'read']);
   });
 
