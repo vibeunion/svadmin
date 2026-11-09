@@ -40,5 +40,8 @@
   "packages/charts": "0.2.0",
   "packages/dock": "0.2.0",
   "packages/auth0": "0.1.0",
-  "packages/socketio": "0.1.0"
+  "packages/socketio": "0.1.0",
+  "packages/clickhouse": "0.1.0",
+  "packages/kinde": "0.1.0",
+  "packages/openfga": "0.1.0"
 }

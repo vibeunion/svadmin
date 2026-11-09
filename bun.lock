@@ -224,6 +224,13 @@
         "@svadmin/core": "workspace:*",
       },
     },
+    "packages/clickhouse": {
+      "name": "@svadmin/clickhouse",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/core": {
       "name": "@svadmin/core",
       "version": "0.76.0",
@@ -493,6 +500,13 @@
         "graphql-request",
       ],
     },
+    "packages/kinde": {
+      "name": "@svadmin/kinde",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/lite": {
       "name": "@svadmin/lite",
       "version": "0.25.3",
@@ -576,6 +590,13 @@
         "@refinedev/nestjsx-crud",
         "@svadmin/core",
       ],
+    },
+    "packages/openfga": {
+      "name": "@svadmin/openfga",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
     },
     "packages/pocketbase": {
       "name": "@svadmin/pocketbase",
@@ -1602,6 +1623,8 @@
 
     "@svadmin/clerk": ["@svadmin/clerk@workspace:packages/clerk"],
 
+    "@svadmin/clickhouse": ["@svadmin/clickhouse@workspace:packages/clickhouse"],
+
     "@svadmin/core": ["@svadmin/core@workspace:packages/core"],
 
     "@svadmin/create": ["@svadmin/create@workspace:packages/create-svadmin"],
@@ -1632,6 +1655,8 @@
 
     "@svadmin/hasura": ["@svadmin/hasura@workspace:packages/hasura"],
 
+    "@svadmin/kinde": ["@svadmin/kinde@workspace:packages/kinde"],
+
     "@svadmin/lite": ["@svadmin/lite@workspace:packages/lite"],
 
     "@svadmin/mcp": ["@svadmin/mcp@workspace:packages/mcp"],
@@ -1641,6 +1666,8 @@
     "@svadmin/nestjs-query": ["@svadmin/nestjs-query@workspace:packages/nestjs-query"],
 
     "@svadmin/nestjsx-crud": ["@svadmin/nestjsx-crud@workspace:packages/nestjsx-crud"],
+
+    "@svadmin/openfga": ["@svadmin/openfga@workspace:packages/openfga"],
 
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 

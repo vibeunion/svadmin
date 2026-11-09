@@ -16,31 +16,31 @@
     /** Tier name, e.g., 'Starter', 'Professional', 'Enterprise' */
     title: string;
     /** Short summary or audience description */
-    description?: string;
+    description?: string | undefined;
     /** Display price, e.g. '$29' or 29 */
     price: string | number;
     /** Billing interval suffix, e.g. '/month', '/yr' or 'per seat' */
-    interval?: string;
+    interval?: string | undefined;
     /** Optional tag/badge text, e.g. 'Recommended', 'Most Popular' */
-    badge?: string;
+    badge?: string | undefined;
     /** Whether this card is highlighted as the primary tier */
-    highlighted?: boolean;
+    highlighted?: boolean | undefined;
     /** List of features for this tier */
-    features?: (PricingFeature | string)[];
+    features?: (PricingFeature | string)[] | undefined;
     /** Primary CTA button label */
-    buttonText?: string;
+    buttonText?: string | undefined;
     /** Primary CTA button disabled state */
-    disabled?: boolean;
+    disabled?: boolean | undefined;
     /** CTA variant style */
-    buttonVariant?: 'default' | 'outline' | 'secondary';
+    buttonVariant?: 'default' | 'outline' | 'secondary' | undefined;
     /** Custom CTA snippet slot */
-    action?: Snippet;
+    action?: Snippet | undefined;
     /** Custom header or badge slot */
-    headerExtra?: Snippet;
+    headerExtra?: Snippet | undefined;
     /** Click callback when CTA is activated */
-    onselect?: () => void;
+    onselect?: (() => void) | undefined;
     /** Additional CSS classes */
-    class?: string;
+    class?: string | undefined;
   }
 
   let {

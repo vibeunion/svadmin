@@ -1,0 +1,49 @@
+{
+  "name": "@svadmin/clickhouse",
+  "version": "0.1.0",
+  "description": "ClickHouse analytical DataProvider adapter for svadmin",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "keywords": [
+    "svadmin",
+    "clickhouse",
+    "analytics",
+    "data-provider",
+    "olap"
+  ],
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/clickhouse"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  },
+  "svadmin": {
+    "capabilities": [
+      "data"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  }
+}
