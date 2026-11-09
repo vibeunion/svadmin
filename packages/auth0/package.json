@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/auth0",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Auth0 AuthProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.28](https://github.com/vibeunion/svadmin/compare/nestjs-query-v0.12.27...nestjs-query-v0.12.28) (2026-11-09)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.7
+  * peerDependencies
+    * @svadmin/core bumped to 0.77.0
+
 ## [0.12.27](https://github.com/vibeunion/svadmin/compare/nestjs-query-v0.12.26...nestjs-query-v0.12.27) (2026-11-04)
 
 
