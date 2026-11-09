@@ -53,6 +53,8 @@ import {
   StatisticCard,
   PricingCard,
   QuotaProgressBar,
+  PricingTable,
+  UsageCard,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -109,10 +111,11 @@ describe('public compatibility aliases', () => {
     expect(LockScreen).toBeDefined();
     expect(ScreenLock).toBeDefined();
     expect(GlobalShortcuts).toBeDefined();
+    expect(PricingTable).toBeDefined();
+    expect(UsageCard).toBeDefined();
     expect(MaskedText).toBe(SensitiveDataMask);
     expect(WaterMark).toBe(Watermark);
     expect(Segmented).toBe(SegmentedControl);
-    expect(GlobalShortcuts).toBeDefined();
   });
 
   it('keeps service aliases bound to canonical services', () => {
