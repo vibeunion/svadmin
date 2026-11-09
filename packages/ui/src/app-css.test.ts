@@ -228,4 +228,22 @@ describe('native component CSS', () => {
     expect(css).toContain('[dir="rtl"] .svadmin-app-shell__sidebar');
     expect(css).toContain('transform: translateX(100%);');
   });
+  it('supports class and data-color-scheme dark mode contracts independently from brand themes', () => {
+    const css = readAppCss();
+    expect(css).toContain(':is(.dark, [data-color-scheme="dark"]) {');
+    expect(css).toContain(':is(.dark, [data-color-scheme="dark"])[data-theme="neutral"]');
+    expect(css).toContain(':is(.dark, [data-color-scheme="dark"]) [data-theme="neutral"]');
+    expect(css).toContain(':is(.dark, [data-color-scheme="dark"]).layout-clean-flat[data-theme="default"]');
+    expect(css).not.toMatch(/^\.dark\[data-theme=/m);
+  });
+
+  it('tokenizes switch sizing and exposes a coarse-pointer hit area', () => {
+    const css = readAppCss();
+    expect(css).toContain('--svadmin-switch-width: 2.25rem;');
+    expect(css).toContain('--svadmin-switch-height: 1.25rem;');
+    expect(css).toContain('--svadmin-switch-hit-area: 0.5rem;');
+    expect(css).toContain('width: var(--svadmin-switch-width);');
+    expect(css).toContain('inset: calc(-1 * var(--svadmin-switch-hit-area));');
+    expect(css).toMatch(/@media \(pointer: coarse\) \{[\s\S]*?--svadmin-switch-hit-area: 0\.75rem;/);
+  });
 });

@@ -11,6 +11,45 @@ This is a progressive migration. Tailwind remains a build-time dependency and
 974 transitional utility aliases remain in the build map. This change does not
 claim a full handwritten-CSS rewrite or modify other packages' styling.
 
+## Dark Mode Contract
+
+The published CSS supports two equivalent dark-mode contracts:
+
+```html
+<html class="dark">
+```
+
+```html
+<html data-color-scheme="dark">
+```
+
+`data-theme` remains reserved for brand/accent presets such as `neutral`,
+`stripe`, `indigo`, and `blue`. This separation lets a host choose a dark color
+scheme and a brand preset independently:
+
+```html
+<html data-color-scheme="dark" data-theme="neutral">
+```
+
+The selectors are implemented as
+`:is(.dark, [data-color-scheme="dark"])`, so nested brand scopes keep working
+without JavaScript. Hosts should also set `color-scheme: dark` on the same
+element for native form controls and scrollbars.
+
+Switch sizing is tokenized for dense and touch layouts:
+
+```css
+:root {
+  --svadmin-switch-width: 2.25rem;
+  --svadmin-switch-height: 1.25rem;
+  --svadmin-switch-hit-area: 0.5rem;
+}
+```
+
+The switch renders an invisible `::before` hit area using the hit-area token.
+Coarse pointers automatically expand it to `0.75rem`. Hosts can override the
+token without changing component markup.
+
 ## PM Gate
 
 JTBD: integrate the admin UI into an existing application without adopting a
