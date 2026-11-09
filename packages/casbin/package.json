@@ -1,0 +1,51 @@
+{
+  "name": "@svadmin/casbin",
+  "version": "0.1.0",
+  "description": "Casbin policy-based AccessControlProvider adapter for svadmin",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "keywords": [
+    "svadmin",
+    "casbin",
+    "rbac",
+    "perm",
+    "abac",
+    "access-control",
+    "authorization"
+  ],
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/casbin"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  },
+  "svadmin": {
+    "capabilities": [
+      "access-control"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  }
+}
