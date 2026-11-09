@@ -50,6 +50,45 @@ The switch renders an invisible `::before` hit area using the hit-area token.
 Coarse pointers automatically expand it to `0.75rem`. Hosts can override the
 token without changing component markup.
 
+## Svelte 5 and Bundler Imports
+
+For CSS-only hosts, prefer the published static classes so no component code or
+Tailwind compiler enters the host bundle:
+
+```svelte
+<input class="svadmin-input" />
+<button class="svadmin-button svadmin-button--default svadmin-button-size--default">
+  Save
+</button>
+```
+
+For interactive Svelte components, import named primitives from the package
+entry:
+
+```svelte
+<script lang="ts">
+  import { Button } from '@svadmin/ui';
+</script>
+
+<Button variant="default" size="default">Save</Button>
+```
+
+Keep one CSS import per application:
+
+```ts
+import '@svadmin/ui/app.css';
+```
+
+Do not import both `app.css` and `app.theme.css` in the same host. Tailwind
+hosts should use `app.theme.css`; non-Tailwind hosts should use `app.css`.
+
+Vite 8 / Rolldown hosts that only need markup styles should avoid deep imports
+from `@svadmin/core` source files. If a host imports the full package entry and
+the optimizer pulls workspace source into the browser chunk, exclude the source
+package from prebundling or switch the affected primitives to the documented
+`svadmin-*` classes. Keep the import path stable so a future package export can
+replace it without changing markup.
+
 ## PM Gate
 
 JTBD: integrate the admin UI into an existing application without adopting a

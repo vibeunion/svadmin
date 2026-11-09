@@ -2265,6 +2265,22 @@ main {
   cursor: not-allowed;
   opacity: 0.5;
 }
+.svadmin-switch[aria-invalid="true"] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--destructive) 28%, transparent);
+}
+@media (forced-colors: active) {
+  .svadmin-switch {
+    border-color: ButtonText;
+  }
+  .svadmin-switch[data-state="checked"] {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+  :is(.svadmin-button, .svadmin-input, .svadmin-select, .svadmin-textarea, .svadmin-switch):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
 
 .svadmin-switch-thumb {
   display: block;

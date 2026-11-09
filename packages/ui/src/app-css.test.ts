@@ -228,6 +228,7 @@ describe('native component CSS', () => {
     expect(css).toContain('[dir="rtl"] .svadmin-app-shell__sidebar');
     expect(css).toContain('transform: translateX(100%);');
   });
+
   it('supports class and data-color-scheme dark mode contracts independently from brand themes', () => {
     const css = readAppCss();
     expect(css).toContain(':is(.dark, [data-color-scheme="dark"]) {');
@@ -245,5 +246,13 @@ describe('native component CSS', () => {
     expect(css).toContain('width: var(--svadmin-switch-width);');
     expect(css).toContain('inset: calc(-1 * var(--svadmin-switch-hit-area));');
     expect(css).toMatch(/@media \(pointer: coarse\) \{[\s\S]*?--svadmin-switch-hit-area: 0\.75rem;/);
+  });
+
+  it('exposes invalid and forced-colors state contracts for native controls', () => {
+    const css = readAppCss();
+    expect(css).toContain('.svadmin-switch[aria-invalid="true"]');
+    expect(css).toMatch(/@media \(forced-colors: active\) \{[\s\S]*?\.svadmin-switch \{[\s\S]*?border-color: ButtonText;/);
+    expect(css).toContain('outline: 2px solid Highlight;');
+    expect(css).toContain('.svadmin-button, .svadmin-input, .svadmin-select, .svadmin-textarea, .svadmin-switch');
   });
 });
