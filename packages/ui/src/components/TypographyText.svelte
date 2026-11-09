@@ -145,6 +145,7 @@
         expandable={multiEllipsis.expandable ?? false}
         expandText={multiEllipsis.expandText}
         collapseText={multiEllipsis.collapseText}
+        tooltip={ellipsisTooltip}
       >
         {#if children}{@render children()}{:else}{text}{/if}
       </TypographyEllipsis>

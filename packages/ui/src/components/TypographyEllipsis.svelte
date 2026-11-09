@@ -14,6 +14,7 @@
     expanded?: boolean | undefined;
     expandText?: string | undefined;
     collapseText?: string | undefined;
+    tooltip?: string | undefined;
     /** 展开按钮的附加说明，例如“展开全部 12 条”。 */
     expandLabel?: string | undefined;
     class?: string | undefined;
@@ -27,6 +28,7 @@
     expanded = $bindable(false),
     expandText,
     collapseText,
+    tooltip,
     expandLabel,
     class: className = '',
     onExpand,
@@ -73,6 +75,7 @@
     bind:this={contentEl}
     class="svadmin-typography-ellipsis__content"
     class:is-clamped={!expanded}
+    title={tooltip}
   >
     {@render children()}
   </div>

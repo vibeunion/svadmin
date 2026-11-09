@@ -44,4 +44,15 @@ describe('CopyableText', () => {
     expect(oncopied).toHaveBeenCalledWith('1234567890123456');
     expect(root?.getAttribute('data-copied')).toBe('true');
   });
+
+  it('does not report success when the Clipboard API is unavailable', async () => {
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+    const oncopied = vi.fn();
+    const { container, getByRole } = render(CopyableText, { text: 'secret', oncopied });
+
+    await fireEvent.click(getByRole('button'));
+
+    expect(container.querySelector('[data-svadmin-component="CopyableText"]')?.getAttribute('data-copied')).toBe('false');
+    expect(oncopied).not.toHaveBeenCalled();
+  });
 });

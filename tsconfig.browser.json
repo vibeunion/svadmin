@@ -8,6 +8,7 @@
     "packages/airtable/src/**/*.test.ts",
     "packages/appwrite/src/**/*.test.ts",
     "packages/auth-utils/src/**/*.test.ts",
+    "packages/auth0/src/**/*.test.ts",
     "packages/clerk/src/**/*.test.ts",
     "packages/core/src/**/*.test.ts",
     "packages/create-svadmin/src/**/*.test.ts",

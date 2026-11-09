@@ -51,9 +51,8 @@
   async function handleCopy() {
     const valueToCopy = copyValue ?? text;
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(valueToCopy);
-      }
+      if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+      await navigator.clipboard.writeText(valueToCopy);
       copied = true;
       oncopied?.(valueToCopy);
       if (resetTimer) clearTimeout(resetTimer);
