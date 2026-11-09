@@ -100,7 +100,6 @@ export default defineConfig({
             { slug: 'providers/clerk' },
             { slug: 'providers/elasticsearch' },
             { slug: 'providers/pusher' },
-            { slug: 'providers/socketio' },
             { slug: 'providers/sveltekit' },
           ],
         },

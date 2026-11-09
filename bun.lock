@@ -661,13 +661,6 @@
         "@svadmin/core",
       ],
     },
-    "packages/socketio": {
-      "name": "@svadmin/socketio",
-      "version": "0.1.0",
-      "peerDependencies": {
-        "@svadmin/core": "workspace:*",
-      },
-    },
     "packages/sso": {
       "name": "@svadmin/sso",
       "version": "0.13.27",
@@ -1653,8 +1646,6 @@
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
     "@svadmin/simple-rest": ["@svadmin/simple-rest@workspace:packages/simple-rest"],
-
-    "@svadmin/socketio": ["@svadmin/socketio@workspace:packages/socketio"],
 
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 
