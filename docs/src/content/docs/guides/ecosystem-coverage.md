@@ -54,9 +54,11 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | AI chat | external AI workspace patterns | `@svadmin/ai-elements` | — | ✅ |
 | CLI | admin CLIs | `create-svadmin`, `agmesh` | — | ✅ |
 | PDF | react-pdf, @react-pdf/renderer | `PdfDocumentViewer` | pdfjs-dist, svelte-pdf | ✅ |
-| SaaS pricing & quota | stripe-pricing-table, pro billing | `PricingCard`, `QuotaProgressBar` | — | ✅ |
-| Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/pusher`, `@svadmin/core` (`createWebSocketLiveProvider`) | — | ✅ |
-| Identity providers | clerk, auth0, supabase-auth | `@svadmin/clerk`, `@svadmin/auth0`, `@svadmin/sso`, `@svadmin/firebase`, `@svadmin/supabase` | — | ✅ |
+| SaaS pricing & quota | stripe-pricing-table, pro billing | `PricingCard`, `QuotaProgressBar`, `PricingTable`, `UsageCard` | — | ✅ |
+| Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/pusher`, WebSocket, SSE | — | ✅ |
+| Identity providers | clerk, auth0, kinde, supabase-auth | `@svadmin/clerk`, `@svadmin/auth0`, `@svadmin/kinde`, `@svadmin/sso`, `@svadmin/firebase`, `@svadmin/supabase` | — | ✅ |
+| OLAP / Analytics | clickhouse, duckdb | `@svadmin/clickhouse` analytical column-oriented data provider | — | ✅ |
+| Fine-grained authorization | openfga, permit.io, casbin | `@svadmin/openfga` ReBAC Zanzibar access control provider | — | ✅ |
 | Gestures | use-gesture | `useSwipe` (pointer-based) | svelte-gestures | ✅ simple swipes; complex gestures via svelte-gestures |
 
 ## Reading the table

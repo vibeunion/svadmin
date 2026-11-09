@@ -692,3 +692,15 @@ export { default as PricingCard } from './components/PricingCard.svelte';
 export type { PricingCardProps, PricingFeature } from './components/PricingCard.svelte';
 export { default as QuotaProgressBar } from './components/QuotaProgressBar.svelte';
 export type { QuotaProgressBarProps } from './components/QuotaProgressBar.svelte';
+export { default as PricingTable } from './components/PricingTable.svelte';
+export type {
+  PricingTableProps,
+  PricingPlan,
+  FeatureComparisonRow,
+  FeatureComparisonGroup,
+} from './components/PricingTable.svelte';
+export { default as UsageCard } from './components/UsageCard.svelte';
+export type {
+  UsageCardProps,
+  UsageMetric,
+} from './components/UsageCard.svelte';
