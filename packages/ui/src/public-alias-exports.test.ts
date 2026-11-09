@@ -16,6 +16,8 @@ import {
   NumberInput,
   Radio,
   RadioGroup,
+  Segmented,
+  SegmentedControl,
   Split,
   SplitPaneLayout,
   TagsInput,
@@ -29,6 +31,12 @@ import {
   TypographyText,
   Typography,
   Title,
+  Divider,
+  ProCard,
+  LightFilter,
+  LockScreen,
+  ScreenLock,
+  GlobalShortcuts,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -68,6 +76,8 @@ describe('public compatibility aliases', () => {
     expect(InputNumber).toBe(NumberInput);
     expect(List).toBe(ItemList);
     expect(Radio).toBe(RadioGroup);
+    expect(Segmented).toBe(SegmentedControl);
+    expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);
     expect(TabBar).toBe(WorkspaceTabBar);
@@ -99,6 +109,12 @@ describe('public compatibility aliases', () => {
     expect(StatisticCard).toBeDefined();
     expect(PricingCard).toBeDefined();
     expect(QuotaProgressBar).toBeDefined();
+    expect(Divider).toBeDefined();
+    expect(ProCard).toBeDefined();
+    expect(LightFilter).toBeDefined();
+    expect(LockScreen).toBeDefined();
+    expect(ScreenLock).toBeDefined();
+    expect(GlobalShortcuts).toBeDefined();
     expect(PricingTable).toBeDefined();
     expect(UsageCard).toBeDefined();
     expect(MaskedText).toBe(SensitiveDataMask);
@@ -107,6 +123,7 @@ describe('public compatibility aliases', () => {
     expect(CopyableText).toBeDefined();
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
+    expect(Segmented).toBe(SegmentedControl);
   });
 
   it('keeps service aliases bound to canonical services', () => {
