@@ -318,3 +318,209 @@ const fields: FieldDefinition[] = [
 ```
 
 `ArrayField` is automatically rendered by `AutoForm` when `type: 'array'` is specified.
+
+## Approval & Workflow Process Tracking
+
+Enterprise administrative workflows (e.g. contract approvals, expense reimbursements, operational sign-offs) require transparent node status and auditor timeline records.
+
+### `<ApprovalTimeline>`
+
+Displays multi-step sequential or parallel approval progression with approver roles, timestamps, comments, and semantic states (`approved`, `rejected`, `running`, `pending`).
+
+```svelte
+<script lang="ts">
+  import { ApprovalTimeline } from '@svadmin/ui';
+
+  const steps = [
+    {
+      id: 'step-1',
+      title: 'Submit Application',
+      approverName: 'Alice Initiator',
+      status: 'approved',
+      time: '2026-11-10 09:00',
+      comment: 'Initial submission verified.',
+    },
+    {
+      id: 'step-2',
+      title: 'Manager Review',
+      approverName: 'Bob Manager',
+      approverRole: 'Department Lead',
+      status: 'running',
+    },
+  ];
+</script>
+
+<ApprovalTimeline {steps} />
+```
+
+### `<WorkflowProcessCard>`
+
+Complete business process card combining instance metadata, ticket code, initiator, overall status badge, and embedded timeline.
+
+```svelte
+<script lang="ts">
+  import { WorkflowProcessCard } from '@svadmin/ui';
+
+  const steps = [
+    { id: '1', title: 'Submit', approverName: 'Alice', status: 'approved' },
+    { id: '2', title: 'Audit', approverName: 'Bob', status: 'running' },
+  ];
+</script>
+
+<WorkflowProcessCard
+  title="Expense Reimbursement Approval"
+  processCode="WF-202611-009"
+  initiatorName="Alice Finance"
+  status="running"
+  {steps}
+/>
+```
+
+## Organization Picker & Tree Transfer
+
+Complex enterprise authorization, role assignment, and organization workflows often require hierarchical department navigation and transfer selection.
+
+### `<TreeTransfer>`
+
+Two-pane transfer component with tree-structured source data, search filtering, batch selection, and customizable target keys.
+
+```svelte
+<script lang="ts">
+  import { TreeTransfer } from '@svadmin/ui';
+
+  const treeData = [
+    {
+      key: 'dept-1',
+      title: 'Engineering',
+      children: [
+        { key: 'eng-frontend', title: 'Frontend Team' },
+        { key: 'eng-backend', title: 'Backend Team' },
+      ],
+    },
+  ];
+
+  let targetKeys = $state<string[]>(['eng-frontend']);
+</script>
+
+<TreeTransfer data={treeData} bind:targetKeys />
+```
+
+### `<OrgTreePicker>`
+
+Specialized organizational personnel picker combining department tree navigation, search indexing, multi-member selection, and instant summary badges.
+
+```svelte
+<script lang="ts">
+  import { OrgTreePicker } from '@svadmin/ui';
+
+  const departments = [
+    {
+      id: 'd-1',
+      name: 'Operations',
+      members: [
+        { id: 'u-1', name: 'John Doe', email: 'john@example.com', role: 'Lead' },
+      ],
+    },
+  ];
+
+  let selectedMembers = $state<string[]>([]);
+</script>
+
+<OrgTreePicker {departments} bind:selectedMemberIds={selectedMembers} />
+```
+
+## Enterprise Data Hub: Excel & Pivot Drilldown
+
+Enterprise users frequently exchange bulk tabular data via spreadsheets or drill down into aggregated metrics.
+
+### `<ExcelImportWizard>`
+
+Three-step data onboarding wizard featuring file dropzone parsing, automatic column-to-field matching, row validation, error highlighting, and download templates.
+
+```svelte
+<script lang="ts">
+  import { ExcelImportWizard } from '@svadmin/ui';
+
+  const fields = [
+    { name: 'sku', label: 'SKU Code', required: true },
+    { name: 'price', label: 'Unit Price', type: 'number' },
+  ];
+</script>
+
+<ExcelImportWizard {fields} onimport={(rows) => console.log(rows)} />
+```
+
+### `<ExcelExportButton>`
+
+Streamlined CSV/TSV data export button supporting static data arrays or lazy async data fetching providers with loading states.
+
+```svelte
+<script lang="ts">
+  import { ExcelExportButton } from '@svadmin/ui';
+
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Customer Name' },
+  ];
+  const dataSource = [{ id: '1', name: 'Acme Corp' }];
+</script>
+
+<ExcelExportButton {columns} {dataSource} filename="customers-export" />
+```
+
+### `<PivotDrilldownModal>`
+
+Multidimensional analytic slice drilldown modal showing the active filter criteria, paginated record list, and quick export.
+
+```svelte
+<script lang="ts">
+  import { PivotDrilldownModal } from '@svadmin/ui';
+
+  let open = $state(true);
+  const filters = [{ dimension: 'Region', value: 'APAC' }];
+  const columns = [{ key: 'revenue', label: 'Revenue' }];
+  const data = [{ revenue: '$1,200,000' }];
+</script>
+
+<PivotDrilldownModal bind:open {filters} {columns} {data} />
+```
+
+## Visual Containers & Micro-Interactions
+
+### `<Ribbon>`
+
+Attaches contextual status ribbons (success, warning, error, info) to card corners without modifying inner content layouts.
+
+```svelte
+<script lang="ts">
+  import { Ribbon, Card } from '@svadmin/ui';
+</script>
+
+<Ribbon text="PRO" status="primary">
+  <Card class="p-6">Subscription Details</Card>
+</Ribbon>
+```
+
+### `<FloatButtonGroup>`
+
+Configurable floating action buttons with expandable options, quick triggers, and back-to-top actions.
+
+```svelte
+<script lang="ts">
+  import { FloatButtonGroup } from '@svadmin/ui';
+</script>
+
+<FloatButtonGroup trigger="hover" position="bottom-right" />
+```
+
+### `<ProSkeleton>`
+
+Specialized skeleton loaders tailored for enterprise dashboards, tables, analytic metric cards, and multi-step forms.
+
+```svelte
+<script lang="ts">
+  import { ProSkeleton } from '@svadmin/ui';
+</script>
+
+<ProSkeleton type="result" active />
+```

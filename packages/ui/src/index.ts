@@ -724,3 +724,37 @@ export { default as LockScreen, default as ScreenLock } from './components/LockS
 export type { LockScreenUser } from './components/LockScreen.svelte';
 export { default as GlobalShortcuts } from './components/GlobalShortcuts.svelte';
 export type { ShortcutItem } from './components/GlobalShortcuts.svelte';
+
+// Enterprise approval and workflow process tracking suite
+export { default as ApprovalTimeline } from './components/ApprovalTimeline.svelte';
+export type {
+  ApprovalTimelineProps,
+  ApprovalStep,
+  ApprovalStatus as ApprovalTimelineStatus,
+} from './components/ApprovalTimeline.svelte';
+export { default as WorkflowProcessCard } from './components/WorkflowProcessCard.svelte';
+export type { WorkflowProcessCardProps } from './components/WorkflowProcessCard.svelte';
+
+// Enterprise tree transfer, org picker, ribbon badge, float button group, and pro skeleton
+export { default as TreeTransfer } from './components/TreeTransfer.svelte';
+export type { TreeTransferProps, TreeTransferNode } from './components/TreeTransfer.svelte';
+export { default as OrgTreePicker } from './components/OrgTreePicker.svelte';
+export type { OrgTreePickerProps, OrgDepartment, OrgMember } from './components/OrgTreePicker.svelte';
+export { default as Ribbon, default as BadgeRibbon } from './components/Ribbon.svelte';
+export type { RibbonProps, RibbonPlacement } from './components/Ribbon.svelte';
+export { default as FloatButtonGroup } from './components/FloatButtonGroup.svelte';
+export type { FloatButtonGroupProps, FloatButtonPosition, FloatButtonShape } from './components/FloatButtonGroup.svelte';
+export { default as ProSkeleton } from './components/ProSkeleton.svelte';
+export type { ProSkeletonProps, ProSkeletonType } from './components/ProSkeleton.svelte';
+
+// Enterprise Excel import/export and pivot table drilldown suite
+export { default as ExcelImportWizard } from './components/ExcelImportWizard.svelte';
+export type { ExcelImportWizardProps, ExcelImportField } from './components/ExcelImportWizard.svelte';
+export { default as ExcelExportButton } from './components/ExcelExportButton.svelte';
+export type { ExcelExportButtonProps, ExcelExportColumn } from './components/ExcelExportButton.svelte';
+export { default as PivotDrilldownModal } from './components/PivotDrilldownModal.svelte';
+export type {
+  PivotDrilldownModalProps,
+  PivotDrilldownColumn,
+  PivotDrilldownFilter,
+} from './components/PivotDrilldownModal.svelte';
