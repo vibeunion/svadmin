@@ -376,7 +376,7 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(workflow).not.toContain('git restore --source="$VERIFIER_SHA" --worktree -- packages');
   });
 
-  test('publishes only from an explicit ci.yml workflow dispatch using OIDC', () => {
+  test('publishes from an explicit ci.yml workflow dispatch with OIDC first', () => {
     const ciWorkflow = readWorkflow('ci.yml');
 
     expect(ciWorkflow).toContain('workflow_dispatch:');
@@ -394,7 +394,8 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).toContain('group: npm-publish-${{ inputs.release_sha }}');
     expect(ciWorkflow).toContain('id-token: write');
     expect(ciWorkflow).not.toContain('bootstrap_publish');
-    expect(ciWorkflow).not.toContain('secrets.NPM_TOKEN');
+    expect(ciWorkflow.match(/secrets\.NPM_TOKEN/g) ?? []).toHaveLength(1);
+    expect(ciWorkflow).toContain('NPM_BOOTSTRAP_TOKEN: ${{ secrets.NPM_TOKEN }}');
     expect(ciWorkflow).toContain('npm publish --provenance --access public');
     expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts');
     expect(ciWorkflow).toContain('id: release_plan');
@@ -447,6 +448,23 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts --include-missing');
   });
 
+  test('retries only E404 package creation with the bootstrap token', () => {
+    const ciWorkflow = readWorkflow('ci.yml');
+    const publishStep = ciWorkflow.slice(ciWorkflow.indexOf('      - name: Publish released packages'));
+
+    expect(publishStep).toContain(
+      'elif grep -q \'E404\' "$PUBLISH_LOG" && [ -n "${NPM_BOOTSTRAP_TOKEN:-}" ]; then',
+    );
+    expect(publishStep).toContain(
+      'env NODE_AUTH_TOKEN="$NPM_BOOTSTRAP_TOKEN" npm publish --provenance --access public --ignore-scripts',
+    );
+    expect(publishStep).toContain('Bootstrap publish FAILED');
+    expect(publishStep).toContain('add its trusted publisher');
+    expect(publishStep.indexOf('npm publish --provenance --access public)')).toBeLessThan(
+      publishStep.indexOf('NODE_AUTH_TOKEN='),
+    );
+  });
+
   test('explains how to bootstrap a package that is not on npm yet', () => {
     const ciWorkflow = readWorkflow('ci.yml');
     const publishStep = ciWorkflow.slice(ciWorkflow.indexOf('      - name: Publish released packages'));
@@ -455,6 +473,7 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishStep).toContain('either the package does not exist on npm yet');
     expect(publishStep).toContain('is not its trusted publisher');
     expect(publishStep).toContain('npm publish --access public');
+    expect(publishStep).toContain('Set the NPM_TOKEN repository secret to bootstrap it');
   });
 
   test('restores publication verifiers from the workflow revision before publishing', () => {

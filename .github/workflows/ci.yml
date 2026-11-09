@@ -343,6 +343,9 @@ jobs:
       - name: Publish released packages
         env:
           RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}
+          # OIDC 只能发布已存在且信任本工作流的包。新包名用 repository token
+          # 兜底一次；已存在的包仍然只走 OIDC trusted publishing。
+          NPM_BOOTSTRAP_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -u
           if [ -z "$RELEASE_DIRS" ]; then
@@ -367,16 +370,28 @@ jobs:
               if [ "$NPM_STATUS" = "missing" ]; then
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
                 PUBLISH_LOG="$RUNNER_TEMP/npm-publish-$(echo "$pkg_dir" | tr '/' '-').log"
-                if ! (cd "$pkg_dir" && npm publish --provenance --access public) > "$PUBLISH_LOG" 2>&1; then
+                if (cd "$pkg_dir" && npm publish --provenance --access public) > "$PUBLISH_LOG" 2>&1; then
+                  cat "$PUBLISH_LOG"
+                elif grep -q 'E404' "$PUBLISH_LOG" && [ -n "${NPM_BOOTSTRAP_TOKEN:-}" ]; then
+                  cat "$PUBLISH_LOG"
+                  echo "::warning::OIDC trusted publishing could not create $NAME; retrying once with the repository bootstrap token. Configure vibeunion/svadmin as its trusted publisher to return to OIDC-only publishing."
+                  BOOTSTRAP_LOG="$RUNNER_TEMP/npm-bootstrap-$(echo "$pkg_dir" | tr '/' '-').log"
+                  if (cd "$pkg_dir" && env NODE_AUTH_TOKEN="$NPM_BOOTSTRAP_TOKEN" npm publish --provenance --access public --ignore-scripts) > "$BOOTSTRAP_LOG" 2>&1; then
+                    cat "$BOOTSTRAP_LOG"
+                    echo "✅ Bootstrapped $NAME@$LOCAL_VER with the repository token; add its trusted publisher before trusting OIDC-only releases."
+                  else
+                    cat "$BOOTSTRAP_LOG"
+                    echo "❌ Bootstrap publish FAILED for $NAME"
+                    failed=1
+                  fi
+                else
                   cat "$PUBLISH_LOG"
                   if grep -q 'E404' "$PUBLISH_LOG"; then
-                    echo "::error::npm rejected $NAME with E404: either the package does not exist on npm yet, or this repository is not its trusted publisher. OIDC trusted publishing can only release packages that already exist and trust this workflow. Publish it once as a scope owner (npm publish --access public) and add vibeunion/svadmin as a trusted publisher, then re-run the release."
+                    echo "::error::npm rejected $NAME with E404: either the package does not exist on npm yet, or this repository is not its trusted publisher. Set the NPM_TOKEN repository secret to bootstrap it, or publish it once as a scope owner (npm publish --access public) and add vibeunion/svadmin as a trusted publisher, then re-run the release."
                   fi
                   echo "❌ Publish FAILED for $NAME"
                   failed=1
-                  continue
                 fi
-                cat "$PUBLISH_LOG"
               elif [ "$NPM_STATUS" = "published" ]; then
                 echo "⏭️ $NAME@$LOCAL_VER already on npm, skipping"
               else

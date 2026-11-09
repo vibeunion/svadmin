@@ -58,14 +58,21 @@ does not exist yet, or whose trusted publisher does not point at
 `vibeunion/svadmin` with the release workflow, fails with `E404` while every
 other package publishes fine. `@svadmin/charts`, `@svadmin/dock`,
 `@svadmin/ai-elements`, `@svadmin/clerk`, `@svadmin/drizzle`,
-`@svadmin/editor`, `@svadmin/elasticsearch`, `@svadmin/pusher`, and
-`@svadmin/storage` are in that state today.
+`@svadmin/editor`, `@svadmin/elasticsearch`, `@svadmin/pusher`,
+`@svadmin/storage`, and the ecosystem providers `@svadmin/clickhouse`,
+`@svadmin/kinde`, and `@svadmin/openfga` were in that state when this fallback
+was added.
 
-The publish job now turns that `E404` into an explicit error naming the
-remediation. To bootstrap a package, an npm account with write access to
-`@svadmin` publishes it once from a clean checkout (`npm publish --access public`
-inside the package directory) and then adds `vibeunion/svadmin` as its trusted
-publisher. Subsequent releases publish it from CI like every other package.
+The publish job first attempts OIDC trusted publishing. If npm returns `E404`
+and the repository `NPM_TOKEN` secret is configured, it retries that one package
+once with the bootstrap token and `--ignore-scripts`, then continues the release.
+Existing packages still publish with OIDC provenance.
+
+Add `vibeunion/svadmin` as the trusted publisher for newly bootstrapped packages
+when possible. Until that is configured, later releases keep using the bootstrap
+fallback for those package names and the workflow emits a warning so the missing
+trust configuration stays visible. Without `NPM_TOKEN`, `E404` still fails the
+job and prints the manual remediation steps.
 
 ## Operating rules
 
