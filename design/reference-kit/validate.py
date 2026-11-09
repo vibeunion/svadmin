@@ -197,6 +197,17 @@ def css_rule(source: str, selector: str, *, within: tuple[str, ...] = ()) -> dic
     return result
 
 
+def css_rule_one_of(source: str, selectors: tuple[str, ...], *, within: tuple[str, ...] = ()) -> dict[str, str]:
+    """读取兼容的单一规则选择器，保留旧主题和组合主题契约。"""
+    errors: list[ValidationError] = []
+    for selector in selectors:
+        try:
+            return css_rule(source, selector, within=within)
+        except ValidationError as exc:
+            errors.append(exc)
+    raise errors[0]
+
+
 def binding(value: dict, *path: str) -> str:
     current = value
     for part in path:
@@ -212,7 +223,11 @@ def validate_sources(contract: dict, root: Path) -> None:
     aliases = css_rule(css, ':root, .svadmin-theme')
     theme = css_rule(_source(root, source['themePath']), '@theme inline')
     light = css_rule(css, ':root', within=('@layer base',))
-    dark = css_rule(css, '.dark', within=('@layer base',))
+    dark = css_rule_one_of(
+        css,
+        (':is(.dark, [data-color-scheme="dark"])', '.dark'),
+        within=('@layer base',),
+    )
     mappings = contract['tokens']
     for name, alias in {'surface': 'card', 'foreground': 'foreground', 'muted': 'muted-foreground',
                         'border': 'border', 'success': 'success', 'warning': 'warning',

@@ -11,6 +11,84 @@ This is a progressive migration. Tailwind remains a build-time dependency and
 974 transitional utility aliases remain in the build map. This change does not
 claim a full handwritten-CSS rewrite or modify other packages' styling.
 
+## Dark Mode Contract
+
+The published CSS supports two equivalent dark-mode contracts:
+
+```html
+<html class="dark">
+```
+
+```html
+<html data-color-scheme="dark">
+```
+
+`data-theme` remains reserved for brand/accent presets such as `neutral`,
+`stripe`, `indigo`, and `blue`. This separation lets a host choose a dark color
+scheme and a brand preset independently:
+
+```html
+<html data-color-scheme="dark" data-theme="neutral">
+```
+
+The selectors are implemented as
+`:is(.dark, [data-color-scheme="dark"])`, so nested brand scopes keep working
+without JavaScript. Hosts should also set `color-scheme: dark` on the same
+element for native form controls and scrollbars.
+
+Switch sizing is tokenized for dense and touch layouts:
+
+```css
+:root {
+  --svadmin-switch-width: 2.25rem;
+  --svadmin-switch-height: 1.25rem;
+  --svadmin-switch-hit-area: 0.5rem;
+}
+```
+
+The switch renders an invisible `::before` hit area using the hit-area token.
+Coarse pointers automatically expand it to `0.75rem`. Hosts can override the
+token without changing component markup.
+
+## Svelte 5 and Bundler Imports
+
+For CSS-only hosts, prefer the published static classes so no component code or
+Tailwind compiler enters the host bundle:
+
+```svelte
+<input class="svadmin-input" />
+<button class="svadmin-button svadmin-button--default svadmin-button-size--default">
+  Save
+</button>
+```
+
+For interactive Svelte components, import named primitives from the package
+entry:
+
+```svelte
+<script lang="ts">
+  import { Button } from '@svadmin/ui';
+</script>
+
+<Button variant="default" size="default">Save</Button>
+```
+
+Keep one CSS import per application:
+
+```ts
+import '@svadmin/ui/app.css';
+```
+
+Do not import both `app.css` and `app.theme.css` in the same host. Tailwind
+hosts should use `app.theme.css`; non-Tailwind hosts should use `app.css`.
+
+Vite 8 / Rolldown hosts that only need markup styles should avoid deep imports
+from `@svadmin/core` source files. If a host imports the full package entry and
+the optimizer pulls workspace source into the browser chunk, exclude the source
+package from prebundling or switch the affected primitives to the documented
+`svadmin-*` classes. Keep the import path stable so a future package export can
+replace it without changing markup.
+
 ## PM Gate
 
 JTBD: integrate the admin UI into an existing application without adopting a
