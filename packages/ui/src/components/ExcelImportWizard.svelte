@@ -426,7 +426,7 @@
         <!-- 统计栏与筛选 -->
         <div class="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20 text-xs">
           <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+            <div class="flex items-center gap-1.5 text-primary font-medium">
               <CheckCircle2 size={16} />
               <span>{i18n.t('excel.validRows')}: {validationResult.validRows.length} 条</span>
             </div>
@@ -484,7 +484,7 @@
     <!-- 步骤 4：导入完成 -->
     {:else if currentStep === 4}
       <div class="flex flex-col items-center justify-center py-12 text-center">
-        <div class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-4">
+        <div class="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
           <CheckCircle2 size={32} />
         </div>
         <h4 class="text-base font-semibold text-foreground mb-1">导入任务已成功提交！</h4>

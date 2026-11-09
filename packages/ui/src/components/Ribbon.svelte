@@ -34,22 +34,22 @@
 
   const presetBgClasses: Record<string, string> = {
     primary: 'bg-primary text-primary-foreground',
-    success: 'bg-emerald-600 text-white',
-    warning: 'bg-amber-500 text-white',
+    success: 'bg-primary text-primary-foreground',
+    warning: 'bg-accent text-accent-foreground',
     destructive: 'bg-destructive text-destructive-foreground',
-    info: 'bg-sky-500 text-white',
-    purple: 'bg-violet-600 text-white',
-    pink: 'bg-rose-500 text-white',
+    info: 'bg-secondary text-secondary-foreground',
+    purple: 'bg-chart-4 text-primary-foreground',
+    pink: 'bg-chart-5 text-primary-foreground',
   };
 
   const presetCornerClasses: Record<string, string> = {
     primary: 'border-t-primary/80',
-    success: 'border-t-emerald-800',
-    warning: 'border-t-amber-700',
+    success: 'border-t-primary/70',
+    warning: 'border-t-accent/80',
     destructive: 'border-t-destructive/80',
-    info: 'border-t-sky-700',
-    purple: 'border-t-violet-800',
-    pink: 'border-t-rose-800',
+    info: 'border-t-secondary/80',
+    purple: 'border-t-chart-4/80',
+    pink: 'border-t-chart-5/80',
   };
 </script>
 
