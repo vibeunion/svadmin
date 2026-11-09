@@ -514,6 +514,13 @@
         "graphql-request",
       ],
     },
+    "packages/jsonapi": {
+      "name": "@svadmin/jsonapi",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/kinde": {
       "name": "@svadmin/kinde",
       "version": "0.2.0",
@@ -1665,6 +1672,8 @@
     "@svadmin/graphql": ["@svadmin/graphql@workspace:packages/graphql"],
 
     "@svadmin/hasura": ["@svadmin/hasura@workspace:packages/hasura"],
+
+    "@svadmin/jsonapi": ["@svadmin/jsonapi@workspace:packages/jsonapi"],
 
     "@svadmin/kinde": ["@svadmin/kinde@workspace:packages/kinde"],
 
