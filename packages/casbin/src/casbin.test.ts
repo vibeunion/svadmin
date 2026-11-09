@@ -54,7 +54,7 @@ describe('createCasbinAccessControl', () => {
   });
 
   it('queries remote Casbin REST API when enforcer is omitted', async () => {
-    const fakeFetch = mock((url: string | URL | Request, init?: RequestInit) => {
+    const fakeFetch = mock((_url: string | URL | Request, _init?: RequestInit) => {
       return Promise.resolve(
         new Response(JSON.stringify({ allowed: true }), {
           status: 200,
