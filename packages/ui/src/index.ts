@@ -40,8 +40,8 @@ export { default as ScrollableTable } from './components/ScrollableTable.svelte'
 export { default as CopyButton } from './components/CopyButton.svelte';
 export { listPaginationItems } from './components/list-pagination.js';
 export type { ListPaginationItem } from './components/list-pagination.js';
-export { default as SegmentedControl } from './components/SegmentedControl.svelte';
-export type { SegmentedControlOption } from './components/SegmentedControl.svelte';
+export { default as SegmentedControl, default as Segmented } from './components/SegmentedControl.svelte';
+export type { SegmentedControlOption, SegmentedControlOption as SegmentedOption } from './components/SegmentedControl.svelte';
 export { default as RadioGroup, default as Radio } from './components/RadioGroup.svelte';
 export type { RadioGroupOption } from './components/RadioGroup.svelte';
 export { default as TagsInput, default as InputTag } from './components/TagsInput.svelte';
@@ -374,7 +374,7 @@ export { Switch } from './components/ui/switch/index.js';
 export { Checkbox } from './components/ui/checkbox/index.js';
 export { Badge } from './components/ui/badge/index.js';
 export { default as Tag } from './components/Tag.svelte';
-export { Separator, Separator as Divider } from './components/ui/separator/index.js';
+export { Separator } from './components/ui/separator/index.js';
 export { default as Link } from './components/Link.svelte';
 export { default as Title, default as Typography } from './components/Typography.svelte';
 export type { TitleLevel } from './components/Typography.svelte';
@@ -704,6 +704,18 @@ export type {
   UsageCardProps,
   UsageMetric,
 } from './components/UsageCard.svelte';
+
+// Enterprise layout, filtering, card containers and workspace security
+export { default as Divider } from './components/Divider.svelte';
+export type { DividerProps } from './components/Divider.svelte';
+export { default as ProCard } from './components/ProCard.svelte';
+export type { ProCardProps, ProCardTab } from './components/ProCard.svelte';
+export { default as LightFilter } from './components/LightFilter.svelte';
+export type { LightFilterProps, LightFilterItem, LightFilterOption } from './components/LightFilter.svelte';
+export { default as LockScreen, default as ScreenLock } from './components/LockScreen.svelte';
+export type { LockScreenUser } from './components/LockScreen.svelte';
+export { default as GlobalShortcuts } from './components/GlobalShortcuts.svelte';
+export type { ShortcutItem } from './components/GlobalShortcuts.svelte';
 
 // Enterprise typography, clipboard and layout controls
 export { default as EllipsisText } from './components/EllipsisText.svelte';

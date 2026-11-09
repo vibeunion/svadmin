@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Moon, Sun, Search, MonitorUp } from '@lucide/svelte';
+  import { Moon, Sun, Search, MonitorUp, Lock } from '@lucide/svelte';
   import { Button } from './ui/button';
   import TooltipButton from './TooltipButton.svelte';
   import { getResolvedTheme, toggleTheme, type MenuItem } from '@svadmin/core';
@@ -31,6 +31,8 @@
     rightActions,
     siteUrl,
     menu,
+    showLock = false,
+    onlock,
   } = $props<{
     showThemeToggle?: boolean;
     showThemeSettings?: boolean;
@@ -48,6 +50,8 @@
     rightActions?: import('svelte').Snippet;
     siteUrl?: string;
     menu?: MenuItem[];
+    showLock?: boolean;
+    onlock?: () => void;
   }>();
 
   // Retrieve optional component overrides from registry
@@ -96,6 +100,12 @@
 
     {#if showThemeSettings}
       <ThemeSettingsDrawer />
+    {/if}
+
+    {#if showLock}
+      <TooltipButton tooltip={i18n.t('common.lockScreen')} onclick={() => onlock?.()} class="rounded-full">
+        <Lock class="h-4 w-4" />
+      </TooltipButton>
     {/if}
 
     {#if showFullscreen}
