@@ -15,8 +15,9 @@ const maximumInitialBytes = 1_400_000;
 // unified visual system measured 390547 gzip bytes on 2026-10-29, and the shell
 // presets plus notification and appearance panels measured 399989 gzip bytes on
 // 2026-10-29. The enterprise component suite in PR #686 measured 401661 gzip
-// bytes after the release baseline; keep a narrow headroom for runner variation.
-const maximumInitialGzipBytes = 402_000;
+// bytes after the release baseline, and the typography/fullscreen controls in
+// PR #681 measured 402140 gzip bytes; keep a narrow headroom for runner variation.
+const maximumInitialGzipBytes = 402_300;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
