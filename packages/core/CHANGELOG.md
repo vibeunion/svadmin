@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.77.0](https://github.com/vibeunion/svadmin/compare/core-v0.76.0...core-v0.77.0) (2026-11-09)
+
+
+### 🚀 Features
+
+* **ecosystem:** complete parity with auth0, socketio, saas and pro cards ([#680](https://github.com/vibeunion/svadmin/issues/680)) ([8c99dd0](https://github.com/vibeunion/svadmin/commit/8c99dd0e26628d57aa0a8e00e360342bccea8efe))
+
+
+### 🐛 Bug Fixes
+
+* **core:** support injected websocket transports ([#687](https://github.com/vibeunion/svadmin/issues/687)) ([9f38f33](https://github.com/vibeunion/svadmin/commit/9f38f33f1707cd7bad73be4d0535e4514e0b3153))
+
 ## [0.76.0](https://github.com/vibeunion/svadmin/compare/core-v0.75.0...core-v0.76.0) (2026-11-04)
 
 

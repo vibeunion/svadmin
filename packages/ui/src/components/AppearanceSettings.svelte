@@ -1,7 +1,8 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
   import { getTheme, setTheme, getColorTheme, setColorTheme, getColorPresets } from '@svadmin/core';
-  import { Check, Monitor, Moon, Sun } from '@lucide/svelte';
+  import { Check, Monitor, Moon, Sun, Layout, PanelLeft, Columns } from '@lucide/svelte';
+  import { uiPreferences, updateUiPreferences, type NavigationMode, type ContentWidth } from '../ui-preferences.svelte.js';
   import SettingsGroup from './content/SettingsGroup.svelte';
   import SettingsFieldRow from './content/SettingsFieldRow.svelte';
   import ContentPageHeader from './content/ContentPageHeader.svelte';
@@ -13,6 +14,15 @@
     { value: 'light' as const, icon: Sun, label: 'settings.light' },
     { value: 'dark' as const, icon: Moon, label: 'settings.dark' },
     { value: 'system' as const, icon: Monitor, label: 'settings.systemTheme' },
+  ];
+  const navOptions: Array<{ value: NavigationMode; icon: typeof PanelLeft; label: string }> = [
+    { value: 'side', icon: PanelLeft, label: 'settings.navSide' },
+    { value: 'top', icon: Layout, label: 'settings.navTop' },
+    { value: 'mix', icon: Columns, label: 'settings.navMix' },
+  ];
+  const widthOptions: Array<{ value: ContentWidth; label: string }> = [
+    { value: 'fixed', label: 'settings.widthFixed' },
+    { value: 'fluid', label: 'settings.widthFluid' },
   ];
   let currentTheme = $derived(getTheme());
   let currentColor = $derived(getColorTheme());
@@ -94,6 +104,65 @@
               <button type="button" aria-pressed={pageSize === size} class="px-3 py-1.5 font-mono text-xs font-medium {pageSize === size ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-accent'}" onclick={() => setPageSize(size)}>{size}</button>
             {/each}
           </div>
+        {/snippet}
+      </SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.navigationLayout')}>
+        {#snippet control()}
+          <div class="flex overflow-hidden rounded-md border border-input">
+            {#each navOptions as option (option.value)}
+              {@const active = uiPreferences.navigation === option.value}
+              <button
+                type="button"
+                aria-pressed={active}
+                class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors {active ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-accent'}"
+                onclick={() => updateUiPreferences({ navigation: option.value })}
+              >
+                <option.icon class="size-3.5" />
+                <span>{i18n.t(option.label)}</span>
+              </button>
+            {/each}
+          </div>
+        {/snippet}
+      </SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.contentWidth')}>
+        {#snippet control()}
+          <div class="flex overflow-hidden rounded-md border border-input">
+            {#each widthOptions as option (option.value)}
+              {@const active = uiPreferences.contentWidth === option.value}
+              <button
+                type="button"
+                aria-pressed={active}
+                class="px-3 py-1.5 text-xs font-medium transition-colors {active ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-accent'}"
+                onclick={() => updateUiPreferences({ contentWidth: option.value })}
+              >
+                {i18n.t(option.label)}
+              </button>
+            {/each}
+          </div>
+        {/snippet}
+      </SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.colorWeak')} description={i18n.t('settings.colorWeakDescription')}>
+        {#snippet control()}
+          <button
+            type="button"
+            aria-pressed={uiPreferences.colorWeak}
+            class="px-3 py-1.5 text-xs font-medium rounded-md border transition-colors {uiPreferences.colorWeak ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background text-muted-foreground hover:bg-accent'}"
+            onclick={() => updateUiPreferences({ colorWeak: !uiPreferences.colorWeak })}
+          >
+            {uiPreferences.colorWeak ? i18n.t('settings.enabled') : i18n.t('settings.disabled')}
+          </button>
+        {/snippet}
+      </SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.pageTransition')} description={i18n.t('settings.pageTransitionDescription')}>
+        {#snippet control()}
+          <button
+            type="button"
+            aria-pressed={uiPreferences.pageTransition}
+            class="px-3 py-1.5 text-xs font-medium rounded-md border transition-colors {uiPreferences.pageTransition ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background text-muted-foreground hover:bg-accent'}"
+            onclick={() => updateUiPreferences({ pageTransition: !uiPreferences.pageTransition })}
+          >
+            {uiPreferences.pageTransition ? i18n.t('settings.enabled') : i18n.t('settings.disabled')}
+          </button>
         {/snippet}
       </SettingsFieldRow>
     </div>

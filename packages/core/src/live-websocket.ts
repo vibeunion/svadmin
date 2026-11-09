@@ -3,6 +3,8 @@ import { createLiveSubscribers, decodeLiveMessage, notifyLiveObserver, readLiveO
 
 export interface WebSocketLiveProviderOptions {
   url: string;
+  /** Optional transport factory for Node ws or another WebSocket-compatible client. */
+  webSocketFactory?: WebSocketFactory;
   /** Retry delay in milliseconds; defaults to 3000. */
   reconnectDelay?: number;
   /** Consecutive failed reconnects; defaults to Infinity. */
@@ -12,29 +14,42 @@ export interface WebSocketLiveProviderOptions {
   onError?: (event: Event) => void;
 }
 
+export interface WebSocketLike {
+  onopen: ((event: Event) => void) | null;
+  onmessage: ((event: MessageEvent<unknown>) => void) | null;
+  onclose: ((event: CloseEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+  send(data: string): void;
+  close(): void;
+}
+
+export type WebSocketFactory = (url: string) => WebSocketLike;
+
 function configuration(options: unknown) {
-  const input = readLiveOptions(options, ['url', 'reconnectDelay', 'maxReconnects', 'onOpen', 'onClose', 'onError']);
+  const input = readLiveOptions(options, ['url', 'webSocketFactory', 'reconnectDelay', 'maxReconnects', 'onOpen', 'onClose', 'onError']);
   const url = input['url'];
+  const factory = input['webSocketFactory'];
   const reconnectDelay = input['reconnectDelay'] === undefined ? 3000 : input['reconnectDelay'];
   const maxReconnects = input['maxReconnects'] === undefined ? Infinity : input['maxReconnects'];
   if (typeof url !== 'string' || !url || typeof reconnectDelay !== 'number' ||
     !Number.isSafeInteger(reconnectDelay) || reconnectDelay < 0 || reconnectDelay > 2_147_483_647 ||
-    typeof maxReconnects !== 'number' || (maxReconnects !== Infinity && (!Number.isSafeInteger(maxReconnects) || maxReconnects < 0))) {
+    typeof maxReconnects !== 'number' || (maxReconnects !== Infinity && (!Number.isSafeInteger(maxReconnects) || maxReconnects < 0)) ||
+    (factory !== undefined && typeof factory !== 'function')) {
     throw new TypeError('Invalid WebSocket live options');
   }
   const onOpen = captureLiveObserver(input['onOpen']);
   const onClose = captureLiveObserver(input['onClose']);
   const onError = captureLiveObserver(input['onError']);
-  return { url, reconnectDelay, maxReconnects, onOpen, onClose, onError };
+  return { url, webSocketFactory: factory as WebSocketFactory | undefined, reconnectDelay, maxReconnects, onOpen, onClose, onError };
 }
 
 /** Each resource uses one checked parameter set until its last subscriber leaves. */
 export function createWebSocketLiveProvider(options: WebSocketLiveProviderOptions): LiveProvider & {
   disconnect: () => void; getStatus: () => 'connecting' | 'connected' | 'disconnected';
 } {
-  const { url, reconnectDelay, maxReconnects, onOpen, onClose, onError } = configuration(options);
+  const { url, webSocketFactory, reconnectDelay, maxReconnects, onOpen, onClose, onError } = configuration(options);
   const subscribers = createLiveSubscribers();
-  let ws: WebSocket | null = null;
+  let ws: WebSocketLike | null = null;
   let reconnectAttempts = 0;
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let status: 'connecting' | 'connected' | 'disconnected' = 'disconnected';
@@ -45,10 +60,10 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
     reconnectAttempts++;
     reconnectTimer = setTimeout(() => { reconnectTimer = undefined; connect(); }, reconnectDelay);
   }
-  function close(socket: WebSocket) {
+  function close(socket: WebSocketLike) {
     try { socket.close(); } catch { /* A retired transport cannot own current state. */ }
   }
-  function send(socket: WebSocket, message: object) {
+  function send(socket: WebSocketLike, message: object) {
     if (ws !== socket) return;
     try { socket.send(JSON.stringify(message)); }
     catch {
@@ -59,11 +74,11 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
     }
   }
   function connect() {
-    if (ws || subscribers.empty || typeof WebSocket === 'undefined') return;
+    if (ws || subscribers.empty || (!webSocketFactory && typeof WebSocket === 'undefined')) return;
     if (reconnectTimer !== undefined) { clearTimeout(reconnectTimer); reconnectTimer = undefined; }
     status = 'connecting';
-    let socket: WebSocket;
-    try { socket = new WebSocket(url); }
+    let socket: WebSocketLike;
+    try { socket = webSocketFactory ? webSocketFactory(url) : new WebSocket(url); }
     catch { status = 'disconnected'; scheduleReconnect(); return; }
     ws = socket;
     const current = () => ws === socket;

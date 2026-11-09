@@ -1,0 +1,49 @@
+{
+  "name": "@svadmin/auth0",
+  "version": "0.2.0",
+  "description": "Auth0 AuthProvider adapter for svadmin",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "keywords": [
+    "svadmin",
+    "auth0",
+    "auth",
+    "auth-provider",
+    "identity"
+  ],
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/auth0"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  },
+  "svadmin": {
+    "capabilities": [
+      "auth"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  }
+}

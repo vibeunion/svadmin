@@ -89,6 +89,7 @@ export default defineConfig({
             { slug: 'providers/data-provider' },
             { slug: 'providers/refine-adapter' },
             { slug: 'providers/auth' },
+            { slug: 'providers/auth0' },
             { slug: 'providers/router' },
             { slug: 'providers/live' },
             { slug: 'providers/elysia' },

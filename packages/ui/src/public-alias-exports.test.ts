@@ -41,6 +41,14 @@ import {
   IconCluster,
   IconApprove,
   IconReject,
+  CheckCard,
+  StatisticCard,
+  PricingCard,
+  QuotaProgressBar,
+  MaskedText,
+  SensitiveDataMask,
+  WaterMark,
+  Watermark,
   EllipsisText,
   CopyableText,
   FullscreenButton,
@@ -85,6 +93,12 @@ describe('public compatibility aliases', () => {
     expect(IconCluster).toBeDefined();
     expect(IconApprove).toBeDefined();
     expect(IconReject).toBeDefined();
+    expect(CheckCard).toBeDefined();
+    expect(StatisticCard).toBeDefined();
+    expect(PricingCard).toBeDefined();
+    expect(QuotaProgressBar).toBeDefined();
+    expect(MaskedText).toBe(SensitiveDataMask);
+    expect(WaterMark).toBe(Watermark);
     expect(EllipsisText).toBeDefined();
     expect(CopyableText).toBeDefined();
     expect(FullscreenButton).toBeDefined();

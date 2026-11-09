@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.116.0](https://github.com/vibeunion/svadmin/compare/ui-v0.115.0...ui-v0.116.0) (2026-11-09)
+
+
+### 🚀 Features
+
+* **ecosystem:** complete parity with auth0, socketio, saas and pro cards ([#680](https://github.com/vibeunion/svadmin/issues/680)) ([8c99dd0](https://github.com/vibeunion/svadmin/commit/8c99dd0e26628d57aa0a8e00e360342bccea8efe))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.6
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.77.0
+
 ## [0.115.0](https://github.com/vibeunion/svadmin/compare/ui-v0.114.0...ui-v0.115.0) (2026-11-05)
 
 
