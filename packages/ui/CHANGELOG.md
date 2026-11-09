@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.117.0](https://github.com/vibeunion/svadmin/compare/ui-v0.116.0...ui-v0.117.0) (2026-11-09)
+
+
+### 🚀 Features
+
+* **ecosystem:** add clickhouse, kinde, openfga providers and pricing table ([4887782](https://github.com/vibeunion/svadmin/commit/4887782d4d6aeef2ea868e40cfb5db30aad30da6))
+* **ui:** add FullscreenButton, EllipsisText, CopyableText and ellipsis support ([d9faffa](https://github.com/vibeunion/svadmin/commit/d9faffa79d4f05e5452f5ca948b05a454fe4300e))
+* **ui:** add LockScreen, rich Badge indicators and GlobalShortcuts suite ([13e3b88](https://github.com/vibeunion/svadmin/commit/13e3b88cfc031a24fb534b386090e70af76a00ab))
+* **ui:** data-color-scheme dark contract, switch hit area, and control states ([2f5885c](https://github.com/vibeunion/svadmin/commit/2f5885cf4e1feb644810725e2b6b6b30aebafc4a))
+
+
+### 🐛 Bug Fixes
+
+* **clickhouse:** preserve and validate filter semantics ([9234a60](https://github.com/vibeunion/svadmin/commit/9234a602dd5be40730dd7a1399831eb279993363))
+* **ui:** harden session guard and merge release baseline ([403dea8](https://github.com/vibeunion/svadmin/commit/403dea84438e79e9db1cc1824f38fcc87597e146))
+* **ui:** preserve text controls and merge release baseline ([a7e9700](https://github.com/vibeunion/svadmin/commit/a7e97009cdac2de4eaee17ba87bac82711cab375))
+* **ui:** route LockScreen avatars through MediaThumbnail state machine ([adf9bf5](https://github.com/vibeunion/svadmin/commit/adf9bf5bfdfe0d89508533442425e33ca3e41cd6))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** include ecosystem providers in fullscreen PR ([eac039f](https://github.com/vibeunion/svadmin/commit/eac039f4228bd21250a878cba6160aa393bff300))
+* **merge:** include ecosystem providers in security PR ([2523b72](https://github.com/vibeunion/svadmin/commit/2523b721c75803fe30d14261ff85e0a106570b69))
+* **merge:** include security controls in fullscreen PR ([b0303d9](https://github.com/vibeunion/svadmin/commit/b0303d9dcd8c6182667c9952d431181037f73efb))
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.7
+    * @svadmin/devtools-contract bumped to 0.3.2
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.78.0
+
 ## [0.116.0](https://github.com/vibeunion/svadmin/compare/ui-v0.115.0...ui-v0.116.0) (2026-11-09)
 
 

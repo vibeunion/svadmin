@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.9.1...auth-utils-v0.9.2) (2026-11-09)
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
 ## [0.9.1](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.9.0...auth-utils-v0.9.1) (2026-10-28)
 
 

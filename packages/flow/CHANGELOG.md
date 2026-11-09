@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/vibeunion/svadmin/compare/flow-v0.7.0...flow-v0.7.1) (2026-11-09)
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
 ## [0.7.0](https://github.com/vibeunion/svadmin/compare/flow-v0.6.2...flow-v0.7.0) (2026-10-29)
 
 

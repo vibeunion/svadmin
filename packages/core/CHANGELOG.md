@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.78.0](https://github.com/vibeunion/svadmin/compare/core-v0.77.0...core-v0.78.0) (2026-11-09)
+
+
+### 🚀 Features
+
+* **ui:** add FullscreenButton, EllipsisText, CopyableText and ellipsis support ([d9faffa](https://github.com/vibeunion/svadmin/commit/d9faffa79d4f05e5452f5ca948b05a454fe4300e))
+* **ui:** add LockScreen, rich Badge indicators and GlobalShortcuts suite ([13e3b88](https://github.com/vibeunion/svadmin/commit/13e3b88cfc031a24fb534b386090e70af76a00ab))
+
+
+### 🐛 Bug Fixes
+
+* **clickhouse:** preserve and validate filter semantics ([9234a60](https://github.com/vibeunion/svadmin/commit/9234a602dd5be40730dd7a1399831eb279993363))
+* **ui:** harden session guard and merge release baseline ([403dea8](https://github.com/vibeunion/svadmin/commit/403dea84438e79e9db1cc1824f38fcc87597e146))
+* **ui:** preserve text controls and merge release baseline ([a7e9700](https://github.com/vibeunion/svadmin/commit/a7e97009cdac2de4eaee17ba87bac82711cab375))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** include security controls in fullscreen PR ([b0303d9](https://github.com/vibeunion/svadmin/commit/b0303d9dcd8c6182667c9952d431181037f73efb))
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
 ## [0.77.0](https://github.com/vibeunion/svadmin/compare/core-v0.76.0...core-v0.77.0) (2026-11-09)
 
 
