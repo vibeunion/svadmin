@@ -89,7 +89,6 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/Icon.svelte',
   'packages/ui/src/components/ImageCropper.svelte',
   'packages/ui/src/components/ImagePreview.svelte',
-  'packages/ui/src/components/LockScreen.svelte',
   'packages/ui/src/components/MediaLibraryModal.svelte',
   'packages/ui/src/components/PresenceAvatarGroup.svelte',
   'packages/lite/src/components/LiteCommentThread.svelte',
