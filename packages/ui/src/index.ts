@@ -704,4 +704,3 @@ export { default as LockScreen, default as ScreenLock } from './components/LockS
 export type { LockScreenUser } from './components/LockScreen.svelte';
 export { default as GlobalShortcuts } from './components/GlobalShortcuts.svelte';
 export type { ShortcutItem } from './components/GlobalShortcuts.svelte';
-export type { ShortcutItem } from './components/GlobalShortcuts.svelte';

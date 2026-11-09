@@ -93,8 +93,8 @@
   const groupedShortcuts = $derived.by(() => {
     const groups: Record<string, ShortcutItem[]> = {};
     for (const item of filteredShortcuts) {
-      if (!groups[item.category]) groups[item.category] = [];
-      groups[item.category].push(item);
+      const group = groups[item.category] ?? (groups[item.category] = []);
+      group.push(item);
     }
     return groups;
   });

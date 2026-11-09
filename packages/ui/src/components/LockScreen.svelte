@@ -39,6 +39,7 @@
   let errorMsg = $state('');
   let verifying = $state(false);
   let isShaking = $state(false);
+  const initial = $derived((user?.name?.trim()?.charAt(0) || 'A').toUpperCase());
 
   // 时钟状态
   let currentTime = $state('');
@@ -89,19 +90,19 @@
     errorMsg = '';
 
     try {
-      if (onUnlock) {
-        const success = await onUnlock(password);
-        if (success) {
-          locked = false;
-          password = '';
-        } else {
-          errorMsg = i18n.t('common.passwordError');
-          triggerShake();
-        }
-      } else {
-        // 默认无鉴权回调时，只要有输入就解锁
+      if (!onUnlock) {
+        // 没有宿主鉴权回调时必须保持锁定，避免默认绕过会话保护。
+        errorMsg = i18n.t('common.passwordError');
+        triggerShake();
+        return;
+      }
+      const success = await onUnlock(password);
+      if (success) {
         locked = false;
         password = '';
+      } else {
+        errorMsg = i18n.t('common.passwordError');
+        triggerShake();
       }
     } catch {
       errorMsg = i18n.t('common.passwordError');
@@ -219,7 +220,7 @@
           {#if user?.avatar}
             <img src={user.avatar} alt={user.name || 'User'} class="h-full w-full object-cover" />
           {:else}
-            <div class="text-2xl font-semibold text-primary">{(user?.name || 'A')[0].toUpperCase()}</div>
+            <div class="text-2xl font-semibold text-primary">{initial}</div>
           {/if}
           <div class="absolute bottom-0 right-0 rounded-full bg-primary p-1 text-primary-foreground shadow-xs">
             <Lock size={12} />

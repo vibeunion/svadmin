@@ -30,6 +30,8 @@ import { createWebSocketLiveProvider } from '@svadmin/core';
 const liveProvider = createWebSocketLiveProvider({ url: 'ws://localhost:3001' });
 ```
 
+内置 Provider 使用轻量 JSON 协议，不依赖 Socket.IO。客户端发送带有 `resource` 的 `SUBSCRIBE` 和 `UNSUBSCRIBE` 消息，服务端返回带有 `resource` 与 `payload` 的 `INSERT`、`UPDATE` 或 `DELETE` 事件。任何兼容 WebSocket 的客户端都可以实现该协议。在 Node 环境中，可传入 `webSocketFactory` 使用 `ws` 等客户端，无需把 WebSocket 挂到全局对象。
+
 ### Server-Sent Events（SSE）
 
 ```typescript

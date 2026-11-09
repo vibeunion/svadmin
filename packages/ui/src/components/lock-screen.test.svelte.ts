@@ -54,4 +54,19 @@ describe('LockScreen Component', () => {
       expect(unlockMock).toHaveBeenCalledWith('secret123');
     }
   });
+
+  it('stays locked when no authentication callback is provided', async () => {
+    const { container } = render(LockScreen, { props: { locked: true } });
+    const passwordInput = container.querySelector('input[type="password"]');
+    const submitBtn = container.querySelector('button[type="button"].bg-primary');
+
+    expect(passwordInput).not.toBeNull();
+    expect(submitBtn).not.toBeNull();
+    if (passwordInput && submitBtn) {
+      await fireEvent.input(passwordInput, { target: { value: 'anything' } });
+      await fireEvent.click(submitBtn);
+    }
+
+    expect(container.querySelector('[data-svadmin-component="lock-screen"]')).not.toBeNull();
+  });
 });
