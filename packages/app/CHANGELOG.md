@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.28](https://github.com/vibeunion/svadmin/compare/app-v0.2.27...app-v0.2.28) (2026-11-09)
+
+
+### 🐛 Bug Fixes
+
+* **clickhouse:** preserve and validate filter semantics ([9234a60](https://github.com/vibeunion/svadmin/commit/9234a602dd5be40730dd7a1399831eb279993363))
+* **ui:** harden session guard and merge release baseline ([403dea8](https://github.com/vibeunion/svadmin/commit/403dea84438e79e9db1cc1824f38fcc87597e146))
+* **ui:** preserve text controls and merge release baseline ([a7e9700](https://github.com/vibeunion/svadmin/commit/a7e97009cdac2de4eaee17ba87bac82711cab375))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.78.0
+
 ## [0.2.27](https://github.com/vibeunion/svadmin/compare/app-v0.2.26...app-v0.2.27) (2026-11-09)
 
 

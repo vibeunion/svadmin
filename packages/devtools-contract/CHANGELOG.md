@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/vibeunion/svadmin/compare/devtools-contract-v0.3.1...devtools-contract-v0.3.2) (2026-11-09)
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
 ## [0.3.1](https://github.com/vibeunion/svadmin/compare/devtools-contract-v0.3.0...devtools-contract-v0.3.1) (2026-10-28)
 
 

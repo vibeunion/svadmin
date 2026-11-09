@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/vibeunion/svadmin/compare/charts-v0.2.0...charts-v0.2.1) (2026-11-09)
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
 ## [0.2.0](https://github.com/vibeunion/svadmin/compare/charts-v0.1.0...charts-v0.2.0) (2026-11-04)
 
 
