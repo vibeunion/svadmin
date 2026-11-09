@@ -11,6 +11,7 @@
     "packages/auth-utils/src/**/*.test.ts",
     "packages/auth0/src/**/*.test.ts",
     "packages/casbin/src/**/*.test.ts",
+    "packages/cerbos/src/**/*.test.ts",
     "packages/clerk/src/**/*.test.ts",
     "packages/clickhouse/src/**/*.test.ts",
     "packages/core/src/**/*.test.ts",

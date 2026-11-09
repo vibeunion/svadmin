@@ -414,6 +414,11 @@
       "release-type": "node",
       "component": "casbin",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/cerbos": {
+      "release-type": "node",
+      "component": "cerbos",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [
