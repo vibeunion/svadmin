@@ -83,6 +83,40 @@ describe('createSocketIOLiveProvider', () => {
     });
   });
 
+  it('keeps a room joined until its last subscription is released', () => {
+    const { socket, emitted } = createMockSocket();
+    const provider = createSocketIOLiveProvider(socket, { useRooms: true });
+
+    const first = provider.subscribe({ resource: 'users', callback: () => {} });
+    const second = provider.subscribe({ resource: 'users', callback: () => {} });
+
+    expect(emitted.filter(item => item.event === 'join')).toHaveLength(1);
+    first();
+    expect(emitted.filter(item => item.event === 'leave')).toHaveLength(0);
+    second();
+    expect(emitted.filter(item => item.event === 'leave')).toHaveLength(1);
+  });
+
+  it('removes all listeners when unsubscribe is called directly', () => {
+    const { socket, listeners } = createMockSocket();
+    const provider = createSocketIOLiveProvider(socket);
+
+    provider.subscribe({ resource: 'users', callback: () => {} });
+    provider.unsubscribe?.({ resource: 'users' });
+
+    expect([...listeners.values()].flat()).toHaveLength(0);
+  });
+
+  it('only listens to direct event names when explicitly enabled', () => {
+    const defaultSocket = createMockSocket();
+    createSocketIOLiveProvider(defaultSocket.socket).subscribe({ resource: 'users', callback: () => {} });
+    expect(defaultSocket.listeners.has('users:created')).toBe(false);
+
+    const directSocket = createMockSocket();
+    createSocketIOLiveProvider(directSocket.socket, { listenToDirectEvents: true }).subscribe({ resource: 'users', callback: () => {} });
+    expect(directSocket.listeners.has('users:created')).toBe(true);
+  });
+
   it('publishes LiveEvent via socket emit', () => {
     const { socket, emitted } = createMockSocket();
     const provider = createSocketIOLiveProvider(socket, { channelPrefix: 'custom-app' });

@@ -4,6 +4,7 @@ description: Connect Socket.IO realtime events to svadmin
 ---
 
 `@svadmin/socketio` bridges Socket.IO client instances into svadmin's standard `LiveProvider`.
+The adapter has no Socket.IO runtime dependency; install and construct the client in the host application.
 
 ## Installation
 
@@ -35,4 +36,5 @@ setLiveProvider(liveProvider);
 - **Resource Subscription**: Automatically subscribes to model changes and channels.
 - **Event Translation**: Maps `created`, `updated`, and `deleted` into standard `INSERT`, `UPDATE`, and `DELETE` `LiveEvent` payloads.
 - **Room Management**: Optional automatic emission of `join` / `leave` room events when subscribing and unsubscribing.
+- **Event Naming**: Namespaced events are used by default; set `listenToDirectEvents: true` only when the server also emits unprefixed resource events.
 - **Bi-directional Publishing**: Publishes outbound events using `publish(event)`.

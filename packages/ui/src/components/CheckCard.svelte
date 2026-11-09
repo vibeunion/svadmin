@@ -1,5 +1,6 @@
 <script lang="ts">
   import { untrack, type Snippet } from 'svelte';
+  import { Loader2 } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   export interface CheckCardProps {
@@ -70,8 +71,9 @@
 <div
   role="checkbox"
   aria-checked={isChecked}
-  aria-disabled={disabled}
-  tabindex={disabled ? -1 : 0}
+  aria-disabled={disabled || loading}
+  aria-busy={loading}
+  tabindex={disabled || loading ? -1 : 0}
   onclick={handleClick}
   onkeydown={handleKeyDown}
   data-svadmin-component="CheckCard"
@@ -81,11 +83,15 @@
     isChecked
       ? 'border-primary bg-primary/5 shadow-sm'
       : 'border-border hover:border-primary/50 hover:bg-muted/30',
-    disabled && 'opacity-50 cursor-not-allowed hover:border-border hover:bg-card',
+    (disabled || loading) && 'opacity-50 cursor-not-allowed hover:border-border hover:bg-card',
+    loading && 'cursor-wait',
     className
   )}
   {...restProps}
 >
+  {#if loading}
+    <Loader2 class="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+  {/if}
   <!-- Active Checkmark Ribbon in Top-Right Corner (Arco style) -->
   {#if isChecked}
     <div

@@ -36,6 +36,15 @@ export interface Auth0AuthOptions {
   loginMode?: 'redirect' | 'popup';
 }
 
+function asInternalRedirect(value: string | undefined): string | undefined {
+  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return undefined;
+  for (const character of value) {
+    const code = character.charCodeAt(0);
+    if (code <= 0x20 || code === 0x7f) return undefined;
+  }
+  return value;
+}
+
 export function createAuth0AuthProvider(
   auth0: Auth0ClientLike,
   options: Auth0AuthOptions = {},
@@ -87,7 +96,8 @@ export function createAuth0AuthProvider(
           ...params,
         });
       }
-      return { success: true, redirectTo: returnTo };
+      const redirectTo = asInternalRedirect(returnTo);
+      return redirectTo ? { success: true, redirectTo } : { success: true };
     },
 
     async check(): Promise<CheckResult> {
@@ -96,15 +106,11 @@ export function createAuth0AuthProvider(
         if (authenticated) {
           return { authenticated: true };
         }
-        return {
-          authenticated: false,
-          ...(options.loginUrl ? { redirectTo: options.loginUrl } : {}),
-        };
+        const redirectTo = asInternalRedirect(options.loginUrl);
+        return { authenticated: false, ...(redirectTo ? { redirectTo } : {}) };
       } catch {
-        return {
-          authenticated: false,
-          ...(options.loginUrl ? { redirectTo: options.loginUrl } : {}),
-        };
+        const redirectTo = asInternalRedirect(options.loginUrl);
+        return { authenticated: false, ...(redirectTo ? { redirectTo } : {}) };
       }
     },
 
@@ -136,9 +142,10 @@ export function createAuth0AuthProvider(
       const status = (error as { status?: number; statusCode?: number })?.status ??
         (error as { status?: number; statusCode?: number })?.statusCode;
       if (status === 401 || status === 403) {
+        const redirectTo = asInternalRedirect(options.loginUrl);
         return {
           logout: true,
-          redirectTo: options.loginUrl ?? '/login',
+          ...(redirectTo ? { redirectTo } : { redirectTo: '/login' }),
         };
       }
       return {};

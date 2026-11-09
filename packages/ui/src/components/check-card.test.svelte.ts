@@ -54,4 +54,17 @@ describe('CheckCard Component', () => {
       expect(onchange).not.toHaveBeenCalled();
     }
   });
+
+  it('exposes loading semantics and blocks interaction while loading', async () => {
+    const onchange = vi.fn();
+    const { container } = render(CheckCard, {
+      props: { title: '加载中', loading: true, onchange },
+    });
+
+    const root = container.querySelector('[data-svadmin-component="CheckCard"]');
+    expect(root?.getAttribute('aria-busy')).toBe('true');
+    expect(root?.getAttribute('aria-disabled')).toBe('true');
+    if (root) await fireEvent.click(root);
+    expect(onchange).not.toHaveBeenCalled();
+  });
 });

@@ -96,4 +96,12 @@ describe('QuotaProgressBar', () => {
     expect(screen.getByText('Memory Limit')).toBeTruthy();
     expect(screen.getByText('50%')).toBeTruthy();
   });
+
+  it('clamps the accessible value when usage exceeds the quota', () => {
+    render(QuotaProgressBar, { label: 'Over quota', used: 120, total: 100 });
+
+    const progressbar = screen.getByRole('progressbar');
+    expect(progressbar.getAttribute('aria-valuenow')).toBe('100');
+    expect(progressbar.getAttribute('aria-valuemax')).toBe('100');
+  });
 });

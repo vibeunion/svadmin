@@ -389,16 +389,6 @@
       "release-type": "node",
       "component": "dock",
       "changelog-path": "CHANGELOG.md"
-    },
-    "packages/auth0": {
-      "release-type": "node",
-      "component": "auth0",
-      "changelog-path": "CHANGELOG.md"
-    },
-    "packages/socketio": {
-      "release-type": "node",
-      "component": "socketio",
-      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

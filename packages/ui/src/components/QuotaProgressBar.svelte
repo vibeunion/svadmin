@@ -41,6 +41,7 @@
   }: QuotaProgressBarProps = $props();
 
   const ratio = $derived(total > 0 ? Math.min(1, Math.max(0, used / total)) : 0);
+  const boundedUsed = $derived(total > 0 ? Math.min(total, Math.max(0, used)) : 0);
   const percent = $derived(Math.round(ratio * 100));
 
   const status = $derived(
@@ -87,7 +88,7 @@
             class={cn('h-full transition-all duration-300', statusColorClass)}
             style="width: {percent}%"
             role="progressbar"
-            aria-valuenow={used}
+            aria-valuenow={boundedUsed}
             aria-valuemin={0}
             aria-valuemax={total}
             aria-label={label}
@@ -124,7 +125,7 @@
         class={cn('h-full transition-all duration-300', statusColorClass)}
         style="width: {percent}%"
         role="progressbar"
-        aria-valuenow={used}
+        aria-valuenow={boundedUsed}
         aria-valuemin={0}
         aria-valuemax={total}
         aria-label={label}

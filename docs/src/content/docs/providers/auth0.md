@@ -36,6 +36,8 @@ const authProvider = createAuth0AuthProvider(auth0Client, {
 setAuthProvider(authProvider);
 ```
 
+`logoutRedirectUri` is passed to Auth0 as its external logout return URI. The svadmin auth hooks only accept internal paths such as `/login` in their `redirectTo` result, so keep `loginUrl` relative when it is used for an in-app route.
+
 ## Features
 
 - **Universal Login**: Seamless redirect or popup authentication via Auth0.

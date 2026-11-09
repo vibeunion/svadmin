@@ -90,7 +90,7 @@ describe('createAuth0AuthProvider', () => {
     expect(loginWithPopup).toHaveBeenCalled();
   });
 
-  it('handles logout and returns redirect URL', async () => {
+  it('passes an external logout return URI to Auth0 without returning it to core navigation', async () => {
     const logout = mock(() => Promise.resolve());
     const client: Auth0ClientLike = {
       isAuthenticated: mock(() => Promise.resolve(true)),
@@ -102,10 +102,23 @@ describe('createAuth0AuthProvider', () => {
     });
     const result = await provider.logout();
     expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe('https://app.example.com/bye');
+    expect(result.redirectTo).toBeUndefined();
     expect(logout).toHaveBeenCalledWith({
       logoutParams: { returnTo: 'https://app.example.com/bye' },
     });
+  });
+
+  it('keeps internal login redirects while omitting external URLs from auth results', async () => {
+    const client: Auth0ClientLike = {
+      isAuthenticated: mock(() => Promise.resolve(false)),
+      getUser: mock(() => Promise.resolve(undefined)),
+    };
+    const internal = createAuth0AuthProvider(client, { loginUrl: '/login' });
+    const external = createAuth0AuthProvider(client, { loginUrl: 'https://app.example.com/login' });
+
+    expect((await internal.check()).redirectTo).toBe('/login');
+    expect((await external.check()).redirectTo).toBeUndefined();
+    expect((await external.onError?.({ status: 401 }))?.redirectTo).toBe('/login');
   });
 
   it('handles 401 error in onError hook', async () => {

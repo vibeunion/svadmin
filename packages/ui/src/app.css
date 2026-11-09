@@ -4699,10 +4699,6 @@ details[data-svadmin-filter][open] > :not(summary),
   height: calc(var(--svadmin-table-head-h) - 0.25rem);
 }
 
-html.svadmin-color-weak {
-  filter: invert(80%);
-}
-
 .svadmin-color-weak [data-slot='badge'],
 .svadmin-color-weak [data-svadmin-status] {
   border: 1px solid currentColor;

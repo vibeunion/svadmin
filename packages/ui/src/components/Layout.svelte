@@ -81,19 +81,19 @@
   // 混合导航模式下，当前激活的一级根菜单项
   const activeMixRoot = $derived.by(() => {
     if (navigation !== 'mix') return null;
-    if (selectedMixRootKey) {
-      const match = topLevelMenu.find((m) => m.name === selectedMixRootKey);
-      if (match) return match;
-    }
     const currentPath = getPath();
-    // 优先根据子项路径匹配根项
+    // URL 是深链接、后退和外部导航的事实来源。
     for (const item of topLevelMenu) {
-      if (item.children && item.children.some((c) => c.href && currentPath.startsWith(c.href))) {
+      if (item.children && item.children.some((c) => c.href && (currentPath === c.href || currentPath.startsWith(`${c.href}/`)))) {
         return item;
       }
       if (item.href && (currentPath === item.href || currentPath.startsWith(`${item.href}/`))) {
         return item;
       }
+    }
+    if (selectedMixRootKey) {
+      const match = topLevelMenu.find((m) => m.name === selectedMixRootKey);
+      if (match) return match;
     }
     return topLevelMenu[0] ?? null;
   });

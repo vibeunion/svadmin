@@ -36,6 +36,8 @@ const authProvider = createAuth0AuthProvider(auth0Client, {
 setAuthProvider(authProvider);
 ```
 
+`logoutRedirectUri` 只作为 Auth0 的外部登出回跳地址使用。svadmin 认证钩子的 `redirectTo` 只接受 `/login` 这类站内路径；如果 `loginUrl` 用于应用内路由，请传入相对路径。
+
 ## 特性
 
 - **Universal Login**: 支持 Auth0 标准的重定向或弹窗认证流程。

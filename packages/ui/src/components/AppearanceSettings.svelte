@@ -141,7 +141,7 @@
           </div>
         {/snippet}
       </SettingsFieldRow>
-      <SettingsFieldRow label={i18n.t('settings.colorWeak')} description="增强页面视觉对比度与图表标识纹理，便于辨识">
+      <SettingsFieldRow label={i18n.t('settings.colorWeak')} description={i18n.t('settings.colorWeakDescription')}>
         {#snippet control()}
           <button
             type="button"
@@ -149,11 +149,11 @@
             class="px-3 py-1.5 text-xs font-medium rounded-md border transition-colors {uiPreferences.colorWeak ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background text-muted-foreground hover:bg-accent'}"
             onclick={() => updateUiPreferences({ colorWeak: !uiPreferences.colorWeak })}
           >
-            {uiPreferences.colorWeak ? '已开启' : '已关闭'}
+            {uiPreferences.colorWeak ? i18n.t('settings.enabled') : i18n.t('settings.disabled')}
           </button>
         {/snippet}
       </SettingsFieldRow>
-      <SettingsFieldRow label={i18n.t('settings.pageTransition')} description="在路由切换时执行平滑过渡动画">
+      <SettingsFieldRow label={i18n.t('settings.pageTransition')} description={i18n.t('settings.pageTransitionDescription')}>
         {#snippet control()}
           <button
             type="button"
@@ -161,7 +161,7 @@
             class="px-3 py-1.5 text-xs font-medium rounded-md border transition-colors {uiPreferences.pageTransition ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background text-muted-foreground hover:bg-accent'}"
             onclick={() => updateUiPreferences({ pageTransition: !uiPreferences.pageTransition })}
           >
-            {uiPreferences.pageTransition ? '已开启' : '已关闭'}
+            {uiPreferences.pageTransition ? i18n.t('settings.enabled') : i18n.t('settings.disabled')}
           </button>
         {/snippet}
       </SettingsFieldRow>

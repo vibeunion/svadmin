@@ -16,6 +16,8 @@ export interface SocketIOLiveOptions {
   joinEvent?: string;
   /** Room leave event name. Defaults to 'leave' */
   leaveEvent?: string;
+  /** Listen to unprefixed resource events too. Defaults to false. */
+  listenToDirectEvents?: boolean;
 }
 
 type SocketEventType = 'created' | 'updated' | 'deleted';
@@ -45,12 +47,15 @@ export function createSocketIOLiveProvider(
   const useRooms = options.useRooms ?? false;
   const joinEvent = options.joinEvent ?? 'join';
   const leaveEvent = options.leaveEvent ?? 'leave';
+  const listenToDirectEvents = options.listenToDirectEvents ?? false;
+  const subscriptions = new Map<string, Set<() => void>>();
 
   return {
     subscribe({ resource, callback }): () => void {
       const roomName = `${prefix}:${resource}`;
+      const resourceSubscriptions = subscriptions.get(roomName) ?? new Set<() => void>();
 
-      if (useRooms) {
+      if (useRooms && resourceSubscriptions.size === 0) {
         socket.emit(joinEvent, { channel: roomName, resource });
       }
 
@@ -74,27 +79,34 @@ export function createSocketIOLiveProvider(
       ];
 
       for (const item of names) {
-        // Listen both on namespaced and direct event names
         socket.on(`${prefix}:${resource}:${item.type}`, item.fn);
-        socket.on(`${resource}:${item.type}`, item.fn);
+        if (listenToDirectEvents) socket.on(`${resource}:${item.type}`, item.fn);
       }
 
-      return () => {
+      let active = true;
+      const cleanup = () => {
+        if (!active) return;
+        active = false;
         for (const item of names) {
           socket.off(`${prefix}:${resource}:${item.type}`, item.fn);
-          socket.off(`${resource}:${item.type}`, item.fn);
+          if (listenToDirectEvents) socket.off(`${resource}:${item.type}`, item.fn);
         }
-        if (useRooms) {
+        resourceSubscriptions.delete(cleanup);
+        if (resourceSubscriptions.size === 0) {
+          subscriptions.delete(roomName);
+        }
+        if (useRooms && resourceSubscriptions.size === 0) {
           socket.emit(leaveEvent, { channel: roomName, resource });
         }
       };
+      resourceSubscriptions.add(cleanup);
+      subscriptions.set(roomName, resourceSubscriptions);
+      return cleanup;
     },
 
     unsubscribe({ resource }): void {
       const roomName = `${prefix}:${resource}`;
-      if (useRooms) {
-        socket.emit(leaveEvent, { channel: roomName, resource });
-      }
+      for (const cleanup of [...(subscriptions.get(roomName) ?? [])]) cleanup();
     },
 
     publish(event: LiveEvent): void {
