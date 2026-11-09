@@ -64,10 +64,10 @@ describe('createJsonApiDataProvider', () => {
 
     expect(result.total).toBe(42);
     expect(result.data.length).toBe(1);
-    expect(result.data[0].id).toBe('1');
-    expect(result.data[0].title).toBe('Getting Started with JSON:API');
-    expect(result.data[0].views).toBe(120);
-    expect(result.data[0].author).toEqual({
+    expect(result.data[0]?.['id']).toBe('1');
+    expect(result.data[0]?.['title']).toBe('Getting Started with JSON:API');
+    expect(result.data[0]?.['views']).toBe(120);
+    expect(result.data[0]?.['author']).toEqual({
       id: '99',
       name: 'John Doe',
       email: 'john@example.com',
@@ -103,8 +103,8 @@ describe('createJsonApiDataProvider', () => {
       id: '1',
     });
 
-    expect(result.data.id).toBe('1');
-    expect(result.data.title).toBe('Deep Dive');
+    expect(result.data['id']).toBe('1');
+    expect(result.data['title']).toBe('Deep Dive');
   });
 
   it('creates resource sending JSON:API envelope', async () => {
@@ -141,8 +141,8 @@ describe('createJsonApiDataProvider', () => {
       variables: { title: 'New Post' },
     });
 
-    expect(result.data.id).toBe('101');
-    expect(result.data.title).toBe('New Post');
+    expect(result.data['id']).toBe('101');
+    expect(result.data['title']).toBe('New Post');
   });
 
   it('handles deleteOne with 204 No Content', async () => {
@@ -162,6 +162,6 @@ describe('createJsonApiDataProvider', () => {
       id: '55',
     });
 
-    expect(result.data.id).toBe('55');
+    expect(result.data['id']).toBe('55');
   });
 });

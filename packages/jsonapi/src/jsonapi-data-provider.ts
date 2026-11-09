@@ -8,8 +8,8 @@ import type {
   CreateResult,
   UpdateParams,
   UpdateResult,
-  DeleteOneParams,
-  DeleteOneResult,
+  DeleteParams,
+  DeleteResult,
   CustomParams,
   CustomResult,
   BaseRecord,
@@ -113,6 +113,10 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
   }
 
   return {
+    getApiUrl(): string {
+      return baseUrl;
+    },
+
     async getList<TData extends BaseRecord = BaseRecord>(params: GetListParams): Promise<GetListResult<TData>> {
       const url = new URL(`${baseUrl}/${params.resource}`);
 
@@ -236,7 +240,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
 
       if (!doc.data || Array.isArray(doc.data)) {
         return {
-          data: { id: params.id, ...(params.variables as object) } as TData,
+          data: ({ id: params.id, ...(params.variables as object) } as unknown) as TData,
         };
       }
 
@@ -245,24 +249,29 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
       };
     },
 
-    async deleteOne<TData extends BaseRecord = BaseRecord>(params: DeleteOneParams): Promise<DeleteOneResult<TData>> {
+    async deleteOne<TData extends BaseRecord = BaseRecord>(params: DeleteParams): Promise<DeleteResult<TData>> {
       const url = `${baseUrl}/${params.resource}/${params.id}`;
       await request(url, {
         method: 'DELETE',
       });
 
       return {
-        data: { id: params.id } as TData,
+        data: ({ id: params.id } as unknown) as TData,
       };
     },
 
     async custom<TData = unknown>(params: CustomParams): Promise<CustomResult<TData>> {
       const endpoint = params.url.startsWith('http') ? params.url : `${baseUrl}/${params.url.replace(/^\/+/, '')}`;
-      const res = await request<TData>(endpoint, {
+      const requestInit: RequestInit = {
         method: params.method ?? 'GET',
-        body: params.payload ? JSON.stringify(params.payload) : undefined,
-        headers: params.headers as Record<string, string> | undefined,
-      });
+      };
+      if (params.payload !== undefined) {
+        requestInit.body = JSON.stringify(params.payload);
+      }
+      if (params.headers !== undefined) {
+        requestInit.headers = params.headers as Record<string, string>;
+      }
+      const res = await request<TData>(endpoint, requestInit);
 
       return {
         data: res,
