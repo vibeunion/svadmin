@@ -676,3 +676,12 @@ export type { RealtimeMonitorViewProps, MetricCardItem } from './components/Real
 
 // Enterprise business icons suite
 export * from './components/icons/index.js';
+
+// Enterprise typography, clipboard and layout controls
+export { default as EllipsisText } from './components/EllipsisText.svelte';
+export type { EllipsisTextProps } from './components/EllipsisText.svelte';
+export { default as CopyableText } from './components/CopyableText.svelte';
+export type { CopyableTextProps } from './components/CopyableText.svelte';
+export { default as FullscreenButton } from './components/FullscreenButton.svelte';
+export { default as FullScreenButton } from './components/FullscreenButton.svelte';
+export type { FullscreenButtonProps, FullScreenButtonProps } from './components/FullscreenButton.svelte';

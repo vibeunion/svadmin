@@ -49,6 +49,7 @@
     onnotificationread?: (item: NotificationItem) => void | Promise<void>;
     onnotificationreadall?: () => void | Promise<void>;
     onnotificationopen?: (item: NotificationItem) => void | Promise<void>;
+    showFullscreen?: boolean;
     class?: string;
   }
 
@@ -64,6 +65,7 @@
     onnotificationread,
     onnotificationreadall,
     onnotificationopen,
+    showFullscreen = true,
     class: className = '',
   }: Props = $props();
   const layoutId = $props.id();
@@ -265,6 +267,7 @@
       <Header
         {...definedOptions({ "siteUrl": siteUrl })}
         {...definedOptions({ "menu": menu })}
+        {showFullscreen}
         showSearch={true}
         showThemeToggle={true}
         notificationItems={notifications ?? []}

@@ -2,11 +2,20 @@
   import { tick, type Snippet } from 'svelte';
   import { Check, Pencil, X } from '@lucide/svelte';
   import CopyButton from './CopyButton.svelte';
+  import TypographyEllipsis from './TypographyEllipsis.svelte';
   import { cn } from '../utils.js';
 
   export type TypographyType = 'default' | 'secondary' | 'success' | 'warning' | 'danger';
 
-  interface Props {
+  export interface TypographyEllipsisConfig {
+    rows?: number;
+    expandable?: boolean;
+    expandText?: string;
+    collapseText?: string;
+    tooltip?: boolean | string;
+  }
+
+  export interface TypographyTextProps {
     text?: string;
     type?: TypographyType;
     strong?: boolean;
@@ -18,6 +27,7 @@
     copyable?: boolean;
     copyLabel?: string;
     copyDescription?: string;
+    ellipsis?: boolean | TypographyEllipsisConfig;
     editable?: boolean;
     editing?: boolean;
     multiline?: boolean;
@@ -42,6 +52,7 @@
     copyable = false,
     copyLabel,
     copyDescription,
+    ellipsis = false,
     editable = false,
     editing = $bindable(false),
     multiline = false,
@@ -52,7 +63,18 @@
     children,
     onchange,
     oncopied,
-  }: Props = $props();
+  }: TypographyTextProps = $props();
+
+  const isSingleEllipsis = $derived(ellipsis === true || (typeof ellipsis === 'object' && (!ellipsis.rows || ellipsis.rows === 1)));
+  const multiEllipsis = $derived(typeof ellipsis === 'object' && typeof ellipsis.rows === 'number' && ellipsis.rows > 1 ? ellipsis : null);
+  const ellipsisTooltip = $derived.by(() => {
+    if (!ellipsis) return undefined;
+    if (typeof ellipsis === 'object' && ellipsis.tooltip) {
+      return typeof ellipsis.tooltip === 'string' ? ellipsis.tooltip : text;
+    }
+    if (ellipsis === true) return text || undefined;
+    return undefined;
+  });
 
   let draft = $state(text);
   let input = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
@@ -117,7 +139,22 @@
       </button>
     </span>
   {:else}
-    <span class="svadmin-typography-text__content">{#if children}{@render children()}{:else}{text}{/if}</span>
+    {#if multiEllipsis}
+      <TypographyEllipsis
+        rows={multiEllipsis.rows}
+        expandable={multiEllipsis.expandable}
+        expandText={multiEllipsis.expandText}
+        collapseText={multiEllipsis.collapseText}
+      >
+        {#if children}{@render children()}{:else}{text}{/if}
+      </TypographyEllipsis>
+    {:else}
+      <span
+        class="svadmin-typography-text__content"
+        class:truncate={isSingleEllipsis && ellipsis !== false}
+        title={ellipsisTooltip}
+      >{#if children}{@render children()}{:else}{text}{/if}</span>
+    {/if}
     {#if copyable}
       <CopyButton value={text} description={copyDescription} label={copyLabel} oncopy={oncopied} class="svadmin-typography-text__action" />
     {/if}

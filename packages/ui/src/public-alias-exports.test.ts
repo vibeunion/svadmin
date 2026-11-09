@@ -41,6 +41,10 @@ import {
   IconCluster,
   IconApprove,
   IconReject,
+  EllipsisText,
+  CopyableText,
+  FullscreenButton,
+  FullScreenButton,
   message,
   notification,
   toast,
@@ -81,6 +85,10 @@ describe('public compatibility aliases', () => {
     expect(IconCluster).toBeDefined();
     expect(IconApprove).toBeDefined();
     expect(IconReject).toBeDefined();
+    expect(EllipsisText).toBeDefined();
+    expect(CopyableText).toBeDefined();
+    expect(FullscreenButton).toBeDefined();
+    expect(FullScreenButton).toBe(FullscreenButton);
   });
 
   it('keeps service aliases bound to canonical services', () => {

@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import TypographyEllipsis from './TypographyEllipsis.svelte';
+import TypographyText from './TypographyText.svelte';
 
 afterEach(() => cleanup());
 
@@ -46,5 +47,19 @@ describe('TypographyEllipsis', () => {
   it('hides the control when expandable is off', () => {
     const view = render(TypographyEllipsis, { props: { expanded: true, children: content } });
     expect(view.queryByRole('button')).toBeNull();
+  });
+
+  it('supports single line and multi-line ellipsis in TypographyText', () => {
+    const single = render(TypographyText, { text: 'Single line text', ellipsis: true });
+    const singleContent = single.container.querySelector('.svadmin-typography-text__content');
+    expect(singleContent?.classList.contains('truncate')).toBe(true);
+    expect(singleContent?.getAttribute('title')).toBe('Single line text');
+
+    const multi = render(TypographyText, {
+      text: 'Multi line text',
+      ellipsis: { rows: 3, expandable: true },
+    });
+    const multiRoot = multi.container.querySelector('.svadmin-typography-ellipsis');
+    expect(multiRoot).not.toBeNull();
   });
 });

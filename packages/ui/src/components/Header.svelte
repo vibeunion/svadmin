@@ -6,6 +6,7 @@
   import Breadcrumbs from './Breadcrumbs.svelte';
   import NotificationCenter, { type NotificationItem } from './NotificationCenter.svelte';
   import ThemeSettingsDrawer from './ThemeSettingsDrawer.svelte';
+  import FullscreenButton from './FullscreenButton.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { getComponentRegistry } from '../component-registry.svelte.js';
@@ -15,6 +16,7 @@
   let {
     showThemeToggle = false,
     showThemeSettings = true,
+    showFullscreen = false,
     showNotifications = true,
     notificationItems = [],
     notificationUnreadCount,
@@ -32,6 +34,7 @@
   } = $props<{
     showThemeToggle?: boolean;
     showThemeSettings?: boolean;
+    showFullscreen?: boolean;
     showNotifications?: boolean;
     notificationItems?: NotificationItem[];
     notificationUnreadCount?: number;
@@ -93,6 +96,10 @@
 
     {#if showThemeSettings}
       <ThemeSettingsDrawer />
+    {/if}
+
+    {#if showFullscreen}
+      <FullscreenButton />
     {/if}
 
     {#if showSearch && onSearchClick}
