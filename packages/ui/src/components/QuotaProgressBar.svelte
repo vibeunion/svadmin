@@ -9,21 +9,21 @@
     /** Total allocated quota limit */
     total: number;
     /** Metric unit suffix (e.g. 'GB', 'calls', 'seats') */
-    unit?: string;
+    unit?: string | undefined;
     /** Ratio for warning state (0-1). Defaults to 0.8 (80%) */
-    warningThreshold?: number;
+    warningThreshold?: number | undefined;
     /** Ratio for critical state (0-1). Defaults to 0.95 (95%) */
-    criticalThreshold?: number;
+    criticalThreshold?: number | undefined;
     /** Whether to display the percentage badge. Defaults to true */
-    showPercent?: boolean;
+    showPercent?: boolean | undefined;
     /** Optional custom number formatter */
-    formatter?: (val: number) => string;
+    formatter?: ((val: number) => string) | undefined;
     /** Optional extra description or action */
-    description?: string;
+    description?: string | undefined;
     /** Compact inline single-line display */
-    compact?: boolean;
+    compact?: boolean | undefined;
     /** Additional CSS classes */
-    class?: string;
+    class?: string | undefined;
   }
 
   let {
