@@ -354,6 +354,7 @@ jobs:
           fi
 
           failed=0
+          unpublished=0
           while IFS= read -r pkg_dir; do
             [ -z "$pkg_dir" ] && continue
             PKG_JSON="$pkg_dir/package.json"
@@ -381,8 +382,8 @@ jobs:
                     echo "✅ Bootstrapped $NAME@$LOCAL_VER with the repository token; add its trusted publisher before trusting OIDC-only releases."
                   else
                     cat "$BOOTSTRAP_LOG"
-                    echo "❌ Bootstrap publish FAILED for $NAME"
-                    failed=1
+                    echo "::warning::Bootstrap publish could not create $NAME; leaving it unpublished. Publish it once as a scope owner and add vibeunion/svadmin as its trusted publisher before relying on OIDC."
+                    unpublished=$((unpublished + 1))
                   fi
                 else
                   cat "$PUBLISH_LOG"
@@ -404,6 +405,10 @@ jobs:
               failed=1
             fi
           done <<< "$RELEASE_DIRS"
+
+          if [ "$unpublished" -ne 0 ]; then
+            echo "::warning::$unpublished package(s) still need a manual npm bootstrap before they can use OIDC trusted publishing"
+          fi
 
           if [ "$failed" -ne 0 ]; then
             echo "::error::One or more release packages failed to publish; see the complete package list above"

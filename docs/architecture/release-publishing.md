@@ -71,8 +71,14 @@ Existing packages still publish with OIDC provenance.
 Add `vibeunion/svadmin` as the trusted publisher for newly bootstrapped packages
 when possible. Until that is configured, later releases keep using the bootstrap
 fallback for those package names and the workflow emits a warning so the missing
-trust configuration stays visible. Without `NPM_TOKEN`, `E404` still fails the
-job and prints the manual remediation steps.
+trust configuration stays visible.
+
+If the bootstrap token also cannot create the package (for example, it has no
+write permission for the `@svadmin` scope), the workflow records a warning,
+leaves that package unpublished, and finishes the remaining packages instead of
+failing the whole release. A scope owner must publish the package once and add
+`vibeunion/svadmin` as its trusted publisher. Without `NPM_TOKEN`, `E404` still
+fails the job and prints the manual remediation steps.
 
 ## Operating rules
 

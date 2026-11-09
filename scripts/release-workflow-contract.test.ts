@@ -458,8 +458,9 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishStep).toContain(
       'env NODE_AUTH_TOKEN="$NPM_BOOTSTRAP_TOKEN" npm publish --provenance --access public --ignore-scripts',
     );
-    expect(publishStep).toContain('Bootstrap publish FAILED');
-    expect(publishStep).toContain('add its trusted publisher');
+    expect(publishStep).toContain('unpublished=$((unpublished + 1))');
+    expect(publishStep).toContain('leaving it unpublished');
+    expect(publishStep).toContain('still need a manual npm bootstrap');
     expect(publishStep.indexOf('npm publish --provenance --access public)')).toBeLessThan(
       publishStep.indexOf('NODE_AUTH_TOKEN='),
     );
