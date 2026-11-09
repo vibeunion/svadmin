@@ -36,7 +36,6 @@
     "packages/rest/src/**/*.test.ts",
     "packages/sanity/src/**/*.test.ts",
     "packages/simple-rest/src/**/*.test.ts",
-    "packages/socketio/src/**/*.test.ts",
     "packages/sso/src/**/*.test.ts",
     "packages/storage/src/**/*.test.ts",
     "packages/strapi/src/**/*.test.ts",

@@ -41,38 +41,104 @@ function sanitizeIdentifier(name: string): string {
   return name;
 }
 
-function buildWhereClause(filters?: Filter[]): string {
-  if (!filters || filters.length === 0) return '';
-  const clauses: string[] = [];
+function quoteString(value: string): string {
+  return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+}
 
-  for (const filter of filters) {
-    if ('field' in filter && filter.field) {
-      const field = sanitizeIdentifier(filter.field);
-      const op = filter.operator;
-      const value = filter.value;
+function quoteValue(value: unknown): string {
+  if (typeof value === 'string') return quoteString(value);
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) throw new Error('Unsupported ClickHouse filter value: expected a finite number');
+    return String(value);
+  }
+  if (typeof value === 'boolean') return value ? '1' : '0';
+  if (value === null) return 'NULL';
+  throw new Error(`Unsupported ClickHouse filter value: ${String(value)}`);
+}
 
-      if (op === 'eq') {
-        clauses.push(typeof value === 'string' ? `${field} = '${value.replace(/'/g, "\\'")}'` : `${field} = ${value}`);
-      } else if (op === 'ne') {
-        clauses.push(typeof value === 'string' ? `${field} != '${value.replace(/'/g, "\\'")}'` : `${field} != ${value}`);
-      } else if (op === 'lt') {
-        clauses.push(`${field} < ${Number(value)}`);
-      } else if (op === 'lte') {
-        clauses.push(`${field} <= ${Number(value)}`);
-      } else if (op === 'gt') {
-        clauses.push(`${field} > ${Number(value)}`);
-      } else if (op === 'gte') {
-        clauses.push(`${field} >= ${Number(value)}`);
-      } else if (op === 'contains') {
-        clauses.push(`${field} LIKE '%${String(value).replace(/'/g, "\\'")}%'`);
-      } else if (op === 'in' && Array.isArray(value)) {
-        const list = value.map((v) => (typeof v === 'string' ? `'${v.replace(/'/g, "\\'")}'` : String(v))).join(', ');
-        clauses.push(`${field} IN (${list})`);
+function quoteList(value: unknown, operator: string): string {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`Unsupported ClickHouse filter operator ${operator}: expected a non-empty array`);
+  }
+  return value.map(quoteValue).join(', ');
+}
+
+function escapedPattern(value: unknown): string {
+  return String(value).replaceAll('\\', '\\\\').replaceAll("'", "\\'");
+}
+
+function buildFilterClause(filter: Filter): string {
+  if ('field' in filter) {
+    const field = sanitizeIdentifier(filter.field);
+    const value = filter.value;
+    switch (filter.operator) {
+      case 'eq':
+      case 'eqs':
+        return `${field} = ${quoteValue(value)}`;
+      case 'ne':
+      case 'nes':
+        return `${field} != ${quoteValue(value)}`;
+      case 'lt':
+        return `${field} < ${quoteValue(value)}`;
+      case 'lte':
+        return `${field} <= ${quoteValue(value)}`;
+      case 'gt':
+        return `${field} > ${quoteValue(value)}`;
+      case 'gte':
+        return `${field} >= ${quoteValue(value)}`;
+      case 'in':
+        return `${field} IN (${quoteList(value, filter.operator)})`;
+      case 'nin':
+        return `${field} NOT IN (${quoteList(value, filter.operator)})`;
+      case 'ina':
+        return `hasAll(${field}, [${quoteList(value, filter.operator)}])`;
+      case 'nina':
+        return `NOT hasAll(${field}, [${quoteList(value, filter.operator)}])`;
+      case 'contains':
+      case 'containss':
+        return `${field} LIKE '%${escapedPattern(value)}%'`;
+      case 'ncontains':
+      case 'ncontainss':
+        return `${field} NOT LIKE '%${escapedPattern(value)}%'`;
+      case 'startswith':
+      case 'startswiths':
+        return `${field} LIKE '${escapedPattern(value)}%'`;
+      case 'nstartswith':
+      case 'nstartswiths':
+        return `${field} NOT LIKE '${escapedPattern(value)}%'`;
+      case 'endswith':
+      case 'endswiths':
+        return `${field} LIKE '%${escapedPattern(value)}'`;
+      case 'nendswith':
+      case 'nendswiths':
+        return `${field} NOT LIKE '%${escapedPattern(value)}'`;
+      case 'null':
+        return `${field} IS NULL`;
+      case 'nnull':
+        return `${field} IS NOT NULL`;
+      case 'between':
+      case 'nbetween': {
+        if (!Array.isArray(value) || value.length !== 2) {
+          throw new Error(`Unsupported ClickHouse filter operator ${filter.operator}: expected two values`);
+        }
+        const clause = `${field} BETWEEN ${quoteValue(value[0])} AND ${quoteValue(value[1])}`;
+        return filter.operator === 'between' ? clause : `NOT (${clause})`;
       }
+      default:
+        throw new Error(`Unsupported ClickHouse filter operator: ${String((filter as { operator: unknown }).operator)}`);
     }
   }
 
-  return clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+  if (!Array.isArray(filter.value) || filter.value.length === 0) {
+    throw new Error(`Unsupported ClickHouse logical operator ${filter.operator}: expected a non-empty filter group`);
+  }
+  const clauses = filter.value.map(buildFilterClause);
+  return `(${clauses.join(` ${filter.operator.toUpperCase()} `)})`;
+}
+
+function buildWhereClause(filters?: Filter[]): string {
+  if (!filters || filters.length === 0) return '';
+  return `WHERE ${filters.map(buildFilterClause).join(' AND ')}`;
 }
 
 function buildOrderBy(sorters?: Sort[]): string {
@@ -151,7 +217,7 @@ export function createClickHouseDataProvider(
 
     async getOne<TData extends BaseRecord = BaseRecord>(params: GetOneParams): Promise<GetOneResult<TData>> {
       const table = sanitizeIdentifier(params.resource);
-      const idStr = typeof params.id === 'string' ? `'${params.id.replace(/'/g, "\\'")}'` : params.id;
+      const idStr = typeof params.id === 'string' ? quoteString(params.id) : quoteValue(params.id);
       const sql = `SELECT * FROM ${table} WHERE id = ${idStr} LIMIT 1 FORMAT JSON`;
       const rows = await executeSql(sql);
 
@@ -169,7 +235,7 @@ export function createClickHouseDataProvider(
       const variables = params.variables as Record<string, unknown>;
       const keys = Object.keys(variables).map(sanitizeIdentifier);
       const values = Object.values(variables).map((val) =>
-        typeof val === 'string' ? `'${val.replace(/'/g, "\\'")}'` : String(val),
+        quoteValue(val),
       );
 
       const sql = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${values.join(', ')})`;
@@ -182,10 +248,10 @@ export function createClickHouseDataProvider(
 
     async update<TData extends BaseRecord = BaseRecord>(params: UpdateParams): Promise<UpdateResult<TData>> {
       const table = sanitizeIdentifier(params.resource);
-      const idStr = typeof params.id === 'string' ? `'${params.id.replace(/'/g, "\\'")}'` : params.id;
+      const idStr = typeof params.id === 'string' ? quoteString(params.id) : quoteValue(params.id);
       const variables = params.variables as Record<string, unknown>;
       const assignments = Object.entries(variables).map(([k, v]) => {
-        const val = typeof v === 'string' ? `'${v.replace(/'/g, "\\'")}'` : String(v);
+        const val = quoteValue(v);
         return `${sanitizeIdentifier(k)} = ${val}`;
       });
 
@@ -199,7 +265,7 @@ export function createClickHouseDataProvider(
 
     async deleteOne<TData extends BaseRecord = BaseRecord>(params: DeleteParams): Promise<DeleteResult<TData>> {
       const table = sanitizeIdentifier(params.resource);
-      const idStr = typeof params.id === 'string' ? `'${params.id.replace(/'/g, "\\'")}'` : params.id;
+      const idStr = typeof params.id === 'string' ? quoteString(params.id) : quoteValue(params.id);
       const sql = `ALTER TABLE ${table} DELETE WHERE id = ${idStr}`;
       await executeSql(sql);
 

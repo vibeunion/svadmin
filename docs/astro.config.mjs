@@ -93,7 +93,6 @@ export default defineConfig({
             { slug: 'providers/kinde' },
             { slug: 'providers/router' },
             { slug: 'providers/live' },
-            { slug: 'providers/socketio' },
             { slug: 'providers/clickhouse' },
             { slug: 'providers/openfga' },
             { slug: 'providers/elysia' },

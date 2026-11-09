@@ -375,11 +375,6 @@
       "component": "auth0",
       "changelog-path": "CHANGELOG.md"
     },
-    "packages/socketio": {
-      "release-type": "node",
-      "component": "socketio",
-      "changelog-path": "CHANGELOG.md"
-    },
     "packages/charts": {
       "release-type": "node",
       "component": "charts",

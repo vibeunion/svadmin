@@ -75,4 +75,45 @@ describe('createClickHouseDataProvider', () => {
 
     expect(result.data).toEqual([{ day: '2026-11-09', total: 1200 }]);
   });
+
+  it('preserves logical filters and escapes string literals', async () => {
+    const executedQueries: string[] = [];
+    const client: ClickHouseClientLike = {
+      query: mock(({ query }) => {
+        executedQueries.push(query);
+        return Promise.resolve({ json: () => Promise.resolve({ data: [{ total: 0 }] }) });
+      }),
+    };
+
+    const provider = createClickHouseDataProvider(client);
+    await provider.getList({
+      resource: 'events',
+      filters: [{
+        operator: 'or',
+        value: [
+          { field: 'event', operator: 'eq', value: "C:\\tmp'start" },
+          { field: 'event', operator: 'contains', value: 'logout' },
+        ],
+      }],
+    });
+
+    expect(executedQueries.some((query) => query.includes("(event = 'C:\\\\tmp\\'start' OR event LIKE '%logout%')"))).toBe(true);
+  });
+
+  it('fails closed for malformed filter groups and unsupported values', async () => {
+    const client: ClickHouseClientLike = {
+      query: mock(() => Promise.resolve({ json: () => Promise.resolve({ data: [] }) })),
+    };
+    const provider = createClickHouseDataProvider(client);
+
+    await expect(provider.getList({
+      resource: 'events',
+      filters: [{ operator: 'and', value: [] }],
+    })).rejects.toThrow('expected a non-empty filter group');
+
+    await expect(provider.getList({
+      resource: 'events',
+      filters: [{ field: 'event', operator: 'eq', value: { secret: true } }],
+    })).rejects.toThrow('Unsupported ClickHouse filter value');
+  });
 });
