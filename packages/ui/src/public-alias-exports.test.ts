@@ -59,6 +59,10 @@ import {
   SensitiveDataMask,
   WaterMark,
   Watermark,
+  EllipsisText,
+  CopyableText,
+  FullscreenButton,
+  FullScreenButton,
   message,
   notification,
   toast,
@@ -115,6 +119,10 @@ describe('public compatibility aliases', () => {
     expect(UsageCard).toBeDefined();
     expect(MaskedText).toBe(SensitiveDataMask);
     expect(WaterMark).toBe(Watermark);
+    expect(EllipsisText).toBeDefined();
+    expect(CopyableText).toBeDefined();
+    expect(FullscreenButton).toBeDefined();
+    expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
   });
 

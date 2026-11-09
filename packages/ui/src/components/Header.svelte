@@ -6,6 +6,7 @@
   import Breadcrumbs from './Breadcrumbs.svelte';
   import NotificationCenter, { type NotificationItem } from './NotificationCenter.svelte';
   import ThemeSettingsDrawer from './ThemeSettingsDrawer.svelte';
+  import FullscreenButton from './FullscreenButton.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { getComponentRegistry } from '../component-registry.svelte.js';
@@ -15,6 +16,7 @@
   let {
     showThemeToggle = false,
     showThemeSettings = true,
+    showFullscreen = false,
     showNotifications = true,
     notificationItems = [],
     notificationUnreadCount,
@@ -34,6 +36,7 @@
   } = $props<{
     showThemeToggle?: boolean;
     showThemeSettings?: boolean;
+    showFullscreen?: boolean;
     showNotifications?: boolean;
     notificationItems?: NotificationItem[];
     notificationUnreadCount?: number;
@@ -99,6 +102,9 @@
       <ThemeSettingsDrawer />
     {/if}
 
+    {#if showFullscreen}
+      <FullscreenButton />
+    {/if}
     {#if showLock}
       <TooltipButton tooltip={i18n.t('common.lockScreen')} onclick={() => onlock?.()} class="rounded-full">
         <Lock class="h-4 w-4" />
