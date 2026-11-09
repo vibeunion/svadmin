@@ -76,6 +76,39 @@
   const showTopNavigation = $derived(navigation === 'top' || navigation === 'mix');
   const topLevelMenu = $derived((menu ?? []).filter((item) => !item.meta?.hidden));
 
+  let selectedMixRootKey = $state<string | null>(null);
+
+  // 混合导航模式下，当前激活的一级根菜单项
+  const activeMixRoot = $derived.by(() => {
+    if (navigation !== 'mix') return null;
+    const currentPath = getPath();
+    // URL 是深链接、后退和外部导航的事实来源。
+    for (const item of topLevelMenu) {
+      if (item.children && item.children.some((c) => c.href && (currentPath === c.href || currentPath.startsWith(`${c.href}/`)))) {
+        return item;
+      }
+      if (item.href && (currentPath === item.href || currentPath.startsWith(`${item.href}/`))) {
+        return item;
+      }
+    }
+    if (selectedMixRootKey) {
+      const match = topLevelMenu.find((m) => m.name === selectedMixRootKey);
+      if (match) return match;
+    }
+    return topLevelMenu[0] ?? null;
+  });
+
+  // 在 mix 模式下，左侧侧边栏联动展示当前激活根菜单的子菜单
+  const effectiveSidebarMenu = $derived.by(() => {
+    if (navigation === 'mix' && activeMixRoot) {
+      if (activeMixRoot.children && activeMixRoot.children.length > 0) {
+        return activeMixRoot.children;
+      }
+      return [activeMixRoot];
+    }
+    return menu;
+  });
+
   const auth = $derived(adminContext.authProvider);
   let loading = $state(true);
   let identity = $state<Identity | null>(null);
@@ -236,7 +269,7 @@
     <!-- Desktop sidebar -->
     {#if showSidebar}
       <div class="svadmin-layout__desktop-sidebar">
-        <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
+        <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": effectiveSidebarMenu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
       </div>
     {/if}
 
@@ -250,7 +283,7 @@
     >
       <Sheet.Title id={`${layoutScope}-mobile-navigation-title`} class="sr-only">{title}</Sheet.Title>
       <div class="md:hidden">
-        <Sidebar collapsed={false} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />
+        <Sidebar collapsed={false} {identity} {title} {...definedOptions({ "menu": effectiveSidebarMenu })} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />
       </div>
     </Sheet.Root>
 
@@ -300,8 +333,19 @@
       {#if showTopNavigation}
         <nav class="svadmin-top-navigation" aria-label={title}>
           {#each topLevelMenu as item (item.name)}
-            {@const active = item.href ? getPath().startsWith(item.href) : false}
-            <a class="svadmin-top-navigation__item" class:is-active={active} href={item.href ?? '#'}>
+            {@const isMixActive = navigation === 'mix' && activeMixRoot?.name === item.name}
+            {@const isPathActive = item.href ? getPath().startsWith(item.href) : false}
+            {@const active = navigation === 'mix' ? isMixActive : isPathActive}
+            <a
+              class="svadmin-top-navigation__item"
+              class:is-active={active}
+              href={item.href ?? (item.children?.[0]?.href ?? '#')}
+              onclick={() => {
+                if (navigation === 'mix') {
+                  selectedMixRootKey = item.name;
+                }
+              }}
+            >
               {item.label ?? i18n.t(`menu.${item.name}`)}
             </a>
           {/each}
