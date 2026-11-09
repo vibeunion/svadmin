@@ -128,6 +128,17 @@ for (const kind of ['websocket', 'sse'] as const) {
   const create = () => kind === 'websocket' ? socket() : stream();
   const connection = () => kind === 'websocket' ? requireValue(Socket.instances.at(-1)) : requireValue(Stream.instances.at(-1));
   describe(`${kind} production transport`, () => {
+    test('uses an injected WebSocket factory when the global transport is unavailable', () => {
+      if (kind !== 'websocket') return;
+      Reflect.deleteProperty(globalThis, 'WebSocket');
+      const factory = mock((url: string) => new Socket(url));
+      const provider = socket({ url: '/custom-ws', maxReconnects: 0, webSocketFactory: factory });
+      provider.subscribe({ resource: 'posts', callback: () => {} });
+
+      expect(factory).toHaveBeenCalledWith('/custom-ws');
+      expect(Socket.instances).toHaveLength(1);
+    });
+
     test('routes checked events to exact and wildcard subscribers', () => {
       const provider = create();
       const exact = mock((_event: LiveEvent) => {});
