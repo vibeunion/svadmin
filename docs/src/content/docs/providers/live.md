@@ -30,7 +30,7 @@ import { createWebSocketLiveProvider } from '@svadmin/core';
 const liveProvider = createWebSocketLiveProvider({ url: 'ws://localhost:3001' });
 ```
 
-The built-in provider uses a small JSON protocol and has no Socket.IO dependency. The client sends `SUBSCRIBE` and `UNSUBSCRIBE` messages with a `resource`; the server sends `INSERT`, `UPDATE`, or `DELETE` events with `resource` and `payload`. Any WebSocket-compatible client can speak this protocol.
+The built-in provider uses a small JSON protocol and has no Socket.IO dependency. The client sends `SUBSCRIBE` and `UNSUBSCRIBE` messages with a `resource`; the server sends `INSERT`, `UPDATE`, or `DELETE` events with `resource` and `payload`. Any WebSocket-compatible client can speak this protocol. In a Node runtime, pass `webSocketFactory` to use a client such as `ws` without installing a global `WebSocket`.
 
 ### Server-Sent Events (SSE)
 
