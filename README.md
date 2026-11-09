@@ -112,6 +112,8 @@
 | `@svadmin/elasticsearch`| Full-text search and document provider       |
 | `@svadmin/pusher`       | Realtime event provider                     |
 | `@svadmin/clerk`        | External authentication provider            |
+| `@svadmin/auth0`        | Auth0 identity and authentication provider  |
+| `@svadmin/socketio`     | Socket.IO realtime live provider            |
 
 The dedicated `@svadmin/parse` wrapper has been retired. Host applications can
 initialize a Parse provider and pass it to `createRefineAdapter`; see the

@@ -182,6 +182,13 @@
         "typescript": "^7.0.2",
       },
     },
+    "packages/auth0": {
+      "name": "@svadmin/auth0",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/charts": {
       "name": "@svadmin/charts",
       "version": "0.2.0",
@@ -653,6 +660,13 @@
         "@refinedev/simple-rest",
         "@svadmin/core",
       ],
+    },
+    "packages/socketio": {
+      "name": "@svadmin/socketio",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
     },
     "packages/sso": {
       "name": "@svadmin/sso",
@@ -1582,6 +1596,8 @@
 
     "@svadmin/auth-utils": ["@svadmin/auth-utils@workspace:packages/auth-utils"],
 
+    "@svadmin/auth0": ["@svadmin/auth0@workspace:packages/auth0"],
+
     "@svadmin/charts": ["@svadmin/charts@workspace:packages/charts"],
 
     "@svadmin/clerk": ["@svadmin/clerk@workspace:packages/clerk"],
@@ -1637,6 +1653,8 @@
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
     "@svadmin/simple-rest": ["@svadmin/simple-rest@workspace:packages/simple-rest"],
+
+    "@svadmin/socketio": ["@svadmin/socketio@workspace:packages/socketio"],
 
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 

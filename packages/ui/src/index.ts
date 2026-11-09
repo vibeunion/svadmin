@@ -676,3 +676,19 @@ export type { RealtimeMonitorViewProps, MetricCardItem } from './components/Real
 
 // Enterprise business icons suite
 export * from './components/icons/index.js';
+
+// Enterprise card-level selection and analytical statistics components
+export { default as CheckCard } from './components/CheckCard.svelte';
+export type { CheckCardProps } from './components/CheckCard.svelte';
+export { default as StatisticCard } from './components/StatisticCard.svelte';
+export type { StatisticCardProps, StatisticTrendItem } from './components/StatisticCard.svelte';
+
+// Canonical compatibility aliases for security and masking
+export { default as MaskedText } from './components/SensitiveDataMask.svelte';
+export { default as WaterMark } from './components/Watermark.svelte';
+
+// Enterprise SaaS billing, pricing, and quota management components
+export { default as PricingCard } from './components/PricingCard.svelte';
+export type { PricingCardProps, PricingFeature } from './components/PricingCard.svelte';
+export { default as QuotaProgressBar } from './components/QuotaProgressBar.svelte';
+export type { QuotaProgressBarProps } from './components/QuotaProgressBar.svelte';

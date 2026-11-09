@@ -41,6 +41,14 @@ import {
   IconCluster,
   IconApprove,
   IconReject,
+  CheckCard,
+  StatisticCard,
+  PricingCard,
+  QuotaProgressBar,
+  MaskedText,
+  SensitiveDataMask,
+  WaterMark,
+  Watermark,
   message,
   notification,
   toast,
@@ -81,6 +89,12 @@ describe('public compatibility aliases', () => {
     expect(IconCluster).toBeDefined();
     expect(IconApprove).toBeDefined();
     expect(IconReject).toBeDefined();
+    expect(CheckCard).toBeDefined();
+    expect(StatisticCard).toBeDefined();
+    expect(PricingCard).toBeDefined();
+    expect(QuotaProgressBar).toBeDefined();
+    expect(MaskedText).toBe(SensitiveDataMask);
+    expect(WaterMark).toBe(Watermark);
   });
 
   it('keeps service aliases bound to canonical services', () => {
