@@ -5,6 +5,7 @@
   },
   "exclude": [
     "node_modules", "dist",
+    "packages/ably/src/**/*.test.ts",
     "packages/airtable/src/**/*.test.ts",
     "packages/appwrite/src/**/*.test.ts",
     "packages/auth-utils/src/**/*.test.ts",
