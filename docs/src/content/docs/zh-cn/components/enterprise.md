@@ -607,6 +607,64 @@ const fields: FieldDefinition[] = [
 />
 ```
 
+### `<GaugeChart>` 与 `<MetricGrid>`
+
+企业级大屏与仪表盘半环刻度仪与响应式度量指标网格套件：
+- **`<GaugeChart>` (SpeedometerGauge)**：
+  - 纯前端 SVG 矢量平滑渲染，支持 180° 半环、240° 速度计圆弧以及 270° 宽弧形刻度（`type="half" | "arc" | "circle"`）。
+  - 多段阈值告警色带（如 0~60 正常绿、60~85 预警黄、85~100 危险红），深度接入 SVAdmin 语义设计系统 Tokens（`var(--success)`、`var(--warning)`、`var(--destructive)`）。
+  - 双重呈现模式：平滑圆弧进度条、机械指示指针带旋转转轴、或两者兼具（`mode="progress" | "needle" | "both"`）。
+  - 自定义刻度线与基准目标参考线（`target={80}`、`targetLabel="SLA 基线"`）。
+  - 完整可访问性契约支持（`role="meter"`、`aria-valuenow`、`aria-valuemin`、`aria-valuemax`）。
+- **`<MetricGrid>` (DashboardMetricGrid)**：
+  - 自适应断点响应式网格布局，支持 1~6 列及自适应排版（`cols="auto"`）。
+  - 内置骨架屏加载态支持（`loading={true}`、`skeletonCount={4}`）。
+  - 内置空数据态占位支持（`empty={true}`、`emptyMessage="暂无指标监控数据"`）。
+  - 无缝承载 `<GaugeChart>`、`<StatisticCard>`、`<MetricStrip>` 等各类度量卡片与图表。
+
+```svelte
+<script lang="ts">
+  import { GaugeChart, MetricGrid, StatisticCard } from '@svadmin/ui';
+
+  let cpuLoad = 78.5;
+  let slaScore = 99.4;
+</script>
+
+<MetricGrid title="基础设施监控看板" description="生产集群实时期望指标与水位监控" cols={3}>
+  <GaugeChart
+    value={cpuLoad}
+    label="CPU 负载率"
+    unit="%"
+    type="arc"
+    mode="both"
+    target={80}
+    targetLabel="SLA 告警阈值"
+    subtext="峰值：业务高峰期达 92.4%"
+  />
+
+  <GaugeChart
+    value={slaScore}
+    min={95}
+    max={100}
+    label="SLA 服务可用率"
+    unit="%"
+    type="half"
+    mode="progress"
+    thresholds={[
+      { value: 98, tone: 'destructive', label: '违约告警' },
+      { value: 99, tone: 'warning', label: '轻度风险' },
+      { value: 100, tone: 'success', label: '健康达标' }
+    ]}
+  />
+
+  <StatisticCard
+    title="今日并发请求总数"
+    value="1,428,950"
+    trend={{ value: 12.8, label: '较昨日同时段' }}
+  />
+</MetricGrid>
+```
+
 ---
 
 ## 微前端与嵌入式沙箱容器（MicroAppFrame / EmbeddedSandbox）
