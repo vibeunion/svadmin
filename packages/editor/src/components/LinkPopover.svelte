@@ -3,10 +3,10 @@
   import { ExternalLink, Unlink, Check } from '@lucide/svelte';
   import { t } from '@svadmin/core';
 
-  let { editor, onclose } = $props<{
+  let { editor, onclose }: {
     editor: Editor;
     onclose?: () => void;
-  }>();
+  } = $props();
 
   let url = $state('');
   let openInNewTab = $state(true);

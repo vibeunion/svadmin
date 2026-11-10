@@ -13,7 +13,7 @@
   import type { ReceivedMailFolder } from '../../providers/inMemoryDb';
   import { mailSourceFingerprint } from '../../providers/mail-source';
 
-  let { resourceName = 'mail_inbox' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'mail_inbox' }: { resourceName?: string } = $props();
   const i18n = useTranslation();
   const context = captureAdminContext();
   let mounted = false;

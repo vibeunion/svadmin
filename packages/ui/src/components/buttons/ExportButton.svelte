@@ -25,7 +25,7 @@
     format = 'csv',
     meta,
     class: className = '',
-  } = $props<{
+  }: {
     resource: string;
     label?: string;
     children?: Snippet;
@@ -42,7 +42,7 @@
     format?: ExportFormat;
     meta?: Record<string, unknown>;
     class?: string;
-  }>();
+  } = $props();
 
   const binding = useResourceContract(() => resource);
   const can = useCan(() => ({

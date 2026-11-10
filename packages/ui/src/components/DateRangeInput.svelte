@@ -15,28 +15,28 @@
   export type DateRangePreset = NonNullable<DateInputOptions['presets']>[number];
 
   interface Props {
-    value?: DateRangeInputValue | null;
-    mode?: DateTimeInputMode;
-    valueMode?: DateTimeValueMode;
-    timeZone?: string;
-    disambiguation?: DateTimeDisambiguation;
-    min?: string;
-    max?: string;
-    step?: number;
-    disabledDate?: (date: string) => boolean;
-    presets?: DateRangePreset[];
-    startId?: string;
-    endId?: string;
-    startName?: string;
-    endName?: string;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
-    describedby?: string;
-    startAriaLabel?: string;
-    endAriaLabel?: string;
-    class?: string;
-    onchange?: (value: DateRangeInputValue) => void;
+    value?: DateRangeInputValue | null | undefined;
+    mode?: DateTimeInputMode | undefined;
+    valueMode?: DateTimeValueMode | undefined;
+    timeZone?: string | undefined;
+    disambiguation?: DateTimeDisambiguation | undefined;
+    min?: string | undefined;
+    max?: string | undefined;
+    step?: number | undefined;
+    disabledDate?: ((date: string) => boolean) | undefined;
+    presets?: DateRangePreset[] | undefined;
+    startId?: string | undefined;
+    endId?: string | undefined;
+    startName?: string | undefined;
+    endName?: string | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
+    describedby?: string | undefined;
+    startAriaLabel?: string | undefined;
+    endAriaLabel?: string | undefined;
+    class?: string | undefined;
+    onchange?: ((value: DateRangeInputValue) => void) | undefined;
   }
 
   let {

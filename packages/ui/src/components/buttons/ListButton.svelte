@@ -6,14 +6,14 @@
 
   const i18n = useTranslation();
 
-  let { resource: resourceName, hideText = false, label, children, onBeforeNavigate, class: className = '' } = $props<{
+  let { resource: resourceName, hideText = false, label, children, onBeforeNavigate, class: className = '' }: {
     resource: string;
     hideText?: boolean;
     label?: string;
     children?: Snippet;
     onBeforeNavigate?: (navigate: () => void) => void;
     class?: string;
-  }>();
+  } = $props();
 
   const nav = useNavigation();
   const res = $derived((() => {

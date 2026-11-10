@@ -9,7 +9,7 @@
   import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
   import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
 
-  let { resourceName = 'crm_accounts' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'crm_accounts' }: { resourceName?: string } = $props();
   const i18n = useTranslation();
   const isZh = $derived(i18n.locale === 'zh-CN');
   let view = $state(readHashView('default'));

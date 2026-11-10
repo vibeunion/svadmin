@@ -3,11 +3,11 @@
   import { ImageIcon, Upload, Link as LinkIcon, RotateCw } from '@lucide/svelte';
   import { t } from '@svadmin/core';
 
-  let { editor, onUpload, onclose } = $props<{
+  let { editor, onUpload, onclose }: {
     editor: Editor;
     onUpload?: (file: File) => Promise<string>;
     onclose?: () => void;
-  }>();
+  } = $props();
 
   let mode: 'url' | 'upload' = $state('url');
   let url = $state('');

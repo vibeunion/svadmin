@@ -6,9 +6,7 @@
 
   const i18n = useTranslation();
 
-  let { open = $bindable(false), title, message = '',
-    confirmText, cancelText, variant = 'danger',
-    confirming = false, onconfirm, oncancel } = $props<{
+  type Props = {
     open?: boolean;
     title?: string;
     message?: string;
@@ -18,7 +16,11 @@
     confirming?: boolean;
     onconfirm: () => void;
     oncancel: () => void;
-  }>();
+  };
+
+  let { open = $bindable(false), title, message = '',
+    confirmText, cancelText, variant = 'danger',
+    confirming = false, onconfirm, oncancel }: Props = $props();
 
   const variantMap = {
     danger: 'destructive' as const,

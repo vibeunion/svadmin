@@ -20,16 +20,16 @@
   }
 
   interface Props {
-    id?: string;
+    id?: string | undefined;
     field: FieldDefinition;
     value: unknown;
     onchange: (value: unknown) => void;
-    disabled?: boolean;
-    invalid?: boolean;
-    describedby?: string;
-    upload?: UploadHandler;
-    cancelUpload?: UploadCancelHandler;
-    onUploadStateChange?: (state: UploadState) => void;
+    disabled?: boolean | undefined;
+    invalid?: boolean | undefined;
+    describedby?: string | undefined;
+    upload?: UploadHandler | undefined;
+    cancelUpload?: UploadCancelHandler | undefined;
+    onUploadStateChange?: ((state: UploadState) => void) | undefined;
   }
 
   let {
