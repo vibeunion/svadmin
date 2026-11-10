@@ -42,6 +42,8 @@ jobs:
           bun run --cwd packages/ui build
       - name: Install pinned real SVAR in isolated consumer
         run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
+      - name: Repair upstream SVAR declaration self-import
+        run: node scripts/fixtures/svar-grid/repair-upstream-types.mjs
       - name: Verify adapter and Surface lint
         run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts packages/ui/src/components/AutoTable.svelte packages/ui/src/components/auto-table-grid.ts packages/surface/src/svar*.ts packages/surface/src/components/Svar*.svelte scripts/fixtures/svar-grid --max-warnings 0
       - name: Verify all adapter unit tests
@@ -71,7 +73,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git diff --exit-code -- bun.lock package.json packages/ui/package.json
-          git fetch --depth=1 origin "$BASE_SHA"
+          git fetch --no-tags origin "$BASE_SHA"
           git diff --check "$BASE_SHA" HEAD
       - uses: actions/upload-artifact@v7
         if: always()

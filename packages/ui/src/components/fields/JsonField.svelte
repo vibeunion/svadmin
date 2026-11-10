@@ -6,9 +6,9 @@
 
   const i18n = useTranslation();
 
-  let { value } = $props<{
+  let { value }: {
     value: unknown;
-  }>();
+  } = $props();
 
   let expanded = $state(false);
   let copied = $state(false);

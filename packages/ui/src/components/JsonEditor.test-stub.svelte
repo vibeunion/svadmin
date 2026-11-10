@@ -2,10 +2,10 @@
   let {
     content = { json: undefined },
     onChange,
-  } = $props<{
+  }: {
     content?: { json?: unknown };
     onChange?: (updated: { content: { json?: unknown } }) => void;
-  }>();
+  } = $props();
 
   const text = $derived(JSON.stringify(content.json ?? null, null, 2));
 

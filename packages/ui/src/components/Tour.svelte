@@ -22,6 +22,7 @@
     onfinish?: () => void;
     onclose?: () => void;
     onstepchange?: (index: number) => void;
+    storageKey?: string;
     class?: string;
     children?: Snippet<[TourStep, number]>;
   }
@@ -35,6 +36,7 @@
     previousText = 'Back',
     finishText = 'Done',
     skipText = 'Skip',
+    storageKey,
     onfinish,
     onclose,
     onstepchange,
@@ -76,6 +78,9 @@
   }
 
   function close(): void {
+    if (storageKey && typeof localStorage !== 'undefined') {
+      try { localStorage.setItem(storageKey, 'true'); } catch { /* ignore */ }
+    }
     open = false;
     onclose?.();
   }
@@ -88,6 +93,9 @@
   }
 
   function finish(): void {
+    if (storageKey && typeof localStorage !== 'undefined') {
+      try { localStorage.setItem(storageKey, 'true'); } catch { /* ignore */ }
+    }
     open = false;
     onfinish?.();
   }
@@ -147,7 +155,7 @@
 </script>
 
 {#if open}
-  <div data-targeted={rect ? 'true' : 'false'} class={cn('svadmin-tour', className)}>
+  <div data-svadmin-component="TourGuide" data-targeted={rect ? 'true' : 'false'} class={cn('svadmin-tour', className)}>
     <button type="button" tabindex="-1" class="svadmin-tour__dismiss" aria-label={skipText} onclick={close}></button>
     {#if rect}
       <div

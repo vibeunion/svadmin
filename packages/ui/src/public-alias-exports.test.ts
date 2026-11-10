@@ -49,6 +49,14 @@ import {
   SafeDeleteConfirm,
   DoubleCheckModal,
   SliderCaptcha,
+  Tour,
+  TourGuide,
+  TrendIndicator,
+  Trend,
+  SignaturePad,
+  VirtualTreeSelect,
+  CronExpressionBuilder,
+  OrgChart,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -141,6 +149,14 @@ describe('public compatibility aliases', () => {
     expect(SafeDeleteConfirm).toBeDefined();
     expect(DoubleCheckModal).toBe(SafeDeleteConfirm);
     expect(SliderCaptcha).toBeDefined();
+    expect(Tour).toBeDefined();
+    expect(TourGuide).toBe(Tour);
+    expect(TrendIndicator).toBeDefined();
+    expect(Trend).toBe(TrendIndicator);
+    expect(SignaturePad).toBeDefined();
+    expect(VirtualTreeSelect).toBeDefined();
+    expect(CronExpressionBuilder).toBeDefined();
+    expect(OrgChart).toBeDefined();
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

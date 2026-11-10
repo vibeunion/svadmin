@@ -40,16 +40,16 @@
     }
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^7.3.0",
-    "@testing-library/dom": "^10.4.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/svelte": "^5.4.2",
     "@types/d3-force": "^3.0.10",
     "@types/d3-hierarchy": "^3.1.7",
     "@types/d3-sankey": "^0.12.5",
     "happy-dom": "^21.0.4",
-    "layerchart": "^2.9.1",
-    "svelte": "5.57.1",
-    "vitest": "^4.1.11"
+    "layerchart": "^2.9.2",
+    "svelte": "5.57.3",
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
@@ -66,7 +66,7 @@
     "directory": "packages/charts"
   },
   "dependencies": {
-    "d3-force": "^3.0.0",
-    "d3-hierarchy": "^3.1.2"
+    "d3-force": "^3.0.1",
+    "d3-hierarchy": "^3.1.3"
   }
 }

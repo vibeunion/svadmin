@@ -29,7 +29,7 @@
     identifierPlaceholder,
     passwordLabel,
     loginButtonLabel,
-  } = $props<{
+  }: {
     title?: string;
     onSuccess?: () => void;
     socialProviders?: SocialProvider[];
@@ -40,7 +40,7 @@
     identifierPlaceholder?: string;
     passwordLabel?: string;
     loginButtonLabel?: string;
-  }>();
+  } = $props();
 
   const adminContext = captureAdminContext();
   const login = useLogin({ successNotification: false, errorMessage: false });

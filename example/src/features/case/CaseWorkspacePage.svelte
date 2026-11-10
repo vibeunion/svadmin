@@ -5,7 +5,7 @@
   import { createCaseWorkspaceState, isCaseStageId } from './case-workspace.svelte';
   import { createCaseActions } from './case-actions';
 
-  let { resourceName = 'case_workspace' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'case_workspace' }: { resourceName?: string } = $props();
   const i18n = useTranslation();
   const isZh = $derived(i18n.locale === 'zh-CN');
   const caseState = createCaseWorkspaceState();

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Badge } from '../ui/badge/index.js';
 
-  let { value, options } = $props<{
+  let { value, options }: {
     value: (string | number)[] | null | undefined;
     options?: { label: string; value: string | number }[];
-  }>();
+  } = $props();
 
   const items = $derived(Array.isArray(value) ? value : []);
 </script>

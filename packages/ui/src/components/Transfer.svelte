@@ -19,22 +19,22 @@
   const i18n = useTranslation();
 
   interface Props {
-    id?: string;
-    labelledby?: string;
-    describedby?: string;
-    invalid?: boolean;
-    dataSource?: TransferItem[];
-    targetKeys?: (string | number)[];
-    titles?: [string, string];
-    searchable?: boolean;
-    disabled?: boolean;
-    class?: string;
+    id?: string | undefined;
+    labelledby?: string | undefined;
+    describedby?: string | undefined;
+    invalid?: boolean | undefined;
+    dataSource?: TransferItem[] | undefined;
+    targetKeys?: (string | number)[] | undefined;
+    titles?: [string, string] | undefined;
+    searchable?: boolean | undefined;
+    disabled?: boolean | undefined;
+    class?: string | undefined;
     onchange?: (
       nextTargetKeys: (string | number)[],
       direction: 'left' | 'right',
       moveKeys: (string | number)[]
     ) => void;
-    renderItem?: Snippet<[{ item: TransferItem; direction: 'left' | 'right' }]>;
+    renderItem?: Snippet<[{ item: TransferItem; direction: 'left' | 'right' }]> | undefined;
   }
 
   let {

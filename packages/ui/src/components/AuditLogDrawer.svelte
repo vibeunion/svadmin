@@ -18,14 +18,15 @@
     loadEntries,
     title,
     description,
-  } = $props<{
+  }: {
     open: boolean;
     resource: string;
     recordId?: string | number | undefined;
+    /** Optional loader; defaults to the AdminContext auditLogProvider. */
     loadEntries?: AuditLogDrawerLoader | undefined;
     title?: string | undefined;
     description?: string | undefined;
-  }>();
+  } = $props();
 
   let logs = $state<AuditEntry[]>([]);
   let isLoading = $state(false);
@@ -81,7 +82,8 @@
       })
       .map((entry) => {
         const changes = computeChanges(entry.previousData, entry.data);
-        const metaIp = entry.meta && typeof entry.meta['ip'] === 'string' ? (entry.meta['ip'] as string) : undefined;
+        const metaValue = entry.meta?.['ip'];
+        const metaIp = typeof metaValue === 'string' ? metaValue : undefined;
         const ip = entry.ipAddress || metaIp;
         return {
           id: String(entry.id ?? Math.random()),

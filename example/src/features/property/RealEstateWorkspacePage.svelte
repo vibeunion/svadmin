@@ -13,7 +13,7 @@
   import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
   import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
 
-  let { resourceName = 'properties' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'properties' }: { resourceName?: string } = $props();
   const i18n = useTranslation();
   const isZh = $derived(i18n.locale === 'zh-CN');
   let view = $state(readHashView('portfolio'));

@@ -1,5 +1,5 @@
 diff --git a/dist/main/lib/webauthn.d.ts b/dist/main/lib/webauthn.d.ts
-index 52871231b278088e0cac078acdfc0cf7dc9744da..d6b6e7552abd28b564fff75aab121b3d8f9660d9 100644
+index 52871231b278088e0cac078acdfc0cf7dc9744da..b3e7482f4cdeac93135762b1d214865a72439573 100644
 --- a/dist/main/lib/webauthn.d.ts
 +++ b/dist/main/lib/webauthn.d.ts
 @@ -72,6 +72,8 @@ export declare function deserializeCredentialRequestOptions(options: ServerCrede
@@ -30,7 +30,7 @@ index 52871231b278088e0cac078acdfc0cf7dc9744da..d6b6e7552abd28b564fff75aab121b3d
   * A simple test to determine if a hostname is a properly-formatted domain name.
   * Considers localhost valid for development environments.
 diff --git a/dist/main/lib/webauthn.dom.d.ts b/dist/main/lib/webauthn.dom.d.ts
-index 2b004e46b6a469572989fed4e10c644fff42fa3d..f5440abc54a297c5bfa4cd5d5c6c4ccf3c4faddf 100644
+index 2b004e46b6a469572989fed4e10c644fff42fa3d..8c9ddd93a4adcdcef105b58435473400affcb2b4 100644
 --- a/dist/main/lib/webauthn.dom.d.ts
 +++ b/dist/main/lib/webauthn.dom.d.ts
 @@ -223,7 +223,7 @@ export interface RegistrationResponseJSON {
@@ -78,7 +78,7 @@ index 2b004e46b6a469572989fed4e10c644fff42fa3d..f5440abc54a297c5bfa4cd5d5c6c4ccf
       * The public key in base64url format.
       * @see {@link https://w3c.github.io/webauthn/#dom-authenticatorattestationresponse-getpublickey W3C - getPublicKey}
 diff --git a/dist/main/lib/webauthn.js b/dist/main/lib/webauthn.js
-index 35e1c8972bda4bbeeaebff7c5dcae60862d0e59a..49ff3c8a0d05c3c796b195f9909f7c65eded87f7 100644
+index 5a329d7c7e7897f3ba37212e5298772e0dc3cf3e..2357fb8375628cb95a226075a1dd25bf23b20a98 100644
 --- a/dist/main/lib/webauthn.js
 +++ b/dist/main/lib/webauthn.js
 @@ -13,6 +13,7 @@ exports.mergeCredentialCreationOptions = mergeCredentialCreationOptions;
@@ -269,7 +269,7 @@ index 0000000000000000000000000000000000000000..bbd2f7032e36ad14131f7bbbc120825f
 +    return output;
 +}
 diff --git a/dist/module/lib/webauthn.d.ts b/dist/module/lib/webauthn.d.ts
-index 52871231b278088e0cac078acdfc0cf7dc9744da..d6b6e7552abd28b564fff75aab121b3d8f9660d9 100644
+index 52871231b278088e0cac078acdfc0cf7dc9744da..b3e7482f4cdeac93135762b1d214865a72439573 100644
 --- a/dist/module/lib/webauthn.d.ts
 +++ b/dist/module/lib/webauthn.d.ts
 @@ -72,6 +72,8 @@ export declare function deserializeCredentialRequestOptions(options: ServerCrede
@@ -300,7 +300,7 @@ index 52871231b278088e0cac078acdfc0cf7dc9744da..d6b6e7552abd28b564fff75aab121b3d
   * A simple test to determine if a hostname is a properly-formatted domain name.
   * Considers localhost valid for development environments.
 diff --git a/dist/module/lib/webauthn.dom.d.ts b/dist/module/lib/webauthn.dom.d.ts
-index 2b004e46b6a469572989fed4e10c644fff42fa3d..f5440abc54a297c5bfa4cd5d5c6c4ccf3c4faddf 100644
+index 2b004e46b6a469572989fed4e10c644fff42fa3d..8c9ddd93a4adcdcef105b58435473400affcb2b4 100644
 --- a/dist/module/lib/webauthn.dom.d.ts
 +++ b/dist/module/lib/webauthn.dom.d.ts
 @@ -223,7 +223,7 @@ export interface RegistrationResponseJSON {
@@ -348,7 +348,7 @@ index 2b004e46b6a469572989fed4e10c644fff42fa3d..f5440abc54a297c5bfa4cd5d5c6c4ccf
       * The public key in base64url format.
       * @see {@link https://w3c.github.io/webauthn/#dom-authenticatorattestationresponse-getpublickey W3C - getPublicKey}
 diff --git a/dist/module/lib/webauthn.js b/dist/module/lib/webauthn.js
-index 574fb876f9a7adc661804b3f460f413c2a9471ab..af0b21479fc82117d77557988f26e8658381b006 100644
+index 2cbcdd1d983e09e9a955b12fbff92c30a351a320..b6bba4b6ad672760ef610edd94997edadbfb0091 100644
 --- a/dist/module/lib/webauthn.js
 +++ b/dist/module/lib/webauthn.js
 @@ -1,5 +1,6 @@
@@ -663,7 +663,7 @@ index 0000000000000000000000000000000000000000..9c4f610dcb5c1aa6816a690291aa17d0
 +  return output
 +}
 diff --git a/src/lib/webauthn.ts b/src/lib/webauthn.ts
-index e568f4565565afae9185d594756e114cd7bc208d..6a1e6396c386ad228122b8b3891eaff58c0306cc 100644
+index b8bdd8ac1f3d9391873bb24bdff811ab8f2add75..a2b557f2e31396d153dd2fd5a0af07e813691f57 100644
 --- a/src/lib/webauthn.ts
 +++ b/src/lib/webauthn.ts
 @@ -1,5 +1,6 @@

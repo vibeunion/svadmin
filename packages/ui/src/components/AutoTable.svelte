@@ -1469,7 +1469,7 @@
 
   <!-- Table (TanStack-powered) -->
   <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
-    {#if listPermission.isLoading || (query.isLoading && !query.isError)}
+    {#if listPermission.isLoading || (canRead && query.isLoading && !query.isError)}
       <Table.Root density={currentDensity}>
         <Table.Header>
           {#each tableView.headerGroups as headerGroup, _i (_i)}

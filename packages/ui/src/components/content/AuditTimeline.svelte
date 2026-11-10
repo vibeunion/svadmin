@@ -183,7 +183,7 @@
               <div class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">
                 变更对比 (Diff)
               </div>
-              {#each item.changes as ch}
+              {#each item.changes as ch (ch.field)}
                 <div class="flex items-center gap-2 text-xs py-0.5 border-b border-border/30 last:border-0">
                   <span class="font-medium text-foreground w-24 truncate flex-shrink-0" title={ch.label ?? ch.field}>
                     {ch.label ?? ch.field}:

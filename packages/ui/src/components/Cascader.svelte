@@ -22,28 +22,28 @@
   const i18n = useTranslation();
 
   interface Props {
-    id?: string;
-    ariaLabel?: string;
-    describedby?: string;
-    invalid?: boolean;
-    options?: CascaderOption[];
-    value?: CascaderPath | CascaderPath[];
-    separator?: string;
-    placeholder?: string;
-    changeOnSelect?: boolean;
-    disabled?: boolean;
-    allowClear?: boolean;
+    id?: string | undefined;
+    ariaLabel?: string | undefined;
+    describedby?: string | undefined;
+    invalid?: boolean | undefined;
+    options?: CascaderOption[] | undefined;
+    value?: CascaderPath | CascaderPath[] | undefined;
+    separator?: string | undefined;
+    placeholder?: string | undefined;
+    changeOnSelect?: boolean | undefined;
+    disabled?: boolean | undefined;
+    allowClear?: boolean | undefined;
     /** Multi-select stores one full path per selected node. */
-    multiple?: boolean;
+    multiple?: boolean | undefined;
     /** Checkable tree mode; implies multi-select. */
-    checkable?: boolean;
-    showSearch?: boolean;
-    searchPlaceholder?: string;
+    checkable?: boolean | undefined;
+    showSearch?: boolean | undefined;
+    searchPlaceholder?: string | undefined;
     /** Maximum visible tags before showing +N. */
-    maxTagCount?: number;
-    displayRender?: (labels: string[], selectedOptions: CascaderOption[][]) => string;
-    loadChildren?: (node: CascaderOption) => Promise<CascaderOption[]>;
-    class?: string;
+    maxTagCount?: number | undefined;
+    displayRender?: ((labels: string[], selectedOptions: CascaderOption[][]) => string) | undefined;
+    loadChildren?: ((node: CascaderOption) => Promise<CascaderOption[]>) | undefined;
+    class?: string | undefined;
     onchange?: (value: CascaderPath | CascaderPath[] | undefined, selectedOptions: CascaderOption[] | CascaderOption[][]) => void;
   }
 

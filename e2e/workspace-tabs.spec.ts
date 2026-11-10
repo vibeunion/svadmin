@@ -1397,17 +1397,22 @@ test('user wheel scroll cancels a late restore that is still retrying', async ({
   await scroller.hover();
   await page.mouse.wheel(0, 500);
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  await scroller.evaluate((element) => element.scrollTo(0, element.scrollHeight));
+  await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBe(
+    await scroller.evaluate((element) => element.scrollHeight - element.clientHeight),
+  );
   const captured = await scroller.evaluate(element => element.scrollTop);
+  const unreachable = captured + 500;
 
-  // 放大视口后内容区最大 scrollTop 变小，旧快照暂时不可达，恢复会持续重试。
+  // 注入一个超出当前内容最大 scrollTop 的旧快照，恢复会持续重试。
   await page.setViewportSize({ width: 1280, height: 500 });
-  await installPersistedScrollOnNextLoad(page, 'crm_accounts', captured);
+  await installPersistedScrollOnNextLoad(page, 'crm_accounts', unreachable);
   await page.reload();
   await expect(page.getByRole('heading', { name: /Operations multi-tab workspace|运营多标签工作区/ })).toBeVisible({ timeout: 20_000 });
   const restored = page.locator('[data-workspace-scroll="crm_accounts"]');
   await expect.poll(() => restored.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
   const maxTop = await restored.evaluate(element => element.scrollHeight - element.clientHeight);
-  expect(captured).toBeGreaterThan(maxTop + 1);
+  expect(unreachable).toBeGreaterThan(maxTop + 1);
 
   await restored.hover();
   await page.mouse.wheel(0, -10_000);
@@ -1430,17 +1435,22 @@ test('cancelled late restore does not resurrect the old position after switching
   await scroller.hover();
   await page.mouse.wheel(0, 500);
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  await scroller.evaluate((element) => element.scrollTo(0, element.scrollHeight));
+  await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBe(
+    await scroller.evaluate((element) => element.scrollHeight - element.clientHeight),
+  );
   const captured = await scroller.evaluate(element => element.scrollTop);
+  const unreachable = captured + 500;
 
-  // 放大视口后最大 scrollTop 变小，旧快照不可达，恢复会持续重试。
+  // 注入一个超出当前内容最大 scrollTop 的旧快照，恢复会持续重试。
   await page.setViewportSize({ width: 1280, height: 500 });
-  await installPersistedScrollOnNextLoad(page, 'crm_accounts', captured);
+  await installPersistedScrollOnNextLoad(page, 'crm_accounts', unreachable);
   await page.reload();
   await expect(page.getByRole('heading', { name: /Operations multi-tab workspace|运营多标签工作区/ })).toBeVisible({ timeout: 20_000 });
   const restored = page.locator('[data-workspace-scroll="crm_accounts"]');
   await expect.poll(() => restored.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
   const maxTop = await restored.evaluate(element => element.scrollHeight - element.clientHeight);
-  expect(captured).toBeGreaterThan(maxTop + 1);
+  expect(unreachable).toBeGreaterThan(maxTop + 1);
 
   // 用户取消迟到恢复：滚回顶部后应采集当前位置，而不是继续保留不可达旧快照。
   await restored.hover();

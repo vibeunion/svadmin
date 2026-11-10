@@ -427,8 +427,8 @@ export type { TimelineEntry } from './components/Timeline.svelte';
 export { default as Statistic } from './components/Statistic.svelte';
 export { default as Countdown } from './components/Countdown.svelte';
 export { default as ResizeBox } from './components/ResizeBox.svelte';
-export { default as Tour } from './components/Tour.svelte';
-export type { TourStep } from './components/Tour.svelte';
+export { default as Tour, default as TourGuide } from './components/Tour.svelte';
+export type { TourStep, TourStep as TourGuideStep } from './components/Tour.svelte';
 export { default as Menu } from './components/Menu.svelte';
 export type { MenuEntry } from './components/Menu.svelte';
 export { default as ConfigProvider, useComponentConfig, hasComponentConfig, resolvePopupContainer } from './components/ConfigProvider.svelte';
@@ -764,3 +764,15 @@ export { default as SafeDeleteConfirm, default as DoubleCheckModal } from './com
 export type { SafeDeleteConfirmProps, ImpactItem } from './components/SafeDeleteConfirm.svelte';
 export { default as SliderCaptcha } from './components/SliderCaptcha.svelte';
 export type { SliderCaptchaProps, SliderCaptchaResult } from './components/SliderCaptcha.svelte';
+
+// Enterprise metrics & trend visualization suite
+export { default as TrendIndicator, default as Trend } from './components/TrendIndicator.svelte';
+export type { TrendIndicatorProps } from './components/TrendIndicator.svelte';
+
+// Enterprise tree, cron scheduler & organization hierarchy suite
+export { default as VirtualTreeSelect } from './components/VirtualTreeSelect.svelte';
+export type { VirtualTreeSelectProps, VirtualTreeNode } from './components/VirtualTreeSelect.svelte';
+export { default as CronExpressionBuilder } from './components/CronExpressionBuilder.svelte';
+export type { CronExpressionBuilderProps, CronPreset } from './components/CronExpressionBuilder.svelte';
+export { default as OrgChart } from './components/OrgChart.svelte';
+export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';

@@ -6,12 +6,12 @@
     icon,
     text,
     wrapperStyles = '',
-  } = $props<{
+  }: {
     collapsed?: boolean;
     icon?: string;
     text?: string;
     wrapperStyles?: string;
-  }>();
+  } = $props();
 
   const adminOptions = getAdminOptions();
   const titleText = $derived(text ?? adminOptions.title?.text ?? 'Admin');
