@@ -17,8 +17,10 @@ const maximumInitialBytes = 1_400_000;
 // 2026-10-29. The enterprise component suite in PR #686 measured 401661 gzip
 // bytes after the release baseline, and the typography/fullscreen controls in
 // PR #681 measured 402140 gzip bytes; PR #691 with enterprise workflow, org
-// and excel suites measured 402903 gzip bytes; keep a narrow headroom for runner variation.
-const maximumInitialGzipBytes = 403_500;
+// and excel suites measured 402903 gzip bytes. The tailwind-variants v4 upgrade
+// ships its merge tables instead of the separate tailwind-merge peer and measured
+// 407081 gzip bytes; keep a narrow headroom for runner variation.
+const maximumInitialGzipBytes = 408_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
