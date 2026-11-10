@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Clock, Calendar, Check, Play, RefreshCw, Copy } from '@lucide/svelte';
+  import { Clock, Check, Play, Copy } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   export interface CronPreset {
@@ -153,7 +153,7 @@
       Common Presets
     </div>
     <div class="flex flex-wrap gap-1.5">
-      {#each presets as p}
+      {#each presets as p (p.value)}
         <button
           type="button"
           onclick={() => applyPreset(p.value)}
@@ -180,7 +180,7 @@
       { id: 'day', label: 'Day (1-31)', part: parts.day },
       { id: 'month', label: 'Month (1-12)', part: parts.month },
       { id: 'week', label: 'Week (0-6)', part: parts.week },
-    ] as tab}
+    ] as tab (tab.id)}
       <button
         type="button"
         onclick={() => { activeTab = tab.id as TabType; }}
@@ -377,7 +377,7 @@
         <span>Next 5 Estimated Executions</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-        {#each nextExecutions as nextTime, idx}
+        {#each nextExecutions as nextTime, idx (idx)}
           <div class="flex items-center gap-2 rounded bg-background px-2.5 py-1.5 border border-border/50 font-mono text-[11px] text-muted-foreground">
             <span class="rounded-full bg-primary/10 text-primary px-1.5 py-0.2 text-[10px] font-bold">#{idx + 1}</span>
             <span class="text-foreground">{nextTime}</span>

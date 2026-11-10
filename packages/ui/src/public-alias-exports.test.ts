@@ -53,9 +53,10 @@ import {
   TourGuide,
   TrendIndicator,
   Trend,
-  TaskCenter,
-  BackgroundTaskDrawer,
   SignaturePad,
+  VirtualTreeSelect,
+  CronExpressionBuilder,
+  OrgChart,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -152,9 +153,10 @@ describe('public compatibility aliases', () => {
     expect(TourGuide).toBe(Tour);
     expect(TrendIndicator).toBeDefined();
     expect(Trend).toBe(TrendIndicator);
-    expect(TaskCenter).toBeDefined();
-    expect(BackgroundTaskDrawer).toBe(TaskCenter);
     expect(SignaturePad).toBeDefined();
+    expect(VirtualTreeSelect).toBeDefined();
+    expect(CronExpressionBuilder).toBeDefined();
+    expect(OrgChart).toBeDefined();
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

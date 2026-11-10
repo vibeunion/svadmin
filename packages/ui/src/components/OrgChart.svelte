@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { ChevronDown, ChevronRight, User, Building, Users } from '@lucide/svelte';
+  import { ChevronDown, User, Building, Users } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   export interface OrgNode {
@@ -54,6 +54,7 @@
 
 <div
   data-svadmin-component="OrgChart"
+  data-direction={direction}
   class={cn('w-full overflow-auto p-6 text-xs font-sans', className)}
 >
   <div class="inline-flex justify-center min-w-full">
