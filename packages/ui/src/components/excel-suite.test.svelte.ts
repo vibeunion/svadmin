@@ -28,7 +28,7 @@ describe('ExcelSuite', () => {
 
       const root = container.querySelector('[data-svadmin-component="ExcelImportWizard"]');
       expect(root).toBeTruthy();
-      expect(screen.getByText('拖拽 Excel 或 CSV 文件至此处，或点击选择文件')).toBeTruthy();
+      expect(screen.getByText('拖拽 CSV 文件至此处，或点击选择文件')).toBeTruthy();
 
       const sampleBtn = screen.getByText('载入测试样本数据');
       await fireEvent.click(sampleBtn);

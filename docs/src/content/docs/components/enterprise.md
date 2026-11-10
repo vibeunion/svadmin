@@ -429,13 +429,13 @@ Specialized organizational personnel picker combining department tree navigation
 <OrgTreePicker {departments} bind:selectedMemberIds={selectedMembers} />
 ```
 
-## Enterprise Data Hub: Excel & Pivot Drilldown
+## Enterprise Data Hub: CSV & Pivot Drilldown
 
-Enterprise users frequently exchange bulk tabular data via spreadsheets or drill down into aggregated metrics.
+Enterprise users frequently exchange bulk tabular data through Excel-compatible CSV exports or drill down into aggregated metrics.
 
 ### `<ExcelImportWizard>`
 
-Three-step data onboarding wizard featuring file dropzone parsing, automatic column-to-field matching, row validation, error highlighting, and download templates.
+Three-step CSV data onboarding wizard featuring file dropzone parsing, automatic column-to-field matching, row validation, error highlighting, and download templates.
 
 ```svelte
 <script lang="ts">
