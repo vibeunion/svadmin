@@ -136,7 +136,7 @@
   )}
 >
   <!-- 左侧树状面板 -->
-  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden">
+  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden min-h-0">
     <div class="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground">
       <span>{defaultTitles[0]}</span>
       <span>{allLeaves.length} 项</span>
@@ -234,7 +234,7 @@
   </div>
 
   <!-- 右侧已选列表面板 -->
-  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden">
+  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden min-h-0">
     <div class="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground">
       <span>{defaultTitles[1]}</span>
       <div class="flex items-center gap-2">
