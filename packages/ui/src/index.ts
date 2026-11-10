@@ -791,6 +791,9 @@ export type {
 } from './components/charts/GaugeChart.svelte';
 export { default as MetricGrid, default as DashboardMetricGrid } from './components/MetricGrid.svelte';
 export type { MetricGridProps } from './components/MetricGrid.svelte';
+// Enterprise micro-frontend & embedded sandbox frame suite
+export { default as MicroAppFrame, default as EmbeddedSandbox } from './components/MicroAppFrame.svelte';
+export type { MicroAppFrameProps, MicroAppMessage } from './components/MicroAppFrame.svelte';
 // Enterprise background task center and async job tracking suite
 export { default as TaskCenter, default as BackgroundTaskDrawer } from './components/TaskCenter.svelte';
 export type { TaskCenterProps, BackgroundTask, BackgroundTaskStatus } from './components/TaskCenter.svelte';

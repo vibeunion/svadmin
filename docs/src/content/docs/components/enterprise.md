@@ -584,6 +584,32 @@ Pure client-side Canvas and CSS jigsaw puzzle captcha for anti-bot rate-limiting
 />
 ```
 
+## Enterprise Audit Trail & Revision Diff Suite
+
+### `<AuditLogDrawer>` & `<AuditTimeline>`
+
+High-resolution audit log inspection and field-level diff viewer:
+- Slide-over drawer connecting directly to `auditLogProvider` or custom loaders.
+- Action filtering (`create`, `update`, `delete`, `approve`, `rollback`) and user/record keyword search.
+- Automatic field diff calculation comparing `previousData` and `data` (strikethrough old value in red, highlight new value in green).
+- Displays operator identity, action badges, and origin IP address.
+
+```svelte
+<script lang="ts">
+  import { AuditLogDrawer, Button } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<Button onclick={() => open = true}>View Audit History</Button>
+
+<AuditLogDrawer
+  bind:open
+  resource="orders"
+  recordId="101"
+/>
+```
+
 ## Real-Time Collaboration & Concurrent Edit Conflict Guard
 
 ### `<PresenceAvatars>` / `<PresenceAvatarGroup>`
@@ -872,6 +898,30 @@ Enterprise dashboard speedometer gauge & responsive metrics grid container suite
 ```
 
 ---
+
+## MicroAppFrame / EmbeddedSandbox
+
+Enterprise micro-frontend and isolated sub-application frame container:
+- Secure bi-directional `postMessage` handshake protocol with origin whitelisting (`allowedOrigins`).
+- Automatic state propagation: syncs host theme (`light`/`dark`), locale, and auth token to embedded iframe.
+- Dynamic auto-resizing via child `svadmin:resize` events to eliminate inner scrollbars.
+- Fullscreen immersion toggle, header toolbar with direct reload, external tab link, and timeout fallback cards.
+
+```svelte
+<script lang="ts">
+  import { MicroAppFrame } from '@svadmin/ui';
+</script>
+
+<MicroAppFrame
+  src="https://grafana.internal.net/d/telemetry-overview"
+  title="Realtime Cluster Metrics"
+  allowedOrigins={['https://grafana.internal.net']}
+  theme="dark"
+  autoResize
+  onready={() => console.log('Micro application handshake complete')}
+  onmessage={(msg) => console.log('Received message from sub-app:', msg)}
+/>
+```
 
 ## TaskCenter / BackgroundTaskDrawer
 

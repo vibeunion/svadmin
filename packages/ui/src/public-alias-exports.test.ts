@@ -64,6 +64,8 @@ import {
   VirtualTreeSelect,
   CronExpressionBuilder,
   OrgChart,
+  MicroAppFrame,
+  EmbeddedSandbox,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -171,6 +173,8 @@ describe('public compatibility aliases', () => {
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
     expect(DashboardMetricGrid).toBe(MetricGrid);
+    expect(MicroAppFrame).toBeDefined();
+    expect(EmbeddedSandbox).toBe(MicroAppFrame);
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

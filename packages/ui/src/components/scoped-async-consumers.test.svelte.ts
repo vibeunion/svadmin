@@ -277,7 +277,7 @@ describe('scoped async consumers', () => {
       action: 'update',
       userId: 'fresh-auditor',
     }]);
-    await waitFor(() => expect(view.getByText('User: fresh-auditor')).not.toBeNull());
+    await waitFor(() => expect(view.getByText(/fresh-auditor/)).not.toBeNull());
     staleEntries.resolve([{
       timestamp: '2026-08-10T00:00:00.000Z',
       action: 'delete',
@@ -294,8 +294,8 @@ describe('scoped async consumers', () => {
       resource: 'new-resource',
       meta: { recordId: 'shared-record', tenantId: 'tenant-new' },
     });
-    expect(view.queryByText('User: stale-auditor')).toBeNull();
-    expect(view.getByText('User: fresh-auditor')).not.toBeNull();
+    expect(view.queryByText(/stale-auditor/)).toBeNull();
+    expect(view.getByText(/fresh-auditor/)).not.toBeNull();
   });
 
   it('clears record A audit logs as soon as recordId switches to B on the same provider', async () => {
@@ -327,7 +327,7 @@ describe('scoped async consumers', () => {
       action: 'delete',
       userId: 'record-a-auditor',
     }]);
-    await waitFor(() => expect(view.getByText('User: record-a-auditor')).not.toBeNull());
+    await waitFor(() => expect(view.getByText(/record-a-auditor/)).not.toBeNull());
 
     await view.rerender({ recordId: 'record-b' });
     await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
@@ -335,17 +335,17 @@ describe('scoped async consumers', () => {
       resource: 'orders',
       meta: { recordId: 'record-b', tenantId: 'tenant-current' },
     });
-    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+    expect(view.queryByText(/record-a-auditor/)).toBeNull();
 
     recordBEntries.resolve([{
       timestamp: '2026-08-12T00:00:00.000Z',
       action: 'update',
       userId: 'record-b-auditor',
     }]);
-    await waitFor(() => expect(view.getByText('User: record-b-auditor')).not.toBeNull());
+    await waitFor(() => expect(view.getByText(/record-b-auditor/)).not.toBeNull());
 
     expect(get).toHaveBeenCalledTimes(2);
-    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+    expect(view.queryByText(/record-a-auditor/)).toBeNull();
   });
 
   it('clears displayed record A audit logs when provider and recordId switch together', async () => {
@@ -371,7 +371,7 @@ describe('scoped async consumers', () => {
       action: 'delete',
       userId: 'record-a-auditor',
     }]);
-    await waitFor(() => expect(view.getByText('User: record-a-auditor')).not.toBeNull());
+    await waitFor(() => expect(view.getByText(/record-a-auditor/)).not.toBeNull());
 
     await view.rerender({
       auditLogProvider: freshProvider.provider,
@@ -383,17 +383,17 @@ describe('scoped async consumers', () => {
       meta: { recordId: 'record-b', tenantId: 'tenant-current' },
     });
     expect(oldProvider.get).toHaveBeenCalledTimes(1);
-    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+    expect(view.queryByText(/record-a-auditor/)).toBeNull();
 
     recordBEntries.resolve([{
       timestamp: '2026-08-12T00:00:00.000Z',
       action: 'update',
       userId: 'record-b-auditor',
     }]);
-    await waitFor(() => expect(view.getByText('User: record-b-auditor')).not.toBeNull());
+    await waitFor(() => expect(view.getByText(/record-b-auditor/)).not.toBeNull());
     expect(oldProvider.get).toHaveBeenCalledTimes(1);
     expect(freshProvider.get).toHaveBeenCalledTimes(1);
-    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+    expect(view.queryByText(/record-a-auditor/)).toBeNull();
   });
 
   it('keeps a late audit entry from record A out after switching recordId to B on the same provider', async () => {
@@ -432,7 +432,7 @@ describe('scoped async consumers', () => {
       action: 'update',
       userId: 'record-b-auditor',
     }]);
-    await waitFor(() => expect(view.getByText('User: record-b-auditor')).not.toBeNull());
+    await waitFor(() => expect(view.getByText(/record-b-auditor/)).not.toBeNull());
 
     recordAEntries.resolve([{
       timestamp: '2026-08-11T00:00:00.000Z',
@@ -443,8 +443,8 @@ describe('scoped async consumers', () => {
     await tick();
 
     expect(get).toHaveBeenCalledTimes(2);
-    expect(view.queryByText('User: record-a-auditor')).toBeNull();
-    expect(view.getByText('User: record-b-auditor')).not.toBeNull();
+    expect(view.queryByText(/record-a-auditor/)).toBeNull();
+    expect(view.getByText(/record-b-auditor/)).not.toBeNull();
   });
 
   it('rejects malformed audit records before rendering their payload', async () => {

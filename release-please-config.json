@@ -390,6 +390,11 @@
       "component": "clickhouse",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/webhooks": {
+      "release-type": "node",
+      "component": "webhooks",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/keycloak": {
       "release-type": "node",
       "component": "keycloak",
