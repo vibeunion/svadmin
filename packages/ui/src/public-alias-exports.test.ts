@@ -37,6 +37,15 @@ import {
   LockScreen,
   ScreenLock,
   GlobalShortcuts,
+  TreeTransfer,
+  OrgTreePicker,
+  Ribbon,
+  BadgeRibbon,
+  FloatButtonGroup,
+  ProSkeleton,
+  ExcelImportWizard,
+  ExcelExportButton,
+  PivotDrilldownModal,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -55,6 +64,8 @@ import {
   QuotaProgressBar,
   PricingTable,
   UsageCard,
+  ApprovalTimeline,
+  WorkflowProcessCard,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -117,6 +128,17 @@ describe('public compatibility aliases', () => {
     expect(GlobalShortcuts).toBeDefined();
     expect(PricingTable).toBeDefined();
     expect(UsageCard).toBeDefined();
+    expect(ApprovalTimeline).toBeDefined();
+    expect(WorkflowProcessCard).toBeDefined();
+    expect(TreeTransfer).toBeDefined();
+    expect(OrgTreePicker).toBeDefined();
+    expect(ExcelImportWizard).toBeDefined();
+    expect(ExcelExportButton).toBeDefined();
+    expect(PivotDrilldownModal).toBeDefined();
+    expect(Ribbon).toBeDefined();
+    expect(BadgeRibbon).toBe(Ribbon);
+    expect(FloatButtonGroup).toBeDefined();
+    expect(ProSkeleton).toBeDefined();
     expect(MaskedText).toBe(SensitiveDataMask);
     expect(WaterMark).toBe(Watermark);
     expect(EllipsisText).toBeDefined();
