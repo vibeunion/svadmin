@@ -29,7 +29,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
-    "@refinedev/strapi-graphql": "^7.0.0"
+    "@refinedev/strapi-graphql": "^6.0.5"
   },
   "peerDependenciesMeta": {
     "@svadmin/core": {

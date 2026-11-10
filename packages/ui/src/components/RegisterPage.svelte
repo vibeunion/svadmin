@@ -11,10 +11,10 @@
 
   const i18n = useTranslation();
 
-  let { title = 'Admin', onSuccess } = $props<{
+  let { title = 'Admin', onSuccess }: {
     title?: string;
     onSuccess?: () => void;
-  }>();
+  } = $props();
 
   const adminContext = captureAdminContext();
   const register = useRegister();

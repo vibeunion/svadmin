@@ -378,7 +378,7 @@ function assertUiDependencyContract(manifest: PackageManifest): void {
   const dependencies = manifest.dependencies ?? {};
 
   assert(
-    dependencies['svelte-sonner'] === '^1.2.1' || dependencies['svelte-sonner'] === '^1.1.1',
+    dependencies['svelte-sonner'] === '^1.2.3' || dependencies['svelte-sonner'] === '^1.2.1' || dependencies['svelte-sonner'] === '^1.1.1',
     '@svadmin/ui: toast runtime must use the Svelte 5-compatible svelte-sonner@^1.1.1',
   );
   assert(

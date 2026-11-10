@@ -33,7 +33,7 @@
     menu,
     showLock = false,
     onlock,
-  } = $props<{
+  }: {
     showThemeToggle?: boolean;
     showThemeSettings?: boolean;
     showFullscreen?: boolean;
@@ -52,7 +52,7 @@
     menu?: MenuItem[];
     showLock?: boolean;
     onlock?: () => void;
-  }>();
+  } = $props();
 
   // Retrieve optional component overrides from registry
   const registry = getComponentRegistry();

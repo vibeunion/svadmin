@@ -1,0 +1,224 @@
+diff --git a/dist/bits/button/components/button.svelte.d.ts b/dist/bits/button/components/button.svelte.d.ts
+index 4cd35080daa1dd9be92fc29c2a94578870cfcd40..a14618cb14daf2d270da0937fd6e12f8bfe22952 100644
+--- a/dist/bits/button/components/button.svelte.d.ts
++++ b/dist/bits/button/components/button.svelte.d.ts
+@@ -1,4 +1,11 @@
+ import type { ButtonRootProps } from "../types.js";
+-declare const Button: import("svelte").Component<ButtonRootProps, {}, "ref">;
++import type { Component } from "svelte";
++// Preserve the component contract without expanding keyof across the DOM union.
++declare const Button: Pick<Component, "element"> & {
++    (internals: Parameters<Component>[0], props: ButtonRootProps): Omit<ReturnType<Component>, "$set"> & {
++        $set?(props: Partial<ButtonRootProps>): void;
++    };
++    z_$$bindings?: "ref";
++};
+ type Button = ReturnType<typeof Button>;
+ export default Button;
+diff --git a/dist/bits/calendar/components/calendar.svelte.d.ts b/dist/bits/calendar/components/calendar.svelte.d.ts
+index 725e3b5af7f9041853403ef6a8005860e5a957b9..feb12e78e27552d1c6065b9bf7b0415be157b87e 100644
+--- a/dist/bits/calendar/components/calendar.svelte.d.ts
++++ b/dist/bits/calendar/components/calendar.svelte.d.ts
+@@ -1,4 +1,11 @@
+ import type { CalendarRootProps } from "../types.js";
+-declare const Calendar: import("svelte").Component<CalendarRootProps, {}, "value" | "ref" | "placeholder">;
++import type { Component } from "svelte";
++// Preserve the component contract without expanding keyof across the DOM union.
++declare const Calendar: Pick<Component, "element"> & {
++    (internals: Parameters<Component>[0], props: CalendarRootProps): Omit<ReturnType<Component>, "$set"> & {
++        $set?(props: Partial<CalendarRootProps>): void;
++    };
++    z_$$bindings?: "value" | "ref" | "placeholder";
++};
+ type Calendar = ReturnType<typeof Calendar>;
+ export default Calendar;
+diff --git a/dist/bits/calendar/components/calendar.svelte.d.ts.orig b/dist/bits/calendar/components/calendar.svelte.d.ts.orig
+new file mode 100644
+index 0000000000000000000000000000000000000000..725e3b5af7f9041853403ef6a8005860e5a957b9
+--- /dev/null
++++ b/dist/bits/calendar/components/calendar.svelte.d.ts.orig
+@@ -0,0 +1,4 @@
++import type { CalendarRootProps } from "../types.js";
++declare const Calendar: import("svelte").Component<CalendarRootProps, {}, "value" | "ref" | "placeholder">;
++type Calendar = ReturnType<typeof Calendar>;
++export default Calendar;
+diff --git a/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts b/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts
+index eed17713c45b35ef94caf8a92b10479e037e821b..d459f65541f3088e13ff921bea38da397aadc456 100644
+--- a/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts
++++ b/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts
+@@ -4,6 +4,7 @@ import { type FloatingRootState } from "./floating-root.svelte.js";
+ import type { Arrayable, WithRefOpts } from "../../../internal/types.js";
+ import type { Measurable, UseFloatingReturn } from "../../../internal/floating-svelte/types.js";
+ import type { Direction, StyleProperties } from "../../../shared/index.js";
++import type * as CSS from "csstype";
+ export declare const SIDE_OPTIONS: readonly ["top", "right", "bottom", "left"];
+ export declare const ALIGN_OPTIONS: readonly ["start", "center", "end"];
+ export type Side = (typeof SIDE_OPTIONS)[number];
+@@ -31,6 +32,22 @@ export interface FloatingContentStateOpts extends ReadableBoxedValues<{
+     customAnchor: string | HTMLElement | null | Measurable;
+ }> {
+ }
++// Keep CSS properties linked to the installed vocabulary instead of expanding
++// hundreds of version-specific Property aliases into this declaration.
++type FloatingWrapperStyle = Readonly<CSS.Properties> & {
++    readonly left: CSS.Property.Left;
++    readonly top: CSS.Property.Top;
++    readonly minWidth: CSS.Property.MinWidth;
++    readonly position: CSS.Property.Position;
++    readonly transform: CSS.Properties["transform"];
++    readonly zIndex: CSS.Properties["zIndex"];
++    readonly "pointer-events"?: string;
++    readonly "--bits-floating-transform-origin": string;
++    readonly "--bits-floating-available-width": string;
++    readonly "--bits-floating-available-height": string;
++    readonly "--bits-floating-anchor-width": string;
++    readonly "--bits-floating-anchor-height": string;
++};
+ export declare class FloatingContentState {
+     #private;
+     static create(opts: FloatingContentStateOpts, tooltip?: boolean): FloatingContentState;
+@@ -67,7 +84,7 @@ export declare class FloatingContentState {
+     wrapperProps: {
+         readonly id: string;
+         readonly "data-bits-floating-content-wrapper": "";
+-        readonly style: any;
++        readonly style: FloatingWrapperStyle;
+         readonly dir: Direction;
+     };
+     props: {
+diff --git a/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts.orig b/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts.orig
+new file mode 100644
+index 0000000000000000000000000000000000000000..eed17713c45b35ef94caf8a92b10479e037e821b
+--- /dev/null
++++ b/dist/bits/utilities/floating-layer/use-floating-layer.svelte.d.ts.orig
+@@ -0,0 +1,112 @@
++import { type Middleware, type Placement } from "@floating-ui/dom";
++import { type ReadableBoxedValues, type Box } from "svelte-toolbelt";
++import { type FloatingRootState } from "./floating-root.svelte.js";
++import type { Arrayable, WithRefOpts } from "../../../internal/types.js";
++import type { Measurable, UseFloatingReturn } from "../../../internal/floating-svelte/types.js";
++import type { Direction, StyleProperties } from "../../../shared/index.js";
++export declare const SIDE_OPTIONS: readonly ["top", "right", "bottom", "left"];
++export declare const ALIGN_OPTIONS: readonly ["start", "center", "end"];
++export type Side = (typeof SIDE_OPTIONS)[number];
++export type Align = (typeof ALIGN_OPTIONS)[number];
++export type Boundary = Element | null;
++export interface FloatingContentStateOpts extends ReadableBoxedValues<{
++    id: string;
++    wrapperId: string;
++    side: Side;
++    sideOffset: number;
++    align: Align;
++    alignOffset: number;
++    arrowPadding: number;
++    avoidCollisions: boolean;
++    collisionBoundary: Arrayable<Boundary>;
++    collisionPadding: number | Partial<Record<Side, number>>;
++    sticky: "partial" | "always";
++    hideWhenDetached: boolean;
++    updatePositionStrategy: "optimized" | "always";
++    strategy: "fixed" | "absolute";
++    onPlaced: () => void;
++    dir: Direction;
++    style: StyleProperties | null | undefined | string;
++    enabled: boolean;
++    customAnchor: string | HTMLElement | null | Measurable;
++}> {
++}
++export declare class FloatingContentState {
++    #private;
++    static create(opts: FloatingContentStateOpts, tooltip?: boolean): FloatingContentState;
++    readonly opts: FloatingContentStateOpts;
++    readonly root: FloatingRootState;
++    contentRef: import("svelte-toolbelt").WritableBox<HTMLElement | null>;
++    wrapperRef: import("svelte-toolbelt").WritableBox<HTMLElement | null>;
++    arrowRef: import("svelte-toolbelt").WritableBox<HTMLElement | null>;
++    readonly contentAttachment: {
++        [x: symbol]: (node: HTMLElement) => () => void;
++    };
++    readonly wrapperAttachment: {
++        [x: symbol]: (node: HTMLElement) => () => void;
++    };
++    readonly arrowAttachment: {
++        [x: symbol]: (node: HTMLElement) => () => void;
++    };
++    arrowId: Box<string>;
++    hasExplicitBoundaries: boolean;
++    detectOverflowOptions: {
++        padding: number | Partial<Record<"left" | "right" | "top" | "bottom", number>>;
++        boundary: Element[];
++        altBoundary: boolean;
++    };
++    middleware: Middleware[];
++    floating: UseFloatingReturn;
++    placedSide: "left" | "right" | "top" | "bottom";
++    placedAlign: "center" | "start" | "end";
++    arrowX: number;
++    arrowY: number;
++    cannotCenterArrow: boolean;
++    contentZIndex: string;
++    arrowBaseSide: "left" | "right" | "top" | "bottom";
++    wrapperProps: {
++        readonly id: string;
++        readonly "data-bits-floating-content-wrapper": "";
++        readonly style: any;
++        readonly dir: Direction;
++    };
++    props: {
++        readonly "data-side": "left" | "right" | "top" | "bottom";
++        readonly "data-align": "center" | "start" | "end";
++        readonly style: string;
++    };
++    arrowStyle: {
++        [x: string]: string | number | undefined;
++        position: string;
++        left: string | undefined;
++        top: string | undefined;
++        "transform-origin": string;
++        transform: string;
++        visibility: string | undefined;
++    };
++    constructor(opts: FloatingContentStateOpts, root: FloatingRootState);
++}
++interface FloatingArrowStateOpts extends WithRefOpts {
++}
++export declare class FloatingArrowState {
++    static create(opts: FloatingArrowStateOpts): FloatingArrowState;
++    readonly opts: FloatingArrowStateOpts;
++    readonly content: FloatingContentState;
++    constructor(opts: FloatingArrowStateOpts, content: FloatingContentState);
++    readonly props: {
++        readonly id: string;
++        readonly style: {
++            [x: string]: string | number | undefined;
++            position: string;
++            left: string | undefined;
++            top: string | undefined;
++            "transform-origin": string;
++            transform: string;
++            visibility: string | undefined;
++        };
++        readonly "data-side": "left" | "right" | "top" | "bottom";
++    };
++}
++export declare function getSideFromPlacement(placement: Placement): "left" | "right" | "top" | "bottom";
++export declare function getAlignFromPlacement(placement: Placement): "center" | "start" | "end";
++export {};
+diff --git a/dist/internal/animations-complete.js b/dist/internal/animations-complete.js
+index b43367141a4ef82e35ad805b9ea95a5bc14486b7..85b3a9b475147d38210bdc2702dfb1bc11c86a98 100644
+--- a/dist/internal/animations-complete.js
++++ b/dist/internal/animations-complete.js
+@@ -19,6 +19,13 @@ export class AnimationsComplete {
+     }
+     run(fn) {
+         this.#cleanup();
++        const node = this.#opts.ref.current;
++        // Test DOMs and legacy browsers may not implement getAnimations(); preserve the
++        // synchronous fallback instead of waiting on a frame that has no animation to observe.
++        if (node && typeof node.getAnimations !== "function") {
++            this.#executeCallback(fn);
++            return;
++        }
+         const runId = this.#runId;
+         const executeIfCurrent = () => {
+             if (runId !== this.#runId)

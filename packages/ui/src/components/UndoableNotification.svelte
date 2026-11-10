@@ -8,14 +8,14 @@
 
   const i18n = useTranslation();
 
-  let { message, duration = 5000, embedded = false, managedExternally = false, onUndo, onTimeout } = $props<{
+  let { message, duration = 5000, embedded = false, managedExternally = false, onUndo, onTimeout }: {
     message: string;
     duration?: number;
     embedded?: boolean;
     managedExternally?: boolean;
     onUndo: () => void;
     onTimeout: () => void;
-  }>();
+  } = $props();
 
   let remaining = $state(0);
   let dismissed = $state(false);

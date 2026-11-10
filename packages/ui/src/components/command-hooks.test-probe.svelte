@@ -17,15 +17,15 @@
     };
     $effect(() => onAuthReady?.(actions));
   }
+  const { mutation } = useCustomMutation(definedReactiveOptions({
+    get command() { return settings.writeCommand ?? writeCommand; },
+    get dataProviderName() { return settings.dataProviderName; },
+  }));
   const { query } = useCustom(definedReactiveOptions({
     get command() { return settings.readCommand ?? readCommand; },
     get input() { return settings.input ?? { filter: { year: 2026 }, labels: ['current'] }; },
     get dataProviderName() { return settings.dataProviderName; },
     get queryOptions() { return { enabled: settings.enabled ?? true, staleTime: settings.staleTime ?? Infinity }; },
-  }));
-  const { mutation } = useCustomMutation(definedReactiveOptions({
-    get command() { return settings.writeCommand ?? writeCommand; },
-    get dataProviderName() { return settings.dataProviderName; },
   }));
   $effect(() => onReady({ query, mutation }));
 </script>

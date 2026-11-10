@@ -3,10 +3,10 @@
   import { createResourceRenderers } from '../../src/rendering/index.js';
   import AutoForm from '../../src/components/AutoForm.svelte';
 
-  let { resourceName, mode = 'create' } = $props<{
+  let { resourceName, mode = 'create' }: {
     resourceName: string;
     mode?: 'create' | 'edit' | 'clone' | 'show';
-  }>();
+  } = $props();
   const binding = useResourceContract(() => resourceName);
   const rendering = $derived(createResourceRenderers(binding.resource));
   let successCount = $state(0);

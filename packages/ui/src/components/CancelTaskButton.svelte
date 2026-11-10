@@ -18,7 +18,7 @@
     variant = 'outline',
     size = 'sm',
     children,
-  } = $props<{
+  }: {
     taskId: string;
     taskProvider?: import('@svadmin/core').TaskProvider;
     onSuccess?: () => void;
@@ -27,7 +27,7 @@
     variant?: import('./ui/button/index.js').ButtonVariant;
     size?: import('./ui/button/index.js').ButtonSize;
     children?: import('svelte').Snippet;
-  }>();
+  } = $props();
 
   const action = createTaskAction({
     action: 'cancel',

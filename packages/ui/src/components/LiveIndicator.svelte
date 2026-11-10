@@ -8,12 +8,12 @@
     resource = '',
     lastEvent = null,
     showDetails = false,
-  } = $props<{
+  }: {
     status: 'connecting' | 'connected' | 'disconnected';
     resource?: string;
     lastEvent?: { type: string; timestamp?: number } | null;
     showDetails?: boolean;
-  }>();
+  } = $props();
 
   const statusConfigs = {
     connected: { variant: 'default' as const, dotClass: 'bg-success', label: 'Live', icon: Wifi },

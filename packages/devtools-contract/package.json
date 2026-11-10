@@ -24,7 +24,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@vibeunion/devtools-protocol": "^0.1.0"
+    "@vibeunion/devtools-protocol": "^0.1.2"
   },
   "license": "MIT",
   "repository": {

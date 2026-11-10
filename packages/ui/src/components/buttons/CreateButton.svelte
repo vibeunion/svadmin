@@ -14,14 +14,14 @@
     hideText = false,
     accessControl = { enabled: true, hideIfUnauthorized: true },
     class: className = '',
-  } = $props<{
+  }: {
     resource: string;
     label?: string;
     children?: Snippet;
     hideText?: boolean;
     accessControl?: ButtonAccessControl;
     class?: string;
-  }>();
+  } = $props();
 
   const nav = useNavigation();
   const resourceDefinition = $derived.by(() => {

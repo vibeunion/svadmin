@@ -39,7 +39,7 @@
     useProviderData = !tasks,
     queryOptions,
     onSelect,
-  } = $props<{
+  }: {
     tasks?: TaskRecord[];
     taskProvider?: TaskProvider<TaskRecord>;
     params?: Record<string, unknown>;
@@ -58,7 +58,7 @@
       refetchIntervalInBackground?: boolean;
     };
     onSelect?: (task: TaskRecord) => void;
-  }>();
+  } = $props();
 
   const hasReadCapability = $derived(typeof (dlq ? taskProvider?.listDlq : taskProvider?.list) === 'function');
   const readUnavailable = $derived(useProviderData && !hasReadCapability);

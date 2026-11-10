@@ -4,10 +4,10 @@
 
   const i18n = useTranslation();
 
-  let { value, maxLength = 200 } = $props<{
+  let { value, maxLength = 200 }: {
     value: string | null | undefined;
     maxLength?: number;
-  }>();
+  } = $props();
 
   const text = $derived(value ?? '');
   const truncated = $derived(text.length > maxLength);

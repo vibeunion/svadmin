@@ -90,6 +90,7 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/ImageCropper.svelte',
   'packages/ui/src/components/ImagePreview.svelte',
   'packages/ui/src/components/MediaLibraryModal.svelte',
+  'packages/ui/src/components/OrgChart.svelte',
   'packages/ui/src/components/PresenceAvatarGroup.svelte',
   'packages/lite/src/components/LiteCommentThread.svelte',
   'packages/lite/src/components/LiteEmptyState.svelte',
