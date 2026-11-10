@@ -759,3 +759,29 @@ Enterprise organizational structure and reporting hierarchy diagram:
   onnodeclick={(node) => console.log('Clicked node:', node.name)}
 />
 ```
+
+---
+
+## MicroAppFrame / EmbeddedSandbox
+
+Enterprise micro-frontend and isolated sub-application frame container:
+- Secure bi-directional `postMessage` handshake protocol with origin whitelisting (`allowedOrigins`).
+- Automatic state propagation: syncs host theme (`light`/`dark`), locale, and auth token to embedded iframe.
+- Dynamic auto-resizing via child `svadmin:resize` events to eliminate inner scrollbars.
+- Fullscreen immersion toggle, header toolbar with direct reload, external tab link, and timeout fallback cards.
+
+```svelte
+<script lang="ts">
+  import { MicroAppFrame } from '@svadmin/ui';
+</script>
+
+<MicroAppFrame
+  src="https://grafana.internal.net/d/telemetry-overview"
+  title="Realtime Cluster Metrics"
+  allowedOrigins={['https://grafana.internal.net']}
+  theme="dark"
+  autoResize
+  onready={() => console.log('Micro application handshake complete')}
+  onmessage={(msg) => console.log('Received message from sub-app:', msg)}
+/>
+```

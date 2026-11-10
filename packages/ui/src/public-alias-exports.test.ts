@@ -57,6 +57,8 @@ import {
   VirtualTreeSelect,
   CronExpressionBuilder,
   OrgChart,
+  MicroAppFrame,
+  EmbeddedSandbox,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -157,6 +159,8 @@ describe('public compatibility aliases', () => {
     expect(VirtualTreeSelect).toBeDefined();
     expect(CronExpressionBuilder).toBeDefined();
     expect(OrgChart).toBeDefined();
+    expect(MicroAppFrame).toBeDefined();
+    expect(EmbeddedSandbox).toBe(MicroAppFrame);
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

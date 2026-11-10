@@ -776,3 +776,7 @@ export { default as CronExpressionBuilder } from './components/CronExpressionBui
 export type { CronExpressionBuilderProps, CronPreset } from './components/CronExpressionBuilder.svelte';
 export { default as OrgChart } from './components/OrgChart.svelte';
 export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';
+
+// Enterprise micro-frontend & embedded sandbox frame suite
+export { default as MicroAppFrame, default as EmbeddedSandbox } from './components/MicroAppFrame.svelte';
+export type { MicroAppFrameProps, MicroAppMessage } from './components/MicroAppFrame.svelte';
