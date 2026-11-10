@@ -72,22 +72,22 @@
 
   function isNodeSelected(node: TreeTransferNode): boolean {
     if (!node.children || node.children.length === 0) {
-      return targetKeys.includes(node.key);
+      return !node.disabled && targetKeys.includes(node.key);
     }
-    const nodeLeaves = getAllLeaves([node]);
+    const nodeLeaves = getAllLeaves([node]).filter((leaf) => !leaf.disabled);
     return nodeLeaves.length > 0 && nodeLeaves.every((l) => targetKeys.includes(l.key));
   }
 
   function isNodeIndeterminate(node: TreeTransferNode): boolean {
     if (!node.children || node.children.length === 0) return false;
-    const nodeLeaves = getAllLeaves([node]);
+    const nodeLeaves = getAllLeaves([node]).filter((leaf) => !leaf.disabled);
     const selectedCount = nodeLeaves.filter((l) => targetKeys.includes(l.key)).length;
     return selectedCount > 0 && selectedCount < nodeLeaves.length;
   }
 
   function toggleSelect(node: TreeTransferNode) {
     if (disabled || node.disabled) return;
-    const nodeLeaves = getAllLeaves([node]);
+    const nodeLeaves = getAllLeaves([node]).filter((leaf) => !leaf.disabled);
     const leafKeys = nodeLeaves.map((l) => l.key);
     const allSelected = isNodeSelected(node);
 
@@ -120,6 +120,11 @@
       .filter((item): item is TreeTransferNode => item !== undefined)
       .filter((item) => (rightSearch.trim() ? item.title.toLowerCase().includes(rightSearch.toLowerCase()) : true)),
   );
+
+  $effect(() => {
+    const validKeys = targetKeys.filter((key) => leafMap.has(key));
+    if (validKeys.length !== targetKeys.length) targetKeys = validKeys;
+  });
 </script>
 
 <div
@@ -131,7 +136,7 @@
   )}
 >
   <!-- 左侧树状面板 -->
-  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden min-h-[320px]">
+  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden">
     <div class="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground">
       <span>{defaultTitles[0]}</span>
       <span>{allLeaves.length} 项</span>
@@ -229,11 +234,11 @@
   </div>
 
   <!-- 右侧已选列表面板 -->
-  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden min-h-[320px]">
+  <div class="flex-1 flex flex-col rounded-lg border border-border bg-background overflow-hidden">
     <div class="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground">
       <span>{defaultTitles[1]}</span>
       <div class="flex items-center gap-2">
-        <span>已选 {targetKeys.length} 项</span>
+        <span>已选 {selectedItems.length} 项</span>
         {#if targetKeys.length > 0}
           <button
             type="button"

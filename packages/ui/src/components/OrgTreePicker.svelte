@@ -2,6 +2,7 @@
   import { Search, Users, Building, Check, X, ChevronRight, ChevronDown } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { useTranslation } from '@svadmin/core';
+  import MediaThumbnail from './content/MediaThumbnail.svelte';
 
   export interface OrgDepartment {
     id: string;
@@ -239,7 +240,14 @@
           <div class="flex items-center gap-2.5 min-w-0">
             <div class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-semibold text-foreground overflow-hidden">
               {#if member.avatar}
-                <img src={member.avatar} alt={member.name} class="h-full w-full object-cover" />
+                <MediaThumbnail
+                  src={member.avatar}
+                  alt={member.name}
+                  size="full"
+                  fit="cover"
+                  showOverlay={false}
+                  class="h-full w-full rounded-full border-0"
+                />
               {:else}
                 {member.name.slice(0, 1).toUpperCase()}
               {/if}

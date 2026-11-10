@@ -42,7 +42,8 @@
   // 转义 CSV/TSV 字段值
   function formatCell(val: unknown, delimiter: string): string {
     if (val === null || val === undefined) return '';
-    const text = String(val);
+    const rawText = String(val);
+    const text = /^[=+\-@]/.test(rawText) ? `'${rawText}` : rawText;
     if (text.includes(delimiter) || text.includes('"') || text.includes('\n') || text.includes('\r')) {
       return `"${text.replace(/"/g, '""')}"`;
     }

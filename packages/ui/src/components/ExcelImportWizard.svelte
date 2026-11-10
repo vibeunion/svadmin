@@ -55,6 +55,8 @@
   let onlyShowErrors = $state(false);
   let isSubmitting = $state(false);
   let isDragOver = $state(false);
+  let fileError = $state('');
+  const maxFileBytes = 5 * 1024 * 1024;
 
   // 简单的 CSV 解析函数
   function parseCSV(text: string): { headers: string[]; rows: Record<string, string>[] } {
@@ -103,6 +105,15 @@
 
   // 处理文件读取
   function handleFile(file: File) {
+    fileError = '';
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      fileError = '当前仅支持 CSV 文件';
+      return;
+    }
+    if (file.size > maxFileBytes) {
+      fileError = '文件不能超过 5 MB';
+      return;
+    }
     fileName = file.name;
     fileSize = `${(file.size / 1024).toFixed(1)} KB`;
 
@@ -129,6 +140,9 @@
       });
       fieldMapping = initialMap;
       currentStep = 2;
+    };
+    reader.onerror = () => {
+      fileError = '文件读取失败，请重试';
     };
     reader.readAsText(file);
   }
@@ -269,7 +283,7 @@
         {/if}
       </div>
 
-      {#if templateUrl}
+      {#if templateUrl && /^https?:\/\//i.test(templateUrl)}
         <a
           href={templateUrl}
           download
@@ -317,7 +331,7 @@
   </div>
 
   <!-- 主体内容区域 -->
-  <div class="p-6 flex-1 min-h-[380px]">
+  <div class="p-6 flex-1">
     <!-- 步骤 1：文件上传 -->
     {#if currentStep === 1}
       <div class="flex flex-col items-center justify-center py-8">
@@ -332,7 +346,7 @@
         >
           <input
             type="file"
-            accept=".csv,.xlsx,.xls"
+            accept=".csv,text/csv"
             class="hidden"
             onchange={handleFileInputChange}
           />
@@ -341,6 +355,7 @@
           </div>
           <p class="text-sm font-medium text-foreground">{i18n.t('excel.dropFile')}</p>
           <p class="text-xs text-muted-foreground mt-1">{i18n.t('excel.fileHint')}</p>
+          {#if fileError}<p class="mt-2 text-xs text-destructive" role="alert">{fileError}</p>{/if}
         </label>
 
         <div class="mt-4 flex items-center gap-3">
