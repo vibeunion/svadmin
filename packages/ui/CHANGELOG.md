@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.120.0](https://github.com/vibeunion/svadmin/compare/ui-v0.119.0...ui-v0.120.0) (2026-11-10)
+
+
+### 🚀 Features
+
+* **ui:** add Barcode, NumberRoll, and VirtualList enterprise suite ([#710](https://github.com/vibeunion/svadmin/issues/710)) ([861e755](https://github.com/vibeunion/svadmin/commit/861e755a36707db4a08ee16a65b371a69445f557))
+
 ## [0.119.0](https://github.com/vibeunion/svadmin/compare/ui-v0.118.0...ui-v0.119.0) (2026-11-10)
 
 
