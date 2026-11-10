@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.4](https://github.com/vibeunion/svadmin/compare/pusher-v0.2.3...pusher-v0.2.4) (2026-11-10)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.79.0
+
 ## [0.2.3](https://github.com/vibeunion/svadmin/compare/pusher-v0.2.2...pusher-v0.2.3) (2026-11-09)
 
 

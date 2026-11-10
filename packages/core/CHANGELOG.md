@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.79.0](https://github.com/vibeunion/svadmin/compare/core-v0.78.0...core-v0.79.0) (2026-11-10)
+
+
+### 🚀 Features
+
+* **ui:** add enterprise workflow, org picker, excel and visual suite ([#691](https://github.com/vibeunion/svadmin/issues/691)) ([6d522f2](https://github.com/vibeunion/svadmin/commit/6d522f2313ae99c3b9dcae11a768e02f3abd52fd))
+
 ## [0.78.0](https://github.com/vibeunion/svadmin/compare/core-v0.77.0...core-v0.78.0) (2026-11-09)
 
 

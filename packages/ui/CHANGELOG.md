@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.118.0](https://github.com/vibeunion/svadmin/compare/ui-v0.117.0...ui-v0.118.0) (2026-11-10)
+
+
+### 🚀 Features
+
+* **live:** add ably pubsub live provider adapter ([#692](https://github.com/vibeunion/svadmin/issues/692)) ([73adbed](https://github.com/vibeunion/svadmin/commit/73adbed4f0a7e63bd7ca6a9f8ed0539a03814bcc))
+* **ui:** add enterprise workflow, org picker, excel and visual suite ([#691](https://github.com/vibeunion/svadmin/issues/691)) ([6d522f2](https://github.com/vibeunion/svadmin/commit/6d522f2313ae99c3b9dcae11a768e02f3abd52fd))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.8
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.79.0
+
 ## [0.117.0](https://github.com/vibeunion/svadmin/compare/ui-v0.116.0...ui-v0.117.0) (2026-11-09)
 
 

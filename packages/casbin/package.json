@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/casbin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Casbin policy-based AccessControlProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,
