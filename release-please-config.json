@@ -390,6 +390,11 @@
       "component": "clickhouse",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/webhooks": {
+      "release-type": "node",
+      "component": "webhooks",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/kinde": {
       "release-type": "node",
       "component": "kinde",
