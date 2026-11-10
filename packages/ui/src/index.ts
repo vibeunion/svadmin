@@ -248,7 +248,7 @@ export { default as SpreadsheetView } from './components/SpreadsheetView.svelte'
 export type { SheetData, SpreadsheetLimits } from './components/SpreadsheetView.svelte';
 export { default as DecisionTable } from './components/DecisionTable.svelte';
 export type { DecisionColumn, DecisionRule } from './components/DecisionTable.svelte';
-export { default as OfflineSyncBanner } from './components/OfflineSyncBanner.svelte';
+export { default as OfflineSyncBanner, default as OfflineBanner } from './components/OfflineSyncBanner.svelte';
 export type { PendingMutation } from './components/OfflineSyncBanner.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
@@ -779,3 +779,13 @@ export { default as CronExpressionBuilder } from './components/CronExpressionBui
 export type { CronExpressionBuilderProps, CronPreset } from './components/CronExpressionBuilder.svelte';
 export { default as OrgChart } from './components/OrgChart.svelte';
 export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';
+
+// Enterprise background task center and async job tracking suite
+export { default as TaskCenter, default as BackgroundTaskDrawer } from './components/TaskCenter.svelte';
+export type { TaskCenterProps, BackgroundTask, BackgroundTaskStatus } from './components/TaskCenter.svelte';
+
+// Enterprise offline resilience & network monitoring suite
+export { useNetworkStatus } from './components/useNetworkStatus.svelte.js';
+export type { NetworkInformationLike, NetworkStatusState, UseNetworkStatusOptions } from './components/useNetworkStatus.svelte.js';
+export { default as OfflineGuard } from './components/OfflineGuard.svelte';
+export type { OfflineGuardProps } from './components/OfflineGuard.svelte';
