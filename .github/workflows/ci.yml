@@ -52,6 +52,14 @@ jobs:
         with:
           bun-version: "1.4.4"
 
+      - name: Normalize lockfile registry URLs
+        run: |
+          if grep -q 'registry\.npmmirror\.com' bun.lock; then
+            sed -i 's#https://registry.npmmirror.com/#https://registry.npmjs.org/#g' bun.lock
+            git add bun.lock
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify -m "chore(ci): normalize lockfile registry URLs"
+          fi
+
       - name: Install dependencies
         run: |
           bun install
@@ -142,6 +150,14 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.4"
+
+      - name: Normalize lockfile registry URLs
+        run: |
+          if grep -q 'registry\.npmmirror\.com' bun.lock; then
+            sed -i 's#https://registry.npmmirror.com/#https://registry.npmjs.org/#g' bun.lock
+            git add bun.lock
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify -m "chore(ci): normalize lockfile registry URLs"
+          fi
 
       - name: Install dependencies
         run: |
@@ -259,6 +275,14 @@ jobs:
         with:
           node-version: "26"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Normalize lockfile registry URLs
+        run: |
+          if grep -q 'registry\.npmmirror\.com' bun.lock; then
+            sed -i 's#https://registry.npmmirror.com/#https://registry.npmjs.org/#g' bun.lock
+            git add bun.lock
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify -m "chore(ci): normalize lockfile registry URLs"
+          fi
 
       - name: Install dependencies
         run: |
