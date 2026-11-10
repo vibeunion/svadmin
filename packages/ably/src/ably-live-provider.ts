@@ -70,21 +70,20 @@ function normalizeEventPayload(data: unknown): Record<string, unknown> {
   return { value: data };
 }
 
+function mapEventType(value: unknown): LiveActionType | undefined {
+  if (typeof value !== 'string') return undefined;
+  return actionTypeMap[value.toLowerCase()];
+}
+
 function resolveEventType(name: string | undefined, data: unknown): LiveActionType {
-  if (name) {
-    const mapped = actionTypeMap[name.toLowerCase()];
-    if (mapped) {
-      return mapped;
-    }
-    if (name === 'INSERT' || name === 'UPDATE' || name === 'DELETE') {
-      return name;
-    }
-  }
-  if (data !== null && typeof data === 'object' && 'type' in data) {
-    const rawType = String((data as Record<string, unknown>)['type']);
-    const mapped = actionTypeMap[rawType.toLowerCase()];
-    if (mapped) {
-      return mapped;
+  const mappedName = mapEventType(name);
+  if (mappedName) return mappedName;
+
+  if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
+    const envelope = data as Record<string, unknown>;
+    for (const key of ['type', 'event', 'name']) {
+      const mapped = mapEventType(envelope[key]);
+      if (mapped) return mapped;
     }
   }
   return 'UPDATE';
