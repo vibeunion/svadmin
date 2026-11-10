@@ -44,5 +44,6 @@
   "packages/kinde": "0.2.0",
   "packages/openfga": "0.2.0",
   "packages/ably": "0.1.0",
+  "packages/jsonapi": "0.1.0",
   "packages/casbin": "0.1.0"
 }

@@ -87,6 +87,7 @@ export default defineConfig({
           translations: { 'zh-CN': '提供器' },
           items: [
             { slug: 'providers/data-provider' },
+            { slug: 'providers/jsonapi' },
             { slug: 'providers/refine-adapter' },
             { slug: 'providers/auth' },
             { slug: 'providers/auth0' },

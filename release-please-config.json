@@ -405,6 +405,11 @@
       "component": "ably",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/jsonapi": {
+      "release-type": "node",
+      "component": "jsonapi",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/casbin": {
       "release-type": "node",
       "component": "casbin",
