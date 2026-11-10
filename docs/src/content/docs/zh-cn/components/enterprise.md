@@ -527,3 +527,78 @@ const fields: FieldDefinition[] = [
   onnodeclick={(node) => console.log('点击节点:', node.name)}
 />
 ```
+
+---
+
+## 异步后台任务中心（TaskCenter / BackgroundTaskDrawer）
+
+企业级大数据量异步导出、清洗与长时间运行作业跟踪中心：
+- 顶栏/悬浮入口集成脉冲动态呼吸指示与运行中任务数角标；
+- 侧拉抽屉支持多状态分栏过滤：全部、执行中（Running）、排队中（Pending）、已完成（Completed）、失败（Failed）；
+- 实时百分比进度条、已处理条数统计（如 `6,800 / 10,000`）与剩余耗时智能预估；
+- 具备成品文件一键下载、失败任务重试、作业取消中断及一键清理已完成记录等快捷操作。
+
+```svelte
+<script lang="ts">
+  import { TaskCenter, type BackgroundTask } from '@svadmin/ui';
+
+  let tasks: BackgroundTask[] = [
+    {
+      id: 'task-1',
+      name: '2026年Q1销售流水总表异步导出',
+      status: 'running',
+      progress: 68,
+      processedCount: 6800,
+      totalCount: 10000,
+      estimatedSecondsRemaining: 24,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'task-2',
+      name: '客户主数据批量清洗转换',
+      status: 'completed',
+      downloadUrl: 'https://cdn.example.com/exports/customers.xlsx',
+      downloadFileName: 'customers.xlsx',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+</script>
+
+<TaskCenter
+  showTrigger
+  tasks={tasks}
+  ondownload={(task) => console.log('下载成果文件:', task.downloadUrl)}
+  oncancel={(task) => console.log('终止作业:', task.id)}
+  onretry={(task) => console.log('重试任务:', task.id)}
+/>
+```
+
+---
+
+## 离线断网自愈守卫套件（OfflineBanner 与 OfflineGuard）
+
+移动与现场作业弱网/断网防丢保护套件：
+- `useNetworkStatus()` 响应式网速与在线状态钩子，监听离线/上线事件及 `rtt` 延迟；
+- `<OfflineBanner>`：全局顶部断网感应横条，断网时醒目提示已启用草稿备份，联网后平滑过渡显示恢复提示；
+- `<OfflineGuard>`：表单提交保护守卫，离线状态下自动拦截表单提交或覆盖半透明防护层，防止数据丢失。
+
+```svelte
+<script lang="ts">
+  import { OfflineBanner, OfflineGuard, useNetworkStatus } from '@svadmin/ui';
+
+  const network = useNetworkStatus();
+</script>
+
+<!-- 全局断网横幅 -->
+<OfflineBanner
+  onretry={() => console.log('正在检测网络连接...')}
+/>
+
+<!-- 表单提交防丢保护层 -->
+<OfflineGuard mode="overlay">
+  <form onsubmit={(e) => { e.preventDefault(); /* 提交逻辑 */ }}>
+    <input placeholder="请输入标题" />
+    <button type="submit">提交表单</button>
+  </form>
+</OfflineGuard>
+```
