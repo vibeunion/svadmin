@@ -19,11 +19,11 @@
   } from '@lucide/svelte';
   import { t } from '@svadmin/core';
 
-  let { editor, onUpload, preset = 'full' } = $props<{
+  let { editor, onUpload, preset = 'full' }: {
     editor: Editor;
     onUpload?: (file: File) => Promise<string>;
     preset?: 'full' | 'minimal' | 'prose';
-  }>();
+  } = $props();
 
   // ─── Reactive state: re-read on every transaction ────────────
   let txn = $state(0);

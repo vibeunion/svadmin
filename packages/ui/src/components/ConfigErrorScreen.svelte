@@ -7,11 +7,11 @@
 
   const i18n = useTranslation();
 
-  let { title, missingVars = [], envTemplate = '' } = $props<{
+  let { title, missingVars = [], envTemplate = '' }: {
     title?: string;
     missingVars?: { key: string; description?: string }[];
     envTemplate?: string;
-  }>();
+  } = $props();
 
   const displayTitle = $derived(title ?? i18n.t('config.missingEnvTitle'));
 

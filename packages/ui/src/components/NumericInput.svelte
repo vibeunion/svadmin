@@ -14,24 +14,24 @@
   export type NumericInputMode = 'number' | 'currency' | 'percent';
 
   interface Props {
-    value?: number | null;
-    mode?: NumericInputMode;
-    currency?: string;
-    scale?: '100' | '1';
+    value?: number | null | undefined;
+    mode?: NumericInputMode | undefined;
+    currency?: string | undefined;
+    scale?: '100' | '1' | undefined;
     locale?: NumericInputLocale | undefined;
-    min?: number;
-    max?: number;
-    step?: number;
-    precision?: number;
-    id?: string;
-    name?: string;
-    placeholder?: string;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
+    min?: number | undefined;
+    max?: number | undefined;
+    step?: number | undefined;
+    precision?: number | undefined;
+    id?: string | undefined;
+    name?: string | undefined;
+    placeholder?: string | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
     describedby?: string | undefined;
-    class?: string;
-    onchange?: (value: number | null) => void;
+    class?: string | undefined;
+    onchange?: ((value: number | null) => void) | undefined;
   }
 
   let {

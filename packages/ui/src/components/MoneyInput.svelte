@@ -5,24 +5,24 @@
 
   interface Props {
     /** 默认按主单位（元）读写；minorUnits 为 true 时按最小货币单位（分）读写。 */
-    value?: number | null;
-    minorUnits?: boolean;
+    value?: number | null | undefined;
+    minorUnits?: boolean | undefined;
     locale?: NumericInputLocale | undefined;
-    currency?: string;
+    currency?: string | undefined;
     /** 与 value 使用同一单位；minorUnits 为 true 时同样按分传入。 */
-    min?: number;
-    max?: number;
-    step?: number;
-    precision?: number;
-    id?: string;
-    name?: string;
-    placeholder?: string;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
+    min?: number | undefined;
+    max?: number | undefined;
+    step?: number | undefined;
+    precision?: number | undefined;
+    id?: string | undefined;
+    name?: string | undefined;
+    placeholder?: string | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
     describedby?: string | undefined;
-    class?: string;
-    onchange?: (value: number | null) => void;
+    class?: string | undefined;
+    onchange?: ((value: number | null) => void) | undefined;
   }
 
   let {

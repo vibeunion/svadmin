@@ -1,10 +1,12 @@
 <script lang="ts">
   import { Bookmark } from '@lucide/svelte';
-  import type { LucideProps } from '@lucide/svelte';
+  import type { SVGAttributes } from 'svelte/elements';
   import type { Snippet } from 'svelte';
   import { cn } from '../../utils.js';
 
-  type Props = Omit<LucideProps, 'children' | 'class'> & { class?: string; children?: Snippet };
+  type Props = Omit<SVGAttributes<SVGSVGElement>, 'color' | 'size'> & {
+    class?: string; children?: Snippet; color?: string; size?: number | string;
+  };
   let { class: className = '', children, size = 16, ...rest }: Props = $props();
 </script>
 

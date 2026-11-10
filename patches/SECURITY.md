@@ -9,20 +9,20 @@ No product code, publication bypass, or repository-wide dependency upgrade is
 included.
 
 The original 19 audit findings are addressed by axios 1.20.0, devalue 5.9.4 and
-DOMPurify 3.4.16. `qs` GHSA-6pq8-jhm2-2vcw is cleared by the `qs` 6.17.0 override;
+DOMPurify 3.4.16. `qs` GHSA-6pq8-jhm2-2vcw is cleared by the `qs` 6.17.1 override;
 the comma-array fix landed in 6.16.1. deepmerge 4.3.1 still has no upstream
 release, so it is patched locally. braces remains patched even though the current
 registry response no longer reports it:
 
 The current registry fixes for `follow-redirects` and `minimatch` are selected by
-root overrides (`1.16.2` and `11.0.3`). `glob` 7.2.3 is patched only at its
+root overrides (`1.16.3` and `11.0.5`). `glob` 7.2.3 is patched only at its
 consumer boundary so its legacy `set`/`globSet` and escape semantics remain stable
 while it uses the fixed minimatch matcher.
 
 | Dependency | Advisory | Local remediation |
 | --- | --- | --- |
 | braces 3.0.3 | GHSA-vfj7-8cjw-p6xm | Hard nesting limit of 128 for braces and parentheses; independent bounds in direct AST compile, expand and stringify walkers. |
-| http-cache-semantics 4.2.0 | GHSA-ch52-4w7c-c8xp | Security restrictions precede max-stale, stale-while-revalidate and stale-if-error reuse; fresh responses and permitted private/public caching remain supported. |
+| http-cache-semantics 4.3.0 | GHSA-ch52-4w7c-c8xp | Security restrictions precede max-stale, stale-while-revalidate and stale-if-error reuse; fresh responses and permitted private/public caching remain supported. |
 | deepmerge 4.3.1 | GHSA-gcqx-w48m-w2h4 | `__proto__`, `constructor`, and `prototype` keys are dropped in both merge loops. Results are written with `Object.defineProperty`. Null and undefined targets still merge, and a throwing `in` check stays fail-open so normal keys are not rejected. |
 
 Use `bun install --frozen-lockfile` to apply the tracked Bun patches. Package

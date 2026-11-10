@@ -14,7 +14,7 @@
     imageAlt,
     icon,
     children,
-  } = $props<{
+  }: {
     title?: string;
     description?: string;
     /** Optional illustration URL. Mirrors the reference `image` prop. */
@@ -23,7 +23,7 @@
     /** Optional custom icon slot; ignored when `image` is set. */
     icon?: Snippet;
     children?: Snippet;
-  }>();
+  } = $props();
 
   function textDefault(value: unknown): string | undefined {
     return typeof value === 'string' ? value : undefined;

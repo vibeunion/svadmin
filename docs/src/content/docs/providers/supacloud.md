@@ -20,7 +20,7 @@ Keeping these APIs under `@svadmin/supabase/supacloud` avoids breaking the exist
 ## Installation
 
 ```bash
-bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.36.0
+bun add @svadmin/supabase @supabase/supabase-js@^2.119.0 @supacloud/js@^0.48.1
 ```
 
 ## Create the Clients
@@ -99,11 +99,11 @@ cancel the server task or prove that a write was rolled back.
 
 Only the modern `{ tasks: ... }` client is accepted. Bare legacy task clients and
 caller-selected result generics are removed. The installed SDK contract is tested
-with `@supacloud/js` 0.33.0, 0.34.0, and 0.36.0 against
-`@supabase/supabase-js` 2.117.1; these tests use
+with `@supacloud/js` 0.33.0, 0.34.0, 0.36.0, and 0.48.1 against
+`@supabase/supabase-js` 2.119.0; these tests use
 injected HTTP, polling and realtime transports, not a hosted deployment.
-The optional SDK peer range is `^0.33.0 || ^0.34.0 || ^0.36.0`.
-The test-only npm aliases keep all three versions installed so the same transport
+The optional SDK peer range is `^0.33.0 || ^0.34.0 || ^0.36.0 || ^0.48.1`.
+The test-only npm aliases keep all four versions installed so the same transport
 suite runs against each SDK. Untested minor lines, including 0.35.x, are not
 declared compatible; this does not imply they are known to be broken.
 Upgrade the SDK and adapter together. SDK task submission expects HTTP 202, and task responses must

@@ -1,0 +1,11 @@
+diff --git a/types/vidstack-CZeLQ-DR.d.ts b/types/vidstack-CZeLQ-DR.d.ts
+index 600a8a956ae14732a1948c0a85cbd9bc4aa43446..c5de5f5c89bee5cdc4fa578b1bbf290923ba8509 100644
+--- a/types/vidstack-CZeLQ-DR.d.ts
++++ b/types/vidstack-CZeLQ-DR.d.ts
+@@ -1,5 +1,5 @@
+ import { Component, Context, DOMEvent, Dispose, EventsTarget, InferEventDetail, MaverickElementConstructor, MaybeStopEffect, ReadSignal, ReadSignalRecord, Scope, SetRequired, State, Store, ViewController, Writable, WriteSignal } from "./vidstack-DKjAgHWd.js";
+-import DASH from "dashjs";
++import * as DASH from "dashjs";
+ import * as HLS from "hls.js";
+ import { CaptionsFileFormat, CaptionsParserFactory, VTTCue as VTTCue$1, VTTHeaderMetadata, VTTRegion } from "media-captions";
+ 

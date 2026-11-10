@@ -9,8 +9,8 @@
   export type DateTimeInputMode = 'date' | 'time' | 'datetime';
 
   interface Props {
-    value?: string | null;
-    mode?: DateTimeInputMode;
+    value?: string | null | undefined;
+    mode?: DateTimeInputMode | undefined;
     min?: string | undefined;
     max?: string | undefined;
     minInstant?: string | undefined;
