@@ -19,7 +19,7 @@ export interface JsonApiResourceObject {
   id: string | number;
   type: string;
   attributes?: Record<string, unknown>;
-  relationships?: Record<string, { data?: { id: string | number; type: string } | Array<{ id: string | number; type: string }> }>;
+  relationships?: Record<string, { data?: null | { id: string | number; type: string } | Array<{ id: string | number; type: string }> }>;
   links?: Record<string, unknown>;
   meta?: Record<string, unknown>;
 }
@@ -56,6 +56,10 @@ function unpackResource(item: JsonApiResourceObject, includedMap?: Map<string, R
 
   if (item.relationships && includedMap) {
     for (const [relName, relData] of Object.entries(item.relationships)) {
+      if (relData?.data === null) {
+        record[relName] = null;
+        continue;
+      }
       if (!relData?.data) continue;
       if (Array.isArray(relData.data)) {
         record[relName] = relData.data.map((ref) => includedMap.get(`${ref.type}:${ref.id}`) ?? { id: ref.id, type: ref.type });
@@ -72,6 +76,21 @@ function unpackResource(item: JsonApiResourceObject, includedMap?: Map<string, R
 export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider {
   const client = options.httpClient ?? fetch;
   const baseUrl = options.apiUrl.replace(/\/+$/, '');
+
+  const resourceUrl = (resource: string, id?: string | number): string => {
+    const path = `${baseUrl}/${encodeURIComponent(resource)}`;
+    return id === undefined ? path : `${path}/${encodeURIComponent(String(id))}`;
+  };
+
+  function appendFilter(url: URL, filter: NonNullable<GetListParams['filters']>[number]): void {
+    if (!('field' in filter)) {
+      throw new Error('JSON:API logical filters require an explicit server-side mapping');
+    }
+    if (filter.value === undefined || filter.value === '') return;
+    const key = filter.operator === 'eq' ? `filter[${filter.field}]` : `filter[${filter.field}][${filter.operator}]`;
+    const value = Array.isArray(filter.value) ? filter.value.join(',') : String(filter.value);
+    url.searchParams.set(key, value);
+  }
 
   async function getHeaders(): Promise<Record<string, string>> {
     const custom = typeof options.headers === 'function' ? await options.headers() : options.headers;
@@ -118,7 +137,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
     },
 
     async getList<TData extends BaseRecord = BaseRecord>(params: GetListParams): Promise<GetListResult<TData>> {
-      const url = new URL(`${baseUrl}/${params.resource}`);
+      const url = new URL(resourceUrl(params.resource));
 
       // Pagination
       if (params.pagination) {
@@ -143,11 +162,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
 
       // Filters
       if (params.filters) {
-        for (const filter of params.filters) {
-          if ('field' in filter && filter.value !== undefined && filter.value !== '') {
-            url.searchParams.set(`filter[${filter.field}]`, String(filter.value));
-          }
-        }
+        for (const filter of params.filters) appendFilter(url, filter);
       }
 
       const doc = await request<JsonApiDocument>(url.toString());
@@ -181,7 +196,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
     },
 
     async getOne<TData extends BaseRecord = BaseRecord>(params: GetOneParams): Promise<GetOneResult<TData>> {
-      const url = `${baseUrl}/${params.resource}/${params.id}`;
+      const url = resourceUrl(params.resource, params.id);
       const doc = await request<JsonApiDocument>(url);
 
       if (!doc.data || Array.isArray(doc.data)) {
@@ -226,7 +241,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
     async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>(
       params: UpdateParams<TVariables>
     ): Promise<UpdateResult<TData>> {
-      const url = `${baseUrl}/${params.resource}/${params.id}`;
+      const url = resourceUrl(params.resource, params.id);
       const doc = await request<JsonApiDocument>(url, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -250,7 +265,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
     },
 
     async deleteOne<TData extends BaseRecord = BaseRecord>(params: DeleteParams): Promise<DeleteResult<TData>> {
-      const url = `${baseUrl}/${params.resource}/${params.id}`;
+      const url = resourceUrl(params.resource, params.id);
       await request(url, {
         method: 'DELETE',
       });

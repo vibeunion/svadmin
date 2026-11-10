@@ -107,6 +107,47 @@ describe('createJsonApiDataProvider', () => {
     expect(result.data['title']).toBe('Deep Dive');
   });
 
+  it('encodes resource identifiers and preserves null relationships', async () => {
+    const mockFetch = mock((url: string | URL | Request) => {
+      expect(String(url)).toBe('https://api.example.com/jsonapi/articles/a%2Fb');
+      return Promise.resolve(new Response(JSON.stringify({
+        data: {
+          id: 'a/b',
+          type: 'articles',
+          attributes: { title: 'Detached' },
+          relationships: { author: { data: null } },
+        },
+      }), { status: 200 }));
+    });
+
+    const provider = createJsonApiDataProvider({
+      apiUrl: 'https://api.example.com/jsonapi',
+      httpClient: mockFetch as unknown as typeof fetch,
+    });
+    const result = await provider.getOne({ resource: 'articles', id: 'a/b' });
+    expect(result.data['author']).toBeNull();
+  });
+
+  it('does not silently discard non-equality or logical filters', async () => {
+    const mockFetch = mock((url: string | URL | Request) =>
+      Promise.resolve(new Response(JSON.stringify({ data: [], meta: { total: 0 } }), { status: 200 })));
+    const provider = createJsonApiDataProvider({
+      apiUrl: 'https://api.example.com/jsonapi',
+      httpClient: mockFetch as unknown as typeof fetch,
+    });
+
+    await provider.getList({
+      resource: 'articles',
+      filters: [{ field: 'status', operator: 'ne', value: 'archived' }],
+    });
+    expect(String(mockFetch.mock.calls[0]?.[0])).toContain('filter%5Bstatus%5D%5Bne%5D=archived');
+
+    await expect(provider.getList({
+      resource: 'articles',
+      filters: [{ operator: 'or', value: [{ field: 'status', operator: 'eq', value: 'draft' }] }],
+    })).rejects.toThrow('logical filters require an explicit server-side mapping');
+  });
+
   it('creates resource sending JSON:API envelope', async () => {
     const mockFetch = mock((url: string | URL | Request, init?: RequestInit) => {
       expect(String(url)).toBe('https://api.example.com/jsonapi/articles');
