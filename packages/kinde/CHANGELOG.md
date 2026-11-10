@@ -1,5 +1,14 @@
 # @svadmin/kinde
 
+## [0.2.1](https://github.com/vibeunion/svadmin/compare/kinde-v0.2.0...kinde-v0.2.1) (2026-11-10)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.79.0
+
 ## [0.2.0](https://github.com/vibeunion/svadmin/compare/kinde-v0.1.0...kinde-v0.2.0) (2026-11-09)
 
 
