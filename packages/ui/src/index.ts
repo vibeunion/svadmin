@@ -780,15 +780,8 @@ export type { CronExpressionBuilderProps, CronPreset } from './components/CronEx
 export { default as OrgChart } from './components/OrgChart.svelte';
 export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';
 
-// Enterprise dashboard gauge & metric grid suite
 export { GaugeChart as SpeedometerGauge } from './components/charts/index.js';
-export type {
-  GaugeChartProps,
-  GaugeThreshold,
-  GaugeTone,
-  GaugeType,
-  GaugeMode,
-} from './components/charts/GaugeChart.svelte';
+export type { GaugeChartProps, GaugeThreshold, GaugeTone, GaugeType, GaugeMode } from './components/charts/GaugeChart.svelte';
 export { default as MetricGrid, default as DashboardMetricGrid } from './components/MetricGrid.svelte';
 export type { MetricGridProps } from './components/MetricGrid.svelte';
 // Enterprise micro-frontend & embedded sandbox frame suite
