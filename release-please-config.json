@@ -399,6 +399,11 @@
       "release-type": "node",
       "component": "openfga",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/casbin": {
+      "release-type": "node",
+      "component": "casbin",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

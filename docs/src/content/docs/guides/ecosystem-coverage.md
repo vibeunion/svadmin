@@ -58,7 +58,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/pusher`, WebSocket, SSE | — | ✅ |
 | Identity providers | clerk, auth0, kinde, supabase-auth | `@svadmin/clerk`, `@svadmin/auth0`, `@svadmin/kinde`, `@svadmin/sso`, `@svadmin/firebase`, `@svadmin/supabase` | — | ✅ |
 | OLAP / Analytics | clickhouse, duckdb | `@svadmin/clickhouse` analytical column-oriented data provider | — | ✅ |
-| Fine-grained authorization | openfga, permit.io, casbin | `@svadmin/openfga` ReBAC Zanzibar access control provider | — | ✅ |
+| Fine-grained authorization | openfga, casbin, permit.io | `@svadmin/openfga` ReBAC Zanzibar access control provider, `@svadmin/casbin` PERM policy adapter | — | ✅ |
 | Gestures | use-gesture | `useSwipe` (pointer-based) | svelte-gestures | ✅ simple swipes; complex gestures via svelte-gestures |
 
 ## Reading the table

@@ -42,5 +42,6 @@
   "packages/auth0": "0.2.1",
   "packages/clickhouse": "0.2.0",
   "packages/kinde": "0.2.0",
-  "packages/openfga": "0.2.0"
+  "packages/openfga": "0.2.0",
+  "packages/casbin": "0.1.0"
 }

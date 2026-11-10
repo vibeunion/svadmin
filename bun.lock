@@ -189,6 +189,13 @@
         "@svadmin/core": "workspace:*",
       },
     },
+    "packages/casbin": {
+      "name": "@svadmin/casbin",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/charts": {
       "name": "@svadmin/charts",
       "version": "0.2.1",
@@ -1611,6 +1618,8 @@
     "@svadmin/auth-utils": ["@svadmin/auth-utils@workspace:packages/auth-utils"],
 
     "@svadmin/auth0": ["@svadmin/auth0@workspace:packages/auth0"],
+
+    "@svadmin/casbin": ["@svadmin/casbin@workspace:packages/casbin"],
 
     "@svadmin/charts": ["@svadmin/charts@workspace:packages/charts"],
 

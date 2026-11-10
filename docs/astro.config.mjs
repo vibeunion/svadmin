@@ -95,6 +95,7 @@ export default defineConfig({
             { slug: 'providers/live' },
             { slug: 'providers/clickhouse' },
             { slug: 'providers/openfga' },
+            { slug: 'providers/casbin' },
             { slug: 'providers/elysia' },
             { slug: 'providers/drizzle' },
             { slug: 'providers/sso' },
