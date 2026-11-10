@@ -780,6 +780,9 @@ export type { CronExpressionBuilderProps, CronPreset } from './components/CronEx
 export { default as OrgChart } from './components/OrgChart.svelte';
 export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';
 
+// Enterprise micro-frontend & embedded sandbox frame suite
+export { default as MicroAppFrame, default as EmbeddedSandbox } from './components/MicroAppFrame.svelte';
+export type { MicroAppFrameProps, MicroAppMessage } from './components/MicroAppFrame.svelte';
 // Enterprise background task center and async job tracking suite
 export { default as TaskCenter, default as BackgroundTaskDrawer } from './components/TaskCenter.svelte';
 export type { TaskCenterProps, BackgroundTask, BackgroundTaskStatus } from './components/TaskCenter.svelte';

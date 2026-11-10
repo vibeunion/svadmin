@@ -609,6 +609,30 @@ const fields: FieldDefinition[] = [
 
 ---
 
+## 微前端与嵌入式沙箱容器（MicroAppFrame / EmbeddedSandbox）
+
+企业级微前端子应用接入与独立外部控制台集成容器：
+- 安全的双向 `postMessage` 握手通信协议，支持来源域名白名单过滤（`allowedOrigins`）；
+- 主子应用状态同步：自动将主系统当前的明暗主题（`light`/`dark`）、国际化语言及认证凭证传递给嵌入页面；
+- 动态自适应高度：根据子页面上报的 `svadmin:resize` 消息自动撑开父容器，告别内外双滚动条；
+- 支持一键沉浸式全屏放大浏览、顶栏重载刷新、新标签页直达及超时错误重试兜底。
+
+```svelte
+<script lang="ts">
+  import { MicroAppFrame } from '@svadmin/ui';
+</script>
+
+<MicroAppFrame
+  src="https://grafana.internal.net/d/telemetry-overview"
+  title="集群实时遥测大屏"
+  allowedOrigins={['https://grafana.internal.net']}
+  theme="dark"
+  autoResize
+  onready={() => console.log('微应用握手完成')}
+  onmessage={(msg) => console.log('收到微应用消息:', msg)}
+/>
+```
+
 ## 异步后台任务中心（TaskCenter / BackgroundTaskDrawer）
 
 企业级大数据量异步导出、清洗与长时间运行作业跟踪中心：
