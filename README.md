@@ -111,6 +111,7 @@
 | `@svadmin/nestjsx-crud` | NestJS CRUD                                  |
 | `@svadmin/elasticsearch`| Full-text search and document provider       |
 | `@svadmin/pusher`       | Realtime event provider                     |
+| `@svadmin/ably`         | Ably Pub/Sub realtime event provider        |
 | `@svadmin/clerk`        | External authentication provider            |
 | `@svadmin/auth0`        | Auth0 identity and authentication provider  |
 | `@svadmin/kinde`        | Kinde identity and authentication provider  |

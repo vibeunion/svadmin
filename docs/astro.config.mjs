@@ -93,6 +93,7 @@ export default defineConfig({
             { slug: 'providers/kinde' },
             { slug: 'providers/router' },
             { slug: 'providers/live' },
+            { slug: 'providers/ably' },
             { slug: 'providers/clickhouse' },
             { slug: 'providers/openfga' },
             { slug: 'providers/casbin' },

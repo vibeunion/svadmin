@@ -55,7 +55,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | CLI | admin CLIs | `create-svadmin`, `agmesh` | — | ✅ |
 | PDF | react-pdf, @react-pdf/renderer | `PdfDocumentViewer` | pdfjs-dist, svelte-pdf | ✅ |
 | SaaS pricing & quota | stripe-pricing-table, pro billing | `PricingCard`, `QuotaProgressBar`, `PricingTable`, `UsageCard` | — | ✅ |
-| Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/pusher`, WebSocket, SSE | — | ✅ |
+| Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/ably`, `@svadmin/pusher`, WebSocket, SSE | — | ✅ |
 | Identity providers | clerk, auth0, kinde, supabase-auth | `@svadmin/clerk`, `@svadmin/auth0`, `@svadmin/kinde`, `@svadmin/sso`, `@svadmin/firebase`, `@svadmin/supabase` | — | ✅ |
 | OLAP / Analytics | clickhouse, duckdb | `@svadmin/clickhouse` analytical column-oriented data provider | — | ✅ |
 | Fine-grained authorization | openfga, casbin, permit.io | `@svadmin/openfga` ReBAC Zanzibar access control provider, `@svadmin/casbin` PERM policy adapter | — | ✅ |
