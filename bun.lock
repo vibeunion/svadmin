@@ -528,6 +528,13 @@
         "@svadmin/core": "workspace:*",
       },
     },
+    "packages/keycloak": {
+      "name": "@svadmin/keycloak",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/kinde": {
       "name": "@svadmin/kinde",
       "version": "0.2.1",
@@ -1708,6 +1715,8 @@
     "@svadmin/hasura": ["@svadmin/hasura@workspace:packages/hasura"],
 
     "@svadmin/jsonapi": ["@svadmin/jsonapi@workspace:packages/jsonapi"],
+
+    "@svadmin/keycloak": ["@svadmin/keycloak@workspace:packages/keycloak"],
 
     "@svadmin/kinde": ["@svadmin/kinde@workspace:packages/kinde"],
 

@@ -118,6 +118,7 @@
 | `@svadmin/webhooks`     | Outgoing webhook dispatcher and HMAC signing |
 | `@svadmin/clerk`        | External authentication provider            |
 | `@svadmin/auth0`        | Auth0 identity and authentication provider  |
+| `@svadmin/keycloak`     | Keycloak enterprise OIDC/PKCE authentication provider |
 | `@svadmin/kinde`        | Kinde identity and authentication provider  |
 | `@svadmin/clickhouse`   | ClickHouse analytical column-oriented OLAP provider |
 | `@svadmin/openfga`      | OpenFGA relationship-based fine-grained access control (ReBAC) |
