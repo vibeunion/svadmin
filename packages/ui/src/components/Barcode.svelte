@@ -45,9 +45,8 @@
     '/': '010100010', '+': '010001010', '%': '000101010', '*': '010010100'
   };
 
-  // CODE128 模式表 (部分常用子集转二进制条空宽序列，每模式11位，末尾以条结束)
-  // 标准 Code128 码表：索引 0-106，对应条码模式（如 '212222' 表示宽度分布）
-  const CODE128_PATTERNS = [
+  // CODE128 模式表 (常用模式)
+  const CODE128_PATTERNS: string[] = [
     '212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213',
     '221312', '231212', '112232', '122132', '122231', '113222', '123122', '123221', '223211', '221132',
     '221231', '213212', '223112', '312131', '311222', '321122', '321221', '312212', '322112', '322211',
@@ -61,7 +60,6 @@
     '114131', '311141', '411131', '211412', '211214', '211232', '2331112'
   ];
 
-  // 计算条形码条线段数据
   interface BarSegment {
     x: number;
     width: number;
@@ -75,8 +73,8 @@
     if (format === 'CODE39') {
       const cleanValue = `*${value.toUpperCase()}*`;
       for (let i = 0; i < cleanValue.length; i++) {
-        const char = cleanValue[i];
-        const pattern = CODE39_ENCODINGS[char] || CODE39_ENCODINGS['-'];
+        const char = cleanValue[i] ?? '-';
+        const pattern = CODE39_ENCODINGS[char] ?? CODE39_ENCODINGS['-'] ?? '010000101';
         // 9 个单元：偶数索引是条，奇数索引是空
         for (let j = 0; j < 9; j++) {
           const isBar = j % 2 === 0;
@@ -99,7 +97,6 @@
 
       for (let i = 0; i < value.length; i++) {
         const charCode = value.charCodeAt(i);
-        // ASCII 32 到 126 映射到 Code 128 索引 0 到 94
         const codeIndex = charCode >= 32 && charCode <= 126 ? charCode - 32 : 0;
         codes.push(codeIndex);
         checksum += codeIndex * (i + 1);
@@ -108,10 +105,11 @@
       codes.push(stopIndex);
 
       for (const code of codes) {
-        const pattern = CODE128_PATTERNS[code] || CODE128_PATTERNS[0];
+        const pattern = CODE128_PATTERNS[code] ?? CODE128_PATTERNS[0] ?? '212222';
         let isBar = true;
         for (let j = 0; j < pattern.length; j++) {
-          const runLength = parseInt(pattern[j], 10) * width;
+          const char = pattern[j] ?? '1';
+          const runLength = parseInt(char, 10) * width;
           if (isBar) {
             bars.push({ x: currentX, width: runLength });
           }
@@ -124,11 +122,11 @@
     return bars;
   });
 
-  const totalWidth = $derived(
-    barcodeBars.length > 0
-      ? barcodeBars[barcodeBars.length - 1].x + barcodeBars[barcodeBars.length - 1].width + margin
-      : 200
-  );
+  const totalWidth = $derived.by(() => {
+    if (barcodeBars.length === 0) return 200;
+    const lastBar = barcodeBars[barcodeBars.length - 1];
+    return lastBar ? lastBar.x + lastBar.width + margin : 200;
+  });
 
   const displayLabel = $derived(text ?? value);
 

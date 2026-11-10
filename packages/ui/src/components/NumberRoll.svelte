@@ -98,7 +98,9 @@
   const formattedNumber = $derived.by(() => {
     const current = displayValue ?? value;
     const fixed = current.toFixed(decimals);
-    const [intPart, decPart] = fixed.split('.');
+    const parts = fixed.split('.');
+    const intPart = parts[0] ?? '0';
+    const decPart = parts[1];
     const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
     return decPart !== undefined ? `${formattedInt}${decimalSeparator}${decPart}` : formattedInt;
   });

@@ -9,7 +9,7 @@
     overscan?: number;
     endReachedThreshold?: number;
     class?: string;
-    keyField?: keyof T | ((item: T, index: number) => string | number);
+    keyField?: string | keyof T | ((item: T, index: number) => string | number);
     onendreached?: () => void;
     children?: Snippet<[T, number]>;
     empty?: Snippet;
@@ -50,8 +50,9 @@
   const visibleItems = $derived.by(() => {
     const list: { item: T; index: number }[] = [];
     for (let i = startIndex; i < endIndex; i++) {
-      if (items[i] !== undefined) {
-        list.push({ item: items[i], index: i });
+      const currentItem = items[i];
+      if (currentItem !== undefined) {
+        list.push({ item: currentItem as T, index: i });
       }
     }
     return list;
@@ -146,11 +147,11 @@
             {:else}
               <div class="flex h-full w-full items-center border-b border-border/40 px-4 text-xs text-foreground">
                 {#if typeof item === 'object' && item !== null && 'title' in item}
-                  {(item as Record<string, unknown>).title}
+                  {(item as Record<string, unknown>)['title']}
                 {:else if typeof item === 'object' && item !== null && 'name' in item}
-                  {(item as Record<string, unknown>).name}
+                  {(item as Record<string, unknown>)['name']}
                 {:else if typeof item === 'object' && item !== null && 'label' in item}
-                  {(item as Record<string, unknown>).label}
+                  {(item as Record<string, unknown>)['label']}
                 {:else}
                   Item {index + 1}: {String(item)}
                 {/if}

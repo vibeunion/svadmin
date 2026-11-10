@@ -15,7 +15,7 @@ describe('VirtualList Component', () => {
         itemHeight: 50,
         height: 300,
         overscan: 2,
-        keyField: 'id',
+        keyField: (item: unknown) => (item as { id: string }).id,
       },
     });
 
