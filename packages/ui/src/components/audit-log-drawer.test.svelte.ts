@@ -33,7 +33,7 @@ describe('AuditLogDrawer custom loader', () => {
       meta: { recordId: 7 },
     }));
     expect(providerGet).not.toHaveBeenCalled();
-    expect(await screen.findByText('update')).toBeTruthy();
+    expect(await screen.findByText('UPDATE orders')).toBeTruthy();
   });
 
   it('shows the error state when the injected loader rejects', async () => {

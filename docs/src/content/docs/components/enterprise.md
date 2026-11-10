@@ -584,6 +584,32 @@ Pure client-side Canvas and CSS jigsaw puzzle captcha for anti-bot rate-limiting
 />
 ```
 
+## Enterprise Audit Trail & Revision Diff Suite
+
+### `<AuditLogDrawer>` & `<AuditTimeline>`
+
+High-resolution audit log inspection and field-level diff viewer:
+- Slide-over drawer connecting directly to `auditLogProvider` or custom loaders.
+- Action filtering (`create`, `update`, `delete`, `approve`, `rollback`) and user/record keyword search.
+- Automatic field diff calculation comparing `previousData` and `data` (strikethrough old value in red, highlight new value in green).
+- Displays operator identity, action badges, and origin IP address.
+
+```svelte
+<script lang="ts">
+  import { AuditLogDrawer, Button } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<Button onclick={() => open = true}>View Audit History</Button>
+
+<AuditLogDrawer
+  bind:open
+  resource="orders"
+  recordId="101"
+/>
+```
+
 ## Real-Time Collaboration & Concurrent Edit Conflict Guard
 
 ### `<PresenceAvatars>` / `<PresenceAvatarGroup>`

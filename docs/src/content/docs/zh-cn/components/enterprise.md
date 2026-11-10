@@ -352,6 +352,32 @@ const fields: FieldDefinition[] = [
 />
 ```
 
+## 企业级操作审计轨迹与字段变更差异套件
+
+### `<AuditLogDrawer>` & `<AuditTimeline>`
+
+高分辨率行级操作审计抽屉与字段 Diff 差异视图：
+- 侧边抽屉一键呼出，无缝对接全局 `auditLogProvider` 或自定义 loader。
+- 内置操作动作过滤（全部 / 新建 / 更新 / 删除 / 审批 / 回滚）与操作人/内容快速搜索。
+- 自动计算并呈现字段级变更对比：红色删除线旧值、绿色高亮新值。
+- 展示操作人头像/姓名、操作动作徽标、客户端 IP 地址与精准时间戳。
+
+```svelte
+<script lang="ts">
+  import { AuditLogDrawer, Button } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<Button onclick={() => open = true}>查看操作审计轨迹</Button>
+
+<AuditLogDrawer
+  bind:open
+  resource="orders"
+  recordId="101"
+/>
+```
+
 ## 实时在线协同感知与并发编辑冲突守卫
 
 ### `<PresenceAvatars>` / `<PresenceAvatarGroup>`
