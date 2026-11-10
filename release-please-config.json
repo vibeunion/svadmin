@@ -390,6 +390,11 @@
       "component": "clickhouse",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/keycloak": {
+      "release-type": "node",
+      "component": "keycloak",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/kinde": {
       "release-type": "node",
       "component": "kinde",
