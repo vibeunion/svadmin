@@ -424,6 +424,11 @@
       "release-type": "node",
       "component": "cerbos",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/postgrest": {
+      "release-type": "node",
+      "component": "postgrest",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

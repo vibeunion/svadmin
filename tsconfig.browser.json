@@ -35,6 +35,7 @@
     "packages/nestjsx-crud/src/**/*.test.ts",
     "packages/openfga/src/**/*.test.ts",
     "packages/pocketbase/src/**/*.test.ts",
+    "packages/postgrest/src/**/*.test.ts",
     "packages/pusher/src/**/*.test.ts",
     "packages/refine-adapter/src/**/*.test.ts",
     "packages/strapi-graphql/src/**/*.test.ts",

@@ -47,5 +47,6 @@
   "packages/jsonapi": "0.2.0",
   "packages/meilisearch": "0.2.0",
   "packages/casbin": "0.2.0",
-  "packages/cerbos": "0.2.0"
+  "packages/cerbos": "0.2.0",
+  "packages/postgrest": "0.1.0"
 }
