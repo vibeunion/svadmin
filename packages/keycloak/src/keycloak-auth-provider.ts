@@ -220,8 +220,9 @@ export function createKeycloakAuthProvider(
       if (rolesSource === 'resource' || rolesSource === 'all') {
         const resourceAccess = tokenClaims.resource_access ?? keycloak.resourceAccess;
         if (resourceAccess) {
-          if (options.clientId && resourceAccess[options.clientId]?.roles) {
-            const clientRoles = resourceAccess[options.clientId].roles;
+          const clientAccess = options.clientId ? resourceAccess[options.clientId] : undefined;
+          if (clientAccess?.roles) {
+            const clientRoles = clientAccess.roles;
             if (Array.isArray(clientRoles)) {
               for (const role of clientRoles) {
                 roles.add(role);

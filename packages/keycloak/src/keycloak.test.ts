@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, mock } from 'bun:test';
 import { createKeycloakAuthProvider } from './keycloak-auth-provider.js';
 import type { KeycloakClientLike } from './keycloak-auth-provider.js';
 
 describe('createKeycloakAuthProvider', () => {
   it('handles login with keycloak client login method', async () => {
-    const loginMock = vi.fn().mockResolvedValue(undefined);
+    const loginMock = mock().mockResolvedValue(undefined);
     const client: KeycloakClientLike = {
       login: loginMock,
     };
@@ -17,20 +17,20 @@ describe('createKeycloakAuthProvider', () => {
   });
 
   it('handles login error gracefully', async () => {
-    const loginMock = vi.fn().mockRejectedValue(new Error('User cancelled login'));
+    const loginMock = mock().mockRejectedValue(new Error('User cancelled login'));
     const client: KeycloakClientLike = {
       login: loginMock,
     };
 
     const provider = createKeycloakAuthProvider(client);
-    const result = await provider.login();
+    const result = await provider.login({});
 
     expect(result.success).toBe(false);
     expect(result.error?.message).toBe('User cancelled login');
   });
 
   it('handles logout with redirect uri', async () => {
-    const logoutMock = vi.fn().mockResolvedValue(undefined);
+    const logoutMock = mock().mockResolvedValue(undefined);
     const client: KeycloakClientLike = {
       logout: logoutMock,
     };
@@ -48,7 +48,7 @@ describe('createKeycloakAuthProvider', () => {
   });
 
   it('checks authentication status and triggers silent token update', async () => {
-    const updateTokenMock = vi.fn().mockResolvedValue(true);
+    const updateTokenMock = mock().mockResolvedValue(true);
     const client: KeycloakClientLike = {
       authenticated: true,
       updateToken: updateTokenMock,
@@ -64,8 +64,8 @@ describe('createKeycloakAuthProvider', () => {
   });
 
   it('reports unauthenticated when token update fails', async () => {
-    const updateTokenMock = vi.fn().mockRejectedValue(new Error('Refresh token expired'));
-    const onTokenRefreshFailed = vi.fn();
+    const updateTokenMock = mock().mockRejectedValue(new Error('Refresh token expired'));
+    const onTokenRefreshFailed = mock();
     const client: KeycloakClientLike = {
       authenticated: true,
       updateToken: updateTokenMock,
@@ -93,7 +93,7 @@ describe('createKeycloakAuthProvider', () => {
         email: 'admin@keycloak.local',
         picture: 'https://keycloak.local/avatars/admin.png',
       },
-      loadUserProfile: vi.fn().mockResolvedValue({
+      loadUserProfile: mock().mockResolvedValue({
         id: 'kc-user-123',
         firstName: 'Keycloak',
         lastName: 'Administrator',
@@ -134,7 +134,7 @@ describe('createKeycloakAuthProvider', () => {
       clientId: 'svadmin-frontend',
       rolesSource: 'all',
     });
-    const roles = await provider.getPermissions();
+    const roles = await provider.getPermissions?.();
 
     expect(roles).toEqual(
       expect.arrayContaining(['offline_access', 'uma_authorization', 'admin', 'editor', 'analytics_viewer']),
@@ -160,7 +160,7 @@ describe('createKeycloakAuthProvider', () => {
       clientId: 'svadmin-frontend',
       rolesSource: 'realm',
     });
-    const roles = await provider.getPermissions();
+    const roles = await provider.getPermissions?.();
 
     expect(roles).toEqual(['realm_admin']);
   });
@@ -173,7 +173,7 @@ describe('createKeycloakAuthProvider', () => {
     const provider = createKeycloakAuthProvider(client, {
       defaultRole: 'guest',
     });
-    const roles = await provider.getPermissions();
+    const roles = await provider.getPermissions?.();
 
     expect(roles).toEqual(['guest']);
   });
