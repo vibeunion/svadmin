@@ -125,8 +125,8 @@
   });
 
   const totalWidth = $derived(
-    barcodeBars.length > 0 
-      ? barcodeBars[barcodeBars.length - 1].x + barcodeBars[barcodeBars.length - 1].width + margin 
+    barcodeBars.length > 0
+      ? barcodeBars[barcodeBars.length - 1].x + barcodeBars[barcodeBars.length - 1].width + margin
       : 200
   );
 
