@@ -235,7 +235,7 @@
   {/if}
 
   <!-- Frame Body -->
-  <div class="relative w-full flex-1 bg-background" style="height: {effectiveHeight}; min-height: 200px;">
+  <div class="relative w-full flex-1 bg-background" style="height: {effectiveHeight};">
     <!-- Loading Overlay -->
     {#if isLoading}
       <div
