@@ -113,6 +113,7 @@ test.describe('CRUD Operations', () => {
       await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
 
       const editBtn = page.locator('table tbody tr').first().locator('[data-slot="row-actions"]').getByRole('button', { name: /^(edit|编辑)$/i });
+      await editBtn.scrollIntoViewIfNeeded();
       await editBtn.hover();
       await expect(page.getByRole('tooltip')).toBeVisible();
       await editBtn.click();

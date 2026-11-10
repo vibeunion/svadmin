@@ -8,12 +8,12 @@
   let {
     status = 'idle',
     error,
-  } = $props<{
+  }: {
     /** The current auto-save status */
     status?: 'idle' | 'loading' | 'success' | 'error';
     /** Optional error message */
     error?: string;
-  }>();
+  } = $props();
 </script>
 
 <div class="flex items-center gap-2 text-sm text-muted-foreground" role="status" aria-live="polite">

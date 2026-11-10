@@ -5,13 +5,13 @@
     readonly = false,
     disabled = false,
     onchange,
-  } = $props<{
+  }: {
     value?: string;
     placeholder?: string;
     readonly?: boolean;
     disabled?: boolean;
     onchange?: (value: string) => void;
-  }>();
+  } = $props();
 </script>
 
 <textarea

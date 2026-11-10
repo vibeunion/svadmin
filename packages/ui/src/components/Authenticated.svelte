@@ -8,13 +8,13 @@
     loading,
     redirectTo = '/login',
     appendCurrentPathToQuery = true,
-  } = $props<{
+  }: {
     children?: Snippet;
     fallback?: Snippet;
     loading?: Snippet;
     redirectTo?: string;
     appendCurrentPathToQuery?: boolean;
-  }>();
+  } = $props();
 
   const adminContext = captureAdminContext();
   const isAuth = useIsAuthenticated();

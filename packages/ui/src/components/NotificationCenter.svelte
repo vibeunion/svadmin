@@ -17,22 +17,22 @@
   }
 
   interface Props {
-    items?: NotificationItem[];
-    title?: string;
-    emptyText?: string;
-    markAllText?: string;
-    unreadCount?: number;
-    showFilters?: boolean;
-    categories?: string[];
-    category?: string;
-    allLabel?: string;
-    loading?: boolean;
-    open?: boolean;
-    children?: Snippet;
-    onread?: (item: NotificationItem) => void | Promise<void>;
-    onreadall?: () => void | Promise<void>;
-    onopen?: (item: NotificationItem) => void | Promise<void>;
-    class?: string;
+    items?: NotificationItem[] | undefined;
+    title?: string | undefined;
+    emptyText?: string | undefined;
+    markAllText?: string | undefined;
+    unreadCount?: number | undefined;
+    showFilters?: boolean | undefined;
+    categories?: string[] | undefined;
+    category?: string | undefined;
+    allLabel?: string | undefined;
+    loading?: boolean | undefined;
+    open?: boolean | undefined;
+    children?: Snippet | undefined;
+    onread?: ((item: NotificationItem) => void | Promise<void>) | undefined;
+    onreadall?: (() => void | Promise<void>) | undefined;
+    onopen?: ((item: NotificationItem) => void | Promise<void>) | undefined;
+    class?: string | undefined;
   }
 
   let {

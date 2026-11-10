@@ -16,22 +16,22 @@
   } from './file-upload-types.js';
 
   interface Props {
-    id?: string;
-    name?: string;
-    accept?: string;
-    multiple?: boolean;
-    maxFiles?: number;
-    maxSize?: number;
-    disabled?: boolean;
-    required?: boolean;
-    ariaLabel?: string;
-    invalid?: boolean;
-    describedby?: string;
-    upload?: UploadHandler;
-    cancelUpload?: UploadCancelHandler;
-    onChange?: (items: UploadItem[]) => void;
-    onReject?: (file: File, reason: string) => void;
-    class?: string;
+    id?: string | undefined;
+    name?: string | undefined;
+    accept?: string | undefined;
+    multiple?: boolean | undefined;
+    maxFiles?: number | undefined;
+    maxSize?: number | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    ariaLabel?: string | undefined;
+    invalid?: boolean | undefined;
+    describedby?: string | undefined;
+    upload?: UploadHandler | undefined;
+    cancelUpload?: UploadCancelHandler | undefined;
+    onChange?: ((items: UploadItem[]) => void) | undefined;
+    onReject?: ((file: File, reason: string) => void) | undefined;
+    class?: string | undefined;
   }
 
   let {

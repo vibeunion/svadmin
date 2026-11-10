@@ -1,10 +1,10 @@
 <script lang="ts">
-  let { value = '', options = [], title = '', onchange } = $props<{
+  let { value = '', options = [], title = '', onchange }: {
     value?: string;
     options: Array<{ value: string; label: string }>;
     title?: string;
     onchange?: (value: string) => void;
-  }>();
+  } = $props();
 </script>
 
 <select

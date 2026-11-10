@@ -1,8 +1,8 @@
 <script lang="ts">
-  let { onselect, onclose } = $props<{
+  let { onselect, onclose }: {
     onselect: (color: string) => void;
     onclose?: () => void;
-  }>();
+  } = $props();
 
   const colors = [
     // Row 1: Reds

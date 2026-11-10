@@ -2,11 +2,11 @@
   import { ExternalLink } from '@lucide/svelte';
   import { captureAdminContext } from '@svadmin/core';
 
-  let { value, resourceName, displayValue } = $props<{
+  let { value, resourceName, displayValue }: {
     value: string | number | null | undefined;
     resourceName?: string;
     displayValue?: string;
-  }>();
+  } = $props();
   const adminContext = captureAdminContext();
 
   const display = $derived(displayValue ?? (value != null ? `#${value}` : '—'));

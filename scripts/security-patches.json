@@ -38,16 +38,16 @@
   },
   {
     "name": "http-cache-semantics",
-    "version": "4.2.0",
+    "version": "4.3.0",
     "advisory": "https://github.com/advisories/GHSA-ch52-4w7c-c8xp",
     "advisoryId": 1240991,
     "affectedRange": "<=4.2.0",
     "severity": "high",
-    "patch": "patches/http-cache-semantics@4.2.0.patch",
-    "sha256": "04b23045d9fa2d71804ef18bd97dfa149d1c3475d56ffd98bab05fec85c46855",
+    "patch": "patches/http-cache-semantics@4.3.0.patch",
+    "sha256": "c3e1d1fddac9acf5e39759777bc2966d33b6b7de2a2f49a3d2392b8f8a5530d1",
     "reason": "Require validation before reusing security-restricted cache entries across all stale paths.",
     "files": {
-      "index.js": "d440941d700777c2250ddcf73ce26b242a4a6722b91ee40adccb7c05d83d2323"
+      "index.js": "bc51c066d0f681fc99d2404a1b90bc29043c0db92e5d1444c7d3f9628fb19333"
     }
   }
 ]

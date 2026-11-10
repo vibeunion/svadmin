@@ -191,19 +191,19 @@ export function useSubmitTask(options: UseSubmitTaskOptions={}) {
 }
 
 export interface UseTaskOptions {
-  taskId?: string;
-  taskProvider?: TaskProvider;
+  taskId?: string | undefined;
+  taskProvider?: TaskProvider | undefined;
   queryOptions?: {
-    enabled?: boolean;
-    staleTime?: number;
-    gcTime?: number;
-    refetchOnWindowFocus?: boolean;
-    refetchInterval?: number|false;
-    refetchIntervalInBackground?: boolean;
+    enabled?: boolean | undefined;
+    staleTime?: number | undefined;
+    gcTime?: number | undefined;
+    refetchOnWindowFocus?: boolean | undefined;
+    refetchInterval?: number|false | undefined;
+    refetchIntervalInBackground?: boolean | undefined;
   };
-  successNotification?: NotificationConfig;
-  errorNotification?: NotificationConfig;
-  overtimeOptions?: OvertimeOptions;
+  successNotification?: NotificationConfig | undefined;
+  errorNotification?: NotificationConfig | undefined;
+  overtimeOptions?: OvertimeOptions | undefined;
 }
 
 export function useTask(
@@ -249,20 +249,20 @@ export function useTask(
 }
 
 export interface UseTaskListOptions {
-  params?: Record<string,unknown>;
-  dlq?: boolean;
-  taskProvider?: TaskProvider;
+  params?: Record<string,unknown> | undefined;
+  dlq?: boolean | undefined;
+  taskProvider?: TaskProvider | undefined;
   queryOptions?: {
-    enabled?: boolean;
-    staleTime?: number;
-    gcTime?: number;
-    refetchOnWindowFocus?: boolean;
-    refetchInterval?: number|false;
-    refetchIntervalInBackground?: boolean;
+    enabled?: boolean | undefined;
+    staleTime?: number | undefined;
+    gcTime?: number | undefined;
+    refetchOnWindowFocus?: boolean | undefined;
+    refetchInterval?: number|false | undefined;
+    refetchIntervalInBackground?: boolean | undefined;
   };
-  successNotification?: NotificationConfig;
-  errorNotification?: NotificationConfig;
-  overtimeOptions?: OvertimeOptions;
+  successNotification?: NotificationConfig | undefined;
+  errorNotification?: NotificationConfig | undefined;
+  overtimeOptions?: OvertimeOptions | undefined;
 }
 
 export function useTaskList(

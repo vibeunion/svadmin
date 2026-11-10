@@ -3,17 +3,17 @@
   import { cn } from '../utils.js';
 
   interface Props {
-    value?: number;
-    count?: number;
-    allowClear?: boolean;
+    value?: number | undefined;
+    count?: number | undefined;
+    allowClear?: boolean | undefined;
     name?: string | undefined;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
     describedby?: string | undefined;
-    ariaLabel?: string;
-    class?: string;
-    onchange?: (value: number) => void;
+    ariaLabel?: string | undefined;
+    class?: string | undefined;
+    onchange?: ((value: number) => void) | undefined;
   }
 
   let {

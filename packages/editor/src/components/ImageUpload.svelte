@@ -3,11 +3,11 @@
   import { ImageIcon, Upload, Link as LinkIcon, RotateCw } from '@lucide/svelte';
   import { t } from '@svadmin/core';
 
-  let { editor, onUpload, onclose } = $props<{
+  let { editor, onUpload, onclose }: {
     editor: Editor;
-    onUpload?: (file: File) => Promise<string>;
-    onclose?: () => void;
-  }>();
+    onUpload?: ((file: File) => Promise<string>) | undefined;
+    onclose?: (() => void) | undefined;
+  } = $props();
 
   let mode: 'url' | 'upload' = $state('url');
   let url = $state('');
@@ -61,7 +61,7 @@
   function insertByUrl() {
     if (!url.trim()) return;
     if (disposed || editor.isDestroyed || !editor.isEditable) return;
-    editor.chain().focus().setImage({ src: url, alt: alt || undefined }).run();
+    editor.chain().focus().setImage({ src: url, ...(alt ? { alt } : {}) }).run();
     url = '';
     alt = '';
     close();

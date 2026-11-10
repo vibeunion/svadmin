@@ -2,7 +2,7 @@
   import { demoRendering } from '../../resource-rendering';
   import { AutoTable } from '@svadmin/ui';
 
-  let { resourceName = 'products' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'products' }: { resourceName?: string } = $props();
 </script>
 
 <AutoTable {resourceName} rendering={demoRendering(resourceName)} />

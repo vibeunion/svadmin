@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
-    "@refinedev/nestjs-query": "^5.0.0"
+    "@refinedev/nestjs-query": "^2.0.1"
   },
   "license": "MIT",
   "repository": {

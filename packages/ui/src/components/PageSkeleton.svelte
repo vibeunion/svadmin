@@ -5,10 +5,10 @@
   let {
     type = 'list',
     rows = 5,
-  } = $props<{
+  }: {
     type?: 'list' | 'show' | 'form';
     rows?: number;
-  }>();
+  } = $props();
 </script>
 
 <div class="w-full space-y-6" out:fade={{ duration: 200 }}>
