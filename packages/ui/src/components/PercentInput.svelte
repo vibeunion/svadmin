@@ -3,22 +3,22 @@
   import type { NumericInputLocale } from './numeric-format.js';
 
   interface Props {
-    value?: number | null;
+    value?: number | null | undefined;
     locale?: NumericInputLocale | undefined;
-    scale?: '100' | '1';
-    min?: number;
-    max?: number;
-    step?: number;
-    precision?: number;
-    id?: string;
-    name?: string;
-    placeholder?: string;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
+    scale?: '100' | '1' | undefined;
+    min?: number | undefined;
+    max?: number | undefined;
+    step?: number | undefined;
+    precision?: number | undefined;
+    id?: string | undefined;
+    name?: string | undefined;
+    placeholder?: string | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
     describedby?: string | undefined;
-    class?: string;
-    onchange?: (value: number | null) => void;
+    class?: string | undefined;
+    onchange?: ((value: number | null) => void) | undefined;
   }
 
   let { value = $bindable(null), ...props }: Props = $props();

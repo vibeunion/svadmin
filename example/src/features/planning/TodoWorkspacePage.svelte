@@ -16,7 +16,7 @@
 
   const i18n = useTranslation();
 
-  let { resourceName = 'todos' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'todos' }: { resourceName?: string } = $props();
   let activeView = $state(readHashView('all'));
   const update = useUpdateMany({ resource: demoContracts.todos });
   let saving = $state(false);

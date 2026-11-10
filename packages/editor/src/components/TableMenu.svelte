@@ -8,10 +8,10 @@
   import ToolbarButton from './ToolbarButton.svelte';
   import { t } from '@svadmin/core';
 
-  let { editor, onclose } = $props<{
+  let { editor, onclose }: {
     editor: Editor;
     onclose?: () => void;
-  }>();
+  } = $props();
 
   const isInTable = $derived(editor.isActive('table'));
 

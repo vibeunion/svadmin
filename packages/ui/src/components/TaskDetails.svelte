@@ -35,7 +35,7 @@
     title,
     useProviderData = !task && !!taskId,
     queryOptions,
-  } = $props<{
+  }: {
     task?: TaskRecord | undefined;
     taskId?: string;
     taskProvider?: TaskProvider<TaskRecord>;
@@ -49,7 +49,7 @@
       refetchInterval?: number | false;
       refetchIntervalInBackground?: boolean;
     };
-  }>();
+  } = $props();
 
   const canRead = $derived(useProviderData && !!taskId && !!taskProvider && queryOptions?.enabled !== false);
   const query = useTask({

@@ -29,21 +29,21 @@
 
   interface Props extends Omit<HTMLButtonAttributes, 'value' | 'onchange' | 'children' | 'onclick' | 'type'> {
     resource: string;
-    value?: string | number | null | (string | number)[];
-    onchange?: (value: string | number | null | (string | number)[]) => void;
-    optionLabel?: string;
-    optionValue?: string;
-    placeholder?: string;
-    searchable?: boolean;
-    multiple?: boolean;
-    onSearch?: (value: string) => Filter[];
-    fetchSize?: number;
-    requestTimeout?: number;
-    virtualized?: boolean;
-    itemHeight?: number;
-    viewportHeight?: number;
-    id?: string;
-    class?: string;
+    value?: string | number | null | (string | number)[] | undefined;
+    onchange?: ((value: string | number | null | (string | number)[]) => void) | undefined;
+    optionLabel?: string | undefined;
+    optionValue?: string | undefined;
+    placeholder?: string | undefined;
+    searchable?: boolean | undefined;
+    multiple?: boolean | undefined;
+    onSearch?: ((value: string) => Filter[]) | undefined;
+    fetchSize?: number | undefined;
+    requestTimeout?: number | undefined;
+    virtualized?: boolean | undefined;
+    itemHeight?: number | undefined;
+    viewportHeight?: number | undefined;
+    id?: string | undefined;
+    class?: string | undefined;
   }
 
   let {

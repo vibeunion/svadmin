@@ -56,6 +56,7 @@ test.describe('UI state contracts', () => {
       await expect(commandButtons.nth(1)).toBeDisabled();
       const blockedCommand = commandFixture.locator('[data-slot="button-restriction"]');
       await expect(blockedCommand).toHaveCount(1);
+      await blockedCommand.scrollIntoViewIfNeeded();
       await blockedCommand.hover();
       await expect(page.getByRole('tooltip')).toContainText(/frozen|冻结/);
 
@@ -63,6 +64,7 @@ test.describe('UI state contracts', () => {
       await filterToggle.click();
       await page.screenshot({ path: join(screenshotDirectory, `ui-state-matrix-${viewport.width}x${viewport.height}.png`), fullPage: false });
       await commandFixture.scrollIntoViewIfNeeded();
+      await blockedCommand.scrollIntoViewIfNeeded();
       await blockedCommand.hover();
       await expect(page.getByRole('tooltip')).toBeVisible();
       await page.screenshot({ path: join(screenshotDirectory, `command-action-${viewport.width}x${viewport.height}.png`), fullPage: false });

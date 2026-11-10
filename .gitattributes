@@ -1,0 +1,2 @@
+patches/*.patch -whitespace
+packages/create-svadmin/template/patches/*.patch -whitespace

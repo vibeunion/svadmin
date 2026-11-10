@@ -23,8 +23,8 @@ export interface UseCanOptions {
   action: Action;
   /** Fixed record target; overrides an ID in additional permission params after validation. */
   id?: string | number;
-  params?: NonNullable<CanParams['params']>;
-  meta?: Record<string,unknown>;
+  params?: NonNullable<CanParams['params']> | undefined;
+  meta?: Record<string,unknown> | undefined;
   queryOptions?: {
     enabled?: boolean;
     staleTime?: number;

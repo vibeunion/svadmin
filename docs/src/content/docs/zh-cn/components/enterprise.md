@@ -352,6 +352,59 @@ const fields: FieldDefinition[] = [
 />
 ```
 
+## 实时在线协同感知与并发编辑冲突守卫
+
+### `<PresenceAvatars>` / `<PresenceAvatarGroup>`
+
+多管理员并发协同状态感知与活跃编辑者头像指示器：
+- 层叠式头像聚簇展示，带平滑上浮微交互；
+- 右下角在线状态呼吸灯（`editing` 脉冲呼吸、`viewing` 在线绿色、`idle` 离线灰色）；
+- 支持配置最大可见头像数与 `+N` 溢出折叠气泡。
+
+```svelte
+<script lang="ts">
+  import { PresenceAvatars } from '@svadmin/ui';
+
+  const users = [
+    { id: 'u1', name: '郭工', role: '架构师', status: 'editing' },
+    { id: 'u2', name: '李工', role: '研发', status: 'viewing' },
+  ];
+</script>
+
+<PresenceAvatars {users} maxCount={4} size="md" />
+```
+
+### `<ConcurrentConflictModal>`
+
+乐观锁并发编辑冲突解决弹窗：
+- 当多位管理员同时编辑同一条记录发生版本冲突时自动弹出；
+- 左右分栏对照“我的本地修改” vs “服务器最新修改”；
+- 灵活的处理策略：支持强制覆盖、放弃并刷新，或逐字段点选合并保存。
+
+```svelte
+<script lang="ts">
+  import { ConcurrentConflictModal } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  const conflictFields = [
+    { field: 'title', label: '商品标题', localValue: '我的修改', remoteValue: '同事修改' },
+    { field: 'price', label: '价格', localValue: 2499, remoteValue: 2699 },
+  ];
+
+  function handleMerge(mergedData: Record<string, unknown>) {
+    console.log('合并数据：', mergedData);
+  }
+</script>
+
+<ConcurrentConflictModal
+  bind:open
+  {conflictFields}
+  modifiedBy="李工"
+  onresolve={handleMerge}
+/>
+```
+
 ## 企业级指引漫游、指标走势与签名套件
 
 ### `<TourGuide>` / `<Tour>`
@@ -552,4 +605,77 @@ const fields: FieldDefinition[] = [
   onready={() => console.log('微应用握手完成')}
   onmessage={(msg) => console.log('收到微应用消息:', msg)}
 />
+```
+
+## 异步后台任务中心（TaskCenter / BackgroundTaskDrawer）
+
+企业级大数据量异步导出、清洗与长时间运行作业跟踪中心：
+- 顶栏/悬浮入口集成脉冲动态呼吸指示与运行中任务数角标；
+- 侧拉抽屉支持多状态分栏过滤：全部、执行中（Running）、排队中（Pending）、已完成（Completed）、失败（Failed）；
+- 实时百分比进度条、已处理条数统计（如 `6,800 / 10,000`）与剩余耗时智能预估；
+- 具备成品文件一键下载、失败任务重试、作业取消中断及一键清理已完成记录等快捷操作。
+
+```svelte
+<script lang="ts">
+  import { TaskCenter, type BackgroundTask } from '@svadmin/ui';
+
+  let tasks: BackgroundTask[] = [
+    {
+      id: 'task-1',
+      name: '2026年Q1销售流水总表异步导出',
+      status: 'running',
+      progress: 68,
+      processedCount: 6800,
+      totalCount: 10000,
+      estimatedSecondsRemaining: 24,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'task-2',
+      name: '客户主数据批量清洗转换',
+      status: 'completed',
+      downloadUrl: 'https://cdn.example.com/exports/customers.xlsx',
+      downloadFileName: 'customers.xlsx',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+</script>
+
+<TaskCenter
+  showTrigger
+  tasks={tasks}
+  ondownload={(task) => console.log('下载成果文件:', task.downloadUrl)}
+  oncancel={(task) => console.log('终止作业:', task.id)}
+  onretry={(task) => console.log('重试任务:', task.id)}
+/>
+```
+
+---
+
+## 离线断网自愈守卫套件（OfflineBanner 与 OfflineGuard）
+
+移动与现场作业弱网/断网防丢保护套件：
+- `useNetworkStatus()` 响应式网速与在线状态钩子，监听离线/上线事件及 `rtt` 延迟；
+- `<OfflineBanner>`：全局顶部断网感应横条，断网时醒目提示已启用草稿备份，联网后平滑过渡显示恢复提示；
+- `<OfflineGuard>`：表单提交保护守卫，离线状态下自动拦截表单提交或覆盖半透明防护层，防止数据丢失。
+
+```svelte
+<script lang="ts">
+  import { OfflineBanner, OfflineGuard, useNetworkStatus } from '@svadmin/ui';
+
+  const network = useNetworkStatus();
+</script>
+
+<!-- 全局断网横幅 -->
+<OfflineBanner
+  onretry={() => console.log('正在检测网络连接...')}
+/>
+
+<!-- 表单提交防丢保护层 -->
+<OfflineGuard mode="overlay">
+  <form onsubmit={(e) => { e.preventDefault(); /* 提交逻辑 */ }}>
+    <input placeholder="请输入标题" />
+    <button type="submit">提交表单</button>
+  </form>
+</OfflineGuard>
 ```

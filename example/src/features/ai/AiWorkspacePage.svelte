@@ -11,7 +11,7 @@
   import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
   import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
 
-  let { resourceName = 'ai_conversations' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'ai_conversations' }: { resourceName?: string } = $props();
   const i18n = useTranslation();
   const context = captureAdminContext();
   const isZh = $derived(i18n.locale === 'zh-CN');

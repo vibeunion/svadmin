@@ -1,5 +1,5 @@
 diff --git a/dist/esm/types/nodes.d.ts b/dist/esm/types/nodes.d.ts
-index 54d7c86c50bdc0c8a5eb6709a1ee5bc15fe73f63..b723f4daf8f55de48b5b57ae55bbdc2bdd73040b 100644
+index 54d7c86c50bdc0c8a5eb6709a1ee5bc15fe73f63..b40d8382cf1d5e48e2b4b54acde514762f7bed0b 100644
 --- a/dist/esm/types/nodes.d.ts
 +++ b/dist/esm/types/nodes.d.ts
 @@ -80,7 +80,7 @@ export type NodeBase<NodeData extends Record<string, unknown> = Record<string, u
@@ -12,7 +12,7 @@ index 54d7c86c50bdc0c8a5eb6709a1ee5bc15fe73f63..b723f4daf8f55de48b5b57ae55bbdc2b
          width?: number;
          height?: number;
 diff --git a/dist/umd/types/nodes.d.ts b/dist/umd/types/nodes.d.ts
-index 54d7c86c50bdc0c8a5eb6709a1ee5bc15fe73f63..b723f4daf8f55de48b5b57ae55bbdc2bdd73040b 100644
+index 54d7c86c50bdc0c8a5eb6709a1ee5bc15fe73f63..b40d8382cf1d5e48e2b4b54acde514762f7bed0b 100644
 --- a/dist/umd/types/nodes.d.ts
 +++ b/dist/umd/types/nodes.d.ts
 @@ -80,7 +80,7 @@ export type NodeBase<NodeData extends Record<string, unknown> = Record<string, u

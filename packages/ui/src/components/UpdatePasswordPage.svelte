@@ -10,9 +10,9 @@
 
   const i18n = useTranslation();
 
-  let { title = 'Admin' } = $props<{
+  let { title = 'Admin' }: {
     title?: string;
-  }>();
+  } = $props();
 
   const adminContext = captureAdminContext();
   const updatePw = useUpdatePassword();
