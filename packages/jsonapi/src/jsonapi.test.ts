@@ -129,7 +129,7 @@ describe('createJsonApiDataProvider', () => {
   });
 
   it('does not silently discard non-equality or logical filters', async () => {
-    const mockFetch = mock((url: string | URL | Request) =>
+    const mockFetch = mock((_url: string | URL | Request) =>
       Promise.resolve(new Response(JSON.stringify({ data: [], meta: { total: 0 } }), { status: 200 })));
     const provider = createJsonApiDataProvider({
       apiUrl: 'https://api.example.com/jsonapi',
