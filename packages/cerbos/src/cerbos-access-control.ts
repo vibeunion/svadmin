@@ -137,11 +137,10 @@ export function createCerbosAccessControl(
           can: false,
           reason: `Cerbos policy denied action "${params.action}" on resource "${params.resource}"`,
         };
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
+      } catch {
         return {
           can: false,
-          reason: `Cerbos authorization error: ${message}`,
+          reason: 'Cerbos authorization error',
         };
       }
     },
