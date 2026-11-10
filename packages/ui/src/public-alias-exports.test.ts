@@ -53,6 +53,8 @@ import {
   TourGuide,
   TrendIndicator,
   Trend,
+  TaskCenter,
+  BackgroundTaskDrawer,
   SignaturePad,
   RoleSwitcher,
   RealtimeMonitorView,
@@ -150,6 +152,8 @@ describe('public compatibility aliases', () => {
     expect(TourGuide).toBe(Tour);
     expect(TrendIndicator).toBeDefined();
     expect(Trend).toBe(TrendIndicator);
+    expect(TaskCenter).toBeDefined();
+    expect(BackgroundTaskDrawer).toBe(TaskCenter);
     expect(SignaturePad).toBeDefined();
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);

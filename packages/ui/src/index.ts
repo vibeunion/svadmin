@@ -768,3 +768,11 @@ export type { SliderCaptchaProps, SliderCaptchaResult } from './components/Slide
 // Enterprise metrics & trend visualization suite
 export { default as TrendIndicator, default as Trend } from './components/TrendIndicator.svelte';
 export type { TrendIndicatorProps } from './components/TrendIndicator.svelte';
+
+// Enterprise tree, cron scheduler & organization hierarchy suite
+export { default as VirtualTreeSelect } from './components/VirtualTreeSelect.svelte';
+export type { VirtualTreeSelectProps, VirtualTreeNode } from './components/VirtualTreeSelect.svelte';
+export { default as CronExpressionBuilder } from './components/CronExpressionBuilder.svelte';
+export type { CronExpressionBuilderProps, CronPreset } from './components/CronExpressionBuilder.svelte';
+export { default as OrgChart } from './components/OrgChart.svelte';
+export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';
