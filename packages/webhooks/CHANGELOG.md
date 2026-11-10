@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.0](https://github.com/vibeunion/svadmin/compare/webhooks-v0.1.0...webhooks-v0.2.0) (2026-11-10)
+
+
+### 🚀 Features
+
+* **webhooks:** add enterprise outgoing webhook dispatch and HMAC signature suite ([#707](https://github.com/vibeunion/svadmin/issues/707)) ([23e2274](https://github.com/vibeunion/svadmin/commit/23e2274c971a4f8c99819ff3ba4642559ba6156b))
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** refresh pull request head ([d15aaca](https://github.com/vibeunion/svadmin/commit/d15aacae9c01956611abc73a0e0ba743a9bb0bb4))
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.80.0
+
 ## 0.1.0
 
 ### Features

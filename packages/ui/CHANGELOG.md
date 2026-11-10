@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.119.0](https://github.com/vibeunion/svadmin/compare/ui-v0.118.0...ui-v0.119.0) (2026-11-10)
+
+
+### 🚀 Features
+
+* **ui:** add enterprise audit log drawer and revision diff timeline suite ([#701](https://github.com/vibeunion/svadmin/issues/701)) ([8ca92a2](https://github.com/vibeunion/svadmin/commit/8ca92a244efdc3efc958d72d5ebdf9e040d505ed))
+* **ui:** add enterprise safe-delete confirm and slider captcha verification suite ([#696](https://github.com/vibeunion/svadmin/issues/696)) ([1fd5976](https://github.com/vibeunion/svadmin/commit/1fd5976dd36c040be307266aa7245ca612d44c25))
+* **ui:** add MicroAppFrame embedded sandbox container suite ([#708](https://github.com/vibeunion/svadmin/issues/708)) ([ab4cb83](https://github.com/vibeunion/svadmin/commit/ab4cb83a38225baf4c2dd0542b850a6d260040cb))
+* **ui:** add presence avatars and concurrent edit conflict modal suite ([#702](https://github.com/vibeunion/svadmin/issues/702)) ([f3a50e4](https://github.com/vibeunion/svadmin/commit/f3a50e414b256e93657fb17ca0edce64c52881df))
+* **ui:** add TaskCenter background job tracker and OfflineGuard resilience suite ([#706](https://github.com/vibeunion/svadmin/issues/706)) ([32a32a7](https://github.com/vibeunion/svadmin/commit/32a32a709817a1c3af748c73fce4abd582ff3ca2))
+* **ui:** add TourGuide, TrendIndicator, and enhanced SignaturePad enterprise suite ([#700](https://github.com/vibeunion/svadmin/issues/700)) ([9d63068](https://github.com/vibeunion/svadmin/commit/9d63068c464fe9507cbdef266461c8fa1018e9ae))
+* **ui:** add VirtualTreeSelect, CronExpressionBuilder, and OrgChart enterprise suite ([#705](https://github.com/vibeunion/svadmin/issues/705)) ([136cca2](https://github.com/vibeunion/svadmin/commit/136cca239bcc8858b03fbb24fe90d43a79c54a6d))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** upgrade tailwind-variants to v4 ([#699](https://github.com/vibeunion/svadmin/issues/699)) ([b742466](https://github.com/vibeunion/svadmin/commit/b7424665044e4a08445e0dadc143601655e163c4))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade workspace dependencies to latest ([#703](https://github.com/vibeunion/svadmin/issues/703)) ([d18b595](https://github.com/vibeunion/svadmin/commit/d18b59506375207193d3d9f76d71c33afc023066))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.9
+    * @svadmin/devtools-contract bumped to 0.3.3
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.4
+  * peerDependencies
+    * @svadmin/core bumped to 0.80.0
+
 ## [0.118.0](https://github.com/vibeunion/svadmin/compare/ui-v0.117.0...ui-v0.118.0) (2026-11-10)
 
 
