@@ -88,6 +88,7 @@ export default defineConfig({
           items: [
             { slug: 'providers/data-provider' },
             { slug: 'providers/jsonapi' },
+            { slug: 'providers/meilisearch' },
             { slug: 'providers/refine-adapter' },
             { slug: 'providers/auth' },
             { slug: 'providers/auth0' },

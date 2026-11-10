@@ -26,6 +26,7 @@
     "packages/graphql/src/**/*.test.ts",
     "packages/hasura/src/**/*.test.ts",
     "packages/jsonapi/src/**/*.test.ts",
+    "packages/meilisearch/src/**/*.test.ts",
     "packages/kinde/src/**/*.test.ts",
     "packages/lite/src/**/*.test.ts",
     "packages/mcp/src/**/*.test.ts",

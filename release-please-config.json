@@ -410,6 +410,11 @@
       "component": "jsonapi",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/meilisearch": {
+      "release-type": "node",
+      "component": "meilisearch",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/casbin": {
       "release-type": "node",
       "component": "casbin",
