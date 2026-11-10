@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/dock",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Resizable split panes and dockable workspaces for svadmin",
   "type": "module",
   "files": [

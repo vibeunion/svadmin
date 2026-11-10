@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/vibeunion/svadmin/compare/charts-v0.2.1...charts-v0.2.2) (2026-11-10)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade workspace dependencies to latest ([#703](https://github.com/vibeunion/svadmin/issues/703)) ([d18b595](https://github.com/vibeunion/svadmin/commit/d18b59506375207193d3d9f76d71c33afc023066))
+
 ## [0.2.1](https://github.com/vibeunion/svadmin/compare/charts-v0.2.0...charts-v0.2.1) (2026-11-09)
 
 

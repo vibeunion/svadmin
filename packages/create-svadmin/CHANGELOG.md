@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.55.4](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.55.3...create-svadmin-v0.55.4) (2026-11-10)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade workspace dependencies to latest ([#703](https://github.com/vibeunion/svadmin/issues/703)) ([d18b595](https://github.com/vibeunion/svadmin/commit/d18b59506375207193d3d9f76d71c33afc023066))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.80.0
+
 ## [0.55.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.55.2...create-svadmin-v0.55.3) (2026-11-10)
 
 

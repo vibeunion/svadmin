@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.80.0](https://github.com/vibeunion/svadmin/compare/core-v0.79.0...core-v0.80.0) (2026-11-10)
+
+
+### 🚀 Features
+
+* **ui:** add enterprise safe-delete confirm and slider captcha verification suite ([#696](https://github.com/vibeunion/svadmin/issues/696)) ([1fd5976](https://github.com/vibeunion/svadmin/commit/1fd5976dd36c040be307266aa7245ca612d44c25))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade workspace dependencies to latest ([#703](https://github.com/vibeunion/svadmin/issues/703)) ([d18b595](https://github.com/vibeunion/svadmin/commit/d18b59506375207193d3d9f76d71c33afc023066))
+
 ## [0.79.0](https://github.com/vibeunion/svadmin/compare/core-v0.78.0...core-v0.79.0) (2026-11-10)
 
 
