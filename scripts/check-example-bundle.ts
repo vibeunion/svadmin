@@ -8,7 +8,8 @@ const repositoryRoot = resolve(import.meta.dir, '..');
 const outputDirectory = join(repositoryRoot, 'example', 'dist');
 const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
-const maximumChunkBytes = 1_250_000;
+// Mermaid 12 bundles a larger ELK layout chunk (1,498,950 bytes) but remains lazy.
+const maximumChunkBytes = 1_550_000;
 const maximumInitialBytes = 1_400_000;
 // Enterprise closeout measured 390055 gzip bytes on 2026-10-26; the released
 // enterprise feedback changes measured 390223 gzip bytes on 2026-10-27, and the

@@ -1,0 +1,11 @@
+diff --git a/dist/context.d.ts b/dist/context.d.ts
+index 45861bbc72947aa07d3b61a2e0977d5005f009e1..21871f2b16be3292fbed15a4d3da1bc269c4c844 100644
+--- a/dist/context.d.ts
++++ b/dist/context.d.ts
+@@ -1,5 +1,5 @@
+ import type { QueryClient } from '@tanstack/query-core';
+-import type { Box } from './containers.svelte';
++import type { Box } from './containers.svelte.js';
+ /**
+  * Retrieves the `QueryClient` set on Svelte's context by `QueryClientProvider` (or by
+  * {@link setQueryClientContext} directly). This is what {@link useQueryClient} calls internally.

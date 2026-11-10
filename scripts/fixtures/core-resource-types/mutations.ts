@@ -56,8 +56,8 @@ export async function mutations(resource: 'posts' | 'users') {
   });
   expectType<Equal<typeof draft.data, Static<typeof Post>>>();
   create.mutation.mutate({ variables: { status: 'draft', title: 'Hello' } }, {
-    onSuccess(result, _params) {
-      expectType<Equal<typeof result.data, Static<typeof Post>>>();
+    onSuccess(_result, _params) {
+      expectType<Equal<typeof _result.data, Static<typeof Post>>>();
       expectType<Equal<typeof _params.variables, Static<typeof CreatePost>>>();
     },
   });

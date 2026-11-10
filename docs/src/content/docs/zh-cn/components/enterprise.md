@@ -404,3 +404,179 @@ const fields: FieldDefinition[] = [
   onresolve={handleMerge}
 />
 ```
+
+## 企业级指引漫游、指标走势与签名套件
+
+### `<TourGuide>` / `<Tour>`
+
+复杂后台系统分步业务功能漫游与指引套件：
+- 聚光灯（Spotlight）视口遮罩与镂空高亮目标元素。
+- 自适应防溢出浮动卡片定位与步骤导航切换。
+- 本地状态记忆持久化（`storageKey`），用户跳过或完成后无需重复弹出。
+- 完整键盘无障碍导航（`Tab`、`Escape`、方向键）与焦点锁定闭环。
+
+```svelte
+<script lang="ts">
+  import { TourGuide } from '@svadmin/ui';
+
+  let showTour = $state(true);
+
+  const steps = [
+    { target: '#search-box', title: '全局检索', description: '一键检索多租户与跨模块业务资源。' },
+    { target: '#export-btn', title: '数据导出', description: '支持按当前过滤视图导出审计凭据与报表。' },
+  ];
+</script>
+
+<TourGuide
+  bind:open={showTour}
+  {steps}
+  storageKey="onboarding_v1_done"
+  onfinish={() => console.log('漫游已完成')}
+/>
+```
+
+### `<TrendIndicator>` / `<Trend>`
+
+报表指标、大屏看板与财务结算同环比涨跌走势胶囊：
+- 支持根据 `value` 与 `prevValue` 自动计算百分比涨跌幅。
+- 支持纯数值、字符串增量格式化，可自定义精度、前缀（如 `YoY` / `环比`）与后缀（默认 `%`）。
+- 支持反向色彩语义（`reverseColor=true`），适配错误率、延迟、排队积压等跌为优的监控场景。
+- 遵循设计系统规范语义 Token，提供 `text`、`badge`、`solid` 多种视觉形态。
+
+```svelte
+<script lang="ts">
+  import { TrendIndicator } from '@svadmin/ui';
+</script>
+
+<!-- 自动计算百分比涨跌 -->
+<TrendIndicator value={1250} prevValue={1000} prefix="YoY" variant="badge" />
+
+<!-- 异常指标反向色彩语义 -->
+<TrendIndicator value={-12.4} reverseColor={true} variant="solid" />
+```
+
+### `<SignaturePad>`
+
+移动审批与桌面结算场景的高保真电子签名手写板：
+- 二次贝塞尔平滑压感笔触插值算法。
+- 完整的笔画撤销（`Undo`）与一键清空重置。
+- 导出透明背景 PNG Data URL（`toDataURL()`）与 SVG 矢量图格式（`toSVG()`）。
+- 适配高分屏 DPI 与移动端触控交互防滚屏。
+
+```svelte
+<script lang="ts">
+  import { SignaturePad } from '@svadmin/ui';
+
+  let signatureData = $state('');
+
+  function handleSave(dataUrl: string) {
+    console.log('保存签名数据 URL:', dataUrl.length);
+  }
+</script>
+
+<SignaturePad
+  bind:value={signatureData}
+  width={480}
+  height={180}
+  onsave={handleSave}
+/>
+```
+
+## 企业级树选择、调度器与架构图套件
+
+### `<VirtualTreeSelect>`
+
+支持万级大数据量虚拟滚动的树形层级选择器：
+- 采用深度优先遍历拍平与动态展开状态管理，万级节点零卡顿。
+- 动态计算可视视口窗口，仅渲染视口内切片，维持极低内存占用与流畅 60fps 滚动。
+- 关键字搜索过滤自动回溯展开命中节点的全链路父级祖先分支。
+- 支持单选与多选模式，多选支持级联全选/半选（Indeterminate）、已选项 Tag 标签回显与单独移除。
+
+```svelte
+<script lang="ts">
+  import { VirtualTreeSelect } from '@svadmin/ui';
+
+  let selected = $state<string[]>([]);
+
+  const treeData = [
+    {
+      value: 'hq',
+      label: '总部机构',
+      children: [
+        { value: 'eng', label: '研发中心', children: [
+          { value: 'fe', label: '前端团队' },
+          { value: 'be', label: '后端团队' },
+        ]},
+        { value: 'ops', label: '运维团队' },
+      ],
+    },
+  ];
+</script>
+
+<VirtualTreeSelect
+  bind:value={selected}
+  options={treeData}
+  multiple={true}
+  searchable={true}
+  placeholder="请选择所属组织架构..."
+/>
+```
+
+### `<CronExpressionBuilder>`
+
+企业级定时调度规则与任务周期可视化构建器：
+- 支持标准 5 段 Cron 格式（分、时、日、月、周）。
+- 内置常用高频预设方案（每分钟、每小时整点、每日零点、工作日上午 9 点、每月 1 号等）。
+- 多 Tab 分步切换可视化配置，直观设定循环间隔与指定时间点。
+- 实时语义解析（人类可读描述）与未来 5 次触发模拟时间预估，防范配置失误。
+
+```svelte
+<script lang="ts">
+  import { CronExpressionBuilder } from '@svadmin/ui';
+
+  let cronValue = $state('0 9 * * 1-5');
+</script>
+
+<CronExpressionBuilder
+  bind:value={cronValue}
+  showPreview={true}
+  onchange={(val) => console.log('更新调度规则:', val)}
+/>
+```
+
+### `<OrgChart>`
+
+企业级组织架构与汇报树状交互图：
+- 纯 CSS 驱动的上下级层级连线，结构清晰，响应式排版。
+- 支持父节点折叠/展开，带下属汇报人数气泡徽标（`+N`）。
+- 优雅的人员卡片布局（头像、姓名、职能职位、部门徽标），支持 Svelte 5 Snippet 自定义扩展。
+- 支持节点点击交互事件（`onnodeclick`），用于查看人员详情或组织穿透。
+
+```svelte
+<script lang="ts">
+  import { OrgChart } from '@svadmin/ui';
+
+  const orgData = {
+    id: 'ceo',
+    name: '张三',
+    title: '首席执行官',
+    department: '总经办',
+    children: [
+      {
+        id: 'cto',
+        name: '李四',
+        title: '技术副总裁',
+        department: '技术中心',
+        children: [
+          { id: 'lead', name: '王五', title: '资深首席架构师', department: '基础平台部' },
+        ],
+      },
+    ],
+  };
+</script>
+
+<OrgChart
+  data={orgData}
+  onnodeclick={(node) => console.log('点击节点:', node.name)}
+/>
+```

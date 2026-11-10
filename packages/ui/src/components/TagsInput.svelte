@@ -3,18 +3,18 @@
   import { cn } from '../utils.js';
 
   interface Props {
-    value?: string[];
+    value?: string[] | undefined;
     name?: string | undefined;
-    placeholder?: string;
-    separator?: string;
-    maxItems?: number;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
+    placeholder?: string | undefined;
+    separator?: string | undefined;
+    maxItems?: number | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
     describedby?: string | undefined;
-    ariaLabel?: string;
-    class?: string;
-    onchange?: (value: string[]) => void;
+    ariaLabel?: string | undefined;
+    class?: string | undefined;
+    onchange?: ((value: string[]) => void) | undefined;
   }
 
   let {

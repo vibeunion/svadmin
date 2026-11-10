@@ -21,13 +21,13 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.32.1",
-    "typebox": "^1.3.34",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "typebox": "^1.4.6",
     "prompts": "^2.4.2",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.6.6",
     "@types/prompts": "^2.4.9",
     "typescript": "^7.0.2",
     "@svadmin/core": "workspace:*"

@@ -13,7 +13,7 @@
 
   const i18n = useTranslation();
 
-  let { resourceName = 'calendar_events' } = $props<{ resourceName?: string }>();
+  let { resourceName = 'calendar_events' }: { resourceName?: string } = $props();
   import { localDateKey, mondayOffset } from '../../workspace/workspace-policy';
   import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
   const today = new Date();

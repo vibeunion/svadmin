@@ -44,9 +44,9 @@
   const i18n = useTranslation();
 
   let {
-    field, value, onchange, disabled, invalid = false, errorId, id, children, nativeSubmit = true,
+    field, value, onchange, disabled = false, invalid = false, errorId, id, children, nativeSubmit = true,
     upload, cancelUpload, onUploadStateChange, fileReferenceMode = false, fileScopeKey,
-  } = $props<{
+  }: {
     field: FieldDefinition;
     value: unknown;
     onchange: (val: unknown) => void;
@@ -65,7 +65,7 @@
     fileReferenceMode?: boolean;
     /** 记录/上传作用域或 reset 变化时只重挂载文件字段。 */
     fileScopeKey?: string | number | object;
-  }>();
+  } = $props();
 
   const instanceId = $props.id();
   const controlId = $derived(id ?? (children ? field.key : `${instanceId}-control`));

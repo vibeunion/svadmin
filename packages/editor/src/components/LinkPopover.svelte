@@ -3,10 +3,10 @@
   import { ExternalLink, Unlink, Check } from '@lucide/svelte';
   import { t } from '@svadmin/core';
 
-  let { editor, onclose } = $props<{
+  let { editor, onclose }: {
     editor: Editor;
     onclose?: () => void;
-  }>();
+  } = $props();
 
   let url = $state('');
   let openInNewTab = $state(true);
@@ -14,8 +14,8 @@
   // Initialize from current link
   $effect(() => {
     const attrs = editor.getAttributes('link');
-    url = (attrs.href as string) ?? '';
-    openInNewTab = attrs.target === '_blank';
+    url = (attrs['href'] as string) ?? '';
+    openInNewTab = attrs['target'] === '_blank';
   });
 
   function applyLink() {

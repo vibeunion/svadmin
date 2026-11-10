@@ -11,11 +11,11 @@
     status = 'pending',
     showIcon = true,
     class: className = '',
-  } = $props<{
+  }: {
     status?: string;
     showIcon?: boolean;
     class?: string;
-  }>();
+  } = $props();
 
   const normalizedStatus = $derived(String(status || 'pending').toLowerCase());
   const lifecycle = $derived(normalizeTaskStatus(normalizedStatus));

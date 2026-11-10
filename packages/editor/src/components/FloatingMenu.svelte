@@ -12,9 +12,9 @@
 
   const floatingMenuKey = new PluginKey('svadminFloatingMenu');
 
-  let { editor } = $props<{
+  let { editor }: {
     editor: Editor;
-  }>();
+  } = $props();
 
   let menuElement: HTMLDivElement | undefined = $state();
 

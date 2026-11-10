@@ -54,8 +54,8 @@ jobs:
 
       - name: Normalize lockfile registry URLs
         run: |
-          if grep -q 'registry\.npmmirror\.com' bun.lock; then
-            sed -i 's#https://registry.npmmirror.com/#https://registry.npmjs.org/#g' bun.lock
+          if grep -qE '(registry|cdn)\.npmmirror\.com' bun.lock; then
+            sed -Ei 's#https://registry\.npmmirror\.com/#https://registry.npmjs.org/#g; s#https://cdn\.npmmirror\.com/packages/(.+?)/[^/]+/([^/]+\.tgz)#https://registry.npmjs.org/\1/-/\2#g' bun.lock
             git add bun.lock
             git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify -m "chore(ci): normalize lockfile registry URLs"
           fi
@@ -153,8 +153,8 @@ jobs:
 
       - name: Normalize lockfile registry URLs
         run: |
-          if grep -q 'registry\.npmmirror\.com' bun.lock; then
-            sed -i 's#https://registry.npmmirror.com/#https://registry.npmjs.org/#g' bun.lock
+          if grep -qE '(registry|cdn)\.npmmirror\.com' bun.lock; then
+            sed -Ei 's#https://registry\.npmmirror\.com/#https://registry.npmjs.org/#g; s#https://cdn\.npmmirror\.com/packages/(.+?)/[^/]+/([^/]+\.tgz)#https://registry.npmjs.org/\1/-/\2#g' bun.lock
             git add bun.lock
             git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify -m "chore(ci): normalize lockfile registry URLs"
           fi
@@ -278,8 +278,8 @@ jobs:
 
       - name: Normalize lockfile registry URLs
         run: |
-          if grep -q 'registry\.npmmirror\.com' bun.lock; then
-            sed -i 's#https://registry.npmmirror.com/#https://registry.npmjs.org/#g' bun.lock
+          if grep -qE '(registry|cdn)\.npmmirror\.com' bun.lock; then
+            sed -Ei 's#https://registry\.npmmirror\.com/#https://registry.npmjs.org/#g; s#https://cdn\.npmmirror\.com/packages/(.+?)/[^/]+/([^/]+\.tgz)#https://registry.npmjs.org/\1/-/\2#g' bun.lock
             git add bun.lock
             git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify -m "chore(ci): normalize lockfile registry URLs"
           fi

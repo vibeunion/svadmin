@@ -13,13 +13,13 @@
     children,
     hideText = false,
     class: className = '',
-  } = $props<{
+  }: {
     resource: string;
     label?: string;
     children?: Snippet;
     hideText?: boolean;
     class?: string;
-  }>();
+  } = $props();
 
   const binding = useResourceContract(() => resource);
   const context = captureAdminContext();

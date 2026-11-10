@@ -14,12 +14,12 @@
     title,
     id,
     onfocusfield,
-  } = $props<{
+  }: {
     errors?: FormErrorEntry[];
     title?: string;
     id?: string;
     onfocusfield?: (fieldKey: string) => void;
-  }>();
+  } = $props();
 
   const generatedId = $props.id();
   const headingId = $derived(`${id ?? generatedId}-title`);

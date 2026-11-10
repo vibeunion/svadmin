@@ -18,7 +18,7 @@
     menu,
     maxItems = 0,
     class: className = 'svadmin-breadcrumbs--spaced',
-  }: { menu?: MenuItem[]; maxItems?: number; class?: string } = $props();
+  }: { menu?: MenuItem[] | undefined; maxItems?: number; class?: string } = $props();
 
   interface Crumb { label: string; href?: string; hidden?: boolean; children?: Crumb[]; }
 

@@ -22,23 +22,23 @@
   const i18n = useTranslation();
 
   interface Props {
-    id?: string;
-    ariaLabel?: string;
-    describedby?: string;
-    invalid?: boolean;
-    options?: TreeSelectOption[];
-    value?: string | number | (string | number)[];
-    multiple?: boolean;
-    placeholder?: string;
-    searchable?: boolean;
-    onlyLeafSelectable?: boolean;
-    disabled?: boolean;
-    allowClear?: boolean;
-    loadChildren?: (node: TreeSelectOption) => Promise<TreeSelectOption[]>;
-    virtualized?: boolean;
-    itemHeight?: number;
-    viewportHeight?: number;
-    class?: string;
+    id?: string | undefined;
+    ariaLabel?: string | undefined;
+    describedby?: string | undefined;
+    invalid?: boolean | undefined;
+    options?: TreeSelectOption[] | undefined;
+    value?: string | number | (string | number)[] | undefined;
+    multiple?: boolean | undefined;
+    placeholder?: string | undefined;
+    searchable?: boolean | undefined;
+    onlyLeafSelectable?: boolean | undefined;
+    disabled?: boolean | undefined;
+    allowClear?: boolean | undefined;
+    loadChildren?: ((node: TreeSelectOption) => Promise<TreeSelectOption[]>) | undefined;
+    virtualized?: boolean | undefined;
+    itemHeight?: number | undefined;
+    viewportHeight?: number | undefined;
+    class?: string | undefined;
     onchange?: (value: string | number | (string | number)[] | undefined) => void;
   }
 

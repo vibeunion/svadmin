@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { createSupaCloudClient as createSupaCloudClient033 } from '@supacloud/js';
+import { createSupaCloudClient as createSupaCloudClient048 } from '@supacloud/js';
+import { createSupaCloudClient as createSupaCloudClient033 } from '@supacloud/js-033';
 import { createSupaCloudClient as createSupaCloudClient034 } from '@supacloud/js-034';
 import { createSupaCloudClient as createSupaCloudClient036 } from '@supacloud/js-036';
 import packageManifest from '../package.json';
@@ -467,6 +468,7 @@ const sdkVersions = [
   ['0.33.0', createSupaCloudClient033<SupabaseClient>],
   ['0.34.0', createSupaCloudClient034<SupabaseClient>],
   ['0.36.0', createSupaCloudClient036<SupabaseClient>],
+  ['0.48.1', createSupaCloudClient048<SupabaseClient>],
 ] as const;
 
 test('declares the tested SDK minor lines without admitting unverified minor releases', () => {
@@ -474,7 +476,7 @@ test('declares the tested SDK minor lines without admitting unverified minor rel
   for (const [version] of sdkVersions) {
     expect(Bun.semver.satisfies(version, range)).toBe(true);
   }
-  for (const version of ['0.32.0', '0.35.0', '0.37.0', '1.0.0']) {
+  for (const version of ['0.32.0', '0.35.0', '0.37.0', '0.47.0', '1.0.0']) {
     expect(Bun.semver.satisfies(version, range)).toBe(false);
   }
   expect(packageManifest.peerDependenciesMeta['@supacloud/js'].optional).toBe(true);

@@ -5,11 +5,11 @@
     value = 0,
     label = 'Progress',
     showLabel = true,
-  } = $props<{
+  }: {
     value?: number;
     label?: string;
     showLabel?: boolean;
-  }>();
+  } = $props();
 
   const safeValue = $derived(Math.max(0, Math.min(100, Number(value ?? 0))));
 </script>

@@ -636,3 +636,179 @@ Optimistic locking edit conflict resolver dialog:
   onresolve={handleMerge}
 />
 ```
+
+## Enterprise Walkthrough, Metrics & Signature Suite
+
+### `<TourGuide>` / `<Tour>`
+
+Step-by-step product walkthrough and onboarding tour with spotlight masking, floating positioning, and skip memory:
+- Viewport spotlight overlay with backdrop cutout around targeted DOM elements.
+- Viewport edge overflow protection and adaptive floating positioning.
+- Local storage persistence (`storageKey`) so users are not prompted again once dismissed or completed.
+- Full keyboard navigation (`Tab`, `Escape`, `ArrowLeft`, `ArrowRight`) with focus trapping.
+
+```svelte
+<script lang="ts">
+  import { TourGuide } from '@svadmin/ui';
+
+  let showTour = $state(true);
+
+  const steps = [
+    { target: '#search-box', title: 'Global Search', description: 'Quickly find resources across workspaces.' },
+    { target: '#export-btn', title: 'Export Data', description: 'Download audit trails and tabular reports in CSV or Excel.' },
+  ];
+</script>
+
+<TourGuide
+  bind:open={showTour}
+  {steps}
+  storageKey="onboarding_v1_done"
+  onfinish={() => console.log('Tour finished')}
+/>
+```
+
+### `<TrendIndicator>` / `<Trend>`
+
+Semantic KPI and reporting trend indicator capsule for dashboards, revenue, and latency metrics:
+- Auto-computed percentage changes when given `value` and `prevValue`.
+- Direct numeric or string delta formatting with customizable precision, prefix, and suffix.
+- Color reversal (`reverseColor=true`) for inverted metrics where downward trends are positive (e.g., error rate, p99 latency).
+- Design system semantic tokens (`variant="text" | "badge" | "solid"`).
+
+```svelte
+<script lang="ts">
+  import { TrendIndicator } from '@svadmin/ui';
+</script>
+
+<!-- Auto percentage calculation -->
+<TrendIndicator value={1250} prevValue={1000} prefix="YoY" variant="badge" />
+
+<!-- Inverted color semantics for error rate -->
+<TrendIndicator value={-12.4} reverseColor={true} variant="solid" />
+```
+
+### `<SignaturePad>`
+
+High-fidelity handwritten digital signature canvas for approvals, audits, and compliance workflows:
+- Smooth quadratic Bezier curve stroke interpolation.
+- State history management with undo and clear operations.
+- Export to transparent PNG Data URL (`toDataURL()`) or SVG vector markup (`toSVG()`).
+- Responsive DPI scaling and touch-friendly pointer interactions.
+
+```svelte
+<script lang="ts">
+  import { SignaturePad } from '@svadmin/ui';
+
+  let signatureData = $state('');
+
+  function handleSave(dataUrl: string) {
+    console.log('Saved signature data URL length:', dataUrl.length);
+  }
+</script>
+
+<SignaturePad
+  bind:value={signatureData}
+  width={480}
+  height={180}
+  onsave={handleSave}
+/>
+```
+
+## Enterprise Tree, Cron & Organization Hierarchy Suite
+
+### `<VirtualTreeSelect>`
+
+High-performance hierarchical tree select component with virtual scrolling for massive datasets:
+- Flattens deep hierarchical trees with O(1) depth-first traversal and dynamic expansion state tracking.
+- Slices visible window items in real-time, rendering smoothly with tens of thousands of nodes.
+- Full keyword search filtering with automatic ancestor chain expansion.
+- Supports single and multiple selection modes with cascading check/indeterminate states, tags display, and clear controls.
+
+```svelte
+<script lang="ts">
+  import { VirtualTreeSelect } from '@svadmin/ui';
+
+  let selected = $state<string[]>([]);
+
+  const treeData = [
+    {
+      value: 'hq',
+      label: 'Headquarters',
+      children: [
+        { value: 'eng', label: 'Engineering', children: [
+          { value: 'fe', label: 'Frontend' },
+          { value: 'be', label: 'Backend' },
+        ]},
+        { value: 'ops', label: 'Operations' },
+      ],
+    },
+  ];
+</script>
+
+<VirtualTreeSelect
+  bind:value={selected}
+  options={treeData}
+  multiple={true}
+  searchable={true}
+  placeholder="Select department..."
+/>
+```
+
+### `<CronExpressionBuilder>`
+
+Enterprise-grade cron scheduling rule visual builder with human-readable summary:
+- Standard 5-part cron syntax support (minute, hour, day-of-month, month, day-of-week).
+- Quick common presets (every minute, hourly, daily, workdays, monthly).
+- Multi-tab segment configuration with cycle, interval, and specific value pickers.
+- Simulated next 5 execution timestamps preview and one-click copy.
+
+```svelte
+<script lang="ts">
+  import { CronExpressionBuilder } from '@svadmin/ui';
+
+  let cronValue = $state('0 9 * * 1-5');
+</script>
+
+<CronExpressionBuilder
+  bind:value={cronValue}
+  showPreview={true}
+  onchange={(val) => console.log('Updated cron:', val)}
+/>
+```
+
+### `<OrgChart>`
+
+Enterprise organizational structure and reporting hierarchy diagram:
+- Clean CSS-powered connector lines between hierarchical managerial nodes.
+- Collapsible child branches with report count badge indicators (`+N`).
+- Customizable employee card slots with avatar, name, title, and department badges.
+- Interactive node click events (`onnodeclick`) for drilldowns or profile inspections.
+
+```svelte
+<script lang="ts">
+  import { OrgChart } from '@svadmin/ui';
+
+  const orgData = {
+    id: 'ceo',
+    name: 'Sarah Connor',
+    title: 'Chief Executive Officer',
+    department: 'Executive Board',
+    children: [
+      {
+        id: 'cto',
+        name: 'John Doe',
+        title: 'Chief Technology Officer',
+        department: 'Engineering',
+        children: [
+          { id: 'lead', name: 'Alice Smith', title: 'Principal Architect', department: 'R&D' },
+        ],
+      },
+    ],
+  };
+</script>
+
+<OrgChart
+  data={orgData}
+  onnodeclick={(node) => console.log('Clicked node:', node.name)}
+/>
+```

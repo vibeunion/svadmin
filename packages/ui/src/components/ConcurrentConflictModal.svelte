@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ShieldAlert, X, AlertTriangle, ArrowRight, Check, RefreshCw, Loader2 } from '@lucide/svelte';
+  import { X, AlertTriangle, Check, Loader2 } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { useTranslation } from '@svadmin/core';
 
@@ -127,7 +127,6 @@
 </script>
 
 {#if open}
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity"
     data-svadmin-component="ConcurrentConflictModal"
@@ -191,7 +190,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-border/60">
-              {#each conflictFields as f}
+              {#each conflictFields as f (f.field)}
                 {@const currentChoice = choices[f.field] ?? 'local'}
                 <tr class="hover:bg-muted/30 transition-colors">
                   <td class="py-2.5 px-3 font-semibold text-foreground">
