@@ -351,3 +351,56 @@ const fields: FieldDefinition[] = [
   onsuccess={handleSuccess}
 />
 ```
+
+## 实时在线协同感知与并发编辑冲突守卫
+
+### `<PresenceAvatars>` / `<PresenceAvatarGroup>`
+
+多管理员并发协同状态感知与活跃编辑者头像指示器：
+- 层叠式头像聚簇展示，带平滑上浮微交互；
+- 右下角在线状态呼吸灯（`editing` 脉冲呼吸、`viewing` 在线绿色、`idle` 离线灰色）；
+- 支持配置最大可见头像数与 `+N` 溢出折叠气泡。
+
+```svelte
+<script lang="ts">
+  import { PresenceAvatars } from '@svadmin/ui';
+
+  const users = [
+    { id: 'u1', name: '郭工', role: '架构师', status: 'editing' },
+    { id: 'u2', name: '李工', role: '研发', status: 'viewing' },
+  ];
+</script>
+
+<PresenceAvatars {users} maxCount={4} size="md" />
+```
+
+### `<ConcurrentConflictModal>`
+
+乐观锁并发编辑冲突解决弹窗：
+- 当多位管理员同时编辑同一条记录发生版本冲突时自动弹出；
+- 左右分栏对照“我的本地修改” vs “服务器最新修改”；
+- 灵活的处理策略：支持强制覆盖、放弃并刷新，或逐字段点选合并保存。
+
+```svelte
+<script lang="ts">
+  import { ConcurrentConflictModal } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  const conflictFields = [
+    { field: 'title', label: '商品标题', localValue: '我的修改', remoteValue: '同事修改' },
+    { field: 'price', label: '价格', localValue: 2499, remoteValue: 2699 },
+  ];
+
+  function handleMerge(mergedData: Record<string, unknown>) {
+    console.log('合并数据：', mergedData);
+  }
+</script>
+
+<ConcurrentConflictModal
+  bind:open
+  {conflictFields}
+  modifiedBy="李工"
+  onresolve={handleMerge}
+/>
+```

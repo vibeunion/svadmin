@@ -49,6 +49,9 @@ import {
   SafeDeleteConfirm,
   DoubleCheckModal,
   SliderCaptcha,
+  PresenceAvatars,
+  PresenceAvatarGroup,
+  ConcurrentConflictModal,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -141,6 +144,9 @@ describe('public compatibility aliases', () => {
     expect(SafeDeleteConfirm).toBeDefined();
     expect(DoubleCheckModal).toBe(SafeDeleteConfirm);
     expect(SliderCaptcha).toBeDefined();
+    expect(PresenceAvatars).toBeDefined();
+    expect(PresenceAvatarGroup).toBe(PresenceAvatars);
+    expect(ConcurrentConflictModal).toBeDefined();
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

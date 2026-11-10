@@ -583,3 +583,56 @@ Pure client-side Canvas and CSS jigsaw puzzle captcha for anti-bot rate-limiting
   onsuccess={handleCaptchaSuccess}
 />
 ```
+
+## Real-Time Collaboration & Concurrent Edit Conflict Guard
+
+### `<PresenceAvatars>` / `<PresenceAvatarGroup>`
+
+Visual indicator of concurrent viewers and active editors on a shared record or workspace:
+- Overlapping avatar cluster with smooth hover micro-animations.
+- Online pulse indicators for active editing status (`editing`, `viewing`, `idle`).
+- Configurable maximum visible avatars with `+N` overflow pill.
+
+```svelte
+<script lang="ts">
+  import { PresenceAvatars } from '@svadmin/ui';
+
+  const users = [
+    { id: 'u1', name: 'Alice Guo', role: 'Lead Architect', status: 'editing' },
+    { id: 'u2', name: 'Bob Smith', role: 'Maintainer', status: 'viewing' },
+  ];
+</script>
+
+<PresenceAvatars {users} maxCount={4} size="md" />
+```
+
+### `<ConcurrentConflictModal>`
+
+Optimistic locking edit conflict resolver dialog:
+- Surfaces when background or WebSocket notifications detect concurrent updates on the same record.
+- Interactive side-by-side diff matrix comparing local changes vs server state.
+- Flexible resolution strategy: force overwrite, discard local changes, or cherry-pick fields to merge.
+
+```svelte
+<script lang="ts">
+  import { ConcurrentConflictModal } from '@svadmin/ui';
+
+  let conflictOpen = $state(false);
+
+  const conflictFields = [
+    { field: 'title', label: 'Title', localValue: 'My Edit', remoteValue: 'Server Update' },
+    { field: 'price', label: 'Price', localValue: 2499, remoteValue: 2699 },
+  ];
+
+  function handleMerge(mergedData: Record<string, unknown>) {
+    console.log('Applying merged fields:', mergedData);
+  }
+</script>
+
+<ConcurrentConflictModal
+  bind:open={conflictOpen}
+  {conflictFields}
+  modifiedBy="Bob Smith"
+  onresolve={handleMerge}
+/>
+```

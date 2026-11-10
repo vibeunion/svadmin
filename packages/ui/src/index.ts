@@ -202,8 +202,8 @@ export { default as Image } from './components/Image.svelte';
 export { default as ImageCropper } from './components/ImageCropper.svelte';
 export { default as ActivityFeed } from './components/ActivityFeed.svelte';
 export type { ActivityItem } from './components/ActivityFeed.svelte';
-export { default as PresenceAvatarGroup } from './components/PresenceAvatarGroup.svelte';
-export type { PresenceUser } from './components/PresenceAvatarGroup.svelte';
+export { default as PresenceAvatarGroup, default as PresenceAvatars } from './components/PresenceAvatarGroup.svelte';
+export type { PresenceAvatarGroupProps, PresenceUser } from './components/PresenceAvatarGroup.svelte';
 export { default as PrintableBill } from './components/PrintableBill.svelte';
 export type { BillItem } from './components/PrintableBill.svelte';
 export { default as JsonSchemaForm } from './components/JsonSchemaForm.svelte';
@@ -764,3 +764,7 @@ export { default as SafeDeleteConfirm, default as DoubleCheckModal } from './com
 export type { SafeDeleteConfirmProps, ImpactItem } from './components/SafeDeleteConfirm.svelte';
 export { default as SliderCaptcha } from './components/SliderCaptcha.svelte';
 export type { SliderCaptchaProps, SliderCaptchaResult } from './components/SliderCaptcha.svelte';
+
+// Enterprise real-time collaboration and concurrent edit conflict guard
+export { default as ConcurrentConflictModal } from './components/ConcurrentConflictModal.svelte';
+export type { ConcurrentConflictModalProps, ConflictFieldDiff } from './components/ConcurrentConflictModal.svelte';
