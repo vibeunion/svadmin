@@ -11,8 +11,8 @@ const file = new URL(
 const source = await readFile(file, 'utf8');
 const repaired = source.replace(/^import Menu from "\.\/Menu\.svelte";\n/m, '');
 if (repaired === source) {
-  console.log('svar-menu declaration has no self-import to repair');
+  console.info('svar-menu declaration has no self-import to repair');
 } else {
   await writeFile(file, repaired);
-  console.log('removed svar-menu declaration self-import');
+  console.info('removed svar-menu declaration self-import');
 }
