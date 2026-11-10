@@ -589,6 +589,13 @@
         "@svadmin/core",
       ],
     },
+    "packages/meilisearch": {
+      "name": "@svadmin/meilisearch",
+      "version": "0.2.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/nestjs-query": {
       "name": "@svadmin/nestjs-query",
       "version": "0.12.30",
@@ -1691,6 +1698,8 @@
     "@svadmin/mcp": ["@svadmin/mcp@workspace:packages/mcp"],
 
     "@svadmin/medusa": ["@svadmin/medusa@workspace:packages/medusa"],
+
+    "@svadmin/meilisearch": ["@svadmin/meilisearch@workspace:packages/meilisearch"],
 
     "@svadmin/nestjs-query": ["@svadmin/nestjs-query@workspace:packages/nestjs-query"],
 
