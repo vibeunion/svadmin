@@ -773,26 +773,23 @@ export { default as TrendIndicator, default as Trend } from './components/TrendI
 export type { TrendIndicatorProps } from './components/TrendIndicator.svelte';
 
 // Enterprise tree, cron scheduler & organization hierarchy suite
-export { default as VirtualTreeSelect } from './components/VirtualTreeSelect.svelte';
-export type { VirtualTreeSelectProps, VirtualTreeNode } from './components/VirtualTreeSelect.svelte';
-export { default as CronExpressionBuilder } from './components/CronExpressionBuilder.svelte';
-export type { CronExpressionBuilderProps, CronPreset } from './components/CronExpressionBuilder.svelte';
-export { default as OrgChart } from './components/OrgChart.svelte';
-export type { OrgChartProps, OrgNode } from './components/OrgChart.svelte';
+export { default as VirtualTreeSelect, type VirtualTreeSelectProps, type VirtualTreeNode } from './components/VirtualTreeSelect.svelte';
+export { default as CronExpressionBuilder, type CronExpressionBuilderProps, type CronPreset } from './components/CronExpressionBuilder.svelte';
+export { default as OrgChart, type OrgChartProps, type OrgNode } from './components/OrgChart.svelte';
 
 export { GaugeChart as SpeedometerGauge } from './components/charts/index.js';
 export type { GaugeChartProps, GaugeThreshold, GaugeTone, GaugeType, GaugeMode } from './components/charts/GaugeChart.svelte';
-export { default as MetricGrid, default as DashboardMetricGrid } from './components/MetricGrid.svelte';
-export type { MetricGridProps } from './components/MetricGrid.svelte';
+export { default as MetricGrid, default as DashboardMetricGrid, type MetricGridProps } from './components/MetricGrid.svelte';
 // Enterprise micro-frontend & embedded sandbox frame suite
-export { default as MicroAppFrame, default as EmbeddedSandbox } from './components/MicroAppFrame.svelte';
-export type { MicroAppFrameProps, MicroAppMessage } from './components/MicroAppFrame.svelte';
+export { default as MicroAppFrame, default as EmbeddedSandbox, type MicroAppFrameProps, type MicroAppMessage } from './components/MicroAppFrame.svelte';
 // Enterprise background task center and async job tracking suite
-export { default as TaskCenter, default as BackgroundTaskDrawer } from './components/TaskCenter.svelte';
-export type { TaskCenterProps, BackgroundTask, BackgroundTaskStatus } from './components/TaskCenter.svelte';
+export { default as TaskCenter, default as BackgroundTaskDrawer, type TaskCenterProps, type BackgroundTask, type BackgroundTaskStatus } from './components/TaskCenter.svelte';
 
 // Enterprise offline resilience & network monitoring suite
-export { useNetworkStatus } from './components/useNetworkStatus.svelte.js';
-export type { NetworkInformationLike, NetworkStatusState, UseNetworkStatusOptions } from './components/useNetworkStatus.svelte.js';
-export { default as OfflineGuard } from './components/OfflineGuard.svelte';
-export type { OfflineGuardProps } from './components/OfflineGuard.svelte';
+export { useNetworkStatus, type NetworkInformationLike, type NetworkStatusState, type UseNetworkStatusOptions } from './components/useNetworkStatus.svelte.js';
+export { default as OfflineGuard, type OfflineGuardProps } from './components/OfflineGuard.svelte';
+
+// Enterprise barcode, dynamic number roll & virtual list suite
+export { default as Barcode, type BarcodeProps, type BarcodeFormat } from './components/Barcode.svelte';
+export { default as NumberRoll, type NumberRollProps } from './components/NumberRoll.svelte';
+export { default as VirtualList, type VirtualListProps } from './components/VirtualList.svelte';

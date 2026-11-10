@@ -995,3 +995,101 @@ Mobile and weak-network resilience protection suite:
   </form>
 </OfflineGuard>
 ```
+
+---
+
+## Enterprise Barcode, Metric Number Roll & Virtual List Suite
+
+High-performance components designed for enterprise asset tracking, operational metrics dashboards, and massive dataset rendering:
+
+- **`<Barcode>`**: Pure SVG vector barcode generator supporting standard CODE128, CODE39, and EAN-13 encodings. Zero heavy external canvas libraries, fully reactive, with native copy and printing integrations.
+- **`<NumberRoll>`**: Smooth ease-out animated number counter designed for financial reports, executive dashboards, and real-time operational indicators. Supports dynamic thousands separators, floating point precision, currency prefixes, and trend color/icon adaptations.
+- **`<VirtualList>`**: Generic, high-efficiency virtual scrolling container for tens of thousands of items (e.g. audit log streams, notification feeds, or complex message records). Renders only items currently within the viewport plus an overscan buffer, maintaining a 60fps frame rate with scroll-to-index and infinite bottom loading hooks.
+
+### Barcode Example
+
+```svelte
+<script lang="ts">
+  import { Barcode } from '@svadmin/ui';
+</script>
+
+<!-- Logistics tracking barcode with action toolbar -->
+<Barcode
+  value="SVADMIN-LOGISTICS-2026"
+  format="CODE128"
+  height={70}
+  width={2}
+  showActions
+/>
+```
+
+### NumberRoll Animated Counter Example
+
+```svelte
+<script lang="ts">
+  import { NumberRoll } from '@svadmin/ui';
+</script>
+
+<div class="flex items-center gap-6">
+  <!-- Revenue metric with thousands separator and currency prefix -->
+  <NumberRoll
+    value={128450.5}
+    from={0}
+    duration={1500}
+    decimals={2}
+    prefix="¥"
+    separator=","
+  />
+
+  <!-- Growth percentage with trend color and icon -->
+  <NumberRoll
+    value={24.8}
+    decimals={1}
+    suffix="%"
+    trendColor
+    showTrendIcon
+  />
+</div>
+```
+
+### VirtualList Massive Data Rendering Example
+
+```svelte
+<script lang="ts">
+  import { VirtualList } from '@svadmin/ui';
+
+  interface LogEntry {
+    id: string;
+    level: string;
+    message: string;
+    timestamp: string;
+  }
+
+  // 10,000 log records rendered seamlessly
+  const logs: LogEntry[] = Array.from({ length: 10000 }, (_, i) => ({
+    id: `log-${i}`,
+    level: i % 10 === 0 ? 'ERROR' : 'INFO',
+    message: `System transaction audit event #${i + 1}`,
+    timestamp: new Date().toISOString(),
+  }));
+</script>
+
+<VirtualList
+  items={logs}
+  itemHeight={52}
+  height={400}
+  overscan={5}
+  keyField="id"
+  onendreached={() => console.log('Reached the end of log stream')}
+>
+  {#snippet children(log, index)}
+    <div class="flex items-center justify-between px-4 py-2 w-full border-b border-border/40 text-xs">
+      <span class="font-mono text-muted-foreground">#{index + 1}</span>
+      <span class="font-medium {log.level === 'ERROR' ? 'text-destructive' : 'text-foreground'}">
+        [{log.level}] {log.message}
+      </span>
+      <span class="font-mono text-muted-foreground">{log.timestamp}</span>
+    </div>
+  {/snippet}
+</VirtualList>
+```

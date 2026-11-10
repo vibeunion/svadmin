@@ -124,6 +124,7 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/MediaLibraryModal.svelte',
   'packages/ui/src/components/PdfDocumentViewer.svelte',
   'packages/ui/src/components/StepForm.svelte',
+  'packages/ui/src/components/VirtualList.svelte',
   'packages/ui/src/components/content/WorkspaceInspector.svelte',
   'packages/ui/src/components/account/GetStartedPage.svelte',
   'packages/lite/src/components/LiteChatDialog.svelte',

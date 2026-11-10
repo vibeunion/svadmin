@@ -64,6 +64,9 @@ import {
   VirtualTreeSelect,
   CronExpressionBuilder,
   OrgChart,
+  Barcode,
+  NumberRoll,
+  VirtualList,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -169,6 +172,9 @@ describe('public compatibility aliases', () => {
     expect(VirtualTreeSelect).toBeDefined();
     expect(CronExpressionBuilder).toBeDefined();
     expect(OrgChart).toBeDefined();
+    expect(Barcode).toBeDefined();
+    expect(NumberRoll).toBeDefined();
+    expect(VirtualList).toBeDefined();
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
