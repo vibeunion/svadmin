@@ -60,7 +60,7 @@ export function createWebhookDispatcher(options: WebhookDispatcherOptions = {}) 
             ...(subscription.headers ?? {}),
           },
           body: serializedPayload,
-          signal: controller?.signal,
+          ...(controller ? { signal: controller.signal } : {}),
         });
 
         if (timer) clearTimeout(timer);

@@ -7,35 +7,35 @@ repository-wide type safety. `check:types:dependencies` must remain enabled.
 - `@refinedev/core@5.0.12`: replace the unresolved build-time `@definitions/index`
   alias with the shipped relative definitions entry in all three declaration
   formats. `@types/papaparse` supplies the actual CSV library declarations.
-- `@tanstack/svelte-query@6.1.48` and `@tanstack/svelte-table@9.2.3`: point
+- `@tanstack/svelte-query@6.4.1` and `@tanstack/svelte-table@9.3.1`: point
   reactive-module declaration imports at the shipped `.svelte.js` modules.
   Extensionless `.svelte` imports caused Svelte checking to invent component
   default exports. Actual component imports are unchanged.
-- `@xyflow/system@0.0.81`: retain the base-node constraint when removing
+- `@xyflow/system@0.0.84`: retain the base-node constraint when removing
   user-supplied measured dimensions. Intersecting the original mapped type with
   the base shape preserves exact optional properties, custom data, node type
   literals, and the original user-node reference without widening those fields.
   ESM and UMD declarations are repaired together.
-- `@xyflow/svelte@1.6.5`: use the system package's existing Promise resolver
+- `@xyflow/svelte@1.7.1`: use the system package's existing Promise resolver
   helper in the runtime and derive the store declaration from it. This removes
   the ES2024 ambient type requirement and fixes `fitView()` in ES2022
   environments without a native `Promise.withResolvers`. The public canvas API
   has a regression with that native method unavailable.
-- `bits-ui@2.19.0`: express the Button/Calendar component signatures without
+- `bits-ui@2.20.6`: express the Button/Calendar component signatures without
   expanding `keyof` across their DOM-property unions. Original prop unions,
   binding names, and setter parameter types remain intact. Floating CSS output
   refers to the installed `csstype` properties rather than stale expanded aliases.
-- `svelte-toolbelt@0.10.6`: import `Expand` explicitly in the box declarations and
+- `svelte-toolbelt@0.10.7`: import `Expand` explicitly in the box declarations and
   derive the sleep handle from `ReturnType<typeof setTimeout>`. Browser-only
   fixtures no longer depend on an accidental global utility or Node timer type.
-- `@supabase/auth-js@2.117.1`: distinguish native binary WebAuthn extensions from
+- `@supabase/auth-js@2.119.0`: distinguish native binary WebAuthn extensions from
   JSON output, require the current attestation fields, and align fallback
   serialization with those declarations. The new helper validates supported
   extensions and encodes large-blob/PRF bytes with correct view boundaries.
   It rejects unknown/malformed extension fields; legacy extension passthrough is
   intentionally removed. Both module formats include the same compiled helper.
   Reapplied unchanged from 2.112.4 for the SupaCloud SDK 0.33.0 compatibility tuple.
-- `elysia@1.4.30`: guard generic indexes, isolate TypeBox definitions from
+- `elysia@1.4.31`: guard generic indexes, isolate TypeBox definitions from
   Standard Schema definitions, and preserve macro context, registered errors,
   numeric/quoted/named status codes, and schema-derived response types.
   Mutable status-wrapper invariance is retained. Model mappers receive the

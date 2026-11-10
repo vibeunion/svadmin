@@ -17,13 +17,13 @@
     title,
     description,
     retry,
-  } = $props<{
+  }: {
     /** Kept for host compatibility; diagnostics are never rendered by default. */
     error?: Error | null;
     title?: string;
     description?: string;
     retry?: () => void;
-  }>();
+  } = $props();
 
   const resolvedTitle = $derived(title ?? translatedOrFallback('error.title', 'common.error'));
   const resolvedDescription = $derived(

@@ -13,14 +13,14 @@
     hideText = false,
     type = 'submit',
     class: className = '',
-  } = $props<{
+  }: {
     loading?: boolean;
     label?: string;
     children?: Snippet;
     hideText?: boolean;
     type?: 'submit' | 'button';
     class?: string;
-  }>();
+  } = $props();
 
   const displayText = $derived(label ?? i18n.t('common.save'));
 </script>

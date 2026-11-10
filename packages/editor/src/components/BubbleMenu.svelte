@@ -11,9 +11,9 @@
 
   const bubbleMenuKey = new PluginKey('svadminBubbleMenu');
 
-  let { editor } = $props<{
+  let { editor }: {
     editor: Editor;
-  }>();
+  } = $props();
 
   let menuElement: HTMLDivElement | undefined = $state();
 

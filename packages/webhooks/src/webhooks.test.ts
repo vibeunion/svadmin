@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, mock } from 'bun:test';
 import {
   createHmacSignature,
   verifyHmacSignature,
@@ -89,7 +89,7 @@ describe('Webhook Dispatcher', () => {
   ];
 
   it('dispatches to active and matching subscriptions only', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
+    const fetchMock = mock().mockResolvedValue(
       new Response(JSON.stringify({ received: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -107,9 +107,9 @@ describe('Webhook Dispatcher', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
     // Verify headers sent to sub-1
-    const sub1Call = fetchMock.mock.calls.find((call) => call[0] === subscriptions[0].url);
+    const sub1Call = fetchMock.mock.calls.find((call) => call[0] === subscriptions[0]!.url);
     expect(sub1Call).toBeDefined();
-    const headers = sub1Call[1].headers;
+    const headers = sub1Call![1]!.headers;
     expect(headers['X-Svadmin-Event']).toBe('order.created');
     expect(headers['X-Custom-Tenant']).toBe('tenant-alpha');
     expect(headers['X-Svadmin-Signature']).toMatch(/^sha256=/);
@@ -117,7 +117,7 @@ describe('Webhook Dispatcher', () => {
 
   it('retries on 500 server error up to maxRetries', async () => {
     let attemptCount = 0;
-    const fetchMock = vi.fn().mockImplementation(() => {
+    const fetchMock = mock().mockImplementation(() => {
       attemptCount++;
       if (attemptCount < 3) {
         return Promise.resolve(new Response('Internal Server Error', { status: 500 }));
@@ -134,25 +134,25 @@ describe('Webhook Dispatcher', () => {
     const results = await dispatcher.dispatch(
       'order.created',
       { orderId: '1002' },
-      [subscriptions[0]],
+      [subscriptions[0]!],
     );
 
-    expect(results[0].success).toBe(true);
-    expect(results[0].attempts).toBe(3);
+    expect(results[0]!.success).toBe(true);
+    expect(results[0]!.attempts).toBe(3);
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('supports sending test ping to endpoint', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response('Pong', { status: 200 }));
+    const fetchMock = mock().mockResolvedValue(new Response('Pong', { status: 200 }));
     const dispatcher = createWebhookDispatcher({
       fetchFn: fetchMock as unknown as typeof fetch,
     });
 
-    const result = await dispatcher.ping(subscriptions[0]);
+    const result = await dispatcher.ping(subscriptions[0]!);
     expect(result.success).toBe(true);
     expect(result.event).toBe('ping');
 
-    const sentBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const sentBody = JSON.parse(fetchMock.mock.calls[0]![1]!.body);
     expect(sentBody.event).toBe('ping');
     expect(sentBody.data.hook_id).toBe('sub-1');
   });

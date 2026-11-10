@@ -12,13 +12,13 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
 
-  let { open = $bindable(false), resource, recordId, loadEntries } = $props<{
+  let { open = $bindable(false), resource, recordId, loadEntries }: {
     open: boolean;
     resource: string;
     recordId?: string | number;
     /** Optional loader; defaults to the AdminContext auditLogProvider. */
     loadEntries?: AuditLogDrawerLoader;
-  }>();
+  } = $props();
 
   let logs = $state<AuditEntry[]>([]);
   let isLoading = $state(false);

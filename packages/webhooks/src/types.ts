@@ -22,11 +22,11 @@ export interface WebhookDeliveryResult {
   url: string;
   event: string;
   success: boolean;
-  statusCode?: number;
-  responseBody?: string;
+  statusCode?: number | undefined;
+  responseBody?: string | undefined;
   durationMs: number;
   attempts: number;
-  error?: string;
+  error?: string | undefined;
 }
 
 export interface WebhookDispatcherOptions {
