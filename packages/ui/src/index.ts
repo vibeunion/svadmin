@@ -202,8 +202,8 @@ export { default as Image } from './components/Image.svelte';
 export { default as ImageCropper } from './components/ImageCropper.svelte';
 export { default as ActivityFeed } from './components/ActivityFeed.svelte';
 export type { ActivityItem } from './components/ActivityFeed.svelte';
-export { default as PresenceAvatarGroup } from './components/PresenceAvatarGroup.svelte';
-export type { PresenceUser } from './components/PresenceAvatarGroup.svelte';
+export { default as PresenceAvatarGroup, default as PresenceAvatars } from './components/PresenceAvatarGroup.svelte';
+export type { PresenceAvatarGroupProps, PresenceUser } from './components/PresenceAvatarGroup.svelte';
 export { default as PrintableBill } from './components/PrintableBill.svelte';
 export type { BillItem } from './components/PrintableBill.svelte';
 export { default as JsonSchemaForm } from './components/JsonSchemaForm.svelte';
@@ -248,7 +248,7 @@ export { default as SpreadsheetView } from './components/SpreadsheetView.svelte'
 export type { SheetData, SpreadsheetLimits } from './components/SpreadsheetView.svelte';
 export { default as DecisionTable } from './components/DecisionTable.svelte';
 export type { DecisionColumn, DecisionRule } from './components/DecisionTable.svelte';
-export { default as OfflineSyncBanner } from './components/OfflineSyncBanner.svelte';
+export { default as OfflineSyncBanner, default as OfflineBanner } from './components/OfflineSyncBanner.svelte';
 export type { PendingMutation } from './components/OfflineSyncBanner.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
@@ -765,6 +765,9 @@ export type { SafeDeleteConfirmProps, ImpactItem } from './components/SafeDelete
 export { default as SliderCaptcha } from './components/SliderCaptcha.svelte';
 export type { SliderCaptchaProps, SliderCaptchaResult } from './components/SliderCaptcha.svelte';
 
+// Enterprise real-time collaboration and concurrent edit conflict guard
+export { default as ConcurrentConflictModal } from './components/ConcurrentConflictModal.svelte';
+export type { ConcurrentConflictModalProps, ConflictFieldDiff } from './components/ConcurrentConflictModal.svelte';
 // Enterprise metrics & trend visualization suite
 export { default as TrendIndicator, default as Trend } from './components/TrendIndicator.svelte';
 export type { TrendIndicatorProps } from './components/TrendIndicator.svelte';
@@ -788,3 +791,12 @@ export type {
 } from './components/charts/GaugeChart.svelte';
 export { default as MetricGrid, default as DashboardMetricGrid } from './components/MetricGrid.svelte';
 export type { MetricGridProps } from './components/MetricGrid.svelte';
+// Enterprise background task center and async job tracking suite
+export { default as TaskCenter, default as BackgroundTaskDrawer } from './components/TaskCenter.svelte';
+export type { TaskCenterProps, BackgroundTask, BackgroundTaskStatus } from './components/TaskCenter.svelte';
+
+// Enterprise offline resilience & network monitoring suite
+export { useNetworkStatus } from './components/useNetworkStatus.svelte.js';
+export type { NetworkInformationLike, NetworkStatusState, UseNetworkStatusOptions } from './components/useNetworkStatus.svelte.js';
+export { default as OfflineGuard } from './components/OfflineGuard.svelte';
+export type { OfflineGuardProps } from './components/OfflineGuard.svelte';

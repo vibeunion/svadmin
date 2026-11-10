@@ -584,6 +584,59 @@ Pure client-side Canvas and CSS jigsaw puzzle captcha for anti-bot rate-limiting
 />
 ```
 
+## Real-Time Collaboration & Concurrent Edit Conflict Guard
+
+### `<PresenceAvatars>` / `<PresenceAvatarGroup>`
+
+Visual indicator of concurrent viewers and active editors on a shared record or workspace:
+- Overlapping avatar cluster with smooth hover micro-animations.
+- Online pulse indicators for active editing status (`editing`, `viewing`, `idle`).
+- Configurable maximum visible avatars with `+N` overflow pill.
+
+```svelte
+<script lang="ts">
+  import { PresenceAvatars } from '@svadmin/ui';
+
+  const users = [
+    { id: 'u1', name: 'Alice Guo', role: 'Lead Architect', status: 'editing' },
+    { id: 'u2', name: 'Bob Smith', role: 'Maintainer', status: 'viewing' },
+  ];
+</script>
+
+<PresenceAvatars {users} maxCount={4} size="md" />
+```
+
+### `<ConcurrentConflictModal>`
+
+Optimistic locking edit conflict resolver dialog:
+- Surfaces when background or WebSocket notifications detect concurrent updates on the same record.
+- Interactive side-by-side diff matrix comparing local changes vs server state.
+- Flexible resolution strategy: force overwrite, discard local changes, or cherry-pick fields to merge.
+
+```svelte
+<script lang="ts">
+  import { ConcurrentConflictModal } from '@svadmin/ui';
+
+  let conflictOpen = $state(false);
+
+  const conflictFields = [
+    { field: 'title', label: 'Title', localValue: 'My Edit', remoteValue: 'Server Update' },
+    { field: 'price', label: 'Price', localValue: 2499, remoteValue: 2699 },
+  ];
+
+  function handleMerge(mergedData: Record<string, unknown>) {
+    console.log('Applying merged fields:', mergedData);
+  }
+</script>
+
+<ConcurrentConflictModal
+  bind:open={conflictOpen}
+  {conflictFields}
+  modifiedBy="Bob Smith"
+  onresolve={handleMerge}
+/>
+```
+
 ## Enterprise Walkthrough, Metrics & Signature Suite
 
 ### `<TourGuide>` / `<Tour>`
@@ -816,4 +869,79 @@ Enterprise dashboard speedometer gauge & responsive metrics grid container suite
     trend={{ value: 12.8, label: 'vs yesterday' }}
   />
 </MetricGrid>
+```
+
+---
+
+## TaskCenter / BackgroundTaskDrawer
+
+Enterprise asynchronous background task tracking and long-running job management center:
+- Floating / header entry with animated progress ring and running task counter.
+- Slide-over drawer with status categorization tabs: All, Running, Pending, Completed, Failed.
+- Real-time progress bars with processed count indicators and remaining duration estimates.
+- Actions for downloading export artifacts, cancelling active tasks, retrying failures, and clearing completed jobs.
+
+```svelte
+<script lang="ts">
+  import { TaskCenter, type BackgroundTask } from '@svadmin/ui';
+
+  let tasks: BackgroundTask[] = [
+    {
+      id: 'task-1',
+      name: 'Sales Ledger Export (2026-Q1)',
+      status: 'running',
+      progress: 68,
+      processedCount: 6800,
+      totalCount: 10000,
+      estimatedSecondsRemaining: 24,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'task-2',
+      name: 'Customer Master Data Sync',
+      status: 'completed',
+      downloadUrl: 'https://cdn.example.com/exports/customers.xlsx',
+      downloadFileName: 'customers.xlsx',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+</script>
+
+<TaskCenter
+  showTrigger
+  tasks={tasks}
+  ondownload={(task) => console.log('Downloading:', task.downloadUrl)}
+  oncancel={(task) => console.log('Cancel task:', task.id)}
+  onretry={(task) => console.log('Retry task:', task.id)}
+/>
+```
+
+---
+
+## OfflineBanner & OfflineGuard
+
+Mobile and weak-network resilience protection suite:
+- `useNetworkStatus()` reactive hook for monitoring `isOnline`, `isWeak`, latency `rtt`, and downlink speeds.
+- `<OfflineBanner>`: Global slide-down alert indicating lost connectivity with automatic draft backup and reconnection banner.
+- `<OfflineGuard>`: Guard component that prevents data loss by intercepting form submissions or displaying modal overlays when disconnected.
+
+```svelte
+<script lang="ts">
+  import { OfflineBanner, OfflineGuard, useNetworkStatus } from '@svadmin/ui';
+
+  const network = useNetworkStatus();
+</script>
+
+<!-- Global top alert -->
+<OfflineBanner
+  onretry={() => console.log('Checking network connection...')}
+/>
+
+<!-- Action protection wrapper -->
+<OfflineGuard mode="overlay">
+  <form onsubmit={(e) => { e.preventDefault(); /* submit */ }}>
+    <input placeholder="Enter title" />
+    <button type="submit">Submit Form</button>
+  </form>
+</OfflineGuard>
 ```

@@ -53,6 +53,9 @@ import {
   MetricGrid,
   DashboardMetricGrid,
   SliderCaptcha,
+  PresenceAvatars,
+  PresenceAvatarGroup,
+  ConcurrentConflictModal,
   Tour,
   TourGuide,
   TrendIndicator,
@@ -153,6 +156,9 @@ describe('public compatibility aliases', () => {
     expect(SafeDeleteConfirm).toBeDefined();
     expect(DoubleCheckModal).toBe(SafeDeleteConfirm);
     expect(SliderCaptcha).toBeDefined();
+    expect(PresenceAvatars).toBeDefined();
+    expect(PresenceAvatarGroup).toBe(PresenceAvatars);
+    expect(ConcurrentConflictModal).toBeDefined();
     expect(Tour).toBeDefined();
     expect(TourGuide).toBe(Tour);
     expect(TrendIndicator).toBeDefined();
