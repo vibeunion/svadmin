@@ -53,6 +53,7 @@ for (const project of [
   'packages/pusher/tsconfig.json',
   'packages/ably/tsconfig.json',
   'packages/cerbos/tsconfig.json',
+  'packages/meilisearch/tsconfig.json',
   'packages/storage/tsconfig.json',
   'scripts/fixtures/pocketbase-types/tsconfig.json',
   'packages/flow/tsconfig.tooling.json',

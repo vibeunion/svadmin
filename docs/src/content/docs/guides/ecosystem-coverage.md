@@ -58,6 +58,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/ably`, `@svadmin/pusher`, WebSocket, SSE | — | ✅ |
 | Identity providers | clerk, auth0, kinde, supabase-auth | `@svadmin/clerk`, `@svadmin/auth0`, `@svadmin/kinde`, `@svadmin/sso`, `@svadmin/firebase`, `@svadmin/supabase` | — | ✅ |
 | OLAP / Analytics | clickhouse, duckdb | `@svadmin/clickhouse` analytical column-oriented data provider | — | ✅ |
+| Search engines | meilisearch, elasticsearch | `@svadmin/meilisearch` instant & faceted search data provider, `@svadmin/elasticsearch` | — | ✅ |
 | Standard API protocols | json:api, odata | `@svadmin/jsonapi` JSON:API 1.0 specification data provider | — | ✅ |
 | Fine-grained authorization | openfga, casbin, cerbos, permit.io | `@svadmin/openfga`, `@svadmin/casbin`, `@svadmin/cerbos` policy adapters | — | ✅ |
 | Gestures | use-gesture | `useSwipe` (pointer-based) | svelte-gestures | ✅ simple swipes; complex gestures via svelte-gestures |
