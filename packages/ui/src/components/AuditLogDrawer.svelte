@@ -115,7 +115,7 @@
     clearAuditScope();
     if (shouldLoad) {
       if (scopedLoader) {
-        void loadAuditLogsWithLoader(scopedLoader, definedOptions({ resource: scopedResource, recordId: scopedRecordId, meta: providerMeta }), false);
+        void loadAuditLogsWithLoader(scopedLoader, definedOptions({ resource: scopedResource, meta: providerMeta }));
       } else if (scopedProvider) {
         void loadAuditLogs(scopedProvider, scopedResource, scopedRecordId, providerMeta);
       }
@@ -143,7 +143,7 @@
   ) {
     return loadAuditLogsWithLoader(
       (params) => withValidatedAuditProvider(scopedProvider).get(params),
-      definedOptions({ resource: scopedResource, recordId: scopedRecordId, meta: providerMeta }),
+      definedOptions({ resource: scopedResource, meta: providerMeta }),
       false,
     );
   }
@@ -183,7 +183,7 @@
       scopedRecordId == null ? undefined : { recordId: scopedRecordId },
     );
     if (scopedLoader) {
-      void loadAuditLogsWithLoader(scopedLoader, definedOptions({ resource: scopedResource, recordId: scopedRecordId, meta: providerMeta }), false);
+      void loadAuditLogsWithLoader(scopedLoader, definedOptions({ resource: scopedResource, meta: providerMeta }));
     } else if (scopedProvider) {
       void loadAuditLogs(scopedProvider, scopedResource, scopedRecordId, providerMeta);
     }
