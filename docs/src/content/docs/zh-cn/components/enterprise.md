@@ -351,3 +351,80 @@ const fields: FieldDefinition[] = [
   onsuccess={handleSuccess}
 />
 ```
+
+## 企业级指引漫游、指标走势与签名套件
+
+### `<TourGuide>` / `<Tour>`
+
+复杂后台系统分步业务功能漫游与指引套件：
+- 聚光灯（Spotlight）视口遮罩与镂空高亮目标元素。
+- 自适应防溢出浮动卡片定位与步骤导航切换。
+- 本地状态记忆持久化（`storageKey`），用户跳过或完成后无需重复弹出。
+- 完整键盘无障碍导航（`Tab`、`Escape`、方向键）与焦点锁定闭环。
+
+```svelte
+<script lang="ts">
+  import { TourGuide } from '@svadmin/ui';
+
+  let showTour = $state(true);
+
+  const steps = [
+    { target: '#search-box', title: '全局检索', description: '一键检索多租户与跨模块业务资源。' },
+    { target: '#export-btn', title: '数据导出', description: '支持按当前过滤视图导出审计凭据与报表。' },
+  ];
+</script>
+
+<TourGuide
+  bind:open={showTour}
+  {steps}
+  storageKey="onboarding_v1_done"
+  onfinish={() => console.log('漫游已完成')}
+/>
+```
+
+### `<TrendIndicator>` / `<Trend>`
+
+报表指标、大屏看板与财务结算同环比涨跌走势胶囊：
+- 支持根据 `value` 与 `prevValue` 自动计算百分比涨跌幅。
+- 支持纯数值、字符串增量格式化，可自定义精度、前缀（如 `YoY` / `环比`）与后缀（默认 `%`）。
+- 支持反向色彩语义（`reverseColor=true`），适配错误率、延迟、排队积压等跌为优的监控场景。
+- 遵循设计系统规范语义 Token，提供 `text`、`badge`、`solid` 多种视觉形态。
+
+```svelte
+<script lang="ts">
+  import { TrendIndicator } from '@svadmin/ui';
+</script>
+
+<!-- 自动计算百分比涨跌 -->
+<TrendIndicator value={1250} prevValue={1000} prefix="YoY" variant="badge" />
+
+<!-- 异常指标反向色彩语义 -->
+<TrendIndicator value={-12.4} reverseColor={true} variant="solid" />
+```
+
+### `<SignaturePad>`
+
+移动审批与桌面结算场景的高保真电子签名手写板：
+- 二次贝塞尔平滑压感笔触插值算法。
+- 完整的笔画撤销（`Undo`）与一键清空重置。
+- 导出透明背景 PNG Data URL（`toDataURL()`）与 SVG 矢量图格式（`toSVG()`）。
+- 适配高分屏 DPI 与移动端触控交互防滚屏。
+
+```svelte
+<script lang="ts">
+  import { SignaturePad } from '@svadmin/ui';
+
+  let signatureData = $state('');
+
+  function handleSave(dataUrl: string) {
+    console.log('保存签名数据 URL:', dataUrl.length);
+  }
+</script>
+
+<SignaturePad
+  bind:value={signatureData}
+  width={480}
+  height={180}
+  onsave={handleSave}
+/>
+```

@@ -583,3 +583,80 @@ Pure client-side Canvas and CSS jigsaw puzzle captcha for anti-bot rate-limiting
   onsuccess={handleCaptchaSuccess}
 />
 ```
+
+## Enterprise Walkthrough, Metrics & Signature Suite
+
+### `<TourGuide>` / `<Tour>`
+
+Step-by-step product walkthrough and onboarding tour with spotlight masking, floating positioning, and skip memory:
+- Viewport spotlight overlay with backdrop cutout around targeted DOM elements.
+- Viewport edge overflow protection and adaptive floating positioning.
+- Local storage persistence (`storageKey`) so users are not prompted again once dismissed or completed.
+- Full keyboard navigation (`Tab`, `Escape`, `ArrowLeft`, `ArrowRight`) with focus trapping.
+
+```svelte
+<script lang="ts">
+  import { TourGuide } from '@svadmin/ui';
+
+  let showTour = $state(true);
+
+  const steps = [
+    { target: '#search-box', title: 'Global Search', description: 'Quickly find resources across workspaces.' },
+    { target: '#export-btn', title: 'Export Data', description: 'Download audit trails and tabular reports in CSV or Excel.' },
+  ];
+</script>
+
+<TourGuide
+  bind:open={showTour}
+  {steps}
+  storageKey="onboarding_v1_done"
+  onfinish={() => console.log('Tour finished')}
+/>
+```
+
+### `<TrendIndicator>` / `<Trend>`
+
+Semantic KPI and reporting trend indicator capsule for dashboards, revenue, and latency metrics:
+- Auto-computed percentage changes when given `value` and `prevValue`.
+- Direct numeric or string delta formatting with customizable precision, prefix, and suffix.
+- Color reversal (`reverseColor=true`) for inverted metrics where downward trends are positive (e.g., error rate, p99 latency).
+- Design system semantic tokens (`variant="text" | "badge" | "solid"`).
+
+```svelte
+<script lang="ts">
+  import { TrendIndicator } from '@svadmin/ui';
+</script>
+
+<!-- Auto percentage calculation -->
+<TrendIndicator value={1250} prevValue={1000} prefix="YoY" variant="badge" />
+
+<!-- Inverted color semantics for error rate -->
+<TrendIndicator value={-12.4} reverseColor={true} variant="solid" />
+```
+
+### `<SignaturePad>`
+
+High-fidelity handwritten digital signature canvas for approvals, audits, and compliance workflows:
+- Smooth quadratic Bezier curve stroke interpolation.
+- State history management with undo and clear operations.
+- Export to transparent PNG Data URL (`toDataURL()`) or SVG vector markup (`toSVG()`).
+- Responsive DPI scaling and touch-friendly pointer interactions.
+
+```svelte
+<script lang="ts">
+  import { SignaturePad } from '@svadmin/ui';
+
+  let signatureData = $state('');
+
+  function handleSave(dataUrl: string) {
+    console.log('Saved signature data URL length:', dataUrl.length);
+  }
+</script>
+
+<SignaturePad
+  bind:value={signatureData}
+  width={480}
+  height={180}
+  onsave={handleSave}
+/>
+```

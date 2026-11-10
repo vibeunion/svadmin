@@ -43,8 +43,10 @@
   function getCanvasPos(e: MouseEvent | TouchEvent): Point | null {
     if (!canvasEl) return null;
     const rect = canvasEl.getBoundingClientRect();
-    const scaleX = canvasEl.width / rect.width;
-    const scaleY = canvasEl.height / rect.height;
+    const rectW = rect.width > 0 ? rect.width : (canvasEl.width || 1);
+    const rectH = rect.height > 0 ? rect.height : (canvasEl.height || 1);
+    const scaleX = canvasEl.width / rectW;
+    const scaleY = canvasEl.height / rectH;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return null;
@@ -99,6 +101,7 @@
         ctx.fill();
         ctx.closePath();
       }
+      isEmpty = false;
       return;
     }
 
@@ -139,6 +142,19 @@
     isEmpty = true;
     value = '';
     onchange?.('');
+  }
+
+  export function toDataURL(type = 'image/png'): string {
+    return canvasEl ? canvasEl.toDataURL(type) : '';
+  }
+
+  export function toSVG(): string {
+    if (!canvasEl) return '';
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><image href="${toDataURL()}" width="${width}" height="${height}" /></svg>`;
+  }
+
+  export function getIsEmpty(): boolean {
+    return isEmpty;
   }
 
   export function undo() {
@@ -185,7 +201,7 @@
   });
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
+<div data-svadmin-component="SignaturePad" class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
   <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="font-semibold text-foreground">
       Electronic Signature <span class="text-muted-foreground font-normal">(Sign inside the box)</span>
