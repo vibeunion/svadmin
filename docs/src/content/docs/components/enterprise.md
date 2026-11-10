@@ -759,3 +759,61 @@ Enterprise organizational structure and reporting hierarchy diagram:
   onnodeclick={(node) => console.log('Clicked node:', node.name)}
 />
 ```
+
+### `<GaugeChart>` & `<MetricGrid>`
+
+Enterprise dashboard speedometer gauge & responsive metrics grid container suite:
+- **`<GaugeChart>` (SpeedometerGauge)**:
+  - Vector SVG smooth rendering with 180° semi-circle, 240° speedometer arc, and 270° wide arc modes (`type="half" | "arc" | "circle"`).
+  - Multi-tier threshold colored zones (e.g. 0-60 normal green, 60-85 warning amber, 85-100 critical red) mapped to semantic design tokens (`var(--success)`, `var(--warning)`, `var(--destructive)`).
+  - Dual presentation modes: smooth rounded progress arc, mechanical indicator needle with pivot cap, or combined (`mode="progress" | "needle" | "both"`).
+  - Custom tick marks and benchmark target line (`target={80}`, `targetLabel="SLA Target"`).
+  - Full accessibility compliance (`role="meter"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`).
+- **`<MetricGrid>` (DashboardMetricGrid)**:
+  - Responsive breakpoint layout supporting 1 to 6 columns and adaptive auto-fit (`cols="auto"`).
+  - Built-in skeleton loading grid (`loading={true}`, `skeletonCount={4}`).
+  - Built-in empty placeholder support (`empty={true}`, `emptyMessage="No metrics found"`).
+  - Seamlessly hosts `<GaugeChart>`, `<StatisticCard>`, `<MetricStrip>`, and custom metric widgets.
+
+```svelte
+<script lang="ts">
+  import { GaugeChart, MetricGrid, StatisticCard } from '@svadmin/ui';
+
+  let cpuLoad = 78.5;
+  let slaScore = 99.4;
+</script>
+
+<MetricGrid title="Infrastructure Overview" description="Live telemetry metrics for prod-cluster" cols={3}>
+  <GaugeChart
+    value={cpuLoad}
+    label="CPU Load"
+    unit="%"
+    type="arc"
+    mode="both"
+    target={80}
+    targetLabel="SLA Threshold"
+    subtext="Peak: 92.4% during peak hours"
+  />
+
+  <GaugeChart
+    value={slaScore}
+    min={95}
+    max={100}
+    label="SLA Compliance"
+    unit="%"
+    type="half"
+    mode="progress"
+    thresholds={[
+      { value: 98, tone: 'destructive', label: 'Breach' },
+      { value: 99, tone: 'warning', label: 'Risk' },
+      { value: 100, tone: 'success', label: 'Compliant' }
+    ]}
+  />
+
+  <StatisticCard
+    title="Daily Active Operations"
+    value="1,428,950"
+    trend={{ value: 12.8, label: 'vs yesterday' }}
+  />
+</MetricGrid>
+```

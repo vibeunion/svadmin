@@ -48,6 +48,10 @@ import {
   PivotDrilldownModal,
   SafeDeleteConfirm,
   DoubleCheckModal,
+  GaugeChart,
+  SpeedometerGauge,
+  MetricGrid,
+  DashboardMetricGrid,
   SliderCaptcha,
   Tour,
   TourGuide,
@@ -157,6 +161,10 @@ describe('public compatibility aliases', () => {
     expect(VirtualTreeSelect).toBeDefined();
     expect(CronExpressionBuilder).toBeDefined();
     expect(OrgChart).toBeDefined();
+    expect(GaugeChart).toBeDefined();
+    expect(SpeedometerGauge).toBe(GaugeChart);
+    expect(MetricGrid).toBeDefined();
+    expect(DashboardMetricGrid).toBe(MetricGrid);
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();
