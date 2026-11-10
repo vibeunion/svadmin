@@ -218,7 +218,7 @@ export function createJsonApiDataProvider(options: JsonApiOptions): DataProvider
     async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>(
       params: CreateParams<TVariables>
     ): Promise<CreateResult<TData>> {
-      const url = `${baseUrl}/${params.resource}`;
+      const url = resourceUrl(params.resource);
       const doc = await request<JsonApiDocument>(url, {
         method: 'POST',
         body: JSON.stringify({

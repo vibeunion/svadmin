@@ -186,6 +186,21 @@ describe('createJsonApiDataProvider', () => {
     expect(result.data['title']).toBe('New Post');
   });
 
+  it('encodes the resource path for create requests', async () => {
+    const mockFetch = mock((url: string | URL | Request) => {
+      expect(String(url)).toBe('https://api.example.com/jsonapi/article%2Ftypes');
+      return Promise.resolve(new Response(JSON.stringify({
+        data: { id: '1', type: 'article/types', attributes: {} },
+      }), { status: 201 }));
+    });
+
+    const provider = createJsonApiDataProvider({
+      apiUrl: 'https://api.example.com/jsonapi',
+      httpClient: mockFetch as unknown as typeof fetch,
+    });
+    await provider.create({ resource: 'article/types', variables: {} });
+  });
+
   it('handles deleteOne with 204 No Content', async () => {
     const mockFetch = mock((url: string | URL | Request, init?: RequestInit) => {
       expect(String(url)).toBe('https://api.example.com/jsonapi/articles/55');
