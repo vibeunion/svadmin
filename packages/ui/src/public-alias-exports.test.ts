@@ -46,6 +46,9 @@ import {
   ExcelImportWizard,
   ExcelExportButton,
   PivotDrilldownModal,
+  SafeDeleteConfirm,
+  DoubleCheckModal,
+  SliderCaptcha,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -135,6 +138,9 @@ describe('public compatibility aliases', () => {
     expect(ExcelImportWizard).toBeDefined();
     expect(ExcelExportButton).toBeDefined();
     expect(PivotDrilldownModal).toBeDefined();
+    expect(SafeDeleteConfirm).toBeDefined();
+    expect(DoubleCheckModal).toBe(SafeDeleteConfirm);
+    expect(SliderCaptcha).toBeDefined();
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

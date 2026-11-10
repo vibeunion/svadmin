@@ -524,3 +524,62 @@ Specialized skeleton loaders tailored for enterprise dashboards, tables, analyti
 
 <ProSkeleton type="result" active />
 ```
+
+## Enterprise Safe-Delete & Bot Verification Suite
+
+### `<SafeDeleteConfirm>` / `<DoubleCheckModal>`
+
+High-risk destructive operations guard (e.g. cluster termination, tenant wipe, schema drops):
+- Requires exact typing of the resource identifier to unlock the confirm button.
+- Built-in paste prevention (`preventPaste=true`) to stop muscle-memory confirmation.
+- Cascading impact assessment list (`impactList`) summarizing affected child entities.
+- Mandatory cooldown countdown (`countdown=3`) before unlock.
+
+```svelte
+<script lang="ts">
+  import { SafeDeleteConfirm } from '@svadmin/ui';
+
+  let showDeleteModal = $state(false);
+
+  async function handleDelete() {
+    await fetch('/api/clusters/prod-east-01', { method: 'DELETE' });
+  }
+</script>
+
+<SafeDeleteConfirm
+  bind:open={showDeleteModal}
+  targetName="prod-east-01"
+  title="Terminate Production Cluster"
+  countdown={3}
+  preventPaste={true}
+  impactList={[
+    { label: 'Attached Volumes', count: 12 },
+    { label: 'Active Replica Sets', count: 4 },
+  ]}
+  onconfirm={handleDelete}
+/>
+```
+
+### `<SliderCaptcha>`
+
+Pure client-side Canvas and CSS jigsaw puzzle captcha for anti-bot rate-limiting on sensitive operations, authentication, or exports:
+- Procedural gradient background and puzzle piece clipping with zero external assets.
+- Jigsaw piece snap verification with configurable tolerance.
+- Trajectory and time bounds analysis (`minTimeMs`) to reject instant automated scripts.
+
+```svelte
+<script lang="ts">
+  import { SliderCaptcha } from '@svadmin/ui';
+
+  function handleCaptchaSuccess({ token, elapsedMs }: { token: string; elapsedMs: number }) {
+    console.log('Verified token:', token, 'Time taken:', elapsedMs);
+  }
+</script>
+
+<SliderCaptcha
+  width={320}
+  height={160}
+  minTimeMs={200}
+  onsuccess={handleCaptchaSuccess}
+/>
+```

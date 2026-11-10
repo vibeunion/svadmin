@@ -52,6 +52,7 @@ jobs:
         run: |
           mkdir -p test-results/enterprise
           git rev-parse HEAD > test-results/enterprise/commit.txt
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
           git diff --check "$BASE_SHA...HEAD" > test-results/enterprise/diff-check.txt
           git diff --stat "$BASE_SHA...HEAD" > test-results/enterprise/diff-stat.txt
           git diff "$BASE_SHA...HEAD" > test-results/enterprise/changes.patch

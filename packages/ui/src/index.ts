@@ -758,3 +758,9 @@ export type {
   PivotDrilldownColumn,
   PivotDrilldownFilter,
 } from './components/PivotDrilldownModal.svelte';
+
+// Enterprise security and safe-delete verification suite
+export { default as SafeDeleteConfirm, default as DoubleCheckModal } from './components/SafeDeleteConfirm.svelte';
+export type { SafeDeleteConfirmProps, ImpactItem } from './components/SafeDeleteConfirm.svelte';
+export { default as SliderCaptcha } from './components/SliderCaptcha.svelte';
+export type { SliderCaptchaProps, SliderCaptchaResult } from './components/SliderCaptcha.svelte';
