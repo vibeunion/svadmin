@@ -290,3 +290,64 @@ const fields: FieldDefinition[] = [
 ```
 
 在 `FieldDefinition` 中指定 `type: 'array'` 时，`AutoForm` 会自动渲染 `ArrayField`。
+
+---
+
+## 生产级防误删审查与滑动验证码套件
+
+### `<SafeDeleteConfirm>` / `<DoubleCheckModal>`
+
+高危破坏性操作强防护弹窗（如删生产集群、删租户、删库）：
+- 目标全名强一致性匹配输入方可解锁确认按钮。
+- 安全防误触：默认启用禁止粘贴（`preventPaste=true`），强制管理员手动键入。
+- 关联影响评估清单（`impactList`）：直观呈现被删除子资源与级联数据量。
+- 强制安全阅读倒计时（`countdown=3`），消除肌肉记忆误触风险。
+
+```svelte
+<script lang="ts">
+  import { SafeDeleteConfirm } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function handleDelete() {
+    await fetch('/api/clusters/prod-east-01', { method: 'DELETE' });
+  }
+</script>
+
+<SafeDeleteConfirm
+  bind:open
+  targetName="prod-east-01"
+  title="删除生产集群"
+  countdown={3}
+  preventPaste={true}
+  impactList={[
+    { label: '挂载存储卷', count: 12 },
+    { label: '生效副本集', count: 4 },
+  ]}
+  onconfirm={handleDelete}
+/>
+```
+
+### `<SliderCaptcha>`
+
+纯前端 Canvas / CSS 驱动的拼图凹槽比对验证码：
+- 零外部图片依赖：程序化多色线性/径向渐变背景防伪渲染。
+- 精准拼图凹凸形状裁剪与实时阴影凹槽比对。
+- 滑动轨迹平滑度与耗时检测（`minTimeMs`），严防自动化机器人瞬时批量刷取。
+
+```svelte
+<script lang="ts">
+  import { SliderCaptcha } from '@svadmin/ui';
+
+  function handleSuccess({ token, elapsedMs }: { token: string; elapsedMs: number }) {
+    console.log('验证成功 token:', token, '耗时:', elapsedMs);
+  }
+</script>
+
+<SliderCaptcha
+  width={320}
+  height={160}
+  minTimeMs={200}
+  onsuccess={handleSuccess}
+/>
+```

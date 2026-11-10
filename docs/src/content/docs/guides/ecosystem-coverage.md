@@ -55,6 +55,7 @@ Status legend: ✅ first-party · 🔶 partial or framework-provided · 🧩 del
 | CLI | admin CLIs | `create-svadmin`, `agmesh` | — | ✅ |
 | PDF | react-pdf, @react-pdf/renderer | `PdfDocumentViewer` | pdfjs-dist, svelte-pdf | ✅ |
 | SaaS pricing & quota | stripe-pricing-table, pro billing | `PricingCard`, `QuotaProgressBar`, `PricingTable`, `UsageCard` | — | ✅ |
+| Security & Safe-delete | — | `SafeDeleteConfirm` (`DoubleCheckModal`), `SliderCaptcha` | — | ✅ high-risk destructive confirmation & canvas jigsaw captcha |
 | Realtime providers | ably, pusher, WebSocket, SSE | `@svadmin/ably`, `@svadmin/pusher`, WebSocket, SSE | — | ✅ |
 | Identity providers | clerk, auth0, kinde, supabase-auth | `@svadmin/clerk`, `@svadmin/auth0`, `@svadmin/kinde`, `@svadmin/sso`, `@svadmin/firebase`, `@svadmin/supabase` | — | ✅ |
 | OLAP / Analytics | clickhouse, duckdb | `@svadmin/clickhouse` analytical column-oriented data provider | — | ✅ |
