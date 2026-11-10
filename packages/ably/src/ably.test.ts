@@ -124,6 +124,22 @@ describe('@svadmin/ably live provider adapter', () => {
     expect(received[1]?.type).toBe('DELETE');
   });
 
+  it('unwraps typed payload envelopes without removing other subscribers', () => {
+    const { client, emit } = createMockAblyClient();
+    const provider = createAblyLiveProvider(client);
+    const first: LiveEvent[] = [];
+    const second: LiveEvent[] = [];
+    provider.subscribe({ resource: 'posts', callback: (event) => first.push(event) });
+    provider.subscribe({ resource: 'posts', callback: (event) => second.push(event) });
+
+    emit('resources:posts', { data: { type: 'created', payload: { id: 'p-1' } } });
+    expect(first[0]?.payload).toEqual({ id: 'p-1' });
+    expect(second[0]?.payload).toEqual({ id: 'p-1' });
+
+    provider.unsubscribe?.({ resource: 'posts' });
+    expect(client.channels.get('resources:posts')).toBeDefined();
+  });
+
   it('unsubscribes cleanly via returned callback and explicit unsubscribe method', () => {
     const { client, listeners, emit } = createMockAblyClient();
     const provider = createAblyLiveProvider(client);

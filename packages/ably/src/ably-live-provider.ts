@@ -61,7 +61,11 @@ const actionTypeMap: Record<string, LiveActionType> = {
 
 function normalizeEventPayload(data: unknown): Record<string, unknown> {
   if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
-    return data as Record<string, unknown>;
+    const envelope = data as Record<string, unknown>;
+    if ('payload' in envelope && ('type' in envelope || 'event' in envelope || 'name' in envelope)) {
+      return normalizeEventPayload(envelope.payload);
+    }
+    return envelope;
   }
   return { value: data };
 }
@@ -95,6 +99,7 @@ export function createAblyLiveProvider(
   options: AblyLiveProviderOptions = {},
 ): LiveProvider {
   const channelPrefix = options.channelPrefix ?? 'resources';
+  const listenersByChannel = new Map<string, Set<AblyMessageListener>>();
 
   function getChannelName(resource: string, liveParams?: Record<string, unknown>): string {
     if (options.channelName) {
@@ -122,16 +127,24 @@ export function createAblyLiveProvider(
       };
 
       void channel.subscribe(listener);
+      const listeners = listenersByChannel.get(channelName) ?? new Set<AblyMessageListener>();
+      listeners.add(listener);
+      listenersByChannel.set(channelName, listeners);
 
       return () => {
         void channel.unsubscribe(listener);
+        const current = listenersByChannel.get(channelName);
+        current?.delete(listener);
+        if (current && current.size === 0) listenersByChannel.delete(channelName);
       };
     },
 
     unsubscribe({ resource, liveParams }): void {
       const channelName = getChannelName(resource, liveParams);
       const channel = client.channels.get(channelName);
-      void channel.unsubscribe();
+      const listeners = listenersByChannel.get(channelName);
+      for (const listener of listeners ?? []) void channel.unsubscribe(listener);
+      listenersByChannel.delete(channelName);
     },
 
     publish(event: LiveEvent): void {
