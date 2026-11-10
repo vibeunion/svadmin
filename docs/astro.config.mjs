@@ -98,6 +98,7 @@ export default defineConfig({
             { slug: 'providers/clickhouse' },
             { slug: 'providers/openfga' },
             { slug: 'providers/casbin' },
+            { slug: 'providers/cerbos' },
             { slug: 'providers/elysia' },
             { slug: 'providers/drizzle' },
             { slug: 'providers/sso' },

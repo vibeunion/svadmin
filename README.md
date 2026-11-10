@@ -119,6 +119,7 @@
 | `@svadmin/clickhouse`   | ClickHouse analytical column-oriented OLAP provider |
 | `@svadmin/openfga`      | OpenFGA relationship-based fine-grained access control (ReBAC) |
 | `@svadmin/casbin`       | Casbin policy-based authorization and multi-tenant RBAC |
+| `@svadmin/cerbos`       | Cerbos policy decision point access control adapter |
 
 The dedicated `@svadmin/parse` wrapper has been retired. Host applications can
 initialize a Parse provider and pass it to `createRefineAdapter`; see the

@@ -203,6 +203,13 @@
         "@svadmin/core": "workspace:*",
       },
     },
+    "packages/cerbos": {
+      "name": "@svadmin/cerbos",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/charts": {
       "name": "@svadmin/charts",
       "version": "0.2.1",
@@ -1636,6 +1643,8 @@
     "@svadmin/auth0": ["@svadmin/auth0@workspace:packages/auth0"],
 
     "@svadmin/casbin": ["@svadmin/casbin@workspace:packages/casbin"],
+
+    "@svadmin/cerbos": ["@svadmin/cerbos@workspace:packages/cerbos"],
 
     "@svadmin/charts": ["@svadmin/charts@workspace:packages/charts"],
 
