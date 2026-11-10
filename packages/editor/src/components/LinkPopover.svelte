@@ -14,8 +14,8 @@
   // Initialize from current link
   $effect(() => {
     const attrs = editor.getAttributes('link');
-    url = (attrs.href as string) ?? '';
-    openInNewTab = attrs.target === '_blank';
+    url = (attrs['href'] as string) ?? '';
+    openInNewTab = attrs['target'] === '_blank';
   });
 
   function applyLink() {

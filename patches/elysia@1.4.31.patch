@@ -8713,7 +8713,7 @@ index 0000000000000000000000000000000000000000..d3e519aa713addbd2087814564c09b5b
 +    decorator: {
 +        contentType: string;
 +    };
-+}, Path>, 
++}, Path>,
 +/**
 + * @deprecated
 + *
@@ -9543,7 +9543,7 @@ index 0000000000000000000000000000000000000000..e93a3ce6ac9e6533717c30606bda20f7
 +    private drain;
 +    then<TResult1 = void, TResult2 = never>(onfulfilled?: ((value: void) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2>;
 +}
-+export declare const fnToContainer: (fn: MaybeArray<Function | HookContainer>, 
++export declare const fnToContainer: (fn: MaybeArray<Function | HookContainer>,
 +/** Only add subType to non contained fn */
 +subType?: HookContainer["subType"]) => MaybeArray<HookContainer>;
 +export declare const localHookToLifeCycleStore: (a: AnyLocalHook) => LifeCycleStore;

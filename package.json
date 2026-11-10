@@ -157,7 +157,8 @@
     "svelte-toolbelt@0.10.7": "patches/svelte-toolbelt@0.10.7.patch",
     "@tanstack/svelte-query@6.4.1": "patches/@tanstack%2Fsvelte-query@6.4.1.patch",
     "@tanstack/svelte-table@9.3.1": "patches/@tanstack%2Fsvelte-table@9.3.1.patch",
-    "http-cache-semantics@4.3.0": "patches/http-cache-semantics@4.3.0.patch"
+    "http-cache-semantics@4.3.0": "patches/http-cache-semantics@4.3.0.patch",
+    "vidstack@1.15.7": "patches/vidstack@1.15.7.patch"
   },
   "main": "eslint.config.js",
   "directories": {
