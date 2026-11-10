@@ -63,7 +63,7 @@ function normalizeEventPayload(data: unknown): Record<string, unknown> {
   if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
     const envelope = data as Record<string, unknown>;
     if ('payload' in envelope && ('type' in envelope || 'event' in envelope || 'name' in envelope)) {
-      return normalizeEventPayload(envelope.payload);
+      return normalizeEventPayload(envelope['payload']);
     }
     return envelope;
   }
