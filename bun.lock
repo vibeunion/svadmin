@@ -651,6 +651,13 @@
         "pocketbase",
       ],
     },
+    "packages/postgrest": {
+      "name": "@svadmin/postgrest",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/pusher": {
       "name": "@svadmin/pusher",
       "version": "0.2.4",
@@ -1708,6 +1715,8 @@
     "@svadmin/openfga": ["@svadmin/openfga@workspace:packages/openfga"],
 
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
+
+    "@svadmin/postgrest": ["@svadmin/postgrest@workspace:packages/postgrest"],
 
     "@svadmin/pusher": ["@svadmin/pusher@workspace:packages/pusher"],
 
