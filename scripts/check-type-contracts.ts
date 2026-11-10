@@ -51,6 +51,7 @@ for (const project of [
   'packages/lite/example/tsconfig.bun-tests.json',
   'packages/pocketbase/tsconfig.json',
   'packages/pusher/tsconfig.json',
+  'packages/ably/tsconfig.json',
   'packages/storage/tsconfig.json',
   'scripts/fixtures/pocketbase-types/tsconfig.json',
   'packages/flow/tsconfig.tooling.json',

@@ -79,6 +79,13 @@
         "vitest": "^4.1.11",
       },
     },
+    "packages/ably": {
+      "name": "@svadmin/ably",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/ai-elements": {
       "name": "@svadmin/ai-elements",
       "version": "0.14.2",
@@ -1606,6 +1613,8 @@
     "@supacloud/js-034": ["@supacloud/js@0.34.0", "https://registry.npmmirror.com/@supacloud/js/-/js-0.34.0.tgz", { "dependencies": { "@supacloud/contracts": "0.5.0" }, "peerDependencies": { "@supabase/supabase-js": "^2.115.0" } }, "sha512-V4WImlO79EV2rkm7Wbn9YVm3SwzMiSu/TQAFkdeoI5Dn58zwbjwF43lsujgDfYSwa0vccisQwWMy6gMJQcmp/w=="],
 
     "@supacloud/js-036": ["@supacloud/js@0.36.0", "https://registry.npmmirror.com/@supacloud/js/-/js-0.36.0.tgz", { "dependencies": { "@supacloud/contracts": "0.8.0", "rxjs": "7.8.2" }, "peerDependencies": { "@supabase/supabase-js": "^2.115.0" } }, "sha512-9NAhMMex82uxkKMNJMHrtYh6mbIfvm2C07JeJGd1JJvcTYlg44vfvdnipkPecXihjxyx94UiwiOzaStT8Vz7dw=="],
+
+    "@svadmin/ably": ["@svadmin/ably@workspace:packages/ably"],
 
     "@svadmin/ai-elements": ["@svadmin/ai-elements@workspace:packages/ai-elements"],
 
