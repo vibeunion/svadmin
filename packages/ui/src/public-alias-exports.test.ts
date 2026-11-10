@@ -54,6 +54,9 @@ import {
   TrendIndicator,
   Trend,
   SignaturePad,
+  VirtualTreeSelect,
+  CronExpressionBuilder,
+  OrgChart,
   RoleSwitcher,
   RealtimeMonitorView,
   IconAudit,
@@ -151,6 +154,9 @@ describe('public compatibility aliases', () => {
     expect(TrendIndicator).toBeDefined();
     expect(Trend).toBe(TrendIndicator);
     expect(SignaturePad).toBeDefined();
+    expect(VirtualTreeSelect).toBeDefined();
+    expect(CronExpressionBuilder).toBeDefined();
+    expect(OrgChart).toBeDefined();
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();

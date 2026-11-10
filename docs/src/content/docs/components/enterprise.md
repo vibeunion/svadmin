@@ -660,3 +660,102 @@ High-fidelity handwritten digital signature canvas for approvals, audits, and co
   onsave={handleSave}
 />
 ```
+
+## Enterprise Tree, Cron & Organization Hierarchy Suite
+
+### `<VirtualTreeSelect>`
+
+High-performance hierarchical tree select component with virtual scrolling for massive datasets:
+- Flattens deep hierarchical trees with O(1) depth-first traversal and dynamic expansion state tracking.
+- Slices visible window items in real-time, rendering smoothly with tens of thousands of nodes.
+- Full keyword search filtering with automatic ancestor chain expansion.
+- Supports single and multiple selection modes with cascading check/indeterminate states, tags display, and clear controls.
+
+```svelte
+<script lang="ts">
+  import { VirtualTreeSelect } from '@svadmin/ui';
+
+  let selected = $state<string[]>([]);
+
+  const treeData = [
+    {
+      value: 'hq',
+      label: 'Headquarters',
+      children: [
+        { value: 'eng', label: 'Engineering', children: [
+          { value: 'fe', label: 'Frontend' },
+          { value: 'be', label: 'Backend' },
+        ]},
+        { value: 'ops', label: 'Operations' },
+      ],
+    },
+  ];
+</script>
+
+<VirtualTreeSelect
+  bind:value={selected}
+  options={treeData}
+  multiple={true}
+  searchable={true}
+  placeholder="Select department..."
+/>
+```
+
+### `<CronExpressionBuilder>`
+
+Enterprise-grade cron scheduling rule visual builder with human-readable summary:
+- Standard 5-part cron syntax support (minute, hour, day-of-month, month, day-of-week).
+- Quick common presets (every minute, hourly, daily, workdays, monthly).
+- Multi-tab segment configuration with cycle, interval, and specific value pickers.
+- Simulated next 5 execution timestamps preview and one-click copy.
+
+```svelte
+<script lang="ts">
+  import { CronExpressionBuilder } from '@svadmin/ui';
+
+  let cronValue = $state('0 9 * * 1-5');
+</script>
+
+<CronExpressionBuilder
+  bind:value={cronValue}
+  showPreview={true}
+  onchange={(val) => console.log('Updated cron:', val)}
+/>
+```
+
+### `<OrgChart>`
+
+Enterprise organizational structure and reporting hierarchy diagram:
+- Clean CSS-powered connector lines between hierarchical managerial nodes.
+- Collapsible child branches with report count badge indicators (`+N`).
+- Customizable employee card slots with avatar, name, title, and department badges.
+- Interactive node click events (`onnodeclick`) for drilldowns or profile inspections.
+
+```svelte
+<script lang="ts">
+  import { OrgChart } from '@svadmin/ui';
+
+  const orgData = {
+    id: 'ceo',
+    name: 'Sarah Connor',
+    title: 'Chief Executive Officer',
+    department: 'Executive Board',
+    children: [
+      {
+        id: 'cto',
+        name: 'John Doe',
+        title: 'Chief Technology Officer',
+        department: 'Engineering',
+        children: [
+          { id: 'lead', name: 'Alice Smith', title: 'Principal Architect', department: 'R&D' },
+        ],
+      },
+    ],
+  };
+</script>
+
+<OrgChart
+  data={orgData}
+  onnodeclick={(node) => console.log('Clicked node:', node.name)}
+/>
+```

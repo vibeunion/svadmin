@@ -428,3 +428,102 @@ const fields: FieldDefinition[] = [
   onsave={handleSave}
 />
 ```
+
+## 企业级树选择、调度器与架构图套件
+
+### `<VirtualTreeSelect>`
+
+支持万级大数据量虚拟滚动的树形层级选择器：
+- 采用深度优先遍历拍平与动态展开状态管理，万级节点零卡顿。
+- 动态计算可视视口窗口，仅渲染视口内切片，维持极低内存占用与流畅 60fps 滚动。
+- 关键字搜索过滤自动回溯展开命中节点的全链路父级祖先分支。
+- 支持单选与多选模式，多选支持级联全选/半选（Indeterminate）、已选项 Tag 标签回显与单独移除。
+
+```svelte
+<script lang="ts">
+  import { VirtualTreeSelect } from '@svadmin/ui';
+
+  let selected = $state<string[]>([]);
+
+  const treeData = [
+    {
+      value: 'hq',
+      label: '总部机构',
+      children: [
+        { value: 'eng', label: '研发中心', children: [
+          { value: 'fe', label: '前端团队' },
+          { value: 'be', label: '后端团队' },
+        ]},
+        { value: 'ops', label: '运维团队' },
+      ],
+    },
+  ];
+</script>
+
+<VirtualTreeSelect
+  bind:value={selected}
+  options={treeData}
+  multiple={true}
+  searchable={true}
+  placeholder="请选择所属组织架构..."
+/>
+```
+
+### `<CronExpressionBuilder>`
+
+企业级定时调度规则与任务周期可视化构建器：
+- 支持标准 5 段 Cron 格式（分、时、日、月、周）。
+- 内置常用高频预设方案（每分钟、每小时整点、每日零点、工作日上午 9 点、每月 1 号等）。
+- 多 Tab 分步切换可视化配置，直观设定循环间隔与指定时间点。
+- 实时语义解析（人类可读描述）与未来 5 次触发模拟时间预估，防范配置失误。
+
+```svelte
+<script lang="ts">
+  import { CronExpressionBuilder } from '@svadmin/ui';
+
+  let cronValue = $state('0 9 * * 1-5');
+</script>
+
+<CronExpressionBuilder
+  bind:value={cronValue}
+  showPreview={true}
+  onchange={(val) => console.log('更新调度规则:', val)}
+/>
+```
+
+### `<OrgChart>`
+
+企业级组织架构与汇报树状交互图：
+- 纯 CSS 驱动的上下级层级连线，结构清晰，响应式排版。
+- 支持父节点折叠/展开，带下属汇报人数气泡徽标（`+N`）。
+- 优雅的人员卡片布局（头像、姓名、职能职位、部门徽标），支持 Svelte 5 Snippet 自定义扩展。
+- 支持节点点击交互事件（`onnodeclick`），用于查看人员详情或组织穿透。
+
+```svelte
+<script lang="ts">
+  import { OrgChart } from '@svadmin/ui';
+
+  const orgData = {
+    id: 'ceo',
+    name: '张三',
+    title: '首席执行官',
+    department: '总经办',
+    children: [
+      {
+        id: 'cto',
+        name: '李四',
+        title: '技术副总裁',
+        department: '技术中心',
+        children: [
+          { id: 'lead', name: '王五', title: '资深首席架构师', department: '基础平台部' },
+        ],
+      },
+    ],
+  };
+</script>
+
+<OrgChart
+  data={orgData}
+  onnodeclick={(node) => console.log('点击节点:', node.name)}
+/>
+```
