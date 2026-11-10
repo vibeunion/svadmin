@@ -92,6 +92,7 @@
 
   function formatTime(val: string | number | undefined): string {
     if (!val) return '';
+    if (typeof val === 'string' && !/^\d{4}-\d{2}-\d{2}T/.test(val)) return val;
     try {
       const d = typeof val === 'number' ? new Date(val) : new Date(val);
       return isNaN(d.getTime()) ? String(val) : d.toLocaleString();
@@ -159,7 +160,13 @@
                   {actorIp}
                 </span>
               {/if}
-              {#if item.tag}
+              {#if item.status}
+                <StatusBadge
+                  status={statusTone}
+                  label={item.tag ?? i18n.t(`audit.status.${item.status}`)}
+                  class="text-[11px] py-0 h-4"
+                />
+              {:else if item.tag}
                 <StatusBadge status={statusTone} label={item.tag} />
               {/if}
             </div>
