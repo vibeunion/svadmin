@@ -1,4 +1,10 @@
 import { describe, expect, it, mock } from 'bun:test';
+
+function required<T>(value: T | undefined, label: string): T {
+  if (value === undefined) throw new Error(`Missing ${label}`);
+  return value;
+}
+
 import {
   createHmacSignature,
   verifyHmacSignature,
@@ -107,9 +113,9 @@ describe('Webhook Dispatcher', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
     // Verify headers sent to sub-1
-    const sub1Call = fetchMock.mock.calls.find((call) => call[0] === subscriptions[0]!.url);
+    const sub1Call = fetchMock.mock.calls.find((call) => call[0] === required(subscriptions[0], 'subscription 0').url);
     expect(sub1Call).toBeDefined();
-    const headers = sub1Call![1]!.headers;
+    const headers = required(required(sub1Call, 'sub1 call')[1], 'sub1 init').headers;
     expect(headers['X-Svadmin-Event']).toBe('order.created');
     expect(headers['X-Custom-Tenant']).toBe('tenant-alpha');
     expect(headers['X-Svadmin-Signature']).toMatch(/^sha256=/);
@@ -134,11 +140,11 @@ describe('Webhook Dispatcher', () => {
     const results = await dispatcher.dispatch(
       'order.created',
       { orderId: '1002' },
-      [subscriptions[0]!],
+      [required(subscriptions[0], 'subscription 0')],
     );
 
-    expect(results[0]!.success).toBe(true);
-    expect(results[0]!.attempts).toBe(3);
+    expect(required(results[0], 'result 0').success).toBe(true);
+    expect(required(results[0], 'result 0').attempts).toBe(3);
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
@@ -148,11 +154,13 @@ describe('Webhook Dispatcher', () => {
       fetchFn: fetchMock as unknown as typeof fetch,
     });
 
-    const result = await dispatcher.ping(subscriptions[0]!);
+    const result = await dispatcher.ping(required(subscriptions[0], 'subscription 0'));
     expect(result.success).toBe(true);
     expect(result.event).toBe('ping');
 
-    const sentBody = JSON.parse(fetchMock.mock.calls[0]![1]!.body);
+    const firstCall = required(fetchMock.mock.calls[0], 'first call');
+    const firstInit = required(firstCall[1], 'first init');
+    const sentBody = JSON.parse(firstInit.body);
     expect(sentBody.event).toBe('ping');
     expect(sentBody.data.hook_id).toBe('sub-1');
   });
