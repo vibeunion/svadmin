@@ -763,3 +763,101 @@ const fields: FieldDefinition[] = [
   </form>
 </OfflineGuard>
 ```
+
+---
+
+## 企业级条形码、动态数字翻牌与万级虚拟列表套件
+
+专为企业资产与物流仓储追踪、财务数据大屏看板、海量高频日志或消息流设计的性能交互套件：
+
+- **`<Barcode>`**：纯 SVG 矢量条形码生成器，支持标准 CODE128、CODE39 以及 EAN-13 格式，零重量级外部 Canvas 依赖，纯原生矢量渲染，内置一键复制与原生打印操作。
+- **`<NumberRoll>`**：基于 Ease-Out 四次缓动的平滑数字翻牌器，适用于财务报表、交易额汇总与实时指标大屏。支持千分位格式化、浮点数精度、货币单位前后缀与涨跌趋势色/图标自适应联动。
+- **`<VirtualList>`**：万级大数据量通用虚拟滚动容器，支持动态或固定行高、视口上下缓冲切片计算。仅挂载视口可见 DOM 元素，轻松实现万级日志流或长列表 60fps 丝滑交互，并提供触底自动加载更多和滚动到指定项索引功能。
+
+### Barcode 条形码示例
+
+```svelte
+<script lang="ts">
+  import { Barcode } from '@svadmin/ui';
+</script>
+
+<!-- 物流资产标签条码与操作栏 -->
+<Barcode
+  value="SVADMIN-LOGISTICS-2026"
+  format="CODE128"
+  height={70}
+  width={2}
+  showActions
+/>
+```
+
+### NumberRoll 动态数字翻牌器示例
+
+```svelte
+<script lang="ts">
+  import { NumberRoll } from '@svadmin/ui';
+</script>
+
+<div class="flex items-center gap-6">
+  <!-- 财务营业额千分位与货币前缀展示 -->
+  <NumberRoll
+    value={128450.5}
+    from={0}
+    duration={1500}
+    decimals={2}
+    prefix="¥"
+    separator=","
+  />
+
+  <!-- 同比增长率与趋势自适应色彩及图标 -->
+  <NumberRoll
+    value={24.8}
+    decimals={1}
+    suffix="%"
+    trendColor
+    showTrendIcon
+  />
+</div>
+```
+
+### VirtualList 万级虚拟滚动长列表示例
+
+```svelte
+<script lang="ts">
+  import { VirtualList } from '@svadmin/ui';
+
+  interface LogEntry {
+    id: string;
+    level: string;
+    message: string;
+    timestamp: string;
+  }
+
+  // 10,000 条长日志极速虚拟滚动
+  const logs: LogEntry[] = Array.from({ length: 10000 }, (_, i) => ({
+    id: `log-${i}`,
+    level: i % 10 === 0 ? 'ERROR' : 'INFO',
+    message: `系统业务审计事务日志 #${i + 1}`,
+    timestamp: new Date().toISOString(),
+  }));
+</script>
+
+<VirtualList
+  items={logs}
+  itemHeight={52}
+  height={400}
+  overscan={5}
+  keyField="id"
+  onendreached={() => console.log('已触达日志流底部')}
+>
+  {#snippet children(log, index)}
+    <div class="flex items-center justify-between px-4 py-2 w-full border-b border-border/40 text-xs">
+      <span class="font-mono text-muted-foreground">#{index + 1}</span>
+      <span class="font-medium {log.level === 'ERROR' ? 'text-destructive' : 'text-foreground'}">
+        [{log.level}] {log.message}
+      </span>
+      <span class="font-mono text-muted-foreground">{log.timestamp}</span>
+    </div>
+  {/snippet}
+</VirtualList>
+```
