@@ -40,7 +40,7 @@
 </script>
 
 <div
-  class={cn('rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs overflow-x-auto', className)}
+  class={cn('rounded-md border border-border bg-card p-5 text-card-foreground shadow-xs overflow-x-auto', className)}
   data-svadmin-component="TierFeatureComparison"
 >
   <table class="w-full border-collapse text-xs">
@@ -58,7 +58,7 @@
             )}
           >
             {#if tier.isPopular}
-              <span class="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold text-primary-foreground mb-1.5 font-mono shadow-2xs">
+              <span class="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground mb-1.5 font-mono shadow-2xs">
                 <Sparkles class="h-3 w-3" />
                 强烈推荐
               </span>

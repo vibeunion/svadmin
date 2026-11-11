@@ -65,7 +65,7 @@
 </script>
 
 <div
-  class={cn('rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs space-y-4', className)}
+  class={cn('rounded-md border border-border bg-card p-5 text-card-foreground shadow-xs space-y-4', className)}
   data-svadmin-component="PlanUsageQuotaBar"
 >
   <!-- Plan Summary Line -->
@@ -78,7 +78,7 @@
         <div class="flex items-center gap-2">
           <h3 class="font-bold text-sm text-foreground">{planName}</h3>
           {#if planBadge}
-            <span class="inline-flex items-center gap-1 rounded bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success font-mono">
+            <span class="inline-flex items-center gap-1 rounded bg-success/10 px-2 py-0.5 text-xs font-semibold text-success font-mono">
               <ShieldCheck class="h-3 w-3" />
               {planBadge}
             </span>
@@ -116,10 +116,10 @@
           <div>
             <span class="font-bold text-foreground text-xs">{q.label}</span>
             {#if q.periodText}
-              <span class="text-muted-foreground text-[10px] block">{q.periodText}</span>
+              <span class="text-muted-foreground text-xs block">{q.periodText}</span>
             {/if}
           </div>
-          <span class={cn('px-1.5 py-0.5 rounded border text-[10px] font-bold', tone.badge)}>
+          <span class={cn('px-1.5 py-0.5 rounded border text-xs font-bold', tone.badge)}>
             {pct}%
           </span>
         </div>

@@ -184,14 +184,14 @@
 <div
   data-svadmin-component="RuleExpressionBuilder"
   class={cn(
-    'w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
+    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
     className,
   )}
 >
   <!-- Header Bar -->
   <div class="flex items-center justify-between border-b border-border/70 pb-4">
     <div class="flex items-center gap-3">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+      <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
         <Network class="h-5 w-5" />
       </div>
       <div>
@@ -218,14 +218,14 @@
   </div>
 
   <!-- Natural Language Expression Preview -->
-  <div class="flex items-center gap-2 rounded-xl border border-border/80 bg-muted/30 px-4 py-2.5 text-xs">
+  <div class="flex items-center gap-2 rounded-md border border-border/80 bg-muted/30 px-4 py-2.5 text-xs">
     <Code class="h-4 w-4 text-primary shrink-0" />
     <span class="font-medium text-muted-foreground shrink-0">{chinese ? '表达式解析:' : 'Expression:'}</span>
     <span class="font-mono text-foreground font-semibold truncate">{naturalExpression || (chinese ? '空规则' : 'Empty rule')}</span>
   </div>
 
   <!-- Root Group Canvas -->
-  <div class="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+  <div class="rounded-md border border-primary/30 bg-primary/5 p-4 space-y-3">
     <!-- Group Header Controls -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2 text-xs">
@@ -310,7 +310,7 @@
           </div>
         {:else}
           <!-- SubGroup Container -->
-          <div class="rounded-xl border border-warning/40 bg-warning/5 p-3 space-y-2">
+          <div class="rounded-md border border-warning/40 bg-warning/5 p-3 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-warning">{chinese ? '子条件组' : 'Subgroup'}</span>

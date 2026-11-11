@@ -114,7 +114,7 @@
   data-svadmin-component="WorkflowStepper"
   data-direction={direction}
   class={cn(
-    'rounded-xl border border-border bg-card text-card-foreground shadow-xs p-5 space-y-4',
+    'rounded-md border border-border bg-card text-card-foreground shadow-xs p-5 space-y-4',
     className,
   )}
 >

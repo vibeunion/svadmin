@@ -103,7 +103,7 @@
         {@render header()}
       {:else}
         <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary border border-primary/30">
+          <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/15 text-primary border border-primary/30">
             <Monitor class="h-5 w-5" />
           </div>
           <div>
