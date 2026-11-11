@@ -69,13 +69,13 @@
 <div
   data-svadmin-component="ConversionFunnel"
   class={cn(
-    'w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
+    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
     className,
   )}
 >
   <div class="flex items-center justify-between border-b border-border/60 pb-3">
     <div class="flex items-center gap-2.5">
-      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+      <div class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
         <Filter class="h-4 w-4" />
       </div>
       <div>
@@ -102,13 +102,13 @@
         <!-- Funnel Bar Segment -->
         <div
           class={cn(
-            'relative flex h-14 items-center justify-between px-4 rounded-xl transition-all duration-200 cursor-pointer shadow-xs border',
+            'relative flex h-14 items-center justify-between px-4 rounded-sm transition-all duration-200 cursor-pointer shadow-xs border',
             isHovered ? 'ring-2 ring-primary border-primary scale-[1.01]' : 'border-border/80 hover:border-primary/50',
           )}
           style="width: {widthPct}%; background: {stage.color ?? 'var(--card)'};"
         >
           <div class="flex items-center gap-2 truncate">
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold">
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
               {idx + 1}
             </span>
             <span class="text-xs font-semibold text-foreground truncate">{stage.label}</span>
@@ -119,7 +119,7 @@
               {valuePrefix}{stage.value.toLocaleString()}{valueSuffix}
             </span>
             {#if showPercentages}
-              <span class="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">
+              <span class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
                 {stage.rateFromTop}%
               </span>
             {/if}
@@ -130,7 +130,7 @@
         {#if idx < computedStages.length - 1 && showDropoff}
           {@const nextStage = computedStages[idx + 1]}
           {#if nextStage}
-            <div class="my-1 flex items-center gap-1.5 text-[10px] text-muted-foreground/80 font-mono">
+            <div class="my-1 flex items-center gap-1.5 text-xs text-muted-foreground/80 font-mono">
               <ArrowDown class="h-3 w-3 text-muted-foreground/60" />
               <span class="text-destructive font-medium">-{nextStage.dropoff}% 流失</span>
               <span>({valuePrefix}{(stage.value - nextStage.value).toLocaleString()})</span>

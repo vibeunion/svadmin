@@ -127,14 +127,14 @@
 <div
   data-svadmin-component="SchemaVisualModeler"
   class={cn(
-    'w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs overflow-hidden flex flex-col',
+    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs overflow-hidden flex flex-col',
     className,
   )}
 >
   <!-- Header Bar -->
   <div class="flex items-center justify-between border-b border-border/70 px-6 py-4 bg-card">
     <div class="flex items-center gap-2.5">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+      <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
         <Database class="h-5 w-5" />
       </div>
       <div>
@@ -204,7 +204,7 @@
         </div>
 
         <!-- Field Rows Table -->
-        <div class="rounded-xl border border-border overflow-hidden">
+        <div class="rounded-md border border-border overflow-hidden">
           <table class="w-full text-left text-xs border-collapse">
             <thead class="bg-muted/40 border-b border-border text-muted-foreground font-semibold">
               <tr>
@@ -329,7 +329,7 @@
           </Button>
         </div>
 
-        <pre class="rounded-xl border border-border bg-muted/40 p-4 font-mono text-xs text-foreground overflow-x-auto"><code>{generatedCode}</code></pre>
+        <pre class="rounded-md border border-border bg-muted/40 p-4 font-mono text-xs text-foreground overflow-x-auto"><code>{generatedCode}</code></pre>
       </div>
     {/if}
   </div>
