@@ -90,14 +90,14 @@
 <div
   data-svadmin-component="ApprovalChainBuilder"
   class={cn(
-    'relative w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4 flex flex-col text-xs',
+    'relative w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4 flex flex-col text-xs',
     className,
   )}
 >
   <!-- Header -->
   <div class="flex items-center justify-between border-b border-border/70 pb-3">
     <div class="flex items-center gap-2.5">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+      <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
         <GitCommit class="h-5 w-5" />
       </div>
       <div>
@@ -119,14 +119,14 @@
           onclick={() => (selectedNodeId = node.id)}
           onkeydown={(e) => e.key === 'Enter' && (selectedNodeId = node.id)}
           class={cn(
-            'group relative flex flex-col w-72 rounded-xl border p-3.5 transition-all cursor-pointer bg-card shadow-2xs',
+            'group relative flex flex-col w-72 rounded-md border p-3.5 transition-all cursor-pointer bg-card shadow-2xs',
             isSelected ? 'border-primary ring-2 ring-primary/20 scale-[1.02]' : 'border-border/80 hover:border-primary/50',
           )}
         >
           <div class="flex items-center justify-between mb-1">
             <span
               class={cn(
-                'text-[10px] font-bold uppercase px-2 py-0.5 rounded-full',
+                'text-xs font-bold uppercase px-2 py-0.5 rounded-full',
                 node.type === 'start' ? 'bg-muted text-muted-foreground' : node.type === 'approver' ? 'bg-primary/10 text-primary' : 'bg-info/10 text-info',
               )}
             >
@@ -152,7 +152,7 @@
           </div>
 
           {#if node.mode}
-            <div class="text-[10px] text-muted-foreground/75 font-mono mt-1">
+            <div class="text-xs text-muted-foreground/75 font-mono mt-1">
               {modeLabels[node.mode]}
             </div>
           {/if}
@@ -177,14 +177,14 @@
                 <button
                   type="button"
                   onclick={() => insertNodeAfter(idx, 'approver')}
-                  class="px-2 py-1 bg-muted hover:bg-primary hover:text-primary-foreground rounded text-[10px] font-semibold whitespace-nowrap"
+                  class="px-2 py-1 bg-muted hover:bg-primary hover:text-primary-foreground rounded text-xs font-semibold whitespace-nowrap"
                 >
                   + {chinese ? '审批节点' : 'Approver'}
                 </button>
                 <button
                   type="button"
                   onclick={() => insertNodeAfter(idx, 'cc')}
-                  class="px-2 py-1 bg-muted hover:bg-info hover:text-info-foreground rounded text-[10px] font-semibold whitespace-nowrap"
+                  class="px-2 py-1 bg-muted hover:bg-info hover:text-info-foreground rounded text-xs font-semibold whitespace-nowrap"
                 >
                   + {chinese ? '抄送节点' : 'CC'}
                 </button>
@@ -198,7 +198,7 @@
 
     <!-- Right Side Node Inspector -->
     {#if selectedNode}
-      <div class="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
+      <div class="rounded-md border border-border bg-muted/20 p-4 space-y-3">
         <div class="flex items-center justify-between border-b border-border/60 pb-2">
           <div class="flex items-center gap-1.5 font-bold text-foreground">
             <Settings class="h-3.5 w-3.5 text-primary" />
@@ -254,7 +254,7 @@
         </div>
       </div>
     {:else}
-      <div class="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground text-xs">
+      <div class="rounded-md border border-dashed border-border p-8 text-center text-muted-foreground text-xs">
         {chinese ? '点击左侧任意节点查看并配置属性' : 'Click any node to inspect properties'}
       </div>
     {/if}

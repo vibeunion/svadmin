@@ -67,14 +67,14 @@
 <div
   data-svadmin-component="PeriodComparisonCard"
   class={cn(
-    'rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-5 space-y-3.5',
+    'rounded-md border border-border bg-card text-card-foreground shadow-xs p-5 space-y-3.5',
     className,
   )}
 >
   <!-- Card Header -->
   <div class="flex items-center justify-between text-xs">
     <span class="font-semibold text-muted-foreground">{title}</span>
-    <span class="rounded bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+    <span class="rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
       {resolvedPeriodName}
     </span>
   </div>
@@ -108,7 +108,7 @@
   </div>
 
   <!-- Micro Comparison Bars -->
-  <div class="space-y-1.5 pt-1 text-[11px]">
+  <div class="space-y-1.5 pt-1 text-xs">
     <!-- Current Period Bar -->
     <div class="space-y-0.5">
       <div class="flex items-center justify-between text-muted-foreground">
@@ -133,7 +133,7 @@
   </div>
 
   <!-- Net Difference Footnote -->
-  <div class="flex items-center justify-between border-t border-border/50 pt-2 text-[11px] text-muted-foreground font-mono">
+  <div class="flex items-center justify-between border-t border-border/50 pt-2 text-xs text-muted-foreground font-mono">
     <span>{chinese ? '绝对差异值:' : 'Net Delta:'}</span>
     <span class="font-bold {isPositive ? 'text-success' : isNegative ? 'text-destructive' : 'text-foreground'}">
       {delta > 0 ? '+' : ''}{prefix}{delta.toLocaleString()}{suffix}
