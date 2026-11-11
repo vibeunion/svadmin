@@ -866,3 +866,38 @@ const fields: FieldDefinition[] = [
   {/snippet}
 </VirtualList>
 ```
+
+### `<UnsavedChangesGuard>` 与 `useUnsavedChanges`
+
+企业级未保存修改防误关与离开页面拦截守卫套件：
+- **`useUnsavedChanges`**：
+  - 自动响应式监听表单是否处于脏修改状态（`isDirty`）。
+  - 拦截浏览器关闭标签页或刷新窗口事件（`beforeunload`），触发系统级提示。
+  - 拦截内部 SPA 路由跳转、导航链接点击与浏览器后退历史（`popstate`）。
+  - 提供编程式的 `proceed()`、`cancel()` 与 `setDirty()`，支持 `onLeave` 与 `onStay` 回调。
+- **`<UnsavedChangesGuard>` (UnsavedChangesModal)**：
+  - 声明式表单保护容器，无缝对接 `<AutoForm>`、`<DrawerForm>` 与复杂配置页面。
+  - 内置无障碍二次确认模态窗（`role="alertdialog"`），支持自定义提示文案、继续编辑与放弃离开按钮。
+  - 100% 契合 SVAdmin 语义设计系统 Tokens。
+
+```svelte
+<script lang="ts">
+  import { UnsavedChangesGuard } from '@svadmin/ui';
+
+  let isFormDirty = $state(false);
+</script>
+
+<UnsavedChangesGuard
+  isDirty={isFormDirty}
+  title="检测到未保存的表单修改"
+  message="当前表单已有编辑内容，若现在离开页面，所有未保存的数据将永久丢失。"
+  stayText="继续留在本页编辑"
+  leaveText="确认丢弃并离开"
+  onleave={() => console.log('用户确认丢弃修改')}
+  onstay={() => console.log('用户选择继续编辑')}
+>
+  <form oninput={() => (isFormDirty = true)}>
+    <!-- 业务表单字段 -->
+  </form>
+</UnsavedChangesGuard>
+```

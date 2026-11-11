@@ -792,3 +792,7 @@ export { default as OfflineGuard, type OfflineGuardProps } from './components/Of
 export { default as Barcode, type BarcodeProps, type BarcodeFormat } from './components/Barcode.svelte';
 export { default as NumberRoll, type NumberRollProps } from './components/NumberRoll.svelte';
 export { default as VirtualList, type VirtualListProps } from './components/VirtualList.svelte';
+
+// Enterprise unsaved changes guard & form loss prevention suite
+export { useUnsavedChanges, type UseUnsavedChangesOptions } from './components/useUnsavedChanges.svelte.js';
+export { default as UnsavedChangesGuard, default as UnsavedChangesModal, type UnsavedChangesGuardProps } from './components/UnsavedChangesGuard.svelte';

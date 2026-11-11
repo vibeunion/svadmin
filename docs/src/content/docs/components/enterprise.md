@@ -1098,3 +1098,38 @@ High-performance components designed for enterprise asset tracking, operational 
   {/snippet}
 </VirtualList>
 ```
+
+### `<UnsavedChangesGuard>` / `useUnsavedChanges`
+
+Enterprise unsaved form modifications and page navigation protection suite:
+- **`useUnsavedChanges`**:
+  - Automatically listens to form dirty state (`isDirty`).
+  - Intercepts native browser tab closing and page refreshes (`beforeunload`).
+  - Intercepts internal router navigation, link clicks, and browser back/forward history navigation (`popstate`).
+  - Provides programmatic `proceed()` and `cancel()` actions with `onLeave` / `onStay` hooks.
+- **`<UnsavedChangesGuard>` (UnsavedChangesModal)**:
+  - Declarative wrapper for forms, modal drawers, and editor pages.
+  - Built-in accessible confirmation alertdialog (`role="alertdialog"`) with customizable warning copy, stay, and discard buttons.
+  - 100% theme token compliant, ensuring dirty form data is never accidentally lost.
+
+```svelte
+<script lang="ts">
+  import { UnsavedChangesGuard } from '@svadmin/ui';
+
+  let isFormDirty = $state(false);
+</script>
+
+<UnsavedChangesGuard
+  isDirty={isFormDirty}
+  title="Unsaved Changes"
+  message="You have unsaved edits in this record. Leaving now will discard all changes."
+  stayText="Keep Editing"
+  leaveText="Discard & Leave"
+  onleave={() => console.log('User discarded modifications')}
+  onstay={() => console.log('User remained on page')}
+>
+  <form oninput={() => (isFormDirty = true)}>
+    <!-- Form fields -->
+  </form>
+</UnsavedChangesGuard>
+```
