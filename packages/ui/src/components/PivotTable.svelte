@@ -220,7 +220,7 @@
   }
 </script>
 
-<div aria-busy={effectiveLoading} class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
+<div aria-busy={effectiveLoading} class={cn('rounded-md border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
   <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="font-semibold text-foreground">
       {i18n.t('pivot.title')} <span class="text-muted-foreground font-normal">({rowLabel} × {columnLabel})</span>

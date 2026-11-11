@@ -110,7 +110,7 @@
     'flex flex-col items-center justify-center text-center',
     layout === 'page'
       ? 'min-h-[50vh] py-16 px-4 w-full'
-      : 'rounded-xl border border-border bg-card p-8 md:p-12 shadow-xs w-full',
+      : 'rounded-md border border-border bg-card p-8 md:p-12 shadow-xs w-full',
     className
   )}
 >
@@ -159,7 +159,7 @@
 
   <!-- Related Business Information Slot -->
   {#if children}
-    <div class="mt-8 w-full max-w-xl text-left rounded-lg border border-border/80 bg-muted/20 p-5 text-sm">
+    <div class="mt-8 w-full max-w-xl text-left rounded-md border border-border/80 bg-muted/20 p-5 text-sm">
       {@render children()}
     </div>
   {/if}

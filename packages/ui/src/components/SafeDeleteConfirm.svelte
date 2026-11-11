@@ -153,7 +153,7 @@
   >
     <div
       class={cn(
-        'relative w-full max-w-lg rounded-xl border bg-background shadow-2xl transition-all duration-200 overflow-hidden',
+        'relative w-full max-w-lg rounded-md border bg-background shadow-[var(--shadow-overlay)] transition-all duration-200 overflow-hidden',
         danger ? 'border-destructive/30' : 'border-border',
         className
       )}
@@ -163,7 +163,7 @@
         <div class="flex items-center gap-3">
           <div
             class={cn(
-              'flex h-10 w-10 items-center justify-center rounded-lg',
+              'flex h-10 w-10 items-center justify-center rounded-sm',
               danger ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
             )}
           >
@@ -197,7 +197,7 @@
       <div class="p-5 space-y-4">
         <!-- Impact Assessment Section -->
         {#if impactList && impactList.length > 0}
-          <div class="rounded-lg border border-border/80 bg-muted/30 p-3.5 space-y-2.5">
+          <div class="rounded-md border border-border/80 bg-muted/30 p-3.5 space-y-2.5">
             <div class="flex items-center gap-2 text-xs font-medium text-foreground">
               <AlertCircle class="h-3.5 w-3.5 text-destructive" />
               <span>{t('safeDelete.impactTitle', '潜在影响面评估')}</span>
@@ -208,11 +208,11 @@
                   <div class="truncate mr-2">
                     <span class="font-medium text-foreground">{item.label}</span>
                     {#if item.description}
-                      <p class="text-[11px] text-muted-foreground truncate">{item.description}</p>
+                      <p class="text-xs text-muted-foreground truncate">{item.description}</p>
                     {/if}
                   </div>
                   {#if item.count !== undefined}
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-destructive/10 text-destructive">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-destructive/10 text-destructive">
                       {item.count}
                     </span>
                   {/if}

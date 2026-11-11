@@ -125,7 +125,7 @@
     >
       {#each Array(skeletonCount) as _, i (i)}
         <div
-          class="flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm space-y-3"
+          class="flex flex-col justify-between rounded-md border border-border bg-card p-5 shadow-sm space-y-3"
         >
           <div class="flex items-center justify-between">
             <Skeleton class="h-4 w-28" />
@@ -147,7 +147,7 @@
     {:else}
       <div
         data-slot="metric-grid-empty"
-        class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-8 text-center text-muted-foreground"
+        class="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-card/50 p-8 text-center text-muted-foreground"
       >
         <p class="text-sm font-medium">{emptyMessage}</p>
       </div>

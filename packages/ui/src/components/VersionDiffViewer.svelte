@@ -80,7 +80,7 @@
   }
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card shadow-xs overflow-hidden', className)}>
+<div class={cn('rounded-md border border-border bg-card shadow-xs overflow-hidden', className)}>
   <!-- Header & Toolbar -->
   <div class="flex items-center justify-between p-3.5 border-b border-border/60 bg-muted/20 flex-wrap">
     <div class="flex items-center gap-2 min-w-0">

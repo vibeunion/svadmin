@@ -88,10 +88,10 @@
 
         <!-- Alert Modal Box -->
         <div
-          class="relative z-50 w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-150"
+          class="relative z-50 w-full max-w-md rounded-md border border-border bg-card p-6 text-card-foreground shadow-[var(--shadow-overlay)] transition-all animate-in fade-in zoom-in-95 duration-150"
         >
           <div class="flex items-start gap-4">
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning border border-warning/20">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-warning/15 text-warning border border-warning/20">
               <AlertTriangle class="h-6 w-6" />
             </div>
 
@@ -107,7 +107,7 @@
             <button
               type="button"
               onclick={guard.cancel}
-              class="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              class="flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               aria-label="Close"
             >
               <X class="h-4 w-4" />
@@ -118,7 +118,7 @@
             <button
               type="button"
               onclick={guard.cancel}
-              class="rounded-lg border border-border bg-background px-4 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+              class="h-8 rounded-sm border border-border bg-background px-4 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer"
             >
               {stayText}
             </button>
@@ -126,7 +126,7 @@
             <button
               type="button"
               onclick={guard.proceed}
-              class="rounded-lg bg-destructive px-4 py-2 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors shadow-sm"
+              class="h-8 rounded-sm bg-destructive px-4 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors shadow-xs cursor-pointer"
             >
               {leaveText}
             </button>

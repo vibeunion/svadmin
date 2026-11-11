@@ -115,7 +115,7 @@
   }
 </script>
 
-<div class={cn('space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs text-xs', className)}>
+<div class={cn('space-y-3 rounded-md border border-border bg-card p-4 shadow-xs text-xs', className)}>
   <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="font-semibold text-foreground">
       Editable Grid <span class="text-muted-foreground font-normal">({rows.length} records)</span>

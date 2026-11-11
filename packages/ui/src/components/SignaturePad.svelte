@@ -336,7 +336,7 @@
   });
 </script>
 
-<div data-svadmin-component="SignaturePad" class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
+<div data-svadmin-component="SignaturePad" class={cn('rounded-md border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
   <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="font-semibold text-foreground flex items-center gap-2">
       <span>Electronic Signature</span>

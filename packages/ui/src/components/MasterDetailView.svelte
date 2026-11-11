@@ -46,7 +46,7 @@
   );
 </script>
 
-<div class={cn('flex h-full min-h-[420px] rounded-xl border border-border bg-card shadow-xs overflow-hidden text-xs', className)}>
+<div class={cn('flex h-full min-h-[420px] rounded-md border border-border bg-card shadow-xs overflow-hidden text-xs', className)}>
   <!-- Master List Panel -->
   <div class={cn('flex flex-col border-r border-border/60 bg-muted/15 shrink-0', listWidth)}>
     <!-- Search Bar -->
