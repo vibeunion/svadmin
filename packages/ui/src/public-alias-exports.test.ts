@@ -203,6 +203,16 @@ import {
   TableColumnSumSummary,
   IncidentWarRoomDrawer,
   AlertIncidentTimeline,
+  PivotMatrix,
+  CrossTableSummary,
+  GeoScatterMap,
+  RegionDistributionMap,
+  DataMaskPolicyEngine,
+  DataMaskCenter,
+  MockDataInterceptor,
+  OfflineMockStudio,
+  SystemHealthCheckDashboard,
+  DiagnosticInspector,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -294,6 +304,16 @@ describe('public compatibility aliases', () => {
     expect(TableColumnSumSummary).toBe(TableAggregationFooter);
     expect(IncidentWarRoomDrawer).toBeDefined();
     expect(AlertIncidentTimeline).toBe(IncidentWarRoomDrawer);
+    expect(PivotMatrix).toBeDefined();
+    expect(CrossTableSummary).toBe(PivotMatrix);
+    expect(GeoScatterMap).toBeDefined();
+    expect(RegionDistributionMap).toBe(GeoScatterMap);
+    expect(DataMaskPolicyEngine).toBeDefined();
+    expect(DataMaskCenter).toBe(DataMaskPolicyEngine);
+    expect(MockDataInterceptor).toBeDefined();
+    expect(OfflineMockStudio).toBe(MockDataInterceptor);
+    expect(SystemHealthCheckDashboard).toBeDefined();
+    expect(DiagnosticInspector).toBe(SystemHealthCheckDashboard);
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);

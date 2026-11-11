@@ -900,3 +900,18 @@ export { default as IncidentWarRoomDrawer, default as AlertIncidentTimeline, typ
 export { default as DataImportDropzone, default as BatchImportDropzone, type DataImportDropzoneProps } from './components/DataImportDropzone.svelte';
 export { default as ColumnMappingTable, default as FieldMappingTable, type ColumnMappingTableProps, type TargetFieldConfig } from './components/ColumnMappingTable.svelte';
 export { default as ImportPreviewValidator, default as ImportDataValidator, type ImportPreviewValidatorProps, type RowValidationError } from './components/ImportPreviewValidator.svelte';
+
+// Enterprise multi-dimensional pivot matrix & cross-tabulation analysis suite
+export { default as PivotMatrix, default as CrossTableSummary, type PivotMatrixProps, type PivotDimension, type PivotMeasure } from './components/PivotMatrix.svelte';
+
+// Enterprise regional geographic distribution & scatter bubble map suite
+export { default as GeoScatterMap, default as RegionDistributionMap, type GeoScatterMapProps, type GeoRegionData } from './components/GeoScatterMap.svelte';
+
+// Enterprise role-based dynamic data masking policy center suite
+export { default as DataMaskPolicyEngine, default as DataMaskCenter, type DataMaskPolicyEngineProps, type MaskingPolicyItem, type MaskingRuleType, type MaskingLevel } from './components/DataMaskPolicyEngine.svelte';
+
+// Enterprise frontend request interceptor and offline mock studio suite
+export { default as MockDataInterceptor, default as OfflineMockStudio, type MockDataInterceptorProps, type MockRuleItem, type HttpMethod as MockHttpMethod } from './components/MockDataInterceptor.svelte';
+
+// Enterprise system health self-check, diagnostics & dependency inspection suite
+export { default as SystemHealthCheckDashboard, default as DiagnosticInspector, type SystemHealthCheckDashboardProps, type HealthServiceCheck, type ServiceStatus as HealthServiceStatus } from './components/SystemHealthCheckDashboard.svelte';
