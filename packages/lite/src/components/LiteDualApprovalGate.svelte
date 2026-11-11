@@ -48,8 +48,10 @@
   .lite-approval-badge { display: inline-block; font-size: 11px; font-weight: 600; color: #f53f3f; background: #ffece8; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
   .lite-approval-title { font-size: 16px; font-weight: 700; color: #1d2129; margin: 0 0 6px 0; }
   .lite-approval-desc { font-size: 12px; color: #86909c; margin: 0 0 16px 0; }
-  .lite-approval-form { display: flex; flex-direction: column; gap: 12px; }
-  .lite-form-row { display: flex; flex-direction: column; gap: 4px; }
+  .lite-approval-form { display: flex; flex-direction: column; }
+  .lite-approval-form > * + * { margin-top: 12px; }
+  .lite-form-row { display: flex; flex-direction: column; }
+  .lite-form-row > * + * { margin-top: 4px; }
   .lite-label { font-size: 12px; font-weight: 600; color: #4e5969; }
   .lite-input { height: 32px; border: 1px solid #e5e6eb; border-radius: 4px; padding: 0 10px; font-size: 12px; }
   .lite-approval-btn { height: 34px; background: #f53f3f; color: #fff; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; }
