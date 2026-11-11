@@ -83,6 +83,12 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  DataImportDropzone,
+  BatchImportDropzone,
+  ColumnMappingTable,
+  FieldMappingTable,
+  ImportPreviewValidator,
+  ImportDataValidator,
   PlanUsageQuotaBar,
   MultiQuotaProgress,
   TierFeatureComparison,
@@ -364,6 +370,12 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(DataImportDropzone).toBeDefined();
+    expect(BatchImportDropzone).toBe(DataImportDropzone);
+    expect(ColumnMappingTable).toBeDefined();
+    expect(FieldMappingTable).toBe(ColumnMappingTable);
+    expect(ImportPreviewValidator).toBeDefined();
+    expect(ImportDataValidator).toBe(ImportPreviewValidator);
     expect(PlanUsageQuotaBar).toBeDefined();
     expect(MultiQuotaProgress).toBe(PlanUsageQuotaBar);
     expect(TierFeatureComparison).toBeDefined();

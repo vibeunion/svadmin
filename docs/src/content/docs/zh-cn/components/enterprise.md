@@ -2435,3 +2435,84 @@ HMAC 签名计算与现场验签沙箱：
   onTriggerMitigation={(action) => console.log('触发应急动作:', action)}
 />
 ```
+
+### `<DataImportDropzone>`
+
+企业级批量数据导入拖拽区：
+- 专为数十万条 Excel/CSV 复杂数据导入打造。
+- **文件白名单与大小预检**：支持自定义格式白名单（默认 `.xlsx` / `.xls` / `.csv`）与文件体积校验（默认最大 30MB）。
+- **标准模板与解析进度**：右上角直接提供规范导入模板下载入口；文件导入后呈现动态进度条并解析文件大小与就绪状态。
+
+```svelte
+<script lang="ts">
+  import { DataImportDropzone } from '@svadmin/ui';
+</script>
+
+<DataImportDropzone
+  resourceName="客户名单"
+  templateUrl="/templates/customer-import-template.xlsx"
+  templateName="客户导入标准模板.xlsx"
+  onfileselect={(file) => console.log('选择导入文件:', file.name)}
+/>
+```
+
+### `<ColumnMappingTable>`
+
+源文件表头与系统目标字段智能列映射配置表：
+- 专为三方导出的不同表头列映射至系统规范字段打造。
+- **智能模糊自动匹配**：根据系统字段名（`key` 或 `label`）自动分析推断源文件对应的表头列，极大降低操作员重复配置成本。
+- **样本数据核验与必填警告**：下拉选取源列后实时展示前 3 条样本数据辅助核对；若存在未映射的必填字段，底部醒目黄标警告并指出具体字段名。
+
+```svelte
+<script lang="ts">
+  import { ColumnMappingTable, type TargetFieldConfig } from '@svadmin/ui';
+
+  const targetFields: TargetFieldConfig[] = [
+    { key: 'name', label: '客户姓名', required: true },
+    { key: 'phone', label: '联系手机', required: true },
+    { key: 'company', label: '所属公司', required: false },
+  ];
+
+  const sourceColumns = ['客户名称', '移动电话', '公司全称', '创建时间'];
+</script>
+
+<ColumnMappingTable
+  {targetFields}
+  {sourceColumns}
+  sampleData={{ '客户名称': ['张三', '李四'], '移动电话': ['13800000000', '13900000000'] }}
+  onmappingchange={(map) => console.log('最新映射:', map)}
+/>
+```
+
+### `<ImportPreviewValidator>`
+
+导入前数据逐行校验与行内订正预检器：
+- 专为批量导入前的质量把关设计，杜绝脏数据入库。
+- **全局概览与仅看异常**：顶部统计总待导入、合法与异常行数，支持一键切换“仅看异常行”。
+- **行内就地修改订正**：标红异常单元格并悬停展示错误原因，操作员可直接双击单元格行内订正，修正后错误即时解除；支持单行快速忽略。
+
+```svelte
+<script lang="ts">
+  import { ImportPreviewValidator } from '@svadmin/ui';
+
+  const columns = [
+    { key: 'name', label: '姓名' },
+    { key: 'email', label: '电子邮箱' },
+  ];
+
+  let rows = $state([
+    { name: '王五', email: 'wangwu@example.com' },
+    { name: '赵六', email: 'invalid-email-address' },
+  ]);
+
+  const errors = [{ rowIndex: 1, field: 'email', message: '邮箱缺少 @ 字符或域名不合法' }];
+</script>
+
+<ImportPreviewValidator
+  {columns}
+  {rows}
+  {errors}
+  onrowchange={(idx, field, val) => console.log('订正单元格:', idx, field, val)}
+  onsubmit={(valid) => console.log('提交合法数据:', valid)}
+/>
+```
