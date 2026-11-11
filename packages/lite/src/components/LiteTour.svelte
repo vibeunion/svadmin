@@ -3,6 +3,10 @@
     title: string;
     description?: string;
     href?: string;
+    /** SPA target selector; ignored by the server-rendered Lite fallback. */
+    target?: string;
+    /** SPA placement; ignored by the server-rendered Lite fallback. */
+    placement?: 'top' | 'bottom' | 'left' | 'right';
   }
 
   interface Props {

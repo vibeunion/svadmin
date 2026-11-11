@@ -14,6 +14,18 @@
     LiteTransfer,
     LiteFilterBuilder,
     LiteDynamicFormList,
+    LiteTrendIndicator,
+    LiteMetricGrid,
+    LiteOrgChart,
+    LiteCronExpressionBuilder,
+    LiteVirtualTreeSelect,
+    LiteConcurrentConflictModal,
+    LiteTaskCenter,
+    LiteMicroAppFrame,
+    LiteSafeDeleteConfirm,
+    LitePresenceAvatarGroup,
+    LiteGaugeChart,
+    LiteAuditLog,
   } from '@svadmin/lite';
   import type { PageProps } from './$types';
 
@@ -68,6 +80,121 @@
       description={report.missingCount === 0 ? '全量覆盖，无缺口' : '需尽快补齐'}
     />
   </div>
+
+
+  <!-- Recent enterprise fallback showroom -->
+  <section class="lite-card" id="recent-fallbacks" style="margin-bottom: 24px;">
+    <h2 class="lite-card-title" style="font-size: 16px; margin-bottom: 4px;">新版企业组件 SSR 降级展示</h2>
+    <p class="lite-card-subtitle" style="margin-bottom: 16px;">
+      以下组件在无 JavaScript 环境下保留指标、表单、任务与审计语义，交互增强由 SPA 承接。
+    </p>
+
+    <div class="lite-dashboard-stats">
+      <div style="flex: 1 1 260px; margin-bottom: 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteTrendIndicator</h3>
+        <div class="lite-card"><LiteTrendIndicator value={12} prevValue={10} /></div>
+      </div>
+      <div style="flex: 1 1 320px; margin-bottom: 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LitePresenceAvatarGroup</h3>
+        <div class="lite-card">
+          <LitePresenceAvatarGroup
+            users={[
+              { id: '1', name: 'Ada Lovelace', status: 'editing' },
+              { id: '2', name: 'Lin Chen', status: 'viewing' },
+              { id: '3', name: 'Sam Rivera', status: 'idle' },
+            ]}
+            maxVisible={2}
+          />
+        </div>
+      </div>
+      <div style="flex: 1 1 360px; margin-bottom: 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteGaugeChart</h3>
+        <LiteGaugeChart value={72} unit="%" target={80} thresholds={[{ value: 60, label: 'Normal' }, { value: 85, label: 'Warning' }]} />
+      </div>
+    </div>
+
+    <h3 style="margin: 8px 0 8px; font-size: 13px; color: #0a2540;">LiteMetricGrid</h3>
+    <LiteMetricGrid
+      title="Service health"
+      cols={3}
+      items={[
+        { label: 'Requests', value: '18.4k', trend: 'up', trendValue: '+6.2%' },
+        { label: 'Errors', value: '0.12%', trend: 'down', trendValue: '-0.04%' },
+        { label: 'P95 latency', value: '182ms', description: 'Target < 250ms' },
+      ]}
+    />
+
+    <div style="display: flex; flex-wrap: wrap; margin: 16px -8px 0;">
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteOrgChart</h3>
+        <LiteOrgChart
+          data={[{ id: 'ceo', name: 'Ada Lovelace', title: 'CEO', department: 'Executive', children: [{ id: 'cto', name: 'Lin Chen', title: 'CTO', department: 'Engineering' }] }]}
+        />
+      </div>
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteTaskCenter</h3>
+        <LiteTaskCenter
+          tasks={[
+            { id: 't1', title: 'Export orders', status: 'running', progress: 42 },
+            { id: 't2', title: 'Import users', status: 'completed', downloadHref: '/lite/parity' },
+          ]}
+        />
+      </div>
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteCronExpressionBuilder</h3>
+        <LiteCronExpressionBuilder
+          value="0 9 * * 1"
+          formAction="/lite/parity"
+          presets={[{ label: 'Weekly', value: '0 9 * * 1' }, { label: 'Daily', value: '0 0 * * *' }]}
+        />
+      </div>
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteVirtualTreeSelect</h3>
+        <div class="lite-card">
+          <LiteVirtualTreeSelect
+            label="Team"
+            value="child"
+            nodes={[{ value: 'root', label: 'Root', children: [{ value: 'child', label: 'Child' }] }]}
+          />
+        </div>
+      </div>
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteConcurrentConflictModal</h3>
+        <LiteConcurrentConflictModal
+          formAction="/lite/parity"
+          modifiedBy="Ada"
+          fields={[{ field: 'price', label: 'Price', localValue: 10, remoteValue: 12 }]}
+        />
+      </div>
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteSafeDeleteConfirm</h3>
+        <LiteSafeDeleteConfirm
+          action="/lite/parity"
+          impactItems={[{ label: 'Line items', count: 3 }, { label: 'Attachments' }]}
+          confirmationText="DELETE"
+        />
+      </div>
+      <div style="flex: 1 1 980px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteAuditLog</h3>
+        <LiteAuditLog
+          entries={[{
+            id: 'a1',
+            timestamp: '2026-11-10T00:00:00.000Z',
+            action: 'update',
+            resource: 'orders',
+            recordId: 7,
+            userId: 'ada',
+            previousData: { status: 'pending' },
+            data: { status: 'approved' },
+          }]}
+        />
+      </div>
+      <div style="flex: 1 1 980px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteMicroAppFrame</h3>
+        <LiteMicroAppFrame src="about:blank" title="Embedded metrics" fallbackHref="/lite/parity" />
+      </div>
+    </div>
+  </section>
 
   <!-- Metric definitions: three separate numbers, never one blended score -->
   <div class="lite-card" style="margin-bottom: 24px;">
