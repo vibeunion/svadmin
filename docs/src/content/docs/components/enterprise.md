@@ -2403,3 +2403,114 @@ Enterprise massive record batch edit and impact verification modal:
   onconfirm={(changes) => console.log('Applying batch changes:', changes)}
 />
 ```
+
+### `<SqlConsole>` / `<DatabaseQueryRunner>`
+
+Enterprise safe read-only SQL execution console and telemetry probe:
+- **Destructive Query Protection**: Built-in AST guard strictly blocks write or DDL commands (`DROP`, `TRUNCATE`, `ALTER`, `DELETE`, `UPDATE`, `INSERT`), guaranteeing 100% read-only safety.
+- **SQL Templates & Execution Metrics**: Pre-configured query templates, execution duration (ms), row count, and formatted results table with JSON/CSV export.
+
+```svelte
+<script lang="ts">
+  import { SqlConsole } from '@svadmin/ui';
+</script>
+
+<SqlConsole
+  title="Analytics Read-Only SQL Console"
+  initialSql="SELECT id, order_no, amount, status FROM orders WHERE amount > 1000 LIMIT 20;"
+  onExecuteQuery={async (sql) => {
+    // E.g. execute read query via DataProvider
+    return { columns: ['id', 'amount'], rows: [{ id: 1, amount: 2000 }], rowCount: 1, durationMs: 12 };
+  }}
+/>
+```
+
+### `<EnvVariableEditor>` / `<SecretVaultManager>`
+
+Multi-environment configuration center and secret vault manager:
+- **Multi-Environment Isolation**: Manage variables across `development`, `staging`, and `production` environments.
+- **Masking & Security**: Obfuscate sensitive credentials with `●●●●●●●●` and toggle reveal with permission-aware controls.
+- **Bulk .env Parser**: One-click import and export of raw `.env` formatted strings.
+
+```svelte
+<script lang="ts">
+  import { EnvVariableEditor } from '@svadmin/ui';
+</script>
+
+<EnvVariableEditor
+  environment="production"
+  onSaveEnv={(vars, env) => console.log('Saved secrets for', env, vars)}
+/>
+```
+
+### `<FeatureAnnouncementModal>` / `<WhatIsNewModal>`
+
+Linear and Apple inspired "What's New" product release announcement modal:
+- **Feature Highlights Stack**: Showcase version badges (`v0.5.15`), release dates, and categorized feature cards.
+- **Do-Not-Disturb Persistence**: Store user dismissal preferences per version in `localStorage`.
+- **Call-to-Action**: "Explore Now" and "Dismiss" workflow actions.
+
+```svelte
+<script lang="ts">
+  import { FeatureAnnouncementModal } from '@svadmin/ui';
+
+  let open = $state(true);
+</script>
+
+<FeatureAnnouncementModal
+  bind:open
+  version="v0.5.15"
+  releaseDate="2026-11-11"
+  onExplore={() => console.log('User navigated to new feature')}
+/>
+```
+
+### `<MasterSubTableDrawer>` / `<NestedRecordExplorer>`
+
+1:N Master-Detail relational explorer and nested line item drawer:
+- **Master Record Overview**: Key master record property cards with auto-summarizing metrics.
+- **Sub-Table Grid**: Nested table featuring independent search filtering, row deletion, and one-click line item insertion.
+- **Bi-directional Sync**: Changes in child items update master summaries automatically.
+
+```svelte
+<script lang="ts">
+  import { MasterSubTableDrawer } from '@svadmin/ui';
+
+  let open = $state(false);
+  let order = { orderNo: 'ORD-2026-901', customer: 'Acme Corp', totalAmount: '¥ 11,000' };
+  let subItems = $state([
+    { sku: 'HW-01', name: 'Server Rack 42U', quantity: 2, subtotal: '¥ 6,000' },
+    { sku: 'HW-02', name: 'Fiber Cable 50m', quantity: 10, subtotal: '¥ 5,000' },
+  ]);
+</script>
+
+<MasterSubTableDrawer
+  bind:open
+  masterRecord={order}
+  bind:subItems
+  subColumns={[
+    { key: 'sku', label: 'SKU' },
+    { key: 'name', label: 'Item Name' },
+    { key: 'quantity', label: 'Qty', align: 'right' },
+    { key: 'subtotal', label: 'Subtotal', align: 'right' },
+  ]}
+/>
+```
+
+### `<ScheduledJobManager>` / `<CronSchedulerMatrix>`
+
+Asynchronous scheduled jobs and cron execution management board:
+- **Job Matrix**: List automated jobs, cron expressions, next execution countdowns, and last run statuses.
+- **Manual Execution Trigger**: One-click "Trigger Now" button with immediate execution feedback.
+- **Lifecycle Control**: Pause and resume job schedules on the fly.
+
+```svelte
+<script lang="ts">
+  import { ScheduledJobManager } from '@svadmin/ui';
+</script>
+
+<ScheduledJobManager
+  onTriggerJob={async (job) => console.log('Triggered job:', job.id)}
+  onToggleJobStatus={(job, status) => console.log('Job status toggled:', job.id, status)}
+/>
+```
