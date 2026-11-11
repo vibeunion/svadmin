@@ -1441,3 +1441,106 @@ const fields: FieldDefinition[] = [
   <button onclick={handleScanBarcode}>扫码入库</button>
 </AudioFeedbackProvider>
 ```
+
+### `<PrintableReportLayout>` 与 `usePrintExport`
+
+企业级安全打印排版与高保真 PDF 报表套件：
+- 标准纸张适配（A4、A5、Letter），支持横版（`landscape`）与竖版（`portrait`）自由切换。
+- **智能防断页布局**：内置 `page-break-inside: avoid` 规避打印跨页时表格行被撕裂截断与签名栏分离。
+- **跨页重复表头**：标准 `thead { display: table-header-group; }` 确保长表格每页自动打印表头。
+- 内置基础单据元数据摘要、防伪水印背景、电子公章区域与动态页码格式化。
+
+```svelte
+<script lang="ts">
+  import { PrintableReportLayout } from '@svadmin/ui';
+
+  const metadata = [
+    { label: '单据编号', value: 'PO-2026-9081' },
+    { label: '核算周期', value: '2026年度第四季度' },
+  ];
+
+  const signatures = [
+    { role: '制单经办', name: '张晓华' },
+    { role: '财务复核主管', name: '李合规' },
+  ];
+</script>
+
+<PrintableReportLayout
+  title="企业年度采购与结算汇总表"
+  subtitle="正式商业核算报告"
+  reportNo="PO-2026-9081"
+  {metadata}
+  {signatures}
+  watermarkText="内部绝密 · 严禁外传"
+>
+  <div class="py-4">
+    <p>财务明细表格与清单数据展示...</p>
+  </div>
+</PrintableReportLayout>
+```
+
+### `<FunnelChart>` 与 `<SankeyChart>`
+
+企业级业务转化漏斗与路径流向图表套件：
+- **纯原生 SVG 矢量绘制（0KB 额外巨型图表库依赖）**：零 ECharts / Chart.js 体积负担，秒开渲染。
+- **留存与流失率自动推算**：智能计算阶段间转化率与环比流失率（如 `-40% 流失`）。
+- **多阶段交互**：各阶段悬浮发光高亮、点击选中回调与端到端综合留存率汇总。
+- **`<SankeyChart>`**：用于用户行为流向、营销归因链路与资金来源去向节点图。
+
+```svelte
+<script lang="ts">
+  import { FunnelChart, type FunnelStageItem } from '@svadmin/ui';
+
+  const stages: FunnelStageItem[] = [
+    { id: '1', label: '线索访问', value: 120000 },
+    { id: '2', label: '商机沟通', value: 45000 },
+    { id: '3', label: '方案报价', value: 18000 },
+    { id: '4', label: '成单签署', value: 7200 },
+  ];
+</script>
+
+<FunnelChart
+  {stages}
+  title="营销获客转化大盘漏斗"
+  showPercentages={true}
+  showDropoff={true}
+/>
+```
+
+### `<SchemaVisualModeler>`
+
+SQL / JSON Schema 可视化逆向建模与资源生成器：
+- 字段属性可视化配置（字段 Key、显示名称、字段类型、必填、可筛选、可排序）。
+- 支持一键粘贴 JSON 数据样例自动逆向推断表结构与数据类型。
+- 实时生成标准 Svelte 5 / `@svadmin/core` `ResourceDefinition` 资源定义代码并支持一键复制。
+
+```svelte
+<script lang="ts">
+  import { SchemaVisualModeler } from '@svadmin/ui';
+</script>
+
+<SchemaVisualModeler
+  resourceName="PurchaseOrder"
+  onSaveSchema={(name, fields) => console.log('已保存模型定义:', name, fields)}
+/>
+```
+
+### `<MicroAppBridge>` 与 `useMicroAppEvent`
+
+微前端沙箱跨应用事件总线与状态共享套件：
+- 基于原生 `window.postMessage` 实现宿主与 iframe 微应用（`<MicroAppFrame>`）之间类型安全、具备 Origin 白名单校验的通信总线。
+- 支持双向事件发布订阅、RPC 状态请求（`PING`/`PONG`）与全站主题（Dark/Light）、语言包及用户信息向子应用自动化广播。
+
+```svelte
+<script lang="ts">
+  import { MicroAppBridge, useMicroAppEvent } from '@svadmin/ui';
+
+  const bus = useMicroAppEvent({ channel: 'enterprise_portal' });
+
+  bus.on('ORDER_CREATED', (payload) => {
+    console.log('子应用新下单回执:', payload);
+  });
+</script>
+
+<MicroAppBridge appId="subapp-billing" />
+```

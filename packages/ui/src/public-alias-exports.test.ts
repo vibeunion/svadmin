@@ -117,6 +117,15 @@ import {
   useTableClipboard,
   AudioFeedbackProvider,
   useAudioAlert,
+  PrintableReportLayout,
+  ReportPrintLayout,
+  usePrintExport,
+  ConversionFunnel,
+  PipelineFunnelChart,
+  SankeyChart,
+  SchemaVisualModeler,
+  MicroAppBridge,
+  useMicroAppEvent,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -153,6 +162,15 @@ describe('public compatibility aliases', () => {
     expect(useTableClipboard).toBeDefined();
     expect(AudioFeedbackProvider).toBeDefined();
     expect(useAudioAlert).toBeDefined();
+    expect(PrintableReportLayout).toBeDefined();
+    expect(ReportPrintLayout).toBe(PrintableReportLayout);
+    expect(usePrintExport).toBeDefined();
+    expect(ConversionFunnel).toBeDefined();
+    expect(PipelineFunnelChart).toBe(ConversionFunnel);
+    expect(SankeyChart).toBeDefined();
+    expect(SchemaVisualModeler).toBeDefined();
+    expect(MicroAppBridge).toBeDefined();
+    expect(useMicroAppEvent).toBeDefined();
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);

@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-11T09:10:42.954Z",
-  "totalComponents": 202,
-  "adaptedCount": 134,
-  "fallbackCount": 63,
-  "spaOnlyCount": 5,
+  "timestamp": "2026-11-11T09:40:29.605Z",
+  "totalComponents": 215,
+  "adaptedCount": 135,
+  "fallbackCount": 68,
+  "spaOnlyCount": 12,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 66.3,
-  "fallbackPercentage": 31.2,
-  "behaviorVerifiedCount": 172,
-  "behaviorVerifiedPercentage": 85.1,
-  "behaviorAssertedCount": 172,
-  "behaviorAssertedPercentage": 85.1,
+  "exactPercentage": 62.8,
+  "fallbackPercentage": 31.6,
+  "behaviorVerifiedCount": 178,
+  "behaviorVerifiedPercentage": 82.8,
+  "behaviorAssertedCount": 178,
+  "behaviorAssertedPercentage": 82.8,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,16 +28,16 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 59,
-      "adapted": 28,
-      "fallback": 27,
-      "spaOnly": 4,
+      "total": 72,
+      "adapted": 29,
+      "fallback": 32,
+      "spaOnly": 11,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 47.5,
-      "fallbackRate": 45.8,
-      "behaviorVerified": 52,
-      "behaviorAsserted": 52
+      "exactRate": 40.3,
+      "fallbackRate": 44.4,
+      "behaviorVerified": 58,
+      "behaviorAsserted": 58
     },
     "widgets": {
       "category": "widgets",
@@ -1692,6 +1692,108 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端异步导出表单、范围选择、格式单选与列复选框提交；动态进度轮询由 SPA 承接"
+    },
+    {
+      "name": "StepWizard",
+      "uiComponent": "StepWizard.svelte",
+      "liteComponent": "LiteStepWizard.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端分步向导容器与原生链接步骤跳转；动态分支校验与草稿断点续填由 SPA 承接"
+    },
+    {
+      "name": "WorkflowStepper",
+      "uiComponent": "WorkflowStepper.svelte",
+      "liteComponent": "LiteWorkflowStepper.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端任务时间线节点与状态徽章展示；单步交互重试由 SPA 承接"
+    },
+    {
+      "name": "ColumnVisibilityDrawer",
+      "uiComponent": "ColumnVisibilityDrawer.svelte",
+      "liteComponent": "LiteColumnSettings.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "原生多选表单与查询参数列过滤；拖拽排序与本地持久化由 SPA 承接"
+    },
+    {
+      "name": "ColumnFilterBuilder",
+      "uiComponent": "ColumnFilterBuilder.svelte",
+      "liteComponent": "LiteFilterBuilder.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "可视化多条件原生筛选表单与 CRUD 运算符解析"
+    },
+    {
+      "name": "KeyboardShortcutsModal",
+      "uiComponent": "KeyboardShortcutsModal.svelte",
+      "liteComponent": "LiteKeyboardShortcutsModal.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端静态快捷键分类矩阵展示；全局事件监听与实时检索由 SPA 承接"
+    },
+    {
+      "name": "DualApprovalGate",
+      "uiComponent": "DualApprovalGate.svelte",
+      "liteComponent": "LiteDualApprovalGate.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端双人复核表单与二次口令验证；二维码动态轮询由 SPA 承接"
+    },
+    {
+      "name": "useHotkeys",
+      "uiComponent": "useHotkeys.svelte.ts",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (浏览器热键监听钩子)",
+      "note": "SSR 不读取 window/keyboard 事件"
+    },
+    {
+      "name": "SessionTimeoutGuard",
+      "uiComponent": "SessionTimeoutGuard.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (浏览器会话空闲守卫)",
+      "note": "SSR 不处理 DOM 空闲监听与倒计时"
+    },
+    {
+      "name": "useSessionTimeout",
+      "uiComponent": "useSessionTimeout.svelte.ts",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (浏览器会话空闲钩子)",
+      "note": "SSR 不支持 BroadcastChannel"
+    },
+    {
+      "name": "TableClipboardManager",
+      "uiComponent": "TableClipboardManager.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (客户端剪贴板与矩阵回写)",
+      "note": "SSR 不读取系统剪贴板"
+    },
+    {
+      "name": "useTableClipboard",
+      "uiComponent": "useTableClipboard.svelte.ts",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (客户端剪贴板解析钩子)"
+    },
+    {
+      "name": "AudioFeedbackProvider",
+      "uiComponent": "AudioFeedbackProvider.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (Web Audio 业务声效)",
+      "note": "SSR 不支持 AudioContext"
+    },
+    {
+      "name": "useAudioAlert",
+      "uiComponent": "useAudioAlert.svelte.ts",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (Web Audio 声效钩子)"
     },
     {
       "name": "ThemeToggle",

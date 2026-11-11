@@ -22,6 +22,10 @@ import LiteUnsavedChangesGuard from './LiteUnsavedChangesGuard.svelte';
 import LiteAnnouncementBanner from './LiteAnnouncementBanner.svelte';
 import LiteTextDiffViewer from './LiteTextDiffViewer.svelte';
 import LiteAsyncExportModal from './LiteAsyncExportModal.svelte';
+import LiteStepWizard from './LiteStepWizard.svelte';
+import LiteWorkflowStepper from './LiteWorkflowStepper.svelte';
+import LiteDualApprovalGate from './LiteDualApprovalGate.svelte';
+import LiteKeyboardShortcutsModal from './LiteKeyboardShortcutsModal.svelte';
 
 afterEach(() => cleanup());
 
@@ -312,4 +316,47 @@ describe('recent UI parity fallbacks', () => {
     expect(exportModal.getByText('Order No')).toBeTruthy();
     expect(exportModal.getByText('Total Amount')).toBeTruthy();
     expect(exportModal.container.querySelector('form')?.getAttribute('action')).toBe('/api/export/orders');
+  });
+it('renders enterprise suites wave 2: StepWizard, WorkflowStepper, DualApprovalGate, KeyboardShortcutsModal', () => {
+    // 10. LiteStepWizard
+    const wizard = render(LiteStepWizard, {
+      steps: [
+        { id: '1', title: '空间信息' },
+        { id: '2', title: '配置确认' },
+      ],
+      currentStep: 0,
+      action: '/wizard/next',
+    });
+    expect(wizard.getByText('空间信息')).toBeTruthy();
+    expect(wizard.container.querySelector('form')?.getAttribute('action')).toBe('/wizard/next');
+
+    // 11. LiteWorkflowStepper
+    const flow = render(LiteWorkflowStepper, {
+      title: '部署进度',
+      nodes: [
+        { id: 'n1', label: '初始化网络', status: 'completed', durationText: '200ms' },
+        { id: 'n2', label: '挂载存储', status: 'running' },
+      ],
+    });
+    expect(flow.getByText('部署进度')).toBeTruthy();
+    expect(flow.getByText('初始化网络')).toBeTruthy();
+    expect(flow.getByText('200ms')).toBeTruthy();
+
+    // 12. LiteDualApprovalGate
+    const approval = render(LiteDualApprovalGate, {
+      actionTitle: '大额打款复核',
+      requiredRole: '财务主管',
+      formAction: '/approve',
+    });
+    expect(approval.getByText('大额打款复核')).toBeTruthy();
+    expect(approval.container.querySelector('form')?.getAttribute('action')).toBe('/approve');
+
+    // 13. LiteKeyboardShortcutsModal
+    const shortcuts = render(LiteKeyboardShortcutsModal, {
+      title: '系统快捷键',
+      shortcuts: [{ label: '搜索', keys: ['Ctrl', 'K'] }],
+    });
+    expect(shortcuts.getByText('系统快捷键')).toBeTruthy();
+    expect(shortcuts.getByText('搜索')).toBeTruthy();
+    expect(shortcuts.getByText('Ctrl')).toBeTruthy();
   });

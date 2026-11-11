@@ -1674,3 +1674,106 @@ Pure native Web Audio API acoustic feedback and operational sound effects suite:
   <button onclick={handleScanSuccess}>Scan Barcode</button>
 </AudioFeedbackProvider>
 ```
+
+### `<PrintableReportLayout>` & `usePrintExport`
+
+Enterprise printable report layout and high-fidelity PDF export suite:
+- Supports standard paper sizes (A4, A5, Letter) in portrait and landscape orientations.
+- **Anti-Break Pagination**: Configured with `page-break-inside: avoid` to prevent mid-row table splits and broken signature blocks.
+- **Repetitive Table Headers**: Enforces `thead { display: table-header-group; }` across multi-page printing.
+- Built-in metadata strip, official approval seal/stamp area, and page numbering.
+
+```svelte
+<script lang="ts">
+  import { PrintableReportLayout } from '@svadmin/ui';
+
+  const metadata = [
+    { label: 'Document No.', value: 'PO-2026-9081' },
+    { label: 'Fiscal Period', value: '2026-Q4' },
+  ];
+
+  const signatures = [
+    { role: 'Preparer', name: 'Alice Smith' },
+    { role: 'Supervisor Auditor', name: 'Bob Jones' },
+  ];
+</script>
+
+<PrintableReportLayout
+  title="Quarterly Settlement Statement"
+  subtitle="Official commercial accounting ledger"
+  reportNo="PO-2026-9081"
+  {metadata}
+  {signatures}
+  watermarkText="CONFIDENTIAL"
+>
+  <div class="py-4">
+    <p>Financial ledger statements and tabular line items...</p>
+  </div>
+</PrintableReportLayout>
+```
+
+### `<FunnelChart>` & `<SankeyChart>`
+
+Enterprise business conversion funnel and path flow diagram suite:
+- **Zero Heavy Dependencies**: Pure SVG vector rendering with no bulky external chart engines.
+- **Conversion & Drop-off Rates**: Automatically calculates stage-by-stage retention percentages and drop-off rates (`-40%`).
+- **Interactive Stages**: Clickable stage segments with hover highlights and end-to-end total conversion calculations.
+- **`<SankeyChart>`**: Multi-stage source-to-target flow visualization for marketing attribution and resource allocation.
+
+```svelte
+<script lang="ts">
+  import { FunnelChart, type FunnelStageItem } from '@svadmin/ui';
+
+  const stages: FunnelStageItem[] = [
+    { id: '1', label: 'Page Impressions', value: 120000 },
+    { id: '2', label: 'Product Clicks', value: 45000 },
+    { id: '3', label: 'Added to Cart', value: 18000 },
+    { id: '4', label: 'Completed Checkout', value: 7200 },
+  ];
+</script>
+
+<FunnelChart
+  {stages}
+  title="E-Commerce Checkout Funnel"
+  showPercentages={true}
+  showDropoff={true}
+/>
+```
+
+### `<SchemaVisualModeler>`
+
+Visual resource schema reverse engineering and code generation canvas:
+- Interactive field designer (key, label, type, required, filterable, sortable).
+- One-click reverse engineering from sample JSON objects.
+- Instant Svelte 5 / `@svadmin/core` `ResourceDefinition` code generation with copy-to-clipboard support.
+
+```svelte
+<script lang="ts">
+  import { SchemaVisualModeler } from '@svadmin/ui';
+</script>
+
+<SchemaVisualModeler
+  resourceName="PurchaseOrder"
+  onSaveSchema={(name, fields) => console.log('Schema configured:', name, fields)}
+/>
+```
+
+### `<MicroAppBridge>` & `useMicroAppEvent`
+
+Enterprise micro-frontend sandbox bridge and cross-origin event bus:
+- Type-safe, Origin-whitelisted postMessage communication between host and child iframe micro-apps (`<MicroAppFrame>`).
+- Seamless bidirectional event subscriptions, RPC requests (`PING`/`PONG`), and automated host theme / locale state synchronization.
+
+```svelte
+<script lang="ts">
+  import { MicroAppBridge, useMicroAppEvent } from '@svadmin/ui';
+
+  const bus = useMicroAppEvent({ channel: 'enterprise_portal' });
+
+  bus.on('ORDER_CREATED', (payload) => {
+    console.log('Sub-app created order:', payload);
+  });
+</script>
+
+<MicroAppBridge appId="subapp-billing" />
+```
