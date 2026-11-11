@@ -1703,3 +1703,72 @@ Enterprise multi-record parameter comparison and difference spotlight suite:
   onsync={(source, target, field) => console.log(`Synced ${field} to ${target.name}`)}
 />
 ```
+
+### `<WidgetContainer>`
+
+Enterprise dashboard widget wrapper container:
+- Standardized container shell for executive dashboards, operational metrics, and charts.
+- **Full Lifecycle Controls**: Built-in header toolbar with one-click manual refresh animation, fullscreen toggle (ESC dismissal), timestamp indicators, and custom actions.
+- **State Resiliency**: Embedded skeleton loading layout (`loading`) and user-friendly error retry cards (`error` + `onretry`).
+
+```svelte
+<script lang="ts">
+  import { WidgetContainer } from '@svadmin/ui';
+
+  const now = new Date();
+</script>
+
+<WidgetContainer
+  title="Realtime QPS Throughput"
+  description="Monitoring request volume fluctuations"
+  lastUpdated={now}
+  allowFullscreen={true}
+  allowRefresh={true}
+  onrefresh={() => console.log('Refreshing widget...')}
+>
+  <div class="h-40 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+    Embed any Chart or Metric component here
+  </div>
+</WidgetContainer>
+```
+
+### `<DataFreshnessIndicator>`
+
+Data freshness indicator and auto-polling cadence pill:
+- Tailored for operational cockpits and live monitoring dashboards to communicate data recency.
+- **Pulsing State Dot**: Dynamic visual cues for `live` (pulsing green ping), `fresh`, `stale` (warning tone), and `offline`.
+- **Interval Selector**: Toggle automatic background polling frequency (`5s`, `15s`, `30s`, `1m`, `off`) with manual click-to-sync triggers.
+
+```svelte
+<script lang="ts">
+  import { DataFreshnessIndicator } from '@svadmin/ui';
+
+  let lastSync = $state(Date.now());
+</script>
+
+<DataFreshnessIndicator
+  lastUpdated={lastSync}
+  pollInterval={15}
+  onsyncnow={() => (lastSync = Date.now())}
+/>
+```
+
+### `<ServerStatusGrid>`
+
+Cluster server node health matrix and metric grid:
+- Built for microservice clusters, edge nodes, and database read replicas.
+- **Cluster Aggregation**: Automatic summary calculation for healthy, warning, and critical node counts alongside average network latency.
+- **Multi-Resource Gauges**: Micro progress bars for CPU, Memory, and Disk usage with threshold-driven tone shifts.
+
+```svelte
+<script lang="ts">
+  import { ServerStatusGrid, type ServerNode } from '@svadmin/ui';
+
+  const nodes: ServerNode[] = [
+    { id: '1', name: 'gateway-sh-01', region: 'cn-shanghai', status: 'healthy', latencyMs: 18, cpuPercent: 35, memoryPercent: 52 },
+    { id: '2', name: 'gateway-bj-02', region: 'cn-beijing', status: 'warning', latencyMs: 140, cpuPercent: 78, memoryPercent: 84 },
+  ];
+</script>
+
+<ServerStatusGrid {nodes} onselectnode={(n) => console.log('Selected:', n.name)} />
+```

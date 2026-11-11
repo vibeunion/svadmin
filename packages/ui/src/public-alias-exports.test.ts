@@ -83,6 +83,12 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  WidgetContainer,
+  DashboardWidget,
+  DataFreshnessIndicator,
+  FreshnessPill,
+  ServerStatusGrid,
+  ClusterHealthMatrix,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -231,6 +237,12 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(WidgetContainer).toBeDefined();
+    expect(DashboardWidget).toBe(WidgetContainer);
+    expect(DataFreshnessIndicator).toBeDefined();
+    expect(FreshnessPill).toBe(DataFreshnessIndicator);
+    expect(ServerStatusGrid).toBeDefined();
+    expect(ClusterHealthMatrix).toBe(ServerStatusGrid);
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();

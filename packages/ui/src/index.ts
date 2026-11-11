@@ -807,3 +807,8 @@ export { useAudioAlert, playAudioAlert, type AudioAlertType, type AudioAlertOpti
 export { default as AudioFeedbackProvider, type AudioFeedbackProviderProps } from './components/AudioFeedbackProvider.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
+
+// Enterprise dashboard widget container, data freshness & server cluster status suite
+export { default as WidgetContainer, default as DashboardWidget, type WidgetContainerProps } from './components/WidgetContainer.svelte';
+export { default as DataFreshnessIndicator, default as FreshnessPill, type DataFreshnessIndicatorProps, type FreshnessStatus, type PollInterval } from './components/DataFreshnessIndicator.svelte';
+export { default as ServerStatusGrid, default as ClusterHealthMatrix, type ServerStatusGridProps, type ServerNode, type NodeHealthStatus } from './components/ServerStatusGrid.svelte';
