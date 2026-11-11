@@ -70,7 +70,6 @@
   .lite-api-request-bar {
     display: flex;
     align-items: center;
-    gap: 8px;
     padding: 6px 10px;
     background: #f7f8fa;
     border: 1px solid #e5e6eb;

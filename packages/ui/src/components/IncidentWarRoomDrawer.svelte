@@ -72,8 +72,8 @@
   };
 </script>
 
-<Sheet.Root bind:open>
-  <Sheet.Content side="right" class={cn('w-full sm:max-w-xl p-0 flex flex-col text-xs', className)}>
+<Sheet.Root bind:open side="right">
+  <Sheet.Content class={cn('w-full sm:max-w-xl p-0 flex flex-col text-xs', className)}>
     <!-- Header -->
     <div class="px-6 py-5 border-b border-border/70 bg-card">
       <div class="flex items-center justify-between">

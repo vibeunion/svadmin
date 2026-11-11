@@ -60,14 +60,17 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
   }
+  .lite-agg-footer > * + * { margin-left: 12px; }
   .lite-agg-left { color: #4e5969; }
   .lite-count { color: #165dff; }
-  .lite-agg-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .lite-agg-cell { display: flex; flex-direction: column; gap: 2px; text-align: right; }
+  .lite-agg-right { display: flex; align-items: center; flex-wrap: wrap; }
+  .lite-agg-right > * + * { margin-left: 16px; }
+  .lite-agg-cell { display: flex; flex-direction: column; text-align: right; }
+  .lite-agg-cell > * + * { margin-top: 2px; }
   .lite-agg-label { font-size: 10px; color: #86909c; font-weight: 500; }
-  .lite-agg-vals { display: flex; gap: 10px; font-family: monospace; font-size: 11px; }
+  .lite-agg-vals { display: flex; font-family: monospace; font-size: 11px; }
+  .lite-agg-vals > * + * { margin-left: 10px; }
   .lite-val-sub strong { color: #165dff; }
   .lite-val-total strong { color: #1d2129; }
 </style>

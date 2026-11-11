@@ -76,13 +76,17 @@
     background: #f7f8fa;
     border-bottom: 1px solid #e5e6eb;
   }
-  .lite-exporter-title-wrap { display: flex; align-items: center; gap: 8px; }
+  .lite-exporter-title-wrap { display: flex; align-items: center; }
+  .lite-exporter-title-wrap > * + * { margin-left: 8px; }
   .lite-exporter-shield { font-size: 11px; font-weight: 600; color: #00b42a; }
   .lite-exporter-title { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
   .lite-fp-tag { font-size: 10px; font-family: monospace; color: #165dff; background: #e8f3ff; padding: 2px 6px; border-radius: 3px; }
   .lite-exporter-body { padding: 12px 14px; }
-  .lite-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .lite-meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .lite-meta-grid { margin-bottom: 10px; overflow: hidden; }
+  .lite-meta-grid .lite-meta-item { float: left; width: 50%; box-sizing: border-box; margin-bottom: 10px; padding-right: 5px; }
+  .lite-meta-grid .lite-meta-item:nth-child(2n) { padding-right: 0; padding-left: 5px; }
+  .lite-meta-item { display: flex; flex-direction: column; }
+  .lite-meta-item > * + * { margin-top: 2px; }
   .lite-meta-label { font-size: 10px; color: #86909c; }
   .lite-meta-val { font-size: 11px; font-weight: 500; color: #1d2129; }
   .font-mono { font-family: monospace; }

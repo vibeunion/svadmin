@@ -92,8 +92,10 @@
   }
   .lite-quotas-tenant { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
   .lite-quotas-tier { font-size: 11px; color: #165dff; font-weight: 500; display: block; margin-top: 2px; }
-  .lite-quotas-grid { padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 640px) { .lite-quotas-grid { grid-template-columns: 1fr; } }
+  .lite-quotas-grid { padding: 12px 14px; overflow: hidden; }
+  .lite-quotas-grid .lite-quota-card { float: left; width: calc(50% - 6px); margin: 0 12px 12px 0; box-sizing: border-box; }
+  .lite-quotas-grid .lite-quota-card:nth-child(2n) { margin-right: 0; }
+  @media (max-width: 640px) { .lite-quotas-grid .lite-quota-card { float: none; width: 100%; margin-right: 0; } }
   .lite-quota-card {
     border: 1px solid #f2f3f5;
     border-radius: 4px;

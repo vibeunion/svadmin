@@ -90,7 +90,6 @@
   .lite-chain-step {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
     padding-bottom: 12px;
     margin-bottom: 12px;
     border-bottom: 1px dashed #e5e6eb;

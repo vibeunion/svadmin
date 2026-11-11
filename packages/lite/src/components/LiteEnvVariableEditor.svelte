@@ -88,7 +88,8 @@
     border-bottom: 1px solid #f2f3f5;
   }
   .lite-env-item:last-child { border-bottom: none; }
-  .lite-env-key-wrap { display: flex; align-items: center; gap: 6px; }
+  .lite-env-key-wrap { display: flex; align-items: center; }
+  .lite-env-key-wrap > * + * { margin-left: 6px; }
   .lite-env-key { font-weight: 600; color: #1d2129; font-family: monospace; font-size: 11px; }
   .lite-env-badge-secret {
     font-size: 10px;

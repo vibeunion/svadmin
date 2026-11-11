@@ -89,7 +89,8 @@
     background: #f7f8fa;
     border-bottom: 1px solid #e5e6eb;
   }
-  .lite-sql-title-wrap { display: flex; align-items: center; gap: 8px; }
+  .lite-sql-title-wrap { display: flex; align-items: center; }
+  .lite-sql-title-wrap > * + * { margin-left: 8px; }
   .lite-sql-tag {
     font-size: 10px;
     font-weight: 700;
