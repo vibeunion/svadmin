@@ -403,7 +403,7 @@ export * as Dropdown from './components/ui/dropdown-menu/index.js';
 // Additional shadcn components
 export * as Breadcrumb from './components/ui/breadcrumb/index.js';
 export * as Pagination from './components/ui/pagination/index.js';
-export * as ContextMenu from './components/ui/context-menu/index.js';
+export * as ContextMenuPrimitive from './components/ui/context-menu/index.js';
 export * as NavigationMenu from './components/ui/navigation-menu/index.js';
 
 export * as Collapsible from './components/ui/collapsible/index.js';
@@ -533,7 +533,7 @@ export { default as NetworkUserCard } from './components/content/NetworkUserCard
 export type { NetworkUser, NetworkMetric } from './components/content/NetworkUserCard.svelte';
 export { default as NetworkTable } from './components/content/NetworkTable.svelte';
 export type { NetworkColumn } from './components/content/NetworkTable.types.js';
-export { default as OtpInput, default as VerificationCode } from './components/content/OtpInput.svelte';
+export { default as OtpInput, default as VerificationCode, type OtpInputProps } from './components/OtpInput.svelte';
 export { default as TwoFactorStepper } from './components/content/TwoFactorStepper.svelte';
 export { default as SystemErrorState } from './components/content/SystemErrorState.svelte';
 export { referenceDemoData } from './reference-data.js';
@@ -794,3 +794,6 @@ export { default as UnsavedChangesGuard, default as UnsavedChangesModal, type Un
 export { default as KpiCard, type KpiCardProps } from './components/KpiCard.svelte';
 export { default as JsonViewer, type JsonViewerProps } from './components/JsonViewer.svelte';
 export { default as ResultPage, type ResultPageProps, type ResultStatus } from './components/ResultPage.svelte';
+// Enterprise dynamic watermark, context menu & OTP authentication suite
+export { default as WatermarkContainer, default as AntiTamperWatermark, type WatermarkContainerProps } from './components/WatermarkContainer.svelte';
+export { default as ContextMenu, type ContextMenuProps, type ContextMenuItem } from './components/ContextMenu.svelte';

@@ -977,3 +977,78 @@ const fields: FieldDefinition[] = [
   onSecondaryAction={() => console.log('继续创建')}
 />
 ```
+
+### `<WatermarkContainer>`
+
+防篡改企业级动态水印防护套件：
+- 专为涉密财务看板、人力薪酬数据与高管大屏设计。
+- 支持员工工号、租户信息、访问 IP 与动态时间戳等多行水印平铺。
+- **防篡改安全机制**：内置 `MutationObserver` 严密监听 DOM 树变动与内联样式操纵，当发生恶意删除水印节点或注入 `display: none` / `opacity: 0` 时，毫秒级自愈还原，杜绝截图泄密。
+
+```svelte
+<script lang="ts">
+  import { WatermarkContainer } from '@svadmin/ui';
+</script>
+
+<WatermarkContainer
+  content={['SVAdmin 企业级办公', '机密数据 严禁外传 - 2026-11-11', '操作人工号: 9527']}
+  gapX={48}
+  gapY={48}
+  antiTamper={true}
+>
+  <div class="p-8 bg-card border rounded-lg shadow-sm">
+    <h3 class="text-lg font-semibold">2026 第四季度核心财务报表</h3>
+    <p class="text-sm text-muted-foreground mt-2">敏感数据区域，已受防篡改动态水印全程保护...</p>
+  </div>
+</WatermarkContainer>
+```
+
+### `<ContextMenu>`
+
+企业级右键上下文操作菜单套件：
+- 无缝挂载于数据表格行（Table Row）、组织架构树节点（TreeNode）、看板卡片与文件列表。
+- 内置视口智能碰撞算法，根据屏幕边缘自适应镜像翻转对齐，防止菜单超出可视窗口被截断。
+- 完整支持快捷键提示徽标（Shortcut hints）、多级子菜单、分割线、禁用态与危险操作警示色。
+
+```svelte
+<script lang="ts">
+  import { ContextMenu, type ContextMenuItem } from '@svadmin/ui';
+
+  const menuItems: ContextMenuItem[] = [
+    { key: 'copy', label: '复制 ID', shortcut: '⌘C' },
+    { key: 'export', label: '导出明细' },
+    { key: 'sep1', label: '', divider: true },
+    { key: 'delete', label: '删除记录', danger: true, shortcut: 'Del' },
+  ];
+</script>
+
+<ContextMenu items={menuItems} onselect={(item) => console.log('选中操作:', item.key)}>
+  <div class="p-6 border rounded-md bg-muted/20 text-center select-none cursor-context-menu">
+    在此区域内点击鼠标右键即可呼出企业级快捷上下文菜单
+  </div>
+</ContextMenu>
+```
+
+### `<OtpInput>`
+
+企业双因子认证（2FA）与安全敏感操作验证码方格：
+- 专为二次身份核验、大额资金划转审批、不可逆危险操作验证等场景打造。
+- 连续键入自动聚焦下一格、Backspace 自动回退、全键盘左右光标移动。
+- 剪贴板一键粘贴智能识别，自动过滤非法字符并分发填入对应格点。
+- 支持密码点掩码显示（`●`）、错误告警状态与多尺寸预设（`sm`、`md`、`lg`）。
+
+```svelte
+<script lang="ts">
+  import { OtpInput } from '@svadmin/ui';
+
+  let verifyCode = $state('');
+</script>
+
+<OtpInput
+  length={6}
+  bind:value={verifyCode}
+  type="number"
+  autoFocus={true}
+  oncomplete={(val) => console.log('2FA 验证码输入完成:', val)}
+/>
+```

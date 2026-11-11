@@ -72,6 +72,9 @@ import {
   KpiCard,
   JsonViewer,
   ResultPage,
+  WatermarkContainer,
+  AntiTamperWatermark,
+  ContextMenu,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -183,6 +186,9 @@ describe('public compatibility aliases', () => {
     expect(KpiCard).toBeDefined();
     expect(JsonViewer).toBeDefined();
     expect(ResultPage).toBeDefined();
+    expect(WatermarkContainer).toBeDefined();
+    expect(AntiTamperWatermark).toBe(WatermarkContainer);
+    expect(ContextMenu).toBeDefined();
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
