@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-11T21:35:33.549Z`
-> 清单映射覆盖率：**100%**（238/238 组件）
-> 1:1 对齐率 (Exact)：**56.7%**（135）· 语义降级率 (Fallback)：**36.6%**（87）
-> 行为验证覆盖：**77.3%**（184/238 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-11T22:24:15.146Z`
+> 清单映射覆盖率：**100%**（257/257 组件）
+> 1:1 对齐率 (Exact)：**52.5%**（135）· 语义降级率 (Fallback)：**38.9%**（100）
+> 行为验证覆盖：**76.7%**（197/257 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,10 +13,10 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
-| **advanced** | 88 | 29 | 45 | 14 | 0 | **33%** | 63/88 | 0 |
-| **widgets** | 45 | 18 | 27 | 0 | 0 | **40%** | 39/45 | 0 |
+| **advanced** | 103 | 29 | 54 | 20 | 0 | **28.2%** | 72/103 | 0 |
+| **widgets** | 47 | 18 | 29 | 0 | 0 | **38.3%** | 41/47 | 0 |
 | **fields** | 50 | 42 | 7 | 1 | 0 | **84%** | 42/50 | 0 |
-| **layout** | 26 | 22 | 3 | 1 | 0 | **84.6%** | 21/26 | 0 |
+| **layout** | 28 | 22 | 5 | 1 | 0 | **78.6%** | 23/28 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
 > 样式钩子（`class`）覆盖是独立指标，见 [CLASS-HOOKS.md](./CLASS-HOOKS.md)，不影响本表状态。
@@ -149,6 +149,21 @@
 | `ApiPlayground` | `LiteApiPlayground.svelte` | ⚡ 语义降级 | 服务端 cURL 命令生成、URL 探针与预估状态展示；交互式 HTTP 请求发起由 SPA 承接 |
 | `TierFeatureComparison` | `LiteTierFeatureComparison.svelte` | ⚡ 语义降级 | 服务端 SaaS 多版本套餐权益对比矩阵静态表格；交互式套餐升级选型由 SPA 承接 |
 | `BillingInvoiceDrawer` | `LiteBillingInvoiceDrawer.svelte` | ⚡ 语义降级 | 服务端月度对账结算明细、项目清单与电子发票下载链接；抽屉动效与开票申请由 SPA 承接 |
+| `TreeTransferSelect` | `LiteTreeSelect.svelte` | ⚡ 语义降级 | 服务端树形穿梭分配列表降级为原生 TreeSelect 树形多选；双向穿梭动效由 SPA 承接 |
+| `ApprovalChainBuilder` | `LiteApprovalChainBuilder.svelte` | ⚡ 语义降级 | 服务端多级审批节点状态与或签/会签流向展示；拖拽节点重排由 SPA 承接 |
+| `useStorageCache` | — | 🚫 免适配 | 免适配 (客户端 KV 缓存适配器钩子) |
+| `RecordCompareModal` | — | 🚫 免适配 | 免适配 (客户端双实体参数差异比对模态弹窗) |
+| `SqlConsole` | `LiteSqlConsole.svelte` | ⚡ 语义降级 | 服务端只读 SQL 语句与执行结果快照表格展示；交互式执行与自动补全由 SPA 承接 |
+| `EnvVariableEditor` | `LiteEnvVariableEditor.svelte` | ⚡ 语义降级 | 服务端环境变量键值与机密掩码展示；敏感凭据解密与在线保存由 SPA 承接 |
+| `FeatureAnnouncementModal` | — | 🚫 免适配 | 免适配 (客户端产品更新发版公告模态框) |
+| `MasterSubTableDrawer` | — | 🚫 免适配 | 免适配 (客户端嵌套子表抽屉探针) |
+| `ScheduledJobManager` | `LiteScheduledJobManager.svelte` | ⚡ 语义降级 | 服务端 Cron 计划任务列表、执行周期与状态展示；手动触发与即时修改由 SPA 承接 |
+| `SecureDataExporter` | `LiteSecureDataExporter.svelte` | ⚡ 语义降级 | 服务端数字隐形防伪指纹、审计信息与下载提示；客户端脱敏二次拦截由 SPA 承接 |
+| `RolePermissionComparator` | — | 🚫 免适配 | 免适配 (客户端角色权限前后差异比对与高危越权警示) |
+| `IncidentWarRoomDrawer` | — | 🚫 免适配 | 免适配 (客户端突发高危故障应急协同战情室抽屉) |
+| `DataImportDropzone` | `LiteDataImportDropzone.svelte` | ⚡ 语义降级 | 服务端批量文件上传框与标准模板下载；客户端拖拽与大文件分片由 SPA 承接 |
+| `ColumnMappingTable` | `LiteColumnMappingTable.svelte` | ⚡ 语义降级 | 服务端源列到目标字段映射关系表格展示；智能自动匹配与类型转换由 SPA 承接 |
+| `ImportPreviewValidator` | `LiteImportPreviewValidator.svelte` | ⚡ 语义降级 | 服务端数据校验统计与错误明细表格展示；客户端只看错误行过滤与单元格修补由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -200,6 +215,8 @@
 | `SankeyChart` | — | ⚡ 语义降级 | 服务端节点来源与去向列表权重展示；SVG 贝塞尔流向图由 SPA 承接 |
 | `ClusterTopologyGraph` | — | ⚡ 语义降级 | 服务端三层集群微服务节点矩阵展示；SVG 连线动效与交互下钻由 SPA 承接 |
 | `PlanUsageQuotaBar` | `LitePlanUsageQuotaBar.svelte` | ⚡ 语义降级 | 服务端多配额用量进度条、重置周期与超额状态提示；升级套餐引导由 SPA 承接 |
+| `PeriodComparisonCard` | `LitePeriodComparisonCard.svelte` | ⚡ 语义降级 | 服务端指标数值与环比/同比变动幅度胶囊展示；动态图表下钻由 SPA 承接 |
+| `TenantQuotasMatrix` | `LiteTenantQuotasMatrix.svelte` | ⚡ 语义降级 | 服务端多租户各资源配额水位进度条；配额申请与升级由 SPA 承接 |
 
 ### FIELDS
 
@@ -285,6 +302,8 @@
 | `ResizeBox` | `LiteResizeBox.svelte` | ⚡ 语义降级 | CSS resize 容器；尺寸持久化由宿主承接 |
 | `Pagination` | `LitePagination.svelte` | ✅ 1:1 对齐 | 原生分页链接与当前页 |
 | `DataScreenContainer` | `LiteDataScreenContainer.svelte` | ⚡ 语义降级 | 服务端大屏外层容器与暗黑科技布局；全屏 API 与 Scale-to-Fit 自适应缩放由 SPA 承接 |
+| `VirtualCardGrid` | `LiteGrid.svelte` | ⚡ 语义降级 | 服务端卡片网格静态分页布局；窗口虚拟滚动由 SPA 承接 |
+| `TableAggregationFooter` | `LiteTableAggregationFooter.svelte` | ⚡ 语义降级 | 服务端全表合计与选中小计汇总栏静态排版；多选行动态即时计算由 SPA 承接 |
 | `ThemeToggle` | — | 🚫 免适配 | 免适配 (Lite 为固定 Slate/Indigo 配色) |
 
 ### BUTTONS

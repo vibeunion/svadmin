@@ -352,6 +352,27 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'TierFeatureComparison', uiComponent: 'TierFeatureComparison.svelte', liteComponent: 'LiteTierFeatureComparison.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 SaaS 多版本套餐权益对比矩阵静态表格；交互式套餐升级选型由 SPA 承接' },
   { name: 'BillingInvoiceDrawer', uiComponent: 'BillingInvoiceDrawer.svelte', liteComponent: 'LiteBillingInvoiceDrawer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端月度对账结算明细、项目清单与电子发票下载链接；抽屉动效与开票申请由 SPA 承接' },
 
+  // ─── Enterprise suites wave 6 (Data Ingestion, Security Audit, SQL & Governance) ───
+  { name: 'TreeTransferSelect', uiComponent: 'TreeTransferSelect.svelte', liteComponent: 'LiteTreeSelect.svelte', category: 'advanced', status: 'fallback', strategy: '服务端树形穿梭分配列表降级为原生 TreeSelect 树形多选；双向穿梭动效由 SPA 承接' },
+  { name: 'VirtualCardGrid', uiComponent: 'VirtualCardGrid.svelte', liteComponent: 'LiteGrid.svelte', category: 'layout', status: 'fallback', strategy: '服务端卡片网格静态分页布局；窗口虚拟滚动由 SPA 承接' },
+  { name: 'ApprovalChainBuilder', uiComponent: 'ApprovalChainBuilder.svelte', liteComponent: 'LiteApprovalChainBuilder.svelte', category: 'advanced', status: 'fallback', strategy: '服务端多级审批节点状态与或签/会签流向展示；拖拽节点重排由 SPA 承接' },
+  { name: 'PeriodComparisonCard', uiComponent: 'PeriodComparisonCard.svelte', liteComponent: 'LitePeriodComparisonCard.svelte', category: 'widgets', status: 'fallback', strategy: '服务端指标数值与环比/同比变动幅度胶囊展示；动态图表下钻由 SPA 承接' },
+  { name: 'useStorageCache', uiComponent: 'useStorageCache.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端 KV 缓存适配器钩子)' },
+  { name: 'RecordCompareModal', uiComponent: 'RecordCompareModal.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端双实体参数差异比对模态弹窗)' },
+  { name: 'SqlConsole', uiComponent: 'SqlConsole.svelte', liteComponent: 'LiteSqlConsole.svelte', category: 'advanced', status: 'fallback', strategy: '服务端只读 SQL 语句与执行结果快照表格展示；交互式执行与自动补全由 SPA 承接' },
+  { name: 'EnvVariableEditor', uiComponent: 'EnvVariableEditor.svelte', liteComponent: 'LiteEnvVariableEditor.svelte', category: 'advanced', status: 'fallback', strategy: '服务端环境变量键值与机密掩码展示；敏感凭据解密与在线保存由 SPA 承接' },
+  { name: 'FeatureAnnouncementModal', uiComponent: 'FeatureAnnouncementModal.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端产品更新发版公告模态框)' },
+  { name: 'MasterSubTableDrawer', uiComponent: 'MasterSubTableDrawer.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端嵌套子表抽屉探针)' },
+  { name: 'ScheduledJobManager', uiComponent: 'ScheduledJobManager.svelte', liteComponent: 'LiteScheduledJobManager.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 Cron 计划任务列表、执行周期与状态展示；手动触发与即时修改由 SPA 承接' },
+  { name: 'SecureDataExporter', uiComponent: 'SecureDataExporter.svelte', liteComponent: 'LiteSecureDataExporter.svelte', category: 'advanced', status: 'fallback', strategy: '服务端数字隐形防伪指纹、审计信息与下载提示；客户端脱敏二次拦截由 SPA 承接' },
+  { name: 'RolePermissionComparator', uiComponent: 'RolePermissionComparator.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端角色权限前后差异比对与高危越权警示)' },
+  { name: 'TenantQuotasMatrix', uiComponent: 'TenantQuotasMatrix.svelte', liteComponent: 'LiteTenantQuotasMatrix.svelte', category: 'widgets', status: 'fallback', strategy: '服务端多租户各资源配额水位进度条；配额申请与升级由 SPA 承接' },
+  { name: 'TableAggregationFooter', uiComponent: 'TableAggregationFooter.svelte', liteComponent: 'LiteTableAggregationFooter.svelte', category: 'layout', status: 'fallback', strategy: '服务端全表合计与选中小计汇总栏静态排版；多选行动态即时计算由 SPA 承接' },
+  { name: 'IncidentWarRoomDrawer', uiComponent: 'IncidentWarRoomDrawer.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端突发高危故障应急协同战情室抽屉)' },
+  { name: 'DataImportDropzone', uiComponent: 'DataImportDropzone.svelte', liteComponent: 'LiteDataImportDropzone.svelte', category: 'advanced', status: 'fallback', strategy: '服务端批量文件上传框与标准模板下载；客户端拖拽与大文件分片由 SPA 承接' },
+  { name: 'ColumnMappingTable', uiComponent: 'ColumnMappingTable.svelte', liteComponent: 'LiteColumnMappingTable.svelte', category: 'advanced', status: 'fallback', strategy: '服务端源列到目标字段映射关系表格展示；智能自动匹配与类型转换由 SPA 承接' },
+  { name: 'ImportPreviewValidator', uiComponent: 'ImportPreviewValidator.svelte', liteComponent: 'LiteImportPreviewValidator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端数据校验统计与错误明细表格展示；客户端只看错误行过滤与单元格修补由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

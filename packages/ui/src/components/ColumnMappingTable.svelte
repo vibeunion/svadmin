@@ -58,9 +58,7 @@
 
   function handleSelectColumn(targetKey: string, sourceCol: string) {
     if (sourceCol === '') {
-      const next = { ...currentMapping };
-      delete next[targetKey];
-      currentMapping = next;
+      currentMapping = Object.fromEntries(Object.entries(currentMapping).filter(([k]) => k !== targetKey));
     } else {
       currentMapping = { ...currentMapping, [targetKey]: sourceCol };
     }
