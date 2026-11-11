@@ -31,6 +31,7 @@
 <div
   class="lite-watermark-container {className}"
   data-svadmin-component="LiteWatermarkContainer"
+  style="--lite-watermark-pattern: url('{encodedSvg}');"
 >
   <div class="lite-watermark-overlay" aria-hidden="true" style="background-image: url('{encodedSvg}');"></div>
   <div class="lite-watermark-content">
