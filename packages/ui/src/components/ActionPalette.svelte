@@ -148,7 +148,7 @@
     <!-- Modal Box -->
     <div
       class={cn(
-        'relative z-10 w-full max-w-xl rounded-2xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100',
+        'relative z-10 w-full max-w-xl rounded-md border border-border bg-card text-card-foreground shadow-[var(--shadow-overlay)] overflow-hidden animate-in fade-in zoom-in-95 duration-100',
         className,
       )}
     >
@@ -206,12 +206,12 @@
 
               <div class="flex items-center gap-2 shrink-0">
                 {#if action.category}
-                  <span class={cn('rounded px-1.5 py-0.5 text-[10px] uppercase font-mono', isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground')}>
+                  <span class={cn('rounded px-1.5 py-0.5 text-xs uppercase font-mono', isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground')}>
                     {action.category}
                   </span>
                 {/if}
                 {#if action.shortcut}
-                  <kbd class={cn('rounded px-1.5 py-0.5 text-[10px] font-mono font-bold border', isSelected ? 'bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground' : 'bg-background border-border text-foreground')}>
+                  <kbd class={cn('rounded px-1.5 py-0.5 text-xs font-mono font-bold border', isSelected ? 'bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground' : 'bg-background border-border text-foreground')}>
                     {action.shortcut}
                   </kbd>
                 {/if}

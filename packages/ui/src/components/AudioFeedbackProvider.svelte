@@ -50,7 +50,7 @@
 
   {#if showControls}
     <div
-      class="inline-flex items-center gap-2 rounded-xl border border-border bg-card/95 p-2 shadow-lg backdrop-blur-sm text-xs text-foreground"
+      class="inline-flex items-center gap-2 rounded-md border border-border bg-card/95 p-2 shadow-md backdrop-blur-sm text-xs text-foreground"
       role="region"
       aria-label="Audio Feedback Controls"
     >

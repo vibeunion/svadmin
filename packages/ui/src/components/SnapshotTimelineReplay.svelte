@@ -78,14 +78,14 @@
 <div
   data-svadmin-component="SnapshotTimelineReplay"
   class={cn(
-    'w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-5',
+    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-5',
     className,
   )}
 >
   <!-- Header -->
   <div class="flex items-center justify-between border-b border-border/70 pb-4">
     <div class="flex items-center gap-2.5">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+      <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
         <History class="h-5 w-5" />
       </div>
       <div>
@@ -96,7 +96,7 @@
   </div>
 
   <!-- Time Travel Slider & Version Pills -->
-  <div class="space-y-3 bg-muted/20 p-4 rounded-xl border border-border/60">
+  <div class="space-y-3 bg-muted/20 p-4 rounded-md border border-border/60">
     <div class="flex items-center justify-between text-xs">
       <span class="font-semibold text-foreground flex items-center gap-1.5">
         <Calendar class="h-3.5 w-3.5 text-primary" />
@@ -132,7 +132,7 @@
           )}
         >
           <span>v{rev.version}</span>
-          <span class="text-[10px] opacity-75 font-mono">{rev.timestamp.slice(5, 16)}</span>
+          <span class="text-xs opacity-75 font-mono">{rev.timestamp.slice(5, 16)}</span>
         </button>
       {/each}
     </div>
@@ -140,7 +140,7 @@
 
   <!-- Active Revision Metadata Strip -->
   {#if currentRevision}
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-card p-3 rounded-xl border border-border/80 text-xs">
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-card p-3 rounded-md border border-border/80 text-xs">
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1 font-semibold text-foreground">
           <User class="h-3.5 w-3.5 text-primary" />
@@ -177,7 +177,7 @@
       <span>{diffRows.filter((r) => r.isChanged).length} 项属性变动</span>
     </div>
 
-    <div class="rounded-xl border border-border overflow-hidden">
+    <div class="rounded-md border border-border overflow-hidden">
       <table class="w-full text-left text-xs border-collapse">
         <thead class="bg-muted/40 border-b border-border text-muted-foreground font-semibold">
           <tr>

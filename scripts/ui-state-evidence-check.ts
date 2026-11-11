@@ -92,6 +92,7 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/MediaLibraryModal.svelte',
   'packages/ui/src/components/OrgChart.svelte',
   'packages/ui/src/components/PresenceAvatarGroup.svelte',
+  'packages/ui/src/components/VirtualCardGrid.svelte',
   'packages/lite/src/components/LiteCommentThread.svelte',
   // Presence avatars are fixed-size decorated identity chips, matching the reference UI owner.
   'packages/lite/src/components/LitePresenceAvatarGroup.svelte',
@@ -126,6 +127,7 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/MediaLibraryModal.svelte',
   'packages/ui/src/components/PdfDocumentViewer.svelte',
   'packages/ui/src/components/PrintableReportLayout.svelte',
+  'packages/ui/src/components/DataScreenContainer.svelte',
   'packages/ui/src/components/StepForm.svelte',
   'packages/ui/src/components/StepWizard.svelte',
   'packages/ui/src/components/VirtualList.svelte',
@@ -134,6 +136,7 @@ const fixedFormatOwners = new Set([
   'packages/lite/src/components/LiteChatDialog.svelte',
   'packages/lite/src/components/LiteTransfer.svelte',
   'packages/lite/src/components/LiteSplitPaneLayout.svelte',
+  'packages/lite/src/components/LiteDataScreenContainer.svelte',
   'packages/lite/src/components/LiteMasterDetailView.svelte',
   'packages/lite/src/components/fields/LiteMarkdownField.svelte',
   'packages/lite/src/components/fields/LiteMultiSelectField.svelte',

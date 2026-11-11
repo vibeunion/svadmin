@@ -110,20 +110,20 @@
     <!-- Comments Stream List -->
     <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
       {#each comments as comment (comment.id)}
-        <div class="rounded-xl border border-border/70 bg-card p-3.5 space-y-2 text-xs shadow-2xs">
+        <div class="rounded-md border border-border/70 bg-card p-3.5 space-y-2 text-xs shadow-2xs">
           <!-- Comment Header -->
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
                 {comment.author.slice(0, 1)}
               </span>
               <span class="font-semibold text-foreground">{comment.author}</span>
-              <span class="text-[10px] text-muted-foreground font-mono">{comment.createdAt}</span>
+              <span class="text-xs text-muted-foreground font-mono">{comment.createdAt}</span>
             </div>
 
             <div class="flex items-center gap-1">
               {#if comment.isResolved}
-                <span class="inline-flex items-center gap-1 rounded bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">
+                <span class="inline-flex items-center gap-1 rounded bg-success/10 px-1.5 py-0.5 text-xs font-medium text-success">
                   <CheckCircle2 class="h-3 w-3" />
                   {chinese ? '已解决' : 'Resolved'}
                 </span>
@@ -167,7 +167,7 @@
                     class="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs hover:border-primary transition-colors"
                   >
                     <span>{emoji}</span>
-                    <span class="font-mono text-[10px] text-muted-foreground">{count}</span>
+                    <span class="font-mono text-xs text-muted-foreground">{count}</span>
                   </button>
                 {/each}
               {/if}
@@ -200,7 +200,7 @@
                 <div class="rounded-lg bg-muted/30 p-2 text-xs space-y-1">
                   <div class="flex items-center justify-between">
                     <span class="font-semibold text-foreground text-[11px]">{reply.author}</span>
-                    <span class="text-[10px] text-muted-foreground font-mono">{reply.createdAt}</span>
+                    <span class="text-xs text-muted-foreground font-mono">{reply.createdAt}</span>
                   </div>
                   <p class="text-foreground leading-relaxed">{reply.content}</p>
                 </div>

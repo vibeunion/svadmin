@@ -296,7 +296,7 @@
   data-svadmin-component="StepWizard"
   data-direction={direction}
   class={cn(
-    'rounded-xl border border-border bg-card text-card-foreground shadow-xs overflow-hidden',
+    'rounded-md border border-border bg-card text-card-foreground shadow-xs overflow-hidden',
     className,
   )}
 >

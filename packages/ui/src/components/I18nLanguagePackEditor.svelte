@@ -105,14 +105,14 @@
 <div
   data-svadmin-component="I18nLanguagePackEditor"
   class={cn(
-    'w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4 flex flex-col',
+    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4 flex flex-col',
     className,
   )}
 >
   <!-- Header -->
   <div class="flex items-center justify-between border-b border-border/70 pb-4">
     <div class="flex items-center gap-3">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+      <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
         <Languages class="h-5 w-5" />
       </div>
       <div>
@@ -142,7 +142,7 @@
   </div>
 
   <!-- Filters Toolbar -->
-  <div class="flex flex-wrap items-center justify-between gap-3 bg-muted/20 p-3 rounded-xl border border-border/60">
+  <div class="flex flex-wrap items-center justify-between gap-3 bg-muted/20 p-3 rounded-md border border-border/60">
     <!-- Namespace tabs -->
     <div class="flex gap-1 overflow-x-auto text-xs">
       {#each namespaces as ns (ns)}
@@ -172,7 +172,7 @@
   </div>
 
   <!-- Translation Table -->
-  <div class="rounded-xl border border-border overflow-hidden">
+  <div class="rounded-md border border-border overflow-hidden">
     <table class="w-full text-left text-xs border-collapse">
       <thead class="bg-muted/40 border-b border-border text-muted-foreground font-semibold">
         <tr>
@@ -187,7 +187,7 @@
           <tr class={cn('hover:bg-muted/20', entry.isModified && 'bg-primary/5')}>
             <td class="p-3 font-mono font-medium text-foreground">{entry.key}</td>
             <td class="p-3">
-              <span class="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+              <span class="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground">
                 {entry.namespace}
               </span>
             </td>

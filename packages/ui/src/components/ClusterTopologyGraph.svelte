@@ -107,14 +107,14 @@
   data-svadmin-component="ClusterTopologyGraph"
   data-edges-count={edges.length}
   class={cn(
-    'relative w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
+    'relative w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
     className,
   )}
 >
   <!-- Header -->
   <div class="flex items-center justify-between border-b border-border/70 pb-4">
     <div class="flex items-center gap-2.5">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-success/10 text-success border border-success/20">
+      <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-success/10 text-success border border-success/20">
         <Activity class="h-5 w-5" />
       </div>
       <div>
@@ -161,13 +161,13 @@
             onclick={() => selectNode(node)}
             onkeydown={(e) => e.key === 'Enter' && selectNode(node)}
             class={cn(
-              'group flex flex-col p-3 rounded-xl border transition-all cursor-pointer bg-card shadow-2xs',
+              'group flex flex-col p-3 rounded-md border transition-all cursor-pointer bg-card shadow-2xs',
               activeNodeId === node.id ? 'border-primary ring-2 ring-primary/20 scale-[1.01]' : 'border-border/80 hover:border-border hover:bg-muted/30',
             )}
           >
             <div class="flex items-center justify-between">
               <span class="font-semibold text-xs text-foreground">{node.label}</span>
-              <span class={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border', healthColors[node.health])}>
+              <span class={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', healthColors[node.health])}>
                 {healthLabels[node.health]}
               </span>
             </div>
@@ -196,13 +196,13 @@
             onclick={() => selectNode(node)}
             onkeydown={(e) => e.key === 'Enter' && selectNode(node)}
             class={cn(
-              'group flex flex-col p-3 rounded-xl border transition-all cursor-pointer bg-card shadow-2xs',
+              'group flex flex-col p-3 rounded-md border transition-all cursor-pointer bg-card shadow-2xs',
               activeNodeId === node.id ? 'border-primary ring-2 ring-primary/20 scale-[1.01]' : 'border-border/80 hover:border-border hover:bg-muted/30',
             )}
           >
             <div class="flex items-center justify-between">
               <span class="font-semibold text-xs text-foreground">{node.label}</span>
-              <span class={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border', healthColors[node.health])}>
+              <span class={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', healthColors[node.health])}>
                 {healthLabels[node.health]}
               </span>
             </div>
@@ -233,13 +233,13 @@
             onclick={() => selectNode(node)}
             onkeydown={(e) => e.key === 'Enter' && selectNode(node)}
             class={cn(
-              'group flex flex-col p-3 rounded-xl border transition-all cursor-pointer bg-card shadow-2xs',
+              'group flex flex-col p-3 rounded-md border transition-all cursor-pointer bg-card shadow-2xs',
               activeNodeId === node.id ? 'border-primary ring-2 ring-primary/20 scale-[1.01]' : 'border-border/80 hover:border-border hover:bg-muted/30',
             )}
           >
             <div class="flex items-center justify-between">
               <span class="font-semibold text-xs text-foreground">{node.label}</span>
-              <span class={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border', healthColors[node.health])}>
+              <span class={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', healthColors[node.health])}>
                 {healthLabels[node.health]}
               </span>
             </div>
@@ -255,14 +255,14 @@
 
   <!-- Slide-out Node Inspector Panel -->
   {#if selectedNode}
-    <div class="mt-4 rounded-xl border border-border bg-muted/20 p-4 space-y-3">
+    <div class="mt-4 rounded-md border border-border bg-muted/20 p-4 space-y-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <Layers class="h-4 w-4 text-primary" />
           <span class="text-xs font-bold text-foreground">
             {chinese ? '服务节点详情与诊断: ' : 'Node Diagnostics: '} {selectedNode.label}
           </span>
-          <span class={cn('text-[10px] font-semibold px-2 py-0.2 rounded-full border', healthColors[selectedNode.health])}>
+          <span class={cn('text-xs font-semibold px-2 py-0.2 rounded-full border', healthColors[selectedNode.health])}>
             {healthLabels[selectedNode.health]}
           </span>
         </div>
@@ -279,19 +279,19 @@
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-background p-3 rounded-lg border border-border/70">
         <div>
-          <span class="block text-muted-foreground text-[10px]">{chinese ? '实时吞吐 QPS' : 'QPS'}</span>
+          <span class="block text-muted-foreground text-xs">{chinese ? '实时吞吐 QPS' : 'QPS'}</span>
           <span class="font-mono font-bold text-foreground">{selectedNode.qps?.toLocaleString() ?? 0}</span>
         </div>
         <div>
-          <span class="block text-muted-foreground text-[10px]">{chinese ? '平均响应延迟' : 'Latency'}</span>
+          <span class="block text-muted-foreground text-xs">{chinese ? '平均响应延迟' : 'Latency'}</span>
           <span class="font-mono font-bold text-foreground">{selectedNode.latencyMs ?? 0} ms</span>
         </div>
         <div>
-          <span class="block text-muted-foreground text-[10px]">{chinese ? '运行容器实例数' : 'Replicas'}</span>
+          <span class="block text-muted-foreground text-xs">{chinese ? '运行容器实例数' : 'Replicas'}</span>
           <span class="font-mono font-bold text-foreground">{selectedNode.instances ?? 1} 副本</span>
         </div>
         <div>
-          <span class="block text-muted-foreground text-[10px]">{chinese ? '接口错误率' : 'Error Rate'}</span>
+          <span class="block text-muted-foreground text-xs">{chinese ? '接口错误率' : 'Error Rate'}</span>
           <span class="font-mono font-bold {selectedNode.errorRate ? 'text-destructive' : 'text-success'}">
             {selectedNode.errorRate ?? 0}%
           </span>

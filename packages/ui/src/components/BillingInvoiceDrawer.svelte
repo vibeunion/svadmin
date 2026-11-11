@@ -77,7 +77,7 @@
   >
     <div
       class={cn(
-        'w-full max-w-lg h-full bg-card border-l border-border text-card-foreground shadow-2xl flex flex-col',
+        'w-full max-w-lg h-full bg-card border-l border-border text-card-foreground shadow-[var(--shadow-overlay)] flex flex-col',
         className
       )}
     >
@@ -147,7 +147,7 @@
                     <td class="p-2.5 text-foreground">
                       <span class="font-medium block">{item.description}</span>
                       {#if item.quantity}
-                        <span class="text-[10px] text-muted-foreground">数量: {item.quantity}</span>
+                        <span class="text-xs text-muted-foreground">数量: {item.quantity}</span>
                       {/if}
                     </td>
                     <td class="p-2.5 text-center text-muted-foreground">{item.category}</td>
