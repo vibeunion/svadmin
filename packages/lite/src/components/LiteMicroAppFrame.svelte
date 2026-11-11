@@ -5,7 +5,7 @@
     height?: string | number;
     sandbox?: string;
     allow?: string;
-    referrerpolicy?: string;
+    referrerpolicy?: ReferrerPolicy;
     fallbackHref?: string;
     fallbackLabel?: string;
     class?: string;
