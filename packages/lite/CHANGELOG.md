@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.28.0](https://github.com/vibeunion/svadmin/compare/lite-v0.27.0...lite-v0.28.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **lite:** add developer sandbox and SaaS billing suites SSR parity fallbacks ([#741](https://github.com/vibeunion/svadmin/issues/741)) ([ed2e1aa](https://github.com/vibeunion/svadmin/commit/ed2e1aa9af3e05cb0422a14159acb87177afec70))
+* **ui:** add FormulaField, DataScreenContainer, ThreadedCommentDrawer, and complete Lite parity suite ([d77d82b](https://github.com/vibeunion/svadmin/commit/d77d82be3f63e04e3a0b05d07ff8ee85d387091e))
+* **ui:** add TreeTransferSelect, VirtualCardGrid, ApprovalChainBuilder, PeriodComparisonCard, and KVStorage suite ([#733](https://github.com/vibeunion/svadmin/issues/733)) ([0575481](https://github.com/vibeunion/svadmin/commit/05754819317120aa56b77b0dbdd73e1f1d1995cf))
+
 ## [0.27.0](https://github.com/vibeunion/svadmin/compare/lite-v0.26.0...lite-v0.27.0) (2026-11-11)
 
 

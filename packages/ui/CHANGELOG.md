@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.123.0](https://github.com/vibeunion/svadmin/compare/ui-v0.122.0...ui-v0.123.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **lite:** add developer sandbox and SaaS billing suites SSR parity fallbacks ([#741](https://github.com/vibeunion/svadmin/issues/741)) ([ed2e1aa](https://github.com/vibeunion/svadmin/commit/ed2e1aa9af3e05cb0422a14159acb87177afec70))
+* **ui:** add FormulaField, DataScreenContainer, ThreadedCommentDrawer, and complete Lite parity suite ([d77d82b](https://github.com/vibeunion/svadmin/commit/d77d82be3f63e04e3a0b05d07ff8ee85d387091e))
+* **ui:** add PlanUsageQuotaBar, TierFeatureComparison, and BillingInvoiceDrawer enterprise suite ([#735](https://github.com/vibeunion/svadmin/issues/735)) ([de056b4](https://github.com/vibeunion/svadmin/commit/de056b419fbff1e39cc494427b75eaf502f92614))
+* **ui:** add QueryBuilder, FilterTagBar, and BatchEditModal enterprise suite ([#729](https://github.com/vibeunion/svadmin/issues/729)) ([6501b82](https://github.com/vibeunion/svadmin/commit/6501b82bd5348a4ad40c020e4653637d388fcc64))
+* **ui:** add RuleExpressionBuilder, ClusterTopologyGraph, SnapshotTimelineReplay, ActionPalette, and I18nEditor suite ([#728](https://github.com/vibeunion/svadmin/issues/728)) ([dacf776](https://github.com/vibeunion/svadmin/commit/dacf776552aa9826df47c624892b1616d5f8e3a1))
+* **ui:** add SecureDataExporter, RolePermissionComparator, TenantQuotasMatrix, TableAggregationFooter, and IncidentWarRoom suite ([#739](https://github.com/vibeunion/svadmin/issues/739)) ([8df3458](https://github.com/vibeunion/svadmin/commit/8df34585f8f2b6c6fce400387480747172f5f302))
+* **ui:** add sql-console, env-editor, subtable, and scheduler suite ([#737](https://github.com/vibeunion/svadmin/issues/737)) ([dcb5ac3](https://github.com/vibeunion/svadmin/commit/dcb5ac3d0a9153e1783a949c4966978daab1bdf3))
+* **ui:** add TreeTransferSelect, VirtualCardGrid, ApprovalChainBuilder, PeriodComparisonCard, and KVStorage suite ([#733](https://github.com/vibeunion/svadmin/issues/733)) ([0575481](https://github.com/vibeunion/svadmin/commit/05754819317120aa56b77b0dbdd73e1f1d1995cf))
+* **ui:** add WebhookSimulator, HmacSignatureCalculator, and ApiPlayground developer suite ([#734](https://github.com/vibeunion/svadmin/issues/734)) ([03ddbf2](https://github.com/vibeunion/svadmin/commit/03ddbf2ab5126e90d8cd5ecbb80b4418a42393f9))
+* **ui:** add WidgetContainer, DataFreshnessIndicator, and ServerStatusGrid enterprise suite ([ac61020](https://github.com/vibeunion/svadmin/commit/ac61020a716f2af5ebccf30c18c7be227d04aec7))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** clear main lint and type failures ([2416334](https://github.com/vibeunion/svadmin/commit/2416334c7b803bed7d577ba12a20cf8102394a6f))
+* **ui:** clear main lint and type failures ([4556b00](https://github.com/vibeunion/svadmin/commit/4556b003cb708d675e3936835b5ed97a717926e5))
+* **ui:** eliminate remaining non-standard radii, shadows, and register viewport owners ([80114c7](https://github.com/vibeunion/svadmin/commit/80114c7fb2e2371d55e977f0b72f6cec3ffcf1a0))
+* **ui:** eliminate remaining non-standard radii, shadows, and register viewport owners ([21a652c](https://github.com/vibeunion/svadmin/commit/21a652ce5288b24518fc32e3a6d4d3c79a19e840))
+
 ## [0.122.0](https://github.com/vibeunion/svadmin/compare/ui-v0.121.0...ui-v0.122.0) (2026-11-11)
 
 
