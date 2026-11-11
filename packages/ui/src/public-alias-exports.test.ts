@@ -50,6 +50,8 @@ import {
   DoubleCheckModal,
   GaugeChart,
   SpeedometerGauge,
+  UnsavedChangesGuard,
+  UnsavedChangesModal,
   MetricGrid,
   DashboardMetricGrid,
   SliderCaptcha,
@@ -193,6 +195,8 @@ describe('public compatibility aliases', () => {
     expect(DashboardMetricGrid).toBe(MetricGrid);
     expect(MicroAppFrame).toBeDefined();
     expect(EmbeddedSandbox).toBe(MicroAppFrame);
+    expect(UnsavedChangesGuard).toBeDefined();
+    expect(UnsavedChangesModal).toBe(UnsavedChangesGuard);
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();
