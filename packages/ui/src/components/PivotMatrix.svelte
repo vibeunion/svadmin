@@ -71,7 +71,12 @@
       if (!rowMap.has(rowKey)) {
         rowMap.set(rowKey, []);
       }
-      rowMap.get(rowKey)!.push(item);
+      const existing = rowMap.get(rowKey);
+      if (existing) {
+        existing.push(item);
+      } else {
+        rowMap.set(rowKey, [item]);
+      }
     }
 
     const uniqueCols = Array.from(colSet).sort();
@@ -198,7 +203,7 @@
           <th class="p-2.5 border-r border-border">
             {rowDimensions.map(d => d.label).join(' / ')}
           </th>
-          {#each matrixComputation.cols as colHeader}
+          {#each matrixComputation.cols as colHeader (colHeader)}
             <th class="p-2.5 text-right border-r border-border min-w-[90px]">
               {colHeader}
             </th>
@@ -221,12 +226,12 @@
             </td>
           </tr>
         {:else}
-          {#each matrixComputation.rows as rowKey}
+          {#each matrixComputation.rows as rowKey (rowKey)}
             <tr class="hover:bg-muted/40 transition-colors">
               <td class="p-2.5 font-medium text-foreground border-r border-border bg-muted/10">
                 {rowKey}
               </td>
-              {#each matrixComputation.cols as colKey}
+              {#each matrixComputation.cols as colKey (colKey)}
                 {@const cellData = matrixComputation.grid[rowKey]?.[colKey] ?? { val: 0, records: [] }}
                 <td
                   class="p-2.5 text-right border-r border-border transition-colors cursor-pointer {getHeatmapClass(cellData.val)}"
@@ -248,7 +253,7 @@
         <tfoot>
           <tr class="border-t-2 border-border bg-muted/60 font-semibold text-foreground">
             <td class="p-2.5 border-r border-border">列汇总</td>
-            {#each matrixComputation.cols as colKey}
+            {#each matrixComputation.cols as colKey (colKey)}
               <td class="p-2.5 text-right border-r border-border">
                 {formatValue(matrixComputation.colTotals[colKey] ?? 0)}
               </td>
