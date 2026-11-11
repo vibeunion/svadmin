@@ -881,3 +881,17 @@ export { default as MasterSubTableDrawer, default as NestedRecordExplorer, type 
 
 // Enterprise scheduled jobs & cron execution matrix manager suite
 export { default as ScheduledJobManager, default as CronSchedulerMatrix, type ScheduledJobManagerProps, type ScheduledJobItem, type ScheduledJobStatus } from './components/ScheduledJobManager.svelte';
+// Enterprise data export security watermark & digital fingerprint suite
+export { default as SecureDataExporter, default as ExportSecurityWatermark, type SecureDataExporterProps, type ExportColumnDef, type ExportAuditPayload } from './components/SecureDataExporter.svelte';
+
+// Enterprise role permission diff comparator & privilege escalation audit suite
+export { default as RolePermissionComparator, default as PermissionAuditDiffModal, type RolePermissionComparatorProps, type ResourcePermissionDiff, type PermissionChangeAuditPayload, type CrudAction } from './components/RolePermissionComparator.svelte';
+
+// Enterprise multi-tenant quotas matrix & quota enforcement guard suite
+export { default as TenantQuotasMatrix, default as QuotaEnforcementGuard, type TenantQuotasMatrixProps, type TenantQuotaItem } from './components/TenantQuotasMatrix.svelte';
+
+// Enterprise table dynamic aggregation sticky footer & column sum suite
+export { default as TableAggregationFooter, default as TableColumnSumSummary, type TableAggregationFooterProps, type AggregationColumnConfig, type AggregationOp } from './components/TableAggregationFooter.svelte';
+
+// Enterprise incident war room emergency drawer & alert timeline suite
+export { default as IncidentWarRoomDrawer, default as AlertIncidentTimeline, type IncidentWarRoomDrawerProps, type IncidentTimelineEvent, type IncidentSeverity } from './components/IncidentWarRoomDrawer.svelte';

@@ -2328,3 +2328,110 @@ HMAC 签名计算与现场验签沙箱：
   onToggleJobStatus={(job, status) => console.log('切换任务状态:', job.id, status)}
 />
 ```
+
+### `<SecureDataExporter>` / `<ExportSecurityWatermark>`
+
+企业级数据导出安全溯源指纹与防泄密套件：
+- **防篡改数字溯源指纹**：导出 CSV/TSV 时，自动在表头首行与元数据中注入操作员工号、时间戳与签名散列（`FP-xxxx`），彻底杜绝数据私自倒卖无从溯源的隐患。
+- **强制合规二次确认**：弹出安全审查弹窗，醒目提示本次导出包含的隐私敏感字段（如手机号/身份证），强制输入“合规导出事由”后方可放行。
+- **自动化审计上报**：导出瞬间触发 `onExportAuditRecord` 回调，向后端安全审计中心持久化本次导出快照。
+
+```svelte
+<script lang="ts">
+  import { SecureDataExporter } from '@svadmin/ui';
+
+  const data = [{ id: 1, name: '张三', phone: '13800000000' }];
+  const columns = [
+    { key: 'id', label: '序号' },
+    { key: 'phone', label: '手机号', isSensitive: true },
+  ];
+</script>
+
+<SecureDataExporter
+  {data}
+  {columns}
+  fileName="2026Q4_客户审计报表"
+  onExportAuditRecord={(audit) => console.log('审计凭据:', audit)}
+/>
+```
+
+### `<RolePermissionComparator>` / `<PermissionAuditDiffModal>`
+
+角色权限变更高危审计与矩阵差异比对器：
+- **Before ↔ After 并排红绿差异矩阵**：清晰对比调整前 vs 拟调整后的权限矩阵，涵盖 CRUD 各动作（`read`, `create`, `update`, `delete`, `export`）。
+- **特权提权高危标红预警**：针对新增的高危敏感权限（如财务删除、客户名单全量导出）以醒目警告色突出提示。
+- **强制输入审批工单号**：必须输入有效关联的提权审批工单编号方可确认提交。
+
+```svelte
+<script lang="ts">
+  import { RolePermissionComparator } from '@svadmin/ui';
+</script>
+
+<RolePermissionComparator
+  roleId="finance_lead"
+  roleName="财务复核主管"
+  onConfirmChanges={(payload) => console.log('权限变更审计记录:', payload)}
+/>
+```
+
+### `<TenantQuotasMatrix>` / `<QuotaEnforcementGuard>`
+
+多租户配额熔断与超额升级拦截门禁：
+- **全量资源仪表板**：API 频次、存储容量、团队席位、算力点数实时进度仪，包含正常、告警、100% 熔断状态。
+- **友好拦截与提额通道**：资源耗尽时提供一键申请临时提额工单与升级套餐入口。
+
+```svelte
+<script lang="ts">
+  import { TenantQuotasMatrix } from '@svadmin/ui';
+</script>
+
+<TenantQuotasMatrix
+  tenantName="华为技术有限公司"
+  planName="企业旗舰版"
+  onUpgradePlan={() => console.log('申请升级租户套餐')}
+/>
+```
+
+### `<TableAggregationFooter>` / `<TableColumnSumSummary>`
+
+表格多维动态聚合统计粘性底部栏：
+- **选中行实时联动合计**：用户在表格中勾选复选框选中某些行时，实时动态计算并刷新“已选 X 行合计值”。
+- **当前页小计与全量总计**：并排呈现当前页小计与服务端返回的全量数据集总计。
+- **格式化对齐**：精确对齐表格列宽与排版（文本居左、金额居右），支持货币符号与小数位精度。
+
+```svelte
+<script lang="ts">
+  import { TableAggregationFooter } from '@svadmin/ui';
+
+  const columns = [
+    { key: 'orderNo', label: '订单号' },
+    { key: 'amount', label: '金额', op: 'sum', prefix: '¥' },
+  ];
+</script>
+
+<TableAggregationFooter
+  {columns}
+  pageRows={[{ orderNo: '1', amount: 100 }, { orderNo: '2', amount: 200 }]}
+  selectedRows={[{ orderNo: '1', amount: 100 }]}
+/>
+```
+
+### `<IncidentWarRoomDrawer>` / `<AlertIncidentTimeline>`
+
+突发严重故障战情室与应急响应协同流：
+- **故障等级与影响面看板**：P0/P1/P2/P3 故障严重度徽章、影响用户数计数与持续分钟倒计时。
+- **一键紧急止血托盘**：网关只读限流降级、清空分布式缓存、隔离故障节点。
+- **应急响应处置时间轴**：实时同步值班人员处置备忘，支持一键宣布故障恢复。
+
+```svelte
+<script lang="ts">
+  import { IncidentWarRoomDrawer } from '@svadmin/ui';
+</script>
+
+<IncidentWarRoomDrawer
+  incidentId="INC-2026-902"
+  title="生产 PostgreSQL 主库连接池耗尽告警"
+  severity="P0"
+  onTriggerMitigation={(action) => console.log('触发应急动作:', action)}
+/>
+```

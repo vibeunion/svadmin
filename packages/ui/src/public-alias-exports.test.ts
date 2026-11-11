@@ -187,6 +187,16 @@ import {
   NestedRecordExplorer,
   ScheduledJobManager,
   CronSchedulerMatrix,
+  SecureDataExporter,
+  ExportSecurityWatermark,
+  RolePermissionComparator,
+  PermissionAuditDiffModal,
+  TenantQuotasMatrix,
+  QuotaEnforcementGuard,
+  TableAggregationFooter,
+  TableColumnSumSummary,
+  IncidentWarRoomDrawer,
+  AlertIncidentTimeline,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -268,6 +278,16 @@ describe('public compatibility aliases', () => {
     expect(NestedRecordExplorer).toBe(MasterSubTableDrawer);
     expect(ScheduledJobManager).toBeDefined();
     expect(CronSchedulerMatrix).toBe(ScheduledJobManager);
+    expect(SecureDataExporter).toBeDefined();
+    expect(ExportSecurityWatermark).toBe(SecureDataExporter);
+    expect(RolePermissionComparator).toBeDefined();
+    expect(PermissionAuditDiffModal).toBe(RolePermissionComparator);
+    expect(TenantQuotasMatrix).toBeDefined();
+    expect(QuotaEnforcementGuard).toBe(TenantQuotasMatrix);
+    expect(TableAggregationFooter).toBeDefined();
+    expect(TableColumnSumSummary).toBe(TableAggregationFooter);
+    expect(IncidentWarRoomDrawer).toBeDefined();
+    expect(AlertIncidentTimeline).toBe(IncidentWarRoomDrawer);
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);
