@@ -436,7 +436,7 @@ const fields: FieldDefinition[] = [
 ### `<TourGuide>` / `<Tour>`
 
 复杂后台系统分步业务功能漫游与指引套件：
-- 聚光灯（Spotlight）视口遮罩与镂空高亮目标元素。
+- 纯 SVG 视口裁剪遮罩与动态聚光灯（Spotlight）镂空高亮目标元素，屏蔽背景点击穿透。
 - 自适应防溢出浮动卡片定位与步骤导航切换。
 - 本地状态记忆持久化（`storageKey`），用户跳过或完成后无需重复弹出。
 - 完整键盘无障碍导航（`Tab`、`Escape`、方向键）与焦点锁定闭环。
@@ -465,9 +465,9 @@ const fields: FieldDefinition[] = [
 
 报表指标、大屏看板与财务结算同环比涨跌走势胶囊：
 - 支持根据 `value` 与 `prevValue` 自动计算百分比涨跌幅。
-- 支持纯数值、字符串增量格式化，可自定义精度、前缀（如 `YoY` / `环比`）与后缀（默认 `%`）。
+- 支持纯数值、字符串增量格式化，可自定义精度、前缀（如 `YoY` / `环比`）与后缀（默认 `%`），支持 `showSign` 显式带符号增减量输出。
 - 支持反向色彩语义（`reverseColor=true`），适配错误率、延迟、排队积压等跌为优的监控场景。
-- 遵循设计系统规范语义 Token，提供 `text`、`badge`、`solid` 多种视觉形态。
+- 遵循设计系统规范语义 Token，提供 `text`、`badge`、`solid`、`icon`（紧凑纯图标）多种视觉形态。
 
 ```svelte
 <script lang="ts">
@@ -479,14 +479,18 @@ const fields: FieldDefinition[] = [
 
 <!-- 异常指标反向色彩语义 -->
 <TrendIndicator value={-12.4} reverseColor={true} variant="solid" />
+
+<!-- 紧凑纯图标形态 -->
+<TrendIndicator value={8.5} variant="icon" prefix="MoM" />
 ```
 
 ### `<SignaturePad>`
 
 移动审批与桌面结算场景的高保真电子签名手写板：
-- 二次贝塞尔平滑压感笔触插值算法。
-- 完整的笔画撤销（`Undo`）与一键清空重置。
-- 导出透明背景 PNG Data URL（`toDataURL()`）与 SVG 矢量图格式（`toSVG()`）。
+- 二次贝塞尔平滑压感笔触插值算法，告别直线锯齿。
+- 完整的笔画历史栈：支持撤销（`Undo`）、重做（`Redo`）与一键清空重置。
+- 安全合规导出规范：支持导出透明背景 PNG 与纯 SVG 矢量图格式（`toSVG()`）。
+- 内置可选操作时间戳防篡改签名选项（`withTimestamp`）。
 - 适配高分屏 DPI 与移动端触控交互防滚屏。
 
 ```svelte
@@ -504,6 +508,7 @@ const fields: FieldDefinition[] = [
   bind:value={signatureData}
   width={480}
   height={180}
+  withTimestamp={true}
   onsave={handleSave}
 />
 ```

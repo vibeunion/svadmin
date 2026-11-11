@@ -241,7 +241,7 @@ export { default as GanttChart } from './components/GanttChart.svelte';
 export type { GanttTask } from './components/GanttChart.svelte';
 export { default as CanvasAnnotation } from './components/CanvasAnnotation.svelte';
 export type { AnnotationTool } from './components/CanvasAnnotation.svelte';
-export { default as SignaturePad } from './components/SignaturePad.svelte';
+export { default as SignaturePad, type SignaturePadProps } from './components/SignaturePad.svelte';
 export { default as PdfDocumentViewer } from './components/PdfDocumentViewer.svelte';
 export type { DocumentStamp } from './components/PdfDocumentViewer.svelte';
 export { default as SpreadsheetView } from './components/SpreadsheetView.svelte';
@@ -769,8 +769,7 @@ export type { SliderCaptchaProps, SliderCaptchaResult } from './components/Slide
 export { default as ConcurrentConflictModal } from './components/ConcurrentConflictModal.svelte';
 export type { ConcurrentConflictModalProps, ConflictFieldDiff } from './components/ConcurrentConflictModal.svelte';
 // Enterprise metrics & trend visualization suite
-export { default as TrendIndicator, default as Trend } from './components/TrendIndicator.svelte';
-export type { TrendIndicatorProps } from './components/TrendIndicator.svelte';
+export { default as TrendIndicator, default as Trend, type TrendIndicatorProps } from './components/TrendIndicator.svelte';
 
 // Enterprise tree, cron scheduler & organization hierarchy suite
 export { default as VirtualTreeSelect, type VirtualTreeSelectProps, type VirtualTreeNode } from './components/VirtualTreeSelect.svelte';

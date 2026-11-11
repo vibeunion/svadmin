@@ -46,7 +46,9 @@ describe('SignaturePad Component', () => {
 
     expect(container.textContent).toContain('Electronic Signature');
     expect(container.textContent).toContain('Undo');
+    expect(container.textContent).toContain('Redo');
     expect(container.textContent).toContain('Clear');
+    expect(container.textContent).toContain('SVG');
   });
 
   it('triggers onsave when confirm button is clicked', async () => {
@@ -79,6 +81,40 @@ describe('SignaturePad Component', () => {
     }
   });
 
+  it('supports undo and redo stack interactions', async () => {
+    const onchangeMock = vi.fn();
+    const { container } = render(SignaturePad, {
+      props: {
+        onchange: onchangeMock,
+      },
+    });
+
+    const canvas = container.querySelector('canvas');
+    if (!canvas) throw new Error('canvas not found');
+
+    // Draw first stroke
+    await fireEvent.mouseDown(canvas, { clientX: 10, clientY: 10 });
+    await fireEvent.mouseMove(canvas, { clientX: 20, clientY: 20 });
+    await fireEvent.mouseUp(canvas);
+
+    const undoBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Undo')
+    );
+    const redoBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Redo')
+    );
+    expect(undoBtn).toBeDefined();
+    expect(redoBtn).toBeDefined();
+
+    if (undoBtn) {
+      await fireEvent.click(undoBtn);
+    }
+
+    if (redoBtn) {
+      await fireEvent.click(redoBtn);
+    }
+  });
+
   it('clears signature board and resets value', async () => {
     const onchangeMock = vi.fn();
     const { container } = render(SignaturePad, {
@@ -103,5 +139,15 @@ describe('SignaturePad Component', () => {
       await fireEvent.click(clearBtn);
       expect(onchangeMock).toHaveBeenLastCalledWith('');
     }
+  });
+
+  it('renders timestamp badge when withTimestamp is true', () => {
+    const { container } = render(SignaturePad, {
+      props: {
+        withTimestamp: true,
+      },
+    });
+
+    expect(container.textContent).toContain('Timestamped');
   });
 });

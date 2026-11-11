@@ -15,10 +15,12 @@
     suffix?: string | undefined;
     /** Number of decimal places when auto computing rate (default: 1) */
     precision?: number | undefined;
+    /** Whether to explicitly prefix positive numbers with '+' (default: true) */
+    showSign?: boolean | undefined;
     /** Invert color semantics (useful for error rate, latency, queue backlog where lower is better) */
     reverseColor?: boolean | undefined;
-    /** Visual style variant: 'text' (inline text), 'badge' (pill badge with subtle background), 'solid' */
-    variant?: 'text' | 'badge' | 'solid' | undefined;
+    /** Visual style variant: 'text' (inline text), 'badge' (pill badge with subtle background), 'solid', 'icon' (compact icon only) */
+    variant?: 'text' | 'badge' | 'solid' | 'icon' | undefined;
     /** Size: 'sm' | 'md' | 'lg' */
     size?: 'sm' | 'md' | 'lg' | undefined;
     /** Whether to render trending arrow icon (default: true) */
@@ -34,6 +36,7 @@
     prefix,
     suffix = '%',
     precision = 1,
+    showSign = true,
     reverseColor = false,
     variant = 'text',
     size = 'md',
@@ -48,9 +51,10 @@
       const rateNum = (diff / Math.abs(prevValue)) * 100;
       const dir: 'up' | 'down' | 'neutral' = diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral';
       const formatted = Math.abs(rateNum).toFixed(precision);
+      const sign = showSign && dir === 'up' ? '+' : dir === 'down' ? '-' : '';
       return {
         direction: direction ?? dir,
-        text: `${formatted}${suffix}`,
+        text: `${sign}${formatted}${suffix}`,
       };
     }
 
@@ -58,9 +62,10 @@
     if (typeof value === 'number') {
       const dir: 'up' | 'down' | 'neutral' = value > 0 ? 'up' : value < 0 ? 'down' : 'neutral';
       const formatted = Math.abs(value).toFixed(precision);
+      const sign = showSign && dir === 'up' ? '+' : dir === 'down' ? '-' : '';
       return {
         direction: direction ?? dir,
-        text: `${formatted}${suffix}`,
+        text: `${sign}${formatted}${suffix}`,
       };
     }
 
@@ -101,12 +106,12 @@
   const sizeClasses = $derived.by(() => {
     switch (size) {
       case 'sm':
-        return 'text-[11px] gap-0.5 px-1.5 py-0.5';
+        return variant === 'icon' ? 'p-1' : 'text-[11px] gap-0.5 px-1.5 py-0.5';
       case 'lg':
-        return 'text-sm gap-1 px-2.5 py-1';
+        return variant === 'icon' ? 'p-2' : 'text-sm gap-1 px-2.5 py-1';
       case 'md':
       default:
-        return 'text-xs gap-1 px-2 py-0.5';
+        return variant === 'icon' ? 'p-1.5' : 'text-xs gap-1 px-2 py-0.5';
     }
   });
 
@@ -126,7 +131,7 @@
     if (isPositive === null) {
       return variant === 'solid'
         ? 'bg-muted text-muted-foreground'
-        : variant === 'badge'
+        : variant === 'badge' || variant === 'icon'
           ? 'bg-muted/50 text-muted-foreground'
           : 'text-muted-foreground';
     }
@@ -134,14 +139,14 @@
     if (isPositive) {
       return variant === 'solid'
         ? 'bg-success text-success-foreground'
-        : variant === 'badge'
+        : variant === 'badge' || variant === 'icon'
           ? 'bg-success/15 text-success border border-success/20'
           : 'text-success';
     }
 
     return variant === 'solid'
       ? 'bg-destructive text-destructive-foreground'
-      : variant === 'badge'
+      : variant === 'badge' || variant === 'icon'
         ? 'bg-destructive/15 text-destructive border border-destructive/20'
         : 'text-destructive';
   });
@@ -149,6 +154,7 @@
 
 <span
   data-svadmin-component="TrendIndicator"
+  title={variant === 'icon' ? (prefix ? `${prefix} ${computed.text}` : computed.text) : undefined}
   class={cn(
     'inline-flex items-center font-medium font-mono select-none transition-colors',
     variant !== 'text' && 'rounded-full font-semibold',
@@ -157,13 +163,13 @@
     className
   )}
 >
-  {#if prefix}
+  {#if prefix && variant !== 'icon'}
     <span class="font-sans text-[11px] font-normal text-muted-foreground mr-0.5">
       {prefix}
     </span>
   {/if}
 
-  {#if showIcon}
+  {#if showIcon || variant === 'icon'}
     {#if computed.direction === 'up'}
       <TrendingUp class={cn(iconSizeClasses, 'shrink-0')} />
     {:else if computed.direction === 'down'}
@@ -173,5 +179,7 @@
     {/if}
   {/if}
 
-  <span>{computed.text}</span>
+  {#if variant !== 'icon'}
+    <span>{computed.text}</span>
+  {/if}
 </span>
