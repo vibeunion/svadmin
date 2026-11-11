@@ -67,7 +67,7 @@
 
 <div
   class={cn(
-    'relative flex flex-col rounded-xl border p-6 transition-all duration-200',
+    'relative flex flex-col rounded-md border p-6 transition-all duration-200',
     'bg-card text-card-foreground',
     highlighted
       ? 'border-primary shadow-lg ring-1 ring-primary'

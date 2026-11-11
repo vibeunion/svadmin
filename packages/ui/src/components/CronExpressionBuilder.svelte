@@ -117,7 +117,7 @@
 
 <div
   data-svadmin-component="CronExpressionBuilder"
-  class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-4 font-sans', className)}
+  class={cn('rounded-md border border-border bg-card p-4 shadow-xs text-xs space-y-4 font-sans', className)}
 >
   <!-- Header: Cron Display & Copy -->
   <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/60">

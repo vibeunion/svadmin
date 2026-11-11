@@ -747,7 +747,7 @@
         <Button type="button" onclick={() => { open = false; }}>{i18n.t('common.close')}</Button>
       {:else if currentStep === 1}
         <div
-          class="border-2 border-dashed border-border/80 hover:border-primary/60 rounded-xl p-8 text-center transition-colors cursor-pointer bg-muted/20"
+          class="border-2 border-dashed border-border/80 hover:border-primary/60 rounded-md p-8 text-center transition-colors cursor-pointer bg-muted/20"
           ondragover={(e) => e.preventDefault()}
           ondrop={handleDrop}
           role="region"

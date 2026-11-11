@@ -118,7 +118,7 @@
 
 <div
   class={cn(
-    'flex flex-col rounded-xl border border-border bg-card shadow-xs text-xs overflow-hidden transition-all',
+    'flex flex-col rounded-md border border-border bg-card shadow-xs text-xs overflow-hidden transition-all',
     isFullscreen ? 'fixed inset-4 z-50 shadow-[var(--shadow-overlay)]' : 'min-h-[500px]',
     className
   )}
