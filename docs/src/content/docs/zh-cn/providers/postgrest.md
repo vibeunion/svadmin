@@ -30,6 +30,7 @@ setDataProvider(dataProvider);
 ## 核心特性
 
 - **原生 Content-Range 分页**：自动将 `pagination.current` 与 `pageSize` 映射为 HTTP `Range: 0-9` 请求头，并从服务端的 `Content-Range: 0-9/100` 解析出数据集总数。
+- **限制总数计算**：客户端分页与关闭分页不会发送服务端范围或请求总数；服务端分页默认使用 `count=exact`，如果只需要近似总数，可以通过 `meta: { count: 'planned' | 'estimated' }` 降低计数开销。
 - **单体对象高效解析**：在 `getOne` 请求中携带 `Accept: application/vnd.pgrst.object+json`，直接返回单条记录对象而非数组。
 - **即时回写结果**：在 `create` 与 `update` 操作中携带 `Prefer: return=representation` 请求头，变动完成后无需二次查询即可获取最新完整记录。
 - **丰富查询操作符**：支持 SvAdmin 过滤条件与 PostgREST 查询操作符的标准序列化（`eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `like`, `ilike`, `in`, `is`, `cs`, `cd`）。

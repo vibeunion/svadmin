@@ -72,6 +72,83 @@ describe('@svadmin/postgrest', () => {
     expect(result.total).toBe(42);
   });
 
+  it('does not request an exact count for unpaginated lists', async () => {
+    let capturedHeaders: HeadersInit | undefined;
+    const mockFetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      capturedHeaders = init?.headers;
+      return new Response(JSON.stringify([{ id: 1 }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    const dataProvider = createPostgrestDataProvider({
+      apiUrl: 'https://api.example.com',
+      fetch: mockFetch,
+    });
+
+    await dataProvider.getList({
+      resource: 'posts',
+      pagination: { mode: 'off' },
+    });
+
+    const headers = capturedHeaders as Record<string, string>;
+    expect(headers['Prefer']).toBeUndefined();
+    expect(headers['Range']).toBeUndefined();
+  });
+
+  it('does not send a sentinel range for client-side or disabled pagination', async () => {
+    const captured: Array<Record<string, string>> = [];
+    const mockFetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      captured.push((init?.headers ?? {}) as Record<string, string>);
+      return new Response(JSON.stringify([{ id: 1 }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    const dataProvider = createPostgrestDataProvider({
+      apiUrl: 'https://api.example.com',
+      fetch: mockFetch,
+    });
+
+    await dataProvider.getList({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 999999, mode: 'client' },
+    });
+    await dataProvider.getList({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 999999, mode: 'off' },
+    });
+
+    expect(captured).toHaveLength(2);
+    for (const headers of captured) {
+      expect(headers['Range']).toBeUndefined();
+      expect(headers['Prefer']).toBeUndefined();
+    }
+  });
+
+  it('allows a list to select a cheaper PostgREST count strategy', async () => {
+    let capturedHeaders: HeadersInit | undefined;
+    const mockFetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      capturedHeaders = init?.headers;
+      return new Response(JSON.stringify([{ id: 1 }]), { status: 200 });
+    });
+
+    const dataProvider = createPostgrestDataProvider({
+      apiUrl: 'https://api.example.com',
+      fetch: mockFetch,
+    });
+
+    await dataProvider.getList({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 10 },
+      meta: { count: 'planned' },
+    });
+
+    expect((capturedHeaders as Record<string, string>)['Prefer']).toBe('count=planned');
+  });
+
   it('retrieves a single object using application/vnd.pgrst.object+json', async () => {
     let capturedHeaders: HeadersInit | undefined;
 
