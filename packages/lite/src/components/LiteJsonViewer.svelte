@@ -32,6 +32,7 @@
 <div
   class="lite-json-viewer {className}"
   data-svadmin-component="LiteJsonViewer"
+  data-initial-depth={initialDepth}
   role="region"
   aria-label={title ?? 'JSON Viewer'}
 >
