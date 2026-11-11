@@ -477,7 +477,7 @@
   bind:this={formElement}
   aria-busy={isSubmitting}
   onsubmit={handleSubmit}
-  class={cn('space-y-4 rounded-xl border border-border bg-card p-6 shadow-xs text-xs', className)}
+  class={cn('space-y-4 rounded-md border border-border bg-card p-6 shadow-xs text-xs', className)}
 >
   {#if resolvedSchema?.title}
     <div class="pb-2 border-b border-border/60">

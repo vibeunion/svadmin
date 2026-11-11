@@ -83,17 +83,17 @@
   >
     <div
       class={cn(
-        'flex flex-col bg-card border border-border text-card-foreground shadow-2xl transition-all duration-200 overflow-hidden',
+        'flex flex-col bg-card border border-border text-card-foreground shadow-[var(--shadow-overlay)] transition-all duration-200 overflow-hidden',
         isFullscreen
-          ? 'fixed inset-2 rounded-xl'
-          : 'w-full max-w-4xl max-h-[85vh] rounded-xl',
+          ? 'fixed inset-2 rounded-md'
+          : 'w-full max-w-4xl max-h-[85vh] rounded-md',
         className,
       )}
     >
       <!-- 弹窗顶栏 -->
       <div class="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/20">
         <div class="flex items-center gap-2.5">
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary/10 text-primary">
             <TableProperties size={18} />
           </div>
           <div>
@@ -176,7 +176,7 @@
 
       <!-- 明细表格主体 -->
       <div class="flex-1 overflow-auto p-4">
-        <div class="rounded-lg border border-border overflow-hidden">
+        <div class="rounded-md border border-border overflow-hidden">
           <table class="w-full text-xs text-left whitespace-nowrap">
             <thead class="bg-muted/40 border-b border-border text-muted-foreground font-semibold sticky top-0">
               <tr>
@@ -217,7 +217,7 @@
         </span>
         <button
           type="button"
-          class="px-4 py-1.5 rounded-lg border border-border bg-background text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
+          class="px-4 py-1.5 rounded-md border border-border bg-background text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
           onclick={handleClose}
         >
           关闭

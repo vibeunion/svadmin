@@ -247,14 +247,14 @@
 
     <div
       class={cn(
-        'relative z-10 flex flex-col w-full max-w-3xl max-h-[85vh] rounded-2xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden',
+        'relative z-10 flex flex-col w-full max-w-3xl max-h-[85vh] rounded-md border border-border bg-card text-card-foreground shadow-[var(--shadow-overlay)] overflow-hidden',
         className,
       )}
     >
       <!-- Header -->
       <div class="flex items-start justify-between border-b border-border px-6 py-4 bg-card">
         <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <div class="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
             <Keyboard class="h-5 w-5" />
           </div>
           <div>
@@ -264,7 +264,7 @@
         </div>
         <button
           type="button"
-          class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          class="flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           onclick={() => (open = false)}
           aria-label="Close"
         >
@@ -306,7 +306,7 @@
                   <Command class="h-3 w-3 text-primary/70" />
                   <span>{categoryLabels[categoryKey] ?? categoryKey}</span>
                 </div>
-                <div class="rounded-xl border border-border/70 bg-muted/15 divide-y divide-border/50 overflow-hidden">
+                <div class="rounded-md border border-border/70 bg-muted/15 divide-y divide-border/50 overflow-hidden">
                   {#each items as item (item.id)}
                     <div
                       class="flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm transition-colors hover:bg-accent/50 cursor-pointer"
@@ -348,11 +348,11 @@
         </span>
         <div class="flex items-center gap-3">
           <span>
-            <kbd class="px-1.5 py-0.5 rounded bg-background border border-border text-[10px] font-mono">?</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-background border border-border text-xs font-mono">?</kbd>
             {chinese ? ' 呼出' : ' Toggle'}
           </span>
           <span>
-            <kbd class="px-1.5 py-0.5 rounded bg-background border border-border text-[10px] font-mono">Esc</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-background border border-border text-xs font-mono">Esc</kbd>
             {chinese ? ' 关闭' : ' Close'}
           </span>
         </div>

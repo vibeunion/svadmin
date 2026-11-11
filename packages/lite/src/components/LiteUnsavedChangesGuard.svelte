@@ -38,7 +38,6 @@
   .lite-unsaved-banner {
     display: flex;
     align-items: center;
-    gap: 8px;
     padding: 8px 12px;
     background: #fff7e8;
     border: 1px solid #ffd591;
@@ -47,6 +46,7 @@
     font-size: 13px;
     color: #d46b08;
   }
+  .lite-unsaved-banner > * + * { margin-left: 8px; }
   .lite-unsaved-icon { font-size: 14px; }
   .lite-unsaved-text { font-weight: 500; }
   .lite-unsaved-content { position: relative; }

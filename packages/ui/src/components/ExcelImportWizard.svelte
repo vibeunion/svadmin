@@ -266,7 +266,7 @@
 <div
   data-svadmin-component="ExcelImportWizard"
   class={cn(
-    'flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden',
+    'flex flex-col rounded-md border border-border bg-card text-card-foreground shadow-sm overflow-hidden',
     className,
   )}
 >
@@ -337,7 +337,7 @@
       <div class="flex flex-col items-center justify-center py-8">
         <label
           class={cn(
-            'flex flex-col items-center justify-center w-full max-w-lg h-60 border-2 border-dashed rounded-xl cursor-pointer transition-all',
+            'flex flex-col items-center justify-center w-full max-w-lg h-60 border-2 border-dashed rounded-md cursor-pointer transition-all',
             isDragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-background',
           )}
           ondragover={(e) => { e.preventDefault(); isDragOver = true; }}

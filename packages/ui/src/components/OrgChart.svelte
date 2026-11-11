@@ -75,7 +75,7 @@
       role="button"
       tabindex="0"
       class={cn(
-        'group relative flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-xs transition-all cursor-pointer',
+        'group relative flex items-center gap-3 rounded-md border border-border bg-card p-3 shadow-xs transition-all cursor-pointer',
         'hover:border-primary/60 hover:shadow-md hover:-translate-y-0.5 select-none min-w-[200px] max-w-[260px]'
       )}
       onclick={() => onnodeclick?.(node)}

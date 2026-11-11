@@ -53,7 +53,8 @@
   .lite-comment-author { font-weight: 600; color: #1d2129; }
   .lite-comment-time { color: #86909c; font-size: 11px; }
   .lite-comment-content { margin: 0; color: #4e5969; }
-  .lite-comment-form { display: flex; flex-direction: column; gap: 8px; }
+  .lite-comment-form { display: flex; flex-direction: column; }
+  .lite-comment-form > * + * { margin-top: 8px; }
   .lite-comment-input { height: 60px; border: 1px solid #e5e6eb; border-radius: 4px; padding: 6px 10px; font-size: 12px; }
   .lite-comment-btn { height: 32px; background: #165dff; color: #fff; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; }
 </style>

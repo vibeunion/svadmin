@@ -121,7 +121,7 @@
 
   <!-- Detailed Feature Comparison Table (Optional) -->
   {#if comparisonGroups.length > 0}
-    <div class="overflow-x-auto rounded-xl border border-border bg-card p-6 shadow-sm">
+    <div class="overflow-x-auto rounded-md border border-border bg-card p-6 shadow-sm">
       <div class="mb-6">
         <h3 class="text-lg font-bold tracking-tight text-foreground">Feature Comparison</h3>
         <p class="text-sm text-muted-foreground">Compare features across all subscription plans</p>

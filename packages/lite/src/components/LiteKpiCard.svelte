@@ -147,10 +147,12 @@
   .lite-kpi-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
   .lite-kpi-card-title { margin: 0; font-size: 13px; font-weight: 600; color: #4e5969; }
   .lite-kpi-card-subtitle { font-size: 11px; color: #86909c; display: block; margin-top: 2px; }
-  .lite-kpi-card-body { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .lite-kpi-card-body { display: flex; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+  .lite-kpi-card-body > * + * { margin-left: 8px; }
   .lite-kpi-card-metric { font-family: monospace; font-size: 24px; font-weight: 700; color: #1d2129; }
   .lite-kpi-card-prefix, .lite-kpi-card-suffix { font-size: 13px; font-weight: 400; color: #86909c; margin: 0 2px; }
-  .lite-kpi-card-trend { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; }
+  .lite-kpi-card-trend { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; }
+  .lite-kpi-card-trend > * + * { margin-left: 2px; }
   .lite-kpi-card-trend-up { color: #00b42a; background: #e8ffea; }
   .lite-kpi-card-trend-down { color: #f53f3f; background: #ffece8; }
   .lite-kpi-card-trend-neutral { color: #4e5969; background: #f2f3f5; }

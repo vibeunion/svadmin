@@ -297,7 +297,7 @@
       {:else}
         {#each displayLabels as tag, idx (idx)}
           {@const tagVal = Array.isArray(value) ? value[idx] : undefined}
-          <span class="inline-flex items-center gap-1 rounded bg-secondary/80 text-secondary-foreground px-1.5 py-0.5 text-[11px] font-medium border border-border/40">
+          <span class="inline-flex items-center gap-1 rounded bg-secondary/80 text-secondary-foreground px-1.5 py-0.5 text-xs font-medium border border-border/40">
             <span class="truncate max-w-[120px]">{tag}</span>
             {#if !disabled && tagVal !== undefined}
               <span

@@ -252,7 +252,7 @@
   });
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
+<div class={cn('rounded-md border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
   <!-- Header & Toolbar -->
   <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/60">

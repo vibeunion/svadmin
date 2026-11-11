@@ -1743,5 +1743,113 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
   recordTitle="采购核算单 #PO-991"
   {comments}
   onAddComment={(text, parentId) => console.log('新增批注:', text, parentId)}
+### `<RecordCompareModal>` 与 `<EntityComparisonDrawer>`
+
+企业级多实体记录参数并排对比与差异透视套件：
+- **多列并排矩阵**：横向并排对比 2~5 条实体记录，首列固定属性标签名，跨字段纵览更直观。
+- **差异高亮聚焦**：支持一键切换“仅显示差异项”（兼容 `defaultHideIdentical` 别名），采用扁平主色高亮与克制设计。
+- **基准实体切换**：可任意指定基准记录列（Baseline 👑），其他记录自动与其对比。
+- **一键差异同步**：支持将基准记录上的特定字段一键同步/覆写至目标记录（`onsync`）。
+- **双模交互呈现**：支持大屏居中弹窗（`layout="modal"`）与右侧滑出抽屉（`layout="drawer"`）。
+
+```svelte
+<script lang="ts">
+  import { RecordCompareModal } from '@svadmin/ui';
+
+  let showCompare = $state(true);
+  const serverNodes = [
+    { id: 'node-01', name: '主节点-A', cpu: '16 核', memory: '64 GB', region: '华东-1' },
+    { id: 'node-02', name: '从节点-B', cpu: '32 核', memory: '64 GB', region: '华东-1' },
+    { id: 'node-03', name: '金丝雀-C', cpu: '8 核', memory: '32 GB', region: '华西-2' },
+  ];
+</script>
+
+<RecordCompareModal
+  bind:open={showCompare}
+  title="集群节点规格横向对比"
+  records={serverNodes}
+  benchmarkIndex={0}
+  onsync={(source, target, field) => console.log(`同步字段 ${field} 到 ${target.name}`)}
+/>
+```
+
+### `<QueryBuilder>`
+
+企业级多层嵌套查询与规则引擎构建器：
+- 专为复杂报表圈选、风控规则、BI 钻取与多维数据检索设计。
+- **AND / OR 逻辑分组嵌套**：支持无限层级的嵌套组递归构建，直观可视化的分组外框与连接引导线。
+- **字段类型自适应操作符**：文本字段（包含、开头为、结尾为）、数值字段（大于、小于、介于、等于）、枚举/布尔（单选/多选属于）、日期字段（早于、晚于）与空值判断（为空/非空）。
+- **SQL / JSON 即时导出**：内置 `serializeToSql` 与标准 JSON 规则树，顶部配备即时“预览 SQL WHERE”与一键重置操作。
+
+```svelte
+<script lang="ts">
+  import { QueryBuilder, type QueryField, type QueryGroup } from '@svadmin/ui';
+
+  const fields: QueryField[] = [
+    { key: 'status', label: '审批状态', type: 'select', options: [{ label: '已通过', value: 'approved' }, { label: '待初审', value: 'pending' }] },
+    { key: 'amount', label: '成交金额', type: 'number' },
+    { key: 'customer', label: '客户姓名', type: 'text' },
+    { key: 'createdAt', label: '创建时间', type: 'date' },
+  ];
+
+  let currentQuery = $state<QueryGroup | null>(null);
+</script>
+
+<QueryBuilder {fields} onchange={(q) => (currentQuery = q)} />
+```
+
+### `<FilterTagBar>`
+
+已生效筛选标签栏与常用视图预设管理器：
+- 置于数据表格上方，直观呈现当前生效的所有检索与筛选条件气泡胶囊。
+- 支持单个条件一键点击 `×` 移除，并支持“清空全部筛选”。
+- **常用视图持久化**：用户可一键将当前复合筛选保存为个人预设视图（保存在 `localStorage`），下拉列表可秒级切换历史预设视图或删除旧预设。
+
+```svelte
+<script lang="ts">
+  import { FilterTagBar, type FilterTagItem } from '@svadmin/ui';
+
+  let activeFilters: FilterTagItem[] = $state([
+    { id: '1', field: 'status', label: '订单状态', operatorLabel: '=', valueLabel: '已支付' },
+    { id: '2', field: 'amount', label: '交易金额', operatorLabel: '>=', valueLabel: '¥10,000' },
+  ]);
+</script>
+
+<FilterTagBar
+  filters={activeFilters}
+  onremove={(id) => (activeFilters = activeFilters.filter((f) => f.id !== id))}
+  onclear={() => (activeFilters = [])}
+/>
+```
+
+### `<BatchEditModal>`
+
+企业级数据表格批量修改与安全预检弹窗：
+- 勾选多条记录后，一键对所选记录发起多字段批量调整。
+- **三种批量模式**：支持“替换为（Replace）”、“追加（Append）”与“置空清空（Clear）”。
+- **安全防误点保护**：顶部醒目展示高影响范围预警（如“将同时覆盖 48 条数据”），提交前具备二次确认机制。
+
+```svelte
+<script lang="ts">
+  import { BatchEditModal, type BatchFieldOption } from '@svadmin/ui';
+
+  let isBatchOpen = $state(false);
+
+  const fields: BatchFieldOption[] = [
+    { key: 'assignee', label: '负责人', type: 'text' },
+    { key: 'status', label: '审批状态', type: 'select', options: [{ label: '已初审', value: 'reviewed' }, { label: '已归档', value: 'archived' }] },
+    { key: 'priority', label: '业务优先级', type: 'number' },
+  ];
+</script>
+
+<button onclick={() => (isBatchOpen = true)}>批量修改已选项</button>
+
+<BatchEditModal
+  bind:open={isBatchOpen}
+  selectedCount={36}
+  resourceName="订单记录"
+  {fields}
+  onconfirm={(changes) => console.log('批量变更提交:', changes)}
+  onclose={() => (isBatchOpen = false)}
 />
 ```

@@ -146,7 +146,7 @@
   >
     <div
       class={cn(
-        'relative flex flex-col w-full max-w-xl max-h-[85vh] rounded-xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden',
+        'relative flex flex-col w-full max-w-xl max-h-[85vh] rounded-md border border-border bg-card text-card-foreground shadow-[var(--shadow-overlay)] overflow-hidden',
         className,
       )}
     >

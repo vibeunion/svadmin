@@ -6,5 +6,6 @@ export {
 
 export type {
   PostgrestOptions,
+  PostgrestCountMode,
   FetchLike,
 } from './postgrest-data-provider.js';

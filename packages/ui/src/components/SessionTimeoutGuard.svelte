@@ -96,10 +96,10 @@
         class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 bg-background/80 backdrop-blur-sm"
       >
         <div
-          class="relative z-50 w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+          class="relative z-50 w-full max-w-md rounded-md border border-border bg-card p-6 text-card-foreground shadow-[var(--shadow-overlay)] animate-in fade-in zoom-in-95 duration-150"
         >
           <div class="flex items-start gap-4">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-warning/15 text-warning border border-warning/20">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-warning/15 text-warning border border-warning/20">
               <ShieldAlert class="h-6 w-6" />
             </div>
 
