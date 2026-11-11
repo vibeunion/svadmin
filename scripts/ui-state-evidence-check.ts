@@ -93,6 +93,8 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/OrgChart.svelte',
   'packages/ui/src/components/PresenceAvatarGroup.svelte',
   'packages/lite/src/components/LiteCommentThread.svelte',
+  // Presence avatars are fixed-size decorated identity chips, matching the reference UI owner.
+  'packages/lite/src/components/LitePresenceAvatarGroup.svelte',
   'packages/lite/src/components/LiteEmptyState.svelte',
   'packages/lite/src/components/LiteImage.svelte',
   'packages/lite/src/components/LiteImagePreview.svelte',
