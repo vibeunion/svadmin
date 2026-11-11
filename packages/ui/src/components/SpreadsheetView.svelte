@@ -1057,7 +1057,7 @@
   }
 </script>
 
-<div data-testid="spreadsheet-view" class={cn('rounded-xl border border-border bg-card shadow-xs text-xs space-y-2 p-3 overflow-hidden', className)}>
+<div data-testid="spreadsheet-view" class={cn('rounded-md border border-border bg-card shadow-xs text-xs space-y-2 p-3 overflow-hidden', className)}>
   <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="flex items-center gap-2">
       <FileSpreadsheet class="h-4 w-4 text-primary shrink-0" />

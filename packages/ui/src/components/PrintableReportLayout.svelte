@@ -80,7 +80,7 @@
   data-paper-size={paperSize}
   data-orientation={orientation}
   class={cn(
-    'relative w-full rounded-2xl border border-border bg-card text-card-foreground shadow-sm p-8 print:p-0 print:border-none print:shadow-none print:bg-transparent',
+    'relative w-full rounded-md border border-border bg-card text-card-foreground shadow-sm p-8 print:p-0 print:border-none print:shadow-none print:bg-transparent',
     className,
   )}
 >
@@ -91,7 +91,7 @@
       <span class="text-sm font-semibold text-foreground">
         {chinese ? '报表打印排版预览' : 'Printable Report Preview'}
       </span>
-      <span class="rounded bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground uppercase">
+      <span class="rounded bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground uppercase">
         {paperSize} {orientation}
       </span>
     </div>
@@ -147,7 +147,7 @@
 
           {#if reportNo}
             <div class="text-right">
-              <span class="block text-[11px] font-medium text-muted-foreground uppercase">
+              <span class="block text-xs font-medium text-muted-foreground uppercase">
                 {chinese ? '单据编号' : 'Document No.'}
               </span>
               <span class="font-mono text-sm font-bold text-foreground">{reportNo}</span>
@@ -161,7 +161,7 @@
         <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-muted/40 p-3 rounded-lg border border-border/60 text-xs">
           {#each metadata as item (item.label)}
             <div>
-              <span class="block text-muted-foreground text-[11px]">{item.label}</span>
+              <span class="block text-muted-foreground text-xs">{item.label}</span>
               <span class="font-semibold text-foreground mt-0.5">{item.value}</span>
             </div>
           {/each}
@@ -188,7 +188,7 @@
                 <div class="border-b border-foreground/40 pb-1">
                   <span class="font-serif italic text-sm">{sig.name || '_______________'}</span>
                 </div>
-                <div class="text-[10px] text-muted-foreground font-mono">
+                <div class="text-xs text-muted-foreground font-mono">
                   {sig.date || (chinese ? '日期: ____年__月__日' : 'Date: YYYY-MM-DD')}
                 </div>
               </div>
@@ -200,7 +200,7 @@
             <div class="relative flex h-28 w-28 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-destructive/60 bg-destructive/5 text-destructive select-none p-2 text-center rotate-[-8deg]">
               <div class="space-y-0.5">
                 <Stamp class="h-5 w-5 mx-auto opacity-70" />
-                <div class="text-[10px] font-bold leading-tight uppercase tracking-tight">
+                <div class="text-xs font-bold leading-tight uppercase tracking-tight">
                   {resolvedStampText}
                 </div>
                 <div class="text-[8px] font-mono opacity-80">
@@ -214,7 +214,7 @@
     {/if}
 
     <!-- Page Numbering & Footer -->
-    <footer class="relative z-10 flex items-center justify-between border-t border-border/50 pt-3 text-[11px] text-muted-foreground">
+    <footer class="relative z-10 flex items-center justify-between border-t border-border/50 pt-3 text-xs text-muted-foreground">
       {#if footer}
         {@render footer()}
       {:else}

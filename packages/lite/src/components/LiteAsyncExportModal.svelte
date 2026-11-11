@@ -87,18 +87,19 @@
     border: 1px solid #e5e6eb;
     border-radius: 4px;
   }
-  .lite-export-radios { display: flex; gap: 12px; margin-top: 4px; }
+  .lite-export-radios { display: flex; margin-top: 4px; }
+  .lite-export-radios > * + * { margin-left: 12px; }
   .lite-export-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
     max-height: 140px;
     overflow-y: auto;
     padding: 6px;
     background: #f7f8fa;
     border-radius: 4px;
   }
-  .lite-export-col-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .lite-export-col-item { display: flex; align-items: center; width: 50%; font-size: 12px; }
+  .lite-export-col-item > * + * { margin-left: 6px; }
   .lite-export-actions { margin-top: 16px; display: flex; justify-content: flex-end; }
   .lite-export-submit {
     padding: 7px 16px;

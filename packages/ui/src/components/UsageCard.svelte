@@ -40,7 +40,7 @@
 </script>
 
 <div
-  class={cn('rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm', className)}
+  class={cn('rounded-md border border-border bg-card p-6 text-card-foreground shadow-sm', className)}
   data-svadmin-component="UsageCard"
 >
   <div class="flex items-start justify-between gap-4 border-b border-border/60 pb-5">

@@ -196,18 +196,18 @@
     <!-- Modal Card -->
     <div
       class={cn(
-        'relative z-10 w-full max-w-lg rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-150',
+        'relative z-10 w-full max-w-lg rounded-md border border-border bg-card p-6 text-card-foreground shadow-[var(--shadow-overlay)] animate-in fade-in zoom-in-95 duration-150',
         className,
       )}
     >
       <!-- Header -->
       <div class="flex items-start justify-between border-b border-border/60 pb-4">
         <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-destructive/15 text-destructive border border-destructive/20">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-destructive/15 text-destructive border border-destructive/20">
             <ShieldCheck class="h-6 w-6" />
           </div>
           <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive mb-1">
+            <div class="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive mb-1">
               <AlertTriangle class="h-3 w-3" />
               <span>{chinese ? '特权高危操作 · 双人双锁' : 'Two-Person Rule Required'}</span>
             </div>
@@ -323,11 +323,11 @@
         </div>
       {:else}
         <!-- Remote Review QR Code -->
-        <div class="flex flex-col items-center justify-center p-4 border border-dashed border-border rounded-xl bg-muted/20 text-center space-y-3">
-          <div class="flex h-36 w-36 items-center justify-center rounded-xl bg-background border border-border shadow-xs text-xs text-muted-foreground p-3">
+        <div class="flex flex-col items-center justify-center p-4 border border-dashed border-border rounded-md bg-muted/20 text-center space-y-3">
+          <div class="flex h-36 w-36 items-center justify-center rounded-sm bg-background border border-border shadow-xs text-xs text-muted-foreground p-3">
             <div class="space-y-1 text-center">
               <QrCode class="h-16 w-16 mx-auto text-primary/80" />
-              <div class="text-[10px] font-mono">{chinese ? '复核专属二维码' : 'Approval QR'}</div>
+              <div class="text-xs font-mono">{chinese ? '复核专属二维码' : 'Approval QR'}</div>
             </div>
           </div>
 
@@ -339,7 +339,7 @@
               <input
                 readonly
                 value={remoteReviewUrl}
-                class="h-7 w-full rounded border border-border bg-background px-2 text-[11px] font-mono text-muted-foreground"
+                class="h-7 w-full rounded border border-border bg-background px-2 text-xs font-mono text-muted-foreground"
               />
               <Button size="sm" variant="outline" class="h-7 px-2 shrink-0" onclick={handleCopyLink}>
                 {#if isCopied}
@@ -355,7 +355,7 @@
 
       <!-- Footer Actions -->
       <div class="mt-6 flex items-center justify-between border-t border-border/60 pt-4">
-        <span class="text-[11px] text-muted-foreground font-mono">
+        <span class="text-xs text-muted-foreground font-mono">
           ID: {actionId}
         </span>
 

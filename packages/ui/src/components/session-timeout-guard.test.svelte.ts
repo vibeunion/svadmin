@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import { useSessionTimeout } from './useSessionTimeout.svelte.js';
 import SessionTimeoutGuard from './SessionTimeoutGuard.svelte';
 

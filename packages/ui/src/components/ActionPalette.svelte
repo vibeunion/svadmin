@@ -253,7 +253,7 @@
             <Button
               size="sm"
               class="h-9 px-3 gap-1 shrink-0"
-              onclick={() => executeAction(pendingAction, paramValue)}
+              onclick={() => pendingAction && executeAction(pendingAction, paramValue)}
             >
               <span>{chinese ? '执行' : 'Run'}</span>
               <CornerDownLeft class="h-3.5 w-3.5" />

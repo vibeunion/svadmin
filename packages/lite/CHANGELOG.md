@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.27.0](https://github.com/vibeunion/svadmin/compare/lite-v0.26.0...lite-v0.27.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **lite:** add recent enterprise suites SSR parity fallbacks ([#722](https://github.com/vibeunion/svadmin/issues/722)) ([b1abece](https://github.com/vibeunion/svadmin/commit/b1abecec0489cb477704db9dc42daf07e5307f7e))
+* **ui:** add PrintableReportLayout, ConversionFunnel, SchemaVisualModeler, and MicroAppBridge enterprise suite ([dc3c700](https://github.com/vibeunion/svadmin/commit/dc3c700c7b7f5df1c747e1fb8a56b1e69034b54b))
+* **ui:** add StepWizard, ColumnVisibilityDrawer, useHotkeys, and PocketBase enterprise suite ([7fcc861](https://github.com/vibeunion/svadmin/commit/7fcc861239b788231e6b590951fa302f9f2a333f))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** keep wizard and approval styles IE11 safe ([a32bb31](https://github.com/vibeunion/svadmin/commit/a32bb31e3652d2b5bd659305c794d9655ea52203))
+
+## [0.26.0](https://github.com/vibeunion/svadmin/compare/lite-v0.25.7...lite-v0.26.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **lite:** add recent enterprise UI parity fallbacks ([#713](https://github.com/vibeunion/svadmin/issues/713)) ([42fdca0](https://github.com/vibeunion/svadmin/commit/42fdca0c6d984cadac43044628370ecd668fe5ae))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** remove an unreachable input sanitizer condition ([#719](https://github.com/vibeunion/svadmin/issues/719)) ([229c543](https://github.com/vibeunion/svadmin/commit/229c543d528b7e0b0ed9109b9a316f528e6bd5b0))
+
 ## [0.25.7](https://github.com/vibeunion/svadmin/compare/lite-v0.25.6...lite-v0.25.7) (2026-11-10)
 
 

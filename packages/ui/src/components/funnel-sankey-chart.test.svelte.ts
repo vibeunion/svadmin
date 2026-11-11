@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import ConversionFunnel, { type FunnelStageItem } from './ConversionFunnel.svelte';
 import SankeyChart, { type SankeyNode, type SankeyLink } from './SankeyChart.svelte';
 

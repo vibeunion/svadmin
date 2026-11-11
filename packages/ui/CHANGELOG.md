@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.122.0](https://github.com/vibeunion/svadmin/compare/ui-v0.121.0...ui-v0.122.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **ui:** add AnnouncementBanner, TextDiffViewer, and AsyncExportModal enterprise suite ([#720](https://github.com/vibeunion/svadmin/issues/720)) ([5c2c8ee](https://github.com/vibeunion/svadmin/commit/5c2c8ee90030116c4e5ac1b05b60d6b44ec41348))
+* **ui:** add PrintableReportLayout, ConversionFunnel, SchemaVisualModeler, and MicroAppBridge enterprise suite ([dc3c700](https://github.com/vibeunion/svadmin/commit/dc3c700c7b7f5df1c747e1fb8a56b1e69034b54b))
+* **ui:** add SessionTimeoutGuard, DualApprovalGate, TableClipboardManager, and AudioFeedback suite ([b624589](https://github.com/vibeunion/svadmin/commit/b62458991a9d88e9ca95d9e1bce713899a0b4a96))
+* **ui:** add StepWizard, ColumnVisibilityDrawer, useHotkeys, and PocketBase enterprise suite ([7fcc861](https://github.com/vibeunion/svadmin/commit/7fcc861239b788231e6b590951fa302f9f2a333f))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** move sheet side to root and narrow filter props ([dbb19bb](https://github.com/vibeunion/svadmin/commit/dbb19bbe90fb8af330f83c7485d0ca92d6009870))
+* **ui:** remove unused test import ([bb69fa6](https://github.com/vibeunion/svadmin/commit/bb69fa6b82d912d4dcc048c8615319e9c9dd49b3))
+* **ui:** remove unused test imports ([5c6ce2f](https://github.com/vibeunion/svadmin/commit/5c6ce2f78278385b68ed457e23acffb6a07130df))
+* **ui:** standardize clean-flat container radius, overlay shadows, and typography ([43bffb2](https://github.com/vibeunion/svadmin/commit/43bffb2b12df34798894ed571640ec5eede7ac91))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** sync report suite with main ([4ba3458](https://github.com/vibeunion/svadmin/commit/4ba34587a25690ca1b461249454be26840b0161c))
+
+## [0.121.0](https://github.com/vibeunion/svadmin/compare/ui-v0.120.0...ui-v0.121.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **ui:** add KpiCard, JsonViewer, and ResultPage enterprise suite ([#717](https://github.com/vibeunion/svadmin/issues/717)) ([b7449d7](https://github.com/vibeunion/svadmin/commit/b7449d793b80bce1d82aca5723e900a845c7fce6))
+* **ui:** add record compare and localize enterprise chrome ([#715](https://github.com/vibeunion/svadmin/issues/715)) ([758508d](https://github.com/vibeunion/svadmin/commit/758508df1c44a25cd9a8ded089ccf7a648357b3b))
+* **ui:** add UnsavedChangesGuard and useUnsavedChanges protection suite ([#716](https://github.com/vibeunion/svadmin/issues/716)) ([f78bf07](https://github.com/vibeunion/svadmin/commit/f78bf0752be3c6e554f177118929df26411d0b34))
+* **ui:** add WatermarkContainer, ContextMenu, and OtpInput enterprise security suite ([#718](https://github.com/vibeunion/svadmin/issues/718)) ([7c7839a](https://github.com/vibeunion/svadmin/commit/7c7839a23770d5c022bdf8bd69303310612de87f))
+* **ui:** enhance TourGuide, TrendIndicator, and SignaturePad enterprise suite ([#714](https://github.com/vibeunion/svadmin/issues/714)) ([4128458](https://github.com/vibeunion/svadmin/commit/4128458c7126e0cbb72905d4c11117e2a96a0ed7))
+
 ## [0.120.0](https://github.com/vibeunion/svadmin/compare/ui-v0.119.0...ui-v0.120.0) (2026-11-10)
 
 

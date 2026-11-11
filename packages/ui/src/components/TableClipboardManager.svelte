@@ -195,7 +195,7 @@
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
   >
     <div
-      class="relative z-10 flex flex-col w-full max-w-2xl max-h-[85vh] rounded-2xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      class="relative z-10 flex flex-col w-full max-w-2xl max-h-[85vh] rounded-md border border-border bg-card text-card-foreground shadow-[var(--shadow-overlay)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
     >
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-border/70 px-6 py-4 bg-card">
@@ -208,7 +208,7 @@
         <button
           type="button"
           onclick={() => (isModalOpen = false)}
-          class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          class="flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
           aria-label="Close"
         >
           <X class="h-4 w-4" />

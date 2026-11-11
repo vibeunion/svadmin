@@ -2103,5 +2103,172 @@ Executive management dashboard cross-period comparison card:
   previousValue={1000000}
   prefix="¥"
   periodName="vs Last Quarter"
+### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
+
+Enterprise multi-record parameter comparison and difference spotlight suite:
+- **Side-by-side Matrix**: Compares 2 to 5 records across all attributes with fixed sticky row labels.
+- **Difference Spotlight**: Toggle "Only Differences" (`defaultHideIdentical` supported) with primary accent highlight to focus on diverging configurations.
+- **Baseline Selection**: Dynamically switch the benchmark reference record column.
+- **Attribute Value Sync**: Built-in one-click sync action to copy values from baseline to target records (`onsync`).
+- **Flexible Layouts**: Supports centered overlay dialog (`layout="modal"`) and right-side slide-over (`layout="drawer"`).
+
+```svelte
+<script lang="ts">
+  import { RecordCompareModal } from '@svadmin/ui';
+
+  let showCompare = $state(true);
+  const serverNodes = [
+    { id: 'node-01', name: 'Master-A', cpu: '16 Cores', memory: '64 GB', region: 'us-east' },
+    { id: 'node-02', name: 'Replica-B', cpu: '32 Cores', memory: '64 GB', region: 'us-east' },
+    { id: 'node-03', name: 'Canary-C', cpu: '8 Cores', memory: '32 GB', region: 'us-west' },
+  ];
+</script>
+
+<RecordCompareModal
+  bind:open={showCompare}
+  title="Server Specification Comparison"
+  records={serverNodes}
+  benchmarkIndex={0}
+  onsync={(source, target, field) => console.log(`Synced ${field} to ${target.name}`)}
+/>
+```
+
+### `<WidgetContainer>`
+
+Enterprise dashboard widget wrapper container:
+- Standardized container shell for executive dashboards, operational metrics, and charts.
+- **Full Lifecycle Controls**: Built-in header toolbar with one-click manual refresh animation, fullscreen toggle (ESC dismissal), timestamp indicators, and custom actions.
+- **State Resiliency**: Embedded skeleton loading layout (`loading`) and user-friendly error retry cards (`error` + `onretry`).
+
+```svelte
+<script lang="ts">
+  import { WidgetContainer } from '@svadmin/ui';
+
+  const now = new Date();
+</script>
+
+<WidgetContainer
+  title="Realtime QPS Throughput"
+  description="Monitoring request volume fluctuations"
+  lastUpdated={now}
+  allowFullscreen={true}
+  allowRefresh={true}
+  onrefresh={() => console.log('Refreshing widget...')}
+>
+  <div class="h-40 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+    Embed any Chart or Metric component here
+  </div>
+</WidgetContainer>
+```
+
+### `<DataFreshnessIndicator>`
+
+Data freshness indicator and auto-polling cadence pill:
+- Tailored for operational cockpits and live monitoring dashboards to communicate data recency.
+- **Pulsing State Dot**: Dynamic visual cues for `live` (pulsing green ping), `fresh`, `stale` (warning tone), and `offline`.
+- **Interval Selector**: Toggle automatic background polling frequency (`5s`, `15s`, `30s`, `1m`, `off`) with manual click-to-sync triggers.
+
+```svelte
+<script lang="ts">
+  import { DataFreshnessIndicator } from '@svadmin/ui';
+
+  let lastSync = $state(Date.now());
+</script>
+
+<DataFreshnessIndicator
+  lastUpdated={lastSync}
+  pollInterval={15}
+  onsyncnow={() => (lastSync = Date.now())}
+/>
+```
+
+### `<ServerStatusGrid>`
+
+Cluster server node health matrix and metric grid:
+- Built for microservice clusters, edge nodes, and database read replicas.
+- **Cluster Aggregation**: Automatic summary calculation for healthy, warning, and critical node counts alongside average network latency.
+- **Multi-Resource Gauges**: Micro progress bars for CPU, Memory, and Disk usage with threshold-driven tone shifts.
+
+```svelte
+<script lang="ts">
+  import { ServerStatusGrid, type ServerNode } from '@svadmin/ui';
+
+  const nodes: ServerNode[] = [
+    { id: '1', name: 'gateway-sh-01', region: 'cn-shanghai', status: 'healthy', latencyMs: 18, cpuPercent: 35, memoryPercent: 52 },
+    { id: '2', name: 'gateway-bj-02', region: 'cn-beijing', status: 'warning', latencyMs: 140, cpuPercent: 78, memoryPercent: 84 },
+  ];
+</script>
+
+<ServerStatusGrid {nodes} onselectnode={(n) => console.log('Selected:', n.name)} />
+### `<QueryBuilder>`
+
+Enterprise multi-level nested visual query and rule builder:
+- Built for advanced BI dashboards, risk policy builders, and multi-dimensional operational datasets.
+- **AND / OR Logical Grouping**: Supports recursive group nesting with intuitive indentation and boundary connections.
+- **Type-adaptive Operators**: Automatic operator mapping for text (contains, starts_with, ends_with), numeric (gt, lt, between, equals), select/boolean (equals, in), and date fields.
+- **Live SQL / JSON Export**: Native SQL WHERE clause serialization and structured JSON rule trees with one-click preview.
+
+```svelte
+<script lang="ts">
+  import { QueryBuilder, type QueryField } from '@svadmin/ui';
+
+  const fields: QueryField[] = [
+    { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Approved', value: 'approved' }] },
+    { key: 'amount', label: 'Amount', type: 'number' },
+    { key: 'customer', label: 'Customer Name', type: 'text' },
+  ];
+</script>
+
+<QueryBuilder {fields} onchange={(q) => console.log('Query changed:', q)} />
+```
+
+### `<FilterTagBar>`
+
+Active filter tag capsule bar and saved preset view manager:
+- Positioned above data tables to present all active filter conditions as dismissible badge tags.
+- Supports individual filter removal (`x`) and quick "Clear All Filters".
+- **Preset Views Persistence**: Save active filter combinations as named preset views in `localStorage`, toggleable via a fast dropdown picker.
+
+```svelte
+<script lang="ts">
+  import { FilterTagBar } from '@svadmin/ui';
+
+  let filters = $state([
+    { id: '1', field: 'status', label: 'Status', operatorLabel: '=', valueLabel: 'Paid' },
+  ]);
+</script>
+
+<FilterTagBar
+  {filters}
+  onremove={(id) => (filters = filters.filter((f) => f.id !== id))}
+  onclear={() => (filters = [])}
+/>
+```
+
+### `<BatchEditModal>`
+
+Enterprise massive record batch edit and impact verification modal:
+- Batch update multiple fields across dozens or hundreds of selected records.
+- **Three Modification Modes**: Replace current value, Append (for tags/arrays), or Clear (set to NULL).
+- **Impact Guard**: Prominently highlights affected record counts and requires secondary confirmation before applying mutations.
+
+```svelte
+<script lang="ts">
+  import { BatchEditModal, type BatchFieldOption } from '@svadmin/ui';
+
+  let open = $state(false);
+  const fields: BatchFieldOption[] = [
+    { key: 'assignee', label: 'Assignee', type: 'text' },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>Batch Edit Selected</button>
+
+<BatchEditModal
+  bind:open
+  selectedCount={24}
+  resourceName="Orders"
+  {fields}
+  onconfirm={(changes) => console.log('Applying batch changes:', changes)}
 />
 ```

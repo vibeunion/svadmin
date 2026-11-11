@@ -78,7 +78,7 @@
 {#if !isOnline || pendingMutations.length > 0}
   <div
     class={cn(
-      'rounded-xl border shadow-xs text-xs p-3 transition-all',
+      'rounded-md border shadow-xs text-xs p-3 transition-all',
       !isOnline
         ? 'bg-warning/15 border-warning/30 text-warning-foreground'
         : 'bg-muted/40 border-border/80 text-foreground',

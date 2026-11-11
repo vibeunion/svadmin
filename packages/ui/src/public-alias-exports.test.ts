@@ -52,6 +52,8 @@ import {
   SpeedometerGauge,
   UnsavedChangesGuard,
   UnsavedChangesModal,
+  RecordCompareModal,
+  EntityComparisonDrawer,
   MetricGrid,
   DashboardMetricGrid,
   SliderCaptcha,
@@ -81,6 +83,17 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  WidgetContainer,
+  DashboardWidget,
+  DataFreshnessIndicator,
+  FreshnessPill,
+  ServerStatusGrid,
+  ClusterHealthMatrix,
+  QueryBuilder,
+  AdvancedQueryBuilder,
+  FilterTagBar,
+  BatchEditModal,
+  BatchEditorModal,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -299,6 +312,17 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(WidgetContainer).toBeDefined();
+    expect(DashboardWidget).toBe(WidgetContainer);
+    expect(DataFreshnessIndicator).toBeDefined();
+    expect(FreshnessPill).toBe(DataFreshnessIndicator);
+    expect(ServerStatusGrid).toBeDefined();
+    expect(ClusterHealthMatrix).toBe(ServerStatusGrid);
+    expect(QueryBuilder).toBeDefined();
+    expect(AdvancedQueryBuilder).toBe(QueryBuilder);
+    expect(FilterTagBar).toBeDefined();
+    expect(BatchEditModal).toBeDefined();
+    expect(BatchEditorModal).toBe(BatchEditModal);
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
@@ -307,6 +331,8 @@ describe('public compatibility aliases', () => {
     expect(EmbeddedSandbox).toBe(MicroAppFrame);
     expect(UnsavedChangesGuard).toBeDefined();
     expect(UnsavedChangesModal).toBe(UnsavedChangesGuard);
+    expect(RecordCompareModal).toBeDefined();
+    expect(EntityComparisonDrawer).toBe(RecordCompareModal);
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();
