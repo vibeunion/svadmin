@@ -110,7 +110,8 @@
   .lite-result-500 .lite-result-icon-wrapper { background: #ffece8; color: #f53f3f; }
   .lite-result-title { margin: 0 0 8px; font-size: 20px; font-weight: 600; color: #1d2129; }
   .lite-result-description { margin: 0 0 24px; font-size: 14px; color: #4e5969; max-width: 480px; margin-left: auto; margin-right: auto; }
-  .lite-result-actions { display: flex; justify-content: center; gap: 12px; }
+  .lite-result-actions { display: flex; justify-content: center; }
+  .lite-result-actions > * + * { margin-left: 12px; }
   .lite-result-btn-primary {
     display: inline-block;
     padding: 8px 18px;
