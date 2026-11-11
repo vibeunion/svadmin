@@ -791,5 +791,19 @@ export { default as ColumnFilterBuilder, type ColumnFilterBuilderProps } from '.
 // Enterprise hotkeys & shortcuts modal suite
 export { useHotkeys, getRegisteredHotkeys, clearRegisteredHotkeys, parseHotkeyCombo, isMac, type UseHotkeysOptions, type HotkeyItem, type ParsedCombo } from './components/useHotkeys.svelte.js';
 export { default as KeyboardShortcutsModal, type KeyboardShortcutsModalProps, type KeyboardShortcutEntry } from './components/KeyboardShortcutsModal.svelte';
+// Enterprise session inactivity guard & timeout keepalive suite
+export { useSessionTimeout, type UseSessionTimeoutOptions } from './components/useSessionTimeout.svelte.js';
+export { default as SessionTimeoutGuard, type SessionTimeoutGuardProps } from './components/SessionTimeoutGuard.svelte';
+
+// Enterprise two-person rule & dual approval gate suite
+export { default as DualApprovalGate, default as TwoPersonRuleModal, type DualApprovalGateProps, type ApprovalMode, type ReviewerVerificationPayload, type DualApprovalAuditRecord } from './components/DualApprovalGate.svelte';
+
+// Enterprise table clipboard manager & Excel bidirectional paste suite
+export { useTableClipboard, parseClipboardText, parseDelimitedText, matchColumnsToDefinitions, copyRowsToClipboard, type ColumnDef, type ColumnMapping, type ParsedClipboardTable } from './components/useTableClipboard.svelte.js';
+export { default as TableClipboardManager, type TableClipboardManagerProps } from './components/TableClipboardManager.svelte';
+
+// Enterprise native Web Audio sound effects & acoustic feedback suite
+export { useAudioAlert, playAudioAlert, type AudioAlertType, type AudioAlertOptions } from './components/useAudioAlert.svelte.js';
+export { default as AudioFeedbackProvider, type AudioFeedbackProviderProps } from './components/AudioFeedbackProvider.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
