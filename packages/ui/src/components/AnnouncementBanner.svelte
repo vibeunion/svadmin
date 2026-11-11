@@ -15,44 +15,44 @@
   export interface AnnouncementItem {
     id: string | number;
     message: string;
-    tone?: 'info' | 'warning' | 'error' | 'success';
-    actionText?: string;
-    actionHref?: string;
-    onaction?: () => void;
+    tone?: 'info' | 'warning' | 'error' | 'success' | undefined;
+    actionText?: string | undefined;
+    actionHref?: string | undefined;
+    onaction?: (() => void) | undefined;
   }
 
   export interface AnnouncementBannerProps {
     /** 单条公告文案（与 items 互斥，简易单条模式） */
-    message?: string;
+    message?: string | undefined;
     /** 多条公告列表，支持自动轮播与手动翻页 */
-    items?: AnnouncementItem[];
+    items?: AnnouncementItem[] | undefined;
     /** 严重级别/色彩语义，默认 'warning' */
-    tone?: 'info' | 'warning' | 'error' | 'success';
+    tone?: 'info' | 'warning' | 'error' | 'success' | undefined;
     /** 维护/停服倒计时目标时间，自动计算并展示倒计时 */
-    countdownTo?: Date | string | number;
+    countdownTo?: Date | string | number | undefined;
     /** 倒计时前缀文案，默认 "距系统维护还剩: " */
-    countdownPrefix?: string;
+    countdownPrefix?: string | undefined;
     /** 倒计时结束时回调 */
-    oncountdownend?: () => void;
+    oncountdownend?: (() => void) | undefined;
     /** 是否可手动关闭，默认 true */
-    closable?: boolean;
+    closable?: boolean | undefined;
     /** 点击关闭后保存至 localStorage 的 key，下次访问直接隐藏 */
-    storageKey?: string;
+    storageKey?: string | undefined;
     /** 多条公告轮播间隔（毫秒），默认 4000ms，为 0 时不自动轮播 */
-    interval?: number;
+    interval?: number | undefined;
     /** 快捷操作按钮文本 */
-    actionText?: string;
+    actionText?: string | undefined;
     /** 快捷操作按钮跳转链接 */
-    actionHref?: string;
+    actionHref?: string | undefined;
     /** 快捷操作按钮点击回调 */
-    onaction?: () => void;
+    onaction?: (() => void) | undefined;
     /** 关闭横幅回调 */
-    onclose?: () => void;
+    onclose?: (() => void) | undefined;
     /** 自定义右侧操作区插槽 */
-    actions?: Snippet;
+    actions?: Snippet | undefined;
     /** 尺寸规格：'sm' (紧凑) 或 'md' (标准) */
-    size?: 'sm' | 'md';
-    class?: string;
+    size?: 'sm' | 'md' | undefined;
+    class?: string | undefined;
   }
 
   let {
