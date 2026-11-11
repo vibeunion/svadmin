@@ -19,6 +19,8 @@ import type {
 
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
+export type PostgrestCountMode = 'exact' | 'planned' | 'estimated';
+
 export interface PostgrestOptions {
   /** PostgREST server API URL, e.g. 'https://api.example.com' */
   apiUrl: string;
@@ -28,6 +30,14 @@ export interface PostgrestOptions {
   fetch?: FetchLike | undefined;
   /** Primary key field name (default: 'id') */
   primaryKey?: string | undefined;
+  /** Count strategy for paginated lists; defaults to 'exact'. */
+  count?: PostgrestCountMode | false | undefined;
+}
+
+function resolveCountMode(value: unknown, fallback: PostgrestCountMode | false): PostgrestCountMode | false {
+  if (value === false) return false;
+  if (value === 'exact' || value === 'planned' || value === 'estimated') return value;
+  return fallback;
 }
 
 export function mapOperatorToPostgrest(operator: CrudOperator): string {
@@ -171,9 +181,10 @@ export function createPostgrestDataProvider(options: PostgrestOptions): DataProv
         queryParams.set('order', orderExpr);
       }
 
-      const headers: Record<string, string> = {
-        Prefer: 'count=exact',
-      };
+      const defaultCount = pagination?.mode === 'off' ? false : (options.count ?? 'exact');
+      const countMode = resolveCountMode(meta?.['count'], defaultCount);
+      const headers: Record<string, string> = {};
+      if (countMode !== false) headers['Prefer'] = `count=${countMode}`;
 
       if (pagination && pagination.pageSize !== undefined) {
         const current = pagination.current ?? 1;
@@ -187,14 +198,14 @@ export function createPostgrestDataProvider(options: PostgrestOptions): DataProv
       const queryString = queryParams.toString();
       const path = `/${resource}${queryString ? `?${queryString}` : ''}`;
 
-      const { data, count } = await request<TData[]>(path, {
+      const { data, count: totalCount } = await request<TData[]>(path, {
         method: 'GET',
         headers,
       });
 
       return {
         data: Array.isArray(data) ? data : [],
-        total: count ?? (Array.isArray(data) ? data.length : 0),
+        total: totalCount ?? (Array.isArray(data) ? data.length : 0),
       };
     },
 

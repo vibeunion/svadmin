@@ -48,18 +48,8 @@ export { default as ColorPicker } from './components/ColorPicker.svelte';
 export { default as Rate } from './components/Rate.svelte';
 export { default as PivotExportButton } from './components/PivotExportButton.svelte';
 export type { PivotCache } from '@svadmin/core/pivot';
-export {
-  decodeSavedListViewMutationResult,
-  decodeSavedListViewRemoveResult,
-  decodeSavedListViewAccess,
-} from './components/saved-list-views.js';
-export type {
-  SavedListView, SavedListViewState, SavedListViewColumnPinning, SavedListViewProvider, SavedListViewMutation,
-  SavedListViewMutationSuccess, SavedListViewMutationConflict, SavedListViewRemoveSuccess,
-  ListPreferenceScope,
-  SavedListViewAccess, SavedListViewAccessMode,
-  SavedListViewSubject,
-} from './components/saved-list-views.js';
+export { decodeSavedListViewMutationResult, decodeSavedListViewRemoveResult, decodeSavedListViewAccess } from './components/saved-list-views.js';
+export type { SavedListView, SavedListViewState, SavedListViewColumnPinning, SavedListViewProvider, SavedListViewMutation, SavedListViewMutationSuccess, SavedListViewMutationConflict, SavedListViewRemoveSuccess, ListPreferenceScope, SavedListViewAccess, SavedListViewAccessMode, SavedListViewSubject } from './components/saved-list-views.js';
 export type { BatchSelection } from './components/table-contract.js';
 export { cloneListFilter, cloneListStateSnapshot } from './components/list-state.svelte.js';
 export type { ListStateSnapshot } from './components/list-state.svelte.js';
@@ -819,6 +809,44 @@ export { default as SchemaVisualModeler, type SchemaVisualModelerProps, type Sch
 // Enterprise micro-frontend sandbox bridge & cross-origin event bus suite
 export { useMicroAppEvent, type UseMicroAppEventOptions, type MicroAppMessage as MicroAppBridgeMessage } from './components/useMicroAppEvent.svelte.js';
 export { default as MicroAppBridge, type MicroAppBridgeProps } from './components/MicroAppBridge.svelte';
+// Enterprise business rule expression builder & logical rule tree suite
+export { default as RuleExpressionBuilder, default as LogicalRuleTree, type RuleExpressionBuilderProps, type RuleGroupNode, type RuleLeafNode, type RuleOperator, type RuleFieldOption } from './components/RuleExpressionBuilder.svelte';
+
+// Enterprise cluster topology graph & microservice health grid suite
+export { default as ClusterTopologyGraph, default as ServiceHealthGrid, type ClusterTopologyGraphProps, type ClusterTopologyNode, type ClusterTopologyEdge, type ClusterNodeHealth, type ClusterNodeType } from './components/ClusterTopologyGraph.svelte';
+
+// Enterprise snapshot audit timeline replay & time-travel diff suite
+export { default as SnapshotTimelineReplay, default as TimeTravelDiff, type SnapshotTimelineReplayProps, type SnapshotRevision } from './components/SnapshotTimelineReplay.svelte';
+
+// Enterprise keyboard-driven action palette & quick command drawer suite
+export { default as ActionPalette, default as QuickActionDrawer, type ActionPaletteProps, type PaletteActionItem } from './components/ActionPalette.svelte';
+
+// Enterprise dynamic i18n language pack editor & runtime patch suite
+export { useDynamicLocale, applyLocalePatch, getLocalePatch, clearLocalePatches, translateDynamic } from './components/useDynamicLocale.svelte.js';
+export { default as I18nLanguagePackEditor, type I18nLanguagePackEditorProps, type I18nEntry } from './components/I18nLanguagePackEditor.svelte';
+// Enterprise dynamic formula field & sandboxed calculation engine suite
+export { useFormulaEngine, evaluateFormula, type FormulaScope } from './components/useFormulaEngine.svelte.js';
+export { default as FormulaField, type FormulaFieldProps } from './components/FormulaField.svelte';
+
+// Enterprise big-screen data container & responsive scale-to-fit dashboard suite
+export { default as DataScreenContainer, default as FullscreenDashboardLayout, type DataScreenContainerProps } from './components/DataScreenContainer.svelte';
+
+// Enterprise threaded comment drawer & record annotation stream suite
+export { default as ThreadedCommentDrawer, default as RecordAnnotationBox, type ThreadedCommentDrawerProps, type ThreadedComment } from './components/ThreadedCommentDrawer.svelte';
+// Enterprise storage cache & cross-platform storage adapter suite
+export { useStorageCache, MemoryStorageAdapter, LocalStorageAdapter, RemoteKVAdapter, defaultMemoryStorage, type StorageAdapter, type UseStorageCacheOptions } from './components/useStorageCache.svelte.js';
+
+// Enterprise tree transfer select & cascading organization assigner suite
+export { default as TreeTransferSelect, default as CascadingAssigner, type TreeTransferSelectProps, type TreeTransferNode } from './components/TreeTransferSelect.svelte';
+
+// Enterprise virtualized card grid & media select gallery suite
+export { default as VirtualCardGrid, default as MediaCardSelect, type VirtualCardGridProps } from './components/VirtualCardGrid.svelte';
+
+// Enterprise visual approval chain flow builder & node config suite
+export { default as ApprovalChainBuilder, default as ApproverNodeConfig, type ApprovalChainBuilderProps, type ApprovalChainNode, type ApproverMode, type ApprovalNodeType } from './components/ApprovalChainBuilder.svelte';
+
+// Enterprise period comparison card & delta metrics capsule suite
+export { default as PeriodComparisonCard, default as MetricsDeltaPill, type PeriodComparisonCardProps } from './components/PeriodComparisonCard.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
 
@@ -826,3 +854,15 @@ export { default as RecordCompareModal, default as EntityComparisonDrawer, type 
 export { default as PlanUsageQuotaBar, default as MultiQuotaProgress, type PlanUsageQuotaBarProps, type QuotaItem } from './components/PlanUsageQuotaBar.svelte';
 export { default as TierFeatureComparison, default as PricingMatrixTable, type TierFeatureComparisonProps, type PricingTier, type FeatureGroup, type FeatureRow } from './components/TierFeatureComparison.svelte';
 export { default as BillingInvoiceDrawer, default as InvoiceDetailDrawer, type BillingInvoiceDrawerProps, type InvoiceData, type BillingItem } from './components/BillingInvoiceDrawer.svelte';
+// Enterprise developer webhook simulation, HMAC crypto signature & API playground suite
+export { default as WebhookSimulator, default as WebhookEventSimulator, type WebhookSimulatorProps, type WebhookEventPreset, type WebhookDeliveryResult } from './components/WebhookSimulator.svelte';
+export { default as HmacSignatureCalculator, default as SignatureDebugger, type HmacSignatureCalculatorProps, type HmacAlgorithm } from './components/HmacSignatureCalculator.svelte';
+export { default as ApiPlayground, default as HttpQuickRunner, type ApiPlaygroundProps, type HttpMethod, type ApiResponse } from './components/ApiPlayground.svelte';
+// Enterprise dashboard widget container, data freshness & server cluster status suite
+export { default as WidgetContainer, default as DashboardWidget, type WidgetContainerProps } from './components/WidgetContainer.svelte';
+export { default as DataFreshnessIndicator, default as FreshnessPill, type DataFreshnessIndicatorProps, type FreshnessStatus, type PollInterval } from './components/DataFreshnessIndicator.svelte';
+export { default as ServerStatusGrid, default as ClusterHealthMatrix, type ServerStatusGridProps, type ServerNode, type NodeHealthStatus } from './components/ServerStatusGrid.svelte';
+// Enterprise advanced query builder, filter tags & batch edit suite
+export { default as QueryBuilder, default as AdvancedQueryBuilder, type QueryBuilderProps, type QueryGroup, type QueryRule, type QueryField, type LogicalOperator, type ComparisonOperator } from './components/QueryBuilder.svelte';
+export { default as FilterTagBar, type FilterTagBarProps, type FilterTagItem, type SavedPresetView } from './components/FilterTagBar.svelte';
+export { default as BatchEditModal, default as BatchEditorModal, type BatchEditModalProps, type BatchEditChange, type BatchFieldOption } from './components/BatchEditModal.svelte';

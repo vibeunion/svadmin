@@ -1777,6 +1777,332 @@ Enterprise micro-frontend sandbox bridge and cross-origin event bus:
 
 <MicroAppBridge appId="subapp-billing" />
 ```
+
+### `<RuleExpressionBuilder>` / `<LogicalRuleTree>`
+
+Enterprise business rule expression builder and logical rule tree suite:
+- **Nested Boolean Logic**: Supports recursive condition groups (`AND` / `OR` / `NOT`) for risk management, automated approval routing, and alert thresholds.
+- **Dynamic Variable Selection**: Pick left-hand field keys (`order.amount`, `user.level`), operators (`=`, `>`, `<`, `in`, `contains`, `regex`), and dynamic right-hand values.
+- **Real-Time AST Compilation**: Compiles visual trees into both structured JSON AST and readable natural-language expressions with one-click copy.
+
+```svelte
+<script lang="ts">
+  import { RuleExpressionBuilder } from '@svadmin/ui';
+
+  const fields = [
+    { key: 'order.amount', label: 'Order Amount', type: 'number' },
+    { key: 'user.riskScore', label: 'Risk Score', type: 'number' },
+    { key: 'user.level', label: 'Member Level', type: 'string' },
+  ];
+</script>
+
+<RuleExpressionBuilder
+  {fields}
+  onChange={(ast, expr) => console.log('Rule updated:', expr, ast)}
+/>
+```
+
+### `<ClusterTopologyGraph>` / `<ServiceHealthGrid>`
+
+Distributed service cluster health and full-topology architecture graph:
+- **0KB External Overhead**: Pure SVG vector rendering with no bulky charting or canvas dependencies.
+- **Tiered Microservice Topology**: Visualizes Ingress Gateways, Application Services, and Database/Cache/Queue storage tiers.
+- **Node Diagnostics & Action**: Interactive node selection with real-time QPS, latency ms, error rate %, and instance restart actions.
+
+```svelte
+<script lang="ts">
+  import { ClusterTopologyGraph } from '@svadmin/ui';
+</script>
+
+<ClusterTopologyGraph
+  title="Production Microservice Topology"
+  onNodeSelect={(node) => console.log('Inspecting node:', node.id)}
+  onRestartNode={(node) => console.log('Restarting service:', node.id)}
+/>
+```
+
+### `<SnapshotTimelineReplay>` / `<TimeTravelDiff>`
+
+Time-travel audit snapshot replay and side-by-side revision comparator:
+- **Interactive Time-Travel Slider**: Smoothly scrub across revision histories to restore historical snapshot states at arbitrary timestamps.
+- **Field-Level Diff Highlighting**: Side-by-side comparison (Before ↔ After) with highlighted modified, added, and deleted attributes.
+- **Rollback Request Flow**: Supports one-click audit snapshot rollback workflow initiation.
+
+```svelte
+<script lang="ts">
+  import { SnapshotTimelineReplay, type SnapshotRevision } from '@svadmin/ui';
+
+  const revisions: SnapshotRevision[] = [
+    {
+      id: 'rev-1',
+      version: 1,
+      timestamp: '2026-11-01 10:00:00',
+      author: 'Alice (Security)',
+      auditHash: 'SHA-001',
+      snapshot: { status: 'draft', quota: 100 },
+    },
+    {
+      id: 'rev-2',
+      version: 2,
+      timestamp: '2026-11-02 14:30:00',
+      author: 'Bob (Lead)',
+      auditHash: 'SHA-002',
+      snapshot: { status: 'published', quota: 500 },
+    },
+  ];
+</script>
+
+<SnapshotTimelineReplay
+  {revisions}
+  onApplyRollback={(rev) => console.log('Reverting to snapshot:', rev.version)}
+/>
+```
+
+### `<ActionPalette>` / `<QuickActionDrawer>`
+
+Keyboard-first quick action launcher and contextual command palette (Linear / Raycast style):
+- **Lightning-Fast Execution**: Triggered via keyboard shortcut (`⌘.`) on highlighted or selected table records.
+- **Fuzzy Search & Pinyin Matching**: Search commands instantly by name, shortcut key, or action category.
+- **Inline Parameter Prompting**: Seamlessly prompts for parameters (e.g. transfer assignee, rejection reason) before batch execution.
+
+```svelte
+<script lang="ts">
+  import { ActionPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+  let selectedRecords = $state([{ id: 101 }, { id: 102 }]);
+</script>
+
+<ActionPalette
+  bind:open
+  {selectedRecords}
+  onExecuteAction={(id, param) => console.log('Executed action:', id, param)}
+/>
+```
+
+### `<I18nLanguagePackEditor>` & `useDynamicLocale`
+
+Dynamic runtime localization patch loader and online translation editor:
+- **Zero-Deploy Hotfixes**: Modify online translations without rebuilding, committing, or redeploying code.
+- **Namespace Organization**: Browse translation keys by namespace (`common`, `table`, `form`, `auth`), filter search terms, and edit inline.
+- **Dynamic Translation Runtime**: `useDynamicLocale` overrides static core strings dynamically via remote APIs or localStorage patches.
+
+```svelte
+<script lang="ts">
+  import { I18nLanguagePackEditor, useDynamicLocale } from '@svadmin/ui';
+
+  const i18n = useDynamicLocale();
+</script>
+
+<I18nLanguagePackEditor
+  targetLocale="zh-CN"
+  onSavePatch={(locale, patch) => console.log('Published i18n patch:', locale, patch)}
+/>
+```
+
+### `<FormulaField>` & `useFormulaEngine`
+
+Enterprise dynamic formula field and sandboxed expression calculation engine:
+- **Zero eval() Vulnerabilities**: Pure AST-based arithmetic and logic evaluator supporting `+`, `-`, `*`, `/`, `^`, `%`, `(`, `)`.
+- **Built-in Functions**: Supports `SUM`, `AVG`, `MAX`, `MIN`, `ROUND(val, decimals)`, and `IF(cond, thenVal, elseVal)`.
+- **Formula Tooltip & Manual Override**: Displays interactive `f(x) = ...` formula preview badge with optional toggle to manually override values.
+
+```svelte
+<script lang="ts">
+  import { FormulaField } from '@svadmin/ui';
+
+  let form = $state({ price: 199, qty: 3, discount: 0.1 });
+</script>
+
+<FormulaField
+  label="Net Total Price"
+  formula="price * qty * (1 - discount)"
+  scope={form}
+  prefix="¥"
+  precision={2}
+  allowManualOverride={true}
+/>
+```
+
+### `<DataScreenContainer>` / `<FullscreenDashboardLayout>`
+
+Operations center and high-resolution data visualization big-screen container:
+- **Scale-to-Fit Auto Scaling**: Automatically calculates uniform scaling (`scale(x)`) based on design dimensions (1920x1080, 21:9, etc.), pixel-perfect centering on any screen size.
+- **Header & Clock**: Built-in digital clock, status headers, and full-screen switcher.
+- **Cyberpunk Accents**: Optional neon tech luminous corner lines.
+
+```svelte
+<script lang="ts">
+  import { DataScreenContainer } from '@svadmin/ui';
+</script>
+
+<DataScreenContainer
+  title="Real-time Dispatch Operations Center"
+  subtitle="NOC Telemetry & Sensor Monitoring"
+  width={1920}
+  height={1080}
+>
+  <div class="grid grid-cols-3 gap-6 h-full">
+    <!-- Telemetry Cards & SVG charts -->
+  </div>
+</DataScreenContainer>
+```
+
+### `<ThreadedCommentDrawer>` / `<RecordAnnotationBox>`
+
+Record-level collaborative discussion stream and threaded annotation drawer:
+- **Threaded Replies & Reactions**: Support nested discussion trees, emoji reactions (`👍`, `✅`), and timestamps.
+- **Task Resolution Status**: Toggle comments as "Resolved" to close out revision concerns.
+- **Mentions & Markdown**: Integrated `@` member mention tags and formatted response submissions.
+
+```svelte
+<script lang="ts">
+  import { ThreadedCommentDrawer, type ThreadedComment } from '@svadmin/ui';
+
+  let open = $state(false);
+  let comments = $state<ThreadedComment[]>([
+    {
+      id: '1',
+      author: 'Alice (Compliance)',
+      content: 'Please verify VAT invoice numbers against tax authority registry.',
+      createdAt: '10m ago',
+      isResolved: false,
+    },
+  ]);
+</script>
+
+<ThreadedCommentDrawer
+  bind:open
+  recordTitle="Purchase Order #PO-991"
+  {comments}
+  onAddComment={(text, parentId) => console.log('New reply:', text, parentId)}
+/>
+```
+
+### `useStorageCache` & Storage Adapters
+
+Enterprise cross-platform key-value cache and storage adapter suite:
+- **Zero Backend Lock-In**: Complete decoupling from specific infrastructure. Seamlessly switch between in-memory testing (`MemoryStorageAdapter`), browser persistence (`LocalStorageAdapter`), large-scale offline client cache (`IndexedDB`), or generic remote REST KV services (`RemoteKVAdapter`).
+- **TTL Eviction & Namespacing**: Automatic expiration of cached tokens and filter preferences with isolated namespace prefixes.
+- **Svelte 5 Reactivity**: `useStorageCache` provides reactive values with automatic write-through and cross-tab sync.
+
+```svelte
+<script lang="ts">
+  import { useStorageCache, LocalStorageAdapter } from '@svadmin/ui';
+
+  const userPrefs = useStorageCache('user_dashboard_prefs', { density: 'comfortable' }, {
+    adapter: new LocalStorageAdapter('svadmin_enterprise'),
+    ttlSeconds: 86400, // 24-hour cache
+  });
+</script>
+
+<div>Current Density: {userPrefs.value.density}</div>
+<button onclick={() => userPrefs.set({ density: 'compact' })}>Switch to Compact</button>
+```
+
+### `<TreeTransferSelect>` / `<CascadingAssigner>`
+
+Deep organization tree transfer and multi-tiered batch assigner:
+- **Hierarchical Branch Selection**: Supports cascading indeterminate checkboxes, branch subtree select-all, and leaf-only node filtering.
+- **Target Mode Flexibility**: View assigned items in a flat list or grouped by department, with single-click removal or bulk reset.
+- **Live Search**: Integrated instant search filter with node path indicators.
+
+```svelte
+<script lang="ts">
+  import { TreeTransferSelect, type TreeTransferNode } from '@svadmin/ui';
+
+  const orgTree: TreeTransferNode[] = [
+    {
+      id: 'eng',
+      label: 'Engineering',
+      children: [
+        { id: 'u1', label: 'Ada Lovelace (Frontend)', isLeaf: true },
+        { id: 'u2', label: 'Alan Turing (Backend)', isLeaf: true },
+      ],
+    },
+  ];
+
+  let assignedKeys = $state(['u1']);
+</script>
+
+<TreeTransferSelect
+  treeData={orgTree}
+  bind:targetKeys={assignedKeys}
+  sourceTitle="Corporate Directory"
+  targetTitle="Assigned Operators"
+/>
+```
+
+### `<VirtualCardGrid>` / `<MediaCardSelect>`
+
+Virtualized responsive card gallery and media multi-selection suite:
+- **60fps Viewport Virtualization**: Renders only currently visible card rows, effortlessly scaling to 10,000+ items without DOM bloat or frame drops.
+- **Responsive Grid**: Adapts columns automatically (2/3/4/6 columns) based on container width.
+- **Multi-Select Controls**: Integrated selection states with count badges, custom card snippets, and batch action toolbars.
+
+```svelte
+<script lang="ts">
+  import { VirtualCardGrid } from '@svadmin/ui';
+
+  const mediaItems = Array.from({ length: 500 }, (_, i) => ({
+    id: `item-${i + 1}`,
+    title: `Asset #${i + 1}`,
+    subtitle: '1080p WebP',
+  }));
+
+  let selectedIds = $state<string[]>([]);
+</script>
+
+<VirtualCardGrid
+  items={mediaItems}
+  bind:selectedIds
+  columns={4}
+  cardHeight={180}
+/>
+```
+
+### `<ApprovalChainBuilder>` / `<ApproverNodeConfig>`
+
+Visual multi-tier approval chain flow builder and node policy designer:
+- **Lightweight Vertical Node Flow**: Linear node sequence (Start -> Approvers -> CC) with one-click `+` insertion between any steps.
+- **Approver Execution Policies**: Supports `all` (Countersign / All must approve), `one` (Any one approves), and `sequential` approval.
+- **Side Node Inspector**: Real-time attribute configuration for role assignees, approval modes, and timeout escalation.
+
+```svelte
+<script lang="ts">
+  import { ApprovalChainBuilder, type ApprovalChainNode } from '@svadmin/ui';
+
+  let chain = $state<ApprovalChainNode[]>([
+    { id: 'start', type: 'start', title: 'Initiator', roleName: 'All Employees' },
+    { id: 'mgr', type: 'approver', title: 'Department Lead', roleName: 'Supervisor', mode: 'one' },
+    { id: 'fin', type: 'approver', title: 'Finance Audit', roleName: 'Controller', mode: 'all' },
+  ]);
+</script>
+
+<ApprovalChainBuilder
+  bind:nodes={chain}
+  onChange={(nodes) => console.log('Updated approval chain:', nodes)}
+/>
+```
+
+### `<PeriodComparisonCard>` / `<MetricsDeltaPill>`
+
+Executive management dashboard cross-period comparison card:
+- **Multi-Period Baseline Comparison**: Formats current period vs baseline/prior period metrics side-by-side.
+- **Delta Indicator Pills**: Calculates absolute change (`+¥250,000`) and percentage delta (`+25%`), shifting between green (positive) and red (negative), with `reverseColor` support for error counts and latencies.
+- **SVG Micro Comparison Bars**: Pure SVG dual progress comparison lines with zero chart engine dependencies.
+
+```svelte
+<script lang="ts">
+  import { PeriodComparisonCard } from '@svadmin/ui';
+</script>
+
+<PeriodComparisonCard
+  title="Quarterly Gross Revenue"
+  currentValue={1250000}
+  previousValue={1000000}
+  prefix="¥"
+  periodName="vs Last Quarter"
 ### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
 
 Enterprise multi-record parameter comparison and difference spotlight suite:
@@ -1884,4 +2210,196 @@ Enterprise monthly settlement ledger and invoice detail drawer:
 <button onclick={() => (open = true)}>View Settlement Ledger</button>
 
 <BillingInvoiceDrawer bind:open {invoice} />
+### `<WebhookSimulator>`
+
+Enterprise webhook event dispatch simulation and replay sandbox:
+- Designed for developer portals, third-party webhook integrations, and sandbox testing.
+- **Preset Events & Auto Fill**: Built-in presets for `order.payment_succeeded`, `user.security_alert`, and `invoice.issued` with automated JSON schema payload population.
+- **Delivery Inspection**: Configurable target endpoint URL, automatic header generation, and live display of HTTP response codes, round-trip latency, and formatted response bodies.
+
+```svelte
+<script lang="ts">
+  import { WebhookSimulator } from '@svadmin/ui';
+</script>
+
+<WebhookSimulator
+  defaultEndpoint="https://api.merchant.com/webhooks/svadmin"
+  ondeliver={async ({ eventType, endpoint }) => {
+    return { statusCode: 200, durationMs: 76, responseBody: '{"ok": true}' };
+  }}
+/>
+```
+
+### `<HmacSignatureCalculator>`
+
+HMAC signature calculation and live verification sandbox:
+- Built for debugging webhook signature mismatches and payload integrity issues.
+- **Hardware-accelerated Web Crypto**: Implemented with native `crypto.subtle` supporting `HMAC-SHA256`, `HMAC-SHA384`, and `HMAC-SHA512`.
+- **Live Match Verification**: Computes hex digest in real-time, provides one-click copy, and verifies external signatures with instant valid/mismatch feedback.
+
+```svelte
+<script lang="ts">
+  import { HmacSignatureCalculator } from '@svadmin/ui';
+</script>
+
+<HmacSignatureCalculator
+  defaultSecret="whsec_prod_secret_8848"
+  defaultBody={'{"event":"payment.succeeded"}'}
+/>
+```
+
+### `<ApiPlayground>`
+
+Embedded interactive API quick debugger and runner:
+- Built for developer documentation, interactive API exploration, and microservice probing.
+- **All Methods & cURL Export**: Covers GET, POST, PUT, PATCH, and DELETE with automated standard cURL command generation for terminal reproduction.
+- **Response Inspection**: Live execution with response HTTP code, duration, payload size, and formatted JSON rendering.
+
+```svelte
+<script lang="ts">
+  import { ApiPlayground } from '@svadmin/ui';
+</script>
+
+<ApiPlayground
+  defaultMethod="POST"
+  defaultUrl="/api/v1/orders"
+  defaultBody={'{\n  "sku": "LICENSE"\n}'}
+### `<WidgetContainer>`
+
+Enterprise dashboard widget wrapper container:
+- Standardized container shell for executive dashboards, operational metrics, and charts.
+- **Full Lifecycle Controls**: Built-in header toolbar with one-click manual refresh animation, fullscreen toggle (ESC dismissal), timestamp indicators, and custom actions.
+- **State Resiliency**: Embedded skeleton loading layout (`loading`) and user-friendly error retry cards (`error` + `onretry`).
+
+```svelte
+<script lang="ts">
+  import { WidgetContainer } from '@svadmin/ui';
+
+  const now = new Date();
+</script>
+
+<WidgetContainer
+  title="Realtime QPS Throughput"
+  description="Monitoring request volume fluctuations"
+  lastUpdated={now}
+  allowFullscreen={true}
+  allowRefresh={true}
+  onrefresh={() => console.log('Refreshing widget...')}
+>
+  <div class="h-40 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+    Embed any Chart or Metric component here
+  </div>
+</WidgetContainer>
+```
+
+### `<DataFreshnessIndicator>`
+
+Data freshness indicator and auto-polling cadence pill:
+- Tailored for operational cockpits and live monitoring dashboards to communicate data recency.
+- **Pulsing State Dot**: Dynamic visual cues for `live` (pulsing green ping), `fresh`, `stale` (warning tone), and `offline`.
+- **Interval Selector**: Toggle automatic background polling frequency (`5s`, `15s`, `30s`, `1m`, `off`) with manual click-to-sync triggers.
+
+```svelte
+<script lang="ts">
+  import { DataFreshnessIndicator } from '@svadmin/ui';
+
+  let lastSync = $state(Date.now());
+</script>
+
+<DataFreshnessIndicator
+  lastUpdated={lastSync}
+  pollInterval={15}
+  onsyncnow={() => (lastSync = Date.now())}
+/>
+```
+
+### `<ServerStatusGrid>`
+
+Cluster server node health matrix and metric grid:
+- Built for microservice clusters, edge nodes, and database read replicas.
+- **Cluster Aggregation**: Automatic summary calculation for healthy, warning, and critical node counts alongside average network latency.
+- **Multi-Resource Gauges**: Micro progress bars for CPU, Memory, and Disk usage with threshold-driven tone shifts.
+
+```svelte
+<script lang="ts">
+  import { ServerStatusGrid, type ServerNode } from '@svadmin/ui';
+
+  const nodes: ServerNode[] = [
+    { id: '1', name: 'gateway-sh-01', region: 'cn-shanghai', status: 'healthy', latencyMs: 18, cpuPercent: 35, memoryPercent: 52 },
+    { id: '2', name: 'gateway-bj-02', region: 'cn-beijing', status: 'warning', latencyMs: 140, cpuPercent: 78, memoryPercent: 84 },
+  ];
+</script>
+
+<ServerStatusGrid {nodes} onselectnode={(n) => console.log('Selected:', n.name)} />
+### `<QueryBuilder>`
+
+Enterprise multi-level nested visual query and rule builder:
+- Built for advanced BI dashboards, risk policy builders, and multi-dimensional operational datasets.
+- **AND / OR Logical Grouping**: Supports recursive group nesting with intuitive indentation and boundary connections.
+- **Type-adaptive Operators**: Automatic operator mapping for text (contains, starts_with, ends_with), numeric (gt, lt, between, equals), select/boolean (equals, in), and date fields.
+- **Live SQL / JSON Export**: Native SQL WHERE clause serialization and structured JSON rule trees with one-click preview.
+
+```svelte
+<script lang="ts">
+  import { QueryBuilder, type QueryField } from '@svadmin/ui';
+
+  const fields: QueryField[] = [
+    { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Approved', value: 'approved' }] },
+    { key: 'amount', label: 'Amount', type: 'number' },
+    { key: 'customer', label: 'Customer Name', type: 'text' },
+  ];
+</script>
+
+<QueryBuilder {fields} onchange={(q) => console.log('Query changed:', q)} />
+```
+
+### `<FilterTagBar>`
+
+Active filter tag capsule bar and saved preset view manager:
+- Positioned above data tables to present all active filter conditions as dismissible badge tags.
+- Supports individual filter removal (`x`) and quick "Clear All Filters".
+- **Preset Views Persistence**: Save active filter combinations as named preset views in `localStorage`, toggleable via a fast dropdown picker.
+
+```svelte
+<script lang="ts">
+  import { FilterTagBar } from '@svadmin/ui';
+
+  let filters = $state([
+    { id: '1', field: 'status', label: 'Status', operatorLabel: '=', valueLabel: 'Paid' },
+  ]);
+</script>
+
+<FilterTagBar
+  {filters}
+  onremove={(id) => (filters = filters.filter((f) => f.id !== id))}
+  onclear={() => (filters = [])}
+/>
+```
+
+### `<BatchEditModal>`
+
+Enterprise massive record batch edit and impact verification modal:
+- Batch update multiple fields across dozens or hundreds of selected records.
+- **Three Modification Modes**: Replace current value, Append (for tags/arrays), or Clear (set to NULL).
+- **Impact Guard**: Prominently highlights affected record counts and requires secondary confirmation before applying mutations.
+
+```svelte
+<script lang="ts">
+  import { BatchEditModal, type BatchFieldOption } from '@svadmin/ui';
+
+  let open = $state(false);
+  const fields: BatchFieldOption[] = [
+    { key: 'assignee', label: 'Assignee', type: 'text' },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>Batch Edit Selected</button>
+
+<BatchEditModal
+  bind:open
+  selectedCount={24}
+  resourceName="Orders"
+  {fields}
+  onconfirm={(changes) => console.log('Applying batch changes:', changes)}
+/>
 ```

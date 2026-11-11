@@ -200,6 +200,11 @@ export { default as LiteKeyboardShortcutsModal } from './components/LiteKeyboard
 export type { LiteStepItem } from './components/LiteStepWizard.svelte';
 export type { LiteWorkflowNode } from './components/LiteWorkflowStepper.svelte';
 export type { LiteShortcutItem } from './components/LiteKeyboardShortcutsModal.svelte';
+export { default as LiteFormulaField } from './components/LiteFormulaField.svelte';
+export { default as LiteDataScreenContainer } from './components/LiteDataScreenContainer.svelte';
+export { default as LiteThreadedCommentDrawer } from './components/LiteThreadedCommentDrawer.svelte';
+export type { LiteComment } from './components/LiteThreadedCommentDrawer.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
