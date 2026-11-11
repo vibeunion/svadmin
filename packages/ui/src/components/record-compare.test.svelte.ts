@@ -85,6 +85,54 @@ describe('RecordCompareModal', () => {
     expect(container.textContent).toContain('16 Cores');
   });
 
+  it('respects defaultHideIdentical as an alias for onlyDiff', () => {
+    const { container } = render(RecordCompareModal, {
+      props: {
+        open: true,
+        records: testRecords,
+        defaultHideIdentical: true,
+      },
+    });
+
+    // Memory is identical across all nodes (64 GB or different? prod-01: 64, prod-02: 64, stage-01: 32 - stage is 32)
+    // All 3 records have region: us-east-1, us-east-1, us-west-2 - all differ
+    expect(container.textContent).toContain('Only Differences');
+  });
+
+  it('strictly adheres to clean-flat design standards (radius, visible sync)', () => {
+    const { container } = render(RecordCompareModal, {
+      props: {
+        open: true,
+        records: testRecords,
+        allowSync: true,
+      },
+    });
+
+    const dialogCard = container.querySelector('[role="dialog"] > div:nth-child(2)');
+    expect(dialogCard?.className).toContain('rounded-md');
+    expect(dialogCard?.className).not.toContain('rounded-2xl');
+
+    // Sync button must be visible without hovering (no opacity-0)
+    const syncButton = container.querySelector('button[title="Sync value from baseline record"]');
+    expect(syncButton).not.toBeNull();
+    expect(syncButton?.className).not.toContain('opacity-0');
+    expect(syncButton?.className).toContain('rounded-sm');
+  });
+
+  it('renders drawer layout with clean-flat dock edge', () => {
+    const { container } = render(RecordCompareModal, {
+      props: {
+        open: true,
+        layout: 'drawer',
+        records: testRecords,
+      },
+    });
+
+    const drawer = container.querySelector('[role="dialog"] > div:nth-child(2)');
+    expect(drawer?.className).toContain('rounded-none');
+    expect(drawer?.className).not.toContain('rounded-l-2xl');
+  });
+
   it('triggers onsync when sync button is clicked for differing field', async () => {
     const onsyncMock = vi.fn();
     const { container } = render(RecordCompareModal, {

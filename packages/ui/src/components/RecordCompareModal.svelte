@@ -62,8 +62,7 @@
     onsync,
   }: RecordCompareModalProps = $props();
 
-  let onlyDiff = $state(untrack(() => defaultOnlyDiff));
-  let hideIdentical = $state(untrack(() => defaultHideIdentical));
+  let onlyDiff = $state(untrack(() => defaultOnlyDiff || defaultHideIdentical));
   let highlightDiff = $state(true);
   let searchQuery = $state('');
   let copiedField = $state<string | null>(null);
@@ -117,10 +116,8 @@
         if (!matchesLabel && !matchesKey) return false;
       }
 
-      // 2. Diff filters
-      const hasDiff = isFieldDifferent(f.key);
-      if (onlyDiff && !hasDiff) return false;
-      if (hideIdentical && !hasDiff) return false;
+      // 2. Diff filter
+      if (onlyDiff && !isFieldDifferent(f.key)) return false;
 
       return true;
     });
@@ -204,23 +201,23 @@
     <!-- Container: Modal or Drawer -->
     <div
       class={cn(
-        'relative z-50 flex flex-col border border-border bg-card text-card-foreground shadow-2xl transition-all',
+        'relative z-50 flex flex-col border border-border bg-card text-card-foreground shadow-[var(--shadow-overlay)] transition-all',
         layout === 'drawer'
-          ? 'fixed right-0 top-0 h-full w-full max-w-4xl rounded-l-2xl border-r-0'
-          : 'mx-4 my-6 h-[85vh] w-full max-w-5xl rounded-2xl',
+          ? 'fixed right-0 top-0 h-full w-full max-w-4xl rounded-none border-l'
+          : 'mx-4 my-6 h-[85vh] w-full max-w-5xl rounded-md',
         className,
       )}
     >
       <!-- Header -->
-      <div class="flex items-center justify-between border-b border-border px-6 py-4">
+      <div class="flex items-center justify-between border-b border-border px-6 py-3.5">
         <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <ArrowLeftRight class="h-5 w-5" />
+          <div class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary/10 text-primary">
+            <ArrowLeftRight class="h-4 w-4" />
           </div>
           <div>
-            <h2 class="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+            <h2 class="text-base font-semibold tracking-tight text-foreground">{title}</h2>
             {#if description}
-              <p class="text-xs text-muted-foreground">{description}</p>
+              <p class="text-xs text-muted-foreground mt-0.5">{description}</p>
             {/if}
           </div>
         </div>
@@ -228,15 +225,15 @@
         <button
           type="button"
           onclick={handleClose}
-          class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          class="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
           aria-label="Close"
         >
-          <X class="h-5 w-5" />
+          <X class="h-4 w-4" />
         </button>
       </div>
 
       <!-- Controls & Filter Toolbar -->
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-6 py-3 text-xs">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-6 py-2.5 text-xs">
         <div class="flex items-center gap-2">
           <div class="relative w-48 sm:w-64">
             <Search class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -244,7 +241,7 @@
               type="text"
               bind:value={searchQuery}
               placeholder="Filter attributes..."
-              class="h-8 w-full rounded-md border border-input bg-background pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              class="h-8 w-full rounded-sm border border-input bg-background pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -252,34 +249,21 @@
             type="button"
             onclick={() => (onlyDiff = !onlyDiff)}
             class={cn(
-              'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-medium transition-colors',
+              'h-8 inline-flex items-center gap-1.5 rounded-sm border px-3 text-xs font-medium transition-colors cursor-pointer',
               onlyDiff
-                ? 'border-warning/30 bg-warning/15 text-warning font-semibold'
-                : 'border-border bg-background text-muted-foreground hover:text-foreground',
+                ? 'border-primary/40 bg-primary/10 text-primary font-medium'
+                : 'border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
-            <SlidersHorizontal class="h-3 w-3" />
+            <SlidersHorizontal class="h-3.5 w-3.5" />
             <span>Only Differences</span>
-          </button>
-
-          <button
-            type="button"
-            onclick={() => (hideIdentical = !hideIdentical)}
-            class={cn(
-              'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-medium transition-colors',
-              hideIdentical
-                ? 'border-primary/30 bg-primary/15 text-primary font-semibold'
-                : 'border-border bg-background text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <span>Hide Identical</span>
           </button>
         </div>
 
-        <div class="flex items-center gap-2 text-muted-foreground">
-          <span>Comparing <strong>{records.length}</strong> records</span>
+        <div class="flex items-center gap-2 text-muted-foreground text-xs">
+          <span>Comparing <strong class="font-mono tabular-nums text-foreground">{records.length}</strong> records</span>
           <span>•</span>
-          <span><strong>{visibleFields.length}</strong> fields shown</span>
+          <span><strong class="font-mono tabular-nums text-foreground">{visibleFields.length}</strong> fields shown</span>
         </div>
       </div>
 
@@ -287,62 +271,61 @@
       <div class="flex-1 overflow-auto p-6">
         {#if records.length < 2}
           <div class="flex h-64 flex-col items-center justify-center text-center text-muted-foreground">
-            <ArrowLeftRight class="mb-3 h-10 w-10 text-muted-foreground/40" />
+            <ArrowLeftRight class="mb-3 h-8 w-8 text-muted-foreground/40" />
             <p class="text-sm font-medium">Please select at least 2 records to compare.</p>
           </div>
         {:else if visibleFields.length === 0}
           <div class="flex h-64 flex-col items-center justify-center text-center text-muted-foreground">
             <p class="text-sm font-medium">No matching attributes found for the current filters.</p>
-            {#if onlyDiff || hideIdentical}
+            {#if onlyDiff}
               <button
                 type="button"
                 onclick={() => {
                   onlyDiff = false;
-                  hideIdentical = false;
                   searchQuery = '';
                 }}
-                class="mt-2 text-xs text-primary underline"
+                class="mt-2 text-xs text-primary underline cursor-pointer"
               >
                 Clear comparison filters
               </button>
             {/if}
           </div>
         {:else}
-          <div class="overflow-x-auto rounded-xl border border-border">
+          <div class="overflow-x-auto rounded-md border border-border bg-card">
             <table class="w-full text-left text-xs border-collapse">
               <!-- Table Header: Record Columns -->
               <thead>
-                <tr class="border-b border-border bg-muted/50">
+                <tr class="h-10 border-b border-border bg-muted/60">
                   <!-- Attribute header -->
-                  <th class="sticky left-0 z-20 w-44 bg-muted/90 p-3 font-semibold text-foreground backdrop-blur-sm sm:w-56">
+                  <th class="sticky left-0 z-20 w-44 bg-muted/95 p-3 text-xs font-semibold text-muted-foreground border-r border-border backdrop-blur-sm sm:w-56">
                     Attribute
                   </th>
 
                   <!-- Record Headers -->
                   {#each records as record, idx (record[recordIdKey] ?? idx)}
                     {@const isBenchmark = idx === benchmarkIndex}
-                    <th class="min-w-[180px] p-3 font-semibold text-foreground border-l border-border">
+                    <th class="min-w-[180px] p-3 text-xs font-semibold text-foreground border-l border-border">
                       <div class="flex flex-col gap-1">
-                        <div class="flex items-center justify-between gap-1">
+                        <div class="flex items-center justify-between gap-1.5">
                           <span class="truncate font-medium text-foreground">
                             {getRecordTitle(record, idx)}
                           </span>
                           {#if isBenchmark}
-                            <span class="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                            <span class="inline-flex items-center rounded-sm bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 text-xs font-medium">
                               Baseline
                             </span>
                           {:else}
                             <button
                               type="button"
                               onclick={() => (benchmarkIndex = idx)}
-                              class="text-[10px] text-muted-foreground hover:text-primary transition-colors"
+                              class="text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                               title="Set as baseline for comparison"
                             >
                               Set Baseline
                             </button>
                           {/if}
                         </div>
-                        <span class="font-mono text-[11px] text-muted-foreground">
+                        <span class="font-mono text-xs text-muted-foreground tabular-nums">
                           ID: {record[recordIdKey] ?? `#${idx + 1}`}
                         </span>
                       </div>
@@ -358,19 +341,19 @@
                   <tr
                     class={cn(
                       'transition-colors',
-                      isDiff && highlightDiff ? 'bg-warning/5 hover:bg-warning/10' : 'hover:bg-muted/40',
+                      isDiff && highlightDiff ? 'bg-primary/[0.03] hover:bg-primary/[0.06]' : 'hover:bg-muted/40',
                     )}
                   >
                     <!-- Attribute label -->
-                    <td class="sticky left-0 z-10 w-44 bg-card p-3 font-medium text-foreground backdrop-blur-sm sm:w-56">
+                    <td class="sticky left-0 z-10 w-44 bg-card p-3 text-xs font-medium text-foreground border-r border-border backdrop-blur-sm sm:w-56">
                       <div class="flex items-center gap-1.5">
                         {#if isDiff && highlightDiff}
-                          <span class="h-1.5 w-1.5 rounded-full bg-warning shrink-0" title="Different value across records"></span>
+                          <span class="h-1.5 w-1.5 rounded-full bg-primary shrink-0" title="Different value across records"></span>
                         {/if}
                         <span class="truncate" title={field.label}>{field.label}</span>
                       </div>
                       {#if field.category}
-                        <span class="text-[10px] text-muted-foreground">{field.category}</span>
+                        <span class="text-xs text-muted-foreground">{field.category}</span>
                       {/if}
                     </td>
 
@@ -384,8 +367,8 @@
 
                       <td
                         class={cn(
-                          'p-3 border-l border-border font-mono transition-colors relative group',
-                          cellDiff && highlightDiff ? 'font-semibold text-warning' : 'text-foreground',
+                          'p-3 border-l border-border font-mono text-xs tabular-nums transition-colors relative',
+                          cellDiff && highlightDiff ? 'font-medium text-primary' : 'text-foreground',
                         )}
                       >
                         <div class="flex items-center justify-between gap-2">
@@ -398,14 +381,19 @@
                             <button
                               type="button"
                               onclick={() => handleSync(record, field.key)}
-                              class="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 rounded bg-background border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:text-primary transition-all shrink-0"
+                              class={cn(
+                                'inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-xs transition-colors shrink-0 cursor-pointer',
+                                cellCopied
+                                  ? 'border-success/30 bg-success/10 text-success'
+                                  : 'border-border bg-background text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5',
+                              )}
                               title="Sync value from baseline record"
                             >
                               {#if cellCopied}
-                                <Check class="h-2.5 w-2.5 text-success" />
+                                <Check class="h-3 w-3 text-success" />
                                 <span class="text-success font-sans">Synced</span>
                               {:else}
-                                <Copy class="h-2.5 w-2.5" />
+                                <Copy class="h-3 w-3" />
                                 <span class="font-sans">Sync</span>
                               {/if}
                             </button>
@@ -422,15 +410,15 @@
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-between border-t border-border px-6 py-3.5 bg-muted/20">
+      <div class="flex items-center justify-between border-t border-border px-6 py-3 bg-muted/20">
         <span class="text-xs text-muted-foreground">
-          Baseline: <strong>{getRecordTitle(benchmarkRecord, benchmarkIndex)}</strong>
+          Baseline: <strong class="text-foreground">{getRecordTitle(benchmarkRecord, benchmarkIndex)}</strong>
         </span>
 
         <button
           type="button"
           onclick={handleClose}
-          class="rounded-lg border border-border bg-background px-4 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+          class="h-8 rounded-sm border border-border bg-background px-4 text-xs font-medium text-foreground hover:bg-muted hover:border-border transition-colors cursor-pointer"
         >
           Close
         </button>

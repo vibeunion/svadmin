@@ -1289,7 +1289,7 @@ Enterprise two-factor authentication (2FA) and sensitive operation verification 
 
 Enterprise multi-record parameter comparison and difference spotlight suite:
 - **Side-by-side Matrix**: Compares 2 to 5 records across all attributes with fixed sticky row labels.
-- **Difference Spotlight**: Toggle "Only Differences" and "Hide Identical" to focus on diverging configurations.
+- **Difference Spotlight**: Toggle "Only Differences" (`defaultHideIdentical` supported) with primary accent highlight to focus on diverging configurations.
 - **Baseline Selection**: Dynamically switch the benchmark reference record column.
 - **Attribute Value Sync**: Built-in one-click sync action to copy values from baseline to target records (`onsync`).
 - **Flexible Layouts**: Supports centered overlay dialog (`layout="modal"`) and right-side slide-over (`layout="drawer"`).
