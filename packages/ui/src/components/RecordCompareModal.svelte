@@ -127,7 +127,7 @@
   });
 
   // Format value safely
-  function formatValue(field: CompareFieldConfig, record: Record<string, unknown>): string {
+  function formatValue(field: CompareFieldConfig, record: Record<string, unknown> | undefined): string {
     if (!record) return '—';
     const val = record[field.key];
     if (field.formatter) {
@@ -145,15 +145,15 @@
     return String(val);
   }
 
-  function getRecordTitle(record: Record<string, unknown>, index: number): string {
+  function getRecordTitle(record: Record<string, unknown> | undefined, index: number): string {
     if (!record) return `Record #${index + 1}`;
     if (recordTitleKey && record[recordTitleKey]) {
       return String(record[recordTitleKey]);
     }
     return (
-      (record.title as string | undefined) ??
-      (record.name as string | undefined) ??
-      (record.label as string | undefined) ??
+      (record['title'] as string | undefined) ??
+      (record['name'] as string | undefined) ??
+      (record['label'] as string | undefined) ??
       (record[recordIdKey] as string | undefined) ??
       `Record #${index + 1}`
     );
