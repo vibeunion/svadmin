@@ -27,8 +27,7 @@ export {
 export type { IconComponent, IconMissHandler, IconRegistry, IconSource, IconSourceInput } from "./icons.js";
 
 // Entry component
-export { default as AdminApp } from './components/AdminApp.svelte';
-export type { AdminPageRoute } from './components/AdminApp.svelte';
+export { default as AdminApp, type AdminPageRoute } from './components/AdminApp.svelte';
 
 // Admin components
 export { default as AutoTable } from './components/AutoTable.svelte';
@@ -40,14 +39,11 @@ export { default as ScrollableTable } from './components/ScrollableTable.svelte'
 export { default as CopyButton } from './components/CopyButton.svelte';
 export { listPaginationItems } from './components/list-pagination.js';
 export type { ListPaginationItem } from './components/list-pagination.js';
-export { default as SegmentedControl, default as Segmented } from './components/SegmentedControl.svelte';
-export type { SegmentedControlOption, SegmentedControlOption as SegmentedOption } from './components/SegmentedControl.svelte';
-export { default as RadioGroup, default as Radio } from './components/RadioGroup.svelte';
-export type { RadioGroupOption } from './components/RadioGroup.svelte';
+export { default as SegmentedControl, default as Segmented, type SegmentedControlOption, type SegmentedControlOption as SegmentedOption } from './components/SegmentedControl.svelte';
+export { default as RadioGroup, default as Radio, type RadioGroupOption } from './components/RadioGroup.svelte';
 export { default as TagsInput, default as InputTag } from './components/TagsInput.svelte';
 export { default as Slider } from './components/Slider.svelte';
-export { default as RangeSlider } from './components/RangeSlider.svelte';
-export type { RangeSliderValue } from './components/RangeSlider.svelte';
+export { default as RangeSlider, type RangeSliderValue } from './components/RangeSlider.svelte';
 export { default as ColorPicker } from './components/ColorPicker.svelte';
 export { default as Rate } from './components/Rate.svelte';
 export { default as PivotExportButton } from './components/PivotExportButton.svelte';
@@ -760,14 +756,11 @@ export type {
 } from './components/PivotDrilldownModal.svelte';
 
 // Enterprise security and safe-delete verification suite
-export { default as SafeDeleteConfirm, default as DoubleCheckModal } from './components/SafeDeleteConfirm.svelte';
-export type { SafeDeleteConfirmProps, ImpactItem } from './components/SafeDeleteConfirm.svelte';
-export { default as SliderCaptcha } from './components/SliderCaptcha.svelte';
-export type { SliderCaptchaProps, SliderCaptchaResult } from './components/SliderCaptcha.svelte';
+export { default as SafeDeleteConfirm, default as DoubleCheckModal, type SafeDeleteConfirmProps, type ImpactItem } from './components/SafeDeleteConfirm.svelte';
+export { default as SliderCaptcha, type SliderCaptchaProps, type SliderCaptchaResult } from './components/SliderCaptcha.svelte';
 
 // Enterprise real-time collaboration and concurrent edit conflict guard
-export { default as ConcurrentConflictModal } from './components/ConcurrentConflictModal.svelte';
-export type { ConcurrentConflictModalProps, ConflictFieldDiff } from './components/ConcurrentConflictModal.svelte';
+export { default as ConcurrentConflictModal, type ConcurrentConflictModalProps, type ConflictFieldDiff } from './components/ConcurrentConflictModal.svelte';
 // Enterprise metrics & trend visualization suite
 export { default as TrendIndicator, default as Trend, type TrendIndicatorProps } from './components/TrendIndicator.svelte';
 
@@ -792,3 +785,8 @@ export { default as OfflineGuard, type OfflineGuardProps } from './components/Of
 export { default as Barcode, type BarcodeProps, type BarcodeFormat } from './components/Barcode.svelte';
 export { default as NumberRoll, type NumberRollProps } from './components/NumberRoll.svelte';
 export { default as VirtualList, type VirtualListProps } from './components/VirtualList.svelte';
+
+// Enterprise KPI card, JSON tree viewer & business result page suite
+export { default as KpiCard, type KpiCardProps } from './components/KpiCard.svelte';
+export { default as JsonViewer, type JsonViewerProps } from './components/JsonViewer.svelte';
+export { default as ResultPage, type ResultPageProps, type ResultStatus } from './components/ResultPage.svelte';
