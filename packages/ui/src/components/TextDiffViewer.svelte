@@ -24,22 +24,22 @@
     /** 变更后的最新文本 */
     newText: string;
     /** 变更前标题，默认 "变更前 (Baseline)" */
-    oldTitle?: string;
+    oldTitle?: string | undefined;
     /** 变更后标题，默认 "变更后 (Current)" */
-    newTitle?: string;
+    newTitle?: string | undefined;
     /** 视图模式：'split'（双栏并排）或 'unified'（单栏内联），默认 'split' */
-    viewMode?: DiffViewMode;
+    viewMode?: DiffViewMode | undefined;
     /** 是否显示顶部操作栏及统计信息，默认 true */
-    showHeader?: boolean;
+    showHeader?: boolean | undefined;
     /** 是否默认折叠未变更的上下文行，默认 false */
-    collapseUnchanged?: boolean;
+    collapseUnchanged?: boolean | undefined;
     /** 折叠模式下在差异行前后保留的上下文行数，默认 3 */
-    contextLines?: number;
+    contextLines?: number | undefined;
     /** 字体风格，默认 'mono' */
-    fontFamily?: 'mono' | 'sans';
+    fontFamily?: ('mono' | 'sans') | undefined;
     /** 内部视图最大高度，如 "480px" */
-    maxHeight?: string;
-    class?: string;
+    maxHeight?: string | undefined;
+    class?: string | undefined;
   }
 
   let {

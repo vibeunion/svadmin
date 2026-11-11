@@ -545,7 +545,7 @@ export function sanitizeRichTextHtml(value: unknown): string {
 
     const attributes: string[] = [];
     const isCheckbox = tag === 'input' && /type\s*=\s*["']?checkbox/iu.test(match[2] ?? '');
-    if ((tag === 'input' && !isCheckbox) || (tag === 'input' && closing)) continue;
+    if (tag === 'input' && !isCheckbox) continue;
     for (const attribute of (match[2] ?? '').matchAll(ATTRIBUTE)) {
       const name = (attribute[1] ?? '').toLowerCase();
       if (!allowedAttributes.includes(name)) continue;
