@@ -3,11 +3,11 @@
   import { untrack } from 'svelte';
   import { cn } from '../utils.js';
 
-  export interface CompareFieldConfig<T = any> {
+  export interface CompareFieldConfig<T = Record<string, unknown>> {
     key: string;
     label: string;
     category?: string | undefined;
-    formatter?: ((value: any, record: T) => string) | undefined;
+    formatter?: ((value: unknown, record: T) => string) | undefined;
     highlightDiff?: boolean | undefined;
   }
 
@@ -19,7 +19,7 @@
     /** Subtitle or description */
     description?: string | undefined;
     /** List of records to compare (2 to 5 records) */
-    records: Record<string, any>[];
+    records: Record<string, unknown>[];
     /** Optional custom field definitions. If omitted, automatically inferred from record properties */
     fields?: CompareFieldConfig[] | undefined;
     /** Index of baseline/benchmark record (default: 0) */
@@ -41,7 +41,7 @@
     /** Callback when user closes the modal */
     onclose?: (() => void) | undefined;
     /** Callback when user clicks sync button from benchmark to target record */
-    onsync?: ((sourceRecord: Record<string, any>, targetRecord: Record<string, any>, fieldKey: string) => void) | undefined;
+    onsync?: ((sourceRecord: Record<string, unknown>, targetRecord: Record<string, unknown>, fieldKey: string) => void) | undefined;
   }
 
   let {
@@ -127,7 +127,7 @@
   });
 
   // Format value safely
-  function formatValue(field: CompareFieldConfig, record: Record<string, any>): string {
+  function formatValue(field: CompareFieldConfig, record: Record<string, unknown>): string {
     if (!record) return '—';
     const val = record[field.key];
     if (field.formatter) {
@@ -145,16 +145,16 @@
     return String(val);
   }
 
-  function getRecordTitle(record: Record<string, any>, index: number): string {
+  function getRecordTitle(record: Record<string, unknown>, index: number): string {
     if (!record) return `Record #${index + 1}`;
     if (recordTitleKey && record[recordTitleKey]) {
       return String(record[recordTitleKey]);
     }
     return (
-      record.title ??
-      record.name ??
-      record.label ??
-      record[recordIdKey] ??
+      (record.title as string | undefined) ??
+      (record.name as string | undefined) ??
+      (record.label as string | undefined) ??
+      (record[recordIdKey] as string | undefined) ??
       `Record #${index + 1}`
     );
   }
@@ -164,10 +164,10 @@
     onclose?.();
   }
 
-  function handleSync(targetRecord: Record<string, any>, fieldKey: string) {
+  function handleSync(targetRecord: Record<string, unknown>, fieldKey: string) {
     if (!benchmarkRecord || !targetRecord) return;
     onsync?.(benchmarkRecord, targetRecord, fieldKey);
-    copiedField = `${targetRecord[recordIdKey] ?? 'target'}_${fieldKey}`;
+    copiedField = `${String(targetRecord[recordIdKey] ?? 'target')}_${fieldKey}`;
     setTimeout(() => {
       copiedField = null;
     }, 1500);
