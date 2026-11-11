@@ -29,8 +29,11 @@ describe('Admin UI content component contract', () => {
 
   it('keeps the public export surface explicit', () => {
     const index = readFileSync(join(root, 'packages/ui/src/index.ts'), 'utf8');
+    // OtpInput moved to a richer root-level implementation; the content wrapper
+    // remains available for direct imports.
+    const canonicalPaths = new Map([['OtpInput', './components/OtpInput.svelte']]);
     for (const name of components.map((entry) => entry.replace('.svelte', ''))) {
-      expect(index).toContain('./components/content/' + name + '.svelte');
+      expect(index).toContain(canonicalPaths.get(name) ?? './components/content/' + name + '.svelte');
     }
     expect(index).toContain("export type { WorkspaceActionBarTone } from './components/content/WorkspaceActionBar.svelte';");
     expect(index).toContain("export type { WorkspaceTabItem } from './components/content/WorkspaceTabBar.svelte';");
