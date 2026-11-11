@@ -64,7 +64,8 @@
   .lite-hmac-title { font-weight: 600; color: #1d2129; }
   .lite-hmac-algo { font-size: 10px; font-family: monospace; background: #e8f3ff; color: #165dff; padding: 1px 6px; border-radius: 3px; }
   .lite-hmac-body { padding: 12px; }
-  .lite-hmac-row { display: flex; gap: 8px; margin-bottom: 8px; font-family: monospace; }
+  .lite-hmac-row { display: flex; margin-bottom: 8px; font-family: monospace; }
+  .lite-hmac-row > * + * { margin-left: 8px; }
   .lite-hmac-label { color: #86909c; min-width: 60px; font-family: sans-serif; }
   .lite-hmac-val { color: #1d2129; word-break: break-all; }
   .lite-hmac-result { margin-top: 8px; }

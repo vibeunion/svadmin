@@ -97,7 +97,8 @@
     border-bottom: 1px solid #e5e6eb;
   }
   .lite-validator-title { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
-  .lite-stats-wrap { display: flex; gap: 8px; font-size: 11px; font-weight: 500; }
+  .lite-stats-wrap { display: flex; font-size: 11px; font-weight: 500; }
+  .lite-stats-wrap > * + * { margin-left: 8px; }
   .lite-stat-total { color: #4e5969; }
   .lite-stat-valid { color: #00b42a; }
   .lite-stat-err { color: #f53f3f; }

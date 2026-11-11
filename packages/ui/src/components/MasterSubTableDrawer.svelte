@@ -87,8 +87,8 @@
   const resolvedSubTitle = $derived(subTitle ?? (chinese ? '关联子表记录明细' : 'Nested Line Items'));
 </script>
 
-<Sheet.Root bind:open>
-  <Sheet.Content side="right" class={cn('w-full sm:max-w-2xl p-0 flex flex-col', className)}>
+<Sheet.Root bind:open side="right">
+  <Sheet.Content class={cn('w-full sm:max-w-2xl p-0 flex flex-col', className)}>
     <!-- Header -->
     <div class="px-6 py-5 border-b border-border/70 bg-card">
       <div class="flex items-center gap-2.5 text-primary">
