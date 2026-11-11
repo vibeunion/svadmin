@@ -1284,3 +1284,92 @@ Enterprise two-factor authentication (2FA) and sensitive operation verification 
   oncomplete={(val) => console.log('2FA Code Complete:', val)}
 />
 ```
+
+### `<AnnouncementBanner>`
+
+Global enterprise broadcast banner and scheduled maintenance countdown bar:
+- Designed for planned maintenance downtime countdowns, multi-tenant quota alerts, release announcements, and security notices.
+- Supports `info`, `warning`, `error`, and `success` semantic tones using strict design tokens.
+- **Maintenance Countdown**: Pass `countdownTo` to automatically compute and render a real-time countdown clock, invoking `oncountdownend` upon completion.
+- **Carousel & Persistence**: Supports rotating multiple announcement items (`items` + `interval`) and remembering dismissal per `storageKey` in `localStorage`.
+
+```svelte
+<script lang="ts">
+  import { AnnouncementBanner } from '@svadmin/ui';
+
+  const scheduledTime = new Date(Date.now() + 3600 * 1000 * 4);
+</script>
+
+<AnnouncementBanner
+  tone="warning"
+  message="Routine database archive & capacity upgrade scheduled for tonight at 22:00 UTC. Write operations will pause briefly."
+  countdownTo={scheduledTime}
+  countdownPrefix="Maintenance starts in: "
+  actionText="View Maintenance Plan"
+  actionHref="/maintenance/plan"
+  closable={true}
+  storageKey="announcement-maintenance-202611"
+/>
+```
+
+### `<TextDiffViewer>`
+
+Enterprise text and configuration split/unified diff viewer:
+- Built for config center publishing audits, SQL/script review, and approval workflow change tracking.
+- Pure client-side LCS diff engine with zero heavy dependencies, millisecond alignment, and semantic additions/deletions styling.
+- **Split & Unified Modes**: Toggle effortlessly between side-by-side (`split`) and inline (`unified`) views.
+- **Context Folding & Metrics**: Collapse unchanged lines (`collapseUnchanged`) to focus purely on changes, inspect line counters (`+added`, `-deleted`), and copy baseline or updated snapshots in one click.
+
+```svelte
+<script lang="ts">
+  import { TextDiffViewer } from '@svadmin/ui';
+
+  const baseline = `server_port: 8080\nmax_connections: 500\nlog_level: info\ncache_enabled: false`;
+  const current = `server_port: 8080\nmax_connections: 2000\nlog_level: debug\ncache_enabled: true\ncluster_mode: active`;
+</script>
+
+<TextDiffViewer
+  oldText={baseline}
+  newText={current}
+  oldTitle="Production Config (v1.2)"
+  newTitle="Pending Release (v1.3)"
+  viewMode="split"
+  collapseUnchanged={false}
+/>
+```
+
+### `<AsyncExportModal>`
+
+Enterprise massive dataset asynchronous export center modal:
+- Tailored for large-scale financial reports, order ledgers, and audit logs without freezing the browser tab or hitting HTTP timeouts.
+- **Full Lifecycle Management**: Interactive parameter configuration (file name, format, scope, column selection) -> asynchronous progress polling -> download & URL copy -> error retry handling.
+- Supports `.xlsx`, `.csv`, and `.json` exports with configurable column pickers and scoped selection counters.
+
+```svelte
+<script lang="ts">
+  import { AsyncExportModal } from '@svadmin/ui';
+
+  let isExportOpen = $state(false);
+
+  const columns = [
+    { key: 'orderNo', label: 'Order ID', defaultSelected: true },
+    { key: 'customer', label: 'Customer', defaultSelected: true },
+    { key: 'amount', label: 'Amount', defaultSelected: true },
+    { key: 'createdAt', label: 'Created At', defaultSelected: true },
+    { key: 'remark', label: 'Approval Note', defaultSelected: false },
+  ];
+</script>
+
+<button onclick={() => (isExportOpen = true)}>Open Export Center</button>
+
+<AsyncExportModal
+  bind:open={isExportOpen}
+  resourceName="Financial Orders"
+  defaultFileName="2026Q4-Settlement-Report"
+  totalCount={154200}
+  filteredCount={3200}
+  selectedCount={4}
+  {columns}
+  onclose={() => (isExportOpen = false)}
+/>
+```

@@ -75,6 +75,12 @@ import {
   WatermarkContainer,
   AntiTamperWatermark,
   ContextMenu,
+  AnnouncementBanner,
+  AlertBanner,
+  TextDiffViewer,
+  DiffViewer,
+  AsyncExportModal,
+  ExportCenterModal,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -189,6 +195,12 @@ describe('public compatibility aliases', () => {
     expect(WatermarkContainer).toBeDefined();
     expect(AntiTamperWatermark).toBe(WatermarkContainer);
     expect(ContextMenu).toBeDefined();
+    expect(AnnouncementBanner).toBeDefined();
+    expect(AlertBanner).toBe(AnnouncementBanner);
+    expect(TextDiffViewer).toBeDefined();
+    expect(DiffViewer).toBe(TextDiffViewer);
+    expect(AsyncExportModal).toBeDefined();
+    expect(ExportCenterModal).toBe(AsyncExportModal);
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
