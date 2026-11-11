@@ -33,7 +33,7 @@
   data-svadmin-component="LiteWatermarkContainer"
   style="--lite-watermark-pattern: url('{encodedSvg}');"
 >
-  <div class="lite-watermark-overlay" aria-hidden="true"></div>
+  <div class="lite-watermark-overlay" aria-hidden="true" style="background-image: url('{encodedSvg}');"></div>
   <div class="lite-watermark-content">
     {#if children}{@render children()}{/if}
   </div>
@@ -49,7 +49,6 @@
     inset: 0;
     pointer-events: none;
     z-index: 9;
-    background-image: var(--lite-watermark-pattern);
     background-repeat: repeat;
   }
   .lite-watermark-content {

@@ -1,6 +1,6 @@
 # Lite styling hook coverage (`class`)
 
-> 自动生成时间: 2026-11-11T09:40:29.640Z
+> 自动生成时间: 2026-11-11T13:06:28.805Z
 > 重新生成: `bun scripts/check-parity.ts --write`
 
 ## 这是什么指标

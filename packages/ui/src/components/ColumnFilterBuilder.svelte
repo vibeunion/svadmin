@@ -104,8 +104,8 @@
   </Button>
 {/if}
 
-<Sheet.Root bind:open>
-  <Sheet.Content side="right" class="w-full sm:max-w-xl p-0 flex flex-col">
+<Sheet.Root bind:open side="right">
+  <Sheet.Content class="w-full sm:max-w-xl p-0 flex flex-col">
     <div class="px-6 py-5 border-b border-border/70 bg-card">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5 text-primary">
@@ -125,7 +125,7 @@
         {fields}
         bind:filters={workingFilters}
         bind:logicalOperator
-        {allowedOperators}
+        {...(allowedOperators ? { allowedOperators } : {})}
         {allowedLogicalOperators}
         onApply={handleApplyInternal}
         onReset={handleResetInternal}

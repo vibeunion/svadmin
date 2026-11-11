@@ -133,7 +133,7 @@
 <div
   data-svadmin-component="OrgTreePicker"
   class={cn(
-    'flex flex-col lg:flex-row items-stretch border border-border rounded-xl bg-card text-card-foreground shadow-xs overflow-hidden h-[540px]',
+    'flex flex-col lg:flex-row items-stretch border border-border rounded-md bg-card text-card-foreground shadow-xs overflow-hidden h-[540px]',
     className,
   )}
 >

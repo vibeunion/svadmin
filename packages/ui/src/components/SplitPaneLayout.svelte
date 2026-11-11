@@ -67,7 +67,7 @@
 <div
   bind:this={containerEl}
   class={cn(
-    'relative flex w-full h-full min-h-72 rounded-xl border border-border bg-card shadow-xs overflow-hidden select-none',
+    'relative flex w-full h-full min-h-72 rounded-md border border-border bg-card shadow-xs overflow-hidden select-none',
     direction === 'horizontal' ? 'flex-row' : 'flex-col',
     className
   )}

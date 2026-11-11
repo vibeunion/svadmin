@@ -73,7 +73,7 @@
   }
 </script>
 
-<div class={cn('space-y-6 rounded-xl border border-border bg-card p-6 shadow-xs', className)}>
+<div class={cn('space-y-6 rounded-md border border-border bg-card p-6 shadow-xs', className)}>
   <!-- Step Navigation Header -->
   <div class="flex items-center justify-between gap-2 overflow-x-auto pb-4 border-b border-border/60">
     {#each steps as step, index (index)}

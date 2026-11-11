@@ -56,7 +56,7 @@
 
 <div class={cn('space-y-4 text-xs', className)}>
   <!-- Print Trigger Bar (Hidden during actual print) -->
-  <div class="flex items-center justify-between p-3 rounded-xl border border-border bg-card shadow-xs print:hidden">
+  <div class="flex items-center justify-between p-3 rounded-md border border-border bg-card shadow-xs print:hidden">
     <div class="text-muted-foreground">
       Document Ready: <strong class="text-foreground">{billNumber}</strong>
     </div>
@@ -67,7 +67,7 @@
   </div>
 
   <!-- Printable A4 Paper Container -->
-  <div class="rounded-xl border border-border bg-card p-8 shadow-xs max-w-3xl mx-auto space-y-6 print:border-none print:shadow-none print:p-0 print:m-0">
+  <div class="rounded-md border border-border bg-card p-8 shadow-xs max-w-3xl mx-auto space-y-6 print:border-none print:shadow-none print:p-0 print:m-0">
     <!-- Header -->
     <div class="flex items-start justify-between border-b-2 border-primary/40 pb-4">
       <div>

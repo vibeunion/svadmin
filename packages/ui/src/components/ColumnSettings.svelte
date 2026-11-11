@@ -285,7 +285,7 @@
             >
               {#if col.fixed}<PinOff class="h-3 w-3" />{:else}<Pin class="h-3 w-3" />{/if}
             </Button>
-            <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="flex items-center gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="icon"
