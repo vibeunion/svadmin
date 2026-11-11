@@ -30,7 +30,7 @@ setDataProvider(dataProvider);
 ## Features
 
 - **Native Content-Range Pagination**: Maps `pagination.current` & `pagination.pageSize` to HTTP `Range: 0-9` request headers, reading total counts from response `Content-Range: 0-9/100`.
-- **Bounded Count Work**: Unpaginated lists do not request a count; paginated lists default to `count=exact` and can opt into `meta: { count: 'planned' | 'estimated' }` when an approximate total is sufficient.
+- **Bounded Count Work**: Client-side and disabled pagination do not send a server range or request a count; server-paginated lists default to `count=exact` and can opt into `meta: { count: 'planned' | 'estimated' }` when an approximate total is sufficient.
 - **Singular Object Retrieval**: Uses `Accept: application/vnd.pgrst.object+json` for `getOne` queries to receive single entities without array wrapping.
 - **Immediate Representation**: Passes `Prefer: return=representation` on `create` and `update` queries to return modified records immediately.
 - **PostgREST Query Operators**: Automatically serializes SvAdmin filter expressions to PostgREST format (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `like`, `ilike`, `in`, `is`, `cs`, `cd`).
