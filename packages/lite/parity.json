@@ -1,56 +1,56 @@
 {
-  "timestamp": "2026-11-11T02:45:03.808Z",
-  "totalComponents": 193,
+  "timestamp": "2026-11-11T09:10:42.954Z",
+  "totalComponents": 202,
   "adaptedCount": 134,
-  "fallbackCount": 54,
+  "fallbackCount": 63,
   "spaOnlyCount": 5,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 69.4,
-  "fallbackPercentage": 28,
-  "behaviorVerifiedCount": 163,
-  "behaviorVerifiedPercentage": 84.5,
-  "behaviorAssertedCount": 163,
-  "behaviorAssertedPercentage": 84.5,
+  "exactPercentage": 66.3,
+  "fallbackPercentage": 31.2,
+  "behaviorVerifiedCount": 172,
+  "behaviorVerifiedPercentage": 85.1,
+  "behaviorAssertedCount": 172,
+  "behaviorAssertedPercentage": 85.1,
   "categories": {
     "pages": {
       "category": "pages",
-      "total": 18,
+      "total": 19,
       "adapted": 14,
-      "fallback": 4,
+      "fallback": 5,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 77.8,
-      "fallbackRate": 22.2,
-      "behaviorVerified": 14,
-      "behaviorAsserted": 14
+      "exactRate": 73.7,
+      "fallbackRate": 26.3,
+      "behaviorVerified": 15,
+      "behaviorAsserted": 15
     },
     "advanced": {
       "category": "advanced",
-      "total": 52,
+      "total": 59,
       "adapted": 28,
-      "fallback": 20,
+      "fallback": 27,
       "spaOnly": 4,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 53.8,
-      "fallbackRate": 38.5,
-      "behaviorVerified": 45,
-      "behaviorAsserted": 45
+      "exactRate": 47.5,
+      "fallbackRate": 45.8,
+      "behaviorVerified": 52,
+      "behaviorAsserted": 52
     },
     "widgets": {
       "category": "widgets",
-      "total": 40,
+      "total": 41,
       "adapted": 18,
-      "fallback": 22,
+      "fallback": 23,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 45,
-      "fallbackRate": 55,
-      "behaviorVerified": 37,
-      "behaviorAsserted": 37
+      "exactRate": 43.9,
+      "fallbackRate": 56.1,
+      "behaviorVerified": 38,
+      "behaviorAsserted": 38
     },
     "fields": {
       "category": "fields",
@@ -1620,6 +1620,78 @@
       "status": "spa_only",
       "strategy": "免适配 (浏览器 Network Information 钩子)",
       "note": "SSR 不读取 navigator；离线快照由服务端或宿主注入"
+    },
+    {
+      "name": "KpiCard",
+      "uiComponent": "KpiCard.svelte",
+      "liteComponent": "LiteKpiCard.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端静态指标数值、同环比胶囊、SVG 迷你走势与目标进度条；骨架过渡与动态动画由 SPA 承接"
+    },
+    {
+      "name": "JsonViewer",
+      "uiComponent": "JsonViewer.svelte",
+      "liteComponent": "LiteJsonViewer.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端 JSON 结构化折叠树与格式化代码块；关键词实时搜索高亮由 SPA 承接"
+    },
+    {
+      "name": "ResultPage",
+      "uiComponent": "ResultPage.svelte",
+      "liteComponent": "LiteResultPage.svelte",
+      "category": "pages",
+      "status": "fallback",
+      "strategy": "服务端 7 大结果与异常状态语义图标、标题及操作按钮组；微光粒子与动态插槽由 SPA 承接"
+    },
+    {
+      "name": "WatermarkContainer",
+      "uiComponent": "WatermarkContainer.svelte",
+      "liteComponent": "LiteWatermarkContainer.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端 CSS 重复平铺 SVG 水印背景与文本遮罩；DOM 监听防篡改自愈由 SPA 承接"
+    },
+    {
+      "name": "ContextMenu",
+      "uiComponent": "ContextMenu.svelte",
+      "liteComponent": "LiteContextMenu.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端语义化操作列表与快捷键提示；视口边缘碰撞自适应翻转由 SPA 承接"
+    },
+    {
+      "name": "UnsavedChangesGuard",
+      "uiComponent": "UnsavedChangesGuard.svelte",
+      "liteComponent": "LiteUnsavedChangesGuard.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端未保存变更状态横幅与确认表单；浏览器 beforeunload 阻拦由 SPA 承接"
+    },
+    {
+      "name": "AnnouncementBanner",
+      "uiComponent": "AnnouncementBanner.svelte",
+      "liteComponent": "LiteAnnouncementBanner.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端全站广播通知横幅、语义状态色调与倒计时展示；跑马灯多条轮播由 SPA 承接"
+    },
+    {
+      "name": "TextDiffViewer",
+      "uiComponent": "TextDiffViewer.svelte",
+      "liteComponent": "LiteTextDiffViewer.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端预渲染文本行差异对比、新增/删除行高亮与行号；动态折叠与双栏切换由 SPA 承接"
+    },
+    {
+      "name": "AsyncExportModal",
+      "uiComponent": "AsyncExportModal.svelte",
+      "liteComponent": "LiteAsyncExportModal.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端异步导出表单、范围选择、格式单选与列复选框提交；动态进度轮询由 SPA 承接"
     },
     {
       "name": "ThemeToggle",

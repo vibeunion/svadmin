@@ -13,6 +13,15 @@ import LiteAuditLog from './LiteAuditLog.svelte';
 import LitePresenceAvatarGroup from './LitePresenceAvatarGroup.svelte';
 import LiteTour from './LiteTour.svelte';
 import LiteGaugeChart from './widgets/LiteGaugeChart.svelte';
+import LiteKpiCard from './LiteKpiCard.svelte';
+import LiteJsonViewer from './LiteJsonViewer.svelte';
+import LiteResultPage from './LiteResultPage.svelte';
+import LiteWatermarkContainer from './LiteWatermarkContainer.svelte';
+import LiteContextMenu from './LiteContextMenu.svelte';
+import LiteUnsavedChangesGuard from './LiteUnsavedChangesGuard.svelte';
+import LiteAnnouncementBanner from './LiteAnnouncementBanner.svelte';
+import LiteTextDiffViewer from './LiteTextDiffViewer.svelte';
+import LiteAsyncExportModal from './LiteAsyncExportModal.svelte';
 
 afterEach(() => cleanup());
 
@@ -186,3 +195,121 @@ describe('recent UI parity fallbacks', () => {
     expect(gauge.getAllByText('Warning').length).toBeGreaterThan(0);
   });
 });
+
+  it('renders enterprise suites: KpiCard, JsonViewer, and ResultPage', () => {
+    // 1. LiteKpiCard
+    const kpi = render(LiteKpiCard, {
+      title: '季度总营收',
+      value: 1250000,
+      prefix: '¥',
+      suffix: '元',
+      trendText: '12.4%',
+      trendDirection: 'up',
+      sparklineData: [10, 20, 15, 30, 45, 40, 60],
+      targetProgress: { current: 75, target: 100, label: '达成率' },
+      alertStatus: 'warning',
+      alertMessage: '接近季度阈值',
+    });
+    expect(kpi.getByText('季度总营收')).toBeTruthy();
+    expect(kpi.getByText('1,250,000')).toBeTruthy();
+    expect(kpi.getByText('¥')).toBeTruthy();
+    expect(kpi.getByText('元')).toBeTruthy();
+    expect(kpi.getByText('12.4%')).toBeTruthy();
+    expect(kpi.getByText('75%')).toBeTruthy();
+    expect(kpi.getByText('接近季度阈值')).toBeTruthy();
+    expect(kpi.container.querySelector('polyline')).toBeTruthy();
+
+    // 2. LiteJsonViewer
+    const json = render(LiteJsonViewer, {
+      title: 'Order Payload',
+      data: { orderId: 'ORD-98213', amount: 450.8, status: 'paid' },
+      initialDepth: 1,
+    });
+    expect(json.getByText('Order Payload')).toBeTruthy();
+    expect(json.container.textContent).toContain('ORD-98213');
+    expect(json.container.textContent).toContain('450.8');
+
+    // 3. LiteResultPage
+    const result = render(LiteResultPage, {
+      status: 'success',
+      title: '创建成功',
+      description: '多租户项目已初始化完成',
+      primaryActionHref: '/dashboard',
+      primaryActionLabel: '前往工作台',
+    });
+    expect(result.getByText('创建成功')).toBeTruthy();
+    expect(result.getByText('多租户项目已初始化完成')).toBeTruthy();
+    expect(result.getByRole('link', { name: '前往工作台' }).getAttribute('href')).toBe('/dashboard');
+  });
+
+  it('renders enterprise suites: WatermarkContainer, ContextMenu, and UnsavedChangesGuard', () => {
+    // 4. LiteWatermarkContainer
+    const watermark = render(LiteWatermarkContainer, {
+      content: ['CONFIDENTIAL', 'USER-9527'],
+    });
+    expect(watermark.container.querySelector('.lite-watermark-overlay')).toBeTruthy();
+    const styleAttr = watermark.container.querySelector('.lite-watermark-container')?.getAttribute('style');
+    expect(styleAttr).toContain('--lite-watermark-pattern');
+    expect(styleAttr).toContain('CONFIDENTIAL');
+
+    // 5. LiteContextMenu
+    const contextMenu = render(LiteContextMenu, {
+      items: [
+        { key: 'copy', label: '复制编号', shortcut: '⌘C' },
+        { key: 'sep', label: '', divider: true },
+        { key: 'del', label: '彻底删除', danger: true, href: '/delete' },
+      ],
+    });
+    expect(contextMenu.getByText('复制编号')).toBeTruthy();
+    expect(contextMenu.getByText('⌘C')).toBeTruthy();
+    expect(contextMenu.getByRole('link', { name: '彻底删除' }).getAttribute('href')).toBe('/delete');
+    expect(contextMenu.container.querySelector('.lite-context-danger')).toBeTruthy();
+
+    // 6. LiteUnsavedChangesGuard
+    const unsaved = render(LiteUnsavedChangesGuard, {
+      hasChanges: true,
+      message: '表单存在尚未保存的修改',
+    });
+    expect(unsaved.getByText('表单存在尚未保存的修改')).toBeTruthy();
+    expect(unsaved.container.querySelector('[data-dirty="true"]')).toBeTruthy();
+  });
+
+  it('renders enterprise suites: AnnouncementBanner, TextDiffViewer, and AsyncExportModal', () => {
+    // 7. LiteAnnouncementBanner
+    const banner = render(LiteAnnouncementBanner, {
+      message: '生产数据库即将于 22:00 进行只读维护',
+      tone: 'warning',
+      countdownText: '01:30:00',
+      actionText: '查看计划',
+      actionHref: '/maintenance',
+    });
+    expect(banner.getByText('生产数据库即将于 22:00 进行只读维护')).toBeTruthy();
+    expect(banner.getByText('01:30:00')).toBeTruthy();
+    expect(banner.getByRole('link', { name: '查看计划' }).getAttribute('href')).toBe('/maintenance');
+
+    // 8. LiteTextDiffViewer
+    const diff = render(LiteTextDiffViewer, {
+      oldText: 'port = 3000\nmode = "dev"',
+      newText: 'port = 8080\nmode = "prod"',
+      oldTitle: 'Base',
+      newTitle: 'Head',
+    });
+    expect(diff.getByText('Base ↔ Head')).toBeTruthy();
+    expect(diff.container.querySelectorAll('.lite-diff-add').length).toBeGreaterThan(0);
+    expect(diff.container.querySelectorAll('.lite-diff-del').length).toBeGreaterThan(0);
+
+    // 9. LiteAsyncExportModal
+    const exportModal = render(LiteAsyncExportModal, {
+      open: true,
+      resourceName: 'Orders',
+      action: '/api/export/orders',
+      columns: [
+        { key: 'id', label: 'Order No' },
+        { key: 'amount', label: 'Total Amount' },
+      ],
+    });
+    expect(exportModal.getByRole('region', { name: 'Export Orders' })).toBeTruthy();
+    expect(exportModal.getByText('Order No')).toBeTruthy();
+    expect(exportModal.getByText('Total Amount')).toBeTruthy();
+    expect(exportModal.container.querySelector('form')?.getAttribute('action')).toBe('/api/export/orders');
+  });
