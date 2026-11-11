@@ -117,7 +117,7 @@
 <div
   data-svadmin-component="JsonViewer"
   class={cn(
-    'rounded-xl border border-border bg-card shadow-xs flex flex-col font-mono text-xs overflow-hidden',
+    'rounded-md border border-border bg-card shadow-xs flex flex-col font-mono text-xs overflow-hidden',
     className
   )}
 >
@@ -147,10 +147,10 @@
         >
           {#if copiedAll}
             <Check class="h-3 w-3 text-success" />
-            <span class="text-success text-[11px]">已复制</span>
+            <span class="text-success text-xs">已复制</span>
           {:else}
             <Copy class="h-3 w-3" />
-            <span class="text-[11px]">复制 JSON</span>
+            <span class="text-xs">复制 JSON</span>
           {/if}
         </button>
       {/if}
@@ -172,7 +172,7 @@
             {@const itemPath = `[${idx}]`}
             {#if matchesSearch(String(idx), item)}
               <div class="flex items-start gap-1 group py-0.5">
-                <span class="text-muted-foreground/60 select-none text-[10px] w-5 text-right">{idx}:</span>
+                <span class="text-muted-foreground/60 select-none text-xs w-5 text-right">{idx}:</span>
                 {#if isObject(item) || isArray(item)}
                   {@const collapsed = isPathCollapsed(itemPath, 1)}
                   <button
@@ -190,14 +190,14 @@
                   {#if collapsed}
                     <button
                       type="button"
-                      class="text-muted-foreground text-[11px] cursor-pointer hover:underline bg-transparent border-0 p-0 text-left font-mono"
+                      class="text-muted-foreground text-xs cursor-pointer hover:underline bg-transparent border-0 p-0 text-left font-mono"
                       onclick={() => handleToggle(itemPath, 1)}
                     >
                       {isArray(item) ? `Array(${item.length})` : `{...}`}
                     </button>
                   {:else}
                     <div class="flex-1">
-                      <div class="text-muted-foreground text-[11px]">{isArray(item) ? '[' : '{'}</div>
+                      <div class="text-muted-foreground text-xs">{isArray(item) ? '[' : '{'}</div>
                       <div class="pl-4 border-l border-border/30 my-0.5 space-y-1">
                         {#each Object.entries(item) as [subKey, subVal] (subKey)}
                           <div class="flex items-baseline gap-1 py-0.5">
@@ -213,7 +213,7 @@
                           </div>
                         {/each}
                       </div>
-                      <div class="text-muted-foreground text-[11px]">{isArray(item) ? ']' : '}'}</div>
+                      <div class="text-muted-foreground text-xs">{isArray(item) ? ']' : '}'}</div>
                     </div>
                   {/if}
                 {:else}
@@ -259,14 +259,14 @@
                   {#if collapsed}
                     <button
                       type="button"
-                      class="text-muted-foreground text-[11px] cursor-pointer hover:underline bg-transparent border-0 p-0 text-left font-mono"
+                      class="text-muted-foreground text-xs cursor-pointer hover:underline bg-transparent border-0 p-0 text-left font-mono"
                       onclick={() => handleToggle(nodePath, 1)}
                     >
                       {isArray(val) ? `Array(${val.length})` : `{...}`}
                     </button>
                   {:else}
                     <div class="flex-1">
-                      <span class="text-muted-foreground text-[11px]">{isArray(val) ? '[' : '{'}</span>
+                      <span class="text-muted-foreground text-xs">{isArray(val) ? '[' : '{'}</span>
                       <div class="pl-4 border-l border-border/30 my-0.5 space-y-1">
                         {#each Object.entries(val) as [subK, subV] (subK)}
                           <div class="flex items-baseline gap-1 py-0.5">
@@ -282,7 +282,7 @@
                           </div>
                         {/each}
                       </div>
-                      <span class="text-muted-foreground text-[11px]">{isArray(val) ? ']' : '}'}</span>
+                      <span class="text-muted-foreground text-xs">{isArray(val) ? ']' : '}'}</span>
                     </div>
                   {/if}
                 {:else}
@@ -303,7 +303,7 @@
                 <button
                   type="button"
                   onclick={() => copySinglePath(nodePath, val)}
-                  class="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  class="opacity-70 hover:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-foreground cursor-pointer"
                   title={`复制路径: ${nodePath}`}
                 >
                   {#if copiedPath === nodePath}

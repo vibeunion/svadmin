@@ -66,7 +66,7 @@
   }
 </script>
 
-<div class={cn('w-full rounded-xl border border-border bg-card shadow-xs overflow-hidden text-xs', className)}>
+<div class={cn('w-full rounded-md border border-border bg-card shadow-xs overflow-hidden text-xs', className)}>
   <table class="w-full text-left border-collapse">
     <thead class="bg-muted/40 font-semibold text-muted-foreground border-b border-border/60 select-none">
       <tr>

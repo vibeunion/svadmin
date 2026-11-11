@@ -49,7 +49,7 @@
 <div
   data-svadmin-component="WorkflowProcessCard"
   class={cn(
-    'rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all space-y-6',
+    'rounded-md border border-border bg-card p-6 text-card-foreground shadow-sm transition-all space-y-6',
     className,
   )}
 >

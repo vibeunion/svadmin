@@ -138,14 +138,14 @@
   >
     <div
       class={cn(
-        'relative w-full max-w-2xl rounded-xl border border-warning/30 bg-background shadow-2xl transition-all duration-200 overflow-hidden flex flex-col max-h-[90vh]',
+        'relative w-full max-w-2xl rounded-md border border-warning/30 bg-background shadow-[var(--shadow-overlay)] transition-all duration-200 overflow-hidden flex flex-col max-h-[90vh]',
         className
       )}
     >
       <!-- Header -->
       <div class="flex items-center justify-between border-b px-5 py-4 bg-warning/10">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20 text-warning-foreground">
+          <div class="flex h-10 w-10 items-center justify-center rounded-sm bg-warning/20 text-warning-foreground">
             <AlertTriangle class="h-5 w-5 text-warning" />
           </div>
           <div>
@@ -179,7 +179,7 @@
           </div>
         {/if}
 
-        <div class="rounded-lg border border-border overflow-hidden">
+        <div class="rounded-md border border-border overflow-hidden">
           <table class="w-full text-xs text-left">
             <thead class="bg-muted text-muted-foreground font-medium border-b border-border">
               <tr>
@@ -198,7 +198,7 @@
                   </td>
                   <td class="py-2.5 px-3">
                     <span class={cn(
-                      'inline-block px-1.5 py-0.5 rounded font-mono text-[11px]',
+                      'inline-block px-1.5 py-0.5 rounded font-mono text-xs',
                       currentChoice === 'local' ? 'bg-primary/15 text-primary font-semibold ring-1 ring-primary/30' : 'bg-muted text-muted-foreground'
                     )}>
                       {formatVal(f.localValue)}
@@ -206,7 +206,7 @@
                   </td>
                   <td class="py-2.5 px-3">
                     <span class={cn(
-                      'inline-block px-1.5 py-0.5 rounded font-mono text-[11px]',
+                      'inline-block px-1.5 py-0.5 rounded font-mono text-xs',
                       currentChoice === 'remote' ? 'bg-success/15 text-success font-semibold ring-1 ring-success/30' : 'bg-muted text-muted-foreground'
                     )}>
                       {formatVal(f.remoteValue)}
@@ -217,7 +217,7 @@
                       <button
                         type="button"
                         class={cn(
-                          'px-2 py-1 rounded text-[11px] font-medium transition-all',
+                          'px-2 py-1 rounded text-xs font-medium transition-all',
                           currentChoice === 'local' ? 'bg-background text-foreground shadow-xs font-semibold' : 'text-muted-foreground hover:text-foreground'
                         )}
                         onclick={() => handleSelectChoice(f.field, 'local')}
@@ -228,7 +228,7 @@
                       <button
                         type="button"
                         class={cn(
-                          'px-2 py-1 rounded text-[11px] font-medium transition-all',
+                          'px-2 py-1 rounded text-xs font-medium transition-all',
                           currentChoice === 'remote' ? 'bg-background text-foreground shadow-xs font-semibold' : 'text-muted-foreground hover:text-foreground'
                         )}
                         onclick={() => handleSelectChoice(f.field, 'remote')}

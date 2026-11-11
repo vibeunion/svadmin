@@ -130,7 +130,7 @@
 <div
   data-svadmin-component="TreeTransfer"
   class={cn(
-    'flex flex-col sm:flex-row items-stretch gap-4 p-4 rounded-xl border border-border bg-card text-card-foreground',
+    'flex flex-col sm:flex-row items-stretch gap-4 p-4 rounded-md border border-border bg-card text-card-foreground',
     disabled && 'opacity-60 pointer-events-none',
     className,
   )}

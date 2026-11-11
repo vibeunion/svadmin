@@ -326,7 +326,7 @@
 
 <div
   class={cn(
-    'relative select-none rounded-xl border border-border bg-card p-3 shadow-md transition-all',
+    'relative select-none rounded-md border border-border bg-card p-3 shadow-md transition-all',
     isShaking && 'animate-shake',
     className
   )}

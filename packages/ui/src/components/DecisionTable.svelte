@@ -122,7 +122,7 @@
   }
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-4', className)}>
+<div class={cn('rounded-md border border-border bg-card p-4 shadow-xs text-xs space-y-4', className)}>
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/60">
     <div class="flex items-center gap-2">
