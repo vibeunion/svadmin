@@ -1544,6 +1544,126 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
 
 <MicroAppBridge appId="subapp-billing" />
 ```
+
+### `<RuleExpressionBuilder>` / `<LogicalRuleTree>`
+
+风控与业务流动态规则表达式设计器：
+- **复合布尔逻辑编排**：支持多层级嵌套条件组（`AND` / `OR` / `NOT` 运算块），广泛适用于风控反欺诈、工单自动化流转、营销准入门槛等复杂判定。
+- **动态变量绑定**：支持从字段元数据中动态选取变量标识（如 `order.amount`、`user.level`）、比较运算符（`>`、`<`、`in`、`contains`、`regex`）及比较值。
+- **实时 AST 与自然语言编译**：双向输出结构化 JSON AST 规则树与易读的中文自然语言表达式，支持一键复制。
+
+```svelte
+<script lang="ts">
+  import { RuleExpressionBuilder } from '@svadmin/ui';
+
+  const fields = [
+    { key: 'order.amount', label: '订单金额', type: 'number' },
+    { key: 'user.riskScore', label: '风险评分', type: 'number' },
+    { key: 'user.level', label: '会员等级', type: 'string' },
+  ];
+</script>
+
+<RuleExpressionBuilder
+  {fields}
+  onChange={(ast, expr) => console.log('规则更新:', expr, ast)}
+/>
+```
+
+### `<ClusterTopologyGraph>` / `<ServiceHealthGrid>`
+
+分布式集群服务健康与全景拓扑图套件：
+- **0KB 外部体积开销**：纯原生 SVG 矢量绘制，零巨型第三方图表或画布引擎依赖，毫秒级轻量渲染。
+- **三层微服务拓扑矩阵**：直观展示入口网关层（Ingress）、应用微服务层（Services）与存储缓存层（Storage）。
+- **节点下钻与健康诊断**：实时呈现节点健康度（健康、降级、故障、维护）、QPS 吞吐、延迟与错误率，支持快捷节点重启与流量隔离。
+
+```svelte
+<script lang="ts">
+  import { ClusterTopologyGraph } from '@svadmin/ui';
+</script>
+
+<ClusterTopologyGraph
+  title="生产环境微服务调用拓扑"
+  onNodeSelect={(node) => console.log('下钻节点:', node.id)}
+  onRestartNode={(node) => console.log('重启实例:', node.id)}
+/>
+```
+
+### `<SnapshotTimelineReplay>` / `<TimeTravelDiff>`
+
+时空快照审计回放与时间旅行对比器：
+- **时间旅行滑块（Time Travel Slider）**：在水平时间轴上顺滑拖动，快速定位历史任意时刻快照版本。
+- **字段级并排红绿对比（Before ↔ After）**：自动对比选定版本与基准版本的差异，高亮变更属性单元格。
+- **一键回滚流程发起**：支持基于防篡改签名哈希直接发起“申请回滚至此版本”操作。
+
+```svelte
+<script lang="ts">
+  import { SnapshotTimelineReplay, type SnapshotRevision } from '@svadmin/ui';
+
+  const revisions: SnapshotRevision[] = [
+    {
+      id: 'rev-1',
+      version: 1,
+      timestamp: '2026-11-01 10:00:00',
+      author: '张安全 (合规审计员)',
+      auditHash: 'SHA-001',
+      snapshot: { status: 'draft', quota: 100 },
+    },
+    {
+      id: 'rev-2',
+      version: 2,
+      timestamp: '2026-11-02 14:30:00',
+      author: '李主管 (技术总监)',
+      auditHash: 'SHA-002',
+      snapshot: { status: 'published', quota: 500 },
+    },
+  ];
+</script>
+
+<SnapshotTimelineReplay
+  {revisions}
+  onApplyRollback={(rev) => console.log('申请回滚至版本:', rev.version)}
+/>
+```
+
+### `<ActionPalette>` / `<QuickActionDrawer>`
+
+全键盘极速动作托盘与指令气泡（Linear / Raycast 生产力人机工效）：
+- **快捷键秒级唤起**：针对表格当前选中或高亮的多条记录，按 `⌘.` 即可原地呼出半透明快捷动作托盘。
+- **拼音与模糊检索**：输入动作名首字母或关键字即时定位目标操作。
+- **行内参数快捷流转**：针对需要参数的动作（如指派给负责人、填写驳回理由），无缝在托盘内直接录入并一键回车批量执行。
+
+```svelte
+<script lang="ts">
+  import { ActionPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+  let selectedRecords = $state([{ id: 101 }, { id: 102 }]);
+</script>
+
+<ActionPalette
+  bind:open
+  {selectedRecords}
+  onExecuteAction={(id, param) => console.log('批量执行动作:', id, param)}
+/>
+```
+
+### `<I18nLanguagePackEditor>` 与 `useDynamicLocale`
+
+动态多语言词条热更新与在线补丁套件：
+- **零发版热修上线**：支持跨国业务运营在线修正翻译与错别字，无需重新走 CI/CD 构建发版。
+- **按命名空间可视化管理**：一览 `common`、`table`、`form`、`auth` 词条，支持表格内实时就地编辑。
+- **运行时增量覆盖**：`useDynamicLocale` 动态合并线上覆盖包，平滑注入现有 `@svadmin/core` 翻译管道。
+
+```svelte
+<script lang="ts">
+  import { I18nLanguagePackEditor, useDynamicLocale } from '@svadmin/ui';
+
+  const i18n = useDynamicLocale();
+</script>
+
+<I18nLanguagePackEditor
+  targetLocale="zh-CN"
+  onSavePatch={(locale, patch) => console.log('发布动态文案补丁:', locale, patch)}
 ### `<RecordCompareModal>` 与 `<EntityComparisonDrawer>`
 
 企业级多实体记录参数并排对比与差异透视套件：

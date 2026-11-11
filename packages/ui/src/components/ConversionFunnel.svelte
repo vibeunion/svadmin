@@ -36,7 +36,6 @@
     class: className = '',
     onSelectStage,
   }: ConversionFunnelProps = $props();
-  void height;
 
   const i18n = useTranslation();
   const chinese = $derived(i18n.locale.startsWith('zh'));
@@ -68,6 +67,7 @@
 
 <div
   data-svadmin-component="ConversionFunnel"
+  style="min-height: {height}px;"
   class={cn(
     'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
     className,
