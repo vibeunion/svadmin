@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0](https://github.com/vibeunion/svadmin/compare/pocketbase-v0.13.28...pocketbase-v0.14.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **ui:** add StepWizard, ColumnVisibilityDrawer, useHotkeys, and PocketBase enterprise suite ([7fcc861](https://github.com/vibeunion/svadmin/commit/7fcc861239b788231e6b590951fa302f9f2a333f))
+* **ui:** add StepWizard, ColumnVisibilityDrawer, useHotkeys, and PocketBase enterprise suite ([6a68dd8](https://github.com/vibeunion/svadmin/commit/6a68dd8f7f4f3273db54773e4f0da4ebf61d4e20))
+
 ## [0.13.28](https://github.com/vibeunion/svadmin/compare/pocketbase-v0.13.27...pocketbase-v0.13.28) (2026-11-10)
 
 

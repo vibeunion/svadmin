@@ -805,6 +805,20 @@ export { default as TableClipboardManager, type TableClipboardManagerProps } fro
 // Enterprise native Web Audio sound effects & acoustic feedback suite
 export { useAudioAlert, playAudioAlert, type AudioAlertType, type AudioAlertOptions } from './components/useAudioAlert.svelte.js';
 export { default as AudioFeedbackProvider, type AudioFeedbackProviderProps } from './components/AudioFeedbackProvider.svelte';
+// Enterprise printable report layout & PDF export suite
+export { usePrintExport, printElement, type PrintExportOptions } from './components/usePrintExport.svelte.js';
+export { default as PrintableReportLayout, default as ReportPrintLayout, type PrintableReportLayoutProps, type ReportSignatureItem, type ReportMetadataItem } from './components/PrintableReportLayout.svelte';
+
+// Enterprise conversion funnel & flow diagram suite
+export { default as ConversionFunnel, default as PipelineFunnelChart, type ConversionFunnelProps, type FunnelStageItem } from './components/ConversionFunnel.svelte';
+export { default as SankeyChart, type SankeyChartProps, type SankeyNode, type SankeyLink } from './components/SankeyChart.svelte';
+
+// Enterprise visual resource schema modeler & code generator suite
+export { default as SchemaVisualModeler, type SchemaVisualModelerProps, type SchemaFieldModel } from './components/SchemaVisualModeler.svelte';
+
+// Enterprise micro-frontend sandbox bridge & cross-origin event bus suite
+export { useMicroAppEvent, type UseMicroAppEventOptions, type MicroAppMessage as MicroAppBridgeMessage } from './components/useMicroAppEvent.svelte.js';
+export { default as MicroAppBridge, type MicroAppBridgeProps } from './components/MicroAppBridge.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
 

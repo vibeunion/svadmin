@@ -193,6 +193,14 @@ export { default as LiteAnnouncementBanner } from './components/LiteAnnouncement
 export { default as LiteTextDiffViewer } from './components/LiteTextDiffViewer.svelte';
 export { default as LiteAsyncExportModal } from './components/LiteAsyncExportModal.svelte';
 export type { LiteContextMenuItem } from './components/LiteContextMenu.svelte';
+export { default as LiteStepWizard } from './components/LiteStepWizard.svelte';
+export { default as LiteWorkflowStepper } from './components/LiteWorkflowStepper.svelte';
+export { default as LiteDualApprovalGate } from './components/LiteDualApprovalGate.svelte';
+export { default as LiteKeyboardShortcutsModal } from './components/LiteKeyboardShortcutsModal.svelte';
+export type { LiteStepItem } from './components/LiteStepWizard.svelte';
+export type { LiteWorkflowNode } from './components/LiteWorkflowStepper.svelte';
+export type { LiteShortcutItem } from './components/LiteKeyboardShortcutsModal.svelte';
+
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
