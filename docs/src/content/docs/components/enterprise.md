@@ -1284,3 +1284,33 @@ Enterprise two-factor authentication (2FA) and sensitive operation verification 
   oncomplete={(val) => console.log('2FA Code Complete:', val)}
 />
 ```
+
+### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
+
+Enterprise multi-record parameter comparison and difference spotlight suite:
+- **Side-by-side Matrix**: Compares 2 to 5 records across all attributes with fixed sticky row labels.
+- **Difference Spotlight**: Toggle "Only Differences" (`defaultHideIdentical` supported) with primary accent highlight to focus on diverging configurations.
+- **Baseline Selection**: Dynamically switch the benchmark reference record column.
+- **Attribute Value Sync**: Built-in one-click sync action to copy values from baseline to target records (`onsync`).
+- **Flexible Layouts**: Supports centered overlay dialog (`layout="modal"`) and right-side slide-over (`layout="drawer"`).
+
+```svelte
+<script lang="ts">
+  import { RecordCompareModal } from '@svadmin/ui';
+
+  let showCompare = $state(true);
+  const serverNodes = [
+    { id: 'node-01', name: 'Master-A', cpu: '16 Cores', memory: '64 GB', region: 'us-east' },
+    { id: 'node-02', name: 'Replica-B', cpu: '32 Cores', memory: '64 GB', region: 'us-east' },
+    { id: 'node-03', name: 'Canary-C', cpu: '8 Cores', memory: '32 GB', region: 'us-west' },
+  ];
+</script>
+
+<RecordCompareModal
+  bind:open={showCompare}
+  title="Server Specification Comparison"
+  records={serverNodes}
+  benchmarkIndex={0}
+  onsync={(source, target, field) => console.log(`Synced ${field} to ${target.name}`)}
+/>
+```
