@@ -1776,9 +1776,9 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
 
 ```svelte
 <script lang="ts">
-  import { TreeTransferSelect, type TreeTransferNode } from '@svadmin/ui';
+  import { TreeTransferSelect, type TreeTransferSelectNode } from '@svadmin/ui';
 
-  const orgTree: TreeTransferNode[] = [
+  const orgTree: TreeTransferSelectNode[] = [
     {
       id: 'eng',
       label: '研发中心',

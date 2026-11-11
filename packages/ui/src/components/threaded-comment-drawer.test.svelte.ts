@@ -15,7 +15,7 @@ describe('ThreadedCommentDrawer suite', () => {
   ];
 
   it('renders threaded comments stream with author and content', () => {
-    const view = render(ThreadedCommentDrawer, {
+    render(ThreadedCommentDrawer, {
       open: true,
       comments: initialComments,
     });

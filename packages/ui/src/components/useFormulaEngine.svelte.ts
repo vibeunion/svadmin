@@ -43,7 +43,7 @@ function tokenize(input: string): Token[] {
   let i = 0;
 
   while (i < input.length) {
-    const char = input[i];
+    const char = input[i] ?? '';
 
     if (/\s/.test(char)) {
       i++;
@@ -71,7 +71,7 @@ function tokenize(input: string): Token[] {
     // Number literal
     if (/\d/.test(char) || (char === '.' && /\d/.test(input[i + 1] ?? ''))) {
       let numStr = '';
-      while (i < input.length && (/[0-9.]/.test(input[i]) || (input[i] === 'e' || input[i] === 'E'))) {
+      while (i < input.length && (/[0-9.]/.test(input[i] ?? '') || (input[i] === 'e' || input[i] === 'E'))) {
         numStr += input[i];
         i++;
       }
@@ -82,7 +82,7 @@ function tokenize(input: string): Token[] {
     // Identifier / Field Path
     if (/[a-zA-Z_$]/.test(char)) {
       let idStr = '';
-      while (i < input.length && /[a-zA-Z0-9_$.]/.test(input[i])) {
+      while (i < input.length && /[a-zA-Z0-9_$.]/.test(input[i] ?? '')) {
         idStr += input[i];
         i++;
       }
@@ -122,7 +122,8 @@ function parseExpression(tokens: Token[], scope: FormulaScope): number {
       if (nextToken && nextToken.type === 'paren' && nextToken.val === '(') {
         pos++; // consume '('
         const args: number[] = [];
-        if (tokens[pos] && !(tokens[pos]?.type === 'paren' && tokens[pos]?.val === ')')) {
+        const current = tokens[pos];
+        if (current && !(current.type === 'paren' && current.val === ')')) {
           args.push(parseAddSub());
           while (tokens[pos]?.type === 'comma') {
             pos++; // consume comma

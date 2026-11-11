@@ -2009,9 +2009,9 @@ Deep organization tree transfer and multi-tiered batch assigner:
 
 ```svelte
 <script lang="ts">
-  import { TreeTransferSelect, type TreeTransferNode } from '@svadmin/ui';
+  import { TreeTransferSelect, type TreeTransferSelectNode } from '@svadmin/ui';
 
-  const orgTree: TreeTransferNode[] = [
+  const orgTree: TreeTransferSelectNode[] = [
     {
       id: 'eng',
       label: 'Engineering',
