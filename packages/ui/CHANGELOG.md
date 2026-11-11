@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.122.0](https://github.com/vibeunion/svadmin/compare/ui-v0.121.0...ui-v0.122.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **ui:** add AnnouncementBanner, TextDiffViewer, and AsyncExportModal enterprise suite ([#720](https://github.com/vibeunion/svadmin/issues/720)) ([5c2c8ee](https://github.com/vibeunion/svadmin/commit/5c2c8ee90030116c4e5ac1b05b60d6b44ec41348))
+* **ui:** add PrintableReportLayout, ConversionFunnel, SchemaVisualModeler, and MicroAppBridge enterprise suite ([dc3c700](https://github.com/vibeunion/svadmin/commit/dc3c700c7b7f5df1c747e1fb8a56b1e69034b54b))
+* **ui:** add SessionTimeoutGuard, DualApprovalGate, TableClipboardManager, and AudioFeedback suite ([b624589](https://github.com/vibeunion/svadmin/commit/b62458991a9d88e9ca95d9e1bce713899a0b4a96))
+* **ui:** add StepWizard, ColumnVisibilityDrawer, useHotkeys, and PocketBase enterprise suite ([7fcc861](https://github.com/vibeunion/svadmin/commit/7fcc861239b788231e6b590951fa302f9f2a333f))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** move sheet side to root and narrow filter props ([dbb19bb](https://github.com/vibeunion/svadmin/commit/dbb19bbe90fb8af330f83c7485d0ca92d6009870))
+* **ui:** remove unused test import ([bb69fa6](https://github.com/vibeunion/svadmin/commit/bb69fa6b82d912d4dcc048c8615319e9c9dd49b3))
+* **ui:** remove unused test imports ([5c6ce2f](https://github.com/vibeunion/svadmin/commit/5c6ce2f78278385b68ed457e23acffb6a07130df))
+* **ui:** standardize clean-flat container radius, overlay shadows, and typography ([43bffb2](https://github.com/vibeunion/svadmin/commit/43bffb2b12df34798894ed571640ec5eede7ac91))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** sync report suite with main ([4ba3458](https://github.com/vibeunion/svadmin/commit/4ba34587a25690ca1b461249454be26840b0161c))
+
 ## [0.121.0](https://github.com/vibeunion/svadmin/compare/ui-v0.120.0...ui-v0.121.0) (2026-11-11)
 
 
