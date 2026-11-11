@@ -435,7 +435,7 @@
       </ol>
     </nav>
 
-    <div class="flex flex-col justify-between p-6 min-h-64">
+    <div class="flex flex-col justify-between p-6">
       <div class="space-y-4">
         {#if stepErrorMessage}
           <div
