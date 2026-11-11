@@ -68,7 +68,8 @@
   .lite-banner-warning { background: #fff7e8; color: #d46b08; border-color: #ffd591; }
   .lite-banner-error { background: #fff1f0; color: #cf1322; border-color: #ffa39e; }
   .lite-banner-success { background: #e8ffea; color: #00b42a; border-color: #aff0b5; }
-  .lite-banner-body { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lite-banner-body { display: flex; align-items: center; flex-wrap: wrap; }
+  .lite-banner-body > * + * { margin-left: 8px; }
   .lite-banner-icon { font-weight: 700; font-size: 14px; }
   .lite-banner-message { font-weight: 500; flex: 1; min-width: 200px; }
   .lite-banner-countdown {

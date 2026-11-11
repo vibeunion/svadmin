@@ -42,28 +42,28 @@
 
   export interface AsyncExportModalProps {
     /** 弹窗是否打开 */
-    open?: boolean;
+    open?: boolean | undefined;
     /** 默认导出的文件名（自动追加后缀） */
-    defaultFileName?: string;
+    defaultFileName?: string | undefined;
     /** 资源或模块标识名，如 "orders" 或 "用户记录" */
-    resourceName?: string;
+    resourceName?: string | undefined;
     /** 当前表格勾选行数 */
-    selectedCount?: number;
+    selectedCount?: number | undefined;
     /** 筛选结果行数 */
-    filteredCount?: number;
+    filteredCount?: number | undefined;
     /** 系统总行数 */
-    totalCount?: number;
+    totalCount?: number | undefined;
     /** 字段列选项列表 */
     columns: ExportColumnOption[];
     /** 支持的导出格式清单 */
-    supportedFormats?: ExportFormat[];
+    supportedFormats?: ExportFormat[] | undefined;
     /** 异步导出执行函数 */
-    onexport?: (config: ExportConfig) => Promise<ExportResult> | ExportResult;
+    onexport?: ((config: ExportConfig) => Promise<ExportResult> | ExportResult) | undefined;
     /** 弹窗关闭回调 */
-    onclose?: () => void;
+    onclose?: (() => void) | undefined;
     /** 点击下载文件回调 */
-    ondownload?: (result: ExportResult) => void;
-    class?: string;
+    ondownload?: ((result: ExportResult) => void) | undefined;
+    class?: string | undefined;
   }
 
   let {

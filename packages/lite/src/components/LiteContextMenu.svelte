@@ -75,8 +75,8 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     display: inline-flex;
     flex-wrap: wrap;
-    gap: 4px;
   }
+  .lite-context-menu-list > * + * { margin-left: 4px; }
   .lite-context-divider {
     width: 1px;
     height: 16px;
@@ -89,18 +89,18 @@
     border-radius: 4px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     padding: 4px 8px;
     color: #1d2129;
     background: #f7f8fa;
   }
+  .lite-context-item > * + * { margin-left: 6px; }
   .lite-context-link {
     color: inherit;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
   }
+  .lite-context-link > * + * { margin-left: 6px; }
   .lite-context-danger { color: #f53f3f; background: #ffece8; }
   .lite-context-disabled { opacity: 0.5; pointer-events: none; }
   kbd {

@@ -48,7 +48,7 @@
       style={`grid-template-columns: repeat(${statistic}, minmax(0, 1fr));`}
     >
       {#each Array(statistic) as _, idx (idx)}
-        <div class="rounded-xl border border-border bg-card p-4 space-y-3">
+        <div class="rounded-md border border-border bg-card p-4 space-y-3">
           <div class="flex items-center justify-between">
             <div class="h-3.5 w-20 rounded-[4px] bg-muted"></div>
             <div class="h-4 w-4 rounded-[4px] bg-muted/70"></div>
@@ -62,7 +62,7 @@
 
   <!-- Table Skeleton -->
   {#if type === 'table'}
-    <div class="rounded-xl border border-border bg-card overflow-hidden p-4 space-y-4">
+    <div class="rounded-md border border-border bg-card overflow-hidden p-4 space-y-4">
       <!-- Table Toolbar -->
       <div class="flex items-center justify-between gap-4 pb-2">
         <div class="h-8 w-48 rounded-[4px] bg-muted"></div>
@@ -113,7 +113,7 @@
 
   <!-- Descriptions Skeleton -->
   {:else if type === 'descriptions'}
-    <div class="rounded-xl border border-border bg-card p-5 space-y-5">
+    <div class="rounded-md border border-border bg-card p-5 space-y-5">
       <!-- Title Bar -->
       <div class="flex items-center justify-between border-b border-border pb-3">
         <div class="h-5 w-36 rounded-[4px] bg-muted"></div>
@@ -139,7 +139,7 @@
 
   <!-- Form Skeleton -->
   {:else if type === 'form'}
-    <div class="rounded-xl border border-border bg-card p-6 space-y-5 max-w-2xl">
+    <div class="rounded-md border border-border bg-card p-6 space-y-5 max-w-2xl">
       {#each Array(rows) as _, rIdx (rIdx)}
         <div class="space-y-2">
           <div class="h-3.5 w-24 rounded-[4px] bg-muted"></div>
@@ -155,7 +155,7 @@
 
   <!-- List Skeleton -->
   {:else if type === 'list'}
-    <div class="rounded-xl border border-border bg-card divide-y divide-border/60">
+    <div class="rounded-md border border-border bg-card divide-y divide-border/60">
       {#each Array(rows) as _, rIdx (rIdx)}
         <div class="flex items-start gap-4 p-4">
           {#if avatar}
@@ -172,7 +172,7 @@
 
   <!-- Result Skeleton -->
   {:else if type === 'result'}
-    <div class="rounded-xl border border-border bg-card p-12 flex flex-col items-center justify-center text-center space-y-4">
+    <div class="rounded-md border border-border bg-card p-12 flex flex-col items-center justify-center text-center space-y-4">
       <div class="h-18 w-18 rounded-full bg-muted/80"></div>
       <div class="h-6 w-48 rounded-[4px] bg-muted"></div>
       <div class="h-3.5 w-72 rounded-[4px] bg-muted/70"></div>

@@ -168,9 +168,9 @@
   });
 
   const sizeClasses = {
-    sm: 'h-8 w-8 text-sm',
-    md: 'h-10 w-10 text-base',
-    lg: 'h-12 w-12 text-lg',
+    sm: 'h-7 w-7 text-xs',
+    md: 'h-8 w-8 text-sm',
+    lg: 'h-9 w-9 text-base',
   };
 </script>
 
@@ -192,8 +192,8 @@
       aria-label={`Digit ${index + 1} of ${length}`}
       aria-invalid={error ? 'true' : undefined}
       class={cn(
-        'rounded-md border text-center font-mono font-semibold transition-all outline-none',
-        'focus:ring-2 focus:ring-primary focus:ring-offset-2',
+        'rounded-sm border text-center font-mono font-semibold transition-all outline-none',
+        'focus:border-primary focus:ring-2 focus:ring-primary/20',
         sizeClasses[size],
         error
           ? 'border-destructive text-destructive focus:ring-destructive'

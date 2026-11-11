@@ -303,7 +303,7 @@
   data-tone={activeTone}
   data-gauge-type={type}
   class={cn(
-    'relative flex flex-col items-center justify-between rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm transition-all',
+    'relative flex flex-col items-center justify-between rounded-md border border-border bg-card p-4 text-card-foreground shadow-sm transition-all',
     className,
   )}
   style="width: {widthPx}px;"
