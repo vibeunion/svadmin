@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-11T02:45:03.808Z`
-> 清单映射覆盖率：**100%**（193/193 组件）
-> 1:1 对齐率 (Exact)：**69.4%**（134）· 语义降级率 (Fallback)：**28%**（54）
-> 行为验证覆盖：**84.5%**（163/193 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-11T09:10:42.954Z`
+> 清单映射覆盖率：**100%**（202/202 组件）
+> 1:1 对齐率 (Exact)：**66.3%**（134）· 语义降级率 (Fallback)：**31.2%**（63）
+> 行为验证覆盖：**85.1%**（172/202 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -12,9 +12,9 @@
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **pages** | 18 | 14 | 4 | 0 | 0 | **77.8%** | 14/18 | 0 |
-| **advanced** | 52 | 28 | 20 | 4 | 0 | **53.8%** | 45/52 | 0 |
-| **widgets** | 40 | 18 | 22 | 0 | 0 | **45%** | 37/40 | 0 |
+| **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
+| **advanced** | 59 | 28 | 27 | 4 | 0 | **47.5%** | 52/59 | 0 |
+| **widgets** | 41 | 18 | 23 | 0 | 0 | **43.9%** | 38/41 | 0 |
 | **fields** | 48 | 42 | 6 | 0 | 0 | **87.5%** | 42/48 | 0 |
 | **layout** | 25 | 22 | 2 | 1 | 0 | **88%** | 21/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
@@ -56,6 +56,7 @@
 | `PdfDocumentViewer` | `LitePdfDocumentViewer.svelte` | ✅ 1:1 对齐 | 嵌入式 PDF 文档与电子盖章批注 |
 | `PageSkeleton` | `LiteSkeleton.svelte` | ✅ 1:1 对齐 | 由 props 决定的页面骨架结构（list/show/form + rows），服务端直接生成 |
 | `ListPagination` | `LitePagination.svelte` | ✅ 1:1 对齐 | URL 驱动分页；页码窗口由服务端输出 |
+| `ResultPage` | `LiteResultPage.svelte` | ⚡ 语义降级 | 服务端 7 大结果与异常状态语义图标、标题及操作按钮组；微光粒子与动态插槽由 SPA 承接 |
 
 ### ADVANCED
 
@@ -112,6 +113,13 @@
 | `MicroAppFrame` | `LiteMicroAppFrame.svelte` | ⚡ 语义降级 | 服务端 iframe、sandbox/allow/referrerpolicy 与新窗口链接；postMessage、主题同步、自动高度和全屏由 SPA 承接 |
 | `OfflineGuard` | — | 🚫 免适配 | 免适配 (客户端网络守卫) |
 | `useNetworkStatus` | — | 🚫 免适配 | 免适配 (浏览器 Network Information 钩子) |
+| `JsonViewer` | `LiteJsonViewer.svelte` | ⚡ 语义降级 | 服务端 JSON 结构化折叠树与格式化代码块；关键词实时搜索高亮由 SPA 承接 |
+| `WatermarkContainer` | `LiteWatermarkContainer.svelte` | ⚡ 语义降级 | 服务端 CSS 重复平铺 SVG 水印背景与文本遮罩；DOM 监听防篡改自愈由 SPA 承接 |
+| `ContextMenu` | `LiteContextMenu.svelte` | ⚡ 语义降级 | 服务端语义化操作列表与快捷键提示；视口边缘碰撞自适应翻转由 SPA 承接 |
+| `UnsavedChangesGuard` | `LiteUnsavedChangesGuard.svelte` | ⚡ 语义降级 | 服务端未保存变更状态横幅与确认表单；浏览器 beforeunload 阻拦由 SPA 承接 |
+| `AnnouncementBanner` | `LiteAnnouncementBanner.svelte` | ⚡ 语义降级 | 服务端全站广播通知横幅、语义状态色调与倒计时展示；跑马灯多条轮播由 SPA 承接 |
+| `TextDiffViewer` | `LiteTextDiffViewer.svelte` | ⚡ 语义降级 | 服务端预渲染文本行差异对比、新增/删除行高亮与行号；动态折叠与双栏切换由 SPA 承接 |
+| `AsyncExportModal` | `LiteAsyncExportModal.svelte` | ⚡ 语义降级 | 服务端异步导出表单、范围选择、格式单选与列复选框提交；动态进度轮询由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -158,6 +166,7 @@
 | `TrendIndicator` | `LiteTrendIndicator.svelte` | ✅ 1:1 对齐 | 服务端计算涨跌幅、方向、前缀/后缀与反向语义色；无客户端状态 |
 | `MetricGrid` | `LiteMetricGrid.svelte` | ⚡ 语义降级 | 服务端网格、标题、加载骨架、空态与指标卡；自定义操作插槽和任意子组件由宿主服务端渲染 |
 | `OrgChart` | `LiteOrgChart.svelte` | ⚡ 语义降级 | 服务端层级表格与部门/职位信息；节点点击、缩放和图形连线由 SPA 承接 |
+| `KpiCard` | `LiteKpiCard.svelte` | ⚡ 语义降级 | 服务端静态指标数值、同环比胶囊、SVG 迷你走势与目标进度条；骨架过渡与动态动画由 SPA 承接 |
 
 ### FIELDS
 

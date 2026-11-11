@@ -26,10 +26,21 @@
     LitePresenceAvatarGroup,
     LiteGaugeChart,
     LiteAuditLog,
+    LiteKpiCard,
+    LiteJsonViewer,
+    LiteResultPage,
+    LiteWatermarkContainer,
+    LiteContextMenu,
+    LiteUnsavedChangesGuard,
+    LiteAnnouncementBanner,
+    LiteTextDiffViewer,
+    LiteAsyncExportModal,
   } from '@svadmin/lite';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
+  const diffSampleOld = 'max_workers = 4\ntimeout = 30';
+  const diffSampleNew = 'max_workers = 8\ntimeout = 60';
   const report = $derived(data.parityReport);
   const classHooks = $derived(data.classHooks);
 
@@ -192,6 +203,101 @@
       <div style="flex: 1 1 980px; margin: 0 8px 16px;">
         <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteMicroAppFrame</h3>
         <LiteMicroAppFrame src="about:blank" title="Embedded metrics" fallbackHref="/lite/parity" />
+      </div>
+
+      <!-- Late-2026-11 Enterprise Suite Showroom -->
+      <div style="flex: 1 1 980px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteAnnouncementBanner</h3>
+        <LiteAnnouncementBanner
+          tone="warning"
+          message="生产环境集群例行冷备归档提醒：写入服务将于今晚短暂切换。"
+          countdownText="01:25:00"
+          actionText="变更预案"
+          actionHref="/lite/parity"
+        />
+      </div>
+
+      <div style="flex: 1 1 320px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteKpiCard</h3>
+        <LiteKpiCard
+          title="季度总营收"
+          value={1284500}
+          prefix="¥"
+          suffix="元"
+          trendText="12.4%"
+          trendDirection="up"
+          sparklineData={[10, 25, 18, 42, 60, 55, 80]}
+          targetProgress={{ current: 85, target: 100, label: "目标达成率" }}
+        />
+      </div>
+
+      <div style="flex: 1 1 320px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteContextMenu</h3>
+        <LiteContextMenu
+          items={[
+            { key: "copy", label: "复制记录 ID", shortcut: "⌘C" },
+            { key: "sep", label: "", divider: true },
+            { key: "del", label: "删除记录", danger: true, href: "/lite/parity" }
+          ]}
+        >
+          <div style="padding: 16px; background: #f7f8fa; border: 1px dashed #e5e6eb; border-radius: 4px; font-size: 12px; color: #4e5969; text-align: center;">
+            右键上下文菜单 SSR 语义降级区域
+          </div>
+        </LiteContextMenu>
+      </div>
+
+      <div style="flex: 1 1 320px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteWatermarkContainer & LiteUnsavedChangesGuard</h3>
+        <LiteWatermarkContainer content={["SVADMIN LITE", "CONFIDENTIAL"]}>
+          <LiteUnsavedChangesGuard hasChanges={true} message="表单存在未保存的数据修改">
+            <div style="padding: 16px; border: 1px solid #e5e6eb; border-radius: 4px; font-size: 12px; background: #ffffff;">
+              涉密财务报表区域已受动态水印保护
+            </div>
+          </LiteUnsavedChangesGuard>
+        </LiteWatermarkContainer>
+      </div>
+
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteJsonViewer</h3>
+        <LiteJsonViewer
+          title="Webhook Payload"
+          data={{ event: "order.paid", amount: 1250, items: 3, verified: true }}
+          initialDepth={1}
+        />
+      </div>
+
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteTextDiffViewer</h3>
+        <LiteTextDiffViewer
+          oldTitle="Baseline (v1.0)"
+          newTitle="Current (v1.1)"
+          oldText={diffSampleOld}
+          newText={diffSampleNew}
+        />
+      </div>
+
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteResultPage</h3>
+        <LiteResultPage
+          status="success"
+          title="订单异步导出已提交"
+          description="系统正在生成报表压缩包，可在任务中心查看"
+          primaryActionHref="/lite/parity"
+          primaryActionLabel="查看任务列表"
+        />
+      </div>
+
+      <div style="flex: 1 1 460px; margin: 0 8px 16px;">
+        <h3 style="margin: 0 0 8px; font-size: 13px; color: #0a2540;">LiteAsyncExportModal</h3>
+        <LiteAsyncExportModal
+          open={true}
+          resourceName="财务流水"
+          action="/lite/parity"
+          columns={[
+            { key: "orderNo", label: "订单流水号" },
+            { key: "amount", label: "结算金额" }
+          ]}
+        />
       </div>
     </div>
   </section>
