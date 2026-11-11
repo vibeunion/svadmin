@@ -821,3 +821,18 @@ export { default as SchemaVisualModeler, type SchemaVisualModelerProps, type Sch
 // Enterprise micro-frontend sandbox bridge & cross-origin event bus suite
 export { useMicroAppEvent, type UseMicroAppEventOptions, type MicroAppMessage as MicroAppBridgeMessage } from './components/useMicroAppEvent.svelte.js';
 export { default as MicroAppBridge, type MicroAppBridgeProps } from './components/MicroAppBridge.svelte';
+// Enterprise business rule expression builder & logical rule tree suite
+export { default as RuleExpressionBuilder, default as LogicalRuleTree, type RuleExpressionBuilderProps, type RuleGroupNode, type RuleLeafNode, type RuleOperator, type RuleFieldOption } from './components/RuleExpressionBuilder.svelte';
+
+// Enterprise cluster topology graph & microservice health grid suite
+export { default as ClusterTopologyGraph, default as ServiceHealthGrid, type ClusterTopologyGraphProps, type ClusterTopologyNode, type ClusterTopologyEdge, type ClusterNodeHealth, type ClusterNodeType } from './components/ClusterTopologyGraph.svelte';
+
+// Enterprise snapshot audit timeline replay & time-travel diff suite
+export { default as SnapshotTimelineReplay, default as TimeTravelDiff, type SnapshotTimelineReplayProps, type SnapshotRevision } from './components/SnapshotTimelineReplay.svelte';
+
+// Enterprise keyboard-driven action palette & quick command drawer suite
+export { default as ActionPalette, default as QuickActionDrawer, type ActionPaletteProps, type PaletteActionItem } from './components/ActionPalette.svelte';
+
+// Enterprise dynamic i18n language pack editor & runtime patch suite
+export { useDynamicLocale, applyLocalePatch, getLocalePatch, clearLocalePatches, translateDynamic } from './components/useDynamicLocale.svelte.js';
+export { default as I18nLanguagePackEditor, type I18nLanguagePackEditorProps, type I18nEntry } from './components/I18nLanguagePackEditor.svelte';

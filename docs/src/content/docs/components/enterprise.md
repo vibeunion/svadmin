@@ -1777,3 +1777,125 @@ Enterprise micro-frontend sandbox bridge and cross-origin event bus:
 
 <MicroAppBridge appId="subapp-billing" />
 ```
+
+### `<RuleExpressionBuilder>` / `<LogicalRuleTree>`
+
+Enterprise business rule expression builder and logical rule tree suite:
+- **Nested Boolean Logic**: Supports recursive condition groups (`AND` / `OR` / `NOT`) for risk management, automated approval routing, and alert thresholds.
+- **Dynamic Variable Selection**: Pick left-hand field keys (`order.amount`, `user.level`), operators (`=`, `>`, `<`, `in`, `contains`, `regex`), and dynamic right-hand values.
+- **Real-Time AST Compilation**: Compiles visual trees into both structured JSON AST and readable natural-language expressions with one-click copy.
+
+```svelte
+<script lang="ts">
+  import { RuleExpressionBuilder } from '@svadmin/ui';
+
+  const fields = [
+    { key: 'order.amount', label: 'Order Amount', type: 'number' },
+    { key: 'user.riskScore', label: 'Risk Score', type: 'number' },
+    { key: 'user.level', label: 'Member Level', type: 'string' },
+  ];
+</script>
+
+<RuleExpressionBuilder
+  {fields}
+  onChange={(ast, expr) => console.log('Rule updated:', expr, ast)}
+/>
+```
+
+### `<ClusterTopologyGraph>` / `<ServiceHealthGrid>`
+
+Distributed service cluster health and full-topology architecture graph:
+- **0KB External Overhead**: Pure SVG vector rendering with no bulky charting or canvas dependencies.
+- **Tiered Microservice Topology**: Visualizes Ingress Gateways, Application Services, and Database/Cache/Queue storage tiers.
+- **Node Diagnostics & Action**: Interactive node selection with real-time QPS, latency ms, error rate %, and instance restart actions.
+
+```svelte
+<script lang="ts">
+  import { ClusterTopologyGraph } from '@svadmin/ui';
+</script>
+
+<ClusterTopologyGraph
+  title="Production Microservice Topology"
+  onNodeSelect={(node) => console.log('Inspecting node:', node.id)}
+  onRestartNode={(node) => console.log('Restarting service:', node.id)}
+/>
+```
+
+### `<SnapshotTimelineReplay>` / `<TimeTravelDiff>`
+
+Time-travel audit snapshot replay and side-by-side revision comparator:
+- **Interactive Time-Travel Slider**: Smoothly scrub across revision histories to restore historical snapshot states at arbitrary timestamps.
+- **Field-Level Diff Highlighting**: Side-by-side comparison (Before ↔ After) with highlighted modified, added, and deleted attributes.
+- **Rollback Request Flow**: Supports one-click audit snapshot rollback workflow initiation.
+
+```svelte
+<script lang="ts">
+  import { SnapshotTimelineReplay, type SnapshotRevision } from '@svadmin/ui';
+
+  const revisions: SnapshotRevision[] = [
+    {
+      id: 'rev-1',
+      version: 1,
+      timestamp: '2026-11-01 10:00:00',
+      author: 'Alice (Security)',
+      auditHash: 'SHA-001',
+      snapshot: { status: 'draft', quota: 100 },
+    },
+    {
+      id: 'rev-2',
+      version: 2,
+      timestamp: '2026-11-02 14:30:00',
+      author: 'Bob (Lead)',
+      auditHash: 'SHA-002',
+      snapshot: { status: 'published', quota: 500 },
+    },
+  ];
+</script>
+
+<SnapshotTimelineReplay
+  {revisions}
+  onApplyRollback={(rev) => console.log('Reverting to snapshot:', rev.version)}
+/>
+```
+
+### `<ActionPalette>` / `<QuickActionDrawer>`
+
+Keyboard-first quick action launcher and contextual command palette (Linear / Raycast style):
+- **Lightning-Fast Execution**: Triggered via keyboard shortcut (`⌘.`) on highlighted or selected table records.
+- **Fuzzy Search & Pinyin Matching**: Search commands instantly by name, shortcut key, or action category.
+- **Inline Parameter Prompting**: Seamlessly prompts for parameters (e.g. transfer assignee, rejection reason) before batch execution.
+
+```svelte
+<script lang="ts">
+  import { ActionPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+  let selectedRecords = $state([{ id: 101 }, { id: 102 }]);
+</script>
+
+<ActionPalette
+  bind:open
+  {selectedRecords}
+  onExecuteAction={(id, param) => console.log('Executed action:', id, param)}
+/>
+```
+
+### `<I18nLanguagePackEditor>` & `useDynamicLocale`
+
+Dynamic runtime localization patch loader and online translation editor:
+- **Zero-Deploy Hotfixes**: Modify online translations without rebuilding, committing, or redeploying code.
+- **Namespace Organization**: Browse translation keys by namespace (`common`, `table`, `form`, `auth`), filter search terms, and edit inline.
+- **Dynamic Translation Runtime**: `useDynamicLocale` overrides static core strings dynamically via remote APIs or localStorage patches.
+
+```svelte
+<script lang="ts">
+  import { I18nLanguagePackEditor, useDynamicLocale } from '@svadmin/ui';
+
+  const i18n = useDynamicLocale();
+</script>
+
+<I18nLanguagePackEditor
+  targetLocale="zh-CN"
+  onSavePatch={(locale, patch) => console.log('Published i18n patch:', locale, patch)}
+/>
+```
