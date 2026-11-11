@@ -311,6 +311,21 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'AnnouncementBanner', uiComponent: 'AnnouncementBanner.svelte', liteComponent: 'LiteAnnouncementBanner.svelte', category: 'advanced', status: 'fallback', strategy: '服务端全站广播通知横幅、语义状态色调与倒计时展示；跑马灯多条轮播由 SPA 承接' },
   { name: 'TextDiffViewer', uiComponent: 'TextDiffViewer.svelte', liteComponent: 'LiteTextDiffViewer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端预渲染文本行差异对比、新增/删除行高亮与行号；动态折叠与双栏切换由 SPA 承接' },
   { name: 'AsyncExportModal', uiComponent: 'AsyncExportModal.svelte', liteComponent: 'LiteAsyncExportModal.svelte', category: 'advanced', status: 'fallback', strategy: '服务端异步导出表单、范围选择、格式单选与列复选框提交；动态进度轮询由 SPA 承接' },
+  // ─── Enterprise suites added in late-2026-11 wave 2 ────────────────────
+  { name: 'StepWizard', uiComponent: 'StepWizard.svelte', liteComponent: 'LiteStepWizard.svelte', category: 'advanced', status: 'fallback', strategy: '服务端分步向导容器与原生链接步骤跳转；动态分支校验与草稿断点续填由 SPA 承接' },
+  { name: 'WorkflowStepper', uiComponent: 'WorkflowStepper.svelte', liteComponent: 'LiteWorkflowStepper.svelte', category: 'advanced', status: 'fallback', strategy: '服务端任务时间线节点与状态徽章展示；单步交互重试由 SPA 承接' },
+  { name: 'ColumnVisibilityDrawer', uiComponent: 'ColumnVisibilityDrawer.svelte', liteComponent: 'LiteColumnSettings.svelte', category: 'advanced', status: 'fallback', strategy: '原生多选表单与查询参数列过滤；拖拽排序与本地持久化由 SPA 承接' },
+  { name: 'ColumnFilterBuilder', uiComponent: 'ColumnFilterBuilder.svelte', liteComponent: 'LiteFilterBuilder.svelte', category: 'advanced', status: 'exact', strategy: '可视化多条件原生筛选表单与 CRUD 运算符解析' },
+  { name: 'KeyboardShortcutsModal', uiComponent: 'KeyboardShortcutsModal.svelte', liteComponent: 'LiteKeyboardShortcutsModal.svelte', category: 'advanced', status: 'fallback', strategy: '服务端静态快捷键分类矩阵展示；全局事件监听与实时检索由 SPA 承接' },
+  { name: 'DualApprovalGate', uiComponent: 'DualApprovalGate.svelte', liteComponent: 'LiteDualApprovalGate.svelte', category: 'advanced', status: 'fallback', strategy: '服务端双人复核表单与二次口令验证；二维码动态轮询由 SPA 承接' },
+  { name: 'useHotkeys', uiComponent: 'useHotkeys.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (浏览器热键监听钩子)', note: 'SSR 不读取 window/keyboard 事件' },
+  { name: 'SessionTimeoutGuard', uiComponent: 'SessionTimeoutGuard.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (浏览器会话空闲守卫)', note: 'SSR 不处理 DOM 空闲监听与倒计时' },
+  { name: 'useSessionTimeout', uiComponent: 'useSessionTimeout.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (浏览器会话空闲钩子)', note: 'SSR 不支持 BroadcastChannel' },
+  { name: 'TableClipboardManager', uiComponent: 'TableClipboardManager.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端剪贴板与矩阵回写)', note: 'SSR 不读取系统剪贴板' },
+  { name: 'useTableClipboard', uiComponent: 'useTableClipboard.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端剪贴板解析钩子)' },
+  { name: 'AudioFeedbackProvider', uiComponent: 'AudioFeedbackProvider.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (Web Audio 业务声效)', note: 'SSR 不支持 AudioContext' },
+  { name: 'useAudioAlert', uiComponent: 'useAudioAlert.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (Web Audio 声效钩子)' },
+
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },

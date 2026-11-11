@@ -16,6 +16,6 @@
     "packages/lite/src/server-adapter.ts": 981,
     "packages/ai-elements/src/components/ChatDialog.svelte": 1417,
     "packages/sso/src/auth-provider.ts": 808,
-    "packages/ui/src/index.ts": 870
+    "packages/ui/src/index.ts": 980
   }
 }

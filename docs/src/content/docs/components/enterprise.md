@@ -1674,6 +1674,229 @@ Pure native Web Audio API acoustic feedback and operational sound effects suite:
   <button onclick={handleScanSuccess}>Scan Barcode</button>
 </AudioFeedbackProvider>
 ```
+
+### `<PrintableReportLayout>` & `usePrintExport`
+
+Enterprise printable report layout and high-fidelity PDF export suite:
+- Supports standard paper sizes (A4, A5, Letter) in portrait and landscape orientations.
+- **Anti-Break Pagination**: Configured with `page-break-inside: avoid` to prevent mid-row table splits and broken signature blocks.
+- **Repetitive Table Headers**: Enforces `thead { display: table-header-group; }` across multi-page printing.
+- Built-in metadata strip, official approval seal/stamp area, and page numbering.
+
+```svelte
+<script lang="ts">
+  import { PrintableReportLayout } from '@svadmin/ui';
+
+  const metadata = [
+    { label: 'Document No.', value: 'PO-2026-9081' },
+    { label: 'Fiscal Period', value: '2026-Q4' },
+  ];
+
+  const signatures = [
+    { role: 'Preparer', name: 'Alice Smith' },
+    { role: 'Supervisor Auditor', name: 'Bob Jones' },
+  ];
+</script>
+
+<PrintableReportLayout
+  title="Quarterly Settlement Statement"
+  subtitle="Official commercial accounting ledger"
+  reportNo="PO-2026-9081"
+  {metadata}
+  {signatures}
+  watermarkText="CONFIDENTIAL"
+>
+  <div class="py-4">
+    <p>Financial ledger statements and tabular line items...</p>
+  </div>
+</PrintableReportLayout>
+```
+
+### `<FunnelChart>` & `<SankeyChart>`
+
+Enterprise business conversion funnel and path flow diagram suite:
+- **Zero Heavy Dependencies**: Pure SVG vector rendering with no bulky external chart engines.
+- **Conversion & Drop-off Rates**: Automatically calculates stage-by-stage retention percentages and drop-off rates (`-40%`).
+- **Interactive Stages**: Clickable stage segments with hover highlights and end-to-end total conversion calculations.
+- **`<SankeyChart>`**: Multi-stage source-to-target flow visualization for marketing attribution and resource allocation.
+
+```svelte
+<script lang="ts">
+  import { FunnelChart, type FunnelStageItem } from '@svadmin/ui';
+
+  const stages: FunnelStageItem[] = [
+    { id: '1', label: 'Page Impressions', value: 120000 },
+    { id: '2', label: 'Product Clicks', value: 45000 },
+    { id: '3', label: 'Added to Cart', value: 18000 },
+    { id: '4', label: 'Completed Checkout', value: 7200 },
+  ];
+</script>
+
+<FunnelChart
+  {stages}
+  title="E-Commerce Checkout Funnel"
+  showPercentages={true}
+  showDropoff={true}
+/>
+```
+
+### `<SchemaVisualModeler>`
+
+Visual resource schema reverse engineering and code generation canvas:
+- Interactive field designer (key, label, type, required, filterable, sortable).
+- One-click reverse engineering from sample JSON objects.
+- Instant Svelte 5 / `@svadmin/core` `ResourceDefinition` code generation with copy-to-clipboard support.
+
+```svelte
+<script lang="ts">
+  import { SchemaVisualModeler } from '@svadmin/ui';
+</script>
+
+<SchemaVisualModeler
+  resourceName="PurchaseOrder"
+  onSaveSchema={(name, fields) => console.log('Schema configured:', name, fields)}
+/>
+```
+
+### `<MicroAppBridge>` & `useMicroAppEvent`
+
+Enterprise micro-frontend sandbox bridge and cross-origin event bus:
+- Type-safe, Origin-whitelisted postMessage communication between host and child iframe micro-apps (`<MicroAppFrame>`).
+- Seamless bidirectional event subscriptions, RPC requests (`PING`/`PONG`), and automated host theme / locale state synchronization.
+
+```svelte
+<script lang="ts">
+  import { MicroAppBridge, useMicroAppEvent } from '@svadmin/ui';
+
+  const bus = useMicroAppEvent({ channel: 'enterprise_portal' });
+
+  bus.on('ORDER_CREATED', (payload) => {
+    console.log('Sub-app created order:', payload);
+  });
+</script>
+
+<MicroAppBridge appId="subapp-billing" />
+```
+
+### `<RuleExpressionBuilder>` / `<LogicalRuleTree>`
+
+Enterprise business rule expression builder and logical rule tree suite:
+- **Nested Boolean Logic**: Supports recursive condition groups (`AND` / `OR` / `NOT`) for risk management, automated approval routing, and alert thresholds.
+- **Dynamic Variable Selection**: Pick left-hand field keys (`order.amount`, `user.level`), operators (`=`, `>`, `<`, `in`, `contains`, `regex`), and dynamic right-hand values.
+- **Real-Time AST Compilation**: Compiles visual trees into both structured JSON AST and readable natural-language expressions with one-click copy.
+
+```svelte
+<script lang="ts">
+  import { RuleExpressionBuilder } from '@svadmin/ui';
+
+  const fields = [
+    { key: 'order.amount', label: 'Order Amount', type: 'number' },
+    { key: 'user.riskScore', label: 'Risk Score', type: 'number' },
+    { key: 'user.level', label: 'Member Level', type: 'string' },
+  ];
+</script>
+
+<RuleExpressionBuilder
+  {fields}
+  onChange={(ast, expr) => console.log('Rule updated:', expr, ast)}
+/>
+```
+
+### `<ClusterTopologyGraph>` / `<ServiceHealthGrid>`
+
+Distributed service cluster health and full-topology architecture graph:
+- **0KB External Overhead**: Pure SVG vector rendering with no bulky charting or canvas dependencies.
+- **Tiered Microservice Topology**: Visualizes Ingress Gateways, Application Services, and Database/Cache/Queue storage tiers.
+- **Node Diagnostics & Action**: Interactive node selection with real-time QPS, latency ms, error rate %, and instance restart actions.
+
+```svelte
+<script lang="ts">
+  import { ClusterTopologyGraph } from '@svadmin/ui';
+</script>
+
+<ClusterTopologyGraph
+  title="Production Microservice Topology"
+  onNodeSelect={(node) => console.log('Inspecting node:', node.id)}
+  onRestartNode={(node) => console.log('Restarting service:', node.id)}
+/>
+```
+
+### `<SnapshotTimelineReplay>` / `<TimeTravelDiff>`
+
+Time-travel audit snapshot replay and side-by-side revision comparator:
+- **Interactive Time-Travel Slider**: Smoothly scrub across revision histories to restore historical snapshot states at arbitrary timestamps.
+- **Field-Level Diff Highlighting**: Side-by-side comparison (Before ↔ After) with highlighted modified, added, and deleted attributes.
+- **Rollback Request Flow**: Supports one-click audit snapshot rollback workflow initiation.
+
+```svelte
+<script lang="ts">
+  import { SnapshotTimelineReplay, type SnapshotRevision } from '@svadmin/ui';
+
+  const revisions: SnapshotRevision[] = [
+    {
+      id: 'rev-1',
+      version: 1,
+      timestamp: '2026-11-01 10:00:00',
+      author: 'Alice (Security)',
+      auditHash: 'SHA-001',
+      snapshot: { status: 'draft', quota: 100 },
+    },
+    {
+      id: 'rev-2',
+      version: 2,
+      timestamp: '2026-11-02 14:30:00',
+      author: 'Bob (Lead)',
+      auditHash: 'SHA-002',
+      snapshot: { status: 'published', quota: 500 },
+    },
+  ];
+</script>
+
+<SnapshotTimelineReplay
+  {revisions}
+  onApplyRollback={(rev) => console.log('Reverting to snapshot:', rev.version)}
+/>
+```
+
+### `<ActionPalette>` / `<QuickActionDrawer>`
+
+Keyboard-first quick action launcher and contextual command palette (Linear / Raycast style):
+- **Lightning-Fast Execution**: Triggered via keyboard shortcut (`⌘.`) on highlighted or selected table records.
+- **Fuzzy Search & Pinyin Matching**: Search commands instantly by name, shortcut key, or action category.
+- **Inline Parameter Prompting**: Seamlessly prompts for parameters (e.g. transfer assignee, rejection reason) before batch execution.
+
+```svelte
+<script lang="ts">
+  import { ActionPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+  let selectedRecords = $state([{ id: 101 }, { id: 102 }]);
+</script>
+
+<ActionPalette
+  bind:open
+  {selectedRecords}
+  onExecuteAction={(id, param) => console.log('Executed action:', id, param)}
+/>
+```
+
+### `<I18nLanguagePackEditor>` & `useDynamicLocale`
+
+Dynamic runtime localization patch loader and online translation editor:
+- **Zero-Deploy Hotfixes**: Modify online translations without rebuilding, committing, or redeploying code.
+- **Namespace Organization**: Browse translation keys by namespace (`common`, `table`, `form`, `auth`), filter search terms, and edit inline.
+- **Dynamic Translation Runtime**: `useDynamicLocale` overrides static core strings dynamically via remote APIs or localStorage patches.
+
+```svelte
+<script lang="ts">
+  import { I18nLanguagePackEditor, useDynamicLocale } from '@svadmin/ui';
+
+  const i18n = useDynamicLocale();
+</script>
+
+<I18nLanguagePackEditor
+  targetLocale="zh-CN"
+  onSavePatch={(locale, patch) => console.log('Published i18n patch:', locale, patch)}
 ### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
 
 Enterprise multi-record parameter comparison and difference spotlight suite:
@@ -1758,5 +1981,142 @@ Embedded interactive API quick debugger and runner:
   defaultMethod="POST"
   defaultUrl="/api/v1/orders"
   defaultBody={'{\n  "sku": "LICENSE"\n}'}
+### `<WidgetContainer>`
+
+Enterprise dashboard widget wrapper container:
+- Standardized container shell for executive dashboards, operational metrics, and charts.
+- **Full Lifecycle Controls**: Built-in header toolbar with one-click manual refresh animation, fullscreen toggle (ESC dismissal), timestamp indicators, and custom actions.
+- **State Resiliency**: Embedded skeleton loading layout (`loading`) and user-friendly error retry cards (`error` + `onretry`).
+
+```svelte
+<script lang="ts">
+  import { WidgetContainer } from '@svadmin/ui';
+
+  const now = new Date();
+</script>
+
+<WidgetContainer
+  title="Realtime QPS Throughput"
+  description="Monitoring request volume fluctuations"
+  lastUpdated={now}
+  allowFullscreen={true}
+  allowRefresh={true}
+  onrefresh={() => console.log('Refreshing widget...')}
+>
+  <div class="h-40 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+    Embed any Chart or Metric component here
+  </div>
+</WidgetContainer>
+```
+
+### `<DataFreshnessIndicator>`
+
+Data freshness indicator and auto-polling cadence pill:
+- Tailored for operational cockpits and live monitoring dashboards to communicate data recency.
+- **Pulsing State Dot**: Dynamic visual cues for `live` (pulsing green ping), `fresh`, `stale` (warning tone), and `offline`.
+- **Interval Selector**: Toggle automatic background polling frequency (`5s`, `15s`, `30s`, `1m`, `off`) with manual click-to-sync triggers.
+
+```svelte
+<script lang="ts">
+  import { DataFreshnessIndicator } from '@svadmin/ui';
+
+  let lastSync = $state(Date.now());
+</script>
+
+<DataFreshnessIndicator
+  lastUpdated={lastSync}
+  pollInterval={15}
+  onsyncnow={() => (lastSync = Date.now())}
+/>
+```
+
+### `<ServerStatusGrid>`
+
+Cluster server node health matrix and metric grid:
+- Built for microservice clusters, edge nodes, and database read replicas.
+- **Cluster Aggregation**: Automatic summary calculation for healthy, warning, and critical node counts alongside average network latency.
+- **Multi-Resource Gauges**: Micro progress bars for CPU, Memory, and Disk usage with threshold-driven tone shifts.
+
+```svelte
+<script lang="ts">
+  import { ServerStatusGrid, type ServerNode } from '@svadmin/ui';
+
+  const nodes: ServerNode[] = [
+    { id: '1', name: 'gateway-sh-01', region: 'cn-shanghai', status: 'healthy', latencyMs: 18, cpuPercent: 35, memoryPercent: 52 },
+    { id: '2', name: 'gateway-bj-02', region: 'cn-beijing', status: 'warning', latencyMs: 140, cpuPercent: 78, memoryPercent: 84 },
+  ];
+</script>
+
+<ServerStatusGrid {nodes} onselectnode={(n) => console.log('Selected:', n.name)} />
+### `<QueryBuilder>`
+
+Enterprise multi-level nested visual query and rule builder:
+- Built for advanced BI dashboards, risk policy builders, and multi-dimensional operational datasets.
+- **AND / OR Logical Grouping**: Supports recursive group nesting with intuitive indentation and boundary connections.
+- **Type-adaptive Operators**: Automatic operator mapping for text (contains, starts_with, ends_with), numeric (gt, lt, between, equals), select/boolean (equals, in), and date fields.
+- **Live SQL / JSON Export**: Native SQL WHERE clause serialization and structured JSON rule trees with one-click preview.
+
+```svelte
+<script lang="ts">
+  import { QueryBuilder, type QueryField } from '@svadmin/ui';
+
+  const fields: QueryField[] = [
+    { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Approved', value: 'approved' }] },
+    { key: 'amount', label: 'Amount', type: 'number' },
+    { key: 'customer', label: 'Customer Name', type: 'text' },
+  ];
+</script>
+
+<QueryBuilder {fields} onchange={(q) => console.log('Query changed:', q)} />
+```
+
+### `<FilterTagBar>`
+
+Active filter tag capsule bar and saved preset view manager:
+- Positioned above data tables to present all active filter conditions as dismissible badge tags.
+- Supports individual filter removal (`x`) and quick "Clear All Filters".
+- **Preset Views Persistence**: Save active filter combinations as named preset views in `localStorage`, toggleable via a fast dropdown picker.
+
+```svelte
+<script lang="ts">
+  import { FilterTagBar } from '@svadmin/ui';
+
+  let filters = $state([
+    { id: '1', field: 'status', label: 'Status', operatorLabel: '=', valueLabel: 'Paid' },
+  ]);
+</script>
+
+<FilterTagBar
+  {filters}
+  onremove={(id) => (filters = filters.filter((f) => f.id !== id))}
+  onclear={() => (filters = [])}
+/>
+```
+
+### `<BatchEditModal>`
+
+Enterprise massive record batch edit and impact verification modal:
+- Batch update multiple fields across dozens or hundreds of selected records.
+- **Three Modification Modes**: Replace current value, Append (for tags/arrays), or Clear (set to NULL).
+- **Impact Guard**: Prominently highlights affected record counts and requires secondary confirmation before applying mutations.
+
+```svelte
+<script lang="ts">
+  import { BatchEditModal, type BatchFieldOption } from '@svadmin/ui';
+
+  let open = $state(false);
+  const fields: BatchFieldOption[] = [
+    { key: 'assignee', label: 'Assignee', type: 'text' },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>Batch Edit Selected</button>
+
+<BatchEditModal
+  bind:open
+  selectedCount={24}
+  resourceName="Orders"
+  {fields}
+  onconfirm={(changes) => console.log('Applying batch changes:', changes)}
 />
 ```

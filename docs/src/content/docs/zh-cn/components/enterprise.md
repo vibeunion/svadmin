@@ -1441,6 +1441,229 @@ const fields: FieldDefinition[] = [
   <button onclick={handleScanBarcode}>扫码入库</button>
 </AudioFeedbackProvider>
 ```
+
+### `<PrintableReportLayout>` 与 `usePrintExport`
+
+企业级安全打印排版与高保真 PDF 报表套件：
+- 标准纸张适配（A4、A5、Letter），支持横版（`landscape`）与竖版（`portrait`）自由切换。
+- **智能防断页布局**：内置 `page-break-inside: avoid` 规避打印跨页时表格行被撕裂截断与签名栏分离。
+- **跨页重复表头**：标准 `thead { display: table-header-group; }` 确保长表格每页自动打印表头。
+- 内置基础单据元数据摘要、防伪水印背景、电子公章区域与动态页码格式化。
+
+```svelte
+<script lang="ts">
+  import { PrintableReportLayout } from '@svadmin/ui';
+
+  const metadata = [
+    { label: '单据编号', value: 'PO-2026-9081' },
+    { label: '核算周期', value: '2026年度第四季度' },
+  ];
+
+  const signatures = [
+    { role: '制单经办', name: '张晓华' },
+    { role: '财务复核主管', name: '李合规' },
+  ];
+</script>
+
+<PrintableReportLayout
+  title="企业年度采购与结算汇总表"
+  subtitle="正式商业核算报告"
+  reportNo="PO-2026-9081"
+  {metadata}
+  {signatures}
+  watermarkText="内部绝密 · 严禁外传"
+>
+  <div class="py-4">
+    <p>财务明细表格与清单数据展示...</p>
+  </div>
+</PrintableReportLayout>
+```
+
+### `<FunnelChart>` 与 `<SankeyChart>`
+
+企业级业务转化漏斗与路径流向图表套件：
+- **纯原生 SVG 矢量绘制（0KB 额外巨型图表库依赖）**：零 ECharts / Chart.js 体积负担，秒开渲染。
+- **留存与流失率自动推算**：智能计算阶段间转化率与环比流失率（如 `-40% 流失`）。
+- **多阶段交互**：各阶段悬浮发光高亮、点击选中回调与端到端综合留存率汇总。
+- **`<SankeyChart>`**：用于用户行为流向、营销归因链路与资金来源去向节点图。
+
+```svelte
+<script lang="ts">
+  import { FunnelChart, type FunnelStageItem } from '@svadmin/ui';
+
+  const stages: FunnelStageItem[] = [
+    { id: '1', label: '线索访问', value: 120000 },
+    { id: '2', label: '商机沟通', value: 45000 },
+    { id: '3', label: '方案报价', value: 18000 },
+    { id: '4', label: '成单签署', value: 7200 },
+  ];
+</script>
+
+<FunnelChart
+  {stages}
+  title="营销获客转化大盘漏斗"
+  showPercentages={true}
+  showDropoff={true}
+/>
+```
+
+### `<SchemaVisualModeler>`
+
+SQL / JSON Schema 可视化逆向建模与资源生成器：
+- 字段属性可视化配置（字段 Key、显示名称、字段类型、必填、可筛选、可排序）。
+- 支持一键粘贴 JSON 数据样例自动逆向推断表结构与数据类型。
+- 实时生成标准 Svelte 5 / `@svadmin/core` `ResourceDefinition` 资源定义代码并支持一键复制。
+
+```svelte
+<script lang="ts">
+  import { SchemaVisualModeler } from '@svadmin/ui';
+</script>
+
+<SchemaVisualModeler
+  resourceName="PurchaseOrder"
+  onSaveSchema={(name, fields) => console.log('已保存模型定义:', name, fields)}
+/>
+```
+
+### `<MicroAppBridge>` 与 `useMicroAppEvent`
+
+微前端沙箱跨应用事件总线与状态共享套件：
+- 基于原生 `window.postMessage` 实现宿主与 iframe 微应用（`<MicroAppFrame>`）之间类型安全、具备 Origin 白名单校验的通信总线。
+- 支持双向事件发布订阅、RPC 状态请求（`PING`/`PONG`）与全站主题（Dark/Light）、语言包及用户信息向子应用自动化广播。
+
+```svelte
+<script lang="ts">
+  import { MicroAppBridge, useMicroAppEvent } from '@svadmin/ui';
+
+  const bus = useMicroAppEvent({ channel: 'enterprise_portal' });
+
+  bus.on('ORDER_CREATED', (payload) => {
+    console.log('子应用新下单回执:', payload);
+  });
+</script>
+
+<MicroAppBridge appId="subapp-billing" />
+```
+
+### `<RuleExpressionBuilder>` / `<LogicalRuleTree>`
+
+风控与业务流动态规则表达式设计器：
+- **复合布尔逻辑编排**：支持多层级嵌套条件组（`AND` / `OR` / `NOT` 运算块），广泛适用于风控反欺诈、工单自动化流转、营销准入门槛等复杂判定。
+- **动态变量绑定**：支持从字段元数据中动态选取变量标识（如 `order.amount`、`user.level`）、比较运算符（`>`、`<`、`in`、`contains`、`regex`）及比较值。
+- **实时 AST 与自然语言编译**：双向输出结构化 JSON AST 规则树与易读的中文自然语言表达式，支持一键复制。
+
+```svelte
+<script lang="ts">
+  import { RuleExpressionBuilder } from '@svadmin/ui';
+
+  const fields = [
+    { key: 'order.amount', label: '订单金额', type: 'number' },
+    { key: 'user.riskScore', label: '风险评分', type: 'number' },
+    { key: 'user.level', label: '会员等级', type: 'string' },
+  ];
+</script>
+
+<RuleExpressionBuilder
+  {fields}
+  onChange={(ast, expr) => console.log('规则更新:', expr, ast)}
+/>
+```
+
+### `<ClusterTopologyGraph>` / `<ServiceHealthGrid>`
+
+分布式集群服务健康与全景拓扑图套件：
+- **0KB 外部体积开销**：纯原生 SVG 矢量绘制，零巨型第三方图表或画布引擎依赖，毫秒级轻量渲染。
+- **三层微服务拓扑矩阵**：直观展示入口网关层（Ingress）、应用微服务层（Services）与存储缓存层（Storage）。
+- **节点下钻与健康诊断**：实时呈现节点健康度（健康、降级、故障、维护）、QPS 吞吐、延迟与错误率，支持快捷节点重启与流量隔离。
+
+```svelte
+<script lang="ts">
+  import { ClusterTopologyGraph } from '@svadmin/ui';
+</script>
+
+<ClusterTopologyGraph
+  title="生产环境微服务调用拓扑"
+  onNodeSelect={(node) => console.log('下钻节点:', node.id)}
+  onRestartNode={(node) => console.log('重启实例:', node.id)}
+/>
+```
+
+### `<SnapshotTimelineReplay>` / `<TimeTravelDiff>`
+
+时空快照审计回放与时间旅行对比器：
+- **时间旅行滑块（Time Travel Slider）**：在水平时间轴上顺滑拖动，快速定位历史任意时刻快照版本。
+- **字段级并排红绿对比（Before ↔ After）**：自动对比选定版本与基准版本的差异，高亮变更属性单元格。
+- **一键回滚流程发起**：支持基于防篡改签名哈希直接发起“申请回滚至此版本”操作。
+
+```svelte
+<script lang="ts">
+  import { SnapshotTimelineReplay, type SnapshotRevision } from '@svadmin/ui';
+
+  const revisions: SnapshotRevision[] = [
+    {
+      id: 'rev-1',
+      version: 1,
+      timestamp: '2026-11-01 10:00:00',
+      author: '张安全 (合规审计员)',
+      auditHash: 'SHA-001',
+      snapshot: { status: 'draft', quota: 100 },
+    },
+    {
+      id: 'rev-2',
+      version: 2,
+      timestamp: '2026-11-02 14:30:00',
+      author: '李主管 (技术总监)',
+      auditHash: 'SHA-002',
+      snapshot: { status: 'published', quota: 500 },
+    },
+  ];
+</script>
+
+<SnapshotTimelineReplay
+  {revisions}
+  onApplyRollback={(rev) => console.log('申请回滚至版本:', rev.version)}
+/>
+```
+
+### `<ActionPalette>` / `<QuickActionDrawer>`
+
+全键盘极速动作托盘与指令气泡（Linear / Raycast 生产力人机工效）：
+- **快捷键秒级唤起**：针对表格当前选中或高亮的多条记录，按 `⌘.` 即可原地呼出半透明快捷动作托盘。
+- **拼音与模糊检索**：输入动作名首字母或关键字即时定位目标操作。
+- **行内参数快捷流转**：针对需要参数的动作（如指派给负责人、填写驳回理由），无缝在托盘内直接录入并一键回车批量执行。
+
+```svelte
+<script lang="ts">
+  import { ActionPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+  let selectedRecords = $state([{ id: 101 }, { id: 102 }]);
+</script>
+
+<ActionPalette
+  bind:open
+  {selectedRecords}
+  onExecuteAction={(id, param) => console.log('批量执行动作:', id, param)}
+/>
+```
+
+### `<I18nLanguagePackEditor>` 与 `useDynamicLocale`
+
+动态多语言词条热更新与在线补丁套件：
+- **零发版热修上线**：支持跨国业务运营在线修正翻译与错别字，无需重新走 CI/CD 构建发版。
+- **按命名空间可视化管理**：一览 `common`、`table`、`form`、`auth` 词条，支持表格内实时就地编辑。
+- **运行时增量覆盖**：`useDynamicLocale` 动态合并线上覆盖包，平滑注入现有 `@svadmin/core` 翻译管道。
+
+```svelte
+<script lang="ts">
+  import { I18nLanguagePackEditor, useDynamicLocale } from '@svadmin/ui';
+
+  const i18n = useDynamicLocale();
+</script>
+
+<I18nLanguagePackEditor
+  targetLocale="zh-CN"
+  onSavePatch={(locale, patch) => console.log('发布动态文案补丁:', locale, patch)}
 ### `<RecordCompareModal>` 与 `<EntityComparisonDrawer>`
 
 企业级多实体记录参数并排对比与差异透视套件：
@@ -1540,5 +1763,159 @@ HMAC 签名计算与现场验签沙箱：
       data: { orderId: 'ORD-9821', created: true },
     };
   }}
+### `<WidgetContainer>`
+
+企业级监控看板小部件容器外壳：
+- 专为统一管理监控图表、指标卡片与运营看板设计。
+- **全生命周期交互**：内置右上角工具栏，支持一键手动刷新动画、全屏放大/ESC 还原、时间戳显示与自定义操作区。
+- **状态容灾自愈**：天然支持 `loading` 骨架屏加载过渡与 `error` 状态友好承接卡片，支持用户一键重试重新拉取数据。
+
+```svelte
+<script lang="ts">
+  import { WidgetContainer } from '@svadmin/ui';
+
+  let isUpdating = $state(false);
+  const now = new Date();
+</script>
+
+<WidgetContainer
+  title="实时请求吞吐量 (QPS)"
+  description="监控过去 24 小时每秒请求数与波动曲线"
+  lastUpdated={now}
+  allowFullscreen={true}
+  allowRefresh={true}
+  refreshing={isUpdating}
+  onrefresh={async () => {
+    isUpdating = true;
+    await new Promise((r) => setTimeout(r, 800));
+    isUpdating = false;
+  }}
+>
+  <div class="h-44 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+    此处嵌入任意 LineChart、AreaChart 或 MetricStrip
+  </div>
+</WidgetContainer>
+```
+
+### `<DataFreshnessIndicator>`
+
+数据新鲜度指示灯与自动轮询状态胶囊：
+- 专为大屏与实时运维监控面板打造，直观感知数据时效性。
+- **动态呼吸灯**：实时同步中（绿色水波纹脉冲）、刚刚更新、X秒前、过期告警（黄色高亮）。
+- **轮询周期自切换**：支持用户在胶囊中切换轮询周期（5秒 / 15秒 / 30秒 / 1分钟 / 手动刷新），点击胶囊即可触发立即重新拉取数据。
+
+```svelte
+<script lang="ts">
+  import { DataFreshnessIndicator } from '@svadmin/ui';
+
+  let lastSyncTime = $state(Date.now());
+</script>
+
+<DataFreshnessIndicator
+  lastUpdated={lastSyncTime}
+  pollInterval={15}
+  staleThresholdMs={60000}
+  onsyncnow={() => (lastSyncTime = Date.now())}
+  onintervalchange={(sec) => console.log('轮询周期变更为:', sec)}
+/>
+```
+
+### `<ServerStatusGrid>`
+
+服务节点集群健康度点阵与指标网格：
+- 专为微服务网关、边缘计算节点、数据库只读副本集群监控打造。
+- **集群全局统计**：自动汇聚计算健康在线节点数、告警节点数、紧急故障节点数与平均网络延迟。
+- **细粒度卡片**：直观展示节点名称、所属地域（如 `cn-shanghai`）、实时心跳延时、CPU 占用、内存消耗与磁盘使用率微型进度条，支持状态动态变色。
+
+```svelte
+<script lang="ts">
+  import { ServerStatusGrid, type ServerNode } from '@svadmin/ui';
+
+  const nodes: ServerNode[] = [
+    { id: '1', name: 'api-gateway-01', region: 'cn-shanghai', status: 'healthy', latencyMs: 18, cpuPercent: 32, memoryPercent: 54, diskPercent: 62 },
+    { id: '2', name: 'api-gateway-02', region: 'cn-beijing', status: 'healthy', latencyMs: 24, cpuPercent: 41, memoryPercent: 60, diskPercent: 65 },
+    { id: '3', name: 'db-replica-ro', region: 'us-west-1', status: 'warning', latencyMs: 185, cpuPercent: 78, memoryPercent: 86, diskPercent: 91 },
+  ];
+</script>
+
+<ServerStatusGrid {nodes} onselectnode={(n) => console.log('选中节点:', n.name)} />
+### `<QueryBuilder>`
+
+企业级多层嵌套查询与规则引擎构建器：
+- 专为复杂报表圈选、风控规则、BI 钻取与多维数据检索设计。
+- **AND / OR 逻辑分组嵌套**：支持无限层级的嵌套组递归构建，直观可视化的分组外框与连接引导线。
+- **字段类型自适应操作符**：文本字段（包含、开头为、结尾为）、数值字段（大于、小于、介于、等于）、枚举/布尔（单选/多选属于）、日期字段（早于、晚于）与空值判断（为空/非空）。
+- **SQL / JSON 即时导出**：内置 `serializeToSql` 与标准 JSON 规则树，顶部配备即时“预览 SQL WHERE”与一键重置操作。
+
+```svelte
+<script lang="ts">
+  import { QueryBuilder, type QueryField, type QueryGroup } from '@svadmin/ui';
+
+  const fields: QueryField[] = [
+    { key: 'status', label: '审批状态', type: 'select', options: [{ label: '已通过', value: 'approved' }, { label: '待初审', value: 'pending' }] },
+    { key: 'amount', label: '成交金额', type: 'number' },
+    { key: 'customer', label: '客户姓名', type: 'text' },
+    { key: 'createdAt', label: '创建时间', type: 'date' },
+  ];
+
+  let currentQuery = $state<QueryGroup | null>(null);
+</script>
+
+<QueryBuilder {fields} onchange={(q) => (currentQuery = q)} />
+```
+
+### `<FilterTagBar>`
+
+已生效筛选标签栏与常用视图预设管理器：
+- 置于数据表格上方，直观呈现当前生效的所有检索与筛选条件气泡胶囊。
+- 支持单个条件一键点击 `×` 移除，并支持“清空全部筛选”。
+- **常用视图持久化**：用户可一键将当前复合筛选保存为个人预设视图（保存在 `localStorage`），下拉列表可秒级切换历史预设视图或删除旧预设。
+
+```svelte
+<script lang="ts">
+  import { FilterTagBar, type FilterTagItem } from '@svadmin/ui';
+
+  let activeFilters: FilterTagItem[] = $state([
+    { id: '1', field: 'status', label: '订单状态', operatorLabel: '=', valueLabel: '已支付' },
+    { id: '2', field: 'amount', label: '交易金额', operatorLabel: '>=', valueLabel: '¥10,000' },
+  ]);
+</script>
+
+<FilterTagBar
+  filters={activeFilters}
+  onremove={(id) => (activeFilters = activeFilters.filter((f) => f.id !== id))}
+  onclear={() => (activeFilters = [])}
+/>
+```
+
+### `<BatchEditModal>`
+
+企业级数据表格批量修改与安全预检弹窗：
+- 勾选多条记录后，一键对所选记录发起多字段批量调整。
+- **三种批量模式**：支持“替换为（Replace）”、“追加（Append）”与“置空清空（Clear）”。
+- **安全防误点保护**：顶部醒目展示高影响范围预警（如“将同时覆盖 48 条数据”），提交前具备二次确认机制。
+
+```svelte
+<script lang="ts">
+  import { BatchEditModal, type BatchFieldOption } from '@svadmin/ui';
+
+  let isBatchOpen = $state(false);
+
+  const fields: BatchFieldOption[] = [
+    { key: 'assignee', label: '负责人', type: 'text' },
+    { key: 'status', label: '审批状态', type: 'select', options: [{ label: '已初审', value: 'reviewed' }, { label: '已归档', value: 'archived' }] },
+    { key: 'priority', label: '业务优先级', type: 'number' },
+  ];
+</script>
+
+<button onclick={() => (isBatchOpen = true)}>批量修改已选项</button>
+
+<BatchEditModal
+  bind:open={isBatchOpen}
+  selectedCount={36}
+  resourceName="订单记录"
+  {fields}
+  onconfirm={(changes) => console.log('批量变更提交:', changes)}
+  onclose={() => (isBatchOpen = false)}
 />
 ```

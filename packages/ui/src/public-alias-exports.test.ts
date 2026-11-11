@@ -89,6 +89,17 @@ import {
   SignatureDebugger,
   ApiPlayground,
   HttpQuickRunner,
+  WidgetContainer,
+  DashboardWidget,
+  DataFreshnessIndicator,
+  FreshnessPill,
+  ServerStatusGrid,
+  ClusterHealthMatrix,
+  QueryBuilder,
+  AdvancedQueryBuilder,
+  FilterTagBar,
+  BatchEditModal,
+  BatchEditorModal,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -125,6 +136,25 @@ import {
   useTableClipboard,
   AudioFeedbackProvider,
   useAudioAlert,
+  PrintableReportLayout,
+  ReportPrintLayout,
+  usePrintExport,
+  ConversionFunnel,
+  PipelineFunnelChart,
+  SankeyChart,
+  SchemaVisualModeler,
+  MicroAppBridge,
+  useMicroAppEvent,
+  RuleExpressionBuilder,
+  LogicalRuleTree,
+  ClusterTopologyGraph,
+  ServiceHealthGrid,
+  SnapshotTimelineReplay,
+  TimeTravelDiff,
+  ActionPalette,
+  QuickActionDrawer,
+  I18nLanguagePackEditor,
+  useDynamicLocale,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -161,6 +191,25 @@ describe('public compatibility aliases', () => {
     expect(useTableClipboard).toBeDefined();
     expect(AudioFeedbackProvider).toBeDefined();
     expect(useAudioAlert).toBeDefined();
+    expect(PrintableReportLayout).toBeDefined();
+    expect(ReportPrintLayout).toBe(PrintableReportLayout);
+    expect(usePrintExport).toBeDefined();
+    expect(ConversionFunnel).toBeDefined();
+    expect(PipelineFunnelChart).toBe(ConversionFunnel);
+    expect(SankeyChart).toBeDefined();
+    expect(SchemaVisualModeler).toBeDefined();
+    expect(MicroAppBridge).toBeDefined();
+    expect(useMicroAppEvent).toBeDefined();
+    expect(RuleExpressionBuilder).toBeDefined();
+    expect(LogicalRuleTree).toBe(RuleExpressionBuilder);
+    expect(ClusterTopologyGraph).toBeDefined();
+    expect(ServiceHealthGrid).toBe(ClusterTopologyGraph);
+    expect(SnapshotTimelineReplay).toBeDefined();
+    expect(TimeTravelDiff).toBe(SnapshotTimelineReplay);
+    expect(ActionPalette).toBeDefined();
+    expect(QuickActionDrawer).toBe(ActionPalette);
+    expect(I18nLanguagePackEditor).toBeDefined();
+    expect(useDynamicLocale).toBeDefined();
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);
@@ -243,6 +292,17 @@ describe('public compatibility aliases', () => {
     expect(SignatureDebugger).toBe(HmacSignatureCalculator);
     expect(ApiPlayground).toBeDefined();
     expect(HttpQuickRunner).toBe(ApiPlayground);
+    expect(WidgetContainer).toBeDefined();
+    expect(DashboardWidget).toBe(WidgetContainer);
+    expect(DataFreshnessIndicator).toBeDefined();
+    expect(FreshnessPill).toBe(DataFreshnessIndicator);
+    expect(ServerStatusGrid).toBeDefined();
+    expect(ClusterHealthMatrix).toBe(ServerStatusGrid);
+    expect(QueryBuilder).toBeDefined();
+    expect(AdvancedQueryBuilder).toBe(QueryBuilder);
+    expect(FilterTagBar).toBeDefined();
+    expect(BatchEditModal).toBeDefined();
+    expect(BatchEditorModal).toBe(BatchEditModal);
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
