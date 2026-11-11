@@ -52,6 +52,8 @@ import {
   SpeedometerGauge,
   UnsavedChangesGuard,
   UnsavedChangesModal,
+  RecordCompareModal,
+  EntityComparisonDrawer,
   MetricGrid,
   DashboardMetricGrid,
   SliderCaptcha,
@@ -221,6 +223,8 @@ describe('public compatibility aliases', () => {
     expect(EmbeddedSandbox).toBe(MicroAppFrame);
     expect(UnsavedChangesGuard).toBeDefined();
     expect(UnsavedChangesModal).toBe(UnsavedChangesGuard);
+    expect(RecordCompareModal).toBeDefined();
+    expect(EntityComparisonDrawer).toBe(RecordCompareModal);
     expect(Ribbon).toBeDefined();
     expect(BadgeRibbon).toBe(Ribbon);
     expect(FloatButtonGroup).toBeDefined();
