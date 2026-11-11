@@ -112,7 +112,7 @@
         >
           <span class="text-muted-foreground">{item.label}</span>
           {#if item.operatorLabel}
-            <span class="font-mono text-[10px] text-primary">{item.operatorLabel}</span>
+            <span class="font-mono text-xs text-primary">{item.operatorLabel}</span>
           {/if}
           <span class="font-semibold">{item.valueLabel}</span>
           <button

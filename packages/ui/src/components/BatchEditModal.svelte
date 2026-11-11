@@ -110,7 +110,7 @@
   >
     <div
       class={cn(
-        'relative w-full max-w-lg rounded-xl border border-border bg-card text-card-foreground shadow-lg overflow-hidden flex flex-col',
+        'relative w-full max-w-lg rounded-md border border-border bg-card text-card-foreground shadow-[var(--shadow-overlay)] overflow-hidden flex flex-col',
         className
       )}
     >

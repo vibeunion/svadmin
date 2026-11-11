@@ -217,7 +217,7 @@
 </script>
 
 <div
-  class={cn('rounded-xl border border-border bg-card p-4 text-card-foreground shadow-xs', className)}
+  class={cn('rounded-md border border-border bg-card p-4 text-card-foreground shadow-xs', className)}
   data-svadmin-component="QueryBuilder"
 >
   <!-- Top Toolbar -->
