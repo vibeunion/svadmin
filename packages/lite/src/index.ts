@@ -182,6 +182,18 @@ export type { LiteConflictField } from './components/LiteConcurrentConflictModal
 export type { LiteTaskStatus, LiteBackgroundTask } from './components/LiteTaskCenter.svelte';
 export type { LiteDeleteImpact } from './components/LiteSafeDeleteConfirm.svelte';
 
+// Enterprise suites SSR parity fallbacks
+export { default as LiteKpiCard } from './components/LiteKpiCard.svelte';
+export { default as LiteJsonViewer } from './components/LiteJsonViewer.svelte';
+export { default as LiteResultPage } from './components/LiteResultPage.svelte';
+export { default as LiteWatermarkContainer } from './components/LiteWatermarkContainer.svelte';
+export { default as LiteContextMenu } from './components/LiteContextMenu.svelte';
+export { default as LiteUnsavedChangesGuard } from './components/LiteUnsavedChangesGuard.svelte';
+export { default as LiteAnnouncementBanner } from './components/LiteAnnouncementBanner.svelte';
+export { default as LiteTextDiffViewer } from './components/LiteTextDiffViewer.svelte';
+export { default as LiteAsyncExportModal } from './components/LiteAsyncExportModal.svelte';
+export type { LiteContextMenuItem } from './components/LiteContextMenu.svelte';
+
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
   configureMarkdownRenderer,

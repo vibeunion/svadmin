@@ -301,6 +301,17 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'OfflineGuard', uiComponent: 'OfflineGuard.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端网络守卫)', note: 'Lite 继续使用 LiteOfflineSyncBanner 渲染离线状态；提交拦截必须由宿主服务端校验' },
   { name: 'useNetworkStatus', uiComponent: 'useNetworkStatus.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (浏览器 Network Information 钩子)', note: 'SSR 不读取 navigator；离线快照由服务端或宿主注入' },
 
+  // ─── Enterprise suites added in late-2026-11 release trains ─────────────
+  { name: 'KpiCard', uiComponent: 'KpiCard.svelte', liteComponent: 'LiteKpiCard.svelte', category: 'widgets', status: 'fallback', strategy: '服务端静态指标数值、同环比胶囊、SVG 迷你走势与目标进度条；骨架过渡与动态动画由 SPA 承接' },
+  { name: 'JsonViewer', uiComponent: 'JsonViewer.svelte', liteComponent: 'LiteJsonViewer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 JSON 结构化折叠树与格式化代码块；关键词实时搜索高亮由 SPA 承接' },
+  { name: 'ResultPage', uiComponent: 'ResultPage.svelte', liteComponent: 'LiteResultPage.svelte', category: 'pages', status: 'fallback', strategy: '服务端 7 大结果与异常状态语义图标、标题及操作按钮组；微光粒子与动态插槽由 SPA 承接' },
+  { name: 'WatermarkContainer', uiComponent: 'WatermarkContainer.svelte', liteComponent: 'LiteWatermarkContainer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 CSS 重复平铺 SVG 水印背景与文本遮罩；DOM 监听防篡改自愈由 SPA 承接' },
+  { name: 'ContextMenu', uiComponent: 'ContextMenu.svelte', liteComponent: 'LiteContextMenu.svelte', category: 'advanced', status: 'fallback', strategy: '服务端语义化操作列表与快捷键提示；视口边缘碰撞自适应翻转由 SPA 承接' },
+  { name: 'UnsavedChangesGuard', uiComponent: 'UnsavedChangesGuard.svelte', liteComponent: 'LiteUnsavedChangesGuard.svelte', category: 'advanced', status: 'fallback', strategy: '服务端未保存变更状态横幅与确认表单；浏览器 beforeunload 阻拦由 SPA 承接' },
+  { name: 'AnnouncementBanner', uiComponent: 'AnnouncementBanner.svelte', liteComponent: 'LiteAnnouncementBanner.svelte', category: 'advanced', status: 'fallback', strategy: '服务端全站广播通知横幅、语义状态色调与倒计时展示；跑马灯多条轮播由 SPA 承接' },
+  { name: 'TextDiffViewer', uiComponent: 'TextDiffViewer.svelte', liteComponent: 'LiteTextDiffViewer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端预渲染文本行差异对比、新增/删除行高亮与行号；动态折叠与双栏切换由 SPA 承接' },
+  { name: 'AsyncExportModal', uiComponent: 'AsyncExportModal.svelte', liteComponent: 'LiteAsyncExportModal.svelte', category: 'advanced', status: 'fallback', strategy: '服务端异步导出表单、范围选择、格式单选与列复选框提交；动态进度轮询由 SPA 承接' },
+
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },
   { name: 'DevTools', uiComponent: 'DevTools.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (SPA 调试器)', note: '受限环境不需要客户端 DevTools 悬浮球' },
