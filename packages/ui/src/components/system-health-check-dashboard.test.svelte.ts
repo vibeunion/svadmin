@@ -38,6 +38,6 @@ describe('SystemHealthCheckDashboard component suite', () => {
     const exportBtn = getByText('导出诊断报告');
     await fireEvent.click(exportBtn);
     expect(exportedData).toBeTruthy();
-    expect(exportedData?.summary).toBeTruthy();
+    expect((exportedData as { summary?: unknown } | null)?.summary).toBeTruthy();
   });
 });

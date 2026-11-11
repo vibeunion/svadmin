@@ -43,8 +43,9 @@ describe('PivotMatrix component suite', () => {
     });
 
     const cells = container.querySelectorAll('tbody td');
-    if (cells.length > 1) {
-      await fireEvent.click(cells[1]);
+    const cell = cells[1];
+    if (cell) {
+      await fireEvent.click(cell);
       expect(clickedParams).toBeTruthy();
     }
   });
