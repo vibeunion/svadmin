@@ -1323,3 +1323,121 @@ const fields: FieldDefinition[] = [
   type="name"
 />
 ```
+
+### `<SessionTimeoutGuard>` 与 `useSessionTimeout`
+
+企业级会话空闲超时锁屏与保活套件：
+- 严格遵循等保 2.0、HIPAA 及 PCI-DSS 安全合规要求，全量监听鼠标、键盘、滚动与触摸事件防抖更新活跃时间戳。
+- **跨标签页强同步**：基于 `BroadcastChannel` 与 `localStorage` 存储事件实现多窗口状态强一致性（任一标签页操作即可全局保活，杜绝切屏突然锁屏）。
+- **提前倒计时预警**：进入倒计时窗口自动弹出悬浮预警对话框，展示精确剩余秒数并支持一键“延长会话”或“立即锁定”。
+
+```svelte
+<script lang="ts">
+  import { SessionTimeoutGuard } from '@svadmin/ui';
+</script>
+
+<SessionTimeoutGuard
+  timeoutMinutes={15}
+  warningSeconds={60}
+  onTimeout={() => console.log('会话因超时自动锁定')}
+  onExtend={() => console.log('已刷新凭证并延长会话')}
+>
+  <div class="p-6">
+    <h3>核心保密业务工作区</h3>
+  </div>
+</SessionTimeoutGuard>
+```
+
+### `<DualApprovalGate>` / `<TwoPersonRuleModal>`
+
+高危特权操作双人联签与复核门禁（Maker-Checker / Two-Person Rule 机制）：
+- 专门应对大额财务调拨、生产环境配置重置、网关主密钥轮换、超级管理员角色委派等“高危不可逆”操作。
+- **双重联签模式**：
+  1. **同台现场复核**：第二位授权复核人输入工号、职务与独立密码或 2FA OTP 验证码。
+  2. **远程异步复核**：自动生成具备有效期的复核专属链接与二维码，推送到合规主管审批队列。
+- 生成具备防篡改签名哈希的 `DualApprovalAuditRecord` 审计凭据，完整留存发起人、复核人及操作快照。
+
+```svelte
+<script lang="ts">
+  import { DualApprovalGate, type DualApprovalAuditRecord } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function verifySupervisor(payload: any) {
+    // 调用后端核验复核人身份与口令
+    return payload.secret === 'valid-otp';
+  }
+
+  function handleApproved(record: DualApprovalAuditRecord) {
+    console.log('双人联签通过，审计哈希:', record.auditHash);
+  }
+</script>
+
+<DualApprovalGate
+  bind:open
+  actionTitle="轮换核心生产 API 网关签名私钥"
+  requiredRole="首席安全官 / CSO"
+  verifyReviewer={verifySupervisor}
+  onApproved={handleApproved}
+>
+  <button class="bg-destructive text-destructive-foreground px-4 py-2 rounded">
+    轮换秘钥
+  </button>
+</DualApprovalGate>
+```
+
+### `<TableClipboardManager>` 与 `useTableClipboard`
+
+企业级表格跨行区域复制与 Excel 双向粘贴解析套件：
+- **`useTableClipboard` 智能解析**：自动解析剪贴板内的制表符分隔（TSV）与逗号分隔（CSV）文本，支持 RFC 4180 转义格式。
+- **表头字段智能对齐**：自动根据列 `key` 与显示名称匹配表格列。
+- **`<TableClipboardManager>` 浮动工具条**：支持一键将选中行导出为 Excel 友好 TSV，并支持 `⌘V` 快捷键粘贴，唤起数据导入预览浮层、校验警告、追加/覆盖模式切换与撤销（Undo）。
+
+```svelte
+<script lang="ts">
+  import { TableClipboardManager } from '@svadmin/ui';
+
+  const columns = [
+    { key: 'sku', label: '商品编码' },
+    { key: 'name', label: '商品名称' },
+    { key: 'price', label: '单价' },
+  ];
+
+  let selectedRows = $state([{ sku: 'A1', name: '标准件', price: 99 }]);
+</script>
+
+<TableClipboardManager
+  {columns}
+  {selectedRows}
+  onPasteConfirmed={(rows, mode) => console.log('确认粘贴行:', rows, mode)}
+  onUndo={() => console.log('已撤销粘贴')}
+/>
+```
+
+### `useAudioAlert` 与 `<AudioFeedbackProvider>`
+
+纯原生 Web Audio API 业务声效与操作声学反馈套件：
+- **零外部音频文件加载（0KB 网络体积消耗）**：基于原生 `OscillatorNode` 振荡器实时合成工业级提示音，零延迟、零网络依赖。
+- **工业级音效预设**：
+  - `success`：清脆明朗的上行大三和弦（C5 -> E5 -> G5），用于扫码录入成功与提交完成。
+  - `error`：沉闷短促的双音警报（180Hz -> 130Hz 锯齿波），用于输入不合规或操作被拦截。
+  - `warning`：中频脉冲双响（440Hz -> 880Hz），用于阈值警告与超时倒计时。
+  - `beep`：标准 1000Hz 激光扫码枪提示音，为仓储、POS 及条码扫描场景提供即时物理敲击感反馈。
+  - `notify`：温和优雅的双音通知铃声。
+- **全方位体验设置**：支持全局静音、音量滑动调节与多音效在线试听。
+
+```svelte
+<script lang="ts">
+  import { useAudioAlert, AudioFeedbackProvider } from '@svadmin/ui';
+
+  const audio = useAudioAlert({ volume: 0.8 });
+
+  function handleScanBarcode() {
+    audio.play('beep');
+  }
+</script>
+
+<AudioFeedbackProvider showControls={true}>
+  <button onclick={handleScanBarcode}>扫码入库</button>
+</AudioFeedbackProvider>
+```

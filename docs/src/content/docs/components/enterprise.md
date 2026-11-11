@@ -1556,3 +1556,121 @@ Sensitive data dynamic masking and authorization reveal component for compliance
   type="name"
 />
 ```
+
+### `<SessionTimeoutGuard>` & `useSessionTimeout`
+
+Enterprise session inactivity timeout guard and compliance auto-lock suite:
+- Conforms to 等保 2.0, HIPAA, and PCI-DSS requirements by actively tracking user interactions (`mousemove`, `keydown`, `click`, `scroll`, `touchstart`).
+- **Cross-Tab Synchronization**: Uses `BroadcastChannel` and `localStorage` storage events to maintain synchronized idle timestamps across all open browser windows (activity in any tab extends the session across all tabs).
+- **Proactive Countdown Warning**: Surfaces an alert modal with real-time countdown seconds when entering the warning window, with one-click session renewal or immediate locking.
+
+```svelte
+<script lang="ts">
+  import { SessionTimeoutGuard } from '@svadmin/ui';
+</script>
+
+<SessionTimeoutGuard
+  timeoutMinutes={15}
+  warningSeconds={60}
+  onTimeout={() => console.log('Session locked due to inactivity')}
+  onExtend={() => console.log('Session token refreshed')}
+>
+  <div class="p-6">
+    <h3>Confidential Operations Workspace</h3>
+  </div>
+</SessionTimeoutGuard>
+```
+
+### `<DualApprovalGate>` / `<TwoPersonRuleModal>`
+
+Two-person rule (Maker-Checker) dual authorization gate for dangerous and irreversible operations:
+- Designed for large financial fund transfers, production database truncations, API gateway key rotations, and superadmin privilege escalation.
+- **Dual Approval Modes**:
+  1. **Onsite Review**: Second authorized supervisor signs in with ID, title, and independent password or 2FA OTP.
+  2. **Remote QR Review**: Generates temporary review link and signed QR code for asynchronous approval queue push.
+- Generates tamper-proof `DualApprovalAuditRecord` with cryptographic signature hash, initiator, reviewer, and timestamp.
+
+```svelte
+<script lang="ts">
+  import { DualApprovalGate, type DualApprovalAuditRecord } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function verifySupervisor(payload: any) {
+    // E.g. check supervisor credentials with backend auth API
+    return payload.secret === 'valid-otp';
+  }
+
+  function handleApproved(record: DualApprovalAuditRecord) {
+    console.log('Dual approval granted with audit hash:', record.auditHash);
+  }
+</script>
+
+<DualApprovalGate
+  bind:open
+  actionTitle="Production API Gateway Key Rotation"
+  requiredRole="Chief Security Officer"
+  verifyReviewer={verifySupervisor}
+  onApproved={handleApproved}
+>
+  <button class="bg-destructive text-destructive-foreground px-4 py-2 rounded">
+    Rotate Secret Key
+  </button>
+</DualApprovalGate>
+```
+
+### `<TableClipboardManager>` & `useTableClipboard`
+
+Enterprise bidirectional clipboard interaction suite for tabular data and Excel / Google Sheets:
+- **`useTableClipboard`**: Parses tab-delimited (TSV) and comma-delimited (CSV) text copied from Excel with RFC 4180 quote support.
+- **Smart Column Mapping**: Automatically aligns clipboard header text with table column definitions.
+- **`<TableClipboardManager>`**: Floating toolbar providing one-click "Copy Selected as TSV" and keyboard `⌘V` paste capture with data preview modal, validation checks, append/overwrite mode toggles, and Undo rollback.
+
+```svelte
+<script lang="ts">
+  import { TableClipboardManager } from '@svadmin/ui';
+
+  const columns = [
+    { key: 'sku', label: 'SKU Code' },
+    { key: 'name', label: 'Product Name' },
+    { key: 'price', label: 'Unit Price' },
+  ];
+
+  let selectedRows = $state([{ sku: 'A1', name: 'Widget', price: 99 }]);
+</script>
+
+<TableClipboardManager
+  {columns}
+  {selectedRows}
+  onPasteConfirmed={(rows, mode) => console.log('Pasted rows:', rows, mode)}
+  onUndo={() => console.log('Reverted paste')}
+/>
+```
+
+### `useAudioAlert` & `<AudioFeedbackProvider>`
+
+Pure native Web Audio API acoustic feedback and operational sound effects suite:
+- **Zero External Assets (0KB network size)**: Uses browser-native `OscillatorNode` synthesis for instant, zero-latency feedback without downloading mp3 or wav files.
+- **Industrial Sound Presets**:
+  - `success`: Crisp ascending major chord (C5 -> E5 -> G5) for barcode scan and mutation success.
+  - `error`: Low punchy buzz (180Hz -> 130Hz) for validation failure or rejected action.
+  - `warning`: Double-pulse warning tone (440Hz -> 880Hz) for threshold alerts.
+  - `beep`: Authentic 1000Hz laser scanner beep for warehouse and POS barcode terminals.
+  - `notify`: Gentle marimba notification chime.
+- **User-Centric Controls**: Global mute toggle, volume adjustment, and test sound previews.
+
+```svelte
+<script lang="ts">
+  import { useAudioAlert, AudioFeedbackProvider } from '@svadmin/ui';
+
+  const audio = useAudioAlert({ volume: 0.8 });
+
+  function handleScanSuccess() {
+    audio.play('beep');
+  }
+</script>
+
+<AudioFeedbackProvider showControls={true}>
+  <button onclick={handleScanSuccess}>Scan Barcode</button>
+</AudioFeedbackProvider>
+```

@@ -109,6 +109,14 @@ import {
   ColumnFilterBuilder,
   useHotkeys,
   KeyboardShortcutsModal,
+  SessionTimeoutGuard,
+  useSessionTimeout,
+  DualApprovalGate,
+  TwoPersonRuleModal,
+  TableClipboardManager,
+  useTableClipboard,
+  AudioFeedbackProvider,
+  useAudioAlert,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -137,6 +145,14 @@ describe('public compatibility aliases', () => {
     expect(ColumnFilterBuilder).toBeDefined();
     expect(useHotkeys).toBeDefined();
     expect(KeyboardShortcutsModal).toBeDefined();
+    expect(SessionTimeoutGuard).toBeDefined();
+    expect(useSessionTimeout).toBeDefined();
+    expect(DualApprovalGate).toBeDefined();
+    expect(TwoPersonRuleModal).toBe(DualApprovalGate);
+    expect(TableClipboardManager).toBeDefined();
+    expect(useTableClipboard).toBeDefined();
+    expect(AudioFeedbackProvider).toBeDefined();
+    expect(useAudioAlert).toBeDefined();
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);
