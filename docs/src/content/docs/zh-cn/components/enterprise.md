@@ -1666,3 +1666,82 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
   onSavePatch={(locale, patch) => console.log('发布动态文案补丁:', locale, patch)}
 />
 ```
+
+### `<FormulaField>` 与 `useFormulaEngine`
+
+企业级动态公式计算字段与沙箱求值引擎：
+- **零 eval() 安全隐患**：基于原生抽象语法树解析，安全支持四则运算（`+`、`-`、`*`、`/`、`^`、`%`、括号）与复杂嵌套属性提取。
+- **开箱即用内置函数**：支持 `SUM`（求和）、`AVG`（均值）、`MAX`、`MIN`、`ROUND`（四舍五入）与 `IF`（条件选择）。
+- **公式气泡与手动覆盖**：呈现 `f(x) = price * qty * (1 - discount)` 公式提示胶囊，并支持一键切换为人工手动覆盖。
+
+```svelte
+<script lang="ts">
+  import { FormulaField } from '@svadmin/ui';
+
+  let form = $state({ price: 199, qty: 3, discount: 0.1 });
+</script>
+
+<FormulaField
+  label="折后实付总额"
+  formula="price * qty * (1 - discount)"
+  scope={form}
+  prefix="¥"
+  precision={2}
+  allowManualOverride={true}
+/>
+```
+
+### `<DataScreenContainer>` / `<FullscreenDashboardLayout>`
+
+指挥中心与大屏数据可视化自适应容器：
+- **Scale-to-Fit 等比自适应缩放**：基于设计稿基准分辨率（如 1920x1080、21:9 超宽屏）自动计算等比缩放矩阵（`scale`），杜绝各类大屏投屏时的变形与排版错位。
+- **科技感边框与头部**：内置实时数字时钟、大屏主副标题与全屏切换按钮（`<FullscreenButton>`）。
+- **微光发光角标**：纯 CSS / SVG 发光点缀，赋予指挥大厅硬核科技质感。
+
+```svelte
+<script lang="ts">
+  import { DataScreenContainer } from '@svadmin/ui';
+</script>
+
+<DataScreenContainer
+  title="全局仓储调度与实时监控指挥中心"
+  subtitle="NOC 遥测大屏与传感器链路大盘"
+  width={1920}
+  height={1080}
+>
+  <div class="grid grid-cols-3 gap-6 h-full">
+    <!-- 各类大屏卡片与实时 SVG 拓扑/图表 -->
+  </div>
+</DataScreenContainer>
+```
+
+### `<ThreadedCommentDrawer>` / `<RecordAnnotationBox>`
+
+记录级协同讨论流与树形批注抽屉：
+- **盖楼式嵌套回复与表情反馈**：支持针对特定评论展开二级回复流，支持点赞（`👍`）、已确认（`✅`）等轻量表情互动。
+- **问题解决状态标记**：支持合规/财务将某条争议评论一键标记为“已解决（Resolved）”。
+- **成员快速协作**：输入框支持快速发表业务批注与 `@` 成员协作提醒。
+
+```svelte
+<script lang="ts">
+  import { ThreadedCommentDrawer, type ThreadedComment } from '@svadmin/ui';
+
+  let open = $state(false);
+  let comments = $state<ThreadedComment[]>([
+    {
+      id: '1',
+      author: '张合规 (审计专员)',
+      content: '请核实该笔采购单附带的专用发票抬头与税号。',
+      createdAt: '10 分钟前',
+      isResolved: false,
+    },
+  ]);
+</script>
+
+<ThreadedCommentDrawer
+  bind:open
+  recordTitle="采购核算单 #PO-991"
+  {comments}
+  onAddComment={(text, parentId) => console.log('新增批注:', text, parentId)}
+/>
+```
