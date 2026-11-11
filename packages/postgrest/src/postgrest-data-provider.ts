@@ -181,12 +181,17 @@ export function createPostgrestDataProvider(options: PostgrestOptions): DataProv
         queryParams.set('order', orderExpr);
       }
 
-      const defaultCount = pagination?.mode === 'off' ? false : (options.count ?? 'exact');
+      // `client` and `off` modes intentionally fetch without server ranges;
+      // the core table state uses a large sentinel page size for both modes.
+      // A range on that sentinel would turn an unpaginated read into an
+      // expensive offset query and would diverge from Refine's provider.
+      const paginationMode = pagination?.mode ?? 'server';
+      const defaultCount = paginationMode === 'server' ? (options.count ?? 'exact') : false;
       const countMode = resolveCountMode(meta?.['count'], defaultCount);
       const headers: Record<string, string> = {};
       if (countMode !== false) headers['Prefer'] = `count=${countMode}`;
 
-      if (pagination && pagination.pageSize !== undefined) {
+      if (paginationMode === 'server' && pagination && pagination.pageSize !== undefined) {
         const current = pagination.current ?? 1;
         const pageSize = pagination.pageSize;
         const from = (current - 1) * pageSize;

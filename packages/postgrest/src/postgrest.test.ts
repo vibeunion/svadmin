@@ -97,6 +97,37 @@ describe('@svadmin/postgrest', () => {
     expect(headers['Range']).toBeUndefined();
   });
 
+  it('does not send a sentinel range for client-side or disabled pagination', async () => {
+    const captured: Array<Record<string, string>> = [];
+    const mockFetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      captured.push((init?.headers ?? {}) as Record<string, string>);
+      return new Response(JSON.stringify([{ id: 1 }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    const dataProvider = createPostgrestDataProvider({
+      apiUrl: 'https://api.example.com',
+      fetch: mockFetch,
+    });
+
+    await dataProvider.getList({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 999999, mode: 'client' },
+    });
+    await dataProvider.getList({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 999999, mode: 'off' },
+    });
+
+    expect(captured).toHaveLength(2);
+    for (const headers of captured) {
+      expect(headers['Range']).toBeUndefined();
+      expect(headers['Prefer']).toBeUndefined();
+    }
+  });
+
   it('allows a list to select a cheaper PostgREST count strategy', async () => {
     let capturedHeaders: HeadersInit | undefined;
     const mockFetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
