@@ -1133,3 +1133,79 @@ Enterprise unsaved form modifications and page navigation protection suite:
   </form>
 </UnsavedChangesGuard>
 ```
+
+## Enterprise Analytics & Business Insight Suite
+
+### `<KpiCard>`
+
+Multi-dimensional KPI scorecard designed for executive, financial, and operational dashboards:
+- Main metric value formatting with thousands separators, currency prefixes, and custom suffixes.
+- Integrated `<TrendIndicator>` capsule for period-over-period comparisons with semantic color adaptation.
+- Pure SVG smooth Sparkline mini trend line and Target Progress Bar.
+- Skeleton loading placeholder (`loading`) and SLA threshold alert banners (`alertStatus` / `alertMessage`).
+
+```svelte
+<script lang="ts">
+  import { KpiCard } from '@svadmin/ui';
+
+  const revenueSparkline = [12, 18, 15, 24, 38, 35, 52];
+</script>
+
+<KpiCard
+  title="Quarterly Revenue"
+  value={1284500}
+  prefix="$"
+  prevValue={1050000}
+  trendPrefix="YoY"
+  sparklineData={revenueSparkline}
+  sparklineTone="success"
+  targetProgress={{ current: 1284500, target: 1500000, label: 'Q3 Target' }}
+  badge="Primary KPI"
+/>
+```
+
+### `<JsonViewer>`
+
+High-fidelity tree JSON inspector designed for API debugging, webhook payloads, audit diffs, and configuration centers:
+- Strict semantic syntax color highlighting (keys, strings, numbers, booleans, and null).
+- Depth-based collapsible/expandable nodes via `initialDepth` with interactive controls.
+- Real-time keyword search filtering for keys and values.
+- One-click full JSON copying and hover-to-copy property path helper.
+
+```svelte
+<script lang="ts">
+  import { JsonViewer } from '@svadmin/ui';
+
+  const webhookPayload = {
+    event: 'order.created',
+    timestamp: '2026-11-11T14:00:00Z',
+    data: { orderId: 'ORD-98213', amount: 450.8, isPaid: true },
+  };
+</script>
+
+<JsonViewer data={webhookPayload} initialDepth={2} searchable={true} copyable={true} />
+```
+
+### `<ResultPage>`
+
+Standardized business process result and HTTP/operation exception display page:
+- Standardized coverage for `success`, `processing`, `warning`, `error`, `403`, `404`, and `500` states.
+- High-visibility semantic vector iconography with subtle glowing radial halos.
+- Configurable primary and secondary action buttons or custom actions snippet.
+- Dual layout support for `card` (container embedded) and `page` (full-page centered), with related business details slot.
+
+```svelte
+<script lang="ts">
+  import { ResultPage } from '@svadmin/ui';
+</script>
+
+<ResultPage
+  status="success"
+  title="Project Initialized"
+  description="Your multi-tenant workspace project has been provisioned successfully."
+  primaryActionText="Go to Dashboard"
+  onPrimaryAction={() => console.log('Go to Dashboard')}
+  secondaryActionText="Create Another"
+  onSecondaryAction={() => console.log('Create Another')}
+/>
+```

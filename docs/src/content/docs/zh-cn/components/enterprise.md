@@ -901,3 +901,79 @@ const fields: FieldDefinition[] = [
   </form>
 </UnsavedChangesGuard>
 ```
+
+## 企业级数据看板与业务洞察套件
+
+### `<KpiCard>`
+
+面向运营大屏、财务与高管看板的多维 KPI 计分卡：
+- 集成主指标数值格式化、千分位及自定义货币前后缀。
+- 内置同环比走势胶囊（`<TrendIndicator>`），自动对比上一期指标并高亮涨跌幅。
+- 内置纯 SVG 平滑 Sparkline 走势微图与目标达成率进度条（Target Progress Bar）。
+- 支持骨架屏加载过渡态（`loading`）与 SLA 阈值异常预警横幅（`alertStatus` / `alertMessage`）。
+
+```svelte
+<script lang="ts">
+  import { KpiCard } from '@svadmin/ui';
+
+  const revenueSparkline = [12, 18, 15, 24, 38, 35, 52];
+</script>
+
+<KpiCard
+  title="季度总营收"
+  value={1284500}
+  prefix="¥"
+  prevValue={1050000}
+  trendPrefix="YoY"
+  sparklineData={revenueSparkline}
+  sparklineTone="success"
+  targetProgress={{ current: 1284500, target: 1500000, label: 'Q3 目标达成' }}
+  badge="核心 KPI"
+/>
+```
+
+### `<JsonViewer>`
+
+专为 API 调试、Webhook 投递 Payload、审计日志变更前/后对比及配置中心设计的高保真树形 JSON 查看器：
+- 严格色彩语法高亮（键名、字符串、数值、布尔值及 Null）。
+- 支持基于 `initialDepth` 的层级折叠展开与交互式展开控制。
+- 关键词即时检索过滤，高亮命中属性与内容。
+- 支持一键复制完整格式化 JSON 字符串，并支持浮动单属性路径复制。
+
+```svelte
+<script lang="ts">
+  import { JsonViewer } from '@svadmin/ui';
+
+  const webhookPayload = {
+    event: 'order.created',
+    timestamp: '2026-11-11T14:00:00Z',
+    data: { orderId: 'ORD-98213', amount: 450.8, isPaid: true },
+  };
+</script>
+
+<JsonViewer data={webhookPayload} initialDepth={2} searchable={true} copyable={true} />
+```
+
+### `<ResultPage>`
+
+标准化企业级业务流程结果与状态异常反馈页：
+- 标准化覆盖 `success`、`processing`、`warning`、`error`、`403`、`404` 与 `500` 七大核心状态。
+- 大号语义矢量图标辅以柔和微光光晕，版面层次分明。
+- 内置主次按钮组响应与自定义操作栏插槽。
+- 支持 `card`（容器内嵌）与 `page`（全屏居中）双重布局模式，并提供下属关联业务详情摘要插槽。
+
+```svelte
+<script lang="ts">
+  import { ResultPage } from '@svadmin/ui';
+</script>
+
+<ResultPage
+  status="success"
+  title="项目创建成功"
+  description="您的多租户企业项目已初始化完成，预计 2 分钟内同步完成权限映射。"
+  primaryActionText="前往工作台"
+  onPrimaryAction={() => console.log('前往工作台')}
+  secondaryActionText="继续创建"
+  onSecondaryAction={() => console.log('继续创建')}
+/>
+```

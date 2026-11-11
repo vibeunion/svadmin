@@ -69,6 +69,9 @@ import {
   Barcode,
   NumberRoll,
   VirtualList,
+  KpiCard,
+  JsonViewer,
+  ResultPage,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -177,6 +180,9 @@ describe('public compatibility aliases', () => {
     expect(Barcode).toBeDefined();
     expect(NumberRoll).toBeDefined();
     expect(VirtualList).toBeDefined();
+    expect(KpiCard).toBeDefined();
+    expect(JsonViewer).toBeDefined();
+    expect(ResultPage).toBeDefined();
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
