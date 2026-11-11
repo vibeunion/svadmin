@@ -785,11 +785,9 @@ export { default as OfflineGuard, type OfflineGuardProps } from './components/Of
 export { default as Barcode, type BarcodeProps, type BarcodeFormat } from './components/Barcode.svelte';
 export { default as NumberRoll, type NumberRollProps } from './components/NumberRoll.svelte';
 export { default as VirtualList, type VirtualListProps } from './components/VirtualList.svelte';
-
 // Enterprise unsaved changes guard & form loss prevention suite
 export { useUnsavedChanges, type UseUnsavedChangesOptions } from './components/useUnsavedChanges.svelte.js';
 export { default as UnsavedChangesGuard, default as UnsavedChangesModal, type UnsavedChangesGuardProps } from './components/UnsavedChangesGuard.svelte';
-
 // Enterprise KPI card, JSON tree viewer & business result page suite
 export { default as KpiCard, type KpiCardProps } from './components/KpiCard.svelte';
 export { default as JsonViewer, type JsonViewerProps } from './components/JsonViewer.svelte';
@@ -797,6 +795,5 @@ export { default as ResultPage, type ResultPageProps, type ResultStatus } from '
 // Enterprise dynamic watermark, context menu & OTP authentication suite
 export { default as WatermarkContainer, default as AntiTamperWatermark, type WatermarkContainerProps } from './components/WatermarkContainer.svelte';
 export { default as ContextMenu, type ContextMenuProps, type ContextMenuItem } from './components/ContextMenu.svelte';
-
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
