@@ -1900,6 +1900,99 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
 />
 ```
 
+### `<PlanUsageQuotaBar>`
+
+企业级 SaaS 多租户用量配额与超限预警进度条群：
+- 专为租户中心用量概览、订阅详情页与资源配额超限警示设计。
+- **多维度配额聚合**：直观展示 API 调用次数、云存储空间、团队席位等多维度指标用量，根据阈值自动渐变变色（正常、警告橙、超额危险红并带告警角标）。
+- **额度周期与升级引导**：展示下次配额重置日期（如“2026-12-01 自动重置”），并支持一键唤起“升级套餐 / 扩容”操作。
+
+```svelte
+<script lang="ts">
+  import { PlanUsageQuotaBar, type QuotaItem } from '@svadmin/ui';
+
+  const quotas: QuotaItem[] = [
+    { id: 'api', label: 'API 调用额度', current: 78500, limit: 100000, unit: '次', periodText: '本月度周期' },
+    { id: 'storage', label: '对象存储空间', current: 18.5, limit: 20, unit: 'GB', dangerThreshold: 90 },
+  ];
+</script>
+
+<PlanUsageQuotaBar
+  planName="企业旗舰版 (Enterprise Scale)"
+  planBadge="SLA 99.99% 保证"
+  resetDateText="2026-12-01 自动重置"
+  {quotas}
+  onupgrade={() => console.log('触发升级套餐')}
+/>
+```
+
+### `<TierFeatureComparison>`
+
+多版本套餐功能与权益对比矩阵表：
+- 专为 B2B SaaS 套餐选型、计费定价页面与多版本权益边界打造。
+- **卡片化表头**：支持基础版、专业版、旗舰版多卡片矩阵并排，支持“强烈推荐”角标高亮与“当前生效套餐”状态禁用。
+- **分组化功能行**：按模块组织特性清单，单元格原生支持布尔对勾（`✓`）、未包含横杠（`—`）与具体数值上限（如 `50 席位`、`100 GB`）。
+
+```svelte
+<script lang="ts">
+  import { TierFeatureComparison, type PricingTier, type FeatureGroup } from '@svadmin/ui';
+
+  const tiers: PricingTier[] = [
+    { key: 'starter', name: '团队基础版', price: '¥299', period: '月', isCurrent: true },
+    { key: 'pro', name: '企业专业版', price: '¥999', period: '月', isPopular: true },
+  ];
+
+  const groups: FeatureGroup[] = [
+    {
+      groupName: '协同与存储',
+      features: [
+        { name: '多租户组织隔离', values: { starter: true, pro: true } },
+        { name: '存储空间上限', values: { starter: '20 GB', pro: '500 GB' } },
+        { name: '专属技术专家支持', values: { starter: false, pro: true } },
+      ],
+    },
+  ];
+</script>
+
+<TierFeatureComparison {tiers} {groups} onselecttier={(k) => console.log('选定套餐:', k)} />
+```
+
+### `<BillingInvoiceDrawer>`
+
+企业月度结算账单明细与发票开具抽屉：
+- 专为财务对账、月度流水核销与增值税发票申请打造。
+- **全生命周期核销**：清晰呈现账单出账日期、结算周期、结算总额、税额与状态徽标（已结清/待付款/已退款）。
+- **消费明细与发票开具**：清单式呈现各项资源月度消耗明细；支持直接下载已开具的电子发票 PDF，或提交开具申请。
+
+```svelte
+<script lang="ts">
+  import { BillingInvoiceDrawer, type InvoiceData } from '@svadmin/ui';
+
+  let isDrawerOpen = $state(false);
+
+  const invoice: InvoiceData = {
+    invoiceNo: 'INV-202611-00812',
+    period: '2026年10月度',
+    issueDate: '2026-11-01',
+    status: 'paid',
+    totalAmount: 18450,
+    taxAmount: 1044.34,
+    items: [
+      { id: '1', description: '企业旗舰版席位月租', category: '基础包月', amount: 15000, quantity: 1 },
+      { id: '2', description: '超量存储流量结算', category: '弹性资源', amount: 3450 },
+    ],
+    invoiceTitle: '未来智能科技有限公司',
+    taxId: '91310115MA1K3XXXXX',
+    downloadUrl: 'https://example.test/inv-00812.pdf',
+  };
+</script>
+
+<button onclick={() => (isDrawerOpen = true)}>查看月度账单明细</button>
+
+<BillingInvoiceDrawer
+  bind:open={isDrawerOpen}
+  {invoice}
+  ondownload={(url) => console.log('下载发票:', url)}
 ### `<WebhookSimulator>`
 
 企业级 Webhook 事件模拟投递与回放测试器：

@@ -850,6 +850,10 @@ export { default as PeriodComparisonCard, default as MetricsDeltaPill, type Peri
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
 
+// Enterprise SaaS multi-tenant quota usage, tier feature comparison & billing invoice suite
+export { default as PlanUsageQuotaBar, default as MultiQuotaProgress, type PlanUsageQuotaBarProps, type QuotaItem } from './components/PlanUsageQuotaBar.svelte';
+export { default as TierFeatureComparison, default as PricingMatrixTable, type TierFeatureComparisonProps, type PricingTier, type FeatureGroup, type FeatureRow } from './components/TierFeatureComparison.svelte';
+export { default as BillingInvoiceDrawer, default as InvoiceDetailDrawer, type BillingInvoiceDrawerProps, type InvoiceData, type BillingItem } from './components/BillingInvoiceDrawer.svelte';
 // Enterprise developer webhook simulation, HMAC crypto signature & API playground suite
 export { default as WebhookSimulator, default as WebhookEventSimulator, type WebhookSimulatorProps, type WebhookEventPreset, type WebhookDeliveryResult } from './components/WebhookSimulator.svelte';
 export { default as HmacSignatureCalculator, default as SignatureDebugger, type HmacSignatureCalculatorProps, type HmacAlgorithm } from './components/HmacSignatureCalculator.svelte';
