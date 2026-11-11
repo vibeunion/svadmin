@@ -48,18 +48,8 @@ export { default as ColorPicker } from './components/ColorPicker.svelte';
 export { default as Rate } from './components/Rate.svelte';
 export { default as PivotExportButton } from './components/PivotExportButton.svelte';
 export type { PivotCache } from '@svadmin/core/pivot';
-export {
-  decodeSavedListViewMutationResult,
-  decodeSavedListViewRemoveResult,
-  decodeSavedListViewAccess,
-} from './components/saved-list-views.js';
-export type {
-  SavedListView, SavedListViewState, SavedListViewColumnPinning, SavedListViewProvider, SavedListViewMutation,
-  SavedListViewMutationSuccess, SavedListViewMutationConflict, SavedListViewRemoveSuccess,
-  ListPreferenceScope,
-  SavedListViewAccess, SavedListViewAccessMode,
-  SavedListViewSubject,
-} from './components/saved-list-views.js';
+export { decodeSavedListViewMutationResult, decodeSavedListViewRemoveResult, decodeSavedListViewAccess } from './components/saved-list-views.js';
+export type { SavedListView, SavedListViewState, SavedListViewColumnPinning, SavedListViewProvider, SavedListViewMutation, SavedListViewMutationSuccess, SavedListViewMutationConflict, SavedListViewRemoveSuccess, ListPreferenceScope, SavedListViewAccess, SavedListViewAccessMode, SavedListViewSubject } from './components/saved-list-views.js';
 export type { BatchSelection } from './components/table-contract.js';
 export { cloneListFilter, cloneListStateSnapshot } from './components/list-state.svelte.js';
 export type { ListStateSnapshot } from './components/list-state.svelte.js';
@@ -826,3 +816,7 @@ export { default as RecordCompareModal, default as EntityComparisonDrawer, type 
 export { default as WidgetContainer, default as DashboardWidget, type WidgetContainerProps } from './components/WidgetContainer.svelte';
 export { default as DataFreshnessIndicator, default as FreshnessPill, type DataFreshnessIndicatorProps, type FreshnessStatus, type PollInterval } from './components/DataFreshnessIndicator.svelte';
 export { default as ServerStatusGrid, default as ClusterHealthMatrix, type ServerStatusGridProps, type ServerNode, type NodeHealthStatus } from './components/ServerStatusGrid.svelte';
+// Enterprise advanced query builder, filter tags & batch edit suite
+export { default as QueryBuilder, default as AdvancedQueryBuilder, type QueryBuilderProps, type QueryGroup, type QueryRule, type QueryField, type LogicalOperator, type ComparisonOperator } from './components/QueryBuilder.svelte';
+export { default as FilterTagBar, type FilterTagBarProps, type FilterTagItem, type SavedPresetView } from './components/FilterTagBar.svelte';
+export { default as BatchEditModal, default as BatchEditorModal, type BatchEditModalProps, type BatchEditChange, type BatchFieldOption } from './components/BatchEditModal.svelte';
