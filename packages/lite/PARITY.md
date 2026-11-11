@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-11T09:10:42.954Z`
-> 清单映射覆盖率：**100%**（202/202 组件）
-> 1:1 对齐率 (Exact)：**66.3%**（134）· 语义降级率 (Fallback)：**31.2%**（63）
-> 行为验证覆盖：**85.1%**（172/202 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-11T13:06:28.795Z`
+> 清单映射覆盖率：**100%**（215/215 组件）
+> 1:1 对齐率 (Exact)：**62.8%**（135）· 语义降级率 (Fallback)：**31.6%**（68）
+> 行为验证覆盖：**82.8%**（178/215 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,7 +13,7 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
-| **advanced** | 59 | 28 | 27 | 4 | 0 | **47.5%** | 52/59 | 0 |
+| **advanced** | 72 | 29 | 32 | 11 | 0 | **40.3%** | 58/72 | 0 |
 | **widgets** | 41 | 18 | 23 | 0 | 0 | **43.9%** | 38/41 | 0 |
 | **fields** | 48 | 42 | 6 | 0 | 0 | **87.5%** | 42/48 | 0 |
 | **layout** | 25 | 22 | 2 | 1 | 0 | **88%** | 21/25 | 0 |
@@ -120,6 +120,19 @@
 | `AnnouncementBanner` | `LiteAnnouncementBanner.svelte` | ⚡ 语义降级 | 服务端全站广播通知横幅、语义状态色调与倒计时展示；跑马灯多条轮播由 SPA 承接 |
 | `TextDiffViewer` | `LiteTextDiffViewer.svelte` | ⚡ 语义降级 | 服务端预渲染文本行差异对比、新增/删除行高亮与行号；动态折叠与双栏切换由 SPA 承接 |
 | `AsyncExportModal` | `LiteAsyncExportModal.svelte` | ⚡ 语义降级 | 服务端异步导出表单、范围选择、格式单选与列复选框提交；动态进度轮询由 SPA 承接 |
+| `StepWizard` | `LiteStepWizard.svelte` | ⚡ 语义降级 | 服务端分步向导容器与原生链接步骤跳转；动态分支校验与草稿断点续填由 SPA 承接 |
+| `WorkflowStepper` | `LiteWorkflowStepper.svelte` | ⚡ 语义降级 | 服务端任务时间线节点与状态徽章展示；单步交互重试由 SPA 承接 |
+| `ColumnVisibilityDrawer` | `LiteColumnSettings.svelte` | ⚡ 语义降级 | 原生多选表单与查询参数列过滤；拖拽排序与本地持久化由 SPA 承接 |
+| `ColumnFilterBuilder` | `LiteFilterBuilder.svelte` | ✅ 1:1 对齐 | 可视化多条件原生筛选表单与 CRUD 运算符解析 |
+| `KeyboardShortcutsModal` | `LiteKeyboardShortcutsModal.svelte` | ⚡ 语义降级 | 服务端静态快捷键分类矩阵展示；全局事件监听与实时检索由 SPA 承接 |
+| `DualApprovalGate` | `LiteDualApprovalGate.svelte` | ⚡ 语义降级 | 服务端双人复核表单与二次口令验证；二维码动态轮询由 SPA 承接 |
+| `useHotkeys` | — | 🚫 免适配 | 免适配 (浏览器热键监听钩子) |
+| `SessionTimeoutGuard` | — | 🚫 免适配 | 免适配 (浏览器会话空闲守卫) |
+| `useSessionTimeout` | — | 🚫 免适配 | 免适配 (浏览器会话空闲钩子) |
+| `TableClipboardManager` | — | 🚫 免适配 | 免适配 (客户端剪贴板与矩阵回写) |
+| `useTableClipboard` | — | 🚫 免适配 | 免适配 (客户端剪贴板解析钩子) |
+| `AudioFeedbackProvider` | — | 🚫 免适配 | 免适配 (Web Audio 业务声效) |
+| `useAudioAlert` | — | 🚫 免适配 | 免适配 (Web Audio 声效钩子) |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
