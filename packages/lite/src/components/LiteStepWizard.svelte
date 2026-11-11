@@ -77,7 +77,8 @@
   .lite-step-wizard { border: 1px solid #e5e6eb; border-radius: 8px; background: #ffffff; padding: 20px; }
   .lite-steps-nav { margin-bottom: 24px; border-bottom: 1px solid #f2f3f5; padding-bottom: 16px; }
   .lite-steps-list { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
-  .lite-step-item { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .lite-step-item { display: flex; align-items: center; flex: 1; }
+  .lite-step-item > * + * { margin-left: 8px; }
   .lite-step-badge {
     width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
     justify-content: center; font-size: 12px; font-weight: 700; background: #f2f3f5; color: #4e5969;
@@ -90,7 +91,8 @@
   .lite-step-divider { flex: 1; height: 1px; background: #e5e6eb; margin: 0 12px; }
   .lite-step-done .lite-step-divider { background: #00b42a; }
   .lite-step-body { min-height: 120px; }
-  .lite-step-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; border-top: 1px solid #f2f3f5; padding-top: 16px; }
+  .lite-step-actions { display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid #f2f3f5; padding-top: 16px; }
+  .lite-step-actions > * + * { margin-left: 12px; }
   .lite-btn-primary { padding: 6px 16px; background: #165dff; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
   .lite-btn-secondary { padding: 6px 16px; background: #f2f3f5; color: #4e5969; border: 1px solid #e5e6eb; border-radius: 4px; font-size: 12px; cursor: pointer; }
 </style>
