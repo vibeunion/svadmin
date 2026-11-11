@@ -147,7 +147,7 @@
       <span>{triggerText}</span>
       {#if runningCount > 0}
         <span
-          class="ml-1 inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-[10px] font-semibold rounded-full bg-primary text-primary-foreground"
+          class="ml-1 inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-xs font-semibold rounded-full bg-primary text-primary-foreground"
           data-svadmin-counter="running-tasks"
         >
           {runningCount}
@@ -230,7 +230,7 @@
             Running
             {#if runningCount > 0}
               <span class="inline-flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
-              <span class="text-[10px] bg-primary/10 text-primary px-1 rounded">{runningCount}</span>
+              <span class="text-xs bg-primary/10 text-primary px-1 rounded">{runningCount}</span>
             {/if}
           </button>
           <button
@@ -321,27 +321,27 @@
                     </span>
                     <!-- Status Badge -->
                     {#if task.status === 'running'}
-                      <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                         <RotateCw class="h-3 w-3 animate-spin" />
                         Running
                       </span>
                     {:else if task.status === 'pending'}
-                      <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         <Clock class="h-3 w-3" />
                         Pending
                       </span>
                     {:else if task.status === 'completed'}
-                      <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-success/15 text-success">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-success/15 text-success">
                         <CheckCircle2 class="h-3 w-3" />
                         Completed
                       </span>
                     {:else if task.status === 'failed'}
-                      <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">
                         <AlertCircle class="h-3 w-3" />
                         Failed
                       </span>
                     {:else if task.status === 'cancelled'}
-                      <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         <XCircle class="h-3 w-3" />
                         Cancelled
                       </span>
@@ -352,7 +352,7 @@
                   {/if}
                 </div>
 
-                <span class="text-[11px] text-muted-foreground whitespace-nowrap">
+                <span class="text-xs text-muted-foreground whitespace-nowrap">
                   {formatTime(task.createdAt)}
                 </span>
               </div>
@@ -397,7 +397,7 @@
 
               <!-- Card Action Footer -->
               <div class="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between text-xs">
-                <span class="text-muted-foreground text-[11px]">
+                <span class="text-muted-foreground text-xs">
                   ID: <span class="font-mono">{task.id}</span>
                 </span>
                 <div class="flex items-center gap-1">
