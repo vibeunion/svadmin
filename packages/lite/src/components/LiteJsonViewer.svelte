@@ -43,12 +43,12 @@
   {/if}
 
   <div class="lite-json-body">
-    <details open={initialDepth > 0} class="lite-json-details">
-      <summary class="lite-json-summary">
+    <div class="lite-json-details">
+      <div class="lite-json-summary">
         <span>Payload Tree ({itemCount})</span>
-      </summary>
+      </div>
       <pre class="lite-json-code"><code>{formattedJson}</code></pre>
-    </details>
+    </div>
   </div>
 </div>
 
@@ -72,7 +72,7 @@
   .lite-json-title { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
   .lite-json-meta { font-size: 11px; color: #86909c; }
   .lite-json-body { padding: 10px 12px; max-height: 400px; overflow: auto; }
-  .lite-json-details summary { cursor: pointer; color: #165dff; font-weight: 500; margin-bottom: 6px; outline: none; }
+  .lite-json-summary { cursor: pointer; color: #165dff; font-weight: 500; margin-bottom: 6px; outline: none; }
   .lite-json-code {
     margin: 0;
     padding: 8px;
