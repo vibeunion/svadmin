@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-10-31T05:16:25.747Z`
-> 清单映射覆盖率：**100%**（179/179 组件）
-> 1:1 对齐率 (Exact)：**73.7%**（132）· 语义降级率 (Fallback)：**25.1%**（45）
-> 行为验证覆盖：**84.9%**（152/179 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-11T02:45:03.808Z`
+> 清单映射覆盖率：**100%**（193/193 组件）
+> 1:1 对齐率 (Exact)：**69.4%**（134）· 语义降级率 (Fallback)：**28%**（54）
+> 行为验证覆盖：**84.5%**（163/193 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,9 +13,9 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 18 | 14 | 4 | 0 | 0 | **77.8%** | 14/18 | 0 |
-| **advanced** | 43 | 27 | 15 | 1 | 0 | **62.8%** | 39/43 | 0 |
-| **widgets** | 37 | 17 | 20 | 0 | 0 | **45.9%** | 34/37 | 0 |
-| **fields** | 46 | 42 | 4 | 0 | 0 | **91.3%** | 40/46 | 0 |
+| **advanced** | 52 | 28 | 20 | 4 | 0 | **53.8%** | 45/52 | 0 |
+| **widgets** | 40 | 18 | 22 | 0 | 0 | **45%** | 37/40 | 0 |
+| **fields** | 48 | 42 | 6 | 0 | 0 | **87.5%** | 42/48 | 0 |
 | **layout** | 25 | 22 | 2 | 1 | 0 | **88%** | 21/25 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
@@ -95,7 +95,7 @@
 | `SpreadsheetView` | `LiteSpreadsheetView.svelte` | ⚡ 语义降级 | 有界原生单表 POST，提交 sheetId 与原始公式；计算、切表及导出由服务端承接，无客户端公式引擎 |
 | `DecisionTable` | `LiteDecisionTable.svelte` | ✅ 1:1 对齐 | 业务决策表与规则执行矩阵 |
 | `CommentThread` | `LiteCommentThread.svelte` | ⚡ 语义降级 | 服务端评论列表、回复与 POST 评论表单；即时提交由宿主承接 |
-| `Tour` | `LiteTour.svelte` | ⚡ 语义降级 | 静态引导步骤与关闭链接；目标高亮和定位由 SPA 承接 |
+| `Tour` | `LiteTour.svelte` | ⚡ 语义降级 | 静态引导步骤、当前步骤与关闭链接；target/placement 定位、聚光灯、完成记忆由 SPA 承接 |
 | `NotificationCenter` | `LiteNotificationCenter.svelte` | ⚡ 语义降级 | 服务端通知列表、已读态与全部已读链接；筛选和实时更新由宿主承接 |
 | `TwoFactorStepper` | `LiteTwoFactorStepper.svelte` | ✅ 1:1 对齐 | 服务端有序步骤，保留自定义步骤、当前索引与列表 class；附原生验证码提交表单 |
 | `Popconfirm` | `LitePopconfirm.svelte` | ✅ 1:1 对齐 | 锚点确认面板（dialog 语义）与原生 POST 表单/链接的确认与取消 |
@@ -103,6 +103,15 @@
 | `RowActions` | `LiteRowActions.svelte` | ✅ 1:1 对齐 | 行内链接或原生 POST 动作 |
 | `Result` | `LiteResult.svelte` | ✅ 1:1 对齐 | 成功、失败、警告与异常状态页 |
 | `Tree` | `LiteTree.svelte` | ⚡ 语义降级 | 静态层级树（缩进 + 节点链接/选中态）；展开、复选半选与键盘树导航由 SPA 承接 |
+| `AuditLogDrawer` | `LiteAuditLog.svelte` | ⚡ 语义降级 | 服务端审计表、分页、操作人/IP 与字段 diff；抽屉、搜索、筛选和加载器由 SPA 承接 |
+| `AuditTimeline` | `LiteAuditLog.svelte` | ⚡ 语义降级 | 服务端时间线/表格与字段 diff；动作筛选、搜索与交互式展开由 SPA 承接 |
+| `SafeDeleteConfirm` | `LiteSafeDeleteConfirm.svelte` | ✅ 1:1 对齐 | 服务端影响清单、输入确认与原生 POST 删除表单；二次点击动画由 SPA 承接 |
+| `SliderCaptcha` | — | 🚫 免适配 | 免适配 (客户端滑动轨迹验证) |
+| `ConcurrentConflictModal` | `LiteConcurrentConflictModal.svelte` | ⚡ 语义降级 | 服务端冲突字段对比与逐字段本地/服务端选择 POST；并发检测、强制覆盖和合并回调由 SPA 承接 |
+| `TaskCenter` | `LiteTaskCenter.svelte` | ⚡ 语义降级 | 服务端任务表、进度、错误、下载/重试/取消/清理 POST；轮询、抽屉和实时角标由 SPA 承接 |
+| `MicroAppFrame` | `LiteMicroAppFrame.svelte` | ⚡ 语义降级 | 服务端 iframe、sandbox/allow/referrerpolicy 与新窗口链接；postMessage、主题同步、自动高度和全屏由 SPA 承接 |
+| `OfflineGuard` | — | 🚫 免适配 | 免适配 (客户端网络守卫) |
+| `useNetworkStatus` | — | 🚫 免适配 | 免适配 (浏览器 Network Information 钩子) |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -118,7 +127,7 @@
 | `BarChart` | `widgets/LiteBarChart.svelte` | ⚡ 语义降级 | 降级为 CSS 柱状图或数据明细表格 |
 | `LineChart` | `widgets/LiteLineChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `PieChart` | `widgets/LitePieChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
-| `PresenceAvatarGroup` | `LitePresenceAvatarGroup.svelte` | ✅ 1:1 对齐 | 多人在线协同感知状态 |
+| `PresenceAvatarGroup` | `LitePresenceAvatarGroup.svelte` | ✅ 1:1 对齐 | 服务端头像栈、在线/编辑/空闲状态、+N 溢出与可选头像；点击回调由 SPA 承接 |
 | `GanttChart` | `LiteGanttChart.svelte` | ⚡ 语义降级 | 共享有界时间线校验；Lite 原生表格与链接恢复，SPA 交互选择与回调，不含依赖/工作日历/自动排程引擎 |
 | `OfflineSyncBanner` | `LiteOfflineSyncBanner.svelte` | ✅ 1:1 对齐 | 离线状态感知与变更队列同步栏 |
 | `Image` | `LiteImage.svelte` | ⚡ 语义降级 | 原生 img、链接与无图占位；图片加载失败回退由服务端或浏览器承接 |
@@ -140,12 +149,15 @@
 | `AreaChart` | `LiteAreaChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `ScatterChart` | `LiteScatterChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `RadarChart` | `LiteRadarChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
-| `GaugeChart` | `LiteGaugeChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `GaugeChart` | `LiteGaugeChart.svelte` | ⚡ 语义降级 | 服务端渲染当前值、范围、目标与阈值数据表；半圆/速度表弧线、指针与动画由 SPA 承接 |
 | `FunnelChart` | `LiteFunnelChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `HeatmapChart` | `LiteHeatmapChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `WaterfallChart` | `LiteWaterfallChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `RoseChart` | `LiteRoseChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
 | `DonutChart` | `LiteDonutChart.svelte` | ⚡ 语义降级 | SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接 |
+| `TrendIndicator` | `LiteTrendIndicator.svelte` | ✅ 1:1 对齐 | 服务端计算涨跌幅、方向、前缀/后缀与反向语义色；无客户端状态 |
+| `MetricGrid` | `LiteMetricGrid.svelte` | ⚡ 语义降级 | 服务端网格、标题、加载骨架、空态与指标卡；自定义操作插槽和任意子组件由宿主服务端渲染 |
+| `OrgChart` | `LiteOrgChart.svelte` | ⚡ 语义降级 | 服务端层级表格与部门/职位信息；节点点击、缩放和图形连线由 SPA 承接 |
 
 ### FIELDS
 
@@ -194,9 +206,11 @@
 | `ImageCropper` | `LiteImageCropper.svelte` | ✅ 1:1 对齐 | 图片缩放与裁剪参数表单 |
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
 | `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
-| `SignaturePad` | `LiteSignaturePad.svelte` | ⚡ 语义降级 | SSR 承接已签署图片的上传与预览；canvas 手写板由 SPA 承接 |
+| `SignaturePad` | `LiteSignaturePad.svelte` | ⚡ 语义降级 | SSR 承接已签署图片的上传、替换与预览；canvas 手写、撤销、清空及 PNG/SVG 导出由 SPA 承接 |
 | `OtpInput` | `LiteOtpInput.svelte` | ✅ 1:1 对齐 | 原生一次性验证码输入与长度约束 |
 | `AutoComplete` | `LiteAutoComplete.svelte` | ⚡ 语义降级 | 原生 input + datalist 建议；异步查询和键盘弹层由 SPA 承接 |
+| `CronExpressionBuilder` | `LiteCronExpressionBuilder.svelte` | ⚡ 语义降级 | 服务端 cron 文本、预设与原生 POST；可视化分段编辑和实时回显由 SPA 承接 |
+| `VirtualTreeSelect` | `LiteVirtualTreeSelect.svelte` | ⚡ 语义降级 | 原生层级 select 保留选项与单选/多选值；虚拟滚动、搜索和异步展开由 SPA 承接 |
 
 ### LAYOUT
 

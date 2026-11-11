@@ -262,7 +262,7 @@ it, so the rest of Lite has no extra runtime dependency. Install the peer with
 import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
 ```
 
-`@svadmin/lite` provides **100% component parity** (179/179 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
+`@svadmin/lite` provides **100% mapping coverage** (193/193 components) corresponding to `@svadmin/ui`: 134 exact 1:1 renderings, 54 semantic fallbacks, and 5 SPA-only components that intentionally have no server rendering. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
 
 ### Core Pages & Layout
 
@@ -275,8 +275,11 @@ import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
 | `LiteImage` / `LiteImagePreview` / `LiteVideoPlayer` / `LiteQRCode` | Media rendering with native controls, links and server-rendered QR |
 | `LiteCalendar` / `LiteCarousel` / `LiteTimeline` / `LiteStatistic` / `LiteCountdown` | Read-only dashboards and chronological displays |
 | `LiteCommentThread` / `LiteTour` / `LiteNotificationCenter` / `LiteDetailDrawer` / `LitePopconfirm` | Server-rendered collaboration and disclosure surfaces |
+| `LiteTaskCenter` / `LiteAuditLog` / `LiteAuditTimeline` | Server-rendered task queues, audit trails and field-level change diffs |
+| `LiteSafeDeleteConfirm` / `LiteConcurrentConflictModal` | Native POST confirmation and field-level conflict resolution forms |
+| `LiteMicroAppFrame` | Sandboxed iframe embedding with a direct fallback link |
 | `LiteSteps` / `LiteProgress` / `LiteSpin` / `LiteSkeleton` / `LiteResult` | Progress, loading and outcome surfaces |
-| `LiteTree` / `LiteItemList` / `LiteRowActions` / `LiteOtpInput` / `LiteTwoFactorStepper` | Hierarchical data, row actions and verification flows |
+| `LiteTree` / `LiteOrgChart` / `LiteItemList` / `LiteRowActions` / `LiteOtpInput` / `LiteTwoFactorStepper` | Hierarchical data, organization charts, row actions and verification flows |
 | `LiteAutoComplete` | Native `datalist` suggestions without async client popovers |
 | `LiteSidebar` / `LiteHeader` | Discrete layout primitives |
 | `LiteListPage` | Full-featured list view with search, table, bulk actions, and pagination |
@@ -302,7 +305,8 @@ import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
 | Category | Components |
 |----------|------------|
 | **Text & Numeric** | `LiteTextField`, `LiteNumberField`, `LiteCurrencyField`, `LitePercentField`, `LitePhoneField`, `LiteEmailField`, `LiteUrlField`, `LiteRatingField`, `LiteCopyField` |
-| **Date & Choice** | `LiteDateField`, `LiteDateRangeField`, `LiteBooleanField`, `LiteSelectField`, `LiteMultiSelectField`, `LiteTreeSelect`, `LiteCascader`, `LiteTagField`, `LiteRelationField` |
+| **Date & Choice** | `LiteDateField`, `LiteDateRangeField`, `LiteBooleanField`, `LiteSelectField`, `LiteMultiSelectField`, `LiteTreeSelect`, `LiteVirtualTreeSelect`, `LiteCascader`, `LiteTagField`, `LiteRelationField` |
+| **Scheduling & Encoding** | `LiteCronExpressionBuilder` |
 | **Media & Rich & Array** | `LiteAvatarField`, `LiteImageField`, `LiteFileField`, `LiteCodeField`, `LiteMarkdownField`, `LiteRichTextField`, `LiteJsonField`, `LiteArrayField`, `LiteDynamicFormList`, `LiteTransfer`, `LiteImageCropper`, `LiteJsonSchemaForm`, `LiteMentionsInput`, `LiteSignaturePad` |
 
 ### Action Buttons (10 Buttons)
@@ -317,7 +321,8 @@ import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
 
 | Component | Description |
 |-----------|-------------|
-| `LiteStatsCard`, `LiteMetricStrip`, `LiteInsightCard`, `LiteAnomalyBadge`, `LiteBadge` | Metric KPI cards/strips and semantic status badges |
+| `LiteStatsCard`, `LiteMetricStrip`, `LiteMetricGrid`, `LiteInsightCard`, `LiteAnomalyBadge`, `LiteBadge` | Metric KPI cards, metric collections and semantic status badges |
+| `LiteTrendIndicator` | Server-computed trend direction, rate and semantic color |
 | `LiteBarChart`, `LiteLineChart`, `LitePieChart` | Server-rendered SVG/HTML charts with fallback data tables |
 | `LiteAreaChart`, `LiteScatterChart`, `LiteRadarChart`, `LiteGaugeChart` | Bounded chart data tables where a client chart engine is unavailable |
 | `LiteFunnelChart`, `LiteHeatmapChart`, `LiteWaterfallChart`, `LiteRoseChart`, `LiteDonutChart` | Bounded chart data tables with the same fallback contract |
@@ -346,6 +351,7 @@ import LiteQRCode from '@svadmin/lite/components/LiteQRCode.svelte';
 | `LiteStepForm`, `LiteTableSummary`, `LiteVersionDiffViewer`, `LiteEditableTable`, `LiteDraggableRowTable` | Server-driven enterprise data interaction components |
 | `LiteMediaLibraryModal`, `LiteActivityFeed`, `LiteKanbanBoard`, `LitePivotTable` | Media, activity, workflow, and analysis views |
 | `LiteCanvasAnnotation`, `LiteSpreadsheetView`, `LiteDecisionTable` | SSR-compatible annotation, spreadsheet, and rules views |
+| `SliderCaptcha`, `OfflineGuard`, `useNetworkStatus` | SPA-only components: CAPTCHA interaction, live offline trapping and reactive network state require client JavaScript |
 | `DevTools` | SPA-only component with no Lite counterpart |
 
 ## Parity Tracking & Visualization
@@ -355,7 +361,7 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 - **CLI Dashboard**: Run `bun run check:parity` to inspect the live coverage matrix in terminal.
 - **Parity Matrix Document**: [PARITY.md](./PARITY.md) is auto-generated with exhaustive module-by-module tables.
 - **Machine-Readable JSON**: `packages/lite/parity.json` provides structured data for automation.
-- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 179 components and live metrics.
+- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 193 components and live metrics.
 - **CI Contract Test**: `scripts/parity-contract.test.ts` runs in CI to prevent regression and ensure every new UI component has a documented Lite counterpart.
 
 ## Server Utilities

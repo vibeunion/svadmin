@@ -4,6 +4,7 @@
   interface Props {
     name?: string;
     value?: string;
+    alt?: string;
     label?: string;
     formAction?: string;
     disabled?: boolean;
@@ -13,6 +14,7 @@
   let {
     name = 'signature',
     value = '',
+    alt = 'Signature preview',
     label = 'Electronic Signature',
     formAction = '',
     disabled = false,
@@ -28,7 +30,7 @@
 
   {#if value}
     <div class="sv-lite-sig-preview">
-      <img src={value} alt="Signature Preview" class="sv-lite-sig-img" />
+      <img src={value} alt={alt} class="sv-lite-sig-img" />
     </div>
   {:else}
     <div class="sv-lite-sig-empty">

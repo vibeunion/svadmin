@@ -166,6 +166,22 @@ export { default as LiteSpin } from './components/LiteSpin.svelte';
 export { default as LiteProgress } from './components/LiteProgress.svelte';
 export { default as LiteTree } from './components/LiteTree.svelte';
 
+// Recent enterprise UI parity fallbacks
+export { default as LiteTrendIndicator } from './components/LiteTrendIndicator.svelte';
+export { default as LiteMetricGrid } from './components/LiteMetricGrid.svelte';
+export { default as LiteOrgChart } from './components/LiteOrgChart.svelte';
+export { default as LiteCronExpressionBuilder } from './components/LiteCronExpressionBuilder.svelte';
+export { default as LiteVirtualTreeSelect } from './components/LiteVirtualTreeSelect.svelte';
+export { default as LiteConcurrentConflictModal } from './components/LiteConcurrentConflictModal.svelte';
+export { default as LiteTaskCenter } from './components/LiteTaskCenter.svelte';
+export { default as LiteMicroAppFrame } from './components/LiteMicroAppFrame.svelte';
+export { default as LiteSafeDeleteConfirm } from './components/LiteSafeDeleteConfirm.svelte';
+export type { LiteOrgNode } from './components/LiteOrgChart.svelte';
+export type { LiteVirtualTreeNode } from './components/LiteVirtualTreeSelect.svelte';
+export type { LiteConflictField } from './components/LiteConcurrentConflictModal.svelte';
+export type { LiteTaskStatus, LiteBackgroundTask } from './components/LiteTaskCenter.svelte';
+export type { LiteDeleteImpact } from './components/LiteSafeDeleteConfirm.svelte';
+
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
   configureMarkdownRenderer,

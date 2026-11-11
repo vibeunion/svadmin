@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-10-31T05:16:25.747Z",
-  "totalComponents": 179,
-  "adaptedCount": 132,
-  "fallbackCount": 45,
-  "spaOnlyCount": 2,
+  "timestamp": "2026-11-11T02:45:03.808Z",
+  "totalComponents": 193,
+  "adaptedCount": 134,
+  "fallbackCount": 54,
+  "spaOnlyCount": 5,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 73.7,
-  "fallbackPercentage": 25.1,
-  "behaviorVerifiedCount": 152,
-  "behaviorVerifiedPercentage": 84.9,
-  "behaviorAssertedCount": 152,
-  "behaviorAssertedPercentage": 84.9,
+  "exactPercentage": 69.4,
+  "fallbackPercentage": 28,
+  "behaviorVerifiedCount": 163,
+  "behaviorVerifiedPercentage": 84.5,
+  "behaviorAssertedCount": 163,
+  "behaviorAssertedPercentage": 84.5,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,42 +28,42 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 43,
-      "adapted": 27,
-      "fallback": 15,
-      "spaOnly": 1,
+      "total": 52,
+      "adapted": 28,
+      "fallback": 20,
+      "spaOnly": 4,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 62.8,
-      "fallbackRate": 34.9,
-      "behaviorVerified": 39,
-      "behaviorAsserted": 39
+      "exactRate": 53.8,
+      "fallbackRate": 38.5,
+      "behaviorVerified": 45,
+      "behaviorAsserted": 45
     },
     "widgets": {
       "category": "widgets",
-      "total": 37,
-      "adapted": 17,
-      "fallback": 20,
+      "total": 40,
+      "adapted": 18,
+      "fallback": 22,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 45.9,
-      "fallbackRate": 54.1,
-      "behaviorVerified": 34,
-      "behaviorAsserted": 34
+      "exactRate": 45,
+      "fallbackRate": 55,
+      "behaviorVerified": 37,
+      "behaviorAsserted": 37
     },
     "fields": {
       "category": "fields",
-      "total": 46,
+      "total": 48,
       "adapted": 42,
-      "fallback": 4,
+      "fallback": 6,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 91.3,
-      "fallbackRate": 8.7,
-      "behaviorVerified": 40,
-      "behaviorAsserted": 40
+      "exactRate": 87.5,
+      "fallbackRate": 12.5,
+      "behaviorVerified": 42,
+      "behaviorAsserted": 42
     },
     "layout": {
       "category": "layout",
@@ -979,7 +979,7 @@
       "liteComponent": "LitePresenceAvatarGroup.svelte",
       "category": "widgets",
       "status": "exact",
-      "strategy": "多人在线协同感知状态"
+      "strategy": "服务端头像栈、在线/编辑/空闲状态、+N 溢出与可选头像；点击回调由 SPA 承接"
     },
     {
       "name": "PrintableBill",
@@ -1051,7 +1051,7 @@
       "liteComponent": "LiteSignaturePad.svelte",
       "category": "fields",
       "status": "fallback",
-      "strategy": "SSR 承接已签署图片的上传与预览；canvas 手写板由 SPA 承接"
+      "strategy": "SSR 承接已签署图片的上传、替换与预览；canvas 手写、撤销、清空及 PNG/SVG 导出由 SPA 承接"
     },
     {
       "name": "PdfDocumentViewer",
@@ -1211,7 +1211,7 @@
       "liteComponent": "LiteTour.svelte",
       "category": "advanced",
       "status": "fallback",
-      "strategy": "静态引导步骤与关闭链接；目标高亮和定位由 SPA 承接"
+      "strategy": "静态引导步骤、当前步骤与关闭链接；target/placement 定位、聚光灯、完成记忆由 SPA 承接"
     },
     {
       "name": "Menu",
@@ -1467,7 +1467,7 @@
       "liteComponent": "LiteGaugeChart.svelte",
       "category": "widgets",
       "status": "fallback",
-      "strategy": "SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接"
+      "strategy": "服务端渲染当前值、范围、目标与阈值数据表；半圆/速度表弧线、指针与动画由 SPA 承接"
     },
     {
       "name": "FunnelChart",
@@ -1508,6 +1508,118 @@
       "category": "widgets",
       "status": "fallback",
       "strategy": "SSR 内联 SVG 图形 + 可访问数据表；tooltip/缩放/图例切换等交互由 SPA 承接"
+    },
+    {
+      "name": "AuditLogDrawer",
+      "uiComponent": "AuditLogDrawer.svelte",
+      "liteComponent": "LiteAuditLog.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端审计表、分页、操作人/IP 与字段 diff；抽屉、搜索、筛选和加载器由 SPA 承接"
+    },
+    {
+      "name": "AuditTimeline",
+      "uiComponent": "content/AuditTimeline.svelte",
+      "liteComponent": "LiteAuditLog.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端时间线/表格与字段 diff；动作筛选、搜索与交互式展开由 SPA 承接"
+    },
+    {
+      "name": "SafeDeleteConfirm",
+      "uiComponent": "SafeDeleteConfirm.svelte",
+      "liteComponent": "LiteSafeDeleteConfirm.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "服务端影响清单、输入确认与原生 POST 删除表单；二次点击动画由 SPA 承接"
+    },
+    {
+      "name": "SliderCaptcha",
+      "uiComponent": "SliderCaptcha.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (客户端滑动轨迹验证)",
+      "note": "服务端不能完成滑块交互，必须使用服务端 rate limit 或等效挑战"
+    },
+    {
+      "name": "TrendIndicator",
+      "uiComponent": "TrendIndicator.svelte",
+      "liteComponent": "LiteTrendIndicator.svelte",
+      "category": "widgets",
+      "status": "exact",
+      "strategy": "服务端计算涨跌幅、方向、前缀/后缀与反向语义色；无客户端状态"
+    },
+    {
+      "name": "MetricGrid",
+      "uiComponent": "MetricGrid.svelte",
+      "liteComponent": "LiteMetricGrid.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端网格、标题、加载骨架、空态与指标卡；自定义操作插槽和任意子组件由宿主服务端渲染"
+    },
+    {
+      "name": "OrgChart",
+      "uiComponent": "OrgChart.svelte",
+      "liteComponent": "LiteOrgChart.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端层级表格与部门/职位信息；节点点击、缩放和图形连线由 SPA 承接"
+    },
+    {
+      "name": "CronExpressionBuilder",
+      "uiComponent": "CronExpressionBuilder.svelte",
+      "liteComponent": "LiteCronExpressionBuilder.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "服务端 cron 文本、预设与原生 POST；可视化分段编辑和实时回显由 SPA 承接"
+    },
+    {
+      "name": "VirtualTreeSelect",
+      "uiComponent": "VirtualTreeSelect.svelte",
+      "liteComponent": "LiteVirtualTreeSelect.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "原生层级 select 保留选项与单选/多选值；虚拟滚动、搜索和异步展开由 SPA 承接"
+    },
+    {
+      "name": "ConcurrentConflictModal",
+      "uiComponent": "ConcurrentConflictModal.svelte",
+      "liteComponent": "LiteConcurrentConflictModal.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端冲突字段对比与逐字段本地/服务端选择 POST；并发检测、强制覆盖和合并回调由 SPA 承接"
+    },
+    {
+      "name": "TaskCenter",
+      "uiComponent": "TaskCenter.svelte",
+      "liteComponent": "LiteTaskCenter.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端任务表、进度、错误、下载/重试/取消/清理 POST；轮询、抽屉和实时角标由 SPA 承接"
+    },
+    {
+      "name": "MicroAppFrame",
+      "uiComponent": "MicroAppFrame.svelte",
+      "liteComponent": "LiteMicroAppFrame.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端 iframe、sandbox/allow/referrerpolicy 与新窗口链接；postMessage、主题同步、自动高度和全屏由 SPA 承接"
+    },
+    {
+      "name": "OfflineGuard",
+      "uiComponent": "OfflineGuard.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (客户端网络守卫)",
+      "note": "Lite 继续使用 LiteOfflineSyncBanner 渲染离线状态；提交拦截必须由宿主服务端校验"
+    },
+    {
+      "name": "useNetworkStatus",
+      "uiComponent": "useNetworkStatus.svelte.ts",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (浏览器 Network Information 钩子)",
+      "note": "SSR 不读取 navigator；离线快照由服务端或宿主注入"
     },
     {
       "name": "ThemeToggle",
