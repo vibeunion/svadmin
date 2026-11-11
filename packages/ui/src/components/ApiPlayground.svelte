@@ -127,7 +127,7 @@
 </script>
 
 <div
-  class={cn('rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs space-y-4', className)}
+  class={cn('rounded-md border border-border bg-card p-5 text-card-foreground shadow-xs space-y-4', className)}
   data-svadmin-component="ApiPlayground"
 >
   <header class="flex items-center justify-between border-b border-border pb-3">
@@ -195,7 +195,7 @@
   {/if}
 
   <!-- Generated cURL preview box -->
-  <div class="rounded-lg border border-border bg-muted/20 p-3 space-y-2 text-xs font-mono">
+  <div class="rounded-md border border-border bg-muted/20 p-3 space-y-2 text-xs font-mono">
     <div class="flex items-center justify-between text-muted-foreground">
       <span class="font-bold text-foreground">一键生成标准终端 cURL 命令</span>
       <button
@@ -217,7 +217,7 @@
 
   <!-- Response Section -->
   {#if responseResult}
-    <div class="rounded-lg border border-border bg-card p-4 space-y-3 text-xs font-mono">
+    <div class="rounded-md border border-border bg-card p-4 space-y-3 text-xs font-mono">
       <div class="flex items-center justify-between border-b border-border pb-2">
         <div class="flex items-center gap-2">
           {#if responseResult.status >= 200 && responseResult.status < 300}

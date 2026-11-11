@@ -84,7 +84,7 @@
 </script>
 
 <div
-  class={cn('rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs space-y-4', className)}
+  class={cn('rounded-md border border-border bg-card p-5 text-card-foreground shadow-xs space-y-4', className)}
   data-svadmin-component="HmacSignatureCalculator"
 >
   <header class="flex items-center justify-between border-b border-border pb-3">
@@ -145,7 +145,7 @@
   </div>
 
   <!-- Computed Output -->
-  <div class="rounded-lg border border-border bg-muted/20 p-3.5 space-y-2 text-xs font-mono">
+  <div class="rounded-md border border-border bg-muted/20 p-3.5 space-y-2 text-xs font-mono">
     <div class="flex items-center justify-between text-muted-foreground">
       <span class="font-bold text-foreground">实时计算所得 HMAC 签名结果 (Hex Digest)</span>
       <button
