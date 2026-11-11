@@ -2514,3 +2514,110 @@ Asynchronous scheduled jobs and cron execution management board:
   onToggleJobStatus={(job, status) => console.log('Job status toggled:', job.id, status)}
 />
 ```
+
+### `<SecureDataExporter>` / `<ExportSecurityWatermark>`
+
+Enterprise secure data exporter with digital traceability fingerprints and audit controls:
+- **Cryptographic Fingerprint Injection**: Embeds tamper-proof operator ID, timestamp, and signature hashes into exported CSV/TSV headers and metadata.
+- **Mandatory Compliance Authorization**: Intercepts exports with a security confirmation modal presenting sensitive field warnings and required reason input.
+- **Automated Audit Callback**: Notifies backend compliance services (`onExportAuditRecord`) with full payload metadata.
+
+```svelte
+<script lang="ts">
+  import { SecureDataExporter } from '@svadmin/ui';
+
+  const data = [{ id: 1, name: 'Alice', phone: '13800000000' }];
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'phone', label: 'Phone', isSensitive: true },
+  ];
+</script>
+
+<SecureDataExporter
+  {data}
+  {columns}
+  fileName="2026_q4_customer_audit"
+  onExportAuditRecord={(audit) => console.log('Audit record:', audit)}
+/>
+```
+
+### `<RolePermissionComparator>` / `<PermissionAuditDiffModal>`
+
+Role permission modification diff comparator and privilege escalation audit modal:
+- **Side-by-Side Diff Matrix**: Compares prior permissions vs proposed permissions across resources and CRUD actions (`read`, `create`, `update`, `delete`, `export`).
+- **Privilege Escalation Warning**: Highlights sensitive high-risk grants (e.g. deletion of financial ledgers, mass export) with prominent alerts.
+- **Mandatory Ticket Tracking**: Requires a validated approval ticket number before changes can be submitted.
+
+```svelte
+<script lang="ts">
+  import { RolePermissionComparator } from '@svadmin/ui';
+</script>
+
+<RolePermissionComparator
+  roleId="finance_lead"
+  roleName="Finance Controller"
+  onConfirmChanges={(payload) => console.log('Permission audit approved:', payload)}
+/>
+```
+
+### `<TenantQuotasMatrix>` / `<QuotaEnforcementGuard>`
+
+Multi-tenant resource quota monitoring dashboard and threshold enforcement guard:
+- **Resource Progress Gauges**: Real-time meters for API calls, storage capacity, user seats, and compute points with status indicators (`normal`, `warning`, `exhausted`).
+- **Enforcement & Recovery**: Provides one-click temporary quota request workflows and plan upgrade triggers.
+
+```svelte
+<script lang="ts">
+  import { TenantQuotasMatrix } from '@svadmin/ui';
+</script>
+
+<TenantQuotasMatrix
+  tenantName="Acme Enterprise"
+  planName="Tier 3 Dedicated"
+  onUpgradePlan={() => console.log('Upgrade plan requested')}
+/>
+```
+
+### `<TableAggregationFooter>` / `<TableColumnSumSummary>`
+
+Sticky bottom multi-dimensional table aggregation footer:
+- **Dynamic Selection Summary**: Automatically calculates and updates sums or averages of currently checked rows in real-time.
+- **Page Subtotal & Overall Total**: Renders page-level subtotals aligned to columns, alongside server-provided grand totals.
+- **Precision & Formatting**: Supports custom currency prefixes (`¥`), decimal precision, and alignment synchronization.
+
+```svelte
+<script lang="ts">
+  import { TableAggregationFooter } from '@svadmin/ui';
+
+  const columns = [
+    { key: 'orderNo', label: 'Order ID' },
+    { key: 'amount', label: 'Amount', op: 'sum', prefix: '¥' },
+  ];
+</script>
+
+<TableAggregationFooter
+  {columns}
+  pageRows={[{ orderNo: '1', amount: 100 }, { orderNo: '2', amount: 200 }]}
+  selectedRows={[{ orderNo: '1', amount: 100 }]}
+/>
+```
+
+### `<IncidentWarRoomDrawer>` / `<AlertIncidentTimeline>`
+
+Production emergency incident war room drawer and alert response timeline:
+- **Incident Severity & Impact**: Surfaces P0/P1 severity badges, impacted user counters, and incident duration.
+- **Emergency Mitigations**: One-click quick-action buttons (Read-only throttling, cache flush, gateway isolation).
+- **Incident Response Timeline**: Collaborative progress event log with resolution declaration action.
+
+```svelte
+<script lang="ts">
+  import { IncidentWarRoomDrawer } from '@svadmin/ui';
+</script>
+
+<IncidentWarRoomDrawer
+  incidentId="INC-2026-902"
+  title="PostgreSQL Primary Connection Exhaustion"
+  severity="P0"
+  onTriggerMitigation={(action) => console.log('Mitigation executed:', action)}
+/>
+```
