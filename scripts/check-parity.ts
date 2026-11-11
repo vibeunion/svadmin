@@ -374,11 +374,11 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'ImportPreviewValidator', uiComponent: 'ImportPreviewValidator.svelte', liteComponent: 'LiteImportPreviewValidator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端数据校验统计与错误明细表格展示；客户端只看错误行过滤与单元格修补由 SPA 承接' },
 
   // ─── Enterprise suites wave 7 (BI Pivot, Geo Distribution, Mask Policy & Diagnostics) ───
-  { name: 'PivotMatrix', uiComponent: 'PivotMatrix.svelte', category: 'widgets', status: 'fallback', strategy: '服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接' },
-  { name: 'GeoScatterMap', uiComponent: 'GeoScatterMap.svelte', category: 'widgets', status: 'fallback', strategy: '服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接' },
-  { name: 'DataMaskPolicyEngine', uiComponent: 'DataMaskPolicyEngine.svelte', category: 'advanced', status: 'fallback', strategy: '服务端脱敏策略基线表格与豁免角色列表；实时沙箱算法推演由 SPA 承接' },
+  { name: 'PivotMatrix', uiComponent: 'PivotMatrix.svelte', liteComponent: 'LitePivotMatrix.svelte', category: 'widgets', status: 'fallback', strategy: '服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接' },
+  { name: 'GeoScatterMap', uiComponent: 'GeoScatterMap.svelte', liteComponent: 'LiteGeoScatterMap.svelte', category: 'widgets', status: 'fallback', strategy: '服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接' },
+  { name: 'DataMaskPolicyEngine', uiComponent: 'DataMaskPolicyEngine.svelte', liteComponent: 'LiteDataMaskPolicyEngine.svelte', category: 'advanced', status: 'fallback', strategy: '服务端脱敏策略基线表格与豁免角色列表；实时沙箱算法推演由 SPA 承接' },
   { name: 'MockDataInterceptor', uiComponent: 'MockDataInterceptor.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端网络拦截与离线 Mock 控制台)' },
-  { name: 'SystemHealthCheckDashboard', uiComponent: 'SystemHealthCheckDashboard.svelte', category: 'advanced', status: 'fallback', strategy: '服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接' },
+  { name: 'SystemHealthCheckDashboard', uiComponent: 'SystemHealthCheckDashboard.svelte', liteComponent: 'LiteSystemHealthCheckDashboard.svelte', category: 'advanced', status: 'fallback', strategy: '服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接' },
 
 
 

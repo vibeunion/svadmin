@@ -214,7 +214,7 @@
             </td>
             <td class="p-2.5">
               <div class="flex flex-wrap gap-1">
-                {#each policy.exemptRoles as roleId}
+                {#each policy.exemptRoles as roleId (roleId)}
                   {@const roleObj = availableRoles.find(r => r.id === roleId)}
                   <span class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                     {roleObj?.name ?? roleId}

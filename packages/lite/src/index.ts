@@ -226,6 +226,12 @@ export { default as LiteImportPreviewValidator } from './components/LiteImportPr
 export { default as LiteApprovalChainBuilder } from './components/LiteApprovalChainBuilder.svelte';
 export { default as LitePeriodComparisonCard } from './components/LitePeriodComparisonCard.svelte';
 
+// Enterprise wave 7 parity fallbacks
+export { default as LitePivotMatrix } from './components/LitePivotMatrix.svelte';
+export { default as LiteGeoScatterMap } from './components/LiteGeoScatterMap.svelte';
+export { default as LiteDataMaskPolicyEngine } from './components/LiteDataMaskPolicyEngine.svelte';
+export { default as LiteSystemHealthCheckDashboard } from './components/LiteSystemHealthCheckDashboard.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)

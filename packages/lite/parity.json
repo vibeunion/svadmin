@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-11T23:23:19.436Z",
+  "timestamp": "2026-11-11T23:50:06.868Z",
   "totalComponents": 262,
   "adaptedCount": 135,
   "fallbackCount": 104,
@@ -8,10 +8,10 @@
   "overallCoveragePercentage": 100,
   "exactPercentage": 51.5,
   "fallbackPercentage": 39.7,
-  "behaviorVerifiedCount": 197,
-  "behaviorVerifiedPercentage": 75.2,
-  "behaviorAssertedCount": 197,
-  "behaviorAssertedPercentage": 75.2,
+  "behaviorVerifiedCount": 201,
+  "behaviorVerifiedPercentage": 76.7,
+  "behaviorAssertedCount": 201,
+  "behaviorAssertedPercentage": 76.7,
   "categories": {
     "pages": {
       "category": "pages",
@@ -36,8 +36,8 @@
       "percentage": 100,
       "exactRate": 27.4,
       "fallbackRate": 52.8,
-      "behaviorVerified": 72,
-      "behaviorAsserted": 72
+      "behaviorVerified": 74,
+      "behaviorAsserted": 74
     },
     "widgets": {
       "category": "widgets",
@@ -49,8 +49,8 @@
       "percentage": 100,
       "exactRate": 36.7,
       "fallbackRate": 63.3,
-      "behaviorVerified": 41,
-      "behaviorAsserted": 41
+      "behaviorVerified": 43,
+      "behaviorAsserted": 43
     },
     "fields": {
       "category": "fields",
@@ -2114,6 +2114,7 @@
     {
       "name": "PivotMatrix",
       "uiComponent": "PivotMatrix.svelte",
+      "liteComponent": "LitePivotMatrix.svelte",
       "category": "widgets",
       "status": "fallback",
       "strategy": "服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接"
@@ -2121,6 +2122,7 @@
     {
       "name": "GeoScatterMap",
       "uiComponent": "GeoScatterMap.svelte",
+      "liteComponent": "LiteGeoScatterMap.svelte",
       "category": "widgets",
       "status": "fallback",
       "strategy": "服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接"
@@ -2128,6 +2130,7 @@
     {
       "name": "DataMaskPolicyEngine",
       "uiComponent": "DataMaskPolicyEngine.svelte",
+      "liteComponent": "LiteDataMaskPolicyEngine.svelte",
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端脱敏策略基线表格与豁免角色列表；实时沙箱算法推演由 SPA 承接"
@@ -2142,6 +2145,7 @@
     {
       "name": "SystemHealthCheckDashboard",
       "uiComponent": "SystemHealthCheckDashboard.svelte",
+      "liteComponent": "LiteSystemHealthCheckDashboard.svelte",
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接"

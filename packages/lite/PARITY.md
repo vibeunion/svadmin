@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-11T23:23:19.436Z`
+> 自动生成时间：`2026-11-11T23:50:06.868Z`
 > 清单映射覆盖率：**100%**（262/262 组件）
 > 1:1 对齐率 (Exact)：**51.5%**（135）· 语义降级率 (Fallback)：**39.7%**（104）
-> 行为验证覆盖：**75.2%**（197/262 映射组件具备断言预算）· 仅被引用：0
+> 行为验证覆盖：**76.7%**（201/262 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,8 +13,8 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
-| **advanced** | 106 | 29 | 56 | 21 | 0 | **27.4%** | 72/106 | 0 |
-| **widgets** | 49 | 18 | 31 | 0 | 0 | **36.7%** | 41/49 | 0 |
+| **advanced** | 106 | 29 | 56 | 21 | 0 | **27.4%** | 74/106 | 0 |
+| **widgets** | 49 | 18 | 31 | 0 | 0 | **36.7%** | 43/49 | 0 |
 | **fields** | 50 | 42 | 7 | 1 | 0 | **84%** | 42/50 | 0 |
 | **layout** | 28 | 22 | 5 | 1 | 0 | **78.6%** | 23/28 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
@@ -164,9 +164,9 @@
 | `DataImportDropzone` | `LiteDataImportDropzone.svelte` | ⚡ 语义降级 | 服务端批量文件上传框与标准模板下载；客户端拖拽与大文件分片由 SPA 承接 |
 | `ColumnMappingTable` | `LiteColumnMappingTable.svelte` | ⚡ 语义降级 | 服务端源列到目标字段映射关系表格展示；智能自动匹配与类型转换由 SPA 承接 |
 | `ImportPreviewValidator` | `LiteImportPreviewValidator.svelte` | ⚡ 语义降级 | 服务端数据校验统计与错误明细表格展示；客户端只看错误行过滤与单元格修补由 SPA 承接 |
-| `DataMaskPolicyEngine` | — | ⚡ 语义降级 | 服务端脱敏策略基线表格与豁免角色列表；实时沙箱算法推演由 SPA 承接 |
+| `DataMaskPolicyEngine` | `LiteDataMaskPolicyEngine.svelte` | ⚡ 语义降级 | 服务端脱敏策略基线表格与豁免角色列表；实时沙箱算法推演由 SPA 承接 |
 | `MockDataInterceptor` | — | 🚫 免适配 | 免适配 (客户端网络拦截与离线 Mock 控制台) |
-| `SystemHealthCheckDashboard` | — | ⚡ 语义降级 | 服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接 |
+| `SystemHealthCheckDashboard` | `LiteSystemHealthCheckDashboard.svelte` | ⚡ 语义降级 | 服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -220,8 +220,8 @@
 | `PlanUsageQuotaBar` | `LitePlanUsageQuotaBar.svelte` | ⚡ 语义降级 | 服务端多配额用量进度条、重置周期与超额状态提示；升级套餐引导由 SPA 承接 |
 | `PeriodComparisonCard` | `LitePeriodComparisonCard.svelte` | ⚡ 语义降级 | 服务端指标数值与环比/同比变动幅度胶囊展示；动态图表下钻由 SPA 承接 |
 | `TenantQuotasMatrix` | `LiteTenantQuotasMatrix.svelte` | ⚡ 语义降级 | 服务端多租户各资源配额水位进度条；配额申请与升级由 SPA 承接 |
-| `PivotMatrix` | — | ⚡ 语义降级 | 服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接 |
-| `GeoScatterMap` | — | ⚡ 语义降级 | 服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接 |
+| `PivotMatrix` | `LitePivotMatrix.svelte` | ⚡ 语义降级 | 服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接 |
+| `GeoScatterMap` | `LiteGeoScatterMap.svelte` | ⚡ 语义降级 | 服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接 |
 
 ### FIELDS
 
