@@ -1174,3 +1174,78 @@ Standardized business process result and HTTP/operation exception display page:
   onSecondaryAction={() => console.log('Create Another')}
 />
 ```
+
+### `<WatermarkContainer>`
+
+Anti-tamper enterprise dynamic watermark protection suite:
+- Designed for confidential financial reports, HR compensation records, and sensitive dashboards.
+- Supports multi-line employee IDs, tenant identifiers, client IP, and dynamic timestamps.
+- **Anti-tamper guard**: Embedded `MutationObserver` detects DOM tree removals and inline styling overrides (`display: none`, `opacity: 0`, `visibility: hidden`), restoring watermark integrity within milliseconds to safeguard against screenshot leakage.
+
+```svelte
+<script lang="ts">
+  import { WatermarkContainer } from '@svadmin/ui';
+</script>
+
+<WatermarkContainer
+  content={['SVAdmin Enterprise', 'CONFIDENTIAL - 2026-11-11', 'UID: 9527']}
+  gapX={48}
+  gapY={48}
+  antiTamper={true}
+>
+  <div class="p-8 bg-card border rounded-lg shadow-sm">
+    <h3 class="text-lg font-semibold">Q4 Confidential Financial Statement</h3>
+    <p class="text-sm text-muted-foreground mt-2">Executive summary data...</p>
+  </div>
+</WatermarkContainer>
+```
+
+### `<ContextMenu>`
+
+Enterprise contextual right-click operation menu suite:
+- Seamlessly mounts on table rows, organization tree nodes, metric cards, and file explorers.
+- Built-in intelligent viewport collision algorithm that automatically mirrors and clamps coordinates at window boundaries.
+- Full support for keyboard shortcut hints, multi-level submenus, visual dividers, disabled states, and danger highlights.
+
+```svelte
+<script lang="ts">
+  import { ContextMenu, type ContextMenuItem } from '@svadmin/ui';
+
+  const menuItems: ContextMenuItem[] = [
+    { key: 'copy', label: 'Copy ID', shortcut: '⌘C' },
+    { key: 'export', label: 'Export Details' },
+    { key: 'sep1', label: '', divider: true },
+    { key: 'delete', label: 'Delete Record', danger: true, shortcut: 'Del' },
+  ];
+</script>
+
+<ContextMenu items={menuItems} onselect={(item) => console.log('Selected:', item.key)}>
+  <div class="p-6 border rounded-md bg-muted/20 text-center select-none cursor-context-menu">
+    Right-click inside this area to inspect context actions
+  </div>
+</ContextMenu>
+```
+
+### `<OtpInput>`
+
+Enterprise two-factor authentication (2FA) and sensitive operation verification grid:
+- Tailored for high-security login verification, financial transaction approval, and dangerous deletion confirmation.
+- Smooth sequential auto-focus to next slot, Backspace auto-rewind, and full keyboard arrow navigation.
+- Smart clipboard paste parsing with automated character validation and slot distribution.
+- Optional password masking (`●`), error shake states, and responsive size presets (`sm`, `md`, `lg`).
+
+```svelte
+<script lang="ts">
+  import { OtpInput } from '@svadmin/ui';
+
+  let code = $state('');
+</script>
+
+<OtpInput
+  length={6}
+  bind:value={code}
+  type="number"
+  autoFocus={true}
+  oncomplete={(val) => console.log('2FA Code Complete:', val)}
+/>
+```
