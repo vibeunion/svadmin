@@ -867,6 +867,7 @@ const fields: FieldDefinition[] = [
 </VirtualList>
 ```
 
+<<<<<<< HEAD
 ### `<UnsavedChangesGuard>` 与 `useUnsavedChanges`
 
 企业级未保存修改防误关与离开页面拦截守卫套件：
@@ -1050,5 +1051,35 @@ const fields: FieldDefinition[] = [
   type="number"
   autoFocus={true}
   oncomplete={(val) => console.log('2FA 验证码输入完成:', val)}
+/>
+```
+
+### `<RecordCompareModal>` 与 `<EntityComparisonDrawer>`
+
+企业级多实体记录参数并排对比与差异透视套件：
+- **多列并排矩阵**：横向并排对比 2~5 条实体记录，首列固定属性标签名，跨字段纵览更直观。
+- **差异高亮聚焦**：支持一键切换“仅显示差异项”与“隐藏相同项”，快速发现异同点。
+- **基准实体切换**：可任意指定基准记录列（Baseline 👑），其他记录自动与其对比。
+- **一键差异同步**：支持将基准记录上的特定字段一键同步/覆写至目标记录（`onsync`）。
+- **双模交互呈现**：支持大屏居中弹窗（`layout="modal"`）与右侧滑出抽屉（`layout="drawer"`）。
+
+```svelte
+<script lang="ts">
+  import { RecordCompareModal } from '@svadmin/ui';
+
+  let showCompare = $state(true);
+  const serverNodes = [
+    { id: 'node-01', name: '主节点-A', cpu: '16 核', memory: '64 GB', region: '华东-1' },
+    { id: 'node-02', name: '从节点-B', cpu: '32 核', memory: '64 GB', region: '华东-1' },
+    { id: 'node-03', name: '金丝雀-C', cpu: '8 核', memory: '32 GB', region: '华西-2' },
+  ];
+</script>
+
+<RecordCompareModal
+  bind:open={showCompare}
+  title="集群节点规格横向对比"
+  records={serverNodes}
+  benchmarkIndex={0}
+  onsync={(source, target, field) => console.log(`同步字段 ${field} 到 ${target.name}`)}
 />
 ```

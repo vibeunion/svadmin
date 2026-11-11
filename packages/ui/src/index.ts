@@ -797,3 +797,6 @@ export { default as ResultPage, type ResultPageProps, type ResultStatus } from '
 // Enterprise dynamic watermark, context menu & OTP authentication suite
 export { default as WatermarkContainer, default as AntiTamperWatermark, type WatermarkContainerProps } from './components/WatermarkContainer.svelte';
 export { default as ContextMenu, type ContextMenuProps, type ContextMenuItem } from './components/ContextMenu.svelte';
+
+// Enterprise record comparison and parameter diff suite
+export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
