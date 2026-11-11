@@ -14,21 +14,21 @@
   import { Button } from './ui/button/index.js';
   import { Checkbox } from './ui/checkbox/index.js';
 
-  export interface TreeTransferNode {
+  export interface TreeTransferSelectNode {
     id: string;
     label: string;
     disabled?: boolean | undefined;
     isLeaf?: boolean | undefined;
-    children?: TreeTransferNode[] | undefined;
+    children?: TreeTransferSelectNode[] | undefined;
   }
 
   export interface TreeTransferSelectProps {
-    treeData: TreeTransferNode[];
+    treeData: TreeTransferSelectNode[];
     targetKeys?: string[] | undefined;
     sourceTitle?: string | undefined;
     targetTitle?: string | undefined;
     class?: string | undefined;
-    onChange?: ((targetKeys: string[], targetNodes: TreeTransferNode[]) => void) | undefined;
+    onChange?: ((targetKeys: string[], targetNodes: TreeTransferSelectNode[]) => void) | undefined;
   }
 
   let {
@@ -49,9 +49,9 @@
   let selectedSourceKeys = $state(new Set<string>());
   let selectedTargetKeys = $state(new Set<string>());
 
-  function getAllLeafNodes(nodes: TreeTransferNode[]): TreeTransferNode[] {
-    const leaves: TreeTransferNode[] = [];
-    function walk(list: TreeTransferNode[]) {
+  function getAllLeafNodes(nodes: TreeTransferSelectNode[]): TreeTransferSelectNode[] {
+    const leaves: TreeTransferSelectNode[] = [];
+    function walk(list: TreeTransferSelectNode[]) {
       for (const n of list) {
         if (!n.children || n.children.length === 0 || n.isLeaf) {
           leaves.push(n);
@@ -78,24 +78,24 @@
     collapsedNodes = next;
   }
 
-  function getBranchLeaves(node: TreeTransferNode): TreeTransferNode[] {
+  function getBranchLeaves(node: TreeTransferSelectNode): TreeTransferSelectNode[] {
     return getAllLeafNodes([node]);
   }
 
-  function isNodeChecked(node: TreeTransferNode): boolean {
+  function isNodeChecked(node: TreeTransferSelectNode): boolean {
     const leaves = getBranchLeaves(node);
     if (leaves.length === 0) return selectedSourceKeys.has(node.id);
     return leaves.every((l) => selectedSourceKeys.has(l.id));
   }
 
-  function isNodeIndeterminate(node: TreeTransferNode): boolean {
+  function isNodeIndeterminate(node: TreeTransferSelectNode): boolean {
     const leaves = getBranchLeaves(node);
     if (leaves.length <= 1) return false;
     const checkedCount = leaves.filter((l) => selectedSourceKeys.has(l.id)).length;
     return checkedCount > 0 && checkedCount < leaves.length;
   }
 
-  function toggleNodeCheck(node: TreeTransferNode) {
+  function toggleNodeCheck(node: TreeTransferSelectNode) {
     const next = new Set(selectedSourceKeys);
     const leaves = getBranchLeaves(node);
     const checked = isNodeChecked(node);

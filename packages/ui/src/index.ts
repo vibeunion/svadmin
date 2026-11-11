@@ -837,7 +837,7 @@ export { default as ThreadedCommentDrawer, default as RecordAnnotationBox, type 
 export { useStorageCache, MemoryStorageAdapter, LocalStorageAdapter, RemoteKVAdapter, defaultMemoryStorage, type StorageAdapter, type UseStorageCacheOptions } from './components/useStorageCache.svelte.js';
 
 // Enterprise tree transfer select & cascading organization assigner suite
-export { default as TreeTransferSelect, default as CascadingAssigner, type TreeTransferSelectProps, type TreeTransferNode } from './components/TreeTransferSelect.svelte';
+export { default as TreeTransferSelect, default as CascadingAssigner, type TreeTransferSelectProps, type TreeTransferSelectNode } from './components/TreeTransferSelect.svelte';
 
 // Enterprise virtualized card grid & media select gallery suite
 export { default as VirtualCardGrid, default as MediaCardSelect, type VirtualCardGridProps } from './components/VirtualCardGrid.svelte';

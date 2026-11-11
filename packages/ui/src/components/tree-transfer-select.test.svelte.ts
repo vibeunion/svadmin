@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
-import TreeTransferSelect, { type TreeTransferNode } from './TreeTransferSelect.svelte';
+import TreeTransferSelect, { type TreeTransferSelectNode } from './TreeTransferSelect.svelte';
 
 describe('TreeTransferSelect suite', () => {
-  const treeData: TreeTransferNode[] = [
+  const treeData: TreeTransferSelectNode[] = [
     {
       id: 'dept-eng',
       label: '研发中心',
