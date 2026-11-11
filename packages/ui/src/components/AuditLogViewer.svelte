@@ -216,7 +216,7 @@
   <div class="fixed inset-0 z-[100] flex justify-end bg-black/40 backdrop-blur-sm" onclick={closeSnapshot}>
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="bg-card shadow-2xl w-full max-w-2xl h-full flex flex-col animate-in slide-in-from-right duration-300" onclick={(e) => e.stopPropagation()}>
+    <div class="bg-card shadow-[var(--shadow-overlay)] w-full max-w-2xl h-full flex flex-col animate-in slide-in-from-right duration-300" onclick={(e) => e.stopPropagation()}>
       <!-- Drawer Header -->
       <div class="p-6 shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)] flex items-center justify-between bg-muted/30">
         <div>

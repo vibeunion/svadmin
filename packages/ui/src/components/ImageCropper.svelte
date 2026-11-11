@@ -56,7 +56,7 @@
   }
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs space-y-4 text-xs', className)}>
+<div class={cn('rounded-md border border-border bg-card p-4 shadow-xs space-y-4 text-xs', className)}>
   <div class="flex items-center justify-between pb-2 border-b border-border/60">
     <h4 class="font-semibold text-foreground flex items-center gap-1.5">
       <Crop class="h-4 w-4 text-primary" />

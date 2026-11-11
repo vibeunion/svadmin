@@ -168,7 +168,7 @@
 
             <div class="flex items-center gap-1">
               {#if node.status}
-                <span class={cn('rounded-[2px] border px-1.5 py-0.2 text-[10px] font-normal leading-tight', getStatusTone(node.status))}>
+                <span class={cn('rounded-[2px] border px-1.5 py-0.2 text-xs font-normal leading-tight', getStatusTone(node.status))}>
                   {node.status}
                 </span>
               {/if}
@@ -205,7 +205,7 @@
             {#if node.assignees && node.assignees.length > 0}
               <div class="mt-2 flex flex-wrap gap-1">
                 {#each node.assignees as assignee (assignee)}
-                  <span class="rounded-[2px] bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  <span class="rounded-[2px] bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                     {assignee}
                   </span>
                 {/each}
@@ -213,7 +213,7 @@
             {/if}
 
             {#if node.error}
-              <span class="mt-1 text-[11px] text-destructive">
+              <span class="mt-1 text-xs text-destructive">
                 {node.error}
               </span>
             {/if}

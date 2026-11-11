@@ -1374,6 +1374,189 @@ Enterprise massive dataset asynchronous export center modal:
 />
 ```
 
+### `<StepWizard>`
+
+Enterprise step wizard navigation and form progression suite:
+- Supports horizontal and vertical step layouts with `wait`, `process`, `finish`, and `error` status indicators.
+- **Async Validation Guard**: Intercepts step transitions with `beforeNext?: (stepIndex, step, draft) => Promise<boolean>`, preventing advancement and surfacing validation errors when invalid.
+- **Dynamic Branching**: Supports conditional steps via `condition?: (draft) => boolean` to dynamically branch workflows based on earlier user input.
+- **Draft Auto-Staging**: Automatic local breakpoint saving and restoration via `storageKey`, with quick reset and manual patch controls.
+
+```svelte
+<script lang="ts">
+  import { StepWizard, type StepWizardItem } from '@svadmin/ui';
+
+  const steps: StepWizardItem[] = [
+    { id: 'tenant', title: 'Tenant Info', description: 'Basic workspace identity' },
+    { id: 'cloud', title: 'Cloud Resources', description: 'Configure VPC & cluster' },
+    { id: 'confirm', title: 'Review & Launch', description: 'Confirm deployment' },
+  ];
+
+  let currentStep = $state(0);
+  let draft = $state({ name: '', region: 'us-east-1' });
+
+  async function validateStep(index: number) {
+    if (index === 0 && !draft.name) return false;
+    return true;
+  }
+</script>
+
+<StepWizard
+  {steps}
+  bind:currentStep
+  bind:draft
+  storageKey="tenant-onboarding-wizard"
+  beforeNext={validateStep}
+  onFinish={(data) => console.log('Finished:', data)}
+/>
+```
+
+### `<WorkflowStepper>`
+
+Visual execution flow tracker for background pipelines, cloud provisioning, and multi-stage jobs:
+- Covers `wait`, `running`, `completed`, `failed`, `blocked`, and `skipped` states with animated progress indicators.
+- Real-time execution duration formatting (e.g. `450ms`, `12.4s`) and step timestamp tracking.
+- Interactive failure recovery with individual node retry triggers (`onRetry`) and custom detail slots (`stepDetail`).
+
+```svelte
+<script lang="ts">
+  import { WorkflowStepper, type WorkflowStepItem } from '@svadmin/ui';
+
+  const pipeline: WorkflowStepItem[] = [
+    { id: 'vpc', label: 'Provision VPC', status: 'completed', durationMs: 820 },
+    { id: 'k8s', label: 'Bootstrap Cluster', status: 'running' },
+    { id: 'dns', label: 'Propagate Anycast DNS', status: 'wait' },
+  ];
+</script>
+
+<WorkflowStepper
+  steps={pipeline}
+  title="Infrastructure Deployment"
+  onRetry={(step) => console.log('Retrying step:', step.id)}
+/>
+```
+
+### `<ColumnVisibilityDrawer>`
+
+Advanced column visibility manager and multi-dimensional view persistence drawer for wide data tables (30–50 columns):
+- Checkbox visibility toggles, business required column locks (`col.required`), and left/right sticky column pinning (`fixed: 'left' | 'right'`).
+- Native smooth drag-and-drop reordering with zero heavy external dependencies.
+- Multi-view persistence (`storageKey`) with custom user view saving and pre-configured view presets (e.g. "Compact View", "Finance Audit View").
+
+```svelte
+<script lang="ts">
+  import { ColumnVisibilityDrawer, type ColumnItem } from '@svadmin/ui';
+
+  let open = $state(false);
+  let columns = $state<ColumnItem[]>([
+    { key: 'id', label: 'ID', visible: true, required: true },
+    { key: 'name', label: 'Customer Name', visible: true, fixed: 'left' },
+    { key: 'revenue', label: 'Annual Revenue', visible: true },
+    { key: 'taxNo', label: 'Tax Identification', visible: false },
+  ]);
+
+  const presets = [
+    { id: 'compact', label: 'Compact View', visibleKeys: ['id', 'name', 'revenue'] },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>Configure Columns</button>
+
+<ColumnVisibilityDrawer
+  bind:open
+  bind:columns
+  {presets}
+  storageKey="customer-table-columns"
+/>
+```
+
+### `<ColumnFilterBuilder>`
+
+Multi-condition nested `AND` / `OR` query tree builder drawer:
+- Build complex filter hierarchies with rich comparison operators (`eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `contains`, `in`, `between`, `null`).
+- Displays active filter count badge on trigger and compiles directly to `@svadmin/core` filter specifications.
+
+```svelte
+<script lang="ts">
+  import { ColumnFilterBuilder } from '@svadmin/ui';
+  import type { FieldDefinition, Filter } from '@svadmin/core';
+
+  const fields: FieldDefinition[] = [
+    { key: 'status', label: 'Status', type: 'select' },
+    { key: 'amount', label: 'Amount', type: 'number' },
+  ];
+
+  let filters = $state<Filter[]>([]);
+</script>
+
+<ColumnFilterBuilder
+  showTrigger={true}
+  {fields}
+  bind:filters
+  onApply={(compiled) => console.log('Applied filters:', compiled)}
+/>
+```
+
+### `useHotkeys` & `<KeyboardShortcutsModal>`
+
+Enterprise keyboard productivity suite:
+- **`useHotkeys`**: Reactive Svelte 5 hook supporting modifier combos (`Mod+S`, `Shift+?`, `Alt+T`) and single keys (`J/K`, `Escape`). Smart input avoidance pauses bare single keys when typing in input or textarea elements while allowing modifier combos.
+- **`<KeyboardShortcutsModal>`**: macOS and Linear inspired shortcuts matrix dialog with categorized grouping, live search filtering, and automatic registration from active `useHotkeys` instances.
+
+```svelte
+<script lang="ts">
+  import { useHotkeys, KeyboardShortcutsModal } from '@svadmin/ui';
+
+  let isShortcutsModalOpen = $state(false);
+
+  // Register command hotkeys
+  useHotkeys('Mod+S', () => console.log('Saving form...'), {
+    label: 'Save Current Form',
+    description: 'Trigger form submission',
+    category: 'action',
+  });
+
+  useHotkeys(['?', 'Shift+?'], () => {
+    isShortcutsModalOpen = !isShortcutsModalOpen;
+  });
+</script>
+
+<KeyboardShortcutsModal bind:open={isShortcutsModalOpen} />
+```
+
+### `<SensitiveDataMask>` / `<MaskedText>`
+
+Sensitive data dynamic masking and authorization reveal component for compliance and data privacy:
+- Built-in presets for `phone` / `mobile`, `id-card` / `idCard`, `bank-card` / `bankCard`, `email`, and Chinese/Western `name`.
+- Clickable reveal toggle with `onReveal` async permission verification and audit logging callback.
+- Safe clipboard protection (`copyMode="masked" | "raw" | "auto"`) preventing accidental data leakage.
+
+```svelte
+<script lang="ts">
+  import { SensitiveDataMask, MaskedText } from '@svadmin/ui';
+
+  async function checkPermissionAndAudit() {
+    // E.g. verify permission or log audit trail
+    console.log('Unmask requested by user');
+    return true; // return false to reject unmasking
+  }
+</script>
+
+<!-- Mobile phone mask -->
+<SensitiveDataMask
+  value="13812345678"
+  type="mobile"
+  onReveal={checkPermissionAndAudit}
+  copyMode="masked"
+/>
+
+<!-- Name mask alias -->
+<MaskedText
+  value="诸葛孔明"
+  type="name"
+/>
+```
+
 ### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
 
 Enterprise multi-record parameter comparison and difference spotlight suite:

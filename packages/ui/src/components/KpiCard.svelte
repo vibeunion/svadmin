@@ -121,7 +121,7 @@
 <div
   data-svadmin-component="KpiCard"
   class={cn(
-    'relative flex flex-col justify-between rounded-xl border p-5 shadow-xs transition-all hover:shadow-sm',
+    'relative flex flex-col justify-between rounded-md border p-5 shadow-xs transition-all hover:shadow-sm',
     alertClasses,
     className
   )}
@@ -143,13 +143,13 @@
         <div class="flex items-center gap-2">
           <span class="text-xs font-medium text-muted-foreground tracking-wide">{title}</span>
           {#if badge}
-            <span class="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+            <span class="rounded-sm bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
               {badge}
             </span>
           {/if}
         </div>
         {#if subtitle}
-          <p class="text-[11px] text-muted-foreground/80">{subtitle}</p>
+          <p class="text-xs text-muted-foreground">{subtitle}</p>
         {/if}
       </div>
 
@@ -201,14 +201,14 @@
             variant="badge"
             size="sm"
           />
-          <span class="text-[11px] text-muted-foreground">对比上一周期</span>
+          <span class="text-xs text-muted-foreground">对比上一周期</span>
         </div>
       {/if}
 
       <!-- Target Completion Progress Bar -->
       {#if targetProgress}
         <div class="space-y-1">
-          <div class="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+          <div class="flex items-center justify-between text-xs text-muted-foreground font-mono">
             <span>{targetProgress.label ?? '目标达成'}</span>
             <span class="font-semibold text-foreground">{progressPercent}%</span>
           </div>

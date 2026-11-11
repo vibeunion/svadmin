@@ -533,7 +533,7 @@
 
   {#if visible}
     <div
-      class="fixed bottom-0 right-4 z-[9999] w-[560px] max-w-[95vw] rounded-t-xl border border-b-0 bg-card shadow-2xl text-[0.8125rem] overflow-hidden"
+      class="fixed bottom-0 right-4 z-[9999] w-[560px] max-w-[95vw] rounded-t-md border border-b-0 bg-card shadow-[var(--shadow-overlay)] text-[0.8125rem] overflow-hidden"
       class:svadmin-devtools--collapsed-width={collapsed}
       class:svadmin-devtools--collapsed-min-width={collapsed}
       transition:fly={{ y: 400, duration: 300 }}
