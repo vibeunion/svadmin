@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.26.0](https://github.com/vibeunion/svadmin/compare/lite-v0.25.7...lite-v0.26.0) (2026-11-11)
+
+
+### 🚀 Features
+
+* **lite:** add recent enterprise UI parity fallbacks ([#713](https://github.com/vibeunion/svadmin/issues/713)) ([42fdca0](https://github.com/vibeunion/svadmin/commit/42fdca0c6d984cadac43044628370ecd668fe5ae))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** remove an unreachable input sanitizer condition ([#719](https://github.com/vibeunion/svadmin/issues/719)) ([229c543](https://github.com/vibeunion/svadmin/commit/229c543d528b7e0b0ed9109b9a316f528e6bd5b0))
+
 ## [0.25.7](https://github.com/vibeunion/svadmin/compare/lite-v0.25.6...lite-v0.25.7) (2026-11-10)
 
 
