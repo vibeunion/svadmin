@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { HTMLIframeAttributes } from 'svelte/elements';
+
   interface Props {
     src: string;
     title?: string;
     height?: string | number;
     sandbox?: string;
     allow?: string;
-    referrerpolicy?: ReferrerPolicy;
+    referrerpolicy?: HTMLIframeAttributes['referrerpolicy'];
     fallbackHref?: string;
     fallbackLabel?: string;
     class?: string;
