@@ -205,6 +205,14 @@ export { default as LiteDataScreenContainer } from './components/LiteDataScreenC
 export { default as LiteThreadedCommentDrawer } from './components/LiteThreadedCommentDrawer.svelte';
 export type { LiteComment } from './components/LiteThreadedCommentDrawer.svelte';
 
+// Enterprise developer sandbox & SaaS billing suite parity fallbacks
+export { default as LiteWebhookSimulator } from './components/LiteWebhookSimulator.svelte';
+export { default as LiteHmacSignatureCalculator } from './components/LiteHmacSignatureCalculator.svelte';
+export { default as LiteApiPlayground } from './components/LiteApiPlayground.svelte';
+export { default as LitePlanUsageQuotaBar } from './components/LitePlanUsageQuotaBar.svelte';
+export { default as LiteTierFeatureComparison } from './components/LiteTierFeatureComparison.svelte';
+export { default as LiteBillingInvoiceDrawer } from './components/LiteBillingInvoiceDrawer.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)

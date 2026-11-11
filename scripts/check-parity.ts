@@ -344,6 +344,14 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'I18nLanguagePackEditor', uiComponent: 'I18nLanguagePackEditor.svelte', category: 'advanced', status: 'fallback', strategy: '服务端多语言词条表格展示；在线热修编辑与增量发布由 SPA 承接' },
   { name: 'useDynamicLocale', uiComponent: 'useDynamicLocale.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (动态语言补丁加载钩子)' },
 
+  // ─── Enterprise suites wave 5 (Developer Sandbox & SaaS Billing) ───────
+  { name: 'WebhookSimulator', uiComponent: 'WebhookSimulator.svelte', liteComponent: 'LiteWebhookSimulator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 Webhook 事件模拟面板、端点与只读载荷展示；真实 HTTP 发送与响应交互由 SPA 承接' },
+  { name: 'HmacSignatureCalculator', uiComponent: 'HmacSignatureCalculator.svelte', liteComponent: 'LiteHmacSignatureCalculator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端预计算签名、算法标识与签名头展示；Web Crypto 现场验签比对由 SPA 承接' },
+  { name: 'ApiPlayground', uiComponent: 'ApiPlayground.svelte', liteComponent: 'LiteApiPlayground.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 cURL 命令生成、URL 探针与预估状态展示；交互式 HTTP 请求发起由 SPA 承接' },
+  { name: 'PlanUsageQuotaBar', uiComponent: 'PlanUsageQuotaBar.svelte', liteComponent: 'LitePlanUsageQuotaBar.svelte', category: 'widgets', status: 'fallback', strategy: '服务端多配额用量进度条、重置周期与超额状态提示；升级套餐引导由 SPA 承接' },
+  { name: 'TierFeatureComparison', uiComponent: 'TierFeatureComparison.svelte', liteComponent: 'LiteTierFeatureComparison.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 SaaS 多版本套餐权益对比矩阵静态表格；交互式套餐升级选型由 SPA 承接' },
+  { name: 'BillingInvoiceDrawer', uiComponent: 'BillingInvoiceDrawer.svelte', liteComponent: 'LiteBillingInvoiceDrawer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端月度对账结算明细、项目清单与电子发票下载链接；抽屉动效与开票申请由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
