@@ -4,16 +4,32 @@
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
 
-  export type MaskType = 'phone' | 'id-card' | 'email' | 'bank-card' | 'secret' | 'custom';
+  export type MaskType =
+    | 'phone'
+    | 'mobile'
+    | 'id-card'
+    | 'idCard'
+    | 'email'
+    | 'bank-card'
+    | 'bankCard'
+    | 'name'
+    | 'secret'
+    | 'custom';
 
-  interface Props {
-    value?: string | number | null;
-    type?: MaskType;
-    maskPattern?: (val: string) => string;
-    allowUnmask?: boolean;
-    defaultMasked?: boolean;
-    onUnmask?: () => void | Promise<void>;
-    class?: string;
+  export type CopyMode = 'raw' | 'masked' | 'auto';
+
+  export interface SensitiveDataMaskProps {
+    value?: string | number | null | undefined;
+    type?: MaskType | undefined;
+    maskPattern?: ((val: string) => string) | undefined;
+    allowUnmask?: boolean | undefined;
+    defaultMasked?: boolean | undefined;
+    allowCopy?: boolean | undefined;
+    copyMode?: CopyMode | undefined;
+    onReveal?: (() => boolean | undefined | Promise<boolean | undefined>) | undefined;
+    onUnmask?: (() => void | Promise<void>) | undefined;
+    onCopy?: ((copiedText: string) => void) | undefined;
+    class?: string | undefined;
   }
 
   let {
@@ -22,14 +38,34 @@
     maskPattern,
     allowUnmask = true,
     defaultMasked = true,
+    allowCopy = true,
+    copyMode = 'raw',
+    onReveal,
     onUnmask,
+    onCopy,
     class: className = '',
-  }: Props = $props();
+  }: SensitiveDataMaskProps = $props();
 
   let isMasked = $state(untrack(() => defaultMasked));
   let isCopied = $state(false);
 
   const rawString = $derived(String(value ?? ''));
+
+  function maskName(val: string): string {
+    const trimmed = val.trim();
+    if (!trimmed) return '—';
+    if (trimmed.includes(' ')) {
+      return trimmed
+        .split(/\s+/)
+        .map((part) => (part.length <= 1 ? '*' : `${part[0]}${'*'.repeat(Math.max(1, part.length - 2))}${part.length > 2 ? part.slice(-1) : '*'}`))
+        .join(' ');
+    }
+    const len = trimmed.length;
+    if (len <= 1) return '*';
+    if (len === 2) return `${trimmed[0]}*`;
+    if (len === 3) return `${trimmed[0]}*${trimmed[2]}`;
+    return `${trimmed[0]}${'*'.repeat(len - 2)}${trimmed.slice(-1)}`;
+  }
 
   function maskValue(val: string, maskType: MaskType): string {
     if (!val) return '—';
@@ -37,28 +73,31 @@
 
     switch (maskType) {
       case 'phone':
-        // e.g. 13812345678 -> 138****5678
+      case 'mobile':
         return val.length >= 7
           ? `${val.slice(0, 3)}****${val.slice(-4)}`
           : '****';
       case 'id-card':
-        // e.g. 110101199001011234 -> 110101********1234
+      case 'idCard':
         return val.length >= 10
           ? `${val.slice(0, 6)}********${val.slice(-4)}`
           : '********';
       case 'email': {
         const parts = val.split('@');
-        const [name, domain] = parts;
-        if (parts.length === 2 && name && domain) {
-          const maskedName = name.length > 2 ? `${name[0]}***${name.slice(-1)}` : `${name[0]}***`;
+        const [namePart, domain] = parts;
+        if (parts.length === 2 && namePart && domain) {
+          const maskedName = namePart.length > 2 ? `${namePart[0]}***${namePart.slice(-1)}` : `${namePart[0]}***`;
           return `${maskedName}@${domain}`;
         }
         return '***@***.***';
       }
       case 'bank-card':
+      case 'bankCard':
         return val.length >= 8
           ? `${val.slice(0, 4)} **** **** ${val.slice(-4)}`
           : '**** ****';
+      case 'name':
+        return maskName(val);
       case 'secret':
         return val.length >= 8
           ? `${val.slice(0, 3)}••••••••••••${val.slice(-4)}`
@@ -71,16 +110,32 @@
   const displayedText = $derived(isMasked ? maskValue(rawString, type) : rawString);
 
   async function toggleMask() {
-    if (isMasked && onUnmask) {
-      await onUnmask();
+    if (isMasked) {
+      if (onReveal) {
+        const allowed = await onReveal();
+        if (allowed === false) return;
+      }
+      if (onUnmask) {
+        await onUnmask();
+      }
+      isMasked = false;
+    } else {
+      isMasked = true;
     }
-    isMasked = !isMasked;
   }
 
   async function handleCopy() {
+    let textToCopy = rawString;
+    if (copyMode === 'masked') {
+      textToCopy = maskValue(rawString, type);
+    } else if (copyMode === 'auto') {
+      textToCopy = isMasked ? maskValue(rawString, type) : rawString;
+    }
+
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(rawString);
+      await navigator.clipboard.writeText(textToCopy);
       isCopied = true;
+      onCopy?.(textToCopy);
       setTimeout(() => {
         isCopied = false;
       }, 1500);
@@ -88,7 +143,11 @@
   }
 </script>
 
-<div class={cn('inline-flex items-center gap-1.5 font-mono text-xs text-foreground', className)}>
+<div
+  data-svadmin-component="SensitiveDataMask"
+  data-masked={isMasked ? 'true' : 'false'}
+  class={cn('inline-flex items-center gap-1.5 font-mono text-xs text-foreground', className)}
+>
   <span class="truncate select-all">{displayedText}</span>
 
   {#if allowUnmask && rawString}
@@ -107,7 +166,7 @@
     </Button>
   {/if}
 
-  {#if rawString}
+  {#if allowCopy && rawString}
     <Button
       variant="ghost"
       size="icon"

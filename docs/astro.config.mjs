@@ -90,6 +90,7 @@ export default defineConfig({
             { slug: 'providers/jsonapi' },
             { slug: 'providers/meilisearch' },
             { slug: 'providers/postgrest' },
+            { slug: 'providers/pocketbase' },
             { slug: 'providers/refine-adapter' },
             { slug: 'providers/auth' },
             { slug: 'providers/auth0' },

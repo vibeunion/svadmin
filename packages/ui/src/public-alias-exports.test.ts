@@ -103,6 +103,12 @@ import {
   UsageCard,
   ApprovalTimeline,
   WorkflowProcessCard,
+  StepWizard,
+  WorkflowStepper,
+  ColumnVisibilityDrawer,
+  ColumnFilterBuilder,
+  useHotkeys,
+  KeyboardShortcutsModal,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -125,6 +131,12 @@ describe('public compatibility aliases', () => {
     expect(List).toBe(ItemList);
     expect(Radio).toBe(RadioGroup);
     expect(Segmented).toBe(SegmentedControl);
+    expect(StepWizard).toBeDefined();
+    expect(WorkflowStepper).toBeDefined();
+    expect(ColumnVisibilityDrawer).toBeDefined();
+    expect(ColumnFilterBuilder).toBeDefined();
+    expect(useHotkeys).toBeDefined();
+    expect(KeyboardShortcutsModal).toBeDefined();
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);

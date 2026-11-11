@@ -1,5 +1,8 @@
 {
-  "sourceRoots": ["example/src", "packages"],
+  "sourceRoots": [
+    "example/src",
+    "packages"
+  ],
   "maxSourceLines": 800,
   "largeFileBaseline": {
     "packages/ui/src/components/AutoTable.svelte": 2743,
@@ -12,6 +15,7 @@
     "packages/core/src/i18n.svelte.ts": 2242,
     "packages/lite/src/server-adapter.ts": 981,
     "packages/ai-elements/src/components/ChatDialog.svelte": 1417,
-    "packages/sso/src/auth-provider.ts": 808
+    "packages/sso/src/auth-provider.ts": 808,
+    "packages/ui/src/index.ts": 850
   }
 }

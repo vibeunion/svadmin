@@ -1141,3 +1141,185 @@ const fields: FieldDefinition[] = [
   onclose={() => (isExportOpen = false)}
 />
 ```
+
+### `<StepWizard>`
+
+企业级分步引导向导与任务执行流套件：
+- 支持水平与垂直两种步骤条布局，具备 `wait`、`process`、`finish`、`error` 状态精准指示。
+- **异步校验守卫**：支持 `beforeNext?: (stepIndex, step, draft) => Promise<boolean>`，校验不通过阻断下一步并智能提示错误。
+- **动态分支支持**：支持根据前序步骤动态挂载不同分支子步骤（`condition?: (draft) => boolean`）。
+- **草稿自动暂存**：支持 `storageKey` 断点续填与步骤回溯，刷新页面无损还原未提交草稿。
+
+```svelte
+<script lang="ts">
+  import { StepWizard, type StepWizardItem } from '@svadmin/ui';
+
+  const steps: StepWizardItem[] = [
+    { id: 'tenant', title: '租户信息', description: '基础空间标识' },
+    { id: 'cloud', title: '云资源配置', description: '配置 VPC 与集群' },
+    { id: 'confirm', title: '确认开通', description: '检查开通摘要' },
+  ];
+
+  let currentStep = $state(0);
+  let draft = $state({ name: '', region: 'cn-hangzhou' });
+
+  async function validateStep(index: number) {
+    if (index === 0 && !draft.name) return false;
+    return true;
+  }
+</script>
+
+<StepWizard
+  {steps}
+  bind:currentStep
+  bind:draft
+  storageKey="tenant-onboarding-wizard"
+  beforeNext={validateStep}
+  onFinish={(data) => console.log('开通完成:', data)}
+/>
+```
+
+### `<WorkflowStepper>`
+
+面向长周期后台流水线、云资源开通及多阶段任务执行的可视化执行流套件：
+- 覆盖 `wait`、`running`、`completed`、`failed`、`blocked`、`skipped` 全状态机，附带动态加载指示器。
+- 原生耗时格式化（如 `450ms`、`12.4s`）与节点启动时间戳呈现。
+- 支持单步失败智能重试（`onRetry`）及节点详情插槽（`stepDetail`）。
+
+```svelte
+<script lang="ts">
+  import { WorkflowStepper, type WorkflowStepItem } from '@svadmin/ui';
+
+  const pipeline: WorkflowStepItem[] = [
+    { id: 'vpc', label: '创建虚拟专有网络 VPC', status: 'completed', durationMs: 820 },
+    { id: 'k8s', label: '初始化容器集群', status: 'running' },
+    { id: 'dns', label: '分配全局 Anycast IP', status: 'wait' },
+  ];
+</script>
+
+<WorkflowStepper
+  steps={pipeline}
+  title="基础设施自动化编排"
+  onRetry={(step) => console.log('重试步骤:', step.id)}
+/>
+```
+
+### `<ColumnVisibilityDrawer>`
+
+针对 30~50 字段宽表的高级列管理器与多维持久化抽屉：
+- 字段勾选显隐、业务必选列强制锁定（`col.required`）、左右侧列锁定（`fixed: 'left' | 'right'`）。
+- 原生平滑拖拽排序（零重量级外部依赖），带抓取视觉反馈与键盘微调支持。
+- 用户自定义列视图持久化（`storageKey` 自动同步 `localStorage`，刷新还原）与一键视图预设（“精简视图”、“财务全量视图”）。
+
+```svelte
+<script lang="ts">
+  import { ColumnVisibilityDrawer, type ColumnItem } from '@svadmin/ui';
+
+  let open = $state(false);
+  let columns = $state<ColumnItem[]>([
+    { key: 'id', label: '单号', visible: true, required: true },
+    { key: 'name', label: '客户姓名', visible: true, fixed: 'left' },
+    { key: 'revenue', label: '年度营收', visible: true },
+    { key: 'taxNo', label: '税号', visible: false },
+  ]);
+
+  const presets = [
+    { id: 'compact', label: '精简视图', visibleKeys: ['id', 'name', 'revenue'] },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>列配置</button>
+
+<ColumnVisibilityDrawer
+  bind:open
+  bind:columns
+  {presets}
+  storageKey="customer-table-columns"
+/>
+```
+
+### `<ColumnFilterBuilder>`
+
+多条件 `AND` / `OR` 嵌套逻辑树组合筛选抽屉：
+- 支持多层条件组嵌套与丰富操作符（`eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `contains`, `in`, `between`, `null` 等）。
+- 触发按钮自带生效筛选数角标，无缝编译为 `@svadmin/core` Filter 契约。
+
+```svelte
+<script lang="ts">
+  import { ColumnFilterBuilder } from '@svadmin/ui';
+  import type { FieldDefinition, Filter } from '@svadmin/core';
+
+  const fields: FieldDefinition[] = [
+    { key: 'status', label: '状态', type: 'select' },
+    { key: 'amount', label: '金额', type: 'number' },
+  ];
+
+  let filters = $state<Filter[]>([]);
+</script>
+
+<ColumnFilterBuilder
+  showTrigger={true}
+  {fields}
+  bind:filters
+  onApply={(compiled) => console.log('已应用过滤条件:', compiled)}
+/>
+```
+
+### `useHotkeys` 与 `<KeyboardShortcutsModal>`
+
+企业级全局热键监听与快捷键总览套件：
+- **`useHotkeys`** 响应式钩子：支持组合键（`Mod+S`, `Shift+?`, `Alt+T`）及单字符（`J/K`, `Escape`）。智能规避输入冲突：在 input、textarea 输入时自动屏蔽单字符热键，组合键始终生效。
+- **`<KeyboardShortcutsModal>`**：仿 Linear / macOS 风格的全量快捷键分类矩阵，支持全局检索与当前活跃注册热键动态汇总。
+
+```svelte
+<script lang="ts">
+  import { useHotkeys, KeyboardShortcutsModal } from '@svadmin/ui';
+
+  let isShortcutsModalOpen = $state(false);
+
+  // 注册全局表单保存快捷键
+  useHotkeys('Mod+S', () => console.log('保存当前表单...'), {
+    label: '保存当前表单',
+    description: '触发提交与保存',
+    category: 'action',
+  });
+
+  useHotkeys(['?', 'Shift+?'], () => {
+    isShortcutsModalOpen = !isShortcutsModalOpen;
+  });
+</script>
+
+<KeyboardShortcutsModal bind:open={isShortcutsModalOpen} />
+```
+
+### `<SensitiveDataMask>` / `<MaskedText>`
+
+敏感数据动态脱敏与显隐鉴权组件：
+- 内置常见预设脱敏规则（`phone` / `mobile`、`id-card` / `idCard`、`bank-card` / `bankCard`、`email`、中文及英文 `name`）。
+- 点击“小眼睛”图标触发 `onReveal` 权限核验与操作审计记录回调。
+- 安全复制防护（支持配置 `copyMode="masked" | "raw" | "auto"`），严防剪贴板数据泄露。
+
+```svelte
+<script lang="ts">
+  import { SensitiveDataMask, MaskedText } from '@svadmin/ui';
+
+  async function checkPermissionAndAudit() {
+    console.log('用户请求查看明文，核验操作权限');
+    return true; // 返回 false 阻止显隐切换
+  }
+</script>
+
+<!-- 手机号脱敏 -->
+<SensitiveDataMask
+  value="13812345678"
+  type="mobile"
+  onReveal={checkPermissionAndAudit}
+  copyMode="masked"
+/>
+
+<!-- 姓名脱敏别名 -->
+<MaskedText
+  value="诸葛孔明"
+  type="name"
+/>
+```

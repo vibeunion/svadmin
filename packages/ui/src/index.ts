@@ -170,7 +170,7 @@ export { default as TreeTable } from './components/TreeTable.svelte';
 export type { TreeTableColumn } from './components/TreeTable.svelte';
 export type { TreeTableSort } from './tree-table-model.js';
 export { default as SensitiveDataMask } from './components/SensitiveDataMask.svelte';
-export type { MaskType } from './components/SensitiveDataMask.svelte';
+export type { MaskType, SensitiveDataMaskProps, CopyMode } from './components/SensitiveDataMask.svelte';
 export { default as ApprovalActionCard } from './components/ApprovalActionCard.svelte';
 export type { ApprovalStatus } from './components/ApprovalActionCard.svelte';
 export { default as ApprovalCenter } from './components/ApprovalCenter.svelte';
@@ -782,3 +782,14 @@ export { default as ContextMenu, type ContextMenuProps, type ContextMenuItem } f
 export { default as AnnouncementBanner, default as AlertBanner, type AnnouncementBannerProps, type AnnouncementItem } from './components/AnnouncementBanner.svelte';
 export { default as TextDiffViewer, default as DiffViewer, type TextDiffViewerProps, type DiffViewMode } from './components/TextDiffViewer.svelte';
 export { default as AsyncExportModal, default as ExportCenterModal, type AsyncExportModalProps, type ExportConfig, type ExportResult, type ExportScope, type ExportFormat } from './components/AsyncExportModal.svelte';
+// Enterprise step wizard & workflow stepper suite
+export { default as StepWizard, type StepWizardProps, type StepWizardItem, type StepWizardStatus } from './components/StepWizard.svelte';
+export { default as WorkflowStepper, type WorkflowStepperProps, type WorkflowStepItem, type WorkflowStepStatus } from './components/WorkflowStepper.svelte';
+
+// Enterprise column visibility drawer & advanced filter builder suite
+export { default as ColumnVisibilityDrawer, type ColumnVisibilityDrawerProps } from './components/ColumnVisibilityDrawer.svelte';
+export { default as ColumnFilterBuilder, type ColumnFilterBuilderProps } from './components/ColumnFilterBuilder.svelte';
+
+// Enterprise hotkeys & shortcuts modal suite
+export { useHotkeys, getRegisteredHotkeys, clearRegisteredHotkeys, parseHotkeyCombo, isMac, type UseHotkeysOptions, type HotkeyItem, type ParsedCombo } from './components/useHotkeys.svelte.js';
+export { default as KeyboardShortcutsModal, type KeyboardShortcutsModalProps, type KeyboardShortcutEntry } from './components/KeyboardShortcutsModal.svelte';
