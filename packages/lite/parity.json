@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-11T15:21:45.766Z",
-  "totalComponents": 232,
+  "timestamp": "2026-11-11T21:35:33.549Z",
+  "totalComponents": 238,
   "adaptedCount": 135,
-  "fallbackCount": 81,
+  "fallbackCount": 87,
   "spaOnlyCount": 16,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 58.2,
-  "fallbackPercentage": 34.9,
-  "behaviorVerifiedCount": 178,
-  "behaviorVerifiedPercentage": 76.7,
-  "behaviorAssertedCount": 178,
-  "behaviorAssertedPercentage": 76.7,
+  "exactPercentage": 56.7,
+  "fallbackPercentage": 36.6,
+  "behaviorVerifiedCount": 184,
+  "behaviorVerifiedPercentage": 77.3,
+  "behaviorAssertedCount": 184,
+  "behaviorAssertedPercentage": 77.3,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,29 +28,29 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 83,
+      "total": 88,
       "adapted": 29,
-      "fallback": 40,
+      "fallback": 45,
       "spaOnly": 14,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 34.9,
-      "fallbackRate": 48.2,
-      "behaviorVerified": 58,
-      "behaviorAsserted": 58
+      "exactRate": 33,
+      "fallbackRate": 51.1,
+      "behaviorVerified": 63,
+      "behaviorAsserted": 63
     },
     "widgets": {
       "category": "widgets",
-      "total": 44,
+      "total": 45,
       "adapted": 18,
-      "fallback": 26,
+      "fallback": 27,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 40.9,
-      "fallbackRate": 59.1,
-      "behaviorVerified": 38,
-      "behaviorAsserted": 38
+      "exactRate": 40,
+      "fallbackRate": 60,
+      "behaviorVerified": 39,
+      "behaviorAsserted": 39
     },
     "fields": {
       "category": "fields",
@@ -1916,6 +1916,54 @@
       "category": "advanced",
       "status": "spa_only",
       "strategy": "免适配 (动态语言补丁加载钩子)"
+    },
+    {
+      "name": "WebhookSimulator",
+      "uiComponent": "WebhookSimulator.svelte",
+      "liteComponent": "LiteWebhookSimulator.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端 Webhook 事件模拟面板、端点与只读载荷展示；真实 HTTP 发送与响应交互由 SPA 承接"
+    },
+    {
+      "name": "HmacSignatureCalculator",
+      "uiComponent": "HmacSignatureCalculator.svelte",
+      "liteComponent": "LiteHmacSignatureCalculator.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端预计算签名、算法标识与签名头展示；Web Crypto 现场验签比对由 SPA 承接"
+    },
+    {
+      "name": "ApiPlayground",
+      "uiComponent": "ApiPlayground.svelte",
+      "liteComponent": "LiteApiPlayground.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端 cURL 命令生成、URL 探针与预估状态展示；交互式 HTTP 请求发起由 SPA 承接"
+    },
+    {
+      "name": "PlanUsageQuotaBar",
+      "uiComponent": "PlanUsageQuotaBar.svelte",
+      "liteComponent": "LitePlanUsageQuotaBar.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端多配额用量进度条、重置周期与超额状态提示；升级套餐引导由 SPA 承接"
+    },
+    {
+      "name": "TierFeatureComparison",
+      "uiComponent": "TierFeatureComparison.svelte",
+      "liteComponent": "LiteTierFeatureComparison.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端 SaaS 多版本套餐权益对比矩阵静态表格；交互式套餐升级选型由 SPA 承接"
+    },
+    {
+      "name": "BillingInvoiceDrawer",
+      "uiComponent": "BillingInvoiceDrawer.svelte",
+      "liteComponent": "LiteBillingInvoiceDrawer.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端月度对账结算明细、项目清单与电子发票下载链接；抽屉动效与开票申请由 SPA 承接"
     },
     {
       "name": "ThemeToggle",

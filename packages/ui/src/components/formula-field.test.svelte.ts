@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
-import { evaluateFormula, useFormulaEngine } from './useFormulaEngine.svelte.js';
+import { evaluateFormula } from './useFormulaEngine.svelte.js';
 import FormulaField from './FormulaField.svelte';
 
 describe('useFormulaEngine and FormulaField suite', () => {

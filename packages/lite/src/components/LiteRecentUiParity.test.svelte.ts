@@ -26,6 +26,12 @@ import LiteStepWizard from './LiteStepWizard.svelte';
 import LiteWorkflowStepper from './LiteWorkflowStepper.svelte';
 import LiteDualApprovalGate from './LiteDualApprovalGate.svelte';
 import LiteKeyboardShortcutsModal from './LiteKeyboardShortcutsModal.svelte';
+import LiteWebhookSimulator from './LiteWebhookSimulator.svelte';
+import LiteHmacSignatureCalculator from './LiteHmacSignatureCalculator.svelte';
+import LiteApiPlayground from './LiteApiPlayground.svelte';
+import LitePlanUsageQuotaBar from './LitePlanUsageQuotaBar.svelte';
+import LiteTierFeatureComparison from './LiteTierFeatureComparison.svelte';
+import LiteBillingInvoiceDrawer from './LiteBillingInvoiceDrawer.svelte';
 
 afterEach(() => cleanup());
 
@@ -359,4 +365,94 @@ it('renders enterprise suites wave 2: StepWizard, WorkflowStepper, DualApprovalG
     expect(shortcuts.getByText('系统快捷键')).toBeTruthy();
     expect(shortcuts.getByText('搜索')).toBeTruthy();
     expect(shortcuts.getByText('Ctrl')).toBeTruthy();
+  });
+
+  it('renders enterprise suites: WebhookSimulator, HmacSignatureCalculator, and ApiPlayground', () => {
+    // 14. LiteWebhookSimulator
+    const webhook = render(LiteWebhookSimulator, {
+      eventType: 'order.paid',
+      endpoint: 'https://api.test/hook',
+      payload: { amount: 100 },
+      statusCode: 200,
+      durationMs: 45,
+    });
+    expect(webhook.getByText('order.paid')).toBeTruthy();
+    expect(webhook.getByText('https://api.test/hook')).toBeTruthy();
+    expect(webhook.container.textContent).toContain('100');
+    expect(webhook.getByText('HTTP 200 OK')).toBeTruthy();
+    expect(webhook.getByText('45ms')).toBeTruthy();
+
+    // 15. LiteHmacSignatureCalculator
+    const hmac = render(LiteHmacSignatureCalculator, {
+      secret: 'my_secret',
+      payload: '{"ok":true}',
+      algorithm: 'SHA-256',
+      signature: '7b5a8e0f9c2d1b4a',
+    });
+    expect(hmac.getByText('my_secret')).toBeTruthy();
+    expect(hmac.getByText('{"ok":true}')).toBeTruthy();
+    expect(hmac.getByText('HMAC-SHA-256')).toBeTruthy();
+    expect(hmac.getByText('7b5a8e0f9c2d1b4a')).toBeTruthy();
+
+    // 16. LiteApiPlayground
+    const api = render(LiteApiPlayground, {
+      method: 'POST',
+      url: '/api/v1/orders',
+      curl: 'curl -X POST "/api/v1/orders"',
+      responseStatus: 200,
+    });
+    expect(api.getAllByText('POST').length).toBeGreaterThan(0);
+    expect(api.getByText('/api/v1/orders')).toBeTruthy();
+    expect(api.container.textContent).toContain('curl -X POST "/api/v1/orders"');
+    expect(api.getByText('预估状态: HTTP 200 OK')).toBeTruthy();
+  });
+
+  it('renders enterprise suites: PlanUsageQuotaBar, TierFeatureComparison, and BillingInvoiceDrawer', () => {
+    // 17. LitePlanUsageQuotaBar
+    const quota = render(LitePlanUsageQuotaBar, {
+      planName: '企业旗舰专属版',
+      resetDateText: '2026-12-01',
+      quotas: [
+        { label: 'API 额度', current: 80, limit: 100, unit: '次' },
+      ],
+    });
+    expect(quota.getByText('企业旗舰专属版')).toBeTruthy();
+    expect(quota.getByText('重置周期: 2026-12-01')).toBeTruthy();
+    expect(quota.getByText('API 额度')).toBeTruthy();
+    expect(quota.getByText('80 / 100 次 (80%)')).toBeTruthy();
+
+    // 18. LiteTierFeatureComparison
+    const tier = render(LiteTierFeatureComparison, {
+      tiers: [
+        { key: 'starter', name: '基础版', price: '¥0', isCurrent: true },
+        { key: 'pro', name: '专业版', price: '¥999' },
+      ],
+      features: [
+        { name: '多租户隔离', values: { starter: true, pro: true } },
+        { name: '坐席席位', values: { starter: '5', pro: '50' } },
+      ],
+    });
+    expect(tier.getByText('基础版')).toBeTruthy();
+    expect(tier.getByText('专业版')).toBeTruthy();
+    expect(tier.getByText('当前套餐')).toBeTruthy();
+    expect(tier.getByText('多租户隔离')).toBeTruthy();
+    expect(tier.getByText('50')).toBeTruthy();
+
+    // 19. LiteBillingInvoiceDrawer
+    const inv = render(LiteBillingInvoiceDrawer, {
+      invoiceNo: 'INV-202611-999',
+      period: '2026-10月度',
+      totalAmount: '¥18,450',
+      status: 'paid',
+      items: [
+        { name: '企业席位租用', amount: '¥15,000' },
+      ],
+      downloadUrl: 'https://example.test/inv.pdf',
+    });
+    expect(inv.getByText('账单 #INV-202611-999')).toBeTruthy();
+    expect(inv.getByText('(2026-10月度)')).toBeTruthy();
+    expect(inv.getByText('PAID')).toBeTruthy();
+    expect(inv.getByText('¥18,450')).toBeTruthy();
+    expect(inv.getByText('企业席位租用')).toBeTruthy();
+    expect(inv.getByRole('link', { name: '下载发票 (PDF)' }).getAttribute('href')).toBe('https://example.test/inv.pdf');
   });
