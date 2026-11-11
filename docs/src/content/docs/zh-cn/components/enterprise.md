@@ -867,7 +867,6 @@ const fields: FieldDefinition[] = [
 </VirtualList>
 ```
 
-<<<<<<< HEAD
 ### `<UnsavedChangesGuard>` 与 `useUnsavedChanges`
 
 企业级未保存修改防误关与离开页面拦截守卫套件：

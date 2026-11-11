@@ -1099,7 +1099,6 @@ High-performance components designed for enterprise asset tracking, operational 
 </VirtualList>
 ```
 
-<<<<<<< HEAD
 ### `<UnsavedChangesGuard>` / `useUnsavedChanges`
 
 Enterprise unsaved form modifications and page navigation protection suite:
