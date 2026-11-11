@@ -155,6 +155,22 @@ import {
   QuickActionDrawer,
   I18nLanguagePackEditor,
   useDynamicLocale,
+  FormulaField,
+  useFormulaEngine,
+  DataScreenContainer,
+  FullscreenDashboardLayout,
+  ThreadedCommentDrawer,
+  RecordAnnotationBox,
+  TreeTransferSelect,
+  CascadingAssigner,
+  VirtualCardGrid,
+  MediaCardSelect,
+  ApprovalChainBuilder,
+  ApproverNodeConfig,
+  PeriodComparisonCard,
+  MetricsDeltaPill,
+  useStorageCache,
+  MemoryStorageAdapter,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -210,6 +226,22 @@ describe('public compatibility aliases', () => {
     expect(QuickActionDrawer).toBe(ActionPalette);
     expect(I18nLanguagePackEditor).toBeDefined();
     expect(useDynamicLocale).toBeDefined();
+    expect(FormulaField).toBeDefined();
+    expect(useFormulaEngine).toBeDefined();
+    expect(DataScreenContainer).toBeDefined();
+    expect(FullscreenDashboardLayout).toBe(DataScreenContainer);
+    expect(ThreadedCommentDrawer).toBeDefined();
+    expect(RecordAnnotationBox).toBe(ThreadedCommentDrawer);
+    expect(TreeTransferSelect).toBeDefined();
+    expect(CascadingAssigner).toBe(TreeTransferSelect);
+    expect(VirtualCardGrid).toBeDefined();
+    expect(MediaCardSelect).toBe(VirtualCardGrid);
+    expect(ApprovalChainBuilder).toBeDefined();
+    expect(ApproverNodeConfig).toBe(ApprovalChainBuilder);
+    expect(PeriodComparisonCard).toBeDefined();
+    expect(MetricsDeltaPill).toBe(PeriodComparisonCard);
+    expect(useStorageCache).toBeDefined();
+    expect(MemoryStorageAdapter).toBeDefined();
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);

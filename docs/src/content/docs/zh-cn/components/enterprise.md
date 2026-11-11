@@ -1664,6 +1664,212 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
 <I18nLanguagePackEditor
   targetLocale="zh-CN"
   onSavePatch={(locale, patch) => console.log('发布动态文案补丁:', locale, patch)}
+/>
+```
+
+### `<FormulaField>` 与 `useFormulaEngine`
+
+企业级动态公式计算字段与沙箱求值引擎：
+- **零 eval() 安全隐患**：基于原生抽象语法树解析，安全支持四则运算（`+`、`-`、`*`、`/`、`^`、`%`、括号）与复杂嵌套属性提取。
+- **开箱即用内置函数**：支持 `SUM`（求和）、`AVG`（均值）、`MAX`、`MIN`、`ROUND`（四舍五入）与 `IF`（条件选择）。
+- **公式气泡与手动覆盖**：呈现 `f(x) = price * qty * (1 - discount)` 公式提示胶囊，并支持一键切换为人工手动覆盖。
+
+```svelte
+<script lang="ts">
+  import { FormulaField } from '@svadmin/ui';
+
+  let form = $state({ price: 199, qty: 3, discount: 0.1 });
+</script>
+
+<FormulaField
+  label="折后实付总额"
+  formula="price * qty * (1 - discount)"
+  scope={form}
+  prefix="¥"
+  precision={2}
+  allowManualOverride={true}
+/>
+```
+
+### `<DataScreenContainer>` / `<FullscreenDashboardLayout>`
+
+指挥中心与大屏数据可视化自适应容器：
+- **Scale-to-Fit 等比自适应缩放**：基于设计稿基准分辨率（如 1920x1080、21:9 超宽屏）自动计算等比缩放矩阵（`scale`），杜绝各类大屏投屏时的变形与排版错位。
+- **科技感边框与头部**：内置实时数字时钟、大屏主副标题与全屏切换按钮（`<FullscreenButton>`）。
+- **微光发光角标**：纯 CSS / SVG 发光点缀，赋予指挥大厅硬核科技质感。
+
+```svelte
+<script lang="ts">
+  import { DataScreenContainer } from '@svadmin/ui';
+</script>
+
+<DataScreenContainer
+  title="全局仓储调度与实时监控指挥中心"
+  subtitle="NOC 遥测大屏与传感器链路大盘"
+  width={1920}
+  height={1080}
+>
+  <div class="grid grid-cols-3 gap-6 h-full">
+    <!-- 各类大屏卡片与实时 SVG 拓扑/图表 -->
+  </div>
+</DataScreenContainer>
+```
+
+### `<ThreadedCommentDrawer>` / `<RecordAnnotationBox>`
+
+记录级协同讨论流与树形批注抽屉：
+- **盖楼式嵌套回复与表情反馈**：支持针对特定评论展开二级回复流，支持点赞（`👍`）、已确认（`✅`）等轻量表情互动。
+- **问题解决状态标记**：支持合规/财务将某条争议评论一键标记为“已解决（Resolved）”。
+- **成员快速协作**：输入框支持快速发表业务批注与 `@` 成员协作提醒。
+
+```svelte
+<script lang="ts">
+  import { ThreadedCommentDrawer, type ThreadedComment } from '@svadmin/ui';
+
+  let open = $state(false);
+  let comments = $state<ThreadedComment[]>([
+    {
+      id: '1',
+      author: '张合规 (审计专员)',
+      content: '请核实该笔采购单附带的专用发票抬头与税号。',
+      createdAt: '10 分钟前',
+      isResolved: false,
+    },
+  ]);
+</script>
+
+<ThreadedCommentDrawer
+  bind:open
+  recordTitle="采购核算单 #PO-991"
+  {comments}
+  onAddComment={(text, parentId) => console.log('新增批注:', text, parentId)}
+/>
+```
+
+### `useStorageCache` 与通用存储适配器套件
+
+企业级跨端键值对缓存与通用存储驱动套件：
+- **存储驱动彻底解耦**：彻底摆脱对特定单点设施的硬绑定。在纯内存测试（`MemoryStorageAdapter`）、本地轻量持久化（`LocalStorageAdapter`）、大容量离线缓存（`IndexedDB`）与通用远程 REST 接口（`RemoteKVAdapter`）之间零成本无缝切换。
+- **过期淘汰与命名空间**：自带秒级 TTL 自动淘汰机制与前缀命名空间隔离，防止本地数据脏污染。
+- **Svelte 5 响应式体验**：`useStorageCache` 自动双向同步响应式状态与底层存储。
+
+```svelte
+<script lang="ts">
+  import { useStorageCache, LocalStorageAdapter } from '@svadmin/ui';
+
+  const userPrefs = useStorageCache('user_dashboard_prefs', { density: 'comfortable' }, {
+    adapter: new LocalStorageAdapter('svadmin_enterprise'),
+    ttlSeconds: 86400, // 24小时自动过期
+  });
+</script>
+
+<div>当前排版密度: {userPrefs.value.density}</div>
+<button onclick={() => userPrefs.set({ density: 'compact' })}>切换为紧凑</button>
+```
+
+### `<TreeTransferSelect>` / `<CascadingAssigner>`
+
+深层组织架构树形穿梭框与批量指派组件：
+- **多层级目录导航**：支持树形子树全选、半选级联与叶子节点过滤，专为集团、子公司、部门到多角色人员的大批量权限指派打造。
+- **灵活已选呈现**：右侧支持平铺或按所属部门分组展示已选节点，支持一键清空或单项移除。
+- **即时拼音检索**：内置快速搜索过滤栏，带路径高亮指示。
+
+```svelte
+<script lang="ts">
+  import { TreeTransferSelect, type TreeTransferNode } from '@svadmin/ui';
+
+  const orgTree: TreeTransferNode[] = [
+    {
+      id: 'eng',
+      label: '研发中心',
+      children: [
+        { id: 'u1', label: 'Ada (前端架构师)', isLeaf: true },
+        { id: 'u2', label: 'Lin (后端核心开发)', isLeaf: true },
+      ],
+    },
+  ];
+
+  let assignedKeys = $state(['u1']);
+</script>
+
+<TreeTransferSelect
+  treeData={orgTree}
+  bind:targetKeys={assignedKeys}
+  sourceTitle="企业通讯录组织树"
+  targetTitle="已指派审批人"
+/>
+```
+
+### `<VirtualCardGrid>` / `<MediaCardSelect>`
+
+海量素材与商品多选虚拟化卡片画廊：
+- **60fps 视口虚拟化**：仅渲染当前屏幕可见区域内的卡片，轻松承载上万张商品卡片、素材图片或插件模块，滚动零卡顿、无内存泄露。
+- **响应式列数适配**：根据屏幕宽度自动适配 2 / 3 / 4 / 6 列。
+- **多选交互套件**：支持连选、框选与全选计数徽章，内置右上角勾选状态与悬浮预览操作。
+
+```svelte
+<script lang="ts">
+  import { VirtualCardGrid } from '@svadmin/ui';
+
+  const mediaItems = Array.from({ length: 500 }, (_, i) => ({
+    id: `item-${i + 1}`,
+    title: `素材编号 #${i + 1}`,
+    subtitle: '1080p WebP 高清图',
+  }));
+
+  let selectedIds = $state<string[]>([]);
+</script>
+
+<VirtualCardGrid
+  items={mediaItems}
+  bind:selectedIds
+  columns={4}
+  cardHeight={180}
+/>
+```
+
+### `<ApprovalChainBuilder>` / `<ApproverNodeConfig>`
+
+可视化轻量多级审批链编排器与节点策略设计器：
+- **轻量纵向审批流编排**：仿飞书/钉钉风格设计树，在节点间随时点击 `+` 快速插入审批人节点或抄送节点。
+- **多人审批决策方式**：支持会签（`all` 全员必须同意）、或签（`one` 一人同意即生效）与顺序逐级审批。
+- **侧边属性抽屉**：可视化配置节点角色、审批方式及超时自动流转策略。
+
+```svelte
+<script lang="ts">
+  import { ApprovalChainBuilder, type ApprovalChainNode } from '@svadmin/ui';
+
+  let chain = $state<ApprovalChainNode[]>([
+    { id: 'start', type: 'start', title: '发起人', roleName: '全体员工' },
+    { id: 'mgr', type: 'approver', title: '直属部门主管', roleName: '部门主管', mode: 'one' },
+    { id: 'fin', type: 'approver', title: '财务总监复核', roleName: '财务审批组', mode: 'all' },
+  ]);
+</script>
+
+<ApprovalChainBuilder
+  bind:nodes={chain}
+  onChange={(nodes) => console.log('更新审批链:', nodes)}
+/>
+```
+
+### `<PeriodComparisonCard>` / `<MetricsDeltaPill>`
+
+高管大盘跨周期同比与环比分析卡片：
+- **双周期指标对比**：并排呈现基准周期与对比周期的实际数值。
+- **差异波动胶囊**：自动推导增减绝对值（`+¥250,000`）与百分比幅度（`+25%`），绿涨红跌清晰醒目，支持 `reverseColor`（如针对故障数、延迟）。
+- **原生微对比条**：纯原生 SVG 双进度对比条，0KB 图表体积开销。
+
+```svelte
+<script lang="ts">
+  import { PeriodComparisonCard } from '@svadmin/ui';
+</script>
+
+<PeriodComparisonCard
+  title="季度净营收额"
+  currentValue={1250000}
+  previousValue={1000000}
+  prefix="¥"
+  periodName="较上季度环比"
 ### `<RecordCompareModal>` 与 `<EntityComparisonDrawer>`
 
 企业级多实体记录参数并排对比与差异透视套件：

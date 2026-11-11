@@ -1897,6 +1897,212 @@ Dynamic runtime localization patch loader and online translation editor:
 <I18nLanguagePackEditor
   targetLocale="zh-CN"
   onSavePatch={(locale, patch) => console.log('Published i18n patch:', locale, patch)}
+/>
+```
+
+### `<FormulaField>` & `useFormulaEngine`
+
+Enterprise dynamic formula field and sandboxed expression calculation engine:
+- **Zero eval() Vulnerabilities**: Pure AST-based arithmetic and logic evaluator supporting `+`, `-`, `*`, `/`, `^`, `%`, `(`, `)`.
+- **Built-in Functions**: Supports `SUM`, `AVG`, `MAX`, `MIN`, `ROUND(val, decimals)`, and `IF(cond, thenVal, elseVal)`.
+- **Formula Tooltip & Manual Override**: Displays interactive `f(x) = ...` formula preview badge with optional toggle to manually override values.
+
+```svelte
+<script lang="ts">
+  import { FormulaField } from '@svadmin/ui';
+
+  let form = $state({ price: 199, qty: 3, discount: 0.1 });
+</script>
+
+<FormulaField
+  label="Net Total Price"
+  formula="price * qty * (1 - discount)"
+  scope={form}
+  prefix="¥"
+  precision={2}
+  allowManualOverride={true}
+/>
+```
+
+### `<DataScreenContainer>` / `<FullscreenDashboardLayout>`
+
+Operations center and high-resolution data visualization big-screen container:
+- **Scale-to-Fit Auto Scaling**: Automatically calculates uniform scaling (`scale(x)`) based on design dimensions (1920x1080, 21:9, etc.), pixel-perfect centering on any screen size.
+- **Header & Clock**: Built-in digital clock, status headers, and full-screen switcher.
+- **Cyberpunk Accents**: Optional neon tech luminous corner lines.
+
+```svelte
+<script lang="ts">
+  import { DataScreenContainer } from '@svadmin/ui';
+</script>
+
+<DataScreenContainer
+  title="Real-time Dispatch Operations Center"
+  subtitle="NOC Telemetry & Sensor Monitoring"
+  width={1920}
+  height={1080}
+>
+  <div class="grid grid-cols-3 gap-6 h-full">
+    <!-- Telemetry Cards & SVG charts -->
+  </div>
+</DataScreenContainer>
+```
+
+### `<ThreadedCommentDrawer>` / `<RecordAnnotationBox>`
+
+Record-level collaborative discussion stream and threaded annotation drawer:
+- **Threaded Replies & Reactions**: Support nested discussion trees, emoji reactions (`👍`, `✅`), and timestamps.
+- **Task Resolution Status**: Toggle comments as "Resolved" to close out revision concerns.
+- **Mentions & Markdown**: Integrated `@` member mention tags and formatted response submissions.
+
+```svelte
+<script lang="ts">
+  import { ThreadedCommentDrawer, type ThreadedComment } from '@svadmin/ui';
+
+  let open = $state(false);
+  let comments = $state<ThreadedComment[]>([
+    {
+      id: '1',
+      author: 'Alice (Compliance)',
+      content: 'Please verify VAT invoice numbers against tax authority registry.',
+      createdAt: '10m ago',
+      isResolved: false,
+    },
+  ]);
+</script>
+
+<ThreadedCommentDrawer
+  bind:open
+  recordTitle="Purchase Order #PO-991"
+  {comments}
+  onAddComment={(text, parentId) => console.log('New reply:', text, parentId)}
+/>
+```
+
+### `useStorageCache` & Storage Adapters
+
+Enterprise cross-platform key-value cache and storage adapter suite:
+- **Zero Backend Lock-In**: Complete decoupling from specific infrastructure. Seamlessly switch between in-memory testing (`MemoryStorageAdapter`), browser persistence (`LocalStorageAdapter`), large-scale offline client cache (`IndexedDB`), or generic remote REST KV services (`RemoteKVAdapter`).
+- **TTL Eviction & Namespacing**: Automatic expiration of cached tokens and filter preferences with isolated namespace prefixes.
+- **Svelte 5 Reactivity**: `useStorageCache` provides reactive values with automatic write-through and cross-tab sync.
+
+```svelte
+<script lang="ts">
+  import { useStorageCache, LocalStorageAdapter } from '@svadmin/ui';
+
+  const userPrefs = useStorageCache('user_dashboard_prefs', { density: 'comfortable' }, {
+    adapter: new LocalStorageAdapter('svadmin_enterprise'),
+    ttlSeconds: 86400, // 24-hour cache
+  });
+</script>
+
+<div>Current Density: {userPrefs.value.density}</div>
+<button onclick={() => userPrefs.set({ density: 'compact' })}>Switch to Compact</button>
+```
+
+### `<TreeTransferSelect>` / `<CascadingAssigner>`
+
+Deep organization tree transfer and multi-tiered batch assigner:
+- **Hierarchical Branch Selection**: Supports cascading indeterminate checkboxes, branch subtree select-all, and leaf-only node filtering.
+- **Target Mode Flexibility**: View assigned items in a flat list or grouped by department, with single-click removal or bulk reset.
+- **Live Search**: Integrated instant search filter with node path indicators.
+
+```svelte
+<script lang="ts">
+  import { TreeTransferSelect, type TreeTransferNode } from '@svadmin/ui';
+
+  const orgTree: TreeTransferNode[] = [
+    {
+      id: 'eng',
+      label: 'Engineering',
+      children: [
+        { id: 'u1', label: 'Ada Lovelace (Frontend)', isLeaf: true },
+        { id: 'u2', label: 'Alan Turing (Backend)', isLeaf: true },
+      ],
+    },
+  ];
+
+  let assignedKeys = $state(['u1']);
+</script>
+
+<TreeTransferSelect
+  treeData={orgTree}
+  bind:targetKeys={assignedKeys}
+  sourceTitle="Corporate Directory"
+  targetTitle="Assigned Operators"
+/>
+```
+
+### `<VirtualCardGrid>` / `<MediaCardSelect>`
+
+Virtualized responsive card gallery and media multi-selection suite:
+- **60fps Viewport Virtualization**: Renders only currently visible card rows, effortlessly scaling to 10,000+ items without DOM bloat or frame drops.
+- **Responsive Grid**: Adapts columns automatically (2/3/4/6 columns) based on container width.
+- **Multi-Select Controls**: Integrated selection states with count badges, custom card snippets, and batch action toolbars.
+
+```svelte
+<script lang="ts">
+  import { VirtualCardGrid } from '@svadmin/ui';
+
+  const mediaItems = Array.from({ length: 500 }, (_, i) => ({
+    id: `item-${i + 1}`,
+    title: `Asset #${i + 1}`,
+    subtitle: '1080p WebP',
+  }));
+
+  let selectedIds = $state<string[]>([]);
+</script>
+
+<VirtualCardGrid
+  items={mediaItems}
+  bind:selectedIds
+  columns={4}
+  cardHeight={180}
+/>
+```
+
+### `<ApprovalChainBuilder>` / `<ApproverNodeConfig>`
+
+Visual multi-tier approval chain flow builder and node policy designer:
+- **Lightweight Vertical Node Flow**: Linear node sequence (Start -> Approvers -> CC) with one-click `+` insertion between any steps.
+- **Approver Execution Policies**: Supports `all` (Countersign / All must approve), `one` (Any one approves), and `sequential` approval.
+- **Side Node Inspector**: Real-time attribute configuration for role assignees, approval modes, and timeout escalation.
+
+```svelte
+<script lang="ts">
+  import { ApprovalChainBuilder, type ApprovalChainNode } from '@svadmin/ui';
+
+  let chain = $state<ApprovalChainNode[]>([
+    { id: 'start', type: 'start', title: 'Initiator', roleName: 'All Employees' },
+    { id: 'mgr', type: 'approver', title: 'Department Lead', roleName: 'Supervisor', mode: 'one' },
+    { id: 'fin', type: 'approver', title: 'Finance Audit', roleName: 'Controller', mode: 'all' },
+  ]);
+</script>
+
+<ApprovalChainBuilder
+  bind:nodes={chain}
+  onChange={(nodes) => console.log('Updated approval chain:', nodes)}
+/>
+```
+
+### `<PeriodComparisonCard>` / `<MetricsDeltaPill>`
+
+Executive management dashboard cross-period comparison card:
+- **Multi-Period Baseline Comparison**: Formats current period vs baseline/prior period metrics side-by-side.
+- **Delta Indicator Pills**: Calculates absolute change (`+¥250,000`) and percentage delta (`+25%`), shifting between green (positive) and red (negative), with `reverseColor` support for error counts and latencies.
+- **SVG Micro Comparison Bars**: Pure SVG dual progress comparison lines with zero chart engine dependencies.
+
+```svelte
+<script lang="ts">
+  import { PeriodComparisonCard } from '@svadmin/ui';
+</script>
+
+<PeriodComparisonCard
+  title="Quarterly Gross Revenue"
+  currentValue={1250000}
+  previousValue={1000000}
+  prefix="¥"
+  periodName="vs Last Quarter"
 ### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
 
 Enterprise multi-record parameter comparison and difference spotlight suite:
