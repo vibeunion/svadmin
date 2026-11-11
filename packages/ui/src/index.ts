@@ -833,6 +833,20 @@ export { default as DataScreenContainer, default as FullscreenDashboardLayout, t
 
 // Enterprise threaded comment drawer & record annotation stream suite
 export { default as ThreadedCommentDrawer, default as RecordAnnotationBox, type ThreadedCommentDrawerProps, type ThreadedComment } from './components/ThreadedCommentDrawer.svelte';
+// Enterprise storage cache & cross-platform storage adapter suite
+export { useStorageCache, MemoryStorageAdapter, LocalStorageAdapter, RemoteKVAdapter, defaultMemoryStorage, type StorageAdapter, type UseStorageCacheOptions } from './components/useStorageCache.svelte.js';
+
+// Enterprise tree transfer select & cascading organization assigner suite
+export { default as TreeTransferSelect, default as CascadingAssigner, type TreeTransferSelectProps, type TreeTransferNode } from './components/TreeTransferSelect.svelte';
+
+// Enterprise virtualized card grid & media select gallery suite
+export { default as VirtualCardGrid, default as MediaCardSelect, type VirtualCardGridProps } from './components/VirtualCardGrid.svelte';
+
+// Enterprise visual approval chain flow builder & node config suite
+export { default as ApprovalChainBuilder, default as ApproverNodeConfig, type ApprovalChainBuilderProps, type ApprovalChainNode, type ApproverMode, type ApprovalNodeType } from './components/ApprovalChainBuilder.svelte';
+
+// Enterprise period comparison card & delta metrics capsule suite
+export { default as PeriodComparisonCard, default as MetricsDeltaPill, type PeriodComparisonCardProps } from './components/PeriodComparisonCard.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
 
