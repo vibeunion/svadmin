@@ -4,7 +4,7 @@ import MasterSubTableDrawer from './MasterSubTableDrawer.svelte';
 
 describe('MasterSubTableDrawer suite', () => {
   it('renders master summary and sub-table rows', () => {
-    const view = render(MasterSubTableDrawer, {
+    render(MasterSubTableDrawer, {
       open: true,
       masterRecord: { orderNo: 'ORD-9901', customer: 'Acme Inc' },
       masterFields: [

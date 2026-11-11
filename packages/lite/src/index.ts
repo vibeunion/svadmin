@@ -213,6 +213,19 @@ export { default as LitePlanUsageQuotaBar } from './components/LitePlanUsageQuot
 export { default as LiteTierFeatureComparison } from './components/LiteTierFeatureComparison.svelte';
 export { default as LiteBillingInvoiceDrawer } from './components/LiteBillingInvoiceDrawer.svelte';
 
+// Enterprise wave 6 parity fallbacks
+export { default as LiteSqlConsole } from './components/LiteSqlConsole.svelte';
+export { default as LiteEnvVariableEditor } from './components/LiteEnvVariableEditor.svelte';
+export { default as LiteScheduledJobManager } from './components/LiteScheduledJobManager.svelte';
+export { default as LiteTenantQuotasMatrix } from './components/LiteTenantQuotasMatrix.svelte';
+export { default as LiteTableAggregationFooter } from './components/LiteTableAggregationFooter.svelte';
+export { default as LiteSecureDataExporter } from './components/LiteSecureDataExporter.svelte';
+export { default as LiteDataImportDropzone } from './components/LiteDataImportDropzone.svelte';
+export { default as LiteColumnMappingTable } from './components/LiteColumnMappingTable.svelte';
+export { default as LiteImportPreviewValidator } from './components/LiteImportPreviewValidator.svelte';
+export { default as LiteApprovalChainBuilder } from './components/LiteApprovalChainBuilder.svelte';
+export { default as LitePeriodComparisonCard } from './components/LitePeriodComparisonCard.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
