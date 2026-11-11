@@ -1053,6 +1053,95 @@ const fields: FieldDefinition[] = [
 />
 ```
 
+### `<AnnouncementBanner>`
+
+企业全站广播通知横幅与停服倒计时公告条：
+- 适用于重大系统维护停服通知、多租户欠费风险预警、版本发布更新公告与紧急安全提示。
+- 支持 `info`、`warning`、`error` 与 `success` 四大语义状态，内置矢量图标并采用语义色彩令牌。
+- **停机维护倒计时**：传入 `countdownTo` 即可自动计算并高亮显示剩余维护倒计时（如 `01:45:20`），并可在归零时触发 `oncountdownend` 回调。
+- **多条轮播与交互**：支持多条公告列表自动轮播（`interval`）与手动上一条/下一条切换，并可在用户关闭后通过 `storageKey` 自动持久化记忆。
+
+```svelte
+<script lang="ts">
+  import { AnnouncementBanner } from '@svadmin/ui';
+
+  const scheduledTime = new Date(Date.now() + 3600 * 1000 * 4);
+</script>
+
+<AnnouncementBanner
+  tone="warning"
+  message="系统计划于今晚 22:00 进行例行数据归档与硬件扩容升级，届时写入服务将短暂暂停。"
+  countdownTo={scheduledTime}
+  countdownPrefix="距维护开始还剩: "
+  actionText="查看变更计划"
+  actionHref="/maintenance/plan"
+  closable={true}
+  storageKey="announcement-maintenance-202611"
+/>
+```
+
+### `<TextDiffViewer>`
+
+企业级文本与配置双栏/单栏差异对比器：
+- 专为配置中心发布审查、SQL 脚本审批对比、审批流大文本变更轨迹与代码审查打造。
+- 纯前端动态规划 LCS 差异算法，零臃肿依赖，毫秒级逐行对比与字符高亮。
+- **双栏并排与单栏内联**：支持在 `split`（左右并排对齐）与 `unified`（单栏内联流式）两种视图模式间一键切换。
+- **智能折叠与统计**：支持折叠未修改的上下文行（`collapseUnchanged`），仅聚焦变更行；顶部提供新增、删除、未变更行数统计与一键复制对比文本操作。
+
+```svelte
+<script lang="ts">
+  import { TextDiffViewer } from '@svadmin/ui';
+
+  const baseline = `server_port: 8080\nmax_connections: 500\nlog_level: info\ncache_enabled: false`;
+  const current = `server_port: 8080\nmax_connections: 2000\nlog_level: debug\ncache_enabled: true\ncluster_mode: active`;
+</script>
+
+<TextDiffViewer
+  oldText={baseline}
+  newText={current}
+  oldTitle="生产运行配置 (v1.2)"
+  newTitle="待发布配置 (v1.3)"
+  viewMode="split"
+  collapseUnchanged={false}
+/>
+```
+
+### `<AsyncExportModal>`
+
+企业级大数据异步导出中心与列选择弹窗：
+- 专为万级/百万级数据异步导出设计，防止前端同步下载引起浏览器卡死或请求网关超时。
+- **全生命周期流转**：参数配置（文件名、导出格式、数据范围、字段列全选/反选）-> 异步导出生成进度条 -> 成功下载与链接复制 -> 失败重试。
+- 支持 `.xlsx`（Excel 规范表格）、`.csv`（纯文本逗号分隔）与 `.json`（结构化数组）多种企业常用格式。
+
+```svelte
+<script lang="ts">
+  import { AsyncExportModal } from '@svadmin/ui';
+
+  let isExportOpen = $state(false);
+
+  const columns = [
+    { key: 'orderNo', label: '订单流水号', defaultSelected: true },
+    { key: 'customer', label: '所属客户', defaultSelected: true },
+    { key: 'amount', label: '交易金额', defaultSelected: true },
+    { key: 'createdAt', label: '创建时间', defaultSelected: true },
+    { key: 'remark', label: '审批备注', defaultSelected: false },
+  ];
+</script>
+
+<button onclick={() => (isExportOpen = true)}>打开异步导出中心</button>
+
+<AsyncExportModal
+  bind:open={isExportOpen}
+  resourceName="财务订单"
+  defaultFileName="2026Q4财务核销汇总表"
+  totalCount={154200}
+  filteredCount={3200}
+  selectedCount={4}
+  {columns}
+  onclose={() => (isExportOpen = false)}
+/>
+```
+
 ### `<RecordCompareModal>` 与 `<EntityComparisonDrawer>`
 
 企业级多实体记录参数并排对比与差异透视套件：

@@ -688,18 +688,8 @@ export { default as PricingCard } from './components/PricingCard.svelte';
 export type { PricingCardProps, PricingFeature } from './components/PricingCard.svelte';
 export { default as QuotaProgressBar } from './components/QuotaProgressBar.svelte';
 export type { QuotaProgressBarProps } from './components/QuotaProgressBar.svelte';
-export { default as PricingTable } from './components/PricingTable.svelte';
-export type {
-  PricingTableProps,
-  PricingPlan,
-  FeatureComparisonRow,
-  FeatureComparisonGroup,
-} from './components/PricingTable.svelte';
-export { default as UsageCard } from './components/UsageCard.svelte';
-export type {
-  UsageCardProps,
-  UsageMetric,
-} from './components/UsageCard.svelte';
+export { default as PricingTable, type PricingTableProps, type PricingPlan, type FeatureComparisonRow, type FeatureComparisonGroup } from './components/PricingTable.svelte';
+export { default as UsageCard, type UsageCardProps, type UsageMetric } from './components/UsageCard.svelte';
 
 // Enterprise typography, clipboard and layout controls
 export { default as EllipsisText } from './components/EllipsisText.svelte';
@@ -722,12 +712,7 @@ export { default as GlobalShortcuts } from './components/GlobalShortcuts.svelte'
 export type { ShortcutItem } from './components/GlobalShortcuts.svelte';
 
 // Enterprise approval and workflow process tracking suite
-export { default as ApprovalTimeline } from './components/ApprovalTimeline.svelte';
-export type {
-  ApprovalTimelineProps,
-  ApprovalStep,
-  ApprovalStatus as ApprovalTimelineStatus,
-} from './components/ApprovalTimeline.svelte';
+export { default as ApprovalTimeline, type ApprovalTimelineProps, type ApprovalStep, type ApprovalStatus as ApprovalTimelineStatus } from './components/ApprovalTimeline.svelte';
 export { default as WorkflowProcessCard } from './components/WorkflowProcessCard.svelte';
 export type { WorkflowProcessCardProps } from './components/WorkflowProcessCard.svelte';
 
@@ -748,12 +733,7 @@ export { default as ExcelImportWizard } from './components/ExcelImportWizard.sve
 export type { ExcelImportWizardProps, ExcelImportField } from './components/ExcelImportWizard.svelte';
 export { default as ExcelExportButton } from './components/ExcelExportButton.svelte';
 export type { ExcelExportButtonProps, ExcelExportColumn } from './components/ExcelExportButton.svelte';
-export { default as PivotDrilldownModal } from './components/PivotDrilldownModal.svelte';
-export type {
-  PivotDrilldownModalProps,
-  PivotDrilldownColumn,
-  PivotDrilldownFilter,
-} from './components/PivotDrilldownModal.svelte';
+export { default as PivotDrilldownModal, type PivotDrilldownModalProps, type PivotDrilldownColumn, type PivotDrilldownFilter } from './components/PivotDrilldownModal.svelte';
 
 // Enterprise security and safe-delete verification suite
 export { default as SafeDeleteConfirm, default as DoubleCheckModal, type SafeDeleteConfirmProps, type ImpactItem } from './components/SafeDeleteConfirm.svelte';
@@ -795,5 +775,10 @@ export { default as ResultPage, type ResultPageProps, type ResultStatus } from '
 // Enterprise dynamic watermark, context menu & OTP authentication suite
 export { default as WatermarkContainer, default as AntiTamperWatermark, type WatermarkContainerProps } from './components/WatermarkContainer.svelte';
 export { default as ContextMenu, type ContextMenuProps, type ContextMenuItem } from './components/ContextMenu.svelte';
+
+// Enterprise announcement banner, text diff & async export center suite
+export { default as AnnouncementBanner, default as AlertBanner, type AnnouncementBannerProps, type AnnouncementItem } from './components/AnnouncementBanner.svelte';
+export { default as TextDiffViewer, default as DiffViewer, type TextDiffViewerProps, type DiffViewMode } from './components/TextDiffViewer.svelte';
+export { default as AsyncExportModal, default as ExportCenterModal, type AsyncExportModalProps, type ExportConfig, type ExportResult, type ExportScope, type ExportFormat } from './components/AsyncExportModal.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
