@@ -1470,3 +1470,75 @@ const fields: FieldDefinition[] = [
   onsync={(source, target, field) => console.log(`同步字段 ${field} 到 ${target.name}`)}
 />
 ```
+
+### `<WebhookSimulator>`
+
+企业级 Webhook 事件模拟投递与回放测试器：
+- 专为开放平台、第三方服务回调联调与自动化集成沙箱打造。
+- **预设事件与自动装填**：内置订单支付成功（`order.payment_succeeded`）、高危安全预警（`user.security_alert`）、发票开具完成（`invoice.issued`）等事件，选择后自动将对应的标准 JSON Schema 载荷填入编辑器。
+- **真实 HTTP 投递与结果面板**：支持输入目标接收 Endpoint，自动生成并携带 `X-Svadmin-Timestamp` 与时间戳请求头，模拟发送后直观展示 HTTP 状态码（200 OK 绿标、4xx/5xx 错误红标）、往返网络耗时与服务端响应报文。
+
+```svelte
+<script lang="ts">
+  import { WebhookSimulator } from '@svadmin/ui';
+</script>
+
+<WebhookSimulator
+  defaultEndpoint="https://api.merchant.com/webhooks/svadmin"
+  ondeliver={async ({ eventType, endpoint, payload }) => {
+    console.log('发起投递:', eventType, endpoint, payload);
+    return {
+      statusCode: 200,
+      durationMs: 82,
+      responseBody: '{"acknowledged": true}',
+    };
+  }}
+/>
+```
+
+### `<HmacSignatureCalculator>`
+
+HMAC 签名计算与现场验签沙箱：
+- 专为排查第三方回调签名不匹配（Signature Mismatch）缺陷与安全合规打造。
+- **Web Crypto 原生算法加速**：纯前端实现，支持 `HMAC-SHA256`、`HMAC-SHA384` 与 `HMAC-SHA512` 工业级哈希摘要。
+- **即时计算与验签比对**：输入 Secret Key 与 Raw Payload 毫秒级生成 Hex 摘要字符串并支持一键复制；提供预期签名比对框，实时给出“验签成功 (Valid)”或“不匹配 (Mismatch)”安全反馈。
+
+```svelte
+<script lang="ts">
+  import { HmacSignatureCalculator } from '@svadmin/ui';
+</script>
+
+<HmacSignatureCalculator
+  defaultSecret="whsec_prod_secret_8848"
+  defaultBody={'{"event":"payment.succeeded","amount":99.0}'}
+  algorithm="SHA-256"
+/>
+```
+
+### `<ApiPlayground>`
+
+内嵌式 API 快捷交互式调试工作台：
+- 专为开发者中心、API 文档内嵌交互式探针与内部微服务联调设计。
+- **全方法覆盖与终端 cURL 一键生成**：支持 `GET`、`POST`、`PUT`、`PATCH`、`DELETE`，根据输入实时生成标准终端 `curl` 命令（支持一键复制到剪贴板在本地执行）。
+- **结构化请求与响应反馈**：支持 Headers 与 JSON Request Body 动态输入，展示响应 HTTP 状态码、数据量大小、网络耗时与美化 JSON 响应。
+
+```svelte
+<script lang="ts">
+  import { ApiPlayground } from '@svadmin/ui';
+</script>
+
+<ApiPlayground
+  defaultMethod="POST"
+  defaultUrl="/api/v1/orders/create"
+  defaultBody={'{\n  "sku": "SVADMIN-PRO-LICENSE",\n  "seats": 10\n}'}
+  onrequest={async (req) => {
+    console.log('执行接口调用:', req);
+    return {
+      status: 200,
+      durationMs: 42,
+      sizeBytes: 128,
+      data: { orderId: 'ORD-9821', created: true },
+    };
+  }}
+/>
+```

@@ -807,3 +807,8 @@ export { useAudioAlert, playAudioAlert, type AudioAlertType, type AudioAlertOpti
 export { default as AudioFeedbackProvider, type AudioFeedbackProviderProps } from './components/AudioFeedbackProvider.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
+
+// Enterprise developer webhook simulation, HMAC crypto signature & API playground suite
+export { default as WebhookSimulator, default as WebhookEventSimulator, type WebhookSimulatorProps, type WebhookEventPreset, type WebhookDeliveryResult } from './components/WebhookSimulator.svelte';
+export { default as HmacSignatureCalculator, default as SignatureDebugger, type HmacSignatureCalculatorProps, type HmacAlgorithm } from './components/HmacSignatureCalculator.svelte';
+export { default as ApiPlayground, default as HttpQuickRunner, type ApiPlaygroundProps, type HttpMethod, type ApiResponse } from './components/ApiPlayground.svelte';

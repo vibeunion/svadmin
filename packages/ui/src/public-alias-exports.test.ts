@@ -83,6 +83,12 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  WebhookSimulator,
+  WebhookEventSimulator,
+  HmacSignatureCalculator,
+  SignatureDebugger,
+  ApiPlayground,
+  HttpQuickRunner,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -231,6 +237,12 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(WebhookSimulator).toBeDefined();
+    expect(WebhookEventSimulator).toBe(WebhookSimulator);
+    expect(HmacSignatureCalculator).toBeDefined();
+    expect(SignatureDebugger).toBe(HmacSignatureCalculator);
+    expect(ApiPlayground).toBeDefined();
+    expect(HttpQuickRunner).toBe(ApiPlayground);
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();
