@@ -44,6 +44,31 @@ describe('useUnsavedChanges', () => {
 
     guard.destroy();
   });
+
+  it('does not prompt again after proceeding with callback-based dirty state', async () => {
+    const guard = useUnsavedChanges({ isDirty: () => true });
+    guard.proceed();
+
+    const event = new Event('beforeunload', { cancelable: true }) as BeforeUnloadEvent;
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    guard.destroy();
+  });
+
+  it('ignores modified link clicks while dirty', () => {
+    const guard = useUnsavedChanges({ isDirty: true });
+    const link = document.createElement('a');
+    link.href = '/dashboard/other';
+    document.body.appendChild(link);
+
+    fireEvent.click(link, { metaKey: true });
+    expect(guard.isBlocked).toBe(false);
+
+    link.remove();
+    guard.destroy();
+  });
 });
 
 describe('UnsavedChangesGuard', () => {

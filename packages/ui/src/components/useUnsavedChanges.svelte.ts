@@ -17,6 +17,7 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}) {
   );
   let isBlocked = $state(false);
   let pendingNavigationUrl = $state<string | null>(null);
+  let allowLeave = false;
 
   const isDirtyDerived = $derived(
     typeof options.isDirty === 'function' ? options.isDirty() : dirtyState,
@@ -33,14 +34,15 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}) {
   );
 
   function handleBeforeUnload(e: BeforeUnloadEvent) {
-    if (!enabled || !isDirtyDerived) return;
+    if (allowLeave || !enabled || !isDirtyDerived) return;
     e.preventDefault();
     e.returnValue = warningMessage;
     return warningMessage;
   }
 
   function handleDocumentClick(e: MouseEvent) {
-    if (!enabled || !isDirtyDerived) return;
+    if (allowLeave || !enabled || !isDirtyDerived) return;
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const target = (e.target as HTMLElement)?.closest?.('a');
     if (!target || !target.href) return;
     if (target.target === '_blank' || target.hasAttribute('download')) return;
@@ -65,7 +67,7 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}) {
   }
 
   function handlePopState() {
-    if (!enabled || !isDirtyDerived) return;
+    if (allowLeave || !enabled || !isDirtyDerived) return;
     window.history.pushState(null, '', window.location.href);
     isBlocked = true;
   }
@@ -80,15 +82,24 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}) {
     const url = pendingNavigationUrl;
     isBlocked = false;
     dirtyState = false;
+    allowLeave = true;
+    pendingNavigationUrl = null;
     options.onLeave?.();
     if (url && typeof window !== 'undefined') {
       window.location.href = url;
+      return;
     }
+    // Reset the bypass only if no synchronous navigation happened, so an
+    // `onLeave` callback can still navigate without a second beforeunload prompt.
+    setTimeout(() => {
+      allowLeave = false;
+    }, 0);
   }
 
   function cancel() {
     isBlocked = false;
     pendingNavigationUrl = null;
+    allowLeave = false;
     options.onStay?.();
   }
 
