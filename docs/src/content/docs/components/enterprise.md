@@ -2133,6 +2133,60 @@ Enterprise multi-record parameter comparison and difference spotlight suite:
 />
 ```
 
+### `<WebhookSimulator>`
+
+Enterprise webhook event dispatch simulation and replay sandbox:
+- Designed for developer portals, third-party webhook integrations, and sandbox testing.
+- **Preset Events & Auto Fill**: Built-in presets for `order.payment_succeeded`, `user.security_alert`, and `invoice.issued` with automated JSON schema payload population.
+- **Delivery Inspection**: Configurable target endpoint URL, automatic header generation, and live display of HTTP response codes, round-trip latency, and formatted response bodies.
+
+```svelte
+<script lang="ts">
+  import { WebhookSimulator } from '@svadmin/ui';
+</script>
+
+<WebhookSimulator
+  defaultEndpoint="https://api.merchant.com/webhooks/svadmin"
+  ondeliver={async ({ eventType, endpoint }) => {
+    return { statusCode: 200, durationMs: 76, responseBody: '{"ok": true}' };
+  }}
+/>
+```
+
+### `<HmacSignatureCalculator>`
+
+HMAC signature calculation and live verification sandbox:
+- Built for debugging webhook signature mismatches and payload integrity issues.
+- **Hardware-accelerated Web Crypto**: Implemented with native `crypto.subtle` supporting `HMAC-SHA256`, `HMAC-SHA384`, and `HMAC-SHA512`.
+- **Live Match Verification**: Computes hex digest in real-time, provides one-click copy, and verifies external signatures with instant valid/mismatch feedback.
+
+```svelte
+<script lang="ts">
+  import { HmacSignatureCalculator } from '@svadmin/ui';
+</script>
+
+<HmacSignatureCalculator
+  defaultSecret="whsec_prod_secret_8848"
+  defaultBody={'{"event":"payment.succeeded"}'}
+/>
+```
+
+### `<ApiPlayground>`
+
+Embedded interactive API quick debugger and runner:
+- Built for developer documentation, interactive API exploration, and microservice probing.
+- **All Methods & cURL Export**: Covers GET, POST, PUT, PATCH, and DELETE with automated standard cURL command generation for terminal reproduction.
+- **Response Inspection**: Live execution with response HTTP code, duration, payload size, and formatted JSON rendering.
+
+```svelte
+<script lang="ts">
+  import { ApiPlayground } from '@svadmin/ui';
+</script>
+
+<ApiPlayground
+  defaultMethod="POST"
+  defaultUrl="/api/v1/orders"
+  defaultBody={'{\n  "sku": "LICENSE"\n}'}
 ### `<WidgetContainer>`
 
 Enterprise dashboard widget wrapper container:
