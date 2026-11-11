@@ -1806,3 +1806,82 @@ Enterprise multi-record parameter comparison and difference spotlight suite:
   onsync={(source, target, field) => console.log(`Synced ${field} to ${target.name}`)}
 />
 ```
+
+### `<PlanUsageQuotaBar>`
+
+Enterprise SaaS multi-tenant quota usage and limit progress suite:
+- Designed for tenant settings, subscription overviews, and quota breach warnings.
+- **Multi-Quota Aggregation**: Tracks API calls, storage, seats, and compute hours with threshold-driven status color shifts (normal, warning amber, danger red).
+- **Reset Cycles & Upgrade CTAs**: Communicates reset dates with one-click upgrade / expand capacity triggers.
+
+```svelte
+<script lang="ts">
+  import { PlanUsageQuotaBar, type QuotaItem } from '@svadmin/ui';
+
+  const quotas: QuotaItem[] = [
+    { id: 'api', label: 'API Request Quota', current: 78500, limit: 100000, unit: 'req' },
+  ];
+</script>
+
+<PlanUsageQuotaBar
+  planName="Enterprise Scale"
+  planBadge="SLA 99.99%"
+  resetDateText="2026-12-01 Auto Reset"
+  {quotas}
+  onupgrade={() => console.log('Upgrade clicked')}
+/>
+```
+
+### `<TierFeatureComparison>`
+
+Multi-tier pricing plan feature matrix and capability comparison table:
+- Built for SaaS pricing pages, plan upgrade workflows, and entitlement boundaries.
+- **Card-Style Headers**: Side-by-side tier cards with recommendation badges and current-plan state indicators.
+- **Grouped Feature Rows**: Categorized rows supporting booleans, dash exclusions, and numeric limit values.
+
+```svelte
+<script lang="ts">
+  import { TierFeatureComparison, type PricingTier, type FeatureGroup } from '@svadmin/ui';
+
+  const tiers: PricingTier[] = [
+    { key: 'starter', name: 'Starter', price: '$49', period: 'mo', isCurrent: true },
+    { key: 'pro', name: 'Pro', price: '$199', period: 'mo', isPopular: true },
+  ];
+
+  const groups: FeatureGroup[] = [
+    {
+      groupName: 'Platform',
+      features: [{ name: 'Multi-tenant isolation', values: { starter: true, pro: true } }],
+    },
+  ];
+</script>
+
+<TierFeatureComparison {tiers} {groups} onselecttier={(k) => console.log('Selected:', k)} />
+```
+
+### `<BillingInvoiceDrawer>`
+
+Enterprise monthly settlement ledger and invoice detail drawer:
+- Tailored for financial reconciliation, settlement review, and tax invoice issuance.
+- **Settlement Overview**: Displays period ID, issue date, total amount, taxes, and payment status badges (Paid/Pending/Refunded).
+- **Itemized Consumptions & PDF Download**: Granular item lists alongside electronic tax invoice PDF downloads.
+
+```svelte
+<script lang="ts">
+  import { BillingInvoiceDrawer, type InvoiceData } from '@svadmin/ui';
+
+  let open = $state(false);
+  const invoice: InvoiceData = {
+    invoiceNo: 'INV-202611-00812',
+    period: 'October 2026',
+    issueDate: '2026-11-01',
+    status: 'paid',
+    totalAmount: 18450,
+    items: [{ id: '1', description: 'Enterprise Seats', category: 'Subscription', amount: 18450 }],
+  };
+</script>
+
+<button onclick={() => (open = true)}>View Settlement Ledger</button>
+
+<BillingInvoiceDrawer bind:open {invoice} />
+```

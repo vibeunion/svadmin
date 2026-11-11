@@ -83,6 +83,12 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  PlanUsageQuotaBar,
+  MultiQuotaProgress,
+  TierFeatureComparison,
+  PricingMatrixTable,
+  BillingInvoiceDrawer,
+  InvoiceDetailDrawer,
   MicroAppFrame,
   EmbeddedSandbox,
   RoleSwitcher,
@@ -249,6 +255,12 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(PlanUsageQuotaBar).toBeDefined();
+    expect(MultiQuotaProgress).toBe(PlanUsageQuotaBar);
+    expect(TierFeatureComparison).toBeDefined();
+    expect(PricingMatrixTable).toBe(TierFeatureComparison);
+    expect(BillingInvoiceDrawer).toBeDefined();
+    expect(InvoiceDetailDrawer).toBe(BillingInvoiceDrawer);
     expect(GaugeChart).toBeDefined();
     expect(SpeedometerGauge).toBe(GaugeChart);
     expect(MetricGrid).toBeDefined();

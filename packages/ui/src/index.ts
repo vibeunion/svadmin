@@ -821,3 +821,8 @@ export { useMicroAppEvent, type UseMicroAppEventOptions, type MicroAppMessage as
 export { default as MicroAppBridge, type MicroAppBridgeProps } from './components/MicroAppBridge.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
+
+// Enterprise SaaS multi-tenant quota usage, tier feature comparison & billing invoice suite
+export { default as PlanUsageQuotaBar, default as MultiQuotaProgress, type PlanUsageQuotaBarProps, type QuotaItem } from './components/PlanUsageQuotaBar.svelte';
+export { default as TierFeatureComparison, default as PricingMatrixTable, type TierFeatureComparisonProps, type PricingTier, type FeatureGroup, type FeatureRow } from './components/TierFeatureComparison.svelte';
+export { default as BillingInvoiceDrawer, default as InvoiceDetailDrawer, type BillingInvoiceDrawerProps, type InvoiceData, type BillingItem } from './components/BillingInvoiceDrawer.svelte';
