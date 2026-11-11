@@ -43,7 +43,7 @@
 <div
   data-svadmin-component="SankeyChart"
   class={cn(
-    'w-full rounded-2xl border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
+    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
     className,
   )}
 >
