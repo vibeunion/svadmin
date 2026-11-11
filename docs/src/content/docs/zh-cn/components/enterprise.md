@@ -2516,3 +2516,192 @@ HMAC 签名计算与现场验签沙箱：
   onsubmit={(valid) => console.log('提交合法数据:', valid)}
 />
 ```
+
+### `<PivotMatrix>` / `<CrossTableSummary>`
+
+多维交叉透视分析矩阵与动态聚合报表：
+- 专为财务核算、营收对账、供应链多仓交叉分析设计，突破普通平铺表格限制。
+- **动态交叉行列分组**：自由指定行维度与列维度，多字段交叉编排。
+- **多度量聚合计算**：原生支持求和（Sum）、平均值（Avg）、计数（Count）、最大/最小值聚合与自定义数字格式化。
+- **热力阶梯与行列总计**：基于单元格数值自动呈现语义热力色彩梯度，内置行汇总与全表总计底栏。
+
+```svelte
+<script lang="ts">
+  import { PivotMatrix } from '@svadmin/ui';
+
+  const data = [
+    { region: '华东', dept: '企业软件', quarter: 'Q1', revenue: 1200 },
+    { region: '华东', dept: '硬件设备', quarter: 'Q1', revenue: 800 },
+    { region: '华南', dept: '企业软件', quarter: 'Q1', revenue: 950 }
+  ];
+</script>
+
+<PivotMatrix {data} title="营收多维透视矩阵" />
+```
+
+### `<GeoScatterMap>` / `<RegionDistributionMap>`
+
+轻量矢量地域空间分布与散点热力大屏组件：
+- 零外部数十兆第三方地图 SDK 依赖，采用极简 SVG 矢量区划拓扑渲染。
+- **散点气泡自适应缩放**：根据指标数值大小计算气泡外扩半径与涟漪光环。
+- **区域排行榜联动**：右侧内置各区域综合负载进度排行与运行状态指示（正常、预警、超限）。
+
+```svelte
+<script lang="ts">
+  import { GeoScatterMap } from '@svadmin/ui';
+
+  const regions = [
+    { id: 'east', name: '华东大区', value: 4820, x: 78, y: 58, status: 'highlight' },
+    { id: 'south', name: '华南大区', value: 3650, x: 68, y: 82, status: 'normal' }
+  ];
+</script>
+
+<GeoScatterMap {regions} title="业务地域空间分布拓扑图" metricLabel="并发连接数" />
+```
+
+### `<DataMaskPolicyEngine>` / `<DataMaskCenter>`
+
+基于角色与密级的动态数据脱敏策略中心：
+- 集中统一管控企业敏感数据安全治理基线，划分 L1~L4 密级。
+- **预设算法与豁免角色**：内置手机号、居民身份证、银行卡号、邮箱、姓名与薪酬脱敏算法，与系统角色矩阵绑定。
+- **客户端即时沙箱**：内置测试输入与算法推演沙箱，零网络往返即时验证脱敏效果。
+
+```svelte
+<script lang="ts">
+  import { DataMaskPolicyEngine } from '@svadmin/ui';
+</script>
+
+<DataMaskPolicyEngine onSavePolicies={(policies) => console.log('保存脱敏策略:', policies)} />
+```
+
+### `<MockDataInterceptor>` / `<OfflineMockStudio>`
+
+前端请求拦截与离线 Mock 沙箱控制台：
+- 彻底解耦前后端联调等待，支持弱网与断网环境下的离线 POC 演示。
+- **全局拦截总控**：一键启用或停用全局 Fetch / DataProvider 请求拦截。
+- **延时与故障模拟**：自定义模拟网络延迟（0~3000ms）与 HTTP 状态码（200、201、403、500 熔断模拟），支持即时请求核验。
+
+```svelte
+<script lang="ts">
+  import { MockDataInterceptor } from '@svadmin/ui';
+</script>
+
+<MockDataInterceptor onToggleActive={(active) => console.log('Mock 状态变更:', active)} />
+```
+
+### `<SystemHealthCheckDashboard>` / `<DiagnosticInspector>`
+
+系统链路自检与运维诊断大盘：
+- 面向企业私有化部署与日常运维的一键全量链路健康巡检。
+- **核心组件覆盖**：主数据库、分布式缓存、对象存储桶、SSO 鉴权、消息队列与通知网关实时健康状态与往返延时。
+- **诊断报告导出**：一键导出带时间戳与环境信息的 JSON / Markdown 诊断审计报告。
+
+```svelte
+<script lang="ts">
+  import { SystemHealthCheckDashboard } from '@svadmin/ui';
+</script>
+
+<SystemHealthCheckDashboard onExportReport={(report) => console.log('导出诊断报告:', report)} />
+```
+
+### `<PivotMatrix>`
+
+多维交叉透视矩阵分析表格：
+- 专为销售多维切片、财务跨期核对与 BI 报表交叉汇总打造。
+- **动态切片与聚合**：支持行维度、列维度自由交叉透视，自动计算行小计、列小计与全表总计。
+- **条件热力梯度着色**：根据数值大小自动提供热力色块阶梯渲染，辅助一眼定位关键指标峰值。
+
+```svelte
+<script lang="ts">
+  import { PivotMatrix, type PivotDimension, type PivotMeasure } from '@svadmin/ui';
+
+  const rows: PivotDimension[] = [{ key: 'region', label: '大区' }];
+  const cols: PivotDimension[] = [{ key: 'quarter', label: '季度' }];
+  const measures: PivotMeasure[] = [{ key: 'revenue', label: '营收 (万元)', aggregation: 'sum' }];
+  const data = [
+    { region: '华东', quarter: 'Q1', revenue: 1200 },
+    { region: '华东', quarter: 'Q2', revenue: 1450 },
+    { region: '华北', quarter: 'Q1', revenue: 980 },
+    { region: '华北', quarter: 'Q2', revenue: 1100 },
+  ];
+</script>
+
+<PivotMatrix {rows} {cols} {measures} {data} />
+```
+
+### `<GeoScatterMap>`
+
+纯 SVG 矢量多地域气泡散点分布图：
+- 专为大屏驾驶舱与多地域业务密度监控打造，零重型第三方 GIS 依赖，极速轻量渲染。
+- **多维度气泡散点**：以地域坐标为基准，根据数值自动换算气泡半径大小与色彩深浅，悬停展示详细业务指标。
+
+```svelte
+<script lang="ts">
+  import { GeoScatterMap, type GeoRegionData } from '@svadmin/ui';
+
+  const regions: GeoRegionData[] = [
+    { id: 'sh', name: '上海节点', x: 75, y: 55, value: 8840, label: '华东核心' },
+    { id: 'bj', name: '北京节点', x: 68, y: 32, value: 7200, label: '华北核心' },
+    { id: 'sz', name: '深圳节点', x: 70, y: 78, value: 6500, label: '华南核心' },
+  ];
+</script>
+
+<GeoScatterMap title="全国各区域订单密度分布" {regions} />
+```
+
+### `<DataMaskPolicyEngine>`
+
+基于角色的企业级动态数据脱敏策略中心：
+- 专为等保三级、金融合规与隐私保护设计。
+- **多规则多级别脱敏**：针对手机号、身份证、银行卡、薪资等敏感资产，按角色配置“完全隐藏”、“部分掩码”或“明文透出”策略。
+
+```svelte
+<script lang="ts">
+  import { DataMaskPolicyEngine, type MaskingPolicyItem } from '@svadmin/ui';
+
+  const policies: MaskingPolicyItem[] = [
+    { field: 'phone', label: '客户手机号', ruleType: 'mobile', level: 'partial' },
+    { field: 'idCard', label: '身份证号', ruleType: 'idCard', level: 'strict' },
+  ];
+</script>
+
+<DataMaskPolicyEngine {policies} onpolicychange={(p) => console.log('策略更新:', p)} />
+```
+
+### `<MockDataInterceptor>`
+
+前端网络请求拦截与离线 Mock 演练室：
+- 专为前端独立开发、离线弱网测试与故障演练设计。
+- **接口录制与故障注入**：支持拦截指定 API 路径，自定义模拟响应延时，甚至注入 500、403 等异常状态码以验证前端容灾兜底。
+
+```svelte
+<script lang="ts">
+  import { MockDataInterceptor, type MockRuleItem } from '@svadmin/ui';
+
+  const rules: MockRuleItem[] = [
+    { urlPattern: '/api/orders', method: 'GET', enabled: true, delayMs: 200, responseStatus: 200, mockData: '{"items":[]}' },
+  ];
+</script>
+
+<MockDataInterceptor {rules} />
+```
+
+### `<SystemHealthCheckDashboard>`
+
+全系统服务健康度自检与诊断大屏：
+- 专为微服务集群监控、依赖可用性诊断与运维巡检打造。
+- **全链路心跳监控**：实时检查数据库主备连接池、Redis 缓存集群、对象存储 OSS 及三方支付接口 SLA。
+
+```svelte
+<script lang="ts">
+  import { SystemHealthCheckDashboard, type HealthServiceCheck } from '@svadmin/ui';
+
+  const services: HealthServiceCheck[] = [
+    { name: 'PostgreSQL 主数据库', status: 'healthy', latencyMs: 12, uptime: '99.99%' },
+    { name: 'Redis 缓存集群', status: 'healthy', latencyMs: 4, uptime: '100%' },
+    { name: 'S3 对象存储', status: 'healthy', latencyMs: 35, uptime: '99.95%' },
+  ];
+</script>
+
+<SystemHealthCheckDashboard {services} />
+```

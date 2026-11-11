@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-11T22:24:15.146Z",
-  "totalComponents": 257,
+  "timestamp": "2026-11-11T23:23:19.436Z",
+  "totalComponents": 262,
   "adaptedCount": 135,
-  "fallbackCount": 100,
-  "spaOnlyCount": 22,
+  "fallbackCount": 104,
+  "spaOnlyCount": 23,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 52.5,
-  "fallbackPercentage": 38.9,
+  "exactPercentage": 51.5,
+  "fallbackPercentage": 39.7,
   "behaviorVerifiedCount": 197,
-  "behaviorVerifiedPercentage": 76.7,
+  "behaviorVerifiedPercentage": 75.2,
   "behaviorAssertedCount": 197,
-  "behaviorAssertedPercentage": 76.7,
+  "behaviorAssertedPercentage": 75.2,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,27 +28,27 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 103,
+      "total": 106,
       "adapted": 29,
-      "fallback": 54,
-      "spaOnly": 20,
+      "fallback": 56,
+      "spaOnly": 21,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 28.2,
-      "fallbackRate": 52.4,
+      "exactRate": 27.4,
+      "fallbackRate": 52.8,
       "behaviorVerified": 72,
       "behaviorAsserted": 72
     },
     "widgets": {
       "category": "widgets",
-      "total": 47,
+      "total": 49,
       "adapted": 18,
-      "fallback": 29,
+      "fallback": 31,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 38.3,
-      "fallbackRate": 61.7,
+      "exactRate": 36.7,
+      "fallbackRate": 63.3,
       "behaviorVerified": 41,
       "behaviorAsserted": 41
     },
@@ -2110,6 +2110,41 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端数据校验统计与错误明细表格展示；客户端只看错误行过滤与单元格修补由 SPA 承接"
+    },
+    {
+      "name": "PivotMatrix",
+      "uiComponent": "PivotMatrix.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接"
+    },
+    {
+      "name": "GeoScatterMap",
+      "uiComponent": "GeoScatterMap.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接"
+    },
+    {
+      "name": "DataMaskPolicyEngine",
+      "uiComponent": "DataMaskPolicyEngine.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端脱敏策略基线表格与豁免角色列表；实时沙箱算法推演由 SPA 承接"
+    },
+    {
+      "name": "MockDataInterceptor",
+      "uiComponent": "MockDataInterceptor.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (客户端网络拦截与离线 Mock 控制台)"
+    },
+    {
+      "name": "SystemHealthCheckDashboard",
+      "uiComponent": "SystemHealthCheckDashboard.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接"
     },
     {
       "name": "ThemeToggle",

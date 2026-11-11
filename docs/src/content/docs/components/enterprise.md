@@ -2679,3 +2679,158 @@ Pre-import record validator and inline cell corrector:
 
 <ImportPreviewValidator {columns} {rows} onsubmit={(valid) => console.log('Submitting:', valid)} />
 ```
+
+### `<PivotMatrix>` / `<CrossTableSummary>`
+
+Multi-dimensional pivot matrix and cross-tabulation analysis table:
+- Designed for financial closing, revenue reconciliation, and inventory cross-analysis.
+- **Dynamic Cross Tabulation**: Dynamically groups records across row and column dimensions.
+- **Multiple Aggregations**: Supports sum, avg, count, min, and max aggregations with custom number formatting.
+- **Heatmap Shading & Totals**: Highlights cell values using semantic color intensity and computes row/column grand totals.
+
+```svelte
+<script lang="ts">
+  import { PivotMatrix } from '@svadmin/ui';
+
+  const data = [
+    { region: 'East', dept: 'Software', quarter: 'Q1', revenue: 1200 },
+    { region: 'East', dept: 'Hardware', quarter: 'Q1', revenue: 800 },
+    { region: 'South', dept: 'Software', quarter: 'Q1', revenue: 950 }
+  ];
+</script>
+
+<PivotMatrix {data} title="Revenue Pivot Analysis" />
+```
+
+### `<GeoScatterMap>` / `<RegionDistributionMap>`
+
+Vector-based regional geographic distribution and scatter bubble map:
+- Zero external mapping SDK dependencies; renders clean SVG geographic topology.
+- **Scatter Bubble Scaling**: Proportional bubble radius based on regional metrics.
+- **Ranking Leaderboard**: Integrated regional ranking progress tracks and status badges.
+
+```svelte
+<script lang="ts">
+  import { GeoScatterMap } from '@svadmin/ui';
+
+  const regions = [
+    { id: 'east', name: 'East Region', value: 4820, x: 78, y: 58, status: 'highlight' },
+    { id: 'south', name: 'South Region', value: 3650, x: 68, y: 82, status: 'normal' }
+  ];
+</script>
+
+<GeoScatterMap {regions} title="Regional Compute Topology" metricLabel="Active Nodes" />
+```
+
+### `<DataMaskPolicyEngine>` / `<DataMaskCenter>`
+
+Enterprise role-based data masking policy center and sandbox:
+- Centralized data governance across sensitivity levels (L1 to L4).
+- **Preset Rules & White-listing**: Built-in rules for mobile, national ID, bank card, email, and salary, mapped to exempt roles.
+- **Interactive Sandbox**: Real-time client-side preview for verifying masking algorithms with instant feedback.
+
+```svelte
+<script lang="ts">
+  import { DataMaskPolicyEngine } from '@svadmin/ui';
+</script>
+
+<DataMaskPolicyEngine onSavePolicies={(policies) => console.log('Saved:', policies)} />
+```
+
+### `<MockDataInterceptor>` / `<OfflineMockStudio>`
+
+Frontend request interceptor and offline Mock API studio:
+- Decouples frontend development from pending backend APIs and offline demo environments.
+- **Global Killswitch**: Master toggle to enable or disable mock request interception.
+- **Delay & Fault Simulation**: Simulates network latency (0~3000ms) and HTTP error status codes (200, 201, 403, 500).
+
+```svelte
+<script lang="ts">
+  import { MockDataInterceptor } from '@svadmin/ui';
+</script>
+
+<MockDataInterceptor onToggleActive={(active) => console.log('Mock active:', active)} />
+```
+
+### `<SystemHealthCheckDashboard>` / `<DiagnosticInspector>`
+
+System self-check, diagnostics, and service dependency inspection dashboard:
+- Instant one-click health diagnosis for database, cache, storage, queue, and auth gateways.
+- **KPI Summary Cards**: Overview of healthy, degraded, and failed services with average round-trip latency.
+- **Exportable Audit Report**: Generates timestamped diagnostic reports in JSON or Markdown.
+
+```svelte
+<script lang="ts">
+  import { SystemHealthCheckDashboard } from '@svadmin/ui';
+</script>
+
+<SystemHealthCheckDashboard onExportReport={(report) => console.log('Diagnostic report:', report)} />
+```
+
+### `<PivotMatrix>`
+
+Multi-dimensional cross-tabulation pivot matrix:
+- Designed for dimensional sales slicing, cross-period financial reconciliation, and BI reporting.
+- **Dynamic Slicing & Aggregations**: Flexible row and column cross-pivoting with automatic subtotal and grand total calculations.
+
+```svelte
+<script lang="ts">
+  import { PivotMatrix } from '@svadmin/ui';
+</script>
+
+<PivotMatrix rows={[{ key: 'region', label: 'Region' }]} cols={[{ key: 'quarter', label: 'Quarter' }]} measures={[{ key: 'revenue', label: 'Revenue', aggregation: 'sum' }]} data={[]} />
+```
+
+### `<GeoScatterMap>`
+
+Pure SVG vector multi-region bubble scatter distribution map:
+- Built for executive dashboards and regional operational density visualization without heavy external GIS dependencies.
+- **Scatter Bubbles**: Dynamically maps regional coordinates with bubble sizes and color gradients based on metrics.
+
+```svelte
+<script lang="ts">
+  import { GeoScatterMap } from '@svadmin/ui';
+</script>
+
+<GeoScatterMap title="Regional Order Density" regions={[]} />
+```
+
+### `<DataMaskPolicyEngine>`
+
+Role-based enterprise dynamic data masking policy center:
+- Built for regulatory compliance, privacy governance, and enterprise access auditing.
+- **Multi-Level Masking**: Configures masking policies across sensitive assets (phone, identity, card) by role.
+
+```svelte
+<script lang="ts">
+  import { DataMaskPolicyEngine } from '@svadmin/ui';
+</script>
+
+<DataMaskPolicyEngine policies={[]} />
+```
+
+### `<MockDataInterceptor>`
+
+Frontend network request interceptor and offline mock studio:
+- Built for offline development, latency simulation, and fault injection testing (500/403/timeout).
+
+```svelte
+<script lang="ts">
+  import { MockDataInterceptor } from '@svadmin/ui';
+</script>
+
+<MockDataInterceptor rules={[]} />
+```
+
+### `<SystemHealthCheckDashboard>`
+
+Comprehensive system service health diagnostics dashboard:
+- Built for microservice clusters, dependency connectivity checks, and SLA health audits.
+
+```svelte
+<script lang="ts">
+  import { SystemHealthCheckDashboard } from '@svadmin/ui';
+</script>
+
+<SystemHealthCheckDashboard services={[]} />
+```
