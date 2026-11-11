@@ -128,7 +128,6 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/PrintableReportLayout.svelte',
   'packages/ui/src/components/StepForm.svelte',
   'packages/ui/src/components/StepWizard.svelte',
-  'packages/ui/src/components/PrintableReportLayout.svelte',
   'packages/ui/src/components/VirtualList.svelte',
   'packages/ui/src/components/content/WorkspaceInspector.svelte',
   'packages/ui/src/components/account/GetStartedPage.svelte',
