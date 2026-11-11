@@ -2218,3 +2218,113 @@ HMAC 签名计算与现场验签沙箱：
   onclose={() => (isBatchOpen = false)}
 />
 ```
+
+### `<SqlConsole>` / `<DatabaseQueryRunner>`
+
+企业级安全只读 SQL 控制台与数据探查器：
+- **破坏性写操作严格拦截**：内置安全语法守卫，严格拦截任何写操作与结构变更语句（`DROP`, `TRUNCATE`, `ALTER`, `DELETE`, `UPDATE`, `INSERT`），确保 100% 只读安全。
+- **查询模板与性能指标**：内置常用聚合与跨表模板，实时统计执行耗时（毫秒）、行数，并支持一键导出 CSV 与 JSON。
+
+```svelte
+<script lang="ts">
+  import { SqlConsole } from '@svadmin/ui';
+</script>
+
+<SqlConsole
+  title="生产只读数据探查控制台"
+  initialSql="SELECT id, order_no, amount, status FROM orders WHERE amount > 1000 LIMIT 20;"
+  onExecuteQuery={async (sql) => {
+    return { columns: ['id', 'amount'], rows: [{ id: 1, amount: 2000 }], rowCount: 1, durationMs: 12 };
+  }}
+/>
+```
+
+### `<EnvVariableEditor>` / `<SecretVaultManager>`
+
+多环境配置中心与密钥敏感变量管理器：
+- **多套环境无缝隔离**：并排管理 `development`、`staging` 与 `production` 环境配置。
+- **敏感变量掩码保护**：核心秘钥全量以 `●●●●●●●●` 加密掩码展示，支持点击眼睛按需查看。
+- **批量 .env 导入导出**：一键粘贴整段 `.env` 文本自动批量解析导入，或一键导出标准文件。
+
+```svelte
+<script lang="ts">
+  import { EnvVariableEditor } from '@svadmin/ui';
+</script>
+
+<EnvVariableEditor
+  environment="production"
+  onSaveEnv={(vars, env) => console.log('已保存环境变量:', env, vars)}
+/>
+```
+
+### `<FeatureAnnouncementModal>` / `<WhatIsNewModal>`
+
+版本发版公告与新特性图文漫游引导弹窗（Linear / Apple 质感设计）：
+- **特性清单图文卡片**：展示新版本号（如 `v0.5.15`）、发布日期与核心特性分类胶囊。
+- **智能免打扰记忆**：勾选“此版本不再提示”后自动持久化至 `localStorage`。
+- **“立即体验”行动流**：支持一键跳转新功能演示或稍后查看。
+
+```svelte
+<script lang="ts">
+  import { FeatureAnnouncementModal } from '@svadmin/ui';
+
+  let open = $state(true);
+</script>
+
+<FeatureAnnouncementModal
+  bind:open
+  version="v0.5.15"
+  releaseDate="2026-11-11"
+  onExplore={() => console.log('用户点击体验新特性')}
+/>
+```
+
+### `<MasterSubTableDrawer>` / `<NestedRecordExplorer>`
+
+1:N 主从嵌套子表与主子记录联动抽屉：
+- **主记录核心摘要卡片**：展示单号、金额、负责人等主对象核心属性。
+- **子表高密度明细网格**：支持子表独立模糊搜索、行内删除与点击添加新行。
+- **双向联动同步**：子记录增删自动联动主表合计反写。
+
+```svelte
+<script lang="ts">
+  import { MasterSubTableDrawer } from '@svadmin/ui';
+
+  let open = $state(false);
+  let order = { orderNo: 'ORD-2026-901', customer: '华为技术有限公司', totalAmount: '¥ 11,000' };
+  let subItems = $state([
+    { sku: 'HW-01', name: '万兆光模块', quantity: 20, subtotal: '¥ 7,600' },
+    { sku: 'HW-02', name: '光纤熔接盒', quantity: 4, subtotal: '¥ 3,400' },
+  ]);
+</script>
+
+<MasterSubTableDrawer
+  bind:open
+  masterRecord={order}
+  bind:subItems
+  subColumns={[
+    { key: 'sku', label: '商品SKU' },
+    { key: 'name', label: '商品名称' },
+    { key: 'quantity', label: '采购数量', align: 'right' },
+    { key: 'subtotal', label: '小计', align: 'right' },
+  ]}
+/>
+```
+
+### `<ScheduledJobManager>` / `<CronSchedulerMatrix>`
+
+异步定时任务调度执行大盘：
+- **Cron 规则矩阵**：一览计划任务列表、Cron 表达式、下次触发实时倒计时与上次执行状态。
+- **即时手动执行**：提供一键“立即执行一次（Trigger Now）”功能，带动态触发中反馈。
+- **生命周期调度控制**：支持一键暂停或恢复计划任务调度。
+
+```svelte
+<script lang="ts">
+  import { ScheduledJobManager } from '@svadmin/ui';
+</script>
+
+<ScheduledJobManager
+  onTriggerJob={async (job) => console.log('手动触发任务:', job.id)}
+  onToggleJobStatus={(job, status) => console.log('切换任务状态:', job.id, status)}
+/>
+```

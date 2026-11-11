@@ -866,3 +866,18 @@ export { default as ServerStatusGrid, default as ClusterHealthMatrix, type Serve
 export { default as QueryBuilder, default as AdvancedQueryBuilder, type QueryBuilderProps, type QueryGroup, type QueryRule, type QueryField, type LogicalOperator, type ComparisonOperator } from './components/QueryBuilder.svelte';
 export { default as FilterTagBar, type FilterTagBarProps, type FilterTagItem, type SavedPresetView } from './components/FilterTagBar.svelte';
 export { default as BatchEditModal, default as BatchEditorModal, type BatchEditModalProps, type BatchEditChange, type BatchFieldOption } from './components/BatchEditModal.svelte';
+
+// Enterprise safe read-only SQL console & database query runner suite
+export { default as SqlConsole, default as DatabaseQueryRunner, type SqlConsoleProps, type SqlQueryResult } from './components/SqlConsole.svelte';
+
+// Enterprise multi-environment secret vault & env configuration suite
+export { default as EnvVariableEditor, default as SecretVaultManager, type EnvVariableEditorProps, type EnvVariableItem } from './components/EnvVariableEditor.svelte';
+
+// Enterprise release what is new & feature announcement modal suite
+export { default as FeatureAnnouncementModal, default as WhatIsNewModal, type FeatureAnnouncementModalProps, type FeatureCardItem } from './components/FeatureAnnouncementModal.svelte';
+
+// Enterprise master-detail nested sub-table explorer drawer suite
+export { default as MasterSubTableDrawer, default as NestedRecordExplorer, type MasterSubTableDrawerProps, type MasterFieldMeta, type SubTableColumnMeta } from './components/MasterSubTableDrawer.svelte';
+
+// Enterprise scheduled jobs & cron execution matrix manager suite
+export { default as ScheduledJobManager, default as CronSchedulerMatrix, type ScheduledJobManagerProps, type ScheduledJobItem, type ScheduledJobStatus } from './components/ScheduledJobManager.svelte';

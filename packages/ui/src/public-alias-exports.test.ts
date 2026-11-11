@@ -177,6 +177,16 @@ import {
   MetricsDeltaPill,
   useStorageCache,
   MemoryStorageAdapter,
+  SqlConsole,
+  DatabaseQueryRunner,
+  EnvVariableEditor,
+  SecretVaultManager,
+  FeatureAnnouncementModal,
+  WhatIsNewModal,
+  MasterSubTableDrawer,
+  NestedRecordExplorer,
+  ScheduledJobManager,
+  CronSchedulerMatrix,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -248,6 +258,16 @@ describe('public compatibility aliases', () => {
     expect(MetricsDeltaPill).toBe(PeriodComparisonCard);
     expect(useStorageCache).toBeDefined();
     expect(MemoryStorageAdapter).toBeDefined();
+    expect(SqlConsole).toBeDefined();
+    expect(DatabaseQueryRunner).toBe(SqlConsole);
+    expect(EnvVariableEditor).toBeDefined();
+    expect(SecretVaultManager).toBe(EnvVariableEditor);
+    expect(FeatureAnnouncementModal).toBeDefined();
+    expect(WhatIsNewModal).toBe(FeatureAnnouncementModal);
+    expect(MasterSubTableDrawer).toBeDefined();
+    expect(NestedRecordExplorer).toBe(MasterSubTableDrawer);
+    expect(ScheduledJobManager).toBeDefined();
+    expect(CronSchedulerMatrix).toBe(ScheduledJobManager);
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);
