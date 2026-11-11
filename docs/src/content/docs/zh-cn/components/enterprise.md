@@ -1694,6 +1694,82 @@ SQL / JSON Schema 可视化逆向建模与资源生成器：
 />
 ```
 
+### `<WidgetContainer>`
+
+企业级监控看板小部件容器外壳：
+- 专为统一管理监控图表、指标卡片与运营看板设计。
+- **全生命周期交互**：内置右上角工具栏，支持一键手动刷新动画、全屏放大/ESC 还原、时间戳显示与自定义操作区。
+- **状态容灾自愈**：天然支持 `loading` 骨架屏加载过渡与 `error` 状态友好承接卡片，支持用户一键重试重新拉取数据。
+
+```svelte
+<script lang="ts">
+  import { WidgetContainer } from '@svadmin/ui';
+
+  let isUpdating = $state(false);
+  const now = new Date();
+</script>
+
+<WidgetContainer
+  title="实时请求吞吐量 (QPS)"
+  description="监控过去 24 小时每秒请求数与波动曲线"
+  lastUpdated={now}
+  allowFullscreen={true}
+  allowRefresh={true}
+  refreshing={isUpdating}
+  onrefresh={async () => {
+    isUpdating = true;
+    await new Promise((r) => setTimeout(r, 800));
+    isUpdating = false;
+  }}
+>
+  <div class="h-44 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+    此处嵌入任意 LineChart、AreaChart 或 MetricStrip
+  </div>
+</WidgetContainer>
+```
+
+### `<DataFreshnessIndicator>`
+
+数据新鲜度指示灯与自动轮询状态胶囊：
+- 专为大屏与实时运维监控面板打造，直观感知数据时效性。
+- **动态呼吸灯**：实时同步中（绿色水波纹脉冲）、刚刚更新、X秒前、过期告警（黄色高亮）。
+- **轮询周期自切换**：支持用户在胶囊中切换轮询周期（5秒 / 15秒 / 30秒 / 1分钟 / 手动刷新），点击胶囊即可触发立即重新拉取数据。
+
+```svelte
+<script lang="ts">
+  import { DataFreshnessIndicator } from '@svadmin/ui';
+
+  let lastSyncTime = $state(Date.now());
+</script>
+
+<DataFreshnessIndicator
+  lastUpdated={lastSyncTime}
+  pollInterval={15}
+  staleThresholdMs={60000}
+  onsyncnow={() => (lastSyncTime = Date.now())}
+  onintervalchange={(sec) => console.log('轮询周期变更为:', sec)}
+/>
+```
+
+### `<ServerStatusGrid>`
+
+服务节点集群健康度点阵与指标网格：
+- 专为微服务网关、边缘计算节点、数据库只读副本集群监控打造。
+- **集群全局统计**：自动汇聚计算健康在线节点数、告警节点数、紧急故障节点数与平均网络延迟。
+- **细粒度卡片**：直观展示节点名称、所属地域（如 `cn-shanghai`）、实时心跳延时、CPU 占用、内存消耗与磁盘使用率微型进度条，支持状态动态变色。
+
+```svelte
+<script lang="ts">
+  import { ServerStatusGrid, type ServerNode } from '@svadmin/ui';
+
+  const nodes: ServerNode[] = [
+    { id: '1', name: 'api-gateway-01', region: 'cn-shanghai', status: 'healthy', latencyMs: 18, cpuPercent: 32, memoryPercent: 54, diskPercent: 62 },
+    { id: '2', name: 'api-gateway-02', region: 'cn-beijing', status: 'healthy', latencyMs: 24, cpuPercent: 41, memoryPercent: 60, diskPercent: 65 },
+    { id: '3', name: 'db-replica-ro', region: 'us-west-1', status: 'warning', latencyMs: 185, cpuPercent: 78, memoryPercent: 86, diskPercent: 91 },
+  ];
+</script>
+
+<ServerStatusGrid {nodes} onselectnode={(n) => console.log('选中节点:', n.name)} />
 ### `<QueryBuilder>`
 
 企业级多层嵌套查询与规则引擎构建器：

@@ -83,6 +83,12 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  WidgetContainer,
+  DashboardWidget,
+  DataFreshnessIndicator,
+  FreshnessPill,
+  ServerStatusGrid,
+  ClusterHealthMatrix,
   QueryBuilder,
   AdvancedQueryBuilder,
   FilterTagBar,
@@ -274,6 +280,12 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(WidgetContainer).toBeDefined();
+    expect(DashboardWidget).toBe(WidgetContainer);
+    expect(DataFreshnessIndicator).toBeDefined();
+    expect(FreshnessPill).toBe(DataFreshnessIndicator);
+    expect(ServerStatusGrid).toBeDefined();
+    expect(ClusterHealthMatrix).toBe(ServerStatusGrid);
     expect(QueryBuilder).toBeDefined();
     expect(AdvancedQueryBuilder).toBe(QueryBuilder);
     expect(FilterTagBar).toBeDefined();
