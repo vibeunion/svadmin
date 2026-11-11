@@ -7,7 +7,7 @@
     target?: string;
     title: string;
     description?: string;
-    placement?: 'top' | 'bottom' | 'left' | 'right';
+    placement?: 'top' | 'bottom' | 'left' | 'right' | 'auto';
   }
 
   interface Props {
@@ -46,6 +46,8 @@
 
   let panel = $state<HTMLElement | null>(null);
   let rect = $state<{ top: number; left: number; width: number; height: number } | null>(null);
+  const maskId = `svadmin-tour-mask-${Math.random().toString(36).slice(2, 8)}`;
+
   const step = $derived(steps[Math.max(0, Math.min(current, steps.length - 1))]);
   const last = $derived(current >= steps.length - 1);
 
@@ -69,9 +71,20 @@
     const width = Math.min(320, window.innerWidth - 24);
     let top = rect.top + rect.height + gap;
     let left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
-    if (step?.placement === 'top') top = rect.top - gap - 160;
-    if (step?.placement === 'left') left = Math.max(12, rect.left - width - gap);
-    if (step?.placement === 'right') left = Math.min(window.innerWidth - width - 12, rect.left + rect.width + gap);
+    const placement = step?.placement ?? 'auto';
+
+    if (placement === 'top') {
+      top = rect.top - gap - 160;
+    } else if (placement === 'left') {
+      left = Math.max(12, rect.left - width - gap);
+      top = rect.top;
+    } else if (placement === 'right') {
+      left = Math.min(window.innerWidth - width - 12, rect.left + rect.width + gap);
+      top = rect.top;
+    } else if (placement === 'bottom') {
+      top = rect.top + rect.height + gap;
+    }
+
     const maxTop = Math.max(12, window.innerHeight - 200);
     top = Math.max(12, Math.min(top, maxTop));
     return `top:${top}px;left:${left}px;width:${width}px`;
@@ -133,6 +146,17 @@
   }
 
   $effect(() => {
+    if (storageKey && typeof localStorage !== 'undefined') {
+      try {
+        if (localStorage.getItem(storageKey) === 'true') {
+          open = false;
+          return;
+        }
+      } catch { /* ignore */ }
+    }
+  });
+
+  $effect(() => {
     if (!open) return;
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const overflow = document.body.style.overflow;
@@ -156,17 +180,45 @@
 
 {#if open}
   <div data-svadmin-component="TourGuide" data-targeted={rect ? 'true' : 'false'} class={cn('svadmin-tour', className)}>
+    <!-- Background dismissal trigger to block click-through -->
     <button type="button" tabindex="-1" class="svadmin-tour__dismiss" aria-label={skipText} onclick={close}></button>
+
+    <!-- Pure SVG Viewport Cutout Mask for Target Element Spotlight -->
     {#if rect}
+      <svg class="svadmin-tour__svg-mask fixed inset-0 w-full h-full pointer-events-none z-[61]" aria-hidden="true">
+        <defs>
+          <mask id={maskId}>
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            <rect
+              x={rect.left - 6}
+              y={rect.top - 6}
+              width={rect.width + 12}
+              height={rect.height + 12}
+              rx="8"
+              ry="8"
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="color-mix(in srgb, var(--foreground) 45%, transparent)"
+          mask="url(#{maskId})"
+        />
+      </svg>
       <div
         class="svadmin-tour__spotlight"
         aria-hidden="true"
-        style:top={`${rect.top - 4}px`}
-        style:left={`${rect.left - 4}px`}
-        style:width={`${rect.width + 8}px`}
-        style:height={`${rect.height + 8}px`}
+        style:top={`${rect.top - 6}px`}
+        style:left={`${rect.left - 6}px`}
+        style:width={`${rect.width + 12}px`}
+        style:height={`${rect.height + 12}px`}
       ></div>
     {/if}
+
     <div
       bind:this={panel}
       class="svadmin-tour__panel"
@@ -178,7 +230,12 @@
       onkeydown={onKeydown}
     >
       <header class="svadmin-tour__header">
-        <p class="svadmin-tour__eyebrow">{title} · {current + 1}/{steps.length}</p>
+        <div class="flex items-center justify-between gap-2">
+          <p class="svadmin-tour__eyebrow">{title} · {current + 1}/{steps.length}</p>
+          <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
+            {current + 1} / {steps.length}
+          </span>
+        </div>
         <h2 id="svadmin-tour-title">{step?.title}</h2>
         {#if step?.description}<p class="svadmin-tour__description">{step.description}</p>{/if}
       </header>
@@ -198,17 +255,18 @@
 
 <style>
   .svadmin-tour__dismiss { position: fixed; inset: 0; z-index: 60; border: 0; background: transparent; cursor: default; }
-  .svadmin-tour[data-targeted='false'] .svadmin-tour__dismiss { background: color-mix(in srgb, var(--foreground) 32%, transparent); }
+  .svadmin-tour[data-targeted='false'] .svadmin-tour__dismiss { background: color-mix(in srgb, var(--foreground) 38%, transparent); }
   .svadmin-tour__spotlight {
     position: fixed;
-    z-index: 61;
+    z-index: 62;
     border-radius: var(--radius-md);
-    box-shadow: 0 0 0 9999px color-mix(in srgb, var(--foreground) 42%, transparent), 0 0 0 2px var(--primary);
+    box-shadow: 0 0 0 2px var(--primary), 0 0 16px color-mix(in srgb, var(--primary) 35%, transparent);
     pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .svadmin-tour__panel {
     position: fixed;
-    z-index: 62;
+    z-index: 63;
     display: grid;
     max-width: calc(100vw - 1.5rem);
     gap: var(--svadmin-space-4);

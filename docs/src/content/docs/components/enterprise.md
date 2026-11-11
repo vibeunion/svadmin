@@ -668,7 +668,7 @@ Optimistic locking edit conflict resolver dialog:
 ### `<TourGuide>` / `<Tour>`
 
 Step-by-step product walkthrough and onboarding tour with spotlight masking, floating positioning, and skip memory:
-- Viewport spotlight overlay with backdrop cutout around targeted DOM elements.
+- Pure SVG viewport cutout mask with spotlight backdrop around targeted DOM elements, preventing backdrop click-through.
 - Viewport edge overflow protection and adaptive floating positioning.
 - Local storage persistence (`storageKey`) so users are not prompted again once dismissed or completed.
 - Full keyboard navigation (`Tab`, `Escape`, `ArrowLeft`, `ArrowRight`) with focus trapping.
@@ -697,9 +697,9 @@ Step-by-step product walkthrough and onboarding tour with spotlight masking, flo
 
 Semantic KPI and reporting trend indicator capsule for dashboards, revenue, and latency metrics:
 - Auto-computed percentage changes when given `value` and `prevValue`.
-- Direct numeric or string delta formatting with customizable precision, prefix, and suffix.
+- Direct numeric or string delta formatting with customizable precision, prefix, suffix, and explicit sign formatting (`showSign`).
 - Color reversal (`reverseColor=true`) for inverted metrics where downward trends are positive (e.g., error rate, p99 latency).
-- Design system semantic tokens (`variant="text" | "badge" | "solid"`).
+- Design system semantic tokens (`variant="text" | "badge" | "solid" | "icon"`).
 
 ```svelte
 <script lang="ts">
@@ -711,14 +711,18 @@ Semantic KPI and reporting trend indicator capsule for dashboards, revenue, and 
 
 <!-- Inverted color semantics for error rate -->
 <TrendIndicator value={-12.4} reverseColor={true} variant="solid" />
+
+<!-- Compact icon-only variant with tooltip -->
+<TrendIndicator value={8.5} variant="icon" prefix="MoM" />
 ```
 
 ### `<SignaturePad>`
 
 High-fidelity handwritten digital signature canvas for approvals, audits, and compliance workflows:
-- Smooth quadratic Bezier curve stroke interpolation.
-- State history management with undo and clear operations.
+- Smooth quadratic Bezier curve stroke interpolation for natural calligraphy feel.
+- State history stack with Undo, Redo, and one-click Clear operations.
 - Export to transparent PNG Data URL (`toDataURL()`) or SVG vector markup (`toSVG()`).
+- Optional tamper-evident verification timestamp watermark (`withTimestamp`).
 - Responsive DPI scaling and touch-friendly pointer interactions.
 
 ```svelte
@@ -736,6 +740,7 @@ High-fidelity handwritten digital signature canvas for approvals, audits, and co
   bind:value={signatureData}
   width={480}
   height={180}
+  withTimestamp={true}
   onsave={handleSave}
 />
 ```

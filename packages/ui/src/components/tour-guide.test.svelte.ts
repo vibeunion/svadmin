@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import Tour from './Tour.svelte';
 
 describe('TourGuide Component', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('renders tour guide dialog and step contents when open', () => {
     const steps = [
       { title: 'Welcome Step', description: 'This is the first step of onboarding' },
@@ -21,6 +25,7 @@ describe('TourGuide Component', () => {
     expect(el).toBeTruthy();
     expect(screen.getByText('Welcome Step')).toBeTruthy();
     expect(screen.getByText('This is the first step of onboarding')).toBeTruthy();
+    expect(container.textContent).toContain('1 / 2');
   });
 
   it('navigates through steps with next button', async () => {
@@ -42,5 +47,21 @@ describe('TourGuide Component', () => {
     await fireEvent.click(nextBtn);
 
     expect(screen.getByText('Step 2')).toBeTruthy();
+  });
+
+  it('respects completed state in localStorage when storageKey is provided', () => {
+    localStorage.setItem('my-tour-key', 'true');
+    const steps = [{ title: 'Step 1', description: 'Description 1' }];
+
+    const { container } = render(Tour, {
+      props: {
+        steps,
+        open: true,
+        storageKey: 'my-tour-key',
+      },
+    });
+
+    const el = container.querySelector('[data-svadmin-component="TourGuide"]');
+    expect(el).toBeNull();
   });
 });
