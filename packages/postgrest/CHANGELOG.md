@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/vibeunion/svadmin/compare/postgrest-v0.2.0...postgrest-v0.2.1) (2026-11-11)
+
+
+### 🐛 Bug Fixes
+
+* **postgrest:** avoid unnecessary exact counts for unpaginated lists ([#732](https://github.com/vibeunion/svadmin/issues/732)) ([361d651](https://github.com/vibeunion/svadmin/commit/361d65160d22b659d6467fefe471340ecc2b13d5))
+* **postgrest:** honor non-server pagination modes ([682e309](https://github.com/vibeunion/svadmin/commit/682e309511a8a2ad09fcf335f9b5ec36e1ea9164))
+* **postgrest:** honor non-server pagination modes ([0f68908](https://github.com/vibeunion/svadmin/commit/0f68908d4d68b5d3994a908d8251b66f6db1113d))
+
 ## [0.2.0](https://github.com/vibeunion/svadmin/compare/postgrest-v0.1.0...postgrest-v0.2.0) (2026-11-10)
 
 
