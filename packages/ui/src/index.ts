@@ -786,6 +786,10 @@ export { default as Barcode, type BarcodeProps, type BarcodeFormat } from './com
 export { default as NumberRoll, type NumberRollProps } from './components/NumberRoll.svelte';
 export { default as VirtualList, type VirtualListProps } from './components/VirtualList.svelte';
 
+// Enterprise unsaved changes guard & form loss prevention suite
+export { useUnsavedChanges, type UseUnsavedChangesOptions } from './components/useUnsavedChanges.svelte.js';
+export { default as UnsavedChangesGuard, default as UnsavedChangesModal, type UnsavedChangesGuardProps } from './components/UnsavedChangesGuard.svelte';
+
 // Enterprise KPI card, JSON tree viewer & business result page suite
 export { default as KpiCard, type KpiCardProps } from './components/KpiCard.svelte';
 export { default as JsonViewer, type JsonViewerProps } from './components/JsonViewer.svelte';
