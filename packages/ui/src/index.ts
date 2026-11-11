@@ -895,3 +895,8 @@ export { default as TableAggregationFooter, default as TableColumnSumSummary, ty
 
 // Enterprise incident war room emergency drawer & alert timeline suite
 export { default as IncidentWarRoomDrawer, default as AlertIncidentTimeline, type IncidentWarRoomDrawerProps, type IncidentTimelineEvent, type IncidentSeverity } from './components/IncidentWarRoomDrawer.svelte';
+
+// Enterprise bulk data import, column mapping & inline error validator suite
+export { default as DataImportDropzone, default as BatchImportDropzone, type DataImportDropzoneProps } from './components/DataImportDropzone.svelte';
+export { default as ColumnMappingTable, default as FieldMappingTable, type ColumnMappingTableProps, type TargetFieldConfig } from './components/ColumnMappingTable.svelte';
+export { default as ImportPreviewValidator, default as ImportDataValidator, type ImportPreviewValidatorProps, type RowValidationError } from './components/ImportPreviewValidator.svelte';

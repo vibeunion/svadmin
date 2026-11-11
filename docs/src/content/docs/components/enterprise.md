@@ -2621,3 +2621,61 @@ Production emergency incident war room drawer and alert response timeline:
   onTriggerMitigation={(action) => console.log('Mitigation executed:', action)}
 />
 ```
+
+### `<DataImportDropzone>`
+
+Enterprise bulk data import dropzone:
+- Designed for large-scale Excel and CSV dataset ingestion.
+- **Extension & Size Pre-Check**: Configurable extension whitelist (defaulting to `.xlsx`, `.xls`, `.csv`) alongside file size constraints.
+- **Template Download & Progress**: Provides standard template download links and simulated parsing progress states.
+
+```svelte
+<script lang="ts">
+  import { DataImportDropzone } from '@svadmin/ui';
+</script>
+
+<DataImportDropzone
+  resourceName="Customers"
+  templateUrl="/templates/customer-import.xlsx"
+  onfileselect={(file) => console.log('File selected:', file.name)}
+/>
+```
+
+### `<ColumnMappingTable>`
+
+Source column to system field intelligent mapping table:
+- Built for mapping external CSV/Excel headers to internal canonical schemas.
+- **Smart Auto-Inference**: Automatically matches source headers to target fields by key/label fuzzy similarity.
+- **Sample Inspection & Required Checks**: Previews sample values per column and highlights unmapped required fields with alerts.
+
+```svelte
+<script lang="ts">
+  import { ColumnMappingTable } from '@svadmin/ui';
+
+  const targetFields = [
+    { key: 'name', label: 'Name', required: true },
+    { key: 'phone', label: 'Phone', required: true },
+  ];
+  const sourceColumns = ['Full Name', 'Mobile Number'];
+</script>
+
+<ColumnMappingTable {targetFields} {sourceColumns} />
+```
+
+### `<ImportPreviewValidator>`
+
+Pre-import record validator and inline cell corrector:
+- Built for data cleansing and format validation before committing records to the database.
+- **Filter by Error**: Toggles between all records and invalid rows only.
+- **Inline Editing**: Highlights invalid cells in red with error messages, allowing direct inline correction before final submission.
+
+```svelte
+<script lang="ts">
+  import { ImportPreviewValidator } from '@svadmin/ui';
+
+  const columns = [{ key: 'name', label: 'Name' }];
+  const rows = [{ name: 'Alice' }];
+</script>
+
+<ImportPreviewValidator {columns} {rows} onsubmit={(valid) => console.log('Submitting:', valid)} />
+```
