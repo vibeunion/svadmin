@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-11T13:06:28.795Z`
-> 清单映射覆盖率：**100%**（215/215 组件）
-> 1:1 对齐率 (Exact)：**62.8%**（135）· 语义降级率 (Fallback)：**31.6%**（68）
-> 行为验证覆盖：**82.8%**（178/215 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-11T15:19:15.069Z`
+> 清单映射覆盖率：**100%**（232/232 组件）
+> 1:1 对齐率 (Exact)：**58.2%**（135）· 语义降级率 (Fallback)：**34.9%**（81）
+> 行为验证覆盖：**76.7%**（178/232 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,10 +13,10 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
-| **advanced** | 72 | 29 | 32 | 11 | 0 | **40.3%** | 58/72 | 0 |
-| **widgets** | 41 | 18 | 23 | 0 | 0 | **43.9%** | 38/41 | 0 |
-| **fields** | 48 | 42 | 6 | 0 | 0 | **87.5%** | 42/48 | 0 |
-| **layout** | 25 | 22 | 2 | 1 | 0 | **88%** | 21/25 | 0 |
+| **advanced** | 83 | 29 | 40 | 14 | 0 | **34.9%** | 58/83 | 0 |
+| **widgets** | 44 | 18 | 26 | 0 | 0 | **40.9%** | 38/44 | 0 |
+| **fields** | 50 | 42 | 7 | 1 | 0 | **84%** | 42/50 | 0 |
+| **layout** | 26 | 22 | 3 | 1 | 0 | **84.6%** | 21/26 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
 > 样式钩子（`class`）覆盖是独立指标，见 [CLASS-HOOKS.md](./CLASS-HOOKS.md)，不影响本表状态。
@@ -133,6 +133,17 @@
 | `useTableClipboard` | — | 🚫 免适配 | 免适配 (客户端剪贴板解析钩子) |
 | `AudioFeedbackProvider` | — | 🚫 免适配 | 免适配 (Web Audio 业务声效) |
 | `useAudioAlert` | — | 🚫 免适配 | 免适配 (Web Audio 声效钩子) |
+| `ThreadedCommentDrawer` | `LiteThreadedCommentDrawer.svelte` | ⚡ 语义降级 | 服务端记录批注列表与原生 POST 回复表单；树形盖楼展开、表情反馈与 @联想由 SPA 承接 |
+| `PrintableReportLayout` | — | ⚡ 语义降级 | 服务端 A4 报表排版、单据元数据与签名栏；window.print 打印驱动由 SPA 承接 |
+| `usePrintExport` | — | 🚫 免适配 | 免适配 (浏览器打印与 PDF 导出钩子) |
+| `SchemaVisualModeler` | — | ⚡ 语义降级 | 服务端字段结构表格展示；交互式拖拽增删与 JSON 逆向推导由 SPA 承接 |
+| `MicroAppBridge` | — | ⚡ 语义降级 | 服务端微应用基础容器；跨域 postMessage 消息总线由 SPA 承接 |
+| `useMicroAppEvent` | — | 🚫 免适配 | 免适配 (跨域 postMessage 事件总线钩子) |
+| `RuleExpressionBuilder` | — | ⚡ 语义降级 | 服务端规则树与自然语言表达式展示；动态嵌套编排与 AST 编译由 SPA 承接 |
+| `SnapshotTimelineReplay` | — | ⚡ 语义降级 | 服务端历史版本快照列表与属性变动对比；时间旅行滑块拖动由 SPA 承接 |
+| `ActionPalette` | — | ⚡ 语义降级 | 服务端操作列表与快捷键提示；全键盘拼音检索与参数内联输入由 SPA 承接 |
+| `I18nLanguagePackEditor` | — | ⚡ 语义降级 | 服务端多语言词条表格展示；在线热修编辑与增量发布由 SPA 承接 |
+| `useDynamicLocale` | — | 🚫 免适配 | 免适配 (动态语言补丁加载钩子) |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -180,6 +191,9 @@
 | `MetricGrid` | `LiteMetricGrid.svelte` | ⚡ 语义降级 | 服务端网格、标题、加载骨架、空态与指标卡；自定义操作插槽和任意子组件由宿主服务端渲染 |
 | `OrgChart` | `LiteOrgChart.svelte` | ⚡ 语义降级 | 服务端层级表格与部门/职位信息；节点点击、缩放和图形连线由 SPA 承接 |
 | `KpiCard` | `LiteKpiCard.svelte` | ⚡ 语义降级 | 服务端静态指标数值、同环比胶囊、SVG 迷你走势与目标进度条；骨架过渡与动态动画由 SPA 承接 |
+| `ConversionFunnel` | — | ⚡ 语义降级 | 服务端业务漏斗转化各阶段数值与留存率统计；动态流向动效由 SPA 承接 |
+| `SankeyChart` | — | ⚡ 语义降级 | 服务端节点来源与去向列表权重展示；SVG 贝塞尔流向图由 SPA 承接 |
+| `ClusterTopologyGraph` | — | ⚡ 语义降级 | 服务端三层集群微服务节点矩阵展示；SVG 连线动效与交互下钻由 SPA 承接 |
 
 ### FIELDS
 
@@ -233,6 +247,8 @@
 | `AutoComplete` | `LiteAutoComplete.svelte` | ⚡ 语义降级 | 原生 input + datalist 建议；异步查询和键盘弹层由 SPA 承接 |
 | `CronExpressionBuilder` | `LiteCronExpressionBuilder.svelte` | ⚡ 语义降级 | 服务端 cron 文本、预设与原生 POST；可视化分段编辑和实时回显由 SPA 承接 |
 | `VirtualTreeSelect` | `LiteVirtualTreeSelect.svelte` | ⚡ 语义降级 | 原生层级 select 保留选项与单选/多选值；虚拟滚动、搜索和异步展开由 SPA 承接 |
+| `FormulaField` | `LiteFormulaField.svelte` | ⚡ 语义降级 | 服务端公式计算结果与标签展示；沙箱动态表达式推算与手动覆盖由 SPA 承接 |
+| `useFormulaEngine` | — | 🚫 免适配 | 免适配 (客户端公式求值引擎) |
 
 ### LAYOUT
 
@@ -262,6 +278,7 @@
 | `BackTop` | `LiteBackTop.svelte` | ✅ 1:1 对齐 | 固定回顶锚点 |
 | `ResizeBox` | `LiteResizeBox.svelte` | ⚡ 语义降级 | CSS resize 容器；尺寸持久化由宿主承接 |
 | `Pagination` | `LitePagination.svelte` | ✅ 1:1 对齐 | 原生分页链接与当前页 |
+| `DataScreenContainer` | `LiteDataScreenContainer.svelte` | ⚡ 语义降级 | 服务端大屏外层容器与暗黑科技布局；全屏 API 与 Scale-to-Fit 自适应缩放由 SPA 承接 |
 | `ThemeToggle` | — | 🚫 免适配 | 免适配 (Lite 为固定 Slate/Indigo 配色) |
 
 ### BUTTONS

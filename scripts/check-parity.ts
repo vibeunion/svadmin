@@ -325,6 +325,25 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'useTableClipboard', uiComponent: 'useTableClipboard.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端剪贴板解析钩子)' },
   { name: 'AudioFeedbackProvider', uiComponent: 'AudioFeedbackProvider.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (Web Audio 业务声效)', note: 'SSR 不支持 AudioContext' },
   { name: 'useAudioAlert', uiComponent: 'useAudioAlert.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (Web Audio 声效钩子)' },
+  // ─── Enterprise suites wave 4 ──────────────────────────────────────────
+  { name: 'FormulaField', uiComponent: 'FormulaField.svelte', liteComponent: 'LiteFormulaField.svelte', category: 'fields', status: 'fallback', strategy: '服务端公式计算结果与标签展示；沙箱动态表达式推算与手动覆盖由 SPA 承接' },
+  { name: 'useFormulaEngine', uiComponent: 'useFormulaEngine.svelte.ts', category: 'fields', status: 'spa_only', strategy: '免适配 (客户端公式求值引擎)' },
+  { name: 'DataScreenContainer', uiComponent: 'DataScreenContainer.svelte', liteComponent: 'LiteDataScreenContainer.svelte', category: 'layout', status: 'fallback', strategy: '服务端大屏外层容器与暗黑科技布局；全屏 API 与 Scale-to-Fit 自适应缩放由 SPA 承接' },
+  { name: 'ThreadedCommentDrawer', uiComponent: 'ThreadedCommentDrawer.svelte', liteComponent: 'LiteThreadedCommentDrawer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端记录批注列表与原生 POST 回复表单；树形盖楼展开、表情反馈与 @联想由 SPA 承接' },
+  { name: 'PrintableReportLayout', uiComponent: 'PrintableReportLayout.svelte', category: 'advanced', status: 'fallback', strategy: '服务端 A4 报表排版、单据元数据与签名栏；window.print 打印驱动由 SPA 承接' },
+  { name: 'usePrintExport', uiComponent: 'usePrintExport.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (浏览器打印与 PDF 导出钩子)' },
+  { name: 'ConversionFunnel', uiComponent: 'ConversionFunnel.svelte', category: 'widgets', status: 'fallback', strategy: '服务端业务漏斗转化各阶段数值与留存率统计；动态流向动效由 SPA 承接' },
+  { name: 'SankeyChart', uiComponent: 'SankeyChart.svelte', category: 'widgets', status: 'fallback', strategy: '服务端节点来源与去向列表权重展示；SVG 贝塞尔流向图由 SPA 承接' },
+  { name: 'SchemaVisualModeler', uiComponent: 'SchemaVisualModeler.svelte', category: 'advanced', status: 'fallback', strategy: '服务端字段结构表格展示；交互式拖拽增删与 JSON 逆向推导由 SPA 承接' },
+  { name: 'MicroAppBridge', uiComponent: 'MicroAppBridge.svelte', category: 'advanced', status: 'fallback', strategy: '服务端微应用基础容器；跨域 postMessage 消息总线由 SPA 承接' },
+  { name: 'useMicroAppEvent', uiComponent: 'useMicroAppEvent.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (跨域 postMessage 事件总线钩子)' },
+  { name: 'RuleExpressionBuilder', uiComponent: 'RuleExpressionBuilder.svelte', category: 'advanced', status: 'fallback', strategy: '服务端规则树与自然语言表达式展示；动态嵌套编排与 AST 编译由 SPA 承接' },
+  { name: 'ClusterTopologyGraph', uiComponent: 'ClusterTopologyGraph.svelte', category: 'widgets', status: 'fallback', strategy: '服务端三层集群微服务节点矩阵展示；SVG 连线动效与交互下钻由 SPA 承接' },
+  { name: 'SnapshotTimelineReplay', uiComponent: 'SnapshotTimelineReplay.svelte', category: 'advanced', status: 'fallback', strategy: '服务端历史版本快照列表与属性变动对比；时间旅行滑块拖动由 SPA 承接' },
+  { name: 'ActionPalette', uiComponent: 'ActionPalette.svelte', category: 'advanced', status: 'fallback', strategy: '服务端操作列表与快捷键提示；全键盘拼音检索与参数内联输入由 SPA 承接' },
+  { name: 'I18nLanguagePackEditor', uiComponent: 'I18nLanguagePackEditor.svelte', category: 'advanced', status: 'fallback', strategy: '服务端多语言词条表格展示；在线热修编辑与增量发布由 SPA 承接' },
+  { name: 'useDynamicLocale', uiComponent: 'useDynamicLocale.svelte.ts', category: 'advanced', status: 'spa_only', strategy: '免适配 (动态语言补丁加载钩子)' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

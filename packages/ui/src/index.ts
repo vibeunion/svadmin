@@ -824,6 +824,15 @@ export { default as ActionPalette, default as QuickActionDrawer, type ActionPale
 // Enterprise dynamic i18n language pack editor & runtime patch suite
 export { useDynamicLocale, applyLocalePatch, getLocalePatch, clearLocalePatches, translateDynamic } from './components/useDynamicLocale.svelte.js';
 export { default as I18nLanguagePackEditor, type I18nLanguagePackEditorProps, type I18nEntry } from './components/I18nLanguagePackEditor.svelte';
+// Enterprise dynamic formula field & sandboxed calculation engine suite
+export { useFormulaEngine, evaluateFormula, type FormulaScope } from './components/useFormulaEngine.svelte.js';
+export { default as FormulaField, type FormulaFieldProps } from './components/FormulaField.svelte';
+
+// Enterprise big-screen data container & responsive scale-to-fit dashboard suite
+export { default as DataScreenContainer, default as FullscreenDashboardLayout, type DataScreenContainerProps } from './components/DataScreenContainer.svelte';
+
+// Enterprise threaded comment drawer & record annotation stream suite
+export { default as ThreadedCommentDrawer, default as RecordAnnotationBox, type ThreadedCommentDrawerProps, type ThreadedComment } from './components/ThreadedCommentDrawer.svelte';
 // Enterprise record comparison and parameter diff suite
 export { default as RecordCompareModal, default as EntityComparisonDrawer, type RecordCompareModalProps, type CompareFieldConfig } from './components/RecordCompareModal.svelte';
 

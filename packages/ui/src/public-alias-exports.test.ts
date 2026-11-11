@@ -149,6 +149,12 @@ import {
   QuickActionDrawer,
   I18nLanguagePackEditor,
   useDynamicLocale,
+  FormulaField,
+  useFormulaEngine,
+  DataScreenContainer,
+  FullscreenDashboardLayout,
+  ThreadedCommentDrawer,
+  RecordAnnotationBox,
   MaskedText,
   SensitiveDataMask,
   WaterMark,
@@ -204,6 +210,12 @@ describe('public compatibility aliases', () => {
     expect(QuickActionDrawer).toBe(ActionPalette);
     expect(I18nLanguagePackEditor).toBeDefined();
     expect(useDynamicLocale).toBeDefined();
+    expect(FormulaField).toBeDefined();
+    expect(useFormulaEngine).toBeDefined();
+    expect(DataScreenContainer).toBeDefined();
+    expect(FullscreenDashboardLayout).toBe(DataScreenContainer);
+    expect(ThreadedCommentDrawer).toBeDefined();
+    expect(RecordAnnotationBox).toBe(ThreadedCommentDrawer);
     expect(ScreenLock).toBe(LockScreen);
     expect(Split).toBe(SplitPaneLayout);
     expect(VerificationCode).toBe(OtpInput);

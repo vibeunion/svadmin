@@ -1897,6 +1897,85 @@ Dynamic runtime localization patch loader and online translation editor:
 <I18nLanguagePackEditor
   targetLocale="zh-CN"
   onSavePatch={(locale, patch) => console.log('Published i18n patch:', locale, patch)}
+/>
+```
+
+### `<FormulaField>` & `useFormulaEngine`
+
+Enterprise dynamic formula field and sandboxed expression calculation engine:
+- **Zero eval() Vulnerabilities**: Pure AST-based arithmetic and logic evaluator supporting `+`, `-`, `*`, `/`, `^`, `%`, `(`, `)`.
+- **Built-in Functions**: Supports `SUM`, `AVG`, `MAX`, `MIN`, `ROUND(val, decimals)`, and `IF(cond, thenVal, elseVal)`.
+- **Formula Tooltip & Manual Override**: Displays interactive `f(x) = ...` formula preview badge with optional toggle to manually override values.
+
+```svelte
+<script lang="ts">
+  import { FormulaField } from '@svadmin/ui';
+
+  let form = $state({ price: 199, qty: 3, discount: 0.1 });
+</script>
+
+<FormulaField
+  label="Net Total Price"
+  formula="price * qty * (1 - discount)"
+  scope={form}
+  prefix="¥"
+  precision={2}
+  allowManualOverride={true}
+/>
+```
+
+### `<DataScreenContainer>` / `<FullscreenDashboardLayout>`
+
+Operations center and high-resolution data visualization big-screen container:
+- **Scale-to-Fit Auto Scaling**: Automatically calculates uniform scaling (`scale(x)`) based on design dimensions (1920x1080, 21:9, etc.), pixel-perfect centering on any screen size.
+- **Header & Clock**: Built-in digital clock, status headers, and full-screen switcher.
+- **Cyberpunk Accents**: Optional neon tech luminous corner lines.
+
+```svelte
+<script lang="ts">
+  import { DataScreenContainer } from '@svadmin/ui';
+</script>
+
+<DataScreenContainer
+  title="Real-time Dispatch Operations Center"
+  subtitle="NOC Telemetry & Sensor Monitoring"
+  width={1920}
+  height={1080}
+>
+  <div class="grid grid-cols-3 gap-6 h-full">
+    <!-- Telemetry Cards & SVG charts -->
+  </div>
+</DataScreenContainer>
+```
+
+### `<ThreadedCommentDrawer>` / `<RecordAnnotationBox>`
+
+Record-level collaborative discussion stream and threaded annotation drawer:
+- **Threaded Replies & Reactions**: Support nested discussion trees, emoji reactions (`👍`, `✅`), and timestamps.
+- **Task Resolution Status**: Toggle comments as "Resolved" to close out revision concerns.
+- **Mentions & Markdown**: Integrated `@` member mention tags and formatted response submissions.
+
+```svelte
+<script lang="ts">
+  import { ThreadedCommentDrawer, type ThreadedComment } from '@svadmin/ui';
+
+  let open = $state(false);
+  let comments = $state<ThreadedComment[]>([
+    {
+      id: '1',
+      author: 'Alice (Compliance)',
+      content: 'Please verify VAT invoice numbers against tax authority registry.',
+      createdAt: '10m ago',
+      isResolved: false,
+    },
+  ]);
+</script>
+
+<ThreadedCommentDrawer
+  bind:open
+  recordTitle="Purchase Order #PO-991"
+  {comments}
+  onAddComment={(text, parentId) => console.log('New reply:', text, parentId)}
 ### `<RecordCompareModal>` / `<EntityComparisonDrawer>`
 
 Enterprise multi-record parameter comparison and difference spotlight suite:
