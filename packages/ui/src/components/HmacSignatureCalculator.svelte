@@ -119,9 +119,9 @@
       <label for="hmac-algorithm" class="block font-medium text-foreground">
         哈希加密算法 (Algorithm)
       </label>
-      <select
+      <select data-size="compact"
         id="hmac-algorithm"
-        class="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary"
+        class="svadmin-select w-full"
         bind:value={selectedAlgorithm}
       >
         <option value="SHA-256">HMAC-SHA256 (推荐工业规范)</option>

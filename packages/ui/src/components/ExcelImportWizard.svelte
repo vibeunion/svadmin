@@ -418,9 +418,9 @@
                     <ArrowRight size={14} class="inline" />
                   </td>
                   <td class="p-3">
-                    <select
+                    <select data-size="compact"
                       bind:value={fieldMapping[field.name]}
-                      class="h-8 w-full rounded-md border border-input bg-background px-2.5 text-xs focus:ring-1 focus:ring-ring"
+                      class="svadmin-select h-8 w-full"
                     >
                       <option value="">-- {i18n.t('excel.unmapped')} --</option>
                       {#each rawHeaders as header (header)}

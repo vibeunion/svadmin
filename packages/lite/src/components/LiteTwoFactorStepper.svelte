@@ -49,5 +49,5 @@
   .lite-two-factor__form { display: block; justify-items: start; }
 
   .lite-two-factor > * + * { margin-top: 16px; }
-  .lite-two-factor__form > * + * { margin-top: 12px; }
+  :global(.lite-two-factor__form > * + *) { margin-top: 12px; }
 </style>

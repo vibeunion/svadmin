@@ -237,7 +237,7 @@
             </div>
             <div class="space-y-2">
               <Label for={`${controlId}-webhook-event`}>{i18n.t('api.eventType')}</Label>
-              <select id={`${controlId}-webhook-event`} bind:value={newWebhookEvent} disabled={!credentialProvider || submitting} class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50">
+              <select id={`${controlId}-webhook-event`} bind:value={newWebhookEvent} disabled={!credentialProvider || submitting} class="svadmin-select flex h-9 w-full disabled:opacity-50">
                 <option value="resource.created">resource.created</option>
                 <option value="resource.updated">resource.updated</option>
                 <option value="resource.deleted">resource.deleted</option>

@@ -241,9 +241,9 @@
               <label for="approval-node-mode" class="block font-medium text-muted-foreground mb-1">
                 {chinese ? '多人审批方式' : 'Approval Policy'}
               </label>
-              <select id="approval-node-mode"
+              <select data-size="compact" id="approval-node-mode"
                 bind:value={selectedNode.mode}
-                class="h-7.5 w-full rounded border border-input bg-background px-2 text-xs text-foreground"
+                class="svadmin-select h-7.5 w-full"
               >
                 <option value="one">{chinese ? '或签 (一名通过即可)' : 'Any one (OR)'}</option>
                 <option value="all">{chinese ? '会签 (所有人必须通过)' : 'Countersign (AND)'}</option>

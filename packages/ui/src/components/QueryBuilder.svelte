@@ -362,8 +362,8 @@
               data-query-rule={item.id}
             >
               <!-- Field Picker -->
-              <select
-                class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary"
+              <select data-size="compact"
+                class="svadmin-select svadmin-select--inline"
                 bind:value={item.field}
                 onchange={() => {
                   const newField = fields.find((f) => f.key === item.field);
@@ -379,8 +379,8 @@
               </select>
 
               <!-- Operator Picker -->
-              <select
-                class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary font-mono"
+              <select data-size="compact"
+                class="svadmin-select svadmin-select--inline font-mono"
                 bind:value={item.operator}
                 onchange={notifyChange}
                 disabled={readOnly}
@@ -393,8 +393,8 @@
               <!-- Value Input (depending on operator / field type) -->
               {#if item.operator !== 'is_null' && item.operator !== 'is_not_null'}
                 {#if fieldDef?.type === 'select' && fieldDef.options}
-                  <select
-                    class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary min-w-[120px]"
+                  <select data-size="compact"
+                    class="svadmin-select min-w-[120px]"
                     bind:value={item.value}
                     onchange={notifyChange}
                     disabled={readOnly}

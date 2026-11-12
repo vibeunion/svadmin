@@ -802,9 +802,9 @@
                   {/if}
                 </div>
                 <div class="w-48 shrink-0">
-                  <select
+                  <select data-size="compact"
                     aria-label={`Map ${header}`}
-                    class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    class="svadmin-select h-8 w-full"
                     value={columnMapping[header]}
                     onchange={(event) => {
                       columnMapping = { ...columnMapping, [header]: event.currentTarget.value };

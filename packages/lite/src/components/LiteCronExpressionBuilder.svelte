@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
+
   interface CronPreset {
     label: string;
     value: string;
@@ -31,7 +33,8 @@
     class: className = '',
   }: Props = $props();
 
-  let expression = $state(value);
+  // Seeded once from the initial prop; the field owns edits afterwards.
+  let expression = $state(untrack(() => value));
 </script>
 
 <section class="lite-cron-builder lite-card {className}" aria-label={label}>

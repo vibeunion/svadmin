@@ -162,9 +162,9 @@
       <label for="webhook-event-type" class="block font-medium text-foreground">
         选择事件类型 (Event Type)
       </label>
-      <select
+      <select data-size="compact"
         id="webhook-event-type"
-        class="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground font-mono focus:ring-1 focus:ring-primary"
+        class="svadmin-select w-full font-mono"
         value={selectedEventType}
         onchange={(e) => handleEventChange((e.currentTarget as HTMLSelectElement).value)}
       >

@@ -173,8 +173,8 @@
                 {#if col.readonly}
                   <div class="px-2 py-1 text-muted-foreground font-mono truncate">{row[col.key] ?? '—'}</div>
                 {:else if col.type === 'select' && col.options}
-                  <select
-                    class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  <select data-size="compact"
+                    class="svadmin-select h-7.5 w-full"
                     value={String(row[col.key] ?? '')}
                     onchange={(e) => updateCell(rowIndex, col.key, e.currentTarget.value)}
                   >

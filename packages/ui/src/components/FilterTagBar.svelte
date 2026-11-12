@@ -141,8 +141,8 @@
     {#if savedPresets.length > 0}
       <div class="flex items-center gap-1">
         <Bookmark class="h-3.5 w-3.5 text-muted-foreground" />
-        <select
-          class="rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground focus:ring-1 focus:ring-primary"
+        <select data-size="compact"
+          class="svadmin-select svadmin-select--inline"
           value={activePresetId ?? ''}
           onchange={(e) => {
             const target = e.currentTarget as HTMLSelectElement;

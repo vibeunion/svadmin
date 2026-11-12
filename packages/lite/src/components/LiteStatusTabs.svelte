@@ -31,5 +31,5 @@
   .lite-status-tabs a.active { border-bottom-color: #165DFF; color: #165DFF; font-weight: 600; }
 
   .lite-status-tabs a + a { margin-left: 4px; }
-  .lite-status-tabs a > * + * { margin-left: 6px; }
+  :global(.lite-status-tabs a > * + *) { margin-left: 6px; }
 </style>

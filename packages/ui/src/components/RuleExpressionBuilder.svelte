@@ -230,10 +230,10 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2 text-xs">
         <span class="font-bold text-primary">{chinese ? '满足以下' : 'Match'}</span>
-        <select
+        <select data-size="compact"
           bind:value={root.combinator}
           onchange={notify}
-          class="h-7 rounded border border-input bg-background px-2 text-xs font-semibold text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-select svadmin-select--inline h-7 font-semibold"
         >
           <option value="and">{chinese ? '全部条件 (AND)' : 'ALL conditions (AND)'}</option>
           <option value="or">{chinese ? '任一条件 (OR)' : 'ANY condition (OR)'}</option>
@@ -262,10 +262,10 @@
         {#if child.type === 'leaf'}
           <div class="flex items-center gap-2 rounded-lg border border-border bg-card p-2 text-xs shadow-2xs">
             <!-- Field select -->
-            <select
+            <select data-size="compact"
               bind:value={child.field}
               onchange={notify}
-              class="h-7 rounded border border-input bg-background px-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              class="svadmin-select svadmin-select--inline h-7 font-medium"
             >
               {#each fields as f (f.key)}
                 <option value={f.key}>{f.label} ({f.key})</option>
@@ -273,10 +273,10 @@
             </select>
 
             <!-- Operator select -->
-            <select
+            <select data-size="compact"
               bind:value={child.operator}
               onchange={notify}
-              class="h-7 rounded border border-input bg-background px-2 text-xs font-mono font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              class="svadmin-select svadmin-select--inline h-7 font-mono font-medium"
             >
               <option value="eq">=</option>
               <option value="ne">≠</option>
@@ -314,10 +314,10 @@
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-warning">{chinese ? '子条件组' : 'Subgroup'}</span>
-                <select
+                <select data-size="compact"
                   bind:value={child.combinator}
                   onchange={notify}
-                  class="h-6 rounded border border-input bg-background px-1.5 text-xs text-foreground"
+                  class="svadmin-select svadmin-select--inline h-6"
                 >
                   <option value="and">AND</option>
                   <option value="or">OR</option>
@@ -343,12 +343,12 @@
               {#each child.children as subChild (subChild.id)}
                 {#if subChild.type === 'leaf'}
                   <div class="flex items-center gap-2 rounded border border-border bg-card p-1.5 text-xs">
-                    <select bind:value={subChild.field} onchange={notify} class="h-6 text-xs bg-background border rounded px-1">
+                    <select data-size="compact" bind:value={subChild.field} onchange={notify} class="svadmin-select svadmin-select--inline h-6">
                       {#each fields as f (f.key)}
                         <option value={f.key}>{f.label}</option>
                       {/each}
                     </select>
-                    <select bind:value={subChild.operator} onchange={notify} class="h-6 text-xs bg-background border rounded px-1">
+                    <select data-size="compact" bind:value={subChild.operator} onchange={notify} class="svadmin-select svadmin-select--inline h-6">
                       <option value="eq">=</option>
                       <option value="gt">&gt;</option>
                       <option value="lt">&lt;</option>
