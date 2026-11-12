@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.27](https://github.com/vibeunion/svadmin/compare/surface-v0.20.26...surface-v0.20.27) (2026-11-12)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh lockfile after release ([#768](https://github.com/vibeunion/svadmin/issues/768)) ([8268aa6](https://github.com/vibeunion/svadmin/commit/8268aa68fc6559ec570551df7f6ca3ce0c65114a))
+
 ## [0.20.26](https://github.com/vibeunion/svadmin/compare/surface-v0.20.25...surface-v0.20.26) (2026-11-12)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.1](https://github.com/vibeunion/svadmin/compare/lite-v0.30.0...lite-v0.30.1) (2026-11-12)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** align approval and loading component boundaries ([4cff7cf](https://github.com/vibeunion/svadmin/commit/4cff7cf5e589ef120497b0d3a7d0722e224028fd))
+
 ## [0.30.0](https://github.com/vibeunion/svadmin/compare/lite-v0.29.0...lite-v0.30.0) (2026-11-12)
 
 
