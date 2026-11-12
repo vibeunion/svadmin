@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/hasura",
-  "version": "0.12.31",
+  "version": "0.12.32",
   "description": "Hasura GraphQL DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

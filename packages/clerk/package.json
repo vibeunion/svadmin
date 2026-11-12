@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/clerk",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Clerk AuthProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

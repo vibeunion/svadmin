@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/jsonapi",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "JSON:API 1.0 specification DataProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

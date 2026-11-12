@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.31](https://github.com/vibeunion/svadmin/compare/app-v0.2.30...app-v0.2.31) (2026-11-12)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.81.0
+
 ## [0.2.30](https://github.com/vibeunion/svadmin/compare/app-v0.2.29...app-v0.2.30) (2026-11-10)
 
 

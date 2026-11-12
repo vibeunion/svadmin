@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/kinde",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Kinde AuthProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0](https://github.com/vibeunion/svadmin/compare/core-v0.80.0...core-v0.81.0) (2026-11-12)
+
+
+### 🚀 Features
+
+* **ui:** add WorkflowGraphDesigner, ExecutionTracker, and DataScope suite ([#752](https://github.com/vibeunion/svadmin/issues/752)) ([c22a730](https://github.com/vibeunion/svadmin/commit/c22a7309d982610f0828b75e81106c2d2c0885b7))
+
 ## [0.80.0](https://github.com/vibeunion/svadmin/compare/core-v0.79.0...core-v0.80.0) (2026-11-10)
 
 

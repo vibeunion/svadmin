@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.11](https://github.com/vibeunion/svadmin/compare/refine-adapter-v0.15.10...refine-adapter-v0.15.11) (2026-11-12)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.81.0
+
 ## [0.15.10](https://github.com/vibeunion/svadmin/compare/refine-adapter-v0.15.9...refine-adapter-v0.15.10) (2026-11-10)
 
 
