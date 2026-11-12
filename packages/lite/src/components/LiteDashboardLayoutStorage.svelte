@@ -63,24 +63,25 @@
     padding: 10px 14px;
   }
   .lite-storage-header { display: flex; align-items: center; font-weight: 600; color: #1d2129; margin-bottom: 8px; }
-  .lite-storage-header > * + * { margin-left: 6px; }
-  .lite-storage-icon { font-size: 14px; }
+  .lite-storage-icon { font-size: 14px; margin-right: 6px; }
   .lite-presets-list { display: flex; flex-direction: column; }
-  .lite-presets-list > * + * { margin-top: 6px; }
   .lite-preset-card {
     border: 1px solid #f2f3f5;
     background: #fafafa;
     border-radius: 4px;
     padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .lite-preset-card:last-child {
+    margin-bottom: 0;
   }
   .lite-preset-active {
     border-color: #165dff;
     background: #e8f3ff;
   }
   .lite-preset-title-row { display: flex; align-items: center; }
-  .lite-preset-title-row > * + * { margin-left: 6px; }
-  .lite-preset-name { font-weight: 600; color: #1d2129; }
-  .lite-preset-badge { font-size: 9px; background: #ffffff; color: #165dff; padding: 1px 4px; border: 1px solid #165dff; border-radius: 2px; }
+  .lite-preset-name { font-weight: 600; color: #1d2129; margin-right: 6px; }
+  .lite-preset-badge { font-size: 9px; background: #ffffff; color: #165dff; padding: 1px 4px; border: 1px solid #165dff; border-radius: 2px; margin-right: 6px; }
   .lite-preset-active-tag { font-size: 10px; color: #165dff; font-weight: 600; }
   .lite-preset-desc { font-size: 11px; color: #86909c; margin: 4px 0; }
   .lite-preset-footer { display: flex; justify-content: space-between; font-size: 10px; color: #86909c; }
