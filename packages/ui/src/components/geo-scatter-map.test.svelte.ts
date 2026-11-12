@@ -30,7 +30,7 @@ describe('GeoScatterMap component suite', () => {
     });
 
     const northItems = getAllByText('华北大区');
-    await fireEvent.click(northItems[0]);
+    if (northItems[0]) await fireEvent.click(northItems[0]);
     expect(selected).toEqual(sampleRegions[1]);
   });
 });

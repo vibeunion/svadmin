@@ -2834,3 +2834,41 @@ Comprehensive system service health diagnostics dashboard:
 
 <SystemHealthCheckDashboard services={[]} />
 ```
+
+### `<AdminCopilotWidget>`
+
+Enterprise admin floating AI copilot assistant:
+- Built for AI-augmented enterprise dashboards and intelligent table filtering.
+- **Floating Trigger & Expanded Card**: Persistent bottom-right floating trigger with pulsing glow, expanding into an interactive chat card.
+- **Natural Language Filter Extraction**: Parses user queries into structured table filter suggestions with a one-click "Apply Filter" action.
+- **Quick Prompt Chips**: Predefined clickable query chips for fast exploration.
+
+```svelte
+<script lang="ts">
+  import { AdminCopilotWidget } from '@svadmin/ui';
+</script>
+
+<AdminCopilotWidget
+  botName="SVAdmin Copilot"
+  title="Financial & Sales Intelligent Copilot"
+  onapplyfilter={(filter) => console.log('Applying filter:', filter)}
+/>
+```
+
+### `<QueryAiExplainer>`
+
+AI query and rule natural language explainer card:
+- Designed to translate complex technical SQL expressions and JSON logic into plain business rules for non-technical users.
+- **Plain Business Insights**: Automatically breaks down technical constraints (e.g. SQL WHERE clauses) into structured business bullets.
+- **One-Click Actions**: Re-explain triggers alongside copy-to-clipboard functionality.
+
+```svelte
+<script lang="ts">
+  import { QueryAiExplainer } from '@svadmin/ui';
+</script>
+
+<QueryAiExplainer
+  contextName="Financial Ledger"
+  queryText="WHERE (region = 'East' AND amount >= 50000) OR priority = 'URGENT'"
+/>
+```

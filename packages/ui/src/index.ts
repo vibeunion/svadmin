@@ -915,3 +915,7 @@ export { default as MockDataInterceptor, default as OfflineMockStudio, type Mock
 
 // Enterprise system health self-check, diagnostics & dependency inspection suite
 export { default as SystemHealthCheckDashboard, default as DiagnosticInspector, type SystemHealthCheckDashboardProps, type HealthServiceCheck, type ServiceStatus as HealthServiceStatus } from './components/SystemHealthCheckDashboard.svelte';
+
+// Enterprise AI copilot floating widget & natural query rule explainer suite
+export { default as AdminCopilotWidget, default as CopilotFloatWidget, type AdminCopilotWidgetProps, type CopilotMessage, type CopilotFilterSuggestion } from './components/AdminCopilotWidget.svelte';
+export { default as QueryAiExplainer, default as SqlRuleAiExplainer, type QueryAiExplainerProps } from './components/QueryAiExplainer.svelte';
