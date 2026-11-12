@@ -115,6 +115,12 @@ import {
   DashboardPresetManager,
   ChartAnnotationOverlay,
   MetricEventAnnotation,
+  AbacPolicyMatrix,
+  AttributeBasedAccessControlMatrix,
+  PermissionSimulator,
+  RolePermissionSandbox,
+  WorkflowNodeInspector,
+  ApprovalNodeDrawer,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
@@ -454,6 +460,12 @@ describe('public compatibility aliases', () => {
     expect(DashboardPresetManager).toBe(DashboardLayoutStorage);
     expect(ChartAnnotationOverlay).toBeDefined();
     expect(MetricEventAnnotation).toBe(ChartAnnotationOverlay);
+    expect(AbacPolicyMatrix).toBeDefined();
+    expect(AttributeBasedAccessControlMatrix).toBe(AbacPolicyMatrix);
+    expect(PermissionSimulator).toBeDefined();
+    expect(RolePermissionSandbox).toBe(PermissionSimulator);
+    expect(WorkflowNodeInspector).toBeDefined();
+    expect(ApprovalNodeDrawer).toBe(WorkflowNodeInspector);
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();

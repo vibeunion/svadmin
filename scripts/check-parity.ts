@@ -406,6 +406,11 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'DashboardLayoutStorage', uiComponent: 'DashboardLayoutStorage.svelte', liteComponent: 'LiteDashboardLayoutStorage.svelte', category: 'widgets', status: 'fallback', strategy: '服务端大屏排版预设方案卡片与角色列表；客户端另存与 JSON 导入导出由 SPA 承接' },
   { name: 'ChartAnnotationOverlay', uiComponent: 'ChartAnnotationOverlay.svelte', liteComponent: 'LiteChartAnnotationOverlay.svelte', category: 'widgets', status: 'fallback', strategy: '服务端大促/故障/发布大事件时间线列表；客户端图表绝对定位垂直标记线与图钉交互由 SPA 承接' },
 
+  // ─── Enterprise suites wave 13 (ABAC Policy Matrix, Permission Simulator & Workflow Node Inspector) ───
+  { name: 'AbacPolicyMatrix', uiComponent: 'AbacPolicyMatrix.svelte', liteComponent: 'LiteAbacPolicyMatrix.svelte', category: 'advanced', status: 'fallback', strategy: '服务端属性权限控制规则表格与状态指示；动态规则编辑与条件联动由 SPA 承接' },
+  { name: 'PermissionSimulator', uiComponent: 'PermissionSimulator.svelte', liteComponent: 'LitePermissionSimulator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端模拟用户角色身份与数据范围列表；客户端多维权限推演与上下文切换由 SPA 承接' },
+  { name: 'WorkflowNodeInspector', uiComponent: 'WorkflowNodeInspector.svelte', liteComponent: 'LiteWorkflowNodeInspector.svelte', category: 'advanced', status: 'fallback', strategy: '服务端审批节点属性与模式配置静态呈现；客户端滑出抽屉与会签比例由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
