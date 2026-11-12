@@ -247,6 +247,7 @@ export { default as LiteTenantContextSwitcher } from './components/LiteTenantCon
 export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCommandPalette.svelte';
 export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
 
+
 // Enterprise wave 12 parity fallbacks (Dashboard Grid Layout, Storage & Chart Annotation)
 export { default as LiteDashboardGridLayout } from './components/LiteDashboardGridLayout.svelte';
 export { default as LiteDashboardLayoutStorage } from './components/LiteDashboardLayoutStorage.svelte';

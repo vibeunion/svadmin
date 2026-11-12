@@ -41,7 +41,7 @@
 
   <div class="lite-dash-grid-body">
     {#each items as item (item.id)}
-      <div class="lite-dash-widget" style="grid-column: span {item.w};">
+      <div class="lite-dash-widget" style="width: calc({item.w} / 12 * 100% - 10px);">
         <div class="lite-widget-header">
           <span class="lite-widget-title">{item.title}</span>
           <span class="lite-widget-span">{item.w}x{item.h} 栅格</span>
@@ -72,17 +72,16 @@
     background: #f7f8fa;
     border-bottom: 1px solid #e5e6eb;
   }
-  .lite-dash-title-row { display: flex; align-items: center; gap: 6px; }
+  .lite-dash-title-row { display: flex; align-items: center; }
+  .lite-dash-title-row > * + * { margin-left: 6px; }
   .lite-dash-icon { font-size: 14px; }
   .lite-dash-title { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
   .lite-dash-count { font-size: 11px; color: #86909c; }
-  .lite-dash-grid-body {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 10px;
-    padding: 12px;
-  }
+  .lite-dash-grid-body { padding: 12px; overflow: hidden; }
   .lite-dash-widget {
+    float: left;
+    box-sizing: border-box;
+    margin: 0 10px 10px 0;
     border: 1px solid #f2f3f5;
     border-radius: 4px;
     background: #fafafa;
