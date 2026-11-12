@@ -90,10 +90,10 @@
   .lite-tenant-trigger {
     display: flex;
     align-items: center;
-    gap: 8px;
     padding-bottom: 8px;
     border-bottom: 1px dashed #e5e6eb;
   }
+  .lite-tenant-trigger > * + * { margin-left: 8px; }
   .lite-tenant-badge {
     width: 28px;
     height: 28px;
@@ -112,8 +112,8 @@
   .lite-tenant-name-row {
     display: flex;
     align-items: center;
-    gap: 6px;
   }
+  .lite-tenant-name-row > * + * { margin-left: 6px; }
   .lite-tenant-name {
     font-weight: 600;
     color: #1d2129;
@@ -151,9 +151,9 @@
   .lite-tenant-li {
     display: flex;
     align-items: center;
-    gap: 4px;
     padding: 2px 0;
   }
+  .lite-tenant-li > * + * { margin-left: 4px; }
   .lite-tenant-active {
     color: #165dff;
     font-weight: 600;
