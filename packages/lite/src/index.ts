@@ -252,13 +252,6 @@ export { default as LiteDashboardGridLayout } from './components/LiteDashboardGr
 export { default as LiteDashboardLayoutStorage } from './components/LiteDashboardLayoutStorage.svelte';
 export { default as LiteChartAnnotationOverlay } from './components/LiteChartAnnotationOverlay.svelte';
 
-// Enterprise wave 11 parity fallbacks (Workspace Switcher, Omnibar, Audit Trail)
-export { default as LiteTenantContextSwitcher } from './components/LiteTenantContextSwitcher.svelte';
-export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCommandPalette.svelte';
-export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
-
-
-
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
   configureMarkdownRenderer,

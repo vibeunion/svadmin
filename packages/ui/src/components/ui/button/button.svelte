@@ -17,6 +17,7 @@
 			size?: ButtonSizeValue;
 			disabledReason?: string;
 			disabledReasonDisplay?: "tooltip" | "inline";
+			disabledReasonSide?: "top" | "bottom" | "left" | "right";
 			restrictionClass?: string;
 			restrictionStyle?: string;
 		};
@@ -48,6 +49,7 @@
 		disabled,
 		disabledReason = "",
 		disabledReasonDisplay = "tooltip",
+		disabledReasonSide = "top",
 		restrictionClass,
 		restrictionStyle,
 		children,
@@ -154,7 +156,7 @@
 				</span>
 			{/snippet}
 		</Tooltip.Trigger>
-		<Tooltip.Content side="top" sideOffset={6}>{restriction}</Tooltip.Content>
+		<Tooltip.Content side={disabledReasonSide} sideOffset={6}>{restriction}</Tooltip.Content>
 	</Tooltip.Root>
 {:else}
 	{@render control()}

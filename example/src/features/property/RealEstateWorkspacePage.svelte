@@ -3,7 +3,7 @@
   import { useList } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, Input, MetricBlock, Select } from '@svadmin/ui';
   import { Heart, Plus } from '@lucide/svelte';
   import { demoContracts } from '../../resource-contracts';
   import { demoRenderers } from '../../resource-rendering';
@@ -152,10 +152,27 @@
       </nav>
       {#if ['buy', 'sell', 'rent'].includes(view)}<p class="text-sm text-muted-foreground">{isZh ? '按挂牌状态或出租率筛选；样例未记录买卖/租赁委托类型。' : 'Filtered by listing status or occupancy. Transaction mandates are not recorded in this sample.'}</p>{/if}
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <label class="text-sm">{isZh ? '区域' : 'Market'}<select class="mt-1 w-full rounded-md border bg-background p-2" bind:value={market}><option value="">{isZh ? '全部' : 'All'}</option>{#each [...new Set(properties.map(item => item.market))] as value (value)}<option>{value}</option>{/each}</select></label>
-        <label class="text-sm">{isZh ? '类型' : 'Type'}<select class="mt-1 w-full rounded-md border bg-background p-2" bind:value={assetType}><option value="">{isZh ? '全部' : 'All'}</option>{#each [...new Set(properties.map(item => item.assetType))] as value (value)}<option>{value}</option>{/each}</select></label>
-        <label class="text-sm">{isZh ? '状态' : 'Status'}<select class="mt-1 w-full rounded-md border bg-background p-2" bind:value={status}><option value="">{isZh ? '全部' : 'All'}</option>{#each [...new Set(properties.map(item => item.status))] as value (value)}<option>{value}</option>{/each}</select></label>
-        <label class="text-sm">{isZh ? '最高价格 USD' : 'Maximum price USD'}<input type="number" min="0" class="mt-1 w-full rounded-md border bg-background p-2" bind:value={maximumPrice} /></label>
+        <label class="grid gap-1 text-xs font-medium text-muted-foreground">{isZh ? '区域' : 'Market'}
+          <Select bind:value={market} aria-label={isZh ? '区域' : 'Market'}>
+            <option value="">{isZh ? '全部' : 'All'}</option>
+            {#each [...new Set(properties.map(item => item.market))] as value (value)}<option>{value}</option>{/each}
+          </Select>
+        </label>
+        <label class="grid gap-1 text-xs font-medium text-muted-foreground">{isZh ? '类型' : 'Type'}
+          <Select bind:value={assetType} aria-label={isZh ? '类型' : 'Type'}>
+            <option value="">{isZh ? '全部' : 'All'}</option>
+            {#each [...new Set(properties.map(item => item.assetType))] as value (value)}<option>{value}</option>{/each}
+          </Select>
+        </label>
+        <label class="grid gap-1 text-xs font-medium text-muted-foreground">{isZh ? '状态' : 'Status'}
+          <Select bind:value={status} aria-label={isZh ? '状态' : 'Status'}>
+            <option value="">{isZh ? '全部' : 'All'}</option>
+            {#each [...new Set(properties.map(item => item.status))] as value (value)}<option>{value}</option>{/each}
+          </Select>
+        </label>
+        <label class="grid gap-1 text-xs font-medium text-muted-foreground">{isZh ? '最高价格 USD' : 'Maximum price USD'}
+          <Input type="number" min="0" bind:value={maximumPrice} aria-label={isZh ? '最高价格 USD' : 'Maximum price USD'} />
+        </label>
       </div>
       <Button variant="ghost" onclick={resetFilters}>{isZh ? '清除筛选' : 'Clear filters'}</Button>
     {/if}
