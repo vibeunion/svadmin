@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.125.0](https://github.com/vibeunion/svadmin/compare/ui-v0.124.0...ui-v0.125.0) (2026-11-12)
+
+
+### 🚀 Features
+
+* **ui:** add AbacPolicyMatrix, PermissionSimulator, and WorkflowNodeInspector suite ([7407de7](https://github.com/vibeunion/svadmin/commit/7407de75e9f78c4aee9bac97b86bf3fa4cebd738))
+* **ui:** add AbacPolicyMatrix, PermissionSimulator, and WorkflowNodeInspector suite ([400e497](https://github.com/vibeunion/svadmin/commit/400e497ef4281bc7b6178c644b76602959b99824))
+* **ui:** add AntiLeakWatermark, DataLineage, LiveLogs, SealStamp, and Capacity suite ([#758](https://github.com/vibeunion/svadmin/issues/758)) ([0851948](https://github.com/vibeunion/svadmin/commit/08519487ef6e7ad1794573291ebfba2d6183c015))
+* **ui:** add DashboardGridLayout, DashboardLayoutStorage, and ChartAnnotationOverlay suite ([#763](https://github.com/vibeunion/svadmin/issues/763)) ([53d59b4](https://github.com/vibeunion/svadmin/commit/53d59b43b0bef447532b890798253b2a5654fc3f))
+* **ui:** add TenantContextSwitcher, OmnibarCommandPalette, and AuditTrailInspector suite ([#760](https://github.com/vibeunion/svadmin/issues/760)) ([0d49341](https://github.com/vibeunion/svadmin/commit/0d493410edd7e5c3c08eec85893b8f60f4c7fa04))
+* **ui:** align pagination select controls and popconfirm with Arco patterns ([d1bb4ac](https://github.com/vibeunion/svadmin/commit/d1bb4ac05feffe90318f23923f0381e7ec9a465f))
+* **ui:** align pagination select controls and popconfirm with Arco patterns ([#765](https://github.com/vibeunion/svadmin/issues/765)) ([39cf819](https://github.com/vibeunion/svadmin/commit/39cf819ad2ad210de0bb5906fe83e0fa8bad6231))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** align wave 11 and 12 SSR components with IE11 margin baseline ([a0eede8](https://github.com/vibeunion/svadmin/commit/a0eede826b10fe971935b75e8ebe2ee88e44a520))
+* **ui:** clear popconfirm lint and optional prop errors ([95b50e0](https://github.com/vibeunion/svadmin/commit/95b50e04cc58211e8eda93f7443e3a95b7ca720a))
+* **ui:** clear popconfirm lint and optional prop errors ([111cb04](https://github.com/vibeunion/svadmin/commit/111cb04534522980cbcbb7530c20024ee915a36d))
+* **ui:** clear popconfirm main CI errors ([5057d49](https://github.com/vibeunion/svadmin/commit/5057d49ae0635cae1fe02e72a33d67e097a60758))
+* **ui:** guard tenant switcher test nodes ([8d16e64](https://github.com/vibeunion/svadmin/commit/8d16e645d6b40f67a6d868c8e5e6b9e1e62d7bf9))
+* **ui:** keep Popconfirm harness callback defined ([969e50d](https://github.com/vibeunion/svadmin/commit/969e50d85e1df6d3d723565d3c484e4474a24d4a))
+* **ui:** narrow wave 11 state setters ([8636355](https://github.com/vibeunion/svadmin/commit/86363552abcc4d8f9195ac80740183bb045268a9))
+* **ui:** satisfy Popconfirm strict fixture checks ([91eba22](https://github.com/vibeunion/svadmin/commit/91eba22023500f7a3324eb82c8c95b6fa4c93671))
+
 ## [0.124.0](https://github.com/vibeunion/svadmin/compare/ui-v0.123.0...ui-v0.124.0) (2026-11-12)
 
 
