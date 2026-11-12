@@ -247,13 +247,6 @@ export { default as LiteTenantContextSwitcher } from './components/LiteTenantCon
 export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCommandPalette.svelte';
 export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
 
-// Enterprise wave 11 parity fallbacks (Workspace Switcher, Omnibar, Audit Trail)
-export { default as LiteTenantContextSwitcher } from './components/LiteTenantContextSwitcher.svelte';
-export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCommandPalette.svelte';
-export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
-
-
-
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
   configureMarkdownRenderer,
