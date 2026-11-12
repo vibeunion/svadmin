@@ -89,6 +89,7 @@
     Eye, Copy, RefreshCw, Rows, X
   } from '@lucide/svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import FullscreenButton from './FullscreenButton.svelte';
   import BatchActionBar from './BatchActionBar.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
   import DetailWorkspaceSections from './DetailWorkspaceSections.svelte';
@@ -126,6 +127,8 @@
     /** @deprecated Retained for compatibility; use the shared appearance baseline. */
     showDensitySwitcher?: boolean;
     showRefresh?: boolean;
+    /** Show the Arco Pro style fullscreen toggle for the table region. */
+    showFullscreen?: boolean;
     /** Custom header actions (right side) */
     headerActions?: Snippet;
     /** Custom cell renderers by field key */
@@ -184,6 +187,7 @@
     showFilterTags = true,
     showDensitySwitcher = true,
     showRefresh = true,
+    showFullscreen = true,
     headerActions,
     columns: customColumns,
     defaultCellRenderer,
@@ -211,6 +215,7 @@
   }: Props = $props();
 
   let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
+  let tableRegion = $state<HTMLElement | undefined>(undefined);
   const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
   const queryClient = useQueryClient();
@@ -1417,6 +1422,13 @@
         </TooltipButton>
       {/if}
 
+      {#if showFullscreen}
+        <FullscreenButton
+          target={tableRegion}
+          class="h-9 w-9 rounded-md border border-input bg-background"
+        />
+      {/if}
+
       {#if !showHeader && canCreate}
         <Button onclick={() => navigation.create(resourceName)}>
           <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t("common.create")}
@@ -1468,7 +1480,7 @@
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
+  <div bind:this={tableRegion} class="svadmin-auto-table__region overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
     {#if listPermission.isLoading || (canRead && query.isLoading && !query.isError)}
       <Table.Root density={currentDensity}>
         <Table.Header>
@@ -1916,5 +1928,12 @@
     .svadmin-auto-table__mobile {
       display: none;
     }
+  }
+
+  .svadmin-auto-table__region:fullscreen {
+    overflow: auto;
+    border: 0;
+    border-radius: 0;
+    background: var(--background);
   }
 </style>

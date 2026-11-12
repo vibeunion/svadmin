@@ -65,7 +65,11 @@
           {#if item.description}<span class="svadmin-steps__description">{item.description}</span>{/if}
         </span>
       </button>
-      {#if index < items.length - 1}<span class="svadmin-steps__connector" aria-hidden="true"></span>{/if}
+      {#if index < items.length - 1}
+        <span class="svadmin-steps__connector" aria-hidden="true" data-filled={stateValue === 'finish' ? 'true' : 'false'}>
+          <span class="svadmin-steps__connector-fill"></span>
+        </span>
+      {/if}
     </li>
   {/each}
 </ol>
@@ -110,13 +114,50 @@
   .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-label); font-weight: 600; }
   .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 500; }
   .svadmin-steps__description { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
-  .svadmin-steps__connector { flex: 1; height: 1px; margin-block-start: 0.875rem; background: var(--border); }
-  .svadmin-steps__item[data-status='finish'] .svadmin-steps__connector { background: var(--primary); }
+  .svadmin-steps__connector {
+    position: relative;
+    flex: 1;
+    height: 1px;
+    margin-block-start: 0.875rem;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .svadmin-steps__connector-fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 0;
+    background: var(--primary);
+    transition: width 240ms var(--svadmin-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+  .svadmin-steps__connector[data-filled='true'] .svadmin-steps__connector-fill { width: 100%; }
+  .svadmin-steps__item[data-status='process'] .svadmin-steps__indicator {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
+  }
   .svadmin-steps[data-direction='vertical'] .svadmin-steps__connector { width: 1px; height: 1.5rem; margin: 0 0 0 0.875rem; }
+  .svadmin-steps[data-direction='vertical'] .svadmin-steps__connector-fill {
+    inset-inline: 0;
+    inset-block-start: 0;
+    width: 100%;
+    height: 0;
+    transition: height 240ms var(--svadmin-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+  .svadmin-steps[data-direction='vertical'] .svadmin-steps__connector[data-filled='true'] .svadmin-steps__connector-fill { height: 100%; }
+  @media (prefers-reduced-motion: reduce) {
+    .svadmin-steps__connector-fill { transition: none; }
+  }
   .svadmin-steps[data-label-placement='vertical'] .svadmin-steps__action { flex-direction: column; }
   .svadmin-steps__item[data-disabled='true'] { opacity: 0.5; }
   @media (max-width: 40rem) {
     .svadmin-steps[data-direction='horizontal'] { flex-direction: column; }
     .svadmin-steps[data-direction='horizontal'] .svadmin-steps__connector { width: 1px; height: 1rem; margin-inline-start: 0.875rem; }
+    .svadmin-steps[data-direction='horizontal'] .svadmin-steps__connector-fill {
+      inset-inline: 0;
+      inset-block-start: 0;
+      width: 100%;
+      height: 0;
+      transition: height 240ms var(--svadmin-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
+    }
+    .svadmin-steps[data-direction='horizontal'] .svadmin-steps__connector[data-filled='true'] .svadmin-steps__connector-fill { height: 100%; }
   }
 </style>

@@ -3,7 +3,7 @@
   import { useList } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageHeader, ContentPageShell, Input, MetricBlock, Select } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, Input, InputGroup, MetricBlock, Select } from '@svadmin/ui';
   import { Heart, Plus } from '@lucide/svelte';
   import { demoContracts } from '../../resource-contracts';
   import { demoRenderers } from '../../resource-rendering';
@@ -142,7 +142,7 @@
       <a class="text-sm text-primary" href="#/properties?view=saved">{isZh ? '收藏' : 'Saved'}</a>
       <a class="text-sm text-primary" href="#/properties?view=map">{isZh ? '区域分布' : 'Markets'}</a>
     </nav>
-    <label class="flex flex-wrap items-center gap-3 text-sm">{isZh ? '搜索' : 'Search'}<input class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" bind:value={search} /></label>
+    <label class="flex flex-wrap items-center gap-3 text-sm">{isZh ? '搜索' : 'Search'}<Input class="min-w-0 flex-1" bind:value={search} aria-label={isZh ? '搜索' : 'Search'} /></label>
     {#if isPropertyView}
       <nav class="flex flex-wrap gap-4 text-sm" aria-label={isZh ? '房源视图' : 'Property views'}>
         <a href="#/properties" class="text-primary">{isZh ? '全部' : 'All'}</a>
@@ -171,7 +171,13 @@
           </Select>
         </label>
         <label class="grid gap-1 text-xs font-medium text-muted-foreground">{isZh ? '最高价格 USD' : 'Maximum price USD'}
-          <Input type="number" min="0" bind:value={maximumPrice} aria-label={isZh ? '最高价格 USD' : 'Maximum price USD'} />
+          <InputGroup
+            addBefore="USD"
+            size="compact"
+            label={isZh ? '最高价格' : 'Maximum price'}
+          >
+            <Input type="number" min="0" bind:value={maximumPrice} aria-label={isZh ? '最高价格 USD' : 'Maximum price USD'} />
+          </InputGroup>
         </label>
       </div>
       <Button variant="ghost" onclick={resetFilters}>{isZh ? '清除筛选' : 'Clear filters'}</Button>

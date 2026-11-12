@@ -64,6 +64,7 @@
 <div
   class={cn('svadmin-rate', className)}
   role="radiogroup"
+  tabindex={-1}
   aria-label={ariaLabel}
   aria-invalid={invalid || undefined}
   aria-describedby={describedby}
