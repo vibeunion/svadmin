@@ -77,10 +77,19 @@ export type BaseRecord = Record<string, unknown>;
 
 // ─── DataProvider ─────────────────────────────────────────────
 
+export interface CursorPageInfo {
+  nextCursor?: string | null;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+  [key: string]: unknown;
+}
+
 export interface Pagination {
   current?: number;
   pageSize?: number;
-  mode?: 'server' | 'client' | 'off';
+  mode?: 'server' | 'client' | 'cursor' | 'off';
+  /** Opaque cursor supplied by a cursor-mode provider. */
+  cursor?: string | null;
 }
 
 export interface Sort {
@@ -135,6 +144,8 @@ export interface GetListParams {
 export interface GetListResult<TData extends BaseRecord = BaseRecord> {
   data: TData[];
   total: number;
+  /** Cursor navigation metadata; offset providers may omit it. */
+  cursor?: CursorPageInfo | string;
   [key: string]: unknown;
 }
 

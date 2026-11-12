@@ -225,6 +225,8 @@ export { setAdminOptions, getAdminOptions, getTextTransformers } from './options
 export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.svelte';
 export { checkError } from './hook-utils.svelte';
 export type { NotificationConfig, OvertimeOptions, OvertimeResult, LiveSubscriptionParams } from './hook-utils.svelte';
+export { createCursorPageCache, createCursorProvider } from './cursor-provider';
+export type { CursorPage, CursorPageCache, CursorPageFetcher, CursorProvider, CursorProviderInput } from './cursor-provider';
 
 export { CRUD_FIELD_OPERATORS, DeleteManyPartialError, HttpError, UndoError, isCrudFieldOperator } from './types';
 export {
@@ -249,7 +251,7 @@ export type {
   UpdateManyParams, UpdateManyResult,
   DeleteParams, DeleteResult,
   DeleteManyParams, DeleteManyResult,
-  Pagination, Sort, Filter, Identity,
+  Pagination, Sort, Filter, Identity, CursorPageInfo,
   ResourceDefinition, ResourceProviderConfig, ResourceTransportConfig, ResourceAdapterConfig,
   FieldDefinition, DateInputOptions, MenuItem,
   AuthActionResult, CheckResult,

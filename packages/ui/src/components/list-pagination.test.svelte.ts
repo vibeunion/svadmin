@@ -7,6 +7,7 @@ import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 import ListI18nProviderHost from '../../test/fixtures/ListI18nProviderHost.svelte';
 import ListPagination from './ListPagination.svelte';
 import ListFooter from './ListFooter.svelte';
+import CursorListFooter from './CursorListFooter.svelte';
 import { listPaginationItems } from './list-pagination.js';
 
 describe('listPaginationItems', () => {
@@ -125,6 +126,38 @@ describe('ListFooter', () => {
     expect(screen.getByText('共 2500 条')).not.toBeNull();
     expect(screen.getByText('结果较多，仅加载前 2500 条，请用筛选收窄范围。')).not.toBeNull();
     expect(screen.getByText('第 1–50 条 / 共 5000 条')).not.toBeNull();
+  });
+});
+
+describe('CursorListFooter', () => {
+  it('renders total-free cursor navigation and emits previous/next actions', async () => {
+    const onPrevious = vi.fn();
+    const onNext = vi.fn();
+    renderWithI18n(CursorListFooter, {
+      props: {
+        label: '委托单', page: 2, loadedCount: 50, hasPrevious: true, hasNext: true,
+        onPrevious, onNext,
+      },
+    }, 'zh-CN');
+    expect(screen.getByText('当前页 50 条')).not.toBeNull();
+    expect(screen.getByText('第 2 页')).not.toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: '委托单上一页' }));
+    await fireEvent.click(screen.getByRole('button', { name: '委托单下一页' }));
+    expect(onPrevious).toHaveBeenCalledOnce();
+    expect(onNext).toHaveBeenCalledOnce();
+    expect(screen.queryByText(/共 \d+ 条/)).toBeNull();
+  });
+
+  it('disables navigation from cursor capabilities and keeps host notes', () => {
+    renderWithI18n(CursorListFooter, {
+      props: {
+        label: 'Records', page: 1, loadedCount: 0, hasPrevious: false, hasNext: false,
+        note: 'Filtered by status', onPrevious: vi.fn(), onNext: vi.fn(),
+      },
+    });
+    expect(screen.getByText('Filtered by status')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Records previous page' })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: 'Records next page' })).toHaveProperty('disabled', true);
   });
 });
 
