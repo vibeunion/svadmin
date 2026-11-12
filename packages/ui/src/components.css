@@ -1767,7 +1767,7 @@ main {
     width: 0.625rem;
     height: 0.625rem;
     border-radius: 0.125rem;
-    background: var(--primary);
+    background: var(--foreground);
     transform: rotate(45deg);
   }
   .svadmin-command-dialog-content {

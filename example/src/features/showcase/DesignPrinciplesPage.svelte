@@ -29,6 +29,8 @@ import { definedOptions } from '@svadmin/core/options';
     MetricStrip,
     PageToolbar,
     SectionHeader,
+    SegmentedControl,
+    Select,
     StatusBadge,
     ApprovalCenter,
     DashboardView,
@@ -356,10 +358,10 @@ import { definedOptions } from '@svadmin/core/options';
               <div class="grid gap-3 sm:grid-cols-2" data-filter-advanced-content>
                 <label class="grid gap-1 text-xs font-medium text-muted-foreground">
                   {isZh ? '原则' : 'Principle'}
-                  <select bind:value={principleFilter} class="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground" aria-label={isZh ? '原则' : 'Principle'}>
+                  <Select bind:value={principleFilter} size="compact" aria-label={isZh ? '原则' : 'Principle'}>
                     <option value="">{isZh ? '全部原则' : 'All principles'}</option>
                     {#each principles as principle (principle.id)}<option value={principle.id}>{principle.title}</option>{/each}
-                  </select>
+                  </Select>
                 </label>
               </div>
             {/snippet}
@@ -388,12 +390,16 @@ import { definedOptions } from '@svadmin/core/options';
     <aside class="space-y-4" aria-labelledby="state-heading">
       <span id="state-heading" class="sr-only">{isZh ? '状态工作台' : 'State workbench'}</span>
       <SectionHeader title={isZh ? '状态工作台' : 'State workbench'} description={isZh ? '用同一组件验证加载、空、错误和权限边界。' : 'Verify loading, empty, error, and permission boundaries with one component.'} />
-      <div class="flex flex-wrap gap-2" role="group" aria-label={isZh ? '选择数据状态' : 'Choose data state'}>
-        {#each Object.keys(stateLabels) as key (key)}
-          {@const stateKey = key as keyof typeof stateLabels}
-          <Button size="sm" variant={viewState === stateKey ? 'default' : 'outline'} onclick={() => viewState = stateKey}>{stateLabels[stateKey]}</Button>
-        {/each}
-      </div>
+      <SegmentedControl
+        ariaLabel={isZh ? '选择数据状态' : 'Choose data state'}
+        options={[
+          { value: 'loading', label: stateLabels.loading },
+          { value: 'empty', label: stateLabels.empty },
+          { value: 'error', label: stateLabels.error },
+          { value: 'forbidden', label: stateLabels.forbidden },
+        ]}
+        bind:value={viewState}
+      />
       <DataState
         state={viewState}
         {...definedOptions({ "title": stateCopy[viewState][0] })}
@@ -415,12 +421,12 @@ import { definedOptions } from '@svadmin/core/options';
         <div class="flex flex-wrap items-start gap-3">
           <div class="grid gap-1 text-xs text-muted-foreground"><div class="h-16 w-24"><MediaThumbnail src={successImage} alt="Loaded evidence" size="full" fit="cover" /></div><span>{isZh ? '成功' : 'Loaded'}</span></div>
           <div class="grid gap-1 text-xs text-muted-foreground"><div class="h-16 w-24"><MediaThumbnail src="/missing-ui-state-image.png" alt="Failed evidence" size="full" fit="cover" errorLabel={isZh ? '图片不可用' : 'Image unavailable'} /></div><span>{isZh ? '失败' : 'Error'}</span></div>
-          <div class="grid gap-1 text-xs text-muted-foreground"><MediaThumbnail src={null} emptyLabel={isZh ? '暂无媒体' : 'No media'} showOverlay={false} /><span>{isZh ? '空态' : 'Empty'}</span></div>
+          <div class="grid gap-1 text-xs text-muted-foreground"><div class="h-16 w-24 flex items-center justify-center rounded-lg border border-dashed border-border bg-muted/20"><MediaThumbnail src={null} emptyLabel={isZh ? '暂无媒体' : 'No media'} showOverlay={false} /></div><span>{isZh ? '空态' : 'Empty'}</span></div>
         </div>
       </section>
       <section class="space-y-3" aria-labelledby="command-action-heading" data-command-action-fixture>
         <SectionHeader id="command-action-heading" title={isZh ? '命令按钮' : 'Command buttons'} description={isZh ? '后端会拒绝的命令不能保持可点。' : 'Commands the backend would reject must not stay clickable.'} />
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 pt-2">
           <Button size="sm">{isZh ? '提交订单' : 'Submit order'}</Button>
           <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'}>{isZh ? '提交订单' : 'Submit order'}</Button>
         </div>
