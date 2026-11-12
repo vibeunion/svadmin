@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte';
   import { cn } from '../utils.js';
   import { Check, X, Clock, Loader2 } from '@lucide/svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
 
   export type ApprovalStatus = 'approved' | 'rejected' | 'pending' | 'running';
 
@@ -34,6 +35,8 @@
     current,
     class: className = '',
   }: ApprovalTimelineProps = $props();
+
+  const i18n = useTranslation();
 
   function getStatusIcon(status: ApprovalStatus) {
     switch (status) {
@@ -77,6 +80,10 @@
           line: 'border-border',
         };
     }
+  }
+
+  function getStatusLabel(status: ApprovalStatus): string {
+    return i18n.t(`approvalTimeline.status.${status}`);
   }
 </script>
 
@@ -125,7 +132,7 @@
                   colors.badge,
                 )}
               >
-                {step.status}
+                {getStatusLabel(step.status)}
               </span>
             </div>
 

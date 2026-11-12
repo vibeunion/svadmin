@@ -384,6 +384,11 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'AdminCopilotWidget', uiComponent: 'AdminCopilotWidget.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端 AI 智能悬浮助手与筛选建议卡片)' },
   { name: 'QueryAiExplainer', uiComponent: 'QueryAiExplainer.svelte', liteComponent: 'LiteQueryAiExplainer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端复杂查询表达式与只读语义口径解释卡片；重新触发解析由 SPA 承接' },
 
+  // ─── Enterprise suites wave 9 (Workflow BPMN, Execution Tracker & Data Scope ABAC) ───
+  { name: 'WorkflowGraphDesigner', uiComponent: 'WorkflowGraphDesigner.svelte', liteComponent: 'LiteApprovalChainBuilder.svelte', category: 'advanced', status: 'fallback', strategy: '服务端工作流节点步骤列表与审批人静态展示；交互式拖拽连线与条件编排由 SPA 承接' },
+  { name: 'WorkflowExecutionTracker', uiComponent: 'WorkflowExecutionTracker.svelte', liteComponent: 'LiteApprovalChainBuilder.svelte', category: 'advanced', status: 'fallback', strategy: '服务端工作流实例流转历史时间线与耗时展示；动态实时轮询由 SPA 承接' },
+  { name: 'DataScopeRuleEditor', uiComponent: 'DataScopeRuleEditor.svelte', liteComponent: 'LiteDataMaskPolicyEngine.svelte', category: 'advanced', status: 'fallback', strategy: '服务端行级数据权限范围与角色策略表格展示；动态条件组嵌套配置由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

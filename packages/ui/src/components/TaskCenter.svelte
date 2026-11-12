@@ -15,6 +15,7 @@
   import * as Sheet from './ui/sheet/index.js';
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
+  import { useTranslation } from '@svadmin/core/i18n';
 
   export type BackgroundTaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
@@ -52,14 +53,16 @@
     class?: string;
   }
 
+  const i18n = useTranslation();
+
   let {
     open = $bindable(false),
     tasks = [],
-    title = 'Task Center',
-    description = 'Track and manage asynchronous background exports and batch jobs',
-    emptyText = 'No background tasks',
+    title,
+    description,
+    emptyText,
     showTrigger = false,
-    triggerText = 'Tasks',
+    triggerText,
     children,
     onclose,
     ondownload,
@@ -69,6 +72,11 @@
     onrefresh,
     class: className,
   }: TaskCenterProps = $props();
+
+  const titleText = $derived(title ?? i18n.t('taskCenter.title'));
+  const descriptionText = $derived(description ?? i18n.t('taskCenter.description'));
+  const emptyTextValue = $derived(emptyText ?? i18n.t('taskCenter.empty'));
+  const triggerTextValue = $derived(triggerText ?? i18n.t('taskCenter.trigger'));
 
   let activeTab = $state<'all' | 'running' | 'pending' | 'completed' | 'failed'>('all');
 
@@ -94,10 +102,10 @@
 
   function formatDuration(seconds: number | undefined): string {
     if (seconds == null || seconds < 0) return '';
-    if (seconds < 60) return `${Math.round(seconds)}s`;
+    if (seconds < 60) return i18n.t('taskCenter.seconds', { count: Math.round(seconds) });
     const mins = Math.floor(seconds / 60);
     const secs = Math.round(seconds % 60);
-    return `${mins}m ${secs}s`;
+    return i18n.t('taskCenter.minutes', { minutes: mins, seconds: secs });
   }
 
   function handleDownload(task: BackgroundTask) {
@@ -140,11 +148,11 @@
       size="sm"
       class="relative flex items-center gap-1.5"
       onclick={() => (open = true)}
-      aria-label="Open task center"
+      aria-label={i18n.t('taskCenter.open')}
       data-svadmin-action="open-task-center"
     >
       <Activity class={cn('h-4 w-4', runningCount > 0 ? 'text-primary animate-pulse' : 'text-muted-foreground')} />
-      <span>{triggerText}</span>
+      <span>{triggerTextValue}</span>
       {#if runningCount > 0}
         <span
           class="ml-1 inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-xs font-semibold rounded-full bg-primary text-primary-foreground"
@@ -163,9 +171,9 @@
         <div>
           <h2 class="text-base font-semibold text-foreground flex items-center gap-2">
             <Activity class="h-4 w-4 text-primary" />
-            {title}
+            {titleText}
           </h2>
-          <p class="text-xs text-muted-foreground mt-0.5">{description}</p>
+          <p class="text-xs text-muted-foreground mt-0.5">{descriptionText}</p>
         </div>
         <div class="flex items-center gap-1">
           {#if onrefresh}
@@ -174,7 +182,7 @@
               size="icon"
               class="h-8 w-8 text-muted-foreground hover:text-foreground"
               onclick={() => onrefresh?.()}
-              aria-label="Refresh tasks"
+              aria-label={i18n.t('taskCenter.refresh')}
               data-svadmin-action="refresh-tasks"
             >
               <RotateCw class="h-4 w-4" />
@@ -188,7 +196,7 @@
               open = false;
               onclose?.();
             }}
-            aria-label="Close task center"
+            aria-label={i18n.t('taskCenter.close')}
             data-svadmin-action="close-task-center"
           >
             <X class="h-4 w-4" />
@@ -212,7 +220,7 @@
             onclick={() => (activeTab = 'all')}
             data-svadmin-tab="all"
           >
-            All ({tasks.length})
+            {i18n.t('taskCenter.tab.all')} ({tasks.length})
           </button>
           <button
             type="button"
@@ -227,7 +235,7 @@
             onclick={() => (activeTab = 'running')}
             data-svadmin-tab="running"
           >
-            Running
+            {i18n.t('taskCenter.tab.running')}
             {#if runningCount > 0}
               <span class="inline-flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
               <span class="text-xs bg-primary/10 text-primary px-1 rounded">{runningCount}</span>
@@ -246,7 +254,7 @@
             onclick={() => (activeTab = 'pending')}
             data-svadmin-tab="pending"
           >
-            Pending ({pendingCount})
+            {i18n.t('taskCenter.tab.pending')} ({pendingCount})
           </button>
           <button
             type="button"
@@ -261,7 +269,7 @@
             onclick={() => (activeTab = 'completed')}
             data-svadmin-tab="completed"
           >
-            Completed ({completedCount})
+            {i18n.t('taskCenter.tab.completed')} ({completedCount})
           </button>
           <button
             type="button"
@@ -276,7 +284,7 @@
             onclick={() => (activeTab = 'failed')}
             data-svadmin-tab="failed"
           >
-            Failed ({failedCount})
+            {i18n.t('taskCenter.tab.failed')} ({failedCount})
           </button>
         </div>
 
@@ -289,7 +297,7 @@
             data-svadmin-action="clear-completed"
           >
             <Trash2 class="h-3 w-3 mr-1" />
-            Clear
+            {i18n.t('taskCenter.clear')}
           </Button>
         {/if}
       </div>
@@ -299,7 +307,7 @@
         {#if filteredTasks.length === 0}
           <div class="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
             <Inbox class="h-10 w-10 stroke-1 text-muted-foreground/40 mb-3" />
-            <p class="text-sm">{emptyText}</p>
+            <p class="text-sm">{emptyTextValue}</p>
           </div>
         {:else}
           {#each filteredTasks as task (task.id)}
@@ -323,27 +331,27 @@
                     {#if task.status === 'running'}
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                         <RotateCw class="h-3 w-3 animate-spin" />
-                        Running
+                        {i18n.t('taskCenter.status.running')}
                       </span>
                     {:else if task.status === 'pending'}
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         <Clock class="h-3 w-3" />
-                        Pending
+                        {i18n.t('taskCenter.status.pending')}
                       </span>
                     {:else if task.status === 'completed'}
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-success/15 text-success">
                         <CheckCircle2 class="h-3 w-3" />
-                        Completed
+                        {i18n.t('taskCenter.status.completed')}
                       </span>
                     {:else if task.status === 'failed'}
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">
                         <AlertCircle class="h-3 w-3" />
-                        Failed
+                        {i18n.t('taskCenter.status.failed')}
                       </span>
                     {:else if task.status === 'cancelled'}
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         <XCircle class="h-3 w-3" />
-                        Cancelled
+                        {i18n.t('taskCenter.status.cancelled')}
                       </span>
                     {/if}
                   </div>
@@ -382,7 +390,7 @@
                       {/if}
                     </span>
                     {#if task.estimatedSecondsRemaining != null && task.status === 'running'}
-                      <span>~{formatDuration(task.estimatedSecondsRemaining)} remaining</span>
+                      <span>{i18n.t('taskCenter.remaining', { duration: formatDuration(task.estimatedSecondsRemaining) })}</span>
                     {/if}
                   </div>
                 </div>
@@ -398,7 +406,7 @@
               <!-- Card Action Footer -->
               <div class="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between text-xs">
                 <span class="text-muted-foreground text-xs">
-                  ID: <span class="font-mono">{task.id}</span>
+                  {i18n.t('taskCenter.id')}: <span class="font-mono">{task.id}</span>
                 </span>
                 <div class="flex items-center gap-1">
                   {#if task.status === 'completed' && (task.downloadUrl || ondownload)}
@@ -410,7 +418,7 @@
                       data-svadmin-action="download-result"
                     >
                       <Download class="h-3 w-3 mr-1" />
-                      Download
+                      {i18n.t('taskCenter.download')}
                     </Button>
                   {/if}
 
@@ -423,7 +431,7 @@
                       data-svadmin-action="retry-task"
                     >
                       <RotateCw class="h-3 w-3 mr-1" />
-                      Retry
+                      {i18n.t('taskCenter.retry')}
                     </Button>
                   {/if}
 
@@ -436,7 +444,7 @@
                       data-svadmin-action="cancel-task"
                     >
                       <XCircle class="h-3 w-3 mr-1" />
-                      Cancel
+                      {i18n.t('taskCenter.cancel')}
                     </Button>
                   {/if}
                 </div>

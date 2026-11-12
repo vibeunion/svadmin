@@ -2872,3 +2872,45 @@ AI query and rule natural language explainer card:
   queryText="WHERE (region = 'East' AND amount >= 50000) OR priority = 'URGENT'"
 />
 ```
+
+### `<WorkflowGraphDesigner>`
+
+Enterprise visual workflow graph and branch gateway designer:
+- Built for multi-level enterprise approvals, conditional gateways, and BPMN 2.0 process modeling.
+- **Node Topology**: Covers start nodes, conditional gateways, multi-approver nodes (sequential/parallel), CC nodes, and end nodes.
+
+```svelte
+<script lang="ts">
+  import { WorkflowGraphDesigner } from '@svadmin/ui';
+</script>
+
+<WorkflowGraphDesigner />
+```
+
+### `<WorkflowExecutionTracker>`
+
+Workflow instance runtime execution and audit tracker:
+- Designed to visualize end-to-end approval progression.
+- **Status Stepper**: Highlights completed approvals with timestamps and comments, pulsating active steps, and pending gateways.
+
+```svelte
+<script lang="ts">
+  import { WorkflowExecutionTracker } from '@svadmin/ui';
+</script>
+
+<WorkflowExecutionTracker instanceId="FLOW-9921" steps={[]} />
+```
+
+### `<DataScopeRuleEditor>`
+
+Row-level security (RLS) and data scope rule editor:
+- Built for multi-tenant and divisional access control.
+- **Granular Scopes**: Configures resource access by scope (all, department & sub-departments, department only, self only, or custom SQL expressions).
+
+```svelte
+<script lang="ts">
+  import { DataScopeRuleEditor } from '@svadmin/ui';
+</script>
+
+<DataScopeRuleEditor roleName="Sales Manager" resources={[]} />
+```
