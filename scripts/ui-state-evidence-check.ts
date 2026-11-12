@@ -127,6 +127,7 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/MediaLibraryModal.svelte',
   'packages/ui/src/components/PdfDocumentViewer.svelte',
   'packages/ui/src/components/PrintableReportLayout.svelte',
+  'packages/ui/src/components/GeoScatterMap.svelte',
   'packages/ui/src/components/DataScreenContainer.svelte',
   'packages/ui/src/components/StepForm.svelte',
   'packages/ui/src/components/StepWizard.svelte',
