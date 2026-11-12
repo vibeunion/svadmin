@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.30.0](https://github.com/vibeunion/svadmin/compare/lite-v0.29.0...lite-v0.30.0) (2026-11-12)
+
+
+### 🚀 Features
+
+* **ui:** add AbacPolicyMatrix, PermissionSimulator, and WorkflowNodeInspector suite ([7407de7](https://github.com/vibeunion/svadmin/commit/7407de75e9f78c4aee9bac97b86bf3fa4cebd738))
+* **ui:** add AbacPolicyMatrix, PermissionSimulator, and WorkflowNodeInspector suite ([400e497](https://github.com/vibeunion/svadmin/commit/400e497ef4281bc7b6178c644b76602959b99824))
+* **ui:** add AntiLeakWatermark, DataLineage, LiveLogs, SealStamp, and Capacity suite ([#758](https://github.com/vibeunion/svadmin/issues/758)) ([0851948](https://github.com/vibeunion/svadmin/commit/08519487ef6e7ad1794573291ebfba2d6183c015))
+* **ui:** add DashboardGridLayout, DashboardLayoutStorage, and ChartAnnotationOverlay suite ([#763](https://github.com/vibeunion/svadmin/issues/763)) ([53d59b4](https://github.com/vibeunion/svadmin/commit/53d59b43b0bef447532b890798253b2a5654fc3f))
+* **ui:** add TenantContextSwitcher, OmnibarCommandPalette, and AuditTrailInspector suite ([#760](https://github.com/vibeunion/svadmin/issues/760)) ([0d49341](https://github.com/vibeunion/svadmin/commit/0d493410edd7e5c3c08eec85893b8f60f4c7fa04))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** align wave 11 and 12 SSR components with IE11 margin baseline ([a0eede8](https://github.com/vibeunion/svadmin/commit/a0eede826b10fe971935b75e8ebe2ee88e44a520))
+* **lite:** align wave 11 and 12 SSR components with IE11 margin baseline ([7680704](https://github.com/vibeunion/svadmin/commit/76807043cc634343c2e125b3b81277b981e5d838))
+* **lite:** align wave 11 and 12 SSR components with IE11 margin baseline ([43084b5](https://github.com/vibeunion/svadmin/commit/43084b51273571edef8df4f4a57c882034f3c4a6))
+* **lite:** remove duplicate exports and restore IE11 gaps ([1de0884](https://github.com/vibeunion/svadmin/commit/1de08844a1afc51a82b4bf5973040c44bbe0caec))
+* **lite:** remove duplicate exports and restore IE11 gaps ([e6a4467](https://github.com/vibeunion/svadmin/commit/e6a4467a81ebb5e97695d512686c834b009d0353))
+
 ## [0.29.0](https://github.com/vibeunion/svadmin/compare/lite-v0.28.0...lite-v0.29.0) (2026-11-12)
 
 
