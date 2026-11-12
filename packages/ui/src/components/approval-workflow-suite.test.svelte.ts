@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
+import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 import ApprovalTimeline, { type ApprovalStep } from './ApprovalTimeline.svelte';
 import WorkflowProcessCard from './WorkflowProcessCard.svelte';
 
@@ -48,6 +49,19 @@ describe('ApprovalTimeline', () => {
 
     expect(screen.getByText('Finance Settlement')).toBeTruthy();
     expect(container.querySelector('[data-svadmin-component="ApprovalTimeline"]')).toBeTruthy();
+  });
+
+  it('translates status labels with the active locale', async () => {
+    const view = renderWithI18n(ApprovalTimeline, { steps }, 'zh-CN');
+
+    expect(view.getByText('已通过')).toBeTruthy();
+    expect(view.getByText('处理中')).toBeTruthy();
+    expect(view.getByText('待处理')).toBeTruthy();
+
+    await view.wrapper.setLocale('en');
+    expect(view.getByText('Approved')).toBeTruthy();
+    expect(view.getByText('In progress')).toBeTruthy();
+    expect(view.getByText('Pending')).toBeTruthy();
   });
 });
 

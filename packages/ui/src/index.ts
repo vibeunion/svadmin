@@ -919,3 +919,8 @@ export { default as SystemHealthCheckDashboard, default as DiagnosticInspector, 
 // Enterprise AI copilot floating widget & natural query rule explainer suite
 export { default as AdminCopilotWidget, default as CopilotFloatWidget, type AdminCopilotWidgetProps, type CopilotMessage, type CopilotFilterSuggestion } from './components/AdminCopilotWidget.svelte';
 export { default as QueryAiExplainer, default as SqlRuleAiExplainer, type QueryAiExplainerProps } from './components/QueryAiExplainer.svelte';
+
+// Enterprise workflow BPMN graph designer, execution tracker & row-level data scope suite
+export { default as WorkflowGraphDesigner, default as BpmnWorkflowDesigner, type WorkflowGraphDesignerProps, type WorkflowGraphNode, type WorkflowNodeType } from './components/WorkflowGraphDesigner.svelte';
+export { default as WorkflowExecutionTracker, default as WorkflowInstanceTracker, type WorkflowExecutionTrackerProps, type ExecutionStep, type ExecutionStatus } from './components/WorkflowExecutionTracker.svelte';
+export { default as DataScopeRuleEditor, default as RowLevelSecurityEditor, type DataScopeRuleEditorProps, type DataScopeRule, type ScopeScopeType } from './components/DataScopeRuleEditor.svelte';

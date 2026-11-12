@@ -83,6 +83,12 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  WorkflowGraphDesigner,
+  BpmnWorkflowDesigner,
+  WorkflowExecutionTracker,
+  WorkflowInstanceTracker,
+  DataScopeRuleEditor,
+  RowLevelSecurityEditor,
   AdminCopilotWidget,
   CopilotFloatWidget,
   QueryAiExplainer,
@@ -394,6 +400,12 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(WorkflowGraphDesigner).toBeDefined();
+    expect(BpmnWorkflowDesigner).toBe(WorkflowGraphDesigner);
+    expect(WorkflowExecutionTracker).toBeDefined();
+    expect(WorkflowInstanceTracker).toBe(WorkflowExecutionTracker);
+    expect(DataScopeRuleEditor).toBeDefined();
+    expect(RowLevelSecurityEditor).toBe(DataScopeRuleEditor);
     expect(AdminCopilotWidget).toBeDefined();
     expect(CopilotFloatWidget).toBe(AdminCopilotWidget);
     expect(QueryAiExplainer).toBeDefined();

@@ -2744,3 +2744,64 @@ AI 规则语义解释卡片：
   onexplain={(sql) => console.log('重新解析 SQL:', sql)}
 />
 ```
+
+### `<WorkflowGraphDesigner>`
+
+复杂审批流 BPMN 流程编排与条件分支设计器：
+- 专为大型政企、OA、ERP 与复杂财务审批流编排打造。
+- **全流程节点图元**：开始节点、条件判断网关（Gateway）、审批节点（直属主管/角色组/多级会签）、抄送节点与流程结束节点。
+- **可视化连线与分支增删**：支持在线动态在各环节之间插入审批节点或条件网关，实时输出标准流程结构拓扑。
+
+```svelte
+<script lang="ts">
+  import { WorkflowGraphDesigner, type WorkflowGraphNode } from '@svadmin/ui';
+
+  const nodes: WorkflowGraphNode[] = [
+    { id: '1', type: 'start', title: '发起请假申请' },
+    { id: '2', type: 'condition', title: '天数判定', conditionText: '请假天数 >= 3 天' },
+    { id: '3', type: 'approval', title: '部门经理审批', assigneeText: '直属总监 (会签)' },
+    { id: '4', type: 'end', title: '审批结束' },
+  ];
+</script>
+
+<WorkflowGraphDesigner initialNodes={nodes} onnodeschange={(n) => console.log('流程更新:', n)} />
+```
+
+### `<WorkflowExecutionTracker>`
+
+审批流执行追踪全景看板：
+- 专为长流转周期工单全景追溯打造。
+- **步进流向与处理耗时**：直观展示已通过节点（处理人、审批时间、附言意见）、当前流转节点（带脉冲水波纹动效与待办人）、未到达节点与驳回节点。
+
+```svelte
+<script lang="ts">
+  import { WorkflowExecutionTracker, type ExecutionStep } from '@svadmin/ui';
+
+  const steps: ExecutionStep[] = [
+    { id: 's1', nodeTitle: '提交采购单', status: 'completed', handlerName: '张三', actionTime: '2026-11-12 09:30' },
+    { id: 's2', nodeTitle: '财务合规审核', status: 'current', handlerName: '李主管', comment: '正在核验预算发票' },
+    { id: 's3', nodeTitle: '总经理终审', status: 'waiting' },
+  ];
+</script>
+
+<WorkflowExecutionTracker instanceId="FLOW-202611-9921" flowName="大额设备采购审批单" {steps} />
+```
+
+### `<DataScopeRuleEditor>`
+
+数据行级权限与范围规则中心（Row-Level Security）：
+- 专为集团型多部门数据隔离与数据安全设计。
+- **多维度数据边界**：按资源配置角色能够查看的行级范围（全部数据、本部门及下属部门、仅本部门、仅本人负责、或自定义 SQL 过滤表达式）。
+
+```svelte
+<script lang="ts">
+  import { DataScopeRuleEditor } from '@svadmin/ui';
+
+  const resources = [
+    { key: 'orders', label: '财务与交易订单' },
+    { key: 'customers', label: '核心客户档案' },
+  ];
+</script>
+
+<DataScopeRuleEditor roleName="区域销售经理" {resources} onchange={(rules) => console.log('行权限规则更新:', rules)} />
+```

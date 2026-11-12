@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-12T00:17:57.540Z",
-  "totalComponents": 264,
+  "timestamp": "2026-11-12T00:44:09.001Z",
+  "totalComponents": 267,
   "adaptedCount": 135,
-  "fallbackCount": 105,
+  "fallbackCount": 108,
   "spaOnlyCount": 24,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 51.1,
-  "fallbackPercentage": 39.8,
-  "behaviorVerifiedCount": 202,
-  "behaviorVerifiedPercentage": 76.5,
-  "behaviorAssertedCount": 202,
-  "behaviorAssertedPercentage": 76.5,
+  "exactPercentage": 50.6,
+  "fallbackPercentage": 40.4,
+  "behaviorVerifiedCount": 205,
+  "behaviorVerifiedPercentage": 76.8,
+  "behaviorAssertedCount": 205,
+  "behaviorAssertedPercentage": 76.8,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,16 +28,16 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 108,
+      "total": 111,
       "adapted": 29,
-      "fallback": 57,
+      "fallback": 60,
       "spaOnly": 22,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 26.9,
-      "fallbackRate": 52.8,
-      "behaviorVerified": 75,
-      "behaviorAsserted": 75
+      "exactRate": 26.1,
+      "fallbackRate": 54.1,
+      "behaviorVerified": 78,
+      "behaviorAsserted": 78
     },
     "widgets": {
       "category": "widgets",
@@ -2164,6 +2164,30 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端复杂查询表达式与只读语义口径解释卡片；重新触发解析由 SPA 承接"
+    },
+    {
+      "name": "WorkflowGraphDesigner",
+      "uiComponent": "WorkflowGraphDesigner.svelte",
+      "liteComponent": "LiteApprovalChainBuilder.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端工作流节点步骤列表与审批人静态展示；交互式拖拽连线与条件编排由 SPA 承接"
+    },
+    {
+      "name": "WorkflowExecutionTracker",
+      "uiComponent": "WorkflowExecutionTracker.svelte",
+      "liteComponent": "LiteApprovalChainBuilder.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端工作流实例流转历史时间线与耗时展示；动态实时轮询由 SPA 承接"
+    },
+    {
+      "name": "DataScopeRuleEditor",
+      "uiComponent": "DataScopeRuleEditor.svelte",
+      "liteComponent": "LiteDataMaskPolicyEngine.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端行级数据权限范围与角色策略表格展示；动态条件组嵌套配置由 SPA 承接"
     },
     {
       "name": "ThemeToggle",
