@@ -28,6 +28,10 @@
     items?: AnnouncementItem[] | undefined;
     /** 严重级别/色彩语义，默认 'warning' */
     tone?: 'info' | 'warning' | 'error' | 'success' | undefined;
+    /** 屏幕阅读器播报策略；未指定时由 blocking 推导 */
+    live?: 'off' | 'polite' | 'assertive' | undefined;
+    /** 是否阻断当前任务；非阻断提示应设置为 false */
+    blocking?: boolean | undefined;
     /** 维护/停服倒计时目标时间，自动计算并展示倒计时 */
     countdownTo?: Date | string | number | undefined;
     /** 倒计时前缀文案，默认 "距系统维护还剩: " */
@@ -59,6 +63,8 @@
     message,
     items,
     tone = 'warning',
+    live,
+    blocking = true,
     countdownTo,
     countdownPrefix = '距系统维护还剩: ',
     oncountdownend,
@@ -98,6 +104,8 @@
   const currentTone = $derived.by<'info' | 'warning' | 'error' | 'success'>(() => {
     return activeItem?.tone ?? tone;
   });
+
+  const liveMode = $derived(live ?? (blocking ? 'assertive' : 'polite'));
 
   const toneStyle = $derived.by(() => {
     switch (currentTone) {
@@ -225,7 +233,10 @@
       className
     )}
     data-svadmin-component="AnnouncementBanner"
-    role="alert"
+    data-svadmin-blocking={blocking}
+    aria-live={liveMode}
+    aria-atomic="true"
+    role={liveMode === 'assertive' ? 'alert' : undefined}
     onmouseenter={() => (isPaused = true)}
     onmouseleave={() => (isPaused = false)}
   >

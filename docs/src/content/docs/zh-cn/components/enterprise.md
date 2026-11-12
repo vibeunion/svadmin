@@ -1350,35 +1350,32 @@ const fields: FieldDefinition[] = [
 
 ### `<DualApprovalGate>` / `<TwoPersonRuleModal>`
 
-高危特权操作双人联签与复核门禁（Maker-Checker / Two-Person Rule 机制）：
-- 专门应对大额财务调拨、生产环境配置重置、网关主密钥轮换、超级管理员角色委派等“高危不可逆”操作。
-- **双重联签模式**：
-  1. **同台现场复核**：第二位授权复核人输入工号、职务与独立密码或 2FA OTP 验证码。
-  2. **远程异步复核**：自动生成具备有效期的复核专属链接与二维码，推送到合规主管审批队列。
-- 生成具备防篡改签名哈希的 `DualApprovalAuditRecord` 审计凭据，完整留存发起人、复核人及操作快照。
+高危特权操作的双人联签展示层（Maker-Checker / Two-Person Rule）：
+- 展示现场复核和远程复核两种交互状态。
+- 通过 `onReviewRequest` 或 `onRemoteReviewRequest` 向宿主提交复核意图。
+- `approvalState` 必须由宿主根据真实审批 RPC/状态机更新；组件不会生成审批记录、审计哈希或模拟批准。
 
 ```svelte
 <script lang="ts">
-  import { DualApprovalGate, type DualApprovalAuditRecord } from '@svadmin/ui';
+  import { DualApprovalGate, type DualApprovalRequest, type DualApprovalState } from '@svadmin/ui';
 
   let open = $state(false);
+  let approvalState = $state<DualApprovalState>('idle');
 
-  async function verifySupervisor(payload: any) {
-    // 调用后端核验复核人身份与口令
-    return payload.secret === 'valid-otp';
-  }
-
-  function handleApproved(record: DualApprovalAuditRecord) {
-    console.log('双人联签通过，审计哈希:', record.auditHash);
+  async function submitReview(request: DualApprovalRequest) {
+    approvalState = 'submitting';
+    // 调用业务审批 RPC；RPC 返回后再把真实状态写回 approvalState。
+    console.log(request);
   }
 </script>
 
 <DualApprovalGate
   bind:open
+  actionId="approval-request-42"
   actionTitle="轮换核心生产 API 网关签名私钥"
   requiredRole="首席安全官 / CSO"
-  verifyReviewer={verifySupervisor}
-  onApproved={handleApproved}
+  {approvalState}
+  onReviewRequest={submitReview}
 >
   <button class="bg-destructive text-destructive-foreground px-4 py-2 rounded">
     轮换秘钥
@@ -2804,4 +2801,79 @@ AI 规则语义解释卡片：
 </script>
 
 <DataScopeRuleEditor roleName="区域销售经理" {resources} onchange={(rules) => console.log('行权限规则更新:', rules)} />
+```
+
+### `<ScreenAntiLeakGuard>` / `<WatermarkPolicyStudio>`
+
+屏幕动态防拍照防泄密防御套件与自愈水印：
+- 专为金融、证券、等保 2.0 及商业机密防内部员工拍照泄密打造。
+- **DOM 防篡改自愈机制**：基于 `MutationObserver` 深度监听 DOM 变动，一旦水印节点被审查元素删除或隐藏，1毫秒内自动强制自愈注水。
+- **动态平铺阵列**：平铺当前登录人工号、姓名、客户端内网 IP 与精确防伪时间戳。
+
+```svelte
+<script lang="ts">
+  import { ScreenAntiLeakGuard } from '@svadmin/ui';
+</script>
+
+<ScreenAntiLeakGuard text="张伟 (EMP-01) · 机密数据" subtext="严禁拍照 · 违者必究" />
+```
+
+### `<DataLineageGraph>` / `<FieldLineageTracker>`
+
+数据资产全链路血缘图谱与字段级影响面分析：
+- 贯穿源数据表、ETL 清洗中间层、数仓主题宽表到下游大屏报表与数据接口。
+- **全链路依赖高亮**：点击任意节点自动高亮上下游血缘路径，弱化无关节点分支。
+- **资产元数据详情**：实时查看数据表记录行数、责任部门、更新频次与核心字段清单。
+
+```svelte
+<script lang="ts">
+  import { DataLineageGraph } from '@svadmin/ui';
+</script>
+
+<DataLineageGraph title="核心财务数仓血缘关系图" />
+```
+
+### `<LiveStreamLogViewer>` / `<TailLogConsole>`
+
+高性能实时流式日志终端与正则高亮监视器：
+- 类似 `tail -f` 极速流式日志排错控制台，专为运维排障与后台定时任务监视设计。
+- **智能吸底跟随**：在日志最底端时自动跟随流式滚动，向上回溯时智能暂停吸底。
+- **日志级别与搜索**：支持按 `INFO`、`WARN`、`ERROR`、`DEBUG` 级别过滤与正则关键字高亮匹配。
+
+```svelte
+<script lang="ts">
+  import { LiveStreamLogViewer } from '@svadmin/ui';
+</script>
+
+<LiveStreamLogViewer title="网关服务实时访问日志" />
+```
+
+### `<ElectronicSealStamp>` / `<ContractSigningPad>`
+
+企业级矢量防伪电子印章与合同签章套件：
+- 纯 SVG 矢量电子印章，失真无损且打印清晰。
+- **经典几何规范**：外层同心双圆环、沿弧形排列的企业全称、中心五角星或“已通过/已驳回”印模。
+- **防伪与做旧质感**：底部防伪 13 位编码与仿真印泥倾角。
+
+```svelte
+<script lang="ts">
+  import { ElectronicSealStamp } from '@svadmin/ui';
+</script>
+
+<ElectronicSealStamp companyName="上海创智多租户网络科技有限公司" sealTitle="电子审批专用章" />
+```
+
+### `<SystemCapacityForecastCard>` / `<ResourceCapacityPredictor>`
+
+系统容量趋势预测与自动扩缩容建议卡片：
+- 针对数据库磁盘、对象存储与 API 额度，前置预测配额耗尽倒计时。
+- **耗尽倒计时预警**：直观展示“预计 N 天后达到硬配额上限”警示徽标。
+- **趋势预测折线图**：历史实际用量实线平滑连接未来拟合虚线，支持一键发起扩容。
+
+```svelte
+<script lang="ts">
+  import { SystemCapacityForecastCard } from '@svadmin/ui';
+</script>
+
+<SystemCapacityForecastCard resourceName="云数据库存储容量" estimatedDaysRemaining={14} />
 ```

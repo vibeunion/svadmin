@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import ProSkeleton from './ProSkeleton.svelte';
+import PageSkeleton from './PageSkeleton.svelte';
 
 describe('ProSkeleton', () => {
   it('renders table skeleton by default with pulse animation', () => {
@@ -53,5 +54,21 @@ describe('ProSkeleton', () => {
     expect(listRoot?.getAttribute('data-type')).toBe('list');
     const avatars = container.querySelectorAll('.rounded-full');
     expect(avatars.length).toBe(3);
+  });
+
+  it('exposes the same loading-region semantics as PageSkeleton', () => {
+    const pro = render(ProSkeleton, {
+      ariaLabel: '正在加载列表',
+      active: false,
+    });
+    const page = render(PageSkeleton, {
+      ariaLabel: '正在加载页面',
+      type: 'list',
+    });
+
+    expect(pro.container.querySelector('[aria-busy="true"]')?.getAttribute('aria-live')).toBe('polite');
+    expect(pro.container.querySelector('[aria-label="正在加载列表"]')).toBeTruthy();
+    expect(page.container.querySelector('[data-svadmin-component="PageSkeleton"]')?.getAttribute('aria-busy')).toBe('true');
+    expect(page.container.querySelector('[aria-label="正在加载页面"]')).toBeTruthy();
   });
 });

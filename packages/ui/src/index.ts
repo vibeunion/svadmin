@@ -130,6 +130,7 @@ export { default as ErrorComponent } from './components/ErrorComponent.svelte';
 export { default as ErrorSummary } from './components/ErrorSummary.svelte';
 export type { FormErrorEntry } from './components/ErrorSummary.svelte';
 export { default as PageSkeleton } from './components/PageSkeleton.svelte';
+export type { PageSkeletonProps } from './components/PageSkeleton.svelte';
 export { default as NavigateToResource } from './components/NavigateToResource.svelte';
 export { default as CatchAllNavigate } from './components/CatchAllNavigate.svelte';
 export { default as ThemedTitle } from './components/ThemedTitle.svelte';
@@ -787,7 +788,16 @@ export { useSessionTimeout, type UseSessionTimeoutOptions } from './components/u
 export { default as SessionTimeoutGuard, type SessionTimeoutGuardProps } from './components/SessionTimeoutGuard.svelte';
 
 // Enterprise two-person rule & dual approval gate suite
-export { default as DualApprovalGate, default as TwoPersonRuleModal, type DualApprovalGateProps, type ApprovalMode, type ReviewerVerificationPayload, type DualApprovalAuditRecord } from './components/DualApprovalGate.svelte';
+export {
+  default as DualApprovalGate,
+  default as TwoPersonRuleModal,
+  type DualApprovalGateProps,
+  type ApprovalMode,
+  type DualApprovalState,
+  type ReviewerVerificationPayload,
+  type DualApprovalRequest,
+  type DualApprovalAuditRecord,
+} from './components/DualApprovalGate.svelte';
 
 // Enterprise table clipboard manager & Excel bidirectional paste suite
 export { useTableClipboard, parseClipboardText, parseDelimitedText, matchColumnsToDefinitions, copyRowsToClipboard, type ColumnDef, type ColumnMapping, type ParsedClipboardTable } from './components/useTableClipboard.svelte.js';
@@ -925,3 +935,18 @@ export { default as QueryAiExplainer, default as SqlRuleAiExplainer, type QueryA
 export { default as WorkflowGraphDesigner, default as BpmnWorkflowDesigner, type WorkflowGraphDesignerProps, type WorkflowGraphNode, type WorkflowNodeType } from './components/WorkflowGraphDesigner.svelte';
 export { default as WorkflowExecutionTracker, default as WorkflowInstanceTracker, type WorkflowExecutionTrackerProps, type ExecutionStep, type ExecutionStatus } from './components/WorkflowExecutionTracker.svelte';
 export { default as DataScopeRuleEditor, default as RowLevelSecurityEditor, type DataScopeRuleEditorProps, type DataScopeRule, type ScopeScopeType } from './components/DataScopeRuleEditor.svelte';
+
+// Enterprise dynamic screen anti-leak watermark guard suite
+export { default as ScreenAntiLeakGuard, default as WatermarkPolicyStudio, type ScreenAntiLeakGuardProps } from './components/ScreenAntiLeakGuard.svelte';
+
+// Enterprise data asset full-chain lineage & impact analysis graph suite
+export { default as DataLineageGraph, default as FieldLineageTracker, type DataLineageGraphProps, type LineageNode, type LineageEdge, type LineageNodeType } from './components/DataLineageGraph.svelte';
+
+// Enterprise high-performance streaming log console & tail viewer suite
+export { default as LiveStreamLogViewer, default as TailLogConsole, type LiveStreamLogViewerProps, type LogEntry, type LogLevel } from './components/LiveStreamLogViewer.svelte';
+
+// Enterprise vector electronic official seal stamp & signing suite
+export { default as ElectronicSealStamp, default as ContractSigningPad, type ElectronicSealStampProps, type SealType } from './components/ElectronicSealStamp.svelte';
+
+// Enterprise system resource capacity forecasting & runout prediction suite
+export { default as SystemCapacityForecastCard, default as ResourceCapacityPredictor, type SystemCapacityForecastCardProps, type CapacityMetricPoint } from './components/SystemCapacityForecastCard.svelte';

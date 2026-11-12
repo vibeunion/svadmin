@@ -235,6 +235,13 @@ export { default as LiteSystemHealthCheckDashboard } from './components/LiteSyst
 // Enterprise AI explainer parity fallback
 export { default as LiteQueryAiExplainer } from './components/LiteQueryAiExplainer.svelte';
 
+// Enterprise wave 10 parity fallbacks
+export { default as LiteScreenAntiLeakGuard } from './components/LiteScreenAntiLeakGuard.svelte';
+export { default as LiteDataLineageGraph } from './components/LiteDataLineageGraph.svelte';
+export { default as LiteLiveStreamLogViewer } from './components/LiteLiveStreamLogViewer.svelte';
+export { default as LiteElectronicSealStamp } from './components/LiteElectronicSealStamp.svelte';
+export { default as LiteSystemCapacityForecastCard } from './components/LiteSystemCapacityForecastCard.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)

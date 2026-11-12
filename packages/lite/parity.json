@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-12T00:44:09.001Z",
-  "totalComponents": 267,
+  "timestamp": "2026-11-12T02:48:36.801Z",
+  "totalComponents": 272,
   "adaptedCount": 135,
-  "fallbackCount": 108,
+  "fallbackCount": 113,
   "spaOnlyCount": 24,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 50.6,
-  "fallbackPercentage": 40.4,
-  "behaviorVerifiedCount": 205,
-  "behaviorVerifiedPercentage": 76.8,
-  "behaviorAssertedCount": 205,
-  "behaviorAssertedPercentage": 76.8,
+  "exactPercentage": 49.6,
+  "fallbackPercentage": 41.5,
+  "behaviorVerifiedCount": 210,
+  "behaviorVerifiedPercentage": 77.2,
+  "behaviorAssertedCount": 210,
+  "behaviorAssertedPercentage": 77.2,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,29 +28,29 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 111,
+      "total": 114,
       "adapted": 29,
-      "fallback": 60,
+      "fallback": 63,
       "spaOnly": 22,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 26.1,
-      "fallbackRate": 54.1,
-      "behaviorVerified": 78,
-      "behaviorAsserted": 78
+      "exactRate": 25.4,
+      "fallbackRate": 55.3,
+      "behaviorVerified": 81,
+      "behaviorAsserted": 81
     },
     "widgets": {
       "category": "widgets",
-      "total": 49,
+      "total": 51,
       "adapted": 18,
-      "fallback": 31,
+      "fallback": 33,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 36.7,
-      "fallbackRate": 63.3,
-      "behaviorVerified": 43,
-      "behaviorAsserted": 43
+      "exactRate": 35.3,
+      "fallbackRate": 64.7,
+      "behaviorVerified": 45,
+      "behaviorAsserted": 45
     },
     "fields": {
       "category": "fields",
@@ -2188,6 +2188,46 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端行级数据权限范围与角色策略表格展示；动态条件组嵌套配置由 SPA 承接"
+    },
+    {
+      "name": "ScreenAntiLeakGuard",
+      "uiComponent": "ScreenAntiLeakGuard.svelte",
+      "liteComponent": "LiteScreenAntiLeakGuard.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端静态平铺防泄密水印背景；客户端 DOM 防篡改自愈由 SPA 承接"
+    },
+    {
+      "name": "DataLineageGraph",
+      "uiComponent": "DataLineageGraph.svelte",
+      "liteComponent": "LiteDataLineageGraph.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端数据血缘上下游节点列表与转换关系展示；SVG 动态高亮连线由 SPA 承接"
+    },
+    {
+      "name": "LiveStreamLogViewer",
+      "uiComponent": "LiveStreamLogViewer.svelte",
+      "liteComponent": "LiteLiveStreamLogViewer.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端静态日志行快照与等级色彩展示；客户端长连接实时流式推送与自动吸底由 SPA 承接"
+    },
+    {
+      "name": "ElectronicSealStamp",
+      "uiComponent": "ElectronicSealStamp.svelte",
+      "liteComponent": "LiteElectronicSealStamp.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端企业防伪电子印章矢量展示与审核标记；动态签署由 SPA 承接"
+    },
+    {
+      "name": "SystemCapacityForecastCard",
+      "uiComponent": "SystemCapacityForecastCard.svelte",
+      "liteComponent": "LiteSystemCapacityForecastCard.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端资源容量耗尽倒计时与用量进度条展示；客户端趋势线性拟合折线图由 SPA 承接"
     },
     {
       "name": "ThemeToggle",
