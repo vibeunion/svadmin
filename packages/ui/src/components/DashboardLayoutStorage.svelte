@@ -110,7 +110,7 @@
       isDefault: false,
       role: '自定义方案',
       updatedAt: '刚刚',
-      items: currentLayout.length > 0 ? [...currentLayout] : [...activePreset.items],
+      items: currentLayout.length > 0 ? [...currentLayout] : (activePreset ? [...activePreset.items] : []),
     };
 
     presets = [...presets, newPreset];
@@ -123,9 +123,10 @@
 
   function handleDelete(id: string) {
     presets = presets.filter((p) => p.id !== id);
-    if (currentPresetId === id && presets.length > 0) {
-      currentPresetId = presets[0].id;
-      onSelectPreset?.(presets[0]);
+    const first = presets[0];
+    if (currentPresetId === id && first) {
+      currentPresetId = first.id;
+      onSelectPreset?.(first);
     }
     onDeletePreset?.(id);
   }
