@@ -3033,3 +3033,48 @@ Audit trail inspection waterfall and cross-tenant security tracker:
 
 <AuditTrailInspector />
 ```
+
+### `<DashboardGridLayout>` / `<DynamicWidgetGrid>`
+
+Enterprise 12-column responsive dashboard grid layout engine:
+- Flexible widget composition canvas inspired by Grafana and Retool, supporting KPI scorecards, charts, and tables.
+- **Dynamic Resize & Lock**: Adjusts widget column and row spans with single-widget static lock protection.
+- **Edit vs View States**: Toggle edit mode to add sample widgets, resize, remove, or reset to default.
+
+```svelte
+<script lang="ts">
+  import { DashboardGridLayout } from '@svadmin/ui';
+</script>
+
+<DashboardGridLayout />
+```
+
+### `<DashboardLayoutStorage>` / `<DashboardPresetManager>`
+
+Multi-tenant and role-based dashboard preset manager:
+- Save, switch, and manage Executive Cockpit, Financial Billing, and SRE Incident dashboard presets.
+- **Save as New Preset**: Save current layout as a custom preset with role and description tags.
+- **JSON Import & Export**: Export layout JSON for version control or cross-environment deployment.
+
+```svelte
+<script lang="ts">
+  import { DashboardLayoutStorage } from '@svadmin/ui';
+</script>
+
+<DashboardLayoutStorage />
+```
+
+### `<ChartAnnotationOverlay>` / `<MetricEventAnnotation>`
+
+Business milestone, outage incident, and threshold annotation layer:
+- Overlays release milestones, campaign peak lines, and threshold alerts onto time-series charts.
+- **Interactive Event Pins**: Percentage-anchored pins with tooltips expanding into root-cause details.
+- **Semantic Status Tones**: Built-in release (`primary`), incident (`destructive`), promotion (`warning`), and target (`success`) tones.
+
+```svelte
+<script lang="ts">
+  import { ChartAnnotationOverlay } from '@svadmin/ui';
+</script>
+
+<ChartAnnotationOverlay />
+```

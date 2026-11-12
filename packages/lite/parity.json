@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-12T03:23:47.843Z",
-  "totalComponents": 275,
+  "timestamp": "2026-11-12T03:52:54.594Z",
+  "totalComponents": 278,
   "adaptedCount": 135,
-  "fallbackCount": 116,
+  "fallbackCount": 119,
   "spaOnlyCount": 24,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 49.1,
-  "fallbackPercentage": 42.2,
-  "behaviorVerifiedCount": 213,
-  "behaviorVerifiedPercentage": 77.5,
-  "behaviorAssertedCount": 213,
-  "behaviorAssertedPercentage": 77.5,
+  "exactPercentage": 48.6,
+  "fallbackPercentage": 42.8,
+  "behaviorVerifiedCount": 216,
+  "behaviorVerifiedPercentage": 77.7,
+  "behaviorAssertedCount": 216,
+  "behaviorAssertedPercentage": 77.7,
   "categories": {
     "pages": {
       "category": "pages",
@@ -41,16 +41,16 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 51,
+      "total": 54,
       "adapted": 18,
-      "fallback": 33,
+      "fallback": 36,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 35.3,
-      "fallbackRate": 64.7,
-      "behaviorVerified": 45,
-      "behaviorAsserted": 45
+      "exactRate": 33.3,
+      "fallbackRate": 66.7,
+      "behaviorVerified": 48,
+      "behaviorAsserted": 48
     },
     "fields": {
       "category": "fields",
@@ -2252,6 +2252,30 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端操作审计流转记录与字段变更差异静态列表；抽屉交互与实时轮询由 SPA 承接"
+    },
+    {
+      "name": "DashboardGridLayout",
+      "uiComponent": "DashboardGridLayout.svelte",
+      "liteComponent": "LiteDashboardGridLayout.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端 12 栅格自适应小部件排版；客户端自由拖拽、伸缩与吸附由 SPA 承接"
+    },
+    {
+      "name": "DashboardLayoutStorage",
+      "uiComponent": "DashboardLayoutStorage.svelte",
+      "liteComponent": "LiteDashboardLayoutStorage.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端大屏排版预设方案卡片与角色列表；客户端另存与 JSON 导入导出由 SPA 承接"
+    },
+    {
+      "name": "ChartAnnotationOverlay",
+      "uiComponent": "ChartAnnotationOverlay.svelte",
+      "liteComponent": "LiteChartAnnotationOverlay.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "服务端大促/故障/发布大事件时间线列表；客户端图表绝对定位垂直标记线与图钉交互由 SPA 承接"
     },
     {
       "name": "ThemeToggle",

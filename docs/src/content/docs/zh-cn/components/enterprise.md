@@ -2924,3 +2924,48 @@ AI 规则语义解释卡片：
 
 <AuditTrailInspector />
 ```
+
+### `<DashboardGridLayout>` / `<DynamicWidgetGrid>`
+
+企业级自由流式 12 栅格自适应大屏排版引擎：
+- 类似 Grafana 与 Retool 的自由大屏小部件排版画布，支持 KPI 计分卡、时序图表与数据表格混排。
+- **自由尺寸缩放与锁定**：支持按栅格调节小部件宽度与高度，支持单卡片静态防拖拽锁定。
+- **编辑态与预览态切换**：一键进入排版编辑模式，支持动态追加卡片、移除卡片与重置默认布局。
+
+```svelte
+<script lang="ts">
+  import { DashboardGridLayout } from '@svadmin/ui';
+</script>
+
+<DashboardGridLayout />
+```
+
+### `<DashboardLayoutStorage>` / `<DashboardPresetManager>`
+
+多租户与角色维度大屏排版预设方案管理器：
+- 支持保存、切换和管理“高管经营全景”、“财务月结对账”与“SRE 故障监控”大屏方案。
+- **一键另存与覆盖更新**：当前排版直接另存为新方案，支持标注适用角色与说明。
+- **JSON 配置导入导出**：支持大屏配置一键导出与跨环境恢复部署。
+
+```svelte
+<script lang="ts">
+  import { DashboardLayoutStorage } from '@svadmin/ui';
+</script>
+
+<DashboardLayoutStorage />
+```
+
+### `<ChartAnnotationOverlay>` / `<MetricEventAnnotation>`
+
+业务重大事件、异常故障与阈值标记层覆盖套件：
+- 在时序走势图、指标折线图上叠加版本全量发布线、促销节点线、水位阈值线与突发故障气泡。
+- **垂直事件线与图钉交互**：按时间百分比精准吸附定位，点击图钉联动展开事件根因与业务说明卡片。
+- **多维告警色彩语义**：内置发布（primary）、故障告警（destructive）、大促活动（warning）、目标达成（success）四种标准语义色。
+
+```svelte
+<script lang="ts">
+  import { ChartAnnotationOverlay } from '@svadmin/ui';
+</script>
+
+<ChartAnnotationOverlay />
+```

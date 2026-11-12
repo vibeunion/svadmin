@@ -532,7 +532,7 @@
               ? mergeDefaults(branchSchema as JsonSchema, next, true) as Record<string, unknown>
               : next;
             if (next) writePath(path, seeded as Record<string, unknown>);
-          }} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs">
+          }} class="svadmin-select" data-size="compact">
             <option value="">{i18n.t('common.selectOption')}</option>
             {#each oneOf.values as branchValues, branch (branch)}
               {#each branchValues as value, valueIndex (valueIndex)}
@@ -592,7 +592,7 @@
         </label>
         {#if node.description}<p id={descriptionId} class="text-[11px] text-muted-foreground">{node.description}</p>{/if}
         {#if options}
-          <select id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} required={required} value={enumIndex(current, options) < 0 ? '' : enumToken(enumIndex(current, options))} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, options))} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs">
+          <select id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} required={required} value={enumIndex(current, options) < 0 ? '' : enumToken(enumIndex(current, options))} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, options))} class="svadmin-select" data-size="compact">
             <option value="">{i18n.t('common.selectOption')}</option>
             {#each options as option, index (index)}<option value={enumToken(index)}>{String(option)}</option>{/each}
           </select>
@@ -601,9 +601,9 @@
         {:else if type === 'boolean'}
           <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
         {:else if type === 'number' || type === 'integer'}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="number" step={type === 'integer' ? 1 : 'any'} min={node.minimum} max={node.maximum} required={required} value={current == null ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="number" step={type === 'integer' ? 1 : 'any'} min={node.minimum} max={node.maximum} required={required} value={current == null ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="svadmin-select" data-size="compact" />
         {:else}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="text" minlength={node.minLength} maxlength={node.maxLength} required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="text" minlength={node.minLength} maxlength={node.maxLength} required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-select" data-size="compact" />
         {/if}
         {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
       </div>

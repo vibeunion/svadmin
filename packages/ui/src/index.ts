@@ -959,3 +959,8 @@ export { default as OmnibarCommandPalette, default as GlobalCommandOmnibar, type
 
 // Enterprise audit trail inspector & cross-tenant security tracker suite
 export { default as AuditTrailInspector, default as SecurityAuditTimeline, type AuditTrailInspectorProps, type AuditEventItem, type AuditActor, type AuditFieldChange } from './components/AuditTrailInspector.svelte';
+
+// Enterprise dashboard grid layout, widget storage & chart annotation suite
+export { default as DashboardGridLayout, default as DynamicWidgetGrid, type DashboardGridLayoutProps, type DashboardGridItem } from './components/DashboardGridLayout.svelte';
+export { default as DashboardLayoutStorage, default as DashboardPresetManager, type DashboardLayoutStorageProps, type DashboardPreset } from './components/DashboardLayoutStorage.svelte';
+export { default as ChartAnnotationOverlay, default as MetricEventAnnotation, type ChartAnnotationOverlayProps, type ChartAnnotationItem } from './components/ChartAnnotationOverlay.svelte';

@@ -24,12 +24,17 @@ describe('TenantContextSwitcher component suite', () => {
 
     const trigger = container.querySelector('button[aria-haspopup="listbox"]');
     expect(trigger).toBeTruthy();
-    await fireEvent.click(trigger);
+    if (trigger) {
+      await fireEvent.click(trigger);
+    }
 
     // Should display other tenants in dropdown
     const options = getAllByText('华东大区创新科技中心');
     expect(options.length).toBeGreaterThan(0);
-    await fireEvent.click(options[0]);
+    const firstOption = options[0];
+    if (firstOption) {
+      await fireEvent.click(firstOption);
+    }
 
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -46,7 +51,9 @@ describe('TenantContextSwitcher component suite', () => {
     });
 
     const trigger = container.querySelector('button[aria-haspopup="listbox"]');
-    await fireEvent.click(trigger);
+    if (trigger) {
+      await fireEvent.click(trigger);
+    }
 
     const searchInput = getByPlaceholderText('搜索租户名称或编号...');
     expect(searchInput).toBeTruthy();
@@ -55,7 +62,9 @@ describe('TenantContextSwitcher component suite', () => {
     // The dropdown should only show matching SupaCloud
     const listbox = container.querySelector('[role="listbox"]');
     expect(listbox).toBeTruthy();
-    expect(listbox.textContent).toContain('SupaCloud 云原生实验室');
-    expect(listbox.textContent).not.toContain('华东大区创新科技中心');
+    if (listbox) {
+      expect(listbox.textContent).toContain('SupaCloud 云原生实验室');
+      expect(listbox.textContent).not.toContain('华东大区创新科技中心');
+    }
   });
 });
