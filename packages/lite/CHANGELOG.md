@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.29.0](https://github.com/vibeunion/svadmin/compare/lite-v0.28.0...lite-v0.29.0) (2026-11-12)
+
+
+### 🚀 Features
+
+* **lite:** add BI pivot, geomap, mask policy, and health dashboard SSR parity ([#749](https://github.com/vibeunion/svadmin/issues/749)) ([97c1665](https://github.com/vibeunion/svadmin/commit/97c16657324d29ca6698ac7861ee54e765d3991f))
+* **lite:** add enterprise ingestion, security audit, and sql suites SSR parity ([#745](https://github.com/vibeunion/svadmin/issues/745)) ([4bde1c2](https://github.com/vibeunion/svadmin/commit/4bde1c2a50a5ced128306c132dd84ffa026a6562))
+* **ui:** add AdminCopilotWidget, QueryAiExplainer, and AI semantic suite ([#751](https://github.com/vibeunion/svadmin/issues/751)) ([710438c](https://github.com/vibeunion/svadmin/commit/710438c5cec11a5a03ca168766af63172b0d6e5e))
+* **ui:** add PivotMatrix, GeoScatterMap, DataMaskPolicy, MockStudio, and HealthCheck suite ([#747](https://github.com/vibeunion/svadmin/issues/747)) ([f46ab55](https://github.com/vibeunion/svadmin/commit/f46ab55a5d0a53be680d7cbb47c2f4b9565ab734))
+* **ui:** add WorkflowGraphDesigner, ExecutionTracker, and DataScope suite ([#752](https://github.com/vibeunion/svadmin/issues/752)) ([c22a730](https://github.com/vibeunion/svadmin/commit/c22a7309d982610f0828b75e81106c2d2c0885b7))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** restore IE11 layout contract after recent suites ([#746](https://github.com/vibeunion/svadmin/issues/746)) ([011b792](https://github.com/vibeunion/svadmin/commit/011b792c23738fe15d0f6383b6a1ad6d354d5b94))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.81.0 to >=0.81.0
+
 ## [0.28.0](https://github.com/vibeunion/svadmin/compare/lite-v0.27.0...lite-v0.28.0) (2026-11-11)
 
 

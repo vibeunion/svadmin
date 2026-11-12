@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/simple-rest",
-  "version": "0.12.31",
+  "version": "0.12.32",
   "description": "Simple REST adapters — fetch-based DataProvider and JWT/Cookie AuthProvider",
   "type": "module",
   "sideEffects": false,

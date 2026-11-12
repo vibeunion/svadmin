@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/nestjsx-crud",
-  "version": "0.12.31",
+  "version": "0.12.32",
   "description": "NestJSX CRUD DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

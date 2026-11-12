@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/vibeunion/svadmin/compare/keycloak-v0.2.0...keycloak-v0.2.1) (2026-11-12)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.81.0
+
 ## [0.2.0](https://github.com/vibeunion/svadmin/compare/keycloak-v0.1.0...keycloak-v0.2.0) (2026-11-10)
 
 
