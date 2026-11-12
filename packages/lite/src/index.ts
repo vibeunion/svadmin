@@ -252,6 +252,11 @@ export { default as LiteDashboardGridLayout } from './components/LiteDashboardGr
 export { default as LiteDashboardLayoutStorage } from './components/LiteDashboardLayoutStorage.svelte';
 export { default as LiteChartAnnotationOverlay } from './components/LiteChartAnnotationOverlay.svelte';
 
+// Enterprise wave 13 parity fallbacks (ABAC Policy Matrix, Permission Simulator & Workflow Node Inspector)
+export { default as LiteAbacPolicyMatrix } from './components/LiteAbacPolicyMatrix.svelte';
+export { default as LitePermissionSimulator } from './components/LitePermissionSimulator.svelte';
+export { default as LiteWorkflowNodeInspector } from './components/LiteWorkflowNodeInspector.svelte';
+
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
   configureMarkdownRenderer,
