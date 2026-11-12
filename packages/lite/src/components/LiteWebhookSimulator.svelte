@@ -81,11 +81,11 @@
     border-bottom: 1px solid #e5e6eb;
   }
   .lite-webhook-title { font-weight: 600; color: #1d2129; }
-  .lite-webhook-badge { font-size: 10px; background: #e8f3ff; color: #165dff; padding: 1px 6px; border-radius: 3px; font-mono: true; }
-  .lite-webhook-body { padding: 12px; space-y: 8px; }
+  .lite-webhook-badge { font-size: 10px; background: #e8f3ff; color: #165dff; padding: 1px 6px; border-radius: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .lite-webhook-body { padding: 12px; }
   .lite-webhook-field { display: flex; align-items: baseline; margin-bottom: 6px; font-family: monospace; }
   .lite-webhook-field > * + * { margin-left: 8px; }
-  .lite-field-label { color: #86909c; min-width: 70px; font-sans: true; }
+  .lite-field-label { color: #86909c; min-width: 70px; }
   .lite-field-val { color: #1d2129; word-break: break-all; }
   .lite-webhook-payload { margin-top: 8px; }
   .lite-payload-code {

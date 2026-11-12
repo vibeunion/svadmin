@@ -1939,6 +1939,11 @@ main {
   transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
+/* Inline variant keeps the Arco chevron and states without forcing full width. */
+.svadmin-select--inline {
+  width: auto;
+}
+
 :is(.dark, [data-color-scheme="dark"]) .svadmin-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23B3B3B3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }

@@ -36,6 +36,8 @@
       {:else if href}
         <a class="lite-btn lite-btn-primary lite-btn-sm" href={href}>{confirmLabel}</a>
       {/if}
+      <!-- The empty fragment clears :target so the CSS-only panel closes without client state. -->
+      <!-- svelte-ignore a11y_invalid_attribute -->
       <a class="lite-btn lite-btn-sm" href="#">{cancelLabel}</a>
     </div>
   </div>

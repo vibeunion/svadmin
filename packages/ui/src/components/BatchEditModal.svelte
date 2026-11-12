@@ -155,8 +155,8 @@
             {@const fieldDef = fields.find((f) => f.key === row.field)}
             <div class="flex flex-wrap items-center gap-2 p-2 rounded-lg border border-border bg-muted/20">
               <!-- Field Picker -->
-              <select
-                class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary w-32"
+              <select data-size="compact"
+                class="svadmin-select w-32"
                 bind:value={row.field}
                 disabled={isSubmitting}
               >
@@ -166,8 +166,8 @@
               </select>
 
               <!-- Edit Mode -->
-              <select
-                class="rounded border border-input bg-background px-2 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary font-mono w-24"
+              <select data-size="compact"
+                class="svadmin-select font-mono w-24"
                 bind:value={row.mode}
                 disabled={isSubmitting}
               >
@@ -179,8 +179,8 @@
               <!-- Value Input -->
               {#if row.mode !== 'clear'}
                 {#if fieldDef?.type === 'select' && fieldDef.options}
-                  <select
-                    class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary flex-1 min-w-[120px]"
+                  <select data-size="compact"
+                    class="svadmin-select flex-1 min-w-[120px]"
                     bind:value={row.value}
                     disabled={isSubmitting}
                   >

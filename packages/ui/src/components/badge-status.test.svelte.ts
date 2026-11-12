@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/svelte';
 import { Badge } from './ui/badge/index.js';
 
-describe('Arco Badge Enhancements', () => {
+describe('Badge status and count enhancements', () => {
   it('renders count badge with overflow truncation', () => {
     const { container, rerender } = render(Badge, {
       props: {

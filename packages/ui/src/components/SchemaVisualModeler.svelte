@@ -235,9 +235,9 @@
                     />
                   </td>
                   <td class="p-2.5">
-                    <select
+                    <select data-size="compact"
                       bind:value={field.type}
-                      class="h-7 w-full rounded border border-input bg-background px-1.5 text-xs"
+                      class="svadmin-select h-7 w-full"
                     >
                       <option value="text">text</option>
                       <option value="number">number</option>

@@ -127,7 +127,7 @@
     /** @deprecated Retained for compatibility; use the shared appearance baseline. */
     showDensitySwitcher?: boolean;
     showRefresh?: boolean;
-    /** Show the Arco Pro style fullscreen toggle for the table region. */
+    /** Show the enterprise-style fullscreen toggle for the table region. */
     showFullscreen?: boolean;
     /** Custom header actions (right side) */
     headerActions?: Snippet;

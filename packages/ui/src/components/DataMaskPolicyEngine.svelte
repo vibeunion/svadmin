@@ -263,10 +263,10 @@
 
       <div>
         <label for="mask-rule-select" class="text-[11px] text-muted-foreground block mb-1">选择校验脱敏策略:</label>
-        <select
+        <select data-size="compact"
           id="mask-rule-select"
           bind:value={testRuleType}
-          class="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          class="svadmin-select w-full"
         >
           <option value="mobile">手机号 (保留首3尾4)</option>
           <option value="id_card">居民身份证 (保留首6尾4)</option>

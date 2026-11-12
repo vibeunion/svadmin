@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
+
   export interface LiteVirtualTreeNode {
     value: string | number;
     label: string;
@@ -44,7 +46,8 @@
   }
 
   const options = $derived(flatten(nodes));
-  let current = $state(value);
+  // Seeded once from the initial prop; the select owns edits afterwards.
+  let current = $state(untrack(() => value));
 </script>
 
 {#snippet treeOptions()}

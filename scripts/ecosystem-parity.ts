@@ -108,7 +108,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'component-docs',
-    counterpart: 'Arco design site',
+    counterpart: 'reference design documentation site',
     capability: 'Generate a props table, state matrix, and copyable Svelte snippet per registered component',
     surface: '`scripts/component-docs.ts`',
     status: 'adopted',
