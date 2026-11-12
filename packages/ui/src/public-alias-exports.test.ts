@@ -109,6 +109,12 @@ import {
   GlobalCommandOmnibar,
   AuditTrailInspector,
   SecurityAuditTimeline,
+  DashboardGridLayout,
+  DynamicWidgetGrid,
+  DashboardLayoutStorage,
+  DashboardPresetManager,
+  ChartAnnotationOverlay,
+  MetricEventAnnotation,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
@@ -442,6 +448,12 @@ describe('public compatibility aliases', () => {
     expect(GlobalCommandOmnibar).toBe(OmnibarCommandPalette);
     expect(AuditTrailInspector).toBeDefined();
     expect(SecurityAuditTimeline).toBe(AuditTrailInspector);
+    expect(DashboardGridLayout).toBeDefined();
+    expect(DynamicWidgetGrid).toBe(DashboardGridLayout);
+    expect(DashboardLayoutStorage).toBeDefined();
+    expect(DashboardPresetManager).toBe(DashboardLayoutStorage);
+    expect(ChartAnnotationOverlay).toBeDefined();
+    expect(MetricEventAnnotation).toBe(ChartAnnotationOverlay);
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();
