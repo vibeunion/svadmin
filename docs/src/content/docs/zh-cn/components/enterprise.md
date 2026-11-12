@@ -2969,3 +2969,50 @@ AI 规则语义解释卡片：
 
 <ChartAnnotationOverlay />
 ```
+
+### `<AbacPolicyMatrix>` / `<AttributeBasedAccessControlMatrix>`
+
+企业级基于属性的动态访问控制（ABAC）策略矩阵：
+- 综合主体属性（部门/职级/安全等级）、客体属性（数据密级/业务金额上限）与环境（IP/时段）动态判定。
+- **多维安全裁决效应**：支持 `allow`（正常放行）、`mask`（动态脱敏）、`require_mfa`（需阶梯提权二次认证）与 `deny`（绝对安全阻断）。
+- **细粒度属性条件组**：支持操作符扩展（`eq`、`in`、`gte`、`lte`），并提供策略启停开关与优先级调度。
+
+```svelte
+<script lang="ts">
+  import { AbacPolicyMatrix } from '@svadmin/ui';
+</script>
+
+<AbacPolicyMatrix />
+```
+
+### `<PermissionSimulator>` / `<RolePermissionSandbox>`
+
+角色身份与多维属性权限推演沙箱（上帝视角模拟器）：
+- 管理员可在无需借用员工密码换号登录的前提下，直接以指定员工身份推演权限。
+- **三栏多维推演结果**：清晰对比展示系统导航菜单可见性、高危业务动作裁决结论与行级数据范围（RLS）注入表达式。
+- **密级与网络环境仿真**：联动展示该员工的安全密级（L1-L4）与模拟访问 IP 网段。
+
+```svelte
+<script lang="ts">
+  import { PermissionSimulator } from '@svadmin/ui';
+</script>
+
+<PermissionSimulator />
+```
+
+### `<WorkflowNodeInspector>` / `<ApprovalNodeDrawer>`
+
+审批流节点属性配置抽屉与决议规则检查器：
+- 面向工作流编排设计器（`<WorkflowGraphDesigner>`）的节点属性配置抽屉。
+- **灵活审批人指定**：支持直属主管、岗位角色、指定具体人员与发起人自选四种模式。
+- **多审批人决议方式**：内置会签（全员同意）、或签（一名同意即可）与投票通过比例配置，并支持超时自动流转策略。
+
+```svelte
+<script lang="ts">
+  import { WorkflowNodeInspector } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<WorkflowNodeInspector bind:open />
+```

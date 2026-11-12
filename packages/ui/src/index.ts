@@ -964,3 +964,8 @@ export { default as AuditTrailInspector, default as SecurityAuditTimeline, type 
 export { default as DashboardGridLayout, default as DynamicWidgetGrid, type DashboardGridLayoutProps, type DashboardGridItem } from './components/DashboardGridLayout.svelte';
 export { default as DashboardLayoutStorage, default as DashboardPresetManager, type DashboardLayoutStorageProps, type DashboardPreset } from './components/DashboardLayoutStorage.svelte';
 export { default as ChartAnnotationOverlay, default as MetricEventAnnotation, type ChartAnnotationOverlayProps, type ChartAnnotationItem } from './components/ChartAnnotationOverlay.svelte';
+
+// Enterprise ABAC policy matrix, permission simulator & workflow node inspector suite
+export { default as AbacPolicyMatrix, default as AttributeBasedAccessControlMatrix, type AbacPolicyMatrixProps, type AbacPolicyRule, type AbacCondition } from './components/AbacPolicyMatrix.svelte';
+export { default as PermissionSimulator, default as RolePermissionSandbox, type PermissionSimulatorProps, type SimulationTargetUser, type SimulatedMenuNode, type SimulatedAction } from './components/PermissionSimulator.svelte';
+export { default as WorkflowNodeInspector, default as ApprovalNodeDrawer, type WorkflowNodeInspectorProps, type WorkflowNodeData } from './components/WorkflowNodeInspector.svelte';

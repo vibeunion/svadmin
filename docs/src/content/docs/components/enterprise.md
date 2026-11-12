@@ -3078,3 +3078,50 @@ Business milestone, outage incident, and threshold annotation layer:
 
 <ChartAnnotationOverlay />
 ```
+
+### `<AbacPolicyMatrix>` / `<AttributeBasedAccessControlMatrix>`
+
+Enterprise Attribute-Based Access Control (ABAC) dynamic policy matrix:
+- Evaluates subject attributes, object/data attributes, and environment constraints dynamically.
+- **Multidimensional Decision Effects**: Supports `allow`, `mask` (data masking), `require_mfa` (stepped auth), and `deny`.
+- **Attribute Conditions**: Supports `eq`, `in`, `gte`, and `lte` operators with priority ordering and toggle state.
+
+```svelte
+<script lang="ts">
+  import { AbacPolicyMatrix } from '@svadmin/ui';
+</script>
+
+<AbacPolicyMatrix />
+```
+
+### `<PermissionSimulator>` / `<RolePermissionSandbox>`
+
+Role and multidimensional attribute permission simulation sandbox:
+- Lets administrators simulate access permissions of any employee without borrowing passwords.
+- **Three-Column Simulation**: Analyzes navigation menu visibility, high-risk action decisions, and row-level security (RLS) SQL filters.
+- **Security Clearance Inspection**: Shows employee clearance level (L1-L4) and simulated IP subnet.
+
+```svelte
+<script lang="ts">
+  import { PermissionSimulator } from '@svadmin/ui';
+</script>
+
+<PermissionSimulator />
+```
+
+### `<WorkflowNodeInspector>` / `<ApprovalNodeDrawer>`
+
+Workflow node property drawer and resolution configuration inspector:
+- Dedicated configuration panel for workflow nodes created in `<WorkflowGraphDesigner>`.
+- **Approver Assignment**: Choose between direct manager, role-based, specific employee, or submitter-selected approver.
+- **Decision Resolution**: Supports consensus (unanimous approval), or-sign (first approval passes), and percentage-based voting.
+
+```svelte
+<script lang="ts">
+  import { WorkflowNodeInspector } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<WorkflowNodeInspector bind:open />
+```
