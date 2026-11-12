@@ -16,7 +16,7 @@ export function useMicroAppState(options: UseMicroAppStateOptions = {}) {
   const appId = options.appId ?? 'host_app';
 
   let messages = $state<MicroAppStateMessage[]>([]);
-  let subscribersCount = $state(3);
+  const subscribersCount = $state(3);
 
   function broadcast<T = unknown>(type: string, payload: T) {
     const msg: MicroAppStateMessage<T> = {
