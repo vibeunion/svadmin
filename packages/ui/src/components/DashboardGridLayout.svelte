@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
   import {
     LayoutDashboard,
     GripVertical,
@@ -13,10 +12,7 @@
     Maximize2,
     Minimize2,
     BarChart3,
-    Activity,
-    Layers,
     Table as TableIcon,
-    Settings2,
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { Button } from './ui/button/index.js';

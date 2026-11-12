@@ -40,7 +40,7 @@
   </header>
 
   <div class="lite-dash-grid-body">
-    {#each items as item}
+    {#each items as item (item.id)}
       <div class="lite-dash-widget" style="grid-column: span {item.w};">
         <div class="lite-widget-header">
           <span class="lite-widget-title">{item.title}</span>

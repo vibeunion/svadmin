@@ -1,15 +1,9 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
   import {
-    Save,
-    RotateCcw,
     FolderKanban,
     Download,
-    Upload,
     Check,
     Trash2,
-    Sparkles,
-    Bookmark,
     Layers,
     Plus,
     X,

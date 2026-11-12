@@ -41,7 +41,7 @@
 
   <div class="lite-ann-body">
     <div class="lite-ann-timeline">
-      {#each annotations as ann}
+      {#each annotations as ann (ann.id)}
         <div class="lite-ann-item">
           <div class="lite-ann-dot" class:lite-dot-warn={ann.colorTone === 'warning'} class:lite-dot-danger={ann.colorTone === 'destructive'}></div>
           <div class="lite-ann-content">

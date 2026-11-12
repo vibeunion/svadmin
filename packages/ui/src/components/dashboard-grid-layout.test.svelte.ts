@@ -16,7 +16,7 @@ describe('DashboardGridLayout component suite', () => {
 
   it('toggles editable mode and adds a widget', async () => {
     const onAdd = vi.fn();
-    const { getByText, container } = render(DashboardGridLayout, {
+    const { getByText } = render(DashboardGridLayout, {
       onAddWidget: onAdd,
     });
 
@@ -33,14 +33,17 @@ describe('DashboardGridLayout component suite', () => {
 
   it('removes a widget when clicking remove in editable mode', async () => {
     const onRemove = vi.fn();
-    const { getByText, container } = render(DashboardGridLayout, {
+    const { container } = render(DashboardGridLayout, {
       isEditable: true,
       onRemoveWidget: onRemove,
     });
 
     const removeBtns = container.querySelectorAll('button[title="移除小部件"]');
     expect(removeBtns.length).toBeGreaterThan(0);
-    await fireEvent.click(removeBtns[0]);
+    const firstRemoveBtn = removeBtns[0];
+    if (firstRemoveBtn) {
+      await fireEvent.click(firstRemoveBtn);
+    }
 
     expect(onRemove).toHaveBeenCalled();
   });

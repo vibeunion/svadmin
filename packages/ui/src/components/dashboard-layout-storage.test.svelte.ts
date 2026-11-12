@@ -15,7 +15,10 @@ describe('DashboardLayoutStorage component suite', () => {
 
     const applyBtns = getAllByText('应用此布局');
     expect(applyBtns.length).toBeGreaterThan(0);
-    await fireEvent.click(applyBtns[0]);
+    const firstApplyBtn = applyBtns[0];
+    if (firstApplyBtn) {
+      await fireEvent.click(firstApplyBtn);
+    }
 
     expect(onSelect).toHaveBeenCalled();
   });

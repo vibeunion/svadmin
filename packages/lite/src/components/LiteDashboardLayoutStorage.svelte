@@ -36,7 +36,7 @@
   </div>
 
   <div class="lite-presets-list">
-    {#each presets as p}
+    {#each presets as p (p.id)}
       <div class="lite-preset-card" class:lite-preset-active={p.id === currentPresetId}>
         <div class="lite-preset-title-row">
           <span class="lite-preset-name">{p.name}</span>

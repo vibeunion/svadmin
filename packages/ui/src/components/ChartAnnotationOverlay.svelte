@@ -1,13 +1,9 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
   import {
     Flag,
     AlertTriangle,
     Rocket,
-    Info,
     CheckCircle2,
-    Calendar,
-    Sparkles,
     Tag,
     X,
   } from '@lucide/svelte';
