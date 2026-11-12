@@ -68,10 +68,9 @@
     padding: 10px 12px;
     background: #f7f8fa;
     border-bottom: 1px solid #e5e6eb;
-    gap: 8px;
   }
-  .lite-search-icon { font-size: 12px; }
-  .lite-input-mock { flex: 1; color: #86909c; font-size: 12px; }
+  .lite-search-icon { font-size: 12px; margin-right: 8px; }
+  .lite-input-mock { flex: 1; color: #86909c; font-size: 12px; margin-right: 8px; }
   .lite-kbd-hint {
     font-size: 10px;
     font-family: monospace;
@@ -91,8 +90,8 @@
     border-bottom: 1px dashed #f2f3f5;
   }
   .lite-cmd-row:last-child { border-bottom: none; }
-  .lite-cmd-main { display: flex; align-items: center; gap: 6px; }
-  .lite-cmd-title { font-weight: 500; color: #1d2129; }
+  .lite-cmd-main { display: flex; align-items: center; }
+  .lite-cmd-title { font-weight: 500; color: #1d2129; margin-right: 6px; }
   .lite-cmd-cat {
     font-size: 10px;
     color: #86909c;
