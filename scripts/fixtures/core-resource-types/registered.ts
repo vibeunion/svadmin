@@ -67,7 +67,7 @@ export function registeredQueries(resource: KnownResources) {
   const page = infinite.query.data?.pages[0];
   expectType<Equal<typeof page, GetListResult<Post> | undefined>>();
   expectType<Equal<typeof select.query.data, { data: User[]; total: number; options: { label: string; value: string | number }[] } | undefined>>();
-  expectType<Equal<typeof list.data, { data: Post[]; total: number; [key: string]: unknown } | undefined>>();
+  expectType<Equal<typeof list.data, GetListResult<Post> | undefined>>();
   expectType<Equal<typeof one.data, { data: User } | undefined>>();
   expectType<Equal<typeof show.data, { data: Post } | undefined>>();
   expectType<Equal<typeof many.data, { data: User[] } | undefined>>();
