@@ -16,6 +16,6 @@
   } = $props();
 </script>
 
-<Popconfirm {title} {okText} {cancelText} {okType} {onConfirm}>
+<Popconfirm {title} {okText} {cancelText} {okType} {...(onConfirm ? { onConfirm } : {})}>
   <button type="button">删除数据</button>
 </Popconfirm>

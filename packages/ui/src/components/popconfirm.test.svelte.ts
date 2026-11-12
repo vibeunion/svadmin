@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent, screen } from "@testing-library/svelte";
-import Popconfirm from "./Popconfirm.svelte";
 import PopconfirmHarness from "../../test/fixtures/PopconfirmHarness.svelte";
 
 describe("Popconfirm Component", () => {
