@@ -1583,35 +1583,32 @@ Enterprise session inactivity timeout guard and compliance auto-lock suite:
 
 ### `<DualApprovalGate>` / `<TwoPersonRuleModal>`
 
-Two-person rule (Maker-Checker) dual authorization gate for dangerous and irreversible operations:
-- Designed for large financial fund transfers, production database truncations, API gateway key rotations, and superadmin privilege escalation.
-- **Dual Approval Modes**:
-  1. **Onsite Review**: Second authorized supervisor signs in with ID, title, and independent password or 2FA OTP.
-  2. **Remote QR Review**: Generates temporary review link and signed QR code for asynchronous approval queue push.
-- Generates tamper-proof `DualApprovalAuditRecord` with cryptographic signature hash, initiator, reviewer, and timestamp.
+Presentation layer for two-person review (Maker-Checker) of dangerous and irreversible operations:
+- Presents onsite and remote review states.
+- Sends review intent to the host through `onReviewRequest` or `onRemoteReviewRequest`.
+- The host must update `approvalState` from the real approval RPC/state machine. The component does not create approval records, audit hashes, or simulated approvals.
 
 ```svelte
 <script lang="ts">
-  import { DualApprovalGate, type DualApprovalAuditRecord } from '@svadmin/ui';
+  import { DualApprovalGate, type DualApprovalRequest, type DualApprovalState } from '@svadmin/ui';
 
   let open = $state(false);
+  let approvalState = $state<DualApprovalState>('idle');
 
-  async function verifySupervisor(payload: any) {
-    // E.g. check supervisor credentials with backend auth API
-    return payload.secret === 'valid-otp';
-  }
-
-  function handleApproved(record: DualApprovalAuditRecord) {
-    console.log('Dual approval granted with audit hash:', record.auditHash);
+  async function submitReview(request: DualApprovalRequest) {
+    approvalState = 'submitting';
+    // Call the business approval RPC and write its real result back to approvalState.
+    console.log(request);
   }
 </script>
 
 <DualApprovalGate
   bind:open
+  actionId="approval-request-42"
   actionTitle="Production API Gateway Key Rotation"
   requiredRole="Chief Security Officer"
-  verifyReviewer={verifySupervisor}
-  onApproved={handleApproved}
+  {approvalState}
+  onReviewRequest={submitReview}
 >
   <button class="bg-destructive text-destructive-foreground px-4 py-2 rounded">
     Rotate Secret Key

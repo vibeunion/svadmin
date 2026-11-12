@@ -130,6 +130,7 @@ export { default as ErrorComponent } from './components/ErrorComponent.svelte';
 export { default as ErrorSummary } from './components/ErrorSummary.svelte';
 export type { FormErrorEntry } from './components/ErrorSummary.svelte';
 export { default as PageSkeleton } from './components/PageSkeleton.svelte';
+export type { PageSkeletonProps } from './components/PageSkeleton.svelte';
 export { default as NavigateToResource } from './components/NavigateToResource.svelte';
 export { default as CatchAllNavigate } from './components/CatchAllNavigate.svelte';
 export { default as ThemedTitle } from './components/ThemedTitle.svelte';
@@ -787,7 +788,16 @@ export { useSessionTimeout, type UseSessionTimeoutOptions } from './components/u
 export { default as SessionTimeoutGuard, type SessionTimeoutGuardProps } from './components/SessionTimeoutGuard.svelte';
 
 // Enterprise two-person rule & dual approval gate suite
-export { default as DualApprovalGate, default as TwoPersonRuleModal, type DualApprovalGateProps, type ApprovalMode, type ReviewerVerificationPayload, type DualApprovalAuditRecord } from './components/DualApprovalGate.svelte';
+export {
+  default as DualApprovalGate,
+  default as TwoPersonRuleModal,
+  type DualApprovalGateProps,
+  type ApprovalMode,
+  type DualApprovalState,
+  type ReviewerVerificationPayload,
+  type DualApprovalRequest,
+  type DualApprovalAuditRecord,
+} from './components/DualApprovalGate.svelte';
 
 // Enterprise table clipboard manager & Excel bidirectional paste suite
 export { useTableClipboard, parseClipboardText, parseDelimitedText, matchColumnsToDefinitions, copyRowsToClipboard, type ColumnDef, type ColumnMapping, type ParsedClipboardTable } from './components/useTableClipboard.svelte.js';

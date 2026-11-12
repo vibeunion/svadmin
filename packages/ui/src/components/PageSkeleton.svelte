@@ -2,16 +2,30 @@
   import { fade } from 'svelte/transition';
   import { Skeleton } from './ui/skeleton';
 
+  export interface PageSkeletonProps {
+    type?: 'list' | 'show' | 'form';
+    rows?: number;
+    ariaLabel?: string;
+    class?: string;
+  }
+
   let {
     type = 'list',
     rows = 5,
-  }: {
-    type?: 'list' | 'show' | 'form';
-    rows?: number;
-  } = $props();
+    ariaLabel = 'Loading page',
+    class: className = '',
+  }: PageSkeletonProps = $props();
 </script>
 
-<div class="w-full space-y-6" out:fade={{ duration: 200 }}>
+<div
+  data-svadmin-component="PageSkeleton"
+  data-type={type}
+  aria-busy="true"
+  aria-live="polite"
+  aria-label={ariaLabel}
+  class="w-full space-y-6 {className}"
+  out:fade={{ duration: 200 }}
+>
   <!-- Header Skeleton -->
   <div class="flex items-center justify-between">
     <div class="space-y-2">
