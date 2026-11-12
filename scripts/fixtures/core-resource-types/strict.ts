@@ -2,7 +2,7 @@ import { Type, type Static, type TObject, type TSchema } from 'typebox';
 import {
   defineResource, defineCommand, useList, useOne, useShow, useMany, useTable, useSelect,
   useInfiniteList, useCreate, useUpdate, useDelete, useCreateMany, useUpdateMany, useDeleteMany, useExport,
-  useForm, useCustom, useCustomMutation, useInvalidate, usePermissions, type PermissionHints, type ContractSchemas, type ContractRecord, type BaseRecord,
+  useForm, useCustom, useCustomMutation, useInvalidate, usePermissions, type PermissionHints, type ContractSchemas, type ContractRecord, type BaseRecord, type GetListResult,
   useLogin, useLogout, useUpdateIdentity, useUpdateProfile, useGetIdentity, useIsAuthenticated,
 } from '@svadmin/core';
 import { posts as scaffoldPosts } from '../../../packages/create-svadmin/template/src/resource-contracts';
@@ -126,7 +126,7 @@ export async function refreshTypes() {
 
 export function strictQueries() {
   const list = useList({ resource: posts, filters: [{ field: 'count', operator: 'gte', value: 0 }] });
-  expectType<Equal<typeof list.data, { data: Static<typeof record>[]; total: number; [key: string]: unknown } | undefined>>();
+  expectType<Equal<typeof list.data, GetListResult<Static<typeof record>> | undefined>>();
   expectType<Equal<typeof list.error, unknown>>();
   if (list.isSuccess) {
     const rows: Static<typeof record>[] = list.data.data;
