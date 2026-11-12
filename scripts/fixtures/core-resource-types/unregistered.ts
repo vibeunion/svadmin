@@ -1,4 +1,4 @@
-import { type BaseRecord, type KnownResources, type ResourceTypeMap } from '@svadmin/core';
+import { type BaseRecord, type GetListResult, type KnownResources, type ResourceTypeMap } from '@svadmin/core';
 import { useList, useOne, useMany, useTable, useInfiniteList } from '@svadmin/core/unsafe';
 import * as unsafe from '@svadmin/core/unsafe';
 
@@ -17,7 +17,7 @@ export function unregisteredQueries(resource: string) {
   const routeTable = useTable();
   expectType<Equal<typeof table.clientData, BaseRecord[]>>();
   expectType<Equal<typeof routeTable.clientData, BaseRecord[]>>();
-  expectType<Equal<typeof list.data, { data: BaseRecord[]; total: number; [key: string]: unknown } | undefined>>();
+  expectType<Equal<typeof list.data, GetListResult<BaseRecord> | undefined>>();
   expectType<Equal<typeof one.data, { data: BaseRecord } | undefined>>();
   expectType<Equal<typeof many.data, { data: BaseRecord[] } | undefined>>();
   useList();
