@@ -34,6 +34,7 @@ export { default as AutoTable } from './components/AutoTable.svelte';
 export { default as SavedViewsMenu } from './components/SavedViewsMenu.svelte';
 export { default as ListPagination } from './components/ListPagination.svelte';
 export { default as ListFooter } from './components/ListFooter.svelte';
+export { default as CursorListFooter } from './components/CursorListFooter.svelte';
 export { default as DataTableShell } from './components/DataTableShell.svelte';
 export { default as ScrollableTable } from './components/ScrollableTable.svelte';
 export { default as CopyButton } from './components/CopyButton.svelte';
