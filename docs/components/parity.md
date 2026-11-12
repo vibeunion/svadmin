@@ -55,7 +55,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Grid | `Grid`, `GridCell`, `Row`, `Col` | ✅ | |
 | Icon | `@lucide/svelte` | ✅ | Ecosystem icon package |
 | Image | `Image`, `ImagePreview`, `MediaThumbnail` | ✅ | Fallback and preview states included |
-| Input | `Input`, `Textarea`, `PasswordInput` | ✅ | |
+| Input | `Input`, `InputGroup`, `Textarea`, `PasswordInput` | ✅ | `InputGroup` merges Arco `addBefore` / `addAfter` affixes onto one hairline border |
 | InputNumber | `NumberInput`, alias `InputNumber` | 🔁 | |
 | InputTag | `TagsInput`, alias `InputTag` | 🔁 | |
 | Layout | `Layout`, `AdminApp` | ✅ | |
@@ -82,9 +82,9 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Space | `Space` | ✅ | |
 | Spin | `Spin` | ✅ | |
 | Statistic | `Statistic`, `StatsCard`, `MetricBlock` | ✅ | |
-| Steps | `Steps`, `WorkspaceStageStepper` | ✅ | |
+| Steps | `Steps`, `WorkspaceStageStepper` | ✅ | Connector progress animates between steps; the active node carries a subtle halo |
 | Switch | `Switch` | ✅ | |
-| Table | `Table` namespace, `AutoTable`, `GroupedTable`, `TreeTable` | ✅ | |
+| Table | `Table` namespace, `AutoTable`, `GroupedTable`, `TreeTable` | ✅ | `AutoTable` toolbar covers refresh, density, column visibility and an opt-out fullscreen toggle (`showFullscreen`) |
 | Tabs | `Tabs`, `EditableTabs`, `StatusTabs` | ✅ | |
 | Tag | `Tag`, `LiteTag` | ✅ | Closable, checkable, disabled and compact states |
 | Timeline | `Timeline`, `ActivityTimeline` | ✅ | |

@@ -356,6 +356,8 @@ export {
 // Base UI components (shadcn-svelte)
 export { Button, buttonVariants } from './components/ui/button/index.js';
 export { Input } from './components/ui/input/index.js';
+export { default as InputGroup } from './components/InputGroup.svelte';
+export type { InputGroupProps } from './components/InputGroup.svelte';
 export { Textarea } from './components/ui/textarea/index.js';
 export { Select } from './components/ui/select/index.js';
 export { Switch } from './components/ui/switch/index.js';
