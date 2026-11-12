@@ -401,6 +401,11 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'OmnibarCommandPalette', uiComponent: 'OmnibarCommandPalette.svelte', liteComponent: 'LiteOmnibarCommandPalette.svelte', category: 'advanced', status: 'fallback', strategy: '服务端全局命令与资源检索静态索引列表；客户端 ⌘K 键盘快捷呼出与拼音检索由 SPA 承接' },
   { name: 'AuditTrailInspector', uiComponent: 'AuditTrailInspector.svelte', liteComponent: 'LiteAuditTrailInspector.svelte', category: 'advanced', status: 'fallback', strategy: '服务端操作审计流转记录与字段变更差异静态列表；抽屉交互与实时轮询由 SPA 承接' },
 
+  // ─── Enterprise suites wave 12 (Dashboard Grid Layout, Storage & Chart Annotation) ───
+  { name: 'DashboardGridLayout', uiComponent: 'DashboardGridLayout.svelte', liteComponent: 'LiteDashboardGridLayout.svelte', category: 'widgets', status: 'fallback', strategy: '服务端 12 栅格自适应小部件排版；客户端自由拖拽、伸缩与吸附由 SPA 承接' },
+  { name: 'DashboardLayoutStorage', uiComponent: 'DashboardLayoutStorage.svelte', liteComponent: 'LiteDashboardLayoutStorage.svelte', category: 'widgets', status: 'fallback', strategy: '服务端大屏排版预设方案卡片与角色列表；客户端另存与 JSON 导入导出由 SPA 承接' },
+  { name: 'ChartAnnotationOverlay', uiComponent: 'ChartAnnotationOverlay.svelte', liteComponent: 'LiteChartAnnotationOverlay.svelte', category: 'widgets', status: 'fallback', strategy: '服务端大促/故障/发布大事件时间线列表；客户端图表绝对定位垂直标记线与图钉交互由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

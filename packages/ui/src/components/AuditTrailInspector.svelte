@@ -278,7 +278,7 @@
                 ? 'bg-primary text-primary-foreground shadow-xs'
                 : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
-            onclick={() => (selectedSeverity = sev.id as typeof selectedSeverity)}
+            onclick={() => (selectedSeverity = sev.id as 'all' | 'critical' | 'warning' | 'info')}
           >
             {sev.label}
           </button>

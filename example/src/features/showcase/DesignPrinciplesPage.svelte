@@ -426,9 +426,9 @@ import { definedOptions } from '@svadmin/core/options';
       </section>
       <section class="space-y-3" aria-labelledby="command-action-heading" data-command-action-fixture>
         <SectionHeader id="command-action-heading" title={isZh ? '命令按钮' : 'Command buttons'} description={isZh ? '后端会拒绝的命令不能保持可点。' : 'Commands the backend would reject must not stay clickable.'} />
-        <div class="flex flex-wrap items-center gap-2 pt-2">
+        <div class="flex flex-wrap items-center gap-2 pt-2 pb-6">
           <Button size="sm">{isZh ? '提交订单' : 'Submit order'}</Button>
-          <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'}>{isZh ? '提交订单' : 'Submit order'}</Button>
+          <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'} disabledReasonSide="bottom">{isZh ? '提交订单' : 'Submit order'}</Button>
         </div>
       </section>
       <section class="space-y-3" aria-labelledby="enterprise-components-heading" data-enterprise-component-fixture>

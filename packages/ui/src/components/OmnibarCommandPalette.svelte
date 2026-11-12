@@ -87,9 +87,9 @@
       }
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      const item = filteredItems[selectedIndex];
-      if (item) {
-        executeItem(item);
+      const selectedItem = filteredItems[selectedIndex];
+      if (selectedItem) {
+        executeItem(selectedItem);
       }
     }
   }
@@ -215,7 +215,7 @@
               ? 'bg-primary text-primary-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
           )}
-          onclick={() => (selectedCategory = cat.id as typeof selectedCategory)}
+          onclick={() => (selectedCategory = cat.id as 'all' | 'actions' | 'navigation' | 'resources' | 'ai')}
         >
           {cat.label}
         </button>

@@ -248,6 +248,10 @@ export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCo
 export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
 
 
+// Enterprise wave 12 parity fallbacks (Dashboard Grid Layout, Storage & Chart Annotation)
+export { default as LiteDashboardGridLayout } from './components/LiteDashboardGridLayout.svelte';
+export { default as LiteDashboardLayoutStorage } from './components/LiteDashboardLayoutStorage.svelte';
+export { default as LiteChartAnnotationOverlay } from './components/LiteChartAnnotationOverlay.svelte';
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
