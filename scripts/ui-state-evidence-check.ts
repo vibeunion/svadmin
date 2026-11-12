@@ -130,6 +130,7 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/PrintableReportLayout.svelte',
   'packages/ui/src/components/GeoScatterMap.svelte',
   'packages/ui/src/components/DataLineageGraph.svelte',
+  'packages/ui/src/components/DashboardGridLayout.svelte',
   'packages/ui/src/components/LiveStreamLogViewer.svelte',
   'packages/ui/src/components/DataScreenContainer.svelte',
   'packages/ui/src/components/StepForm.svelte',

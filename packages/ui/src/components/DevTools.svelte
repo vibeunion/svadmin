@@ -763,19 +763,19 @@
                       data-testid="devtools-filter-component"
                       bind:value={filterComponent}
                     />
-                    <select class="h-8 rounded-md border bg-background px-2 text-xs" data-testid="devtools-filter-kind" bind:value={filterKind}>
+                    <select class="svadmin-select" data-size="compact" data-testid="devtools-filter-kind" bind:value={filterKind}>
                       <option value="all">All kinds</option>
                       <option value="query">Queries</option>
                       <option value="mutation">Mutations</option>
                     </select>
-                    <select class="h-8 rounded-md border bg-background px-2 text-xs" data-testid="devtools-filter-status" bind:value={filterStatus}>
+                    <select class="svadmin-select" data-size="compact" data-testid="devtools-filter-status" bind:value={filterStatus}>
                       <option value="all">All statuses</option>
                       <option value="success">success</option>
                       <option value="error">error</option>
                       <option value="fetching">fetching</option>
                       <option value="pending">pending</option>
                     </select>
-                    <select class="h-8 rounded-md border bg-background px-2 text-xs sm:col-span-2" data-testid="devtools-filter-resource" bind:value={filterResource}>
+                    <select class="svadmin-select sm:col-span-2" data-size="compact" data-testid="devtools-filter-resource" bind:value={filterResource}>
                       {#each inspectorResources as resource (resource)}
                         <option value={resource}>{resource}</option>
                       {/each}

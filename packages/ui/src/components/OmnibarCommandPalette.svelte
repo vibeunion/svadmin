@@ -215,7 +215,7 @@
               ? 'bg-primary text-primary-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
           )}
-          onclick={() => (selectedCategory = cat.id as typeof selectedCategory)}
+          onclick={() => (selectedCategory = cat.id as 'all' | 'actions' | 'navigation' | 'resources' | 'ai')}
         >
           {cat.label}
         </button>

@@ -165,11 +165,46 @@
   .svadmin-list-pagination { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .75rem; min-width: 0; color: var(--foreground); }
   .svadmin-list-pagination__info { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; font-size: .8125rem; color: var(--muted-foreground); }
   .svadmin-list-pagination__size { display: inline-flex; align-items: center; gap: .35rem; }
-  .svadmin-list-pagination__size select { height: 2rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--background); color: inherit; padding: 0 .45rem; font: inherit; }
+  .svadmin-list-pagination__size select {
+    height: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, .25rem);
+    background-color: var(--background);
+    color: inherit;
+    padding: 0 1.75rem 0 .5rem;
+    font: inherit;
+    font-size: .8125rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234E5969' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.45rem center;
+    background-size: 0.75rem 0.75rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+  }
+  .svadmin-list-pagination__size select:focus-visible {
+    border-color: var(--ring);
+  }
+  :is(.dark, [data-color-scheme="dark"]) .svadmin-list-pagination__size select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23B3B3B3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
   .svadmin-list-pagination__controls { display: flex; align-items: center; flex-wrap: var(--svadmin-list-pagination-wrap, wrap); gap: .25rem; }
   .svadmin-list-pagination__pages { display: flex; align-items: center; flex-wrap: var(--svadmin-list-pagination-wrap, wrap); min-width: 0; gap: var(--svadmin-list-pagination-gap, .5rem); }
   .svadmin-list-pagination__control,
-  .svadmin-list-pagination__page { min-width: 2.25rem; height: 2.25rem; padding: 0 .75rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--background); color: inherit; cursor: pointer; font-size: .8125rem; }
+  .svadmin-list-pagination__page {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 .625rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, .25rem);
+    background: var(--background);
+    color: inherit;
+    cursor: pointer;
+    font-size: .8125rem;
+    transition: all var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+  }
   .svadmin-list-pagination__page { padding: 0 .5rem; }
   .svadmin-list-pagination__control:hover:not(:disabled),
   .svadmin-list-pagination__page:hover:not(:disabled) { border-color: var(--ring); color: var(--primary); }
@@ -180,6 +215,7 @@
   .svadmin-list-pagination__ellipsis { min-width: 1.5rem; text-align: center; color: var(--muted-foreground); }
   .svadmin-list-pagination__simple { min-width: 6rem; color: var(--muted-foreground); font-size: .8125rem; text-align: center; }
   .svadmin-list-pagination__jumper { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted-foreground); font-size: .8125rem; }
-  .svadmin-list-pagination__jumper input { width: 3.5rem; height: 2.25rem; padding: 0 .4rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--background); color: var(--foreground); font: inherit; }
+  .svadmin-list-pagination__jumper input { width: 3.5rem; height: 2rem; padding: 0 .4rem; border: 1px solid var(--border); border-radius: var(--radius-sm, .25rem); background: var(--background); color: var(--foreground); font: inherit; outline: none; }
+  .svadmin-list-pagination__jumper input:focus-visible { border-color: var(--ring); }
   .svadmin-list-pagination__summary { margin: 0; font-size: .8125rem; color: var(--muted-foreground); }
 </style>
