@@ -42,7 +42,7 @@
 >
   {#if hasBefore}
     <span class="svadmin-input-group__addon svadmin-input-group__addon--before" aria-hidden="true">
-      {#if typeof addBefore === 'string'}{addBefore}{:else}{@render addBefore()}{/if}
+      {#if typeof addBefore === 'string'}{addBefore}{:else if addBefore}{@render addBefore()}{/if}
     </span>
   {/if}
   <span class="svadmin-input-group__control">
@@ -50,7 +50,7 @@
   </span>
   {#if hasAfter}
     <span class="svadmin-input-group__addon svadmin-input-group__addon--after" aria-hidden="true">
-      {#if typeof addAfter === 'string'}{addAfter}{:else}{@render addAfter()}{/if}
+      {#if typeof addAfter === 'string'}{addAfter}{:else if addAfter}{@render addAfter()}{/if}
     </span>
   {/if}
 </div>
