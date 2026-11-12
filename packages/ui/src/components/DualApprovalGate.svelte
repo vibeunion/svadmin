@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack, type Snippet } from 'svelte';
+  import { type Snippet } from 'svelte';
   import {
     ShieldCheck,
     Users,
@@ -18,6 +18,7 @@
   import { Button } from './ui/button/index.js';
 
   export type ApprovalMode = 'onsite' | 'remote';
+  export type DualApprovalState = 'idle' | 'submitting' | 'pending' | 'approved' | 'rejected' | 'unknown';
 
   export interface ReviewerVerificationPayload {
     reviewerId: string;
@@ -38,16 +39,35 @@
     auditHash: string;
   }
 
+  export interface DualApprovalRequest {
+    actionId?: string | undefined;
+    actionTitle: string;
+    actionPayload?: Record<string, unknown> | undefined;
+    reviewerId?: string | undefined;
+    reviewerName?: string | undefined;
+    reviewerRole: string;
+    secret?: string | undefined;
+    mode: ApprovalMode;
+  }
+
   export interface DualApprovalGateProps {
     open?: boolean | undefined;
+    /** Stable business action identifier supplied by the host/RPC layer. */
+    actionId?: string | undefined;
     actionTitle: string;
     actionDescription?: string | undefined;
     actionPayload?: Record<string, unknown> | undefined;
     requiredRole?: string | undefined;
     defaultMode?: ApprovalMode | undefined;
     allowModeSwitch?: boolean | undefined;
+    approvalState?: DualApprovalState | undefined;
+    approvalError?: string | undefined;
+    remoteReviewUrl?: string | undefined;
     verifyReviewer?: ((payload: ReviewerVerificationPayload) => Promise<boolean | undefined> | boolean | undefined) | undefined;
-    onApproved?: ((record: DualApprovalAuditRecord) => void) | undefined;
+    /** Submit a review intent; the host must update approvalState from the FA RPC result. */
+    onReviewRequest?: ((request: DualApprovalRequest) => Promise<void> | void) | undefined;
+    /** Request creation of a remote review link; the host supplies the resulting URL. */
+    onRemoteReviewRequest?: ((request: DualApprovalRequest) => Promise<void> | void) | undefined;
     onRejected?: ((reason?: string) => void) | undefined;
     class?: string | undefined;
     trigger?: Snippet<[{ openModal: () => void }]> | undefined;
@@ -56,14 +76,19 @@
 
   let {
     open = $bindable(false),
+    actionId,
     actionTitle,
     actionDescription,
     actionPayload,
     requiredRole = '合规主管 / Supervisor Admin',
     defaultMode = 'onsite',
     allowModeSwitch = true,
+    approvalState = 'idle',
+    approvalError,
+    remoteReviewUrl,
     verifyReviewer,
-    onApproved,
+    onReviewRequest,
+    onRemoteReviewRequest,
     onRejected,
     class: className = '',
     trigger,
@@ -73,7 +98,7 @@
   const i18n = useTranslation();
   const chinese = $derived(i18n.locale.startsWith('zh'));
 
-  let activeMode = $state<ApprovalMode>(untrack(() => defaultMode));
+  let activeMode = $state<ApprovalMode | undefined>();
   let reviewerId = $state('');
   let reviewerName = $state('');
   let reviewerSecret = $state('');
@@ -81,24 +106,38 @@
   let errorMessage = $state<string | null>(null);
   let isCopied = $state(false);
 
-  const actionId = $derived(`action-${Math.random().toString(36).slice(2, 9)}`);
-  const remoteReviewUrl = $derived(
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/approval/dual-review?id=${actionId}`
-      : `https://example.com/approval/dual-review?id=${actionId}`,
+  const selectedMode = $derived(activeMode ?? defaultMode);
+  const reviewLocked = $derived(
+    approvalState === 'submitting' || approvalState === 'pending' || approvalState === 'approved',
   );
 
-  function generateAuditHash(): string {
-    const raw = `${actionId}:${reviewerId}:${Date.now()}:${JSON.stringify(actionPayload ?? {})}`;
-    let hash = 0;
-    for (let i = 0; i < raw.length; i++) {
-      hash = (hash << 5) - hash + raw.charCodeAt(i);
-      hash |= 0;
-    }
-    return `SHA-${Math.abs(hash).toString(16).padStart(8, '0')}`;
+  const resolvedApprovalError = $derived(approvalError ?? (approvalState === 'unknown'
+    ? (chinese ? '审批结果尚未确认，请查询原请求后再继续。' : 'The approval result is unconfirmed; query the original request before continuing.')
+    : approvalState === 'rejected'
+      ? (chinese ? '复核请求未通过。' : 'The review request was rejected.')
+      : null));
+
+  function buildRequest(mode: ApprovalMode): DualApprovalRequest {
+    return {
+      actionId,
+      actionTitle,
+      actionPayload,
+      reviewerId: reviewerId.trim() || undefined,
+      reviewerName: reviewerName.trim() || undefined,
+      reviewerRole: requiredRole,
+      secret: reviewerSecret.trim() || undefined,
+      mode,
+    };
   }
 
   async function handleOnsiteSubmit() {
+    if (!actionId?.trim()) {
+      errorMessage = chinese
+        ? '缺少业务请求标识，复核意图未提交。'
+        : 'A business request ID is required; the review intent was not submitted.';
+      return;
+    }
+
     if (!reviewerId.trim() || !reviewerSecret.trim()) {
       errorMessage = chinese ? '请完整填写复核人员工号与核验口令' : 'Please provide reviewer ID and authorization secret';
       return;
@@ -122,19 +161,15 @@
         }
       }
 
-      const auditRecord: DualApprovalAuditRecord = {
-        actionId,
-        actionTitle,
-        reviewerId: reviewerId.trim(),
-        reviewerRole: requiredRole,
-        mode: 'onsite',
-        approvedAt: new Date().toISOString(),
-        auditHash: generateAuditHash(),
-      };
+      if (!onReviewRequest) {
+        errorMessage = chinese
+          ? '审批服务未配置，复核意图未提交。'
+          : 'No approval service is configured; the review intent was not submitted.';
+        return;
+      }
 
-      open = false;
-      onApproved?.(auditRecord);
-      resetState();
+      await onReviewRequest(buildRequest('onsite'));
+      errorMessage = null;
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     } finally {
@@ -157,12 +192,38 @@
   }
 
   async function handleCopyLink() {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    if (remoteReviewUrl && typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(remoteReviewUrl);
       isCopied = true;
       setTimeout(() => {
         isCopied = false;
       }, 1500);
+    }
+  }
+
+  async function handleRemoteRequest() {
+    if (!actionId?.trim()) {
+      errorMessage = chinese
+        ? '缺少业务请求标识，远程复核请求未提交。'
+        : 'A business request ID is required; the remote review request was not submitted.';
+      return;
+    }
+
+    if (!onRemoteReviewRequest) {
+      errorMessage = chinese
+        ? '远程复核服务未配置，未生成复核链接。'
+        : 'No remote review service is configured; no review link was created.';
+      return;
+    }
+
+    isVerifying = true;
+    errorMessage = null;
+    try {
+      await onRemoteReviewRequest(buildRequest('remote'));
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    } finally {
+      isVerifying = false;
     }
   }
 
@@ -240,7 +301,7 @@
             onclick={() => (activeMode = 'onsite')}
             class={cn(
               'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md font-medium transition-all',
-              activeMode === 'onsite' ? 'bg-card text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground',
+              selectedMode === 'onsite' ? 'bg-card text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             <KeyRound class="h-3.5 w-3.5" />
@@ -251,7 +312,7 @@
             onclick={() => (activeMode = 'remote')}
             class={cn(
               'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md font-medium transition-all',
-              activeMode === 'remote' ? 'bg-card text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground',
+              selectedMode === 'remote' ? 'bg-card text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             <QrCode class="h-3.5 w-3.5" />
@@ -260,15 +321,27 @@
         </div>
       {/if}
 
-      <!-- Error alert -->
-      {#if errorMessage}
+      <!-- Error and external approval status -->
+      {#if errorMessage || resolvedApprovalError}
         <div role="alert" class="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive mb-4">
           <XCircle class="h-4 w-4 shrink-0" />
-          <span>{errorMessage}</span>
+          <span>{errorMessage ?? resolvedApprovalError}</span>
         </div>
       {/if}
 
-      {#if activeMode === 'onsite'}
+      {#if approvalState === 'approved'}
+        <div role="status" class="flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 p-3 text-xs text-success mb-4">
+          <CheckCircle2 class="h-4 w-4 shrink-0" />
+          <span>{chinese ? '审批服务已确认复核通过。' : 'The approval service confirmed the review.'}</span>
+        </div>
+      {:else if approvalState === 'pending' || approvalState === 'submitting'}
+        <div role="status" class="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 p-3 text-xs text-primary mb-4" aria-live="polite">
+          <Loader2 class="h-4 w-4 shrink-0 animate-spin" />
+          <span>{chinese ? '复核请求已提交，等待审批服务确认。' : 'The review request was submitted and is awaiting confirmation.'}</span>
+        </div>
+      {/if}
+
+      {#if selectedMode === 'onsite'}
         <!-- Onsite Form -->
         <div class="space-y-3.5 text-xs">
           <div>
@@ -338,16 +411,18 @@
             <div class="flex items-center gap-1.5 pt-1">
               <input
                 readonly
-                value={remoteReviewUrl}
+                value={remoteReviewUrl ?? (chinese ? '等待审批服务生成链接' : 'Waiting for the approval service to create a link')}
                 class="h-7 w-full rounded border border-border bg-background px-2 text-xs font-mono text-muted-foreground"
               />
-              <Button size="sm" variant="outline" class="h-7 px-2 shrink-0" onclick={handleCopyLink}>
-                {#if isCopied}
-                  <Check class="h-3.5 w-3.5 text-success" />
-                {:else}
-                  <Copy class="h-3.5 w-3.5" />
-                {/if}
-              </Button>
+              {#if remoteReviewUrl}
+                <Button size="sm" variant="outline" class="h-7 px-2 shrink-0" onclick={handleCopyLink}>
+                  {#if isCopied}
+                    <Check class="h-3.5 w-3.5 text-success" />
+                  {:else}
+                    <Copy class="h-3.5 w-3.5" />
+                  {/if}
+                </Button>
+              {/if}
             </div>
           </div>
         </div>
@@ -356,7 +431,7 @@
       <!-- Footer Actions -->
       <div class="mt-6 flex items-center justify-between border-t border-border/60 pt-4">
         <span class="text-xs text-muted-foreground font-mono">
-          ID: {actionId}
+          ID: {actionId ?? (chinese ? '由审批服务提供' : 'Provided by approval service')}
         </span>
 
         <div class="flex items-center gap-2">
@@ -370,12 +445,12 @@
             {chinese ? '放弃操作' : 'Cancel'}
           </Button>
 
-          {#if activeMode === 'onsite'}
+          {#if selectedMode === 'onsite'}
             <Button
               type="button"
               size="sm"
               onclick={handleOnsiteSubmit}
-              disabled={isVerifying || !reviewerId || !reviewerSecret}
+            disabled={isVerifying || reviewLocked || !reviewerId || !reviewerSecret}
               class="gap-1.5 min-w-28 bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {#if isVerifying}
@@ -390,25 +465,17 @@
             <Button
               type="button"
               size="sm"
-              onclick={() => {
-                // Simulate approval callback for remote mode demo
-                const auditRecord: DualApprovalAuditRecord = {
-                  actionId,
-                  actionTitle,
-                  reviewerId: 'REMOTE-MGR',
-                  reviewerRole: requiredRole,
-                  mode: 'remote',
-                  approvedAt: new Date().toISOString(),
-                  auditHash: generateAuditHash(),
-                };
-                open = false;
-                onApproved?.(auditRecord);
-                resetState();
-              }}
+              onclick={handleRemoteRequest}
+              disabled={isVerifying || reviewLocked}
               class="gap-1.5"
             >
-              <CheckCircle2 class="h-3.5 w-3.5 text-success" />
-              <span>{chinese ? '模拟远程复核通过' : 'Simulate Approved'}</span>
+              {#if isVerifying}
+                <Loader2 class="h-3.5 w-3.5 animate-spin" />
+                <span>{chinese ? '创建复核请求中...' : 'Creating review request...'}</span>
+              {:else}
+                <QrCode class="h-3.5 w-3.5" />
+                <span>{chinese ? '请求远程复核' : 'Request Remote Review'}</span>
+              {/if}
             </Button>
           {/if}
         </div>

@@ -1583,35 +1583,32 @@ Enterprise session inactivity timeout guard and compliance auto-lock suite:
 
 ### `<DualApprovalGate>` / `<TwoPersonRuleModal>`
 
-Two-person rule (Maker-Checker) dual authorization gate for dangerous and irreversible operations:
-- Designed for large financial fund transfers, production database truncations, API gateway key rotations, and superadmin privilege escalation.
-- **Dual Approval Modes**:
-  1. **Onsite Review**: Second authorized supervisor signs in with ID, title, and independent password or 2FA OTP.
-  2. **Remote QR Review**: Generates temporary review link and signed QR code for asynchronous approval queue push.
-- Generates tamper-proof `DualApprovalAuditRecord` with cryptographic signature hash, initiator, reviewer, and timestamp.
+Presentation layer for two-person review (Maker-Checker) of dangerous and irreversible operations:
+- Presents onsite and remote review states.
+- Sends review intent to the host through `onReviewRequest` or `onRemoteReviewRequest`.
+- The host must update `approvalState` from the real approval RPC/state machine. The component does not create approval records, audit hashes, or simulated approvals.
 
 ```svelte
 <script lang="ts">
-  import { DualApprovalGate, type DualApprovalAuditRecord } from '@svadmin/ui';
+  import { DualApprovalGate, type DualApprovalRequest, type DualApprovalState } from '@svadmin/ui';
 
   let open = $state(false);
+  let approvalState = $state<DualApprovalState>('idle');
 
-  async function verifySupervisor(payload: any) {
-    // E.g. check supervisor credentials with backend auth API
-    return payload.secret === 'valid-otp';
-  }
-
-  function handleApproved(record: DualApprovalAuditRecord) {
-    console.log('Dual approval granted with audit hash:', record.auditHash);
+  async function submitReview(request: DualApprovalRequest) {
+    approvalState = 'submitting';
+    // Call the business approval RPC and write its real result back to approvalState.
+    console.log(request);
   }
 </script>
 
 <DualApprovalGate
   bind:open
+  actionId="approval-request-42"
   actionTitle="Production API Gateway Key Rotation"
   requiredRole="Chief Security Officer"
-  verifyReviewer={verifySupervisor}
-  onApproved={handleApproved}
+  {approvalState}
+  onReviewRequest={submitReview}
 >
   <button class="bg-destructive text-destructive-foreground px-4 py-2 rounded">
     Rotate Secret Key
@@ -2913,4 +2910,79 @@ Row-level security (RLS) and data scope rule editor:
 </script>
 
 <DataScopeRuleEditor roleName="Sales Manager" resources={[]} />
+```
+
+### `<ScreenAntiLeakGuard>` / `<WatermarkPolicyStudio>`
+
+Dynamic screen anti-leak watermark guard with self-healing protection:
+- Designed for enterprise compliance, classified trade secret protection, and camera anti-leak deterrence.
+- **Self-Healing Protection**: Listens to DOM mutations via `MutationObserver` and restores itself if tampered with or hidden.
+- **Repeating Matrix Overlay**: Displays employee identity, client IP, timestamp, and confidentiality notice.
+
+```svelte
+<script lang="ts">
+  import { ScreenAntiLeakGuard } from '@svadmin/ui';
+</script>
+
+<ScreenAntiLeakGuard text="CONFIDENTIAL · DO NOT PHOTOGRAPH" subtext="Audit Active" />
+```
+
+### `<DataLineageGraph>` / `<FieldLineageTracker>`
+
+Data asset full-chain lineage DAG and impact analysis topology:
+- Designed to trace data source origin, ETL transforms, wide datasets, and downstream consumption endpoints.
+- **Interactive Highlighting**: Clicking any node highlights full upstream and downstream dependency chains.
+- **Metadata Inspector**: Details asset ownership, schedule frequency, record counts, and schema fields.
+
+```svelte
+<script lang="ts">
+  import { DataLineageGraph } from '@svadmin/ui';
+</script>
+
+<DataLineageGraph title="Data Asset Lineage Graph" />
+```
+
+### `<LiveStreamLogViewer>` / `<TailLogConsole>`
+
+High-performance real-time streaming log terminal:
+- Designed for DevOps troubleshooting, scheduled job monitoring, and API gateway tail logs.
+- **Smart Auto-Scroll**: Follows active tail stream automatically and pauses when scrolling history.
+- **Filtering & Search**: Severity level pills (`INFO`, `WARN`, `ERROR`, `DEBUG`) and keyword matching.
+
+```svelte
+<script lang="ts">
+  import { LiveStreamLogViewer } from '@svadmin/ui';
+</script>
+
+<LiveStreamLogViewer title="Microservice Tail Log Stream" />
+```
+
+### `<ElectronicSealStamp>` / `<ContractSigningPad>`
+
+Vector electronic official seal stamp and approval badge:
+- Pure SVG vector rendering with crisp resolution at any scale.
+- **Authentic Circular Geometry**: Classic double outer rings, arc company name text path, and central star or approval status.
+- **Distressed Vintage Ink Texture**: Slight random tilt angle and anti-counterfeiting serial numbers.
+
+```svelte
+<script lang="ts">
+  import { ElectronicSealStamp } from '@svadmin/ui';
+</script>
+
+<ElectronicSealStamp companyName="Acme Enterprise Corp" sealTitle="Official Approval Seal" />
+```
+
+### `<SystemCapacityForecastCard>` / `<ResourceCapacityPredictor>`
+
+System resource capacity consumption trend forecasting card:
+- Predicts storage, memory, and API quota runout dates before hard limits are hit.
+- **Countdown Alert**: Displays estimated days remaining until quota exhaustion.
+- **Sparkline Trajectory**: Solid historical trend line extending into dashed predictive forecast.
+
+```svelte
+<script lang="ts">
+  import { SystemCapacityForecastCard } from '@svadmin/ui';
+</script>
+
+<SystemCapacityForecastCard resourceName="PostgreSQL Cloud Storage" estimatedDaysRemaining={14} />
 ```

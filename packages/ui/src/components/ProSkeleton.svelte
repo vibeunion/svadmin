@@ -18,6 +18,8 @@
     statistic?: number;
     /** Additional CSS classes */
     class?: string;
+    /** Accessible label for the loading region */
+    ariaLabel?: string;
   }
 
   let {
@@ -28,6 +30,7 @@
     avatar = false,
     statistic = 0,
     class: className = '',
+    ariaLabel = 'Loading content',
   }: ProSkeletonProps = $props();
 
   const pulseClass = $derived(active ? 'animate-pulse' : '');
@@ -40,6 +43,7 @@
   class={cn('w-full space-y-4 select-none', pulseClass, className)}
   aria-busy="true"
   aria-live="polite"
+  aria-label={ariaLabel}
 >
   <!-- KPI Statistic Cards Top Section -->
   {#if statistic > 0}

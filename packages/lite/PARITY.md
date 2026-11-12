@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-12T00:44:09.001Z`
-> 清单映射覆盖率：**100%**（267/267 组件）
-> 1:1 对齐率 (Exact)：**50.6%**（135）· 语义降级率 (Fallback)：**40.4%**（108）
-> 行为验证覆盖：**76.8%**（205/267 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-12T02:48:36.801Z`
+> 清单映射覆盖率：**100%**（272/272 组件）
+> 1:1 对齐率 (Exact)：**49.6%**（135）· 语义降级率 (Fallback)：**41.5%**（113）
+> 行为验证覆盖：**77.2%**（210/272 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,8 +13,8 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
-| **advanced** | 111 | 29 | 60 | 22 | 0 | **26.1%** | 78/111 | 0 |
-| **widgets** | 49 | 18 | 31 | 0 | 0 | **36.7%** | 43/49 | 0 |
+| **advanced** | 114 | 29 | 63 | 22 | 0 | **25.4%** | 81/114 | 0 |
+| **widgets** | 51 | 18 | 33 | 0 | 0 | **35.3%** | 45/51 | 0 |
 | **fields** | 50 | 42 | 7 | 1 | 0 | **84%** | 42/50 | 0 |
 | **layout** | 28 | 22 | 5 | 1 | 0 | **78.6%** | 23/28 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
@@ -172,6 +172,9 @@
 | `WorkflowGraphDesigner` | `LiteApprovalChainBuilder.svelte` | ⚡ 语义降级 | 服务端工作流节点步骤列表与审批人静态展示；交互式拖拽连线与条件编排由 SPA 承接 |
 | `WorkflowExecutionTracker` | `LiteApprovalChainBuilder.svelte` | ⚡ 语义降级 | 服务端工作流实例流转历史时间线与耗时展示；动态实时轮询由 SPA 承接 |
 | `DataScopeRuleEditor` | `LiteDataMaskPolicyEngine.svelte` | ⚡ 语义降级 | 服务端行级数据权限范围与角色策略表格展示；动态条件组嵌套配置由 SPA 承接 |
+| `ScreenAntiLeakGuard` | `LiteScreenAntiLeakGuard.svelte` | ⚡ 语义降级 | 服务端静态平铺防泄密水印背景；客户端 DOM 防篡改自愈由 SPA 承接 |
+| `DataLineageGraph` | `LiteDataLineageGraph.svelte` | ⚡ 语义降级 | 服务端数据血缘上下游节点列表与转换关系展示；SVG 动态高亮连线由 SPA 承接 |
+| `LiveStreamLogViewer` | `LiteLiveStreamLogViewer.svelte` | ⚡ 语义降级 | 服务端静态日志行快照与等级色彩展示；客户端长连接实时流式推送与自动吸底由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -227,6 +230,8 @@
 | `TenantQuotasMatrix` | `LiteTenantQuotasMatrix.svelte` | ⚡ 语义降级 | 服务端多租户各资源配额水位进度条；配额申请与升级由 SPA 承接 |
 | `PivotMatrix` | `LitePivotMatrix.svelte` | ⚡ 语义降级 | 服务端多维交叉聚合矩阵静态表格；动态拖拽切片与热力色阶由 SPA 承接 |
 | `GeoScatterMap` | `LiteGeoScatterMap.svelte` | ⚡ 语义降级 | 服务端大区分布散点卡片矩阵与排行榜；SVG 交互下钻由 SPA 承接 |
+| `ElectronicSealStamp` | `LiteElectronicSealStamp.svelte` | ⚡ 语义降级 | 服务端企业防伪电子印章矢量展示与审核标记；动态签署由 SPA 承接 |
+| `SystemCapacityForecastCard` | `LiteSystemCapacityForecastCard.svelte` | ⚡ 语义降级 | 服务端资源容量耗尽倒计时与用量进度条展示；客户端趋势线性拟合折线图由 SPA 承接 |
 
 ### FIELDS
 

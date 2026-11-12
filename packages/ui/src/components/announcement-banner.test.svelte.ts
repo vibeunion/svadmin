@@ -15,6 +15,22 @@ describe('AnnouncementBanner Component', () => {
     expect(root).toBeTruthy();
     expect(container.textContent).toContain('系统将于今晚 23:00 进行停服维护');
     expect(root?.className).toContain('text-warning');
+    expect(root?.getAttribute('role')).toBe('alert');
+  });
+
+  it('uses a polite live region for non-blocking status messages', () => {
+    const { container } = render(AnnouncementBanner, {
+      props: {
+        message: '审批结果尚未确认，可继续后续审批。',
+        tone: 'info',
+        blocking: false,
+      },
+    });
+
+    const root = container.querySelector('[data-svadmin-component="AnnouncementBanner"]');
+    expect(root?.getAttribute('data-svadmin-blocking')).toBe('false');
+    expect(root?.getAttribute('aria-live')).toBe('polite');
+    expect(root?.getAttribute('role')).toBeNull();
   });
 
   it('renders multiple announcements with carousel pagination controls', async () => {
