@@ -971,3 +971,9 @@ export { default as ChartAnnotationOverlay, default as MetricEventAnnotation, ty
 export { default as AbacPolicyMatrix, default as AttributeBasedAccessControlMatrix, type AbacPolicyMatrixProps, type AbacPolicyRule, type AbacCondition } from './components/AbacPolicyMatrix.svelte';
 export { default as PermissionSimulator, default as RolePermissionSandbox, type PermissionSimulatorProps, type SimulationTargetUser, type SimulatedMenuNode, type SimulatedAction } from './components/PermissionSimulator.svelte';
 export { default as WorkflowNodeInspector, default as ApprovalNodeDrawer, type WorkflowNodeInspectorProps, type WorkflowNodeData } from './components/WorkflowNodeInspector.svelte';
+
+// Enterprise micro-app isolated sandbox runtime, state bus & route sync suite
+export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type MicroAppSandboxProps } from './components/MicroAppSandbox.svelte';
+export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
+export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
+export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
