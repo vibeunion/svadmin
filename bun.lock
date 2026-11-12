@@ -544,7 +544,7 @@
     },
     "packages/lite": {
       "name": "@svadmin/lite",
-      "version": "0.30.0",
+      "version": "0.30.1",
       "dependencies": {
         "@lucide/svelte": "^1.71.0",
         "typebox": "^1.4.6",
@@ -811,7 +811,7 @@
     },
     "packages/surface": {
       "name": "@svadmin/surface",
-      "version": "0.20.26",
+      "version": "0.20.27",
       "dependencies": {
         "typebox": "^1.4.6",
       },
