@@ -1,18 +1,23 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
-  import Button from './ui/button/button.svelte';
-  import * as Popover from './ui/popover/index.js';
+  import type { Snippet } from "svelte";
+  import { CircleAlert } from "@lucide/svelte";
+  import Button from "./ui/button/button.svelte";
+  import * as Popover from "./ui/popover/index.js";
 
   let {
     title,
-    okText = '确定',
-    cancelText = '取消',
+    okText = "确定",
+    cancelText = "取消",
+    okType = "primary",
+    icon,
     onConfirm,
     children,
   }: {
     title: string;
     okText?: string;
     cancelText?: string;
+    okType?: "primary" | "danger";
+    icon?: Snippet;
     onConfirm?: () => void;
     children: Snippet;
   } = $props();
@@ -27,10 +32,17 @@
     {/snippet}
   </Popover.Trigger>
   <Popover.Content class="svadmin-popconfirm" sideOffset={8}>
-    <p class="svadmin-popconfirm__title">{title}</p>
+    <div class="flex items-start gap-2">
+      {#if icon}
+        {@render icon()}
+      {:else}
+        <CircleAlert class="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
+      {/if}
+      <p class="svadmin-popconfirm__title leading-5">{title}</p>
+    </div>
     <div class="svadmin-popconfirm__actions">
-      <Button type="button" variant="outline" size="sm" onclick={() => (open = false)}>{cancelText}</Button>
-      <Button type="button" size="sm" onclick={() => { onConfirm?.(); open = false; }}>{okText}</Button>
+      <Button type="button" variant="outline" size="xs" onclick={() => (open = false)}>{cancelText}</Button>
+      <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="xs" onclick={() => { onConfirm?.(); open = false; }}>{okText}</Button>
     </div>
   </Popover.Content>
 </Popover.Root>
