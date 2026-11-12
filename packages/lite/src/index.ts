@@ -242,6 +242,16 @@ export { default as LiteLiveStreamLogViewer } from './components/LiteLiveStreamL
 export { default as LiteElectronicSealStamp } from './components/LiteElectronicSealStamp.svelte';
 export { default as LiteSystemCapacityForecastCard } from './components/LiteSystemCapacityForecastCard.svelte';
 
+// Enterprise wave 11 parity fallbacks
+export { default as LiteTenantContextSwitcher } from './components/LiteTenantContextSwitcher.svelte';
+export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCommandPalette.svelte';
+export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
+
+// Enterprise wave 11 parity fallbacks (Workspace Switcher, Omnibar, Audit Trail)
+export { default as LiteTenantContextSwitcher } from './components/LiteTenantContextSwitcher.svelte';
+export { default as LiteOmnibarCommandPalette } from './components/LiteOmnibarCommandPalette.svelte';
+export { default as LiteAuditTrailInspector } from './components/LiteAuditTrailInspector.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
