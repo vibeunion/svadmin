@@ -87,8 +87,9 @@
       }
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredItems[selectedIndex]) {
-        executeItem(filteredItems[selectedIndex]);
+      const item = filteredItems[selectedIndex];
+      if (item) {
+        executeItem(item);
       }
     }
   }
@@ -214,7 +215,7 @@
               ? 'bg-primary text-primary-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
           )}
-          onclick={() => (selectedCategory = cat.id as unknown)}
+          onclick={() => (selectedCategory = cat.id as typeof selectedCategory)}
         >
           {cat.label}
         </button>
