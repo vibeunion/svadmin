@@ -136,7 +136,7 @@
 	);
 	const contentClass = $derived(
 		cn(
-			"animate-in fade-in-0 zoom-in-95 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm bg-primary text-primary-foreground z-50 w-fit max-w-xs",
+			"animate-in fade-in-0 zoom-in-95 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm bg-foreground text-background shadow-md dark:bg-card dark:text-foreground dark:border dark:border-border z-50 w-fit max-w-xs",
 			className
 		)
 	);

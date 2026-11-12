@@ -396,6 +396,11 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'ElectronicSealStamp', uiComponent: 'ElectronicSealStamp.svelte', liteComponent: 'LiteElectronicSealStamp.svelte', category: 'widgets', status: 'fallback', strategy: '服务端企业防伪电子印章矢量展示与审核标记；动态签署由 SPA 承接' },
   { name: 'SystemCapacityForecastCard', uiComponent: 'SystemCapacityForecastCard.svelte', liteComponent: 'LiteSystemCapacityForecastCard.svelte', category: 'widgets', status: 'fallback', strategy: '服务端资源容量耗尽倒计时与用量进度条展示；客户端趋势线性拟合折线图由 SPA 承接' },
 
+  // ─── Enterprise suites wave 11 (Tenant Switcher, Omnibar Palette & Audit Trail) ───
+  { name: 'TenantContextSwitcher', uiComponent: 'TenantContextSwitcher.svelte', liteComponent: 'LiteTenantContextSwitcher.svelte', category: 'layout', status: 'fallback', strategy: '服务端多租户与工作区切换下拉表单；客户端即时切换与持久化由 SPA 承接' },
+  { name: 'OmnibarCommandPalette', uiComponent: 'OmnibarCommandPalette.svelte', liteComponent: 'LiteOmnibarCommandPalette.svelte', category: 'advanced', status: 'fallback', strategy: '服务端全局命令与资源检索静态索引列表；客户端 ⌘K 键盘快捷呼出与拼音检索由 SPA 承接' },
+  { name: 'AuditTrailInspector', uiComponent: 'AuditTrailInspector.svelte', liteComponent: 'LiteAuditTrailInspector.svelte', category: 'advanced', status: 'fallback', strategy: '服务端操作审计流转记录与字段变更差异静态列表；抽屉交互与实时轮询由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

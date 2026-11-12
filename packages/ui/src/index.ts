@@ -950,3 +950,12 @@ export { default as ElectronicSealStamp, default as ContractSigningPad, type Ele
 
 // Enterprise system resource capacity forecasting & runout prediction suite
 export { default as SystemCapacityForecastCard, default as ResourceCapacityPredictor, type SystemCapacityForecastCardProps, type CapacityMetricPoint } from './components/SystemCapacityForecastCard.svelte';
+
+// Enterprise workspace & multi-tenant context switcher suite
+export { default as TenantContextSwitcher, default as WorkspaceContextSwitcher, type TenantContextSwitcherProps, type TenantItem, type TenantRole } from './components/TenantContextSwitcher.svelte';
+
+// Enterprise global omnibar command palette & resource search suite
+export { default as OmnibarCommandPalette, default as GlobalCommandOmnibar, type OmnibarCommandPaletteProps, type CommandPaletteItem } from './components/OmnibarCommandPalette.svelte';
+
+// Enterprise audit trail inspector & cross-tenant security tracker suite
+export { default as AuditTrailInspector, default as SecurityAuditTimeline, type AuditTrailInspectorProps, type AuditEventItem, type AuditActor, type AuditFieldChange } from './components/AuditTrailInspector.svelte';

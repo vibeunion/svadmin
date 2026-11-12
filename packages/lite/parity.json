@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-12T02:48:36.801Z",
-  "totalComponents": 272,
+  "timestamp": "2026-11-12T03:23:47.843Z",
+  "totalComponents": 275,
   "adaptedCount": 135,
-  "fallbackCount": 113,
+  "fallbackCount": 116,
   "spaOnlyCount": 24,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 49.6,
-  "fallbackPercentage": 41.5,
-  "behaviorVerifiedCount": 210,
-  "behaviorVerifiedPercentage": 77.2,
-  "behaviorAssertedCount": 210,
-  "behaviorAssertedPercentage": 77.2,
+  "exactPercentage": 49.1,
+  "fallbackPercentage": 42.2,
+  "behaviorVerifiedCount": 213,
+  "behaviorVerifiedPercentage": 77.5,
+  "behaviorAssertedCount": 213,
+  "behaviorAssertedPercentage": 77.5,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,16 +28,16 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 114,
+      "total": 116,
       "adapted": 29,
-      "fallback": 63,
+      "fallback": 65,
       "spaOnly": 22,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 25.4,
-      "fallbackRate": 55.3,
-      "behaviorVerified": 81,
-      "behaviorAsserted": 81
+      "exactRate": 25,
+      "fallbackRate": 56,
+      "behaviorVerified": 83,
+      "behaviorAsserted": 83
     },
     "widgets": {
       "category": "widgets",
@@ -67,16 +67,16 @@
     },
     "layout": {
       "category": "layout",
-      "total": 28,
+      "total": 29,
       "adapted": 22,
-      "fallback": 5,
+      "fallback": 6,
       "spaOnly": 1,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 78.6,
-      "fallbackRate": 17.9,
-      "behaviorVerified": 23,
-      "behaviorAsserted": 23
+      "exactRate": 75.9,
+      "fallbackRate": 20.7,
+      "behaviorVerified": 24,
+      "behaviorAsserted": 24
     },
     "buttons": {
       "category": "buttons",
@@ -2228,6 +2228,30 @@
       "category": "widgets",
       "status": "fallback",
       "strategy": "服务端资源容量耗尽倒计时与用量进度条展示；客户端趋势线性拟合折线图由 SPA 承接"
+    },
+    {
+      "name": "TenantContextSwitcher",
+      "uiComponent": "TenantContextSwitcher.svelte",
+      "liteComponent": "LiteTenantContextSwitcher.svelte",
+      "category": "layout",
+      "status": "fallback",
+      "strategy": "服务端多租户与工作区切换下拉表单；客户端即时切换与持久化由 SPA 承接"
+    },
+    {
+      "name": "OmnibarCommandPalette",
+      "uiComponent": "OmnibarCommandPalette.svelte",
+      "liteComponent": "LiteOmnibarCommandPalette.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端全局命令与资源检索静态索引列表；客户端 ⌘K 键盘快捷呼出与拼音检索由 SPA 承接"
+    },
+    {
+      "name": "AuditTrailInspector",
+      "uiComponent": "AuditTrailInspector.svelte",
+      "liteComponent": "LiteAuditTrailInspector.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端操作审计流转记录与字段变更差异静态列表；抽屉交互与实时轮询由 SPA 承接"
     },
     {
       "name": "ThemeToggle",
