@@ -380,6 +380,10 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'MockDataInterceptor', uiComponent: 'MockDataInterceptor.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端网络拦截与离线 Mock 控制台)' },
   { name: 'SystemHealthCheckDashboard', uiComponent: 'SystemHealthCheckDashboard.svelte', liteComponent: 'LiteSystemHealthCheckDashboard.svelte', category: 'advanced', status: 'fallback', strategy: '服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接' },
 
+  // ─── Enterprise suites wave 8 (Admin Copilot & AI Query Explainer) ───────
+  { name: 'AdminCopilotWidget', uiComponent: 'AdminCopilotWidget.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (客户端 AI 智能悬浮助手与筛选建议卡片)' },
+  { name: 'QueryAiExplainer', uiComponent: 'QueryAiExplainer.svelte', liteComponent: 'LiteQueryAiExplainer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端复杂查询表达式与只读语义口径解释卡片；重新触发解析由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

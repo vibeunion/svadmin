@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-11T23:50:06.868Z",
-  "totalComponents": 262,
+  "timestamp": "2026-11-12T00:17:57.540Z",
+  "totalComponents": 264,
   "adaptedCount": 135,
-  "fallbackCount": 104,
-  "spaOnlyCount": 23,
+  "fallbackCount": 105,
+  "spaOnlyCount": 24,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 51.5,
-  "fallbackPercentage": 39.7,
-  "behaviorVerifiedCount": 201,
-  "behaviorVerifiedPercentage": 76.7,
-  "behaviorAssertedCount": 201,
-  "behaviorAssertedPercentage": 76.7,
+  "exactPercentage": 51.1,
+  "fallbackPercentage": 39.8,
+  "behaviorVerifiedCount": 202,
+  "behaviorVerifiedPercentage": 76.5,
+  "behaviorAssertedCount": 202,
+  "behaviorAssertedPercentage": 76.5,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,16 +28,16 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 106,
+      "total": 108,
       "adapted": 29,
-      "fallback": 56,
-      "spaOnly": 21,
+      "fallback": 57,
+      "spaOnly": 22,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 27.4,
+      "exactRate": 26.9,
       "fallbackRate": 52.8,
-      "behaviorVerified": 74,
-      "behaviorAsserted": 74
+      "behaviorVerified": 75,
+      "behaviorAsserted": 75
     },
     "widgets": {
       "category": "widgets",
@@ -2149,6 +2149,21 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端服务组件健康指标与往返延时静态列表；一键全量巡检轮询由 SPA 承接"
+    },
+    {
+      "name": "AdminCopilotWidget",
+      "uiComponent": "AdminCopilotWidget.svelte",
+      "category": "advanced",
+      "status": "spa_only",
+      "strategy": "免适配 (客户端 AI 智能悬浮助手与筛选建议卡片)"
+    },
+    {
+      "name": "QueryAiExplainer",
+      "uiComponent": "QueryAiExplainer.svelte",
+      "liteComponent": "LiteQueryAiExplainer.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端复杂查询表达式与只读语义口径解释卡片；重新触发解析由 SPA 承接"
     },
     {
       "name": "ThemeToggle",

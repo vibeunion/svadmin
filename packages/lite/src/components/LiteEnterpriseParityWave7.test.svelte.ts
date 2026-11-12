@@ -42,3 +42,18 @@ describe('Lite Enterprise Parity Wave 7 suite', () => {
     expect(getAllByText('运行健康').length).toBeGreaterThanOrEqual(1);
   });
 });
+
+import LiteQueryAiExplainer from './LiteQueryAiExplainer.svelte';
+
+describe('LiteQueryAiExplainer test', () => {
+  it('renders LiteQueryAiExplainer with query and explanation', () => {
+    const { getByText } = render(LiteQueryAiExplainer, {
+      title: 'AI 规则语义卡片',
+      queryText: 'WHERE age >= 18',
+      explanation: '用于筛选成年人用户。'
+    });
+    expect(getByText('AI 规则语义卡片')).toBeTruthy();
+    expect(getByText('WHERE age >= 18')).toBeTruthy();
+    expect(getByText('用于筛选成年人用户。')).toBeTruthy();
+  });
+});

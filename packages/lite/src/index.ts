@@ -232,6 +232,9 @@ export { default as LiteGeoScatterMap } from './components/LiteGeoScatterMap.sve
 export { default as LiteDataMaskPolicyEngine } from './components/LiteDataMaskPolicyEngine.svelte';
 export { default as LiteSystemHealthCheckDashboard } from './components/LiteSystemHealthCheckDashboard.svelte';
 
+// Enterprise AI explainer parity fallback
+export { default as LiteQueryAiExplainer } from './components/LiteQueryAiExplainer.svelte';
+
 
 
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)

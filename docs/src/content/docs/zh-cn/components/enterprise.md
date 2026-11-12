@@ -2705,3 +2705,42 @@ HMAC 签名计算与现场验签沙箱：
 
 <SystemHealthCheckDashboard {services} />
 ```
+
+### `<AdminCopilotWidget>`
+
+管理后台右下角智能业务副驾驶浮动助手：
+- 专为现代 AI 增强型企业工作台与表格智能问答设计。
+- **常驻悬浮与智能展开**：右下角常驻带脉冲光晕的圆形触发按钮，点击平滑展开交互式对话卡片。
+- **自然语言过滤意图提取与回写**：用户输入自然语言（如“筛选华东大区大额订单”），助理在回复中智能提取推荐的结构化筛选条件（如 `region = 华东大区 且 amount >= 50000`），并提供“一键应用此筛选”操作按钮，直接注入页面表格。
+- **快捷提问气泡**：预置高频业务问题气泡，支持点击秒级填入并自动发送。
+
+```svelte
+<script lang="ts">
+  import { AdminCopilotWidget } from '@svadmin/ui';
+</script>
+
+<AdminCopilotWidget
+  botName="SVAdmin AI 助手"
+  title="财务与销售数据智能副驾驶"
+  onapplyfilter={(filter) => console.log('应用筛选条件:', filter)}
+/>
+```
+
+### `<QueryAiExplainer>`
+
+AI 规则语义解释卡片：
+- 专为非技术业务人员、财务与审计人员理解复杂技术表达式打造。
+- **技术表达式转自然语言**：接收复杂的 SQL WHERE 语句、JSON 规则树或逻辑条件，自动解析拆解为通俗易懂的业务规则清单。
+- **双栏直观对比与复制**：代码区高亮原始表达式，业务区清晰罗列核心业务约束与交并集逻辑，支持一键复制说明文本。
+
+```svelte
+<script lang="ts">
+  import { QueryAiExplainer } from '@svadmin/ui';
+</script>
+
+<QueryAiExplainer
+  contextName="核心订单流水表"
+  queryText="WHERE (region = '华东大区' AND amount >= 50000) OR priority = 'URGENT'"
+  onexplain={(sql) => console.log('重新解析 SQL:', sql)}
+/>
+```

@@ -83,6 +83,10 @@ import {
   DiffViewer,
   AsyncExportModal,
   ExportCenterModal,
+  AdminCopilotWidget,
+  CopilotFloatWidget,
+  QueryAiExplainer,
+  SqlRuleAiExplainer,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
@@ -390,6 +394,10 @@ describe('public compatibility aliases', () => {
     expect(DiffViewer).toBe(TextDiffViewer);
     expect(AsyncExportModal).toBeDefined();
     expect(ExportCenterModal).toBe(AsyncExportModal);
+    expect(AdminCopilotWidget).toBeDefined();
+    expect(CopilotFloatWidget).toBe(AdminCopilotWidget);
+    expect(QueryAiExplainer).toBeDefined();
+    expect(SqlRuleAiExplainer).toBe(QueryAiExplainer);
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();
