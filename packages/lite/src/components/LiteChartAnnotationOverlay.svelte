@@ -74,27 +74,29 @@
     border-bottom: 1px solid #e5e6eb;
   }
   .lite-ann-title-row { display: flex; align-items: center; }
-  .lite-ann-icon { font-size: 14px; margin-right: 6px; }
+  .lite-ann-title-row > * + * { margin-left: 6px; }
+  .lite-ann-icon { font-size: 14px; }
   .lite-ann-title { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
   .lite-ann-count { font-size: 11px; color: #86909c; }
   .lite-ann-body { padding: 12px 14px; }
   .lite-ann-timeline { display: flex; flex-direction: column; }
-  .lite-ann-item { display: flex; align-items: flex-start; margin-bottom: 8px; }
-  .lite-ann-item:last-child { margin-bottom: 0; }
+  .lite-ann-timeline > * + * { margin-top: 8px; }
+  .lite-ann-item { display: flex; align-items: flex-start; }
+  .lite-ann-item > * + * { margin-left: 8px; }
   .lite-ann-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: #165dff;
     margin-top: 4px;
-    margin-right: 8px;
     shrink: 0;
   }
   .lite-dot-warn { background: #ff7d00; }
   .lite-dot-danger { background: #f53f3f; }
   .lite-ann-content { flex: 1; display: flex; flex-direction: column; }
   .lite-ann-main-row { display: flex; align-items: center; }
-  .lite-ann-label { font-weight: 500; color: #1d2129; margin-right: 6px; }
+  .lite-ann-main-row > * + * { margin-left: 6px; }
+  .lite-ann-label { font-weight: 500; color: #1d2129; }
   .lite-ann-val { font-size: 10px; color: #165dff; font-weight: 600; }
   .font-mono { font-family: monospace; }
   .lite-ann-time { font-size: 10px; color: #86909c; }

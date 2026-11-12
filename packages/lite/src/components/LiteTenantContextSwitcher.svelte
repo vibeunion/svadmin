@@ -113,6 +113,7 @@
     display: flex;
     align-items: center;
   }
+  .lite-tenant-name-row > * + * { margin-left: 6px; }
   .lite-tenant-name {
     font-weight: 600;
     color: #1d2129;

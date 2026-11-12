@@ -69,8 +69,9 @@
     background: #f7f8fa;
     border-bottom: 1px solid #e5e6eb;
   }
-  .lite-search-icon { font-size: 12px; margin-right: 8px; }
-  .lite-input-mock { flex: 1; color: #86909c; font-size: 12px; margin-right: 8px; }
+  .lite-omnibar-input > * + * { margin-left: 8px; }
+  .lite-search-icon { font-size: 12px; }
+  .lite-input-mock { flex: 1; color: #86909c; font-size: 12px; }
   .lite-kbd-hint {
     font-size: 10px;
     font-family: monospace;
@@ -91,7 +92,8 @@
   }
   .lite-cmd-row:last-child { border-bottom: none; }
   .lite-cmd-main { display: flex; align-items: center; }
-  .lite-cmd-title { font-weight: 500; color: #1d2129; margin-right: 6px; }
+  .lite-cmd-main > * + * { margin-left: 6px; }
+  .lite-cmd-title { font-weight: 500; color: #1d2129; }
   .lite-cmd-cat {
     font-size: 10px;
     color: #86909c;
