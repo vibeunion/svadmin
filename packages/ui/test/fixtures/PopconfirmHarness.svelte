@@ -6,7 +6,7 @@
     okText = "确定",
     cancelText = "取消",
     okType = "primary",
-    onConfirm,
+    onConfirm = () => {},
   }: {
     title?: string;
     okText?: string;
