@@ -30,13 +30,16 @@
     onchange,
   }: Props = $props();
 
+  let hoverValue = $state<number | null>(null);
   const normalizedCount = $derived(Number.isSafeInteger(count) && count > 0 && count <= 10 ? count : 5);
   const normalizedValue = $derived(Math.min(normalizedCount, Math.max(0, Math.round(value))));
+  const displayValue = $derived(hoverValue !== null ? hoverValue : normalizedValue);
 
   function choose(next: number): void {
     if (disabled) return;
     const selected = allowClear && normalizedValue === next ? 0 : next;
     value = selected;
+    hoverValue = null;
     onchange?.(selected);
   }
 
@@ -65,10 +68,12 @@
   aria-invalid={invalid || undefined}
   aria-describedby={describedby}
   data-invalid={invalid ? 'true' : undefined}
+  onmouseleave={() => { if (!disabled) hoverValue = null; }}
 >
   {#if name}<input type="hidden" {name} value={normalizedValue} required={required} {disabled} />{/if}
   {#each Array(normalizedCount) as _, index (index)}
     {@const rating = index + 1}
+    {@const isFilled = displayValue >= rating}
     <button
       type="button"
       role="radio"
@@ -77,10 +82,12 @@
       aria-disabled={disabled ? 'true' : undefined}
       tabindex={disabled ? -1 : normalizedValue === rating || (normalizedValue === 0 && index === 0) ? 0 : -1}
       disabled={disabled}
+      class:svadmin-rate__button--filled={isFilled}
+      onmouseenter={() => { if (!disabled) hoverValue = rating; }}
       onclick={() => choose(rating)}
       onkeydown={(event) => handleKeydown(event, index)}
     >
-      <Star fill={normalizedValue >= rating ? 'currentColor' : 'none'} aria-hidden="true" />
+      <Star fill={isFilled ? 'currentColor' : 'none'} aria-hidden="true" />
     </button>
   {/each}
 </div>
@@ -105,7 +112,16 @@
     cursor: pointer;
   }
 
-  .svadmin-rate button[aria-checked='true'] {
+  .svadmin-rate button {
+    transition: transform var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+  }
+
+  .svadmin-rate button:hover:not(:disabled) {
+    transform: scale(1.15);
+  }
+
+  .svadmin-rate button[aria-checked='true'],
+  .svadmin-rate button.svadmin-rate__button--filled {
     color: var(--warning);
   }
 

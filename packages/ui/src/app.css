@@ -1570,6 +1570,13 @@ main {
 }
 
 .svadmin-result { display: grid; justify-items: center; gap: 0.5rem; padding: 2rem 1rem; text-align: center; }
+.svadmin-result__icon { display: flex; align-items: center; justify-content: center; margin-bottom: 0.25rem; color: var(--primary); }
+.svadmin-result[data-status="success"] .svadmin-result__icon { color: var(--success); }
+.svadmin-result[data-status="warning"] .svadmin-result__icon { color: var(--warning); }
+.svadmin-result[data-status="error"] .svadmin-result__icon,
+.svadmin-result[data-status="403"] .svadmin-result__icon,
+.svadmin-result[data-status="404"] .svadmin-result__icon,
+.svadmin-result[data-status="500"] .svadmin-result__icon { color: var(--destructive); }
 .svadmin-result__status { margin: 0; color: var(--primary); font-size: 0.75rem; font-weight: 600; }
 .svadmin-result[data-status="success"] .svadmin-result__status { color: var(--success); }
 .svadmin-result[data-status="warning"] .svadmin-result__status { color: var(--warning); }
