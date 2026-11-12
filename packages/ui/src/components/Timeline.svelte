@@ -9,6 +9,7 @@
     time?: string;
     tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
     active?: boolean;
+    dot?: Snippet;
   }
 
   interface Props {
@@ -16,16 +17,23 @@
     mode?: 'vertical' | 'horizontal';
     label?: string;
     class?: string;
+    dot?: Snippet<[TimelineEntry]>;
     children?: Snippet<[TimelineEntry]>;
   }
 
-  let { items, mode = 'vertical', label = 'Timeline', class: className = '', children }: Props = $props();
+  let { items, mode = 'vertical', label = 'Timeline', class: className = '', dot, children }: Props = $props();
 </script>
 
 <ol class={cn('svadmin-timeline', className)} data-mode={mode} aria-label={label}>
   {#each items as item (item.id)}
     <li class="svadmin-timeline__item" data-tone={item.tone ?? 'neutral'} data-active={item.active ? 'true' : undefined}>
-      <span class="svadmin-timeline__marker" aria-hidden="true"></span>
+      {#if item.dot}
+        <span class="svadmin-timeline__custom-dot" aria-hidden="true">{@render item.dot()}</span>
+      {:else if dot}
+        <span class="svadmin-timeline__custom-dot" aria-hidden="true">{@render dot(item)}</span>
+      {:else}
+        <span class="svadmin-timeline__marker" aria-hidden="true"></span>
+      {/if}
       <div class="svadmin-timeline__content">
         {#if children}
           {@render children(item)}
@@ -73,7 +81,8 @@
   .svadmin-timeline__item[data-tone='success'] .svadmin-timeline__marker { border-color: var(--success, var(--primary)); }
   .svadmin-timeline__item[data-tone='warning'] .svadmin-timeline__marker { border-color: var(--warning, var(--primary)); }
   .svadmin-timeline__item[data-tone='danger'] .svadmin-timeline__marker { border-color: var(--destructive); }
-  .svadmin-timeline__item[data-active='true'] .svadmin-timeline__marker { background: var(--primary); border-color: var(--primary); }
+  .svadmin-timeline__item[data-active='true'] .svadmin-timeline__marker { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent); }
+  .svadmin-timeline__custom-dot { display: inline-flex; align-items: center; justify-content: center; margin-block-start: 0.15rem; z-index: 1; color: var(--primary); }
   .svadmin-timeline__content { min-width: 0; }
   .svadmin-timeline__time { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-timeline__title { margin: 0; color: var(--foreground); font-size: var(--svadmin-text-body); font-weight: 600; }
