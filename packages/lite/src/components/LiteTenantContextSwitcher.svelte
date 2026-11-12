@@ -90,7 +90,6 @@
   .lite-tenant-trigger {
     display: flex;
     align-items: center;
-    gap: 8px;
     padding-bottom: 8px;
     border-bottom: 1px dashed #e5e6eb;
   }
@@ -103,6 +102,7 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
+    margin-right: 8px;
   }
   .lite-tenant-info {
     flex: 1;
@@ -112,11 +112,11 @@
   .lite-tenant-name-row {
     display: flex;
     align-items: center;
-    gap: 6px;
   }
   .lite-tenant-name {
     font-weight: 600;
     color: #1d2129;
+    margin-right: 6px;
   }
   .lite-tier-tag {
     font-size: 9px;
@@ -133,6 +133,7 @@
   .lite-caret {
     font-size: 10px;
     color: #86909c;
+    margin-left: 8px;
   }
   .lite-tenant-noscript-list {
     margin-top: 6px;
@@ -151,15 +152,21 @@
   .lite-tenant-li {
     display: flex;
     align-items: center;
-    gap: 4px;
     padding: 2px 0;
+  }
+  .lite-tenant-bullet {
+    margin-right: 4px;
+  }
+  .lite-tenant-li-code {
+    margin-left: 4px;
+  }
+  .lite-active-mark {
+    margin-left: 4px;
+    font-size: 10px;
+    color: #165dff;
   }
   .lite-tenant-active {
     color: #165dff;
     font-weight: 600;
-  }
-  .lite-active-mark {
-    font-size: 10px;
-    color: #165dff;
   }
 </style>

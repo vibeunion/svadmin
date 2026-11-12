@@ -128,8 +128,8 @@
     background: #f7f8fa;
     border-bottom: 1px solid #e5e6eb;
   }
-  .lite-audit-title-row { display: flex; align-items: center; gap: 6px; }
-  .lite-shield-icon { font-size: 14px; }
+  .lite-audit-title-row { display: flex; align-items: center; }
+  .lite-shield-icon { font-size: 14px; margin-right: 6px; }
   .lite-audit-title { margin: 0; font-size: 13px; font-weight: 600; color: #1d2129; }
   .lite-audit-count { font-size: 11px; color: #86909c; }
   .lite-audit-table-wrap { overflow-x: auto; }
