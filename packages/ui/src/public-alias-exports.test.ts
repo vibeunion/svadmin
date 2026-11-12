@@ -93,6 +93,16 @@ import {
   CopilotFloatWidget,
   QueryAiExplainer,
   SqlRuleAiExplainer,
+  ScreenAntiLeakGuard,
+  WatermarkPolicyStudio,
+  DataLineageGraph,
+  FieldLineageTracker,
+  LiveStreamLogViewer,
+  TailLogConsole,
+  ElectronicSealStamp,
+  ContractSigningPad,
+  SystemCapacityForecastCard,
+  ResourceCapacityPredictor,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
@@ -410,6 +420,16 @@ describe('public compatibility aliases', () => {
     expect(CopilotFloatWidget).toBe(AdminCopilotWidget);
     expect(QueryAiExplainer).toBeDefined();
     expect(SqlRuleAiExplainer).toBe(QueryAiExplainer);
+    expect(ScreenAntiLeakGuard).toBeDefined();
+    expect(WatermarkPolicyStudio).toBe(ScreenAntiLeakGuard);
+    expect(DataLineageGraph).toBeDefined();
+    expect(FieldLineageTracker).toBe(DataLineageGraph);
+    expect(LiveStreamLogViewer).toBeDefined();
+    expect(TailLogConsole).toBe(LiveStreamLogViewer);
+    expect(ElectronicSealStamp).toBeDefined();
+    expect(ContractSigningPad).toBe(ElectronicSealStamp);
+    expect(SystemCapacityForecastCard).toBeDefined();
+    expect(ResourceCapacityPredictor).toBe(SystemCapacityForecastCard);
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();

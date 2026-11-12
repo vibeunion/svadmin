@@ -389,6 +389,13 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'WorkflowExecutionTracker', uiComponent: 'WorkflowExecutionTracker.svelte', liteComponent: 'LiteApprovalChainBuilder.svelte', category: 'advanced', status: 'fallback', strategy: '服务端工作流实例流转历史时间线与耗时展示；动态实时轮询由 SPA 承接' },
   { name: 'DataScopeRuleEditor', uiComponent: 'DataScopeRuleEditor.svelte', liteComponent: 'LiteDataMaskPolicyEngine.svelte', category: 'advanced', status: 'fallback', strategy: '服务端行级数据权限范围与角色策略表格展示；动态条件组嵌套配置由 SPA 承接' },
 
+  // ─── Enterprise suites wave 10 (AntiLeak Watermark, Lineage DAG, Live Logs, Electronic Seal & Capacity Predictor) ───
+  { name: 'ScreenAntiLeakGuard', uiComponent: 'ScreenAntiLeakGuard.svelte', liteComponent: 'LiteScreenAntiLeakGuard.svelte', category: 'advanced', status: 'fallback', strategy: '服务端静态平铺防泄密水印背景；客户端 DOM 防篡改自愈由 SPA 承接' },
+  { name: 'DataLineageGraph', uiComponent: 'DataLineageGraph.svelte', liteComponent: 'LiteDataLineageGraph.svelte', category: 'advanced', status: 'fallback', strategy: '服务端数据血缘上下游节点列表与转换关系展示；SVG 动态高亮连线由 SPA 承接' },
+  { name: 'LiveStreamLogViewer', uiComponent: 'LiveStreamLogViewer.svelte', liteComponent: 'LiteLiveStreamLogViewer.svelte', category: 'advanced', status: 'fallback', strategy: '服务端静态日志行快照与等级色彩展示；客户端长连接实时流式推送与自动吸底由 SPA 承接' },
+  { name: 'ElectronicSealStamp', uiComponent: 'ElectronicSealStamp.svelte', liteComponent: 'LiteElectronicSealStamp.svelte', category: 'widgets', status: 'fallback', strategy: '服务端企业防伪电子印章矢量展示与审核标记；动态签署由 SPA 承接' },
+  { name: 'SystemCapacityForecastCard', uiComponent: 'SystemCapacityForecastCard.svelte', liteComponent: 'LiteSystemCapacityForecastCard.svelte', category: 'widgets', status: 'fallback', strategy: '服务端资源容量耗尽倒计时与用量进度条展示；客户端趋势线性拟合折线图由 SPA 承接' },
+
 
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────

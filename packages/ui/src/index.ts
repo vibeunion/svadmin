@@ -935,3 +935,18 @@ export { default as QueryAiExplainer, default as SqlRuleAiExplainer, type QueryA
 export { default as WorkflowGraphDesigner, default as BpmnWorkflowDesigner, type WorkflowGraphDesignerProps, type WorkflowGraphNode, type WorkflowNodeType } from './components/WorkflowGraphDesigner.svelte';
 export { default as WorkflowExecutionTracker, default as WorkflowInstanceTracker, type WorkflowExecutionTrackerProps, type ExecutionStep, type ExecutionStatus } from './components/WorkflowExecutionTracker.svelte';
 export { default as DataScopeRuleEditor, default as RowLevelSecurityEditor, type DataScopeRuleEditorProps, type DataScopeRule, type ScopeScopeType } from './components/DataScopeRuleEditor.svelte';
+
+// Enterprise dynamic screen anti-leak watermark guard suite
+export { default as ScreenAntiLeakGuard, default as WatermarkPolicyStudio, type ScreenAntiLeakGuardProps } from './components/ScreenAntiLeakGuard.svelte';
+
+// Enterprise data asset full-chain lineage & impact analysis graph suite
+export { default as DataLineageGraph, default as FieldLineageTracker, type DataLineageGraphProps, type LineageNode, type LineageEdge, type LineageNodeType } from './components/DataLineageGraph.svelte';
+
+// Enterprise high-performance streaming log console & tail viewer suite
+export { default as LiveStreamLogViewer, default as TailLogConsole, type LiveStreamLogViewerProps, type LogEntry, type LogLevel } from './components/LiveStreamLogViewer.svelte';
+
+// Enterprise vector electronic official seal stamp & signing suite
+export { default as ElectronicSealStamp, default as ContractSigningPad, type ElectronicSealStampProps, type SealType } from './components/ElectronicSealStamp.svelte';
+
+// Enterprise system resource capacity forecasting & runout prediction suite
+export { default as SystemCapacityForecastCard, default as ResourceCapacityPredictor, type SystemCapacityForecastCardProps, type CapacityMetricPoint } from './components/SystemCapacityForecastCard.svelte';
