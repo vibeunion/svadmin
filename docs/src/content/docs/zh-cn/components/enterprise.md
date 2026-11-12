@@ -2877,3 +2877,50 @@ AI 规则语义解释卡片：
 
 <SystemCapacityForecastCard resourceName="云数据库存储容量" estimatedDaysRemaining={14} />
 ```
+
+### `<TenantContextSwitcher>` / `<WorkspaceContextSwitcher>`
+
+企业级多租户、多工作区与分级组织架构切换器：
+- 顶栏或侧边栏级组织切换面板，支持多子公司、事业部、网点与独立工作区。
+- **租户树形检索**：按租户名称、代号快速模糊检索过滤，带旗舰版/专业版配额徽标。
+- **最近访问与切换确认**：置顶最近使用的工作区，支持切换拦截、异步加载态与组织管理入口。
+
+```svelte
+<script lang="ts">
+  import { TenantContextSwitcher } from '@svadmin/ui';
+</script>
+
+<TenantContextSwitcher currentTenantId="tenant-corp-01" />
+```
+
+### `<OmnibarCommandPalette>` / `<GlobalCommandOmnibar>`
+
+全局 `⌘+K` / `Ctrl+K` 极速命令面板与全系统资源检索浮窗：
+- 对标 Raycast、Linear 与 Stripe Command Menu 的全局命令中枢。
+- **多维分类搜索**：无缝聚合快捷操作、页面导航直达、业务实体数据检索与 AI 智语解读。
+- **全键盘流畅交互**：支持全局热键监听、上下方向键高亮、回车执行、ESC 退出与分类 Chips 切换。
+
+```svelte
+<script lang="ts">
+  import { OmnibarCommandPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<OmnibarCommandPalette bind:open />
+```
+
+### `<AuditTrailInspector>` / `<SecurityAuditTimeline>`
+
+全局操作审计追踪中心与敏感变更链路回溯：
+- 记录跨租户切换、高危指令、权限提权、批量删除与大批量数据导出的审计日志流。
+- **多维安全指标统计**：实时统计总事件数、高危提权告警、安全门禁拦截数与租户切换频次。
+- **字段变更差异对比**：展开查看操作人真实 IP、Trace 链路追踪 ID、执行上下文以及实体字段变更前/后对比（Field Diffs）。
+
+```svelte
+<script lang="ts">
+  import { AuditTrailInspector } from '@svadmin/ui';
+</script>
+
+<AuditTrailInspector />
+```

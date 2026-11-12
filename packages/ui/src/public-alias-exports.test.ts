@@ -103,6 +103,12 @@ import {
   ContractSigningPad,
   SystemCapacityForecastCard,
   ResourceCapacityPredictor,
+  TenantContextSwitcher,
+  WorkspaceContextSwitcher,
+  OmnibarCommandPalette,
+  GlobalCommandOmnibar,
+  AuditTrailInspector,
+  SecurityAuditTimeline,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
@@ -430,6 +436,12 @@ describe('public compatibility aliases', () => {
     expect(ContractSigningPad).toBe(ElectronicSealStamp);
     expect(SystemCapacityForecastCard).toBeDefined();
     expect(ResourceCapacityPredictor).toBe(SystemCapacityForecastCard);
+    expect(TenantContextSwitcher).toBeDefined();
+    expect(WorkspaceContextSwitcher).toBe(TenantContextSwitcher);
+    expect(OmnibarCommandPalette).toBeDefined();
+    expect(GlobalCommandOmnibar).toBe(OmnibarCommandPalette);
+    expect(AuditTrailInspector).toBeDefined();
+    expect(SecurityAuditTimeline).toBe(AuditTrailInspector);
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();

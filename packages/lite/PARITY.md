@@ -1,9 +1,9 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-11-12T02:48:36.801Z`
-> 清单映射覆盖率：**100%**（272/272 组件）
-> 1:1 对齐率 (Exact)：**49.6%**（135）· 语义降级率 (Fallback)：**41.5%**（113）
-> 行为验证覆盖：**77.2%**（210/272 映射组件具备断言预算）· 仅被引用：0
+> 自动生成时间：`2026-11-12T03:23:47.843Z`
+> 清单映射覆盖率：**100%**（275/275 组件）
+> 1:1 对齐率 (Exact)：**49.1%**（135）· 语义降级率 (Fallback)：**42.2%**（116）
+> 行为验证覆盖：**77.5%**（213/275 映射组件具备断言预算）· 仅被引用：0
 >
 > 映射覆盖率包含语义降级与免适配，不能单独作为发布口径。推进目标看后两项：1:1 对齐率与行为断言覆盖。
 > 行为断言覆盖按"测试文件断言数 ÷ 该文件引入的 Lite 组件数 ≥ 2"估算，是文件级预算，不等价于逐组件深度验收。
@@ -13,10 +13,10 @@
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 1:1 对齐率 | 行为断言 | 仅引用 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **pages** | 19 | 14 | 5 | 0 | 0 | **73.7%** | 15/19 | 0 |
-| **advanced** | 114 | 29 | 63 | 22 | 0 | **25.4%** | 81/114 | 0 |
+| **advanced** | 116 | 29 | 65 | 22 | 0 | **25%** | 83/116 | 0 |
 | **widgets** | 51 | 18 | 33 | 0 | 0 | **35.3%** | 45/51 | 0 |
 | **fields** | 50 | 42 | 7 | 1 | 0 | **84%** | 42/50 | 0 |
-| **layout** | 28 | 22 | 5 | 1 | 0 | **78.6%** | 23/28 | 0 |
+| **layout** | 29 | 22 | 6 | 1 | 0 | **75.9%** | 24/29 | 0 |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** | 4/10 | 0 |
 
 > 样式钩子（`class`）覆盖是独立指标，见 [CLASS-HOOKS.md](./CLASS-HOOKS.md)，不影响本表状态。
@@ -175,6 +175,8 @@
 | `ScreenAntiLeakGuard` | `LiteScreenAntiLeakGuard.svelte` | ⚡ 语义降级 | 服务端静态平铺防泄密水印背景；客户端 DOM 防篡改自愈由 SPA 承接 |
 | `DataLineageGraph` | `LiteDataLineageGraph.svelte` | ⚡ 语义降级 | 服务端数据血缘上下游节点列表与转换关系展示；SVG 动态高亮连线由 SPA 承接 |
 | `LiveStreamLogViewer` | `LiteLiveStreamLogViewer.svelte` | ⚡ 语义降级 | 服务端静态日志行快照与等级色彩展示；客户端长连接实时流式推送与自动吸底由 SPA 承接 |
+| `OmnibarCommandPalette` | `LiteOmnibarCommandPalette.svelte` | ⚡ 语义降级 | 服务端全局命令与资源检索静态索引列表；客户端 ⌘K 键盘快捷呼出与拼音检索由 SPA 承接 |
+| `AuditTrailInspector` | `LiteAuditTrailInspector.svelte` | ⚡ 语义降级 | 服务端操作审计流转记录与字段变更差异静态列表；抽屉交互与实时轮询由 SPA 承接 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 
 ### WIDGETS
@@ -319,6 +321,7 @@
 | `DataScreenContainer` | `LiteDataScreenContainer.svelte` | ⚡ 语义降级 | 服务端大屏外层容器与暗黑科技布局；全屏 API 与 Scale-to-Fit 自适应缩放由 SPA 承接 |
 | `VirtualCardGrid` | `LiteGrid.svelte` | ⚡ 语义降级 | 服务端卡片网格静态分页布局；窗口虚拟滚动由 SPA 承接 |
 | `TableAggregationFooter` | `LiteTableAggregationFooter.svelte` | ⚡ 语义降级 | 服务端全表合计与选中小计汇总栏静态排版；多选行动态即时计算由 SPA 承接 |
+| `TenantContextSwitcher` | `LiteTenantContextSwitcher.svelte` | ⚡ 语义降级 | 服务端多租户与工作区切换下拉表单；客户端即时切换与持久化由 SPA 承接 |
 | `ThemeToggle` | — | 🚫 免适配 | 免适配 (Lite 为固定 Slate/Indigo 配色) |
 
 ### BUTTONS

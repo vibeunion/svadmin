@@ -2986,3 +2986,50 @@ System resource capacity consumption trend forecasting card:
 
 <SystemCapacityForecastCard resourceName="PostgreSQL Cloud Storage" estimatedDaysRemaining={14} />
 ```
+
+### `<TenantContextSwitcher>` / `<WorkspaceContextSwitcher>`
+
+Multi-tenant, multi-workspace, and organization hierarchy switcher:
+- Header and sidebar navigation control for switching subsidiaries, divisions, branches, and workspaces.
+- **Fuzzy Search & Filtering**: Fast search by tenant name or code, with Enterprise and Pro tier badges.
+- **Recent Tenants & Switch Guard**: Pins recently visited workspaces with async loading and management actions.
+
+```svelte
+<script lang="ts">
+  import { TenantContextSwitcher } from '@svadmin/ui';
+</script>
+
+<TenantContextSwitcher currentTenantId="tenant-corp-01" />
+```
+
+### `<OmnibarCommandPalette>` / `<GlobalCommandOmnibar>`
+
+Global `⌘+K` / `Ctrl+K` command palette and omnibar search:
+- Centralized quick command dialog inspired by Raycast, Linear, and Stripe Command Menu.
+- **Multi-Category Aggregation**: Unifies quick actions, page navigation, entity records, and AI prompts.
+- **Full Keyboard Navigation**: Global hotkey listener, arrow key selection, Enter execution, and category chips.
+
+```svelte
+<script lang="ts">
+  import { OmnibarCommandPalette } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<OmnibarCommandPalette bind:open />
+```
+
+### `<AuditTrailInspector>` / `<SecurityAuditTimeline>`
+
+Audit trail inspection waterfall and cross-tenant security tracker:
+- Records tenant switching, privilege elevation, sensitive export, and destructive operation events.
+- **Security Metric Counters**: Real-time counts of critical alerts, blocked attempts, and tenant switches.
+- **Field Change Diffs**: Trace IDs, client IP geolocation, and before/after value diff inspections.
+
+```svelte
+<script lang="ts">
+  import { AuditTrailInspector } from '@svadmin/ui';
+</script>
+
+<AuditTrailInspector />
+```
