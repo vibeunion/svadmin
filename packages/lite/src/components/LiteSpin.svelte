@@ -5,14 +5,16 @@
     spinning?: boolean;
     size?: 'sm' | 'md' | 'lg';
     label?: string;
+    /** Caller class merged with the built-in class list. */
+    class?: string;
     children?: Snippet;
   }
 
-  let { spinning = true, size = 'md', label = 'Loading', children }: Props = $props();
+  let { spinning = true, size = 'md', label = 'Loading', class: className = '', children }: Props = $props();
   const px = $derived(size === 'sm' ? 16 : size === 'lg' ? 36 : 24);
 </script>
 
-<div class="lite-spin" aria-busy={spinning || undefined}>
+<div class="lite-spin {className}" aria-busy={spinning || undefined}>
   {#if spinning}
     <span class="lite-spin__indicator" style={`width:${px}px;height:${px}px`} role="status" aria-label={label}></span>
   {/if}
