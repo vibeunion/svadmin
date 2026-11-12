@@ -78,6 +78,7 @@ if (violations.length > 0) throw new Error(`UI repository audit failed:\n${viola
 const allowedImageOwners = new Set([
   'packages/ui/src/components/ProfilePage.svelte',
   'packages/ui/src/components/TenantSwitcher.svelte',
+  'packages/ui/src/components/TenantContextSwitcher.svelte',
   'packages/ui/src/components/ThemedTitle.svelte',
   'packages/ui/src/components/fields/AvatarField.svelte',
   'packages/ui/src/components/profile/ProfileCard.svelte',
@@ -128,6 +129,7 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/PdfDocumentViewer.svelte',
   'packages/ui/src/components/PrintableReportLayout.svelte',
   'packages/ui/src/components/GeoScatterMap.svelte',
+  'packages/ui/src/components/DataLineageGraph.svelte',
   'packages/ui/src/components/LiveStreamLogViewer.svelte',
   'packages/ui/src/components/DataScreenContainer.svelte',
   'packages/ui/src/components/StepForm.svelte',
