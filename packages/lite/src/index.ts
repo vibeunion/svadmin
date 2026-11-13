@@ -258,6 +258,11 @@ export { default as LiteAbacPolicyMatrix } from './components/LiteAbacPolicyMatr
 export { default as LitePermissionSimulator } from './components/LitePermissionSimulator.svelte';
 export { default as LiteWorkflowNodeInspector } from './components/LiteWorkflowNodeInspector.svelte';
 
+// Enterprise wave 14 parity fallbacks (MicroApp Sandbox, State Bus & Route Sync)
+export { default as LiteMicroAppSandbox } from './components/LiteMicroAppSandbox.svelte';
+export { default as LiteMicroAppStateBusIndicator } from './components/LiteMicroAppStateBusIndicator.svelte';
+export { default as LiteMicroAppRouteSync } from './components/LiteMicroAppRouteSync.svelte';
+
 // Rich content rendering (SSR-safe Markdown + rich HTML allowlist)
 export {
   configureMarkdownRenderer,

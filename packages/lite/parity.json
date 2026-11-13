@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-11-13T00:17:21.474Z",
-  "totalComponents": 281,
+  "timestamp": "2026-11-13T00:50:15.011Z",
+  "totalComponents": 284,
   "adaptedCount": 135,
-  "fallbackCount": 122,
+  "fallbackCount": 125,
   "spaOnlyCount": 24,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
-  "exactPercentage": 48,
-  "fallbackPercentage": 43.4,
-  "behaviorVerifiedCount": 219,
-  "behaviorVerifiedPercentage": 77.9,
-  "behaviorAssertedCount": 219,
-  "behaviorAssertedPercentage": 77.9,
+  "exactPercentage": 47.5,
+  "fallbackPercentage": 44,
+  "behaviorVerifiedCount": 222,
+  "behaviorVerifiedPercentage": 78.2,
+  "behaviorAssertedCount": 222,
+  "behaviorAssertedPercentage": 78.2,
   "categories": {
     "pages": {
       "category": "pages",
@@ -28,16 +28,16 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 119,
+      "total": 122,
       "adapted": 29,
-      "fallback": 68,
+      "fallback": 71,
       "spaOnly": 22,
       "missing": 0,
       "percentage": 100,
-      "exactRate": 24.4,
-      "fallbackRate": 57.1,
-      "behaviorVerified": 86,
-      "behaviorAsserted": 86
+      "exactRate": 23.8,
+      "fallbackRate": 58.2,
+      "behaviorVerified": 89,
+      "behaviorAsserted": 89
     },
     "widgets": {
       "category": "widgets",
@@ -2300,6 +2300,30 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "服务端审批节点属性与模式配置静态呈现；客户端滑出抽屉与会签比例由 SPA 承接"
+    },
+    {
+      "name": "MicroAppSandbox",
+      "uiComponent": "MicroAppSandbox.svelte",
+      "liteComponent": "LiteMicroAppSandbox.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端子应用占位骨架与安全元数据展示；客户端无损沙箱运行时与崩溃自愈由 SPA 承接"
+    },
+    {
+      "name": "MicroAppStateBusIndicator",
+      "uiComponent": "MicroAppStateBusIndicator.svelte",
+      "liteComponent": "LiteMicroAppStateBusIndicator.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端跨端状态总线频道与策略说明展示；客户端双向 BroadcastChannel 事件广播由 SPA 承接"
+    },
+    {
+      "name": "MicroAppRouteSync",
+      "uiComponent": "MicroAppRouteSync.svelte",
+      "liteComponent": "LiteMicroAppRouteSync.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "服务端内部路由与宿主映射静态对照；客户端双向 PopState 路由无感同步由 SPA 承接"
     },
     {
       "name": "ThemeToggle",

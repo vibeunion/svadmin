@@ -137,7 +137,7 @@
     "ws": "8.22.2",
     "zod": "4.6.7",
     "decode-uri-component": "0.5.1",
-    "hono": "4.13.13",
+    "hono": "4.13.18",
     "follow-redirects": "1.16.3",
     "minimatch": "11.0.5",
     "svelte-toolbelt": "0.10.7",

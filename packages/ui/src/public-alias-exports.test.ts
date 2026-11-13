@@ -121,6 +121,13 @@ import {
   RolePermissionSandbox,
   WorkflowNodeInspector,
   ApprovalNodeDrawer,
+  MicroAppSandbox,
+  SubAppRuntimeSandbox,
+  MicroAppStateBusIndicator,
+  CrossAppStateBus,
+  MicroAppRouteSync,
+  SubAppUrlSynchronizer,
+  useMicroAppState,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
@@ -466,6 +473,13 @@ describe('public compatibility aliases', () => {
     expect(RolePermissionSandbox).toBe(PermissionSimulator);
     expect(WorkflowNodeInspector).toBeDefined();
     expect(ApprovalNodeDrawer).toBe(WorkflowNodeInspector);
+    expect(MicroAppSandbox).toBeDefined();
+    expect(SubAppRuntimeSandbox).toBe(MicroAppSandbox);
+    expect(MicroAppStateBusIndicator).toBeDefined();
+    expect(CrossAppStateBus).toBe(MicroAppStateBusIndicator);
+    expect(MicroAppRouteSync).toBeDefined();
+    expect(SubAppUrlSynchronizer).toBe(MicroAppRouteSync);
+    expect(useMicroAppState).toBeDefined();
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();
