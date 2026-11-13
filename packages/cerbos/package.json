@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/cerbos",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Cerbos Cloud-Native Policy PDP AccessControl adapter for svadmin",
   "type": "module",
   "sideEffects": false,

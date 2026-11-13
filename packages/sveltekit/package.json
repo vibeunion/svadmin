@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/sveltekit",
-  "version": "0.13.30",
+  "version": "0.13.31",
   "description": "SvelteKit integration for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@sveltejs/kit": "^3.0.0",
-    "@svadmin/core": ">=0.32.2 <0.82.0",
+    "@svadmin/core": ">=0.81.1",
     "svelte": "^5.57.1"
   },
   "license": "MIT",

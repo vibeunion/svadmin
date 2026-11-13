@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/storage",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Storage adapters — S3, Cloudflare R2, and in-memory storage provider for svadmin",
   "type": "module",
   "sideEffects": false,

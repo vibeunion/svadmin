@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.126.1](https://github.com/vibeunion/svadmin/compare/ui-v0.126.0...ui-v0.126.1) (2026-11-13)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** localize filter and freshness aria labels ([#779](https://github.com/vibeunion/svadmin/issues/779)) ([5485836](https://github.com/vibeunion/svadmin/commit/54858363e3af8bc5bf1f4f0464dbf1e4571bb345))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.11
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.14.6
+  * peerDependencies
+    * @svadmin/core bumped to 0.81.1
+
 ## [0.126.0](https://github.com/vibeunion/svadmin/compare/ui-v0.125.0...ui-v0.126.0) (2026-11-13)
 
 
