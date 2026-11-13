@@ -1,7 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { Bookmark, BookmarkPlus, X, Trash2, Check, Filter } from '@lucide/svelte';
   import { cn } from '../utils.js';
+
+  const i18n = useTranslation();
 
   export interface FilterTagItem {
     id: string;
@@ -119,7 +122,7 @@
             type="button"
             class="rounded-full p-0.5 text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer"
             onclick={() => onremove?.(item.id)}
-            aria-label="Remove filter"
+            aria-label={i18n.t('common.removeFilter')}
           >
             <X class="h-3 w-3" />
           </button>
@@ -160,8 +163,8 @@
             type="button"
             class="p-1 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
             onclick={() => activePresetId && deletePreset(activePresetId)}
-            title="删除此预设"
-            aria-label="Delete active preset"
+            title={i18n.t('common.deletePreset')}
+            aria-label={i18n.t('common.deletePreset')}
           >
             <Trash2 class="h-3 w-3" />
           </button>

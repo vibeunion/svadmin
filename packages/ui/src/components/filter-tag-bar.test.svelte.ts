@@ -21,6 +21,7 @@ describe('FilterTagBar Component', () => {
     expect(container.textContent).toContain('进行中');
     expect(container.textContent).toContain('¥1,000');
     expect(container.textContent).toContain('清空全部');
+    expect(container.querySelector('button[aria-label="Remove filter"]')).toBeTruthy();
   });
 
   it('triggers onremove callback when remove button is clicked', async () => {

@@ -1,7 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { RotateCw, Clock } from '@lucide/svelte';
   import { cn } from '../utils.js';
+
+  const i18n = useTranslation();
 
   export type FreshnessStatus = 'live' | 'fresh' | 'stale' | 'offline';
   export type PollInterval = 0 | 5 | 15 | 30 | 60 | 300;
@@ -137,7 +140,7 @@
       class="bg-transparent text-[11px] font-mono outline-none text-foreground cursor-pointer"
       value={currentPollInterval}
       onchange={handleIntervalChange}
-      aria-label="Poll interval"
+      aria-label={i18n.t('common.pollInterval')}
     >
       <option value={5} class="text-foreground bg-card">5秒自动刷新</option>
       <option value={15} class="text-foreground bg-card">15秒自动刷新</option>
