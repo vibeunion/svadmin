@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.31.0](https://github.com/vibeunion/svadmin/compare/lite-v0.30.1...lite-v0.31.0) (2026-11-13)
+
+
+### 🚀 Features
+
+* **ui:** add InputGroup affixes, animate Steps progress, and add table fullscreen toggle ([#772](https://github.com/vibeunion/svadmin/issues/772)) ([3f8a87c](https://github.com/vibeunion/svadmin/commit/3f8a87c7205bd1fd932faa4933c650edbf161114))
+* **ui:** micro-app sandbox, route sync and cross-app state bus suite ([#775](https://github.com/vibeunion/svadmin/issues/775)) ([362274f](https://github.com/vibeunion/svadmin/commit/362274f51dccbdbc235bbcdb03fa8249e02639d0))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** unify native selects on the design-system styling and clear runtime warnings ([#774](https://github.com/vibeunion/svadmin/issues/774)) ([3f706a1](https://github.com/vibeunion/svadmin/commit/3f706a18fa45b67d56ecdc58eae677292de9923d))
+
 ## [0.30.1](https://github.com/vibeunion/svadmin/compare/lite-v0.30.0...lite-v0.30.1) (2026-11-12)
 
 
