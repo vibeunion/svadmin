@@ -287,7 +287,7 @@
     },
     "packages/create-svadmin": {
       "name": "@svadmin/create",
-      "version": "0.55.10",
+      "version": "0.56.0",
       "bin": {
         "create-svadmin": "./dist/index.js",
       },
