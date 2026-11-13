@@ -122,7 +122,7 @@
   <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[500px]">
     <div class="svadmin-permission-matrix__mobile-sidebar w-full rounded-lg border border-border bg-card p-4 shadow-sm">
       <label for={`${instanceId}-permission-role-select`} class="mb-2 block text-sm font-medium text-foreground">{i18n.t('permissions.roles') || 'Roles'}</label>
-      <select id={`${instanceId}-permission-role-select`} value={selectedRole} onchange={(event) => { selectedRole = event.currentTarget.value; }} class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" disabled={roles.length === 0}>
+      <select id={`${instanceId}-permission-role-select`} value={selectedRole} onchange={(event) => { selectedRole = event.currentTarget.value; }} class="svadmin-select h-9 w-full" disabled={roles.length === 0}>
         {#each roles as role (role.code)}<option value={role.code}>{role.name}</option>{/each}
       </select>
       {#if roles.length === 0}<p class="mt-2 text-sm text-muted-foreground">{i18n.t('permissions.noRoles') || 'No roles available'}</p>{/if}

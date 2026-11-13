@@ -96,7 +96,7 @@
       <h3>Navigation</h3>
       <label class="svadmin-theme-settings__field">
         <span>Navigation mode</span>
-        <select value={uiPreferences.navigation} onchange={(event) => chooseNavigation((event.currentTarget as HTMLSelectElement).value as 'side' | 'top' | 'mix' | 'split')}>
+        <select class="svadmin-select" value={uiPreferences.navigation} onchange={(event) => chooseNavigation((event.currentTarget as HTMLSelectElement).value as 'side' | 'top' | 'mix' | 'split')}>
           <option value="side">Sidebar</option>
           <option value="top">Top bar</option>
           <option value="mix">Mixed</option>
@@ -105,7 +105,7 @@
       </label>
       <label class="svadmin-theme-settings__field">
         <span>Navigation theme</span>
-        <select value={uiPreferences.navigationTheme} onchange={(event) => updateUiPreferences({ navigationTheme: (event.currentTarget as HTMLSelectElement).value as 'light' | 'dark' | 'system' })}>
+        <select class="svadmin-select" value={uiPreferences.navigationTheme} onchange={(event) => updateUiPreferences({ navigationTheme: (event.currentTarget as HTMLSelectElement).value as 'light' | 'dark' | 'system' })}>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="system">Follow theme</option>
@@ -113,7 +113,7 @@
       </label>
       <label class="svadmin-theme-settings__field">
         <span>Content width</span>
-        <select value={uiPreferences.contentWidth} onchange={(event) => updateUiPreferences({ contentWidth: (event.currentTarget as HTMLSelectElement).value as 'fluid' | 'fixed' | 'wide' })}>
+        <select class="svadmin-select" value={uiPreferences.contentWidth} onchange={(event) => updateUiPreferences({ contentWidth: (event.currentTarget as HTMLSelectElement).value as 'fluid' | 'fixed' | 'wide' })}>
           <option value="fixed">Fixed</option>
           <option value="fluid">Fluid</option>
           <option value="wide">Wide</option>
@@ -137,7 +137,7 @@
       </label>
       <label class="svadmin-theme-settings__field">
         <span>Motion</span>
-        <select value={uiPreferences.motion} onchange={(event) => updateUiPreferences({ motion: (event.currentTarget as HTMLSelectElement).value as 'system' | 'reduced' })}>
+        <select class="svadmin-select" value={uiPreferences.motion} onchange={(event) => updateUiPreferences({ motion: (event.currentTarget as HTMLSelectElement).value as 'system' | 'reduced' })}>
           <option value="system">System</option>
           <option value="reduced">Reduced motion</option>
         </select>
@@ -192,15 +192,7 @@
   }
   .svadmin-theme-settings__swatch[aria-pressed='true'] { box-shadow: 0 0 0 2px var(--foreground); }
   .svadmin-theme-settings__field { display: grid; gap: var(--svadmin-space-1); color: var(--foreground); font-size: var(--svadmin-text-label); }
-  .svadmin-theme-settings__field select {
-    width: 100%;
-    height: var(--svadmin-control-h);
-    border: 1px solid var(--input);
-    border-radius: var(--radius-sm);
-    background: var(--background);
-    color: var(--foreground);
-    padding-inline: var(--svadmin-space-2);
-  }
+  .svadmin-theme-settings__field select { width: 100%; }
   .svadmin-theme-settings__toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--svadmin-space-4); }
   .svadmin-theme-settings__toggle span { display: grid; gap: 0.1rem; }
   .svadmin-theme-settings__toggle strong { font-size: var(--svadmin-text-label); font-weight: 600; color: var(--foreground); }

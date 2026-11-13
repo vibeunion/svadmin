@@ -135,7 +135,7 @@
             <td class="p-3">
               <select
                 class={cn(
-                  'w-full rounded-md border bg-background px-3 py-1.5 text-xs font-mono outline-none focus:ring-1 focus:ring-primary',
+                  'svadmin-select w-full text-xs font-mono outline-none focus:ring-1 focus:ring-primary',
                   selectedCol
                     ? 'border-primary/40 font-semibold text-foreground'
                     : tf.required
