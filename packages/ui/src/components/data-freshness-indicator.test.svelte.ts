@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
+import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 import DataFreshnessIndicator from './DataFreshnessIndicator.svelte';
 
 describe('DataFreshnessIndicator Component', () => {
@@ -46,5 +47,15 @@ describe('DataFreshnessIndicator Component', () => {
       await fireEvent.click(syncBtn);
       expect(onSync).toHaveBeenCalledTimes(1);
     }
+  });
+
+  it('localizes the poll interval accessible name', () => {
+    const { container } = renderWithI18n(DataFreshnessIndicator, {
+      props: {
+        lastUpdated: Date.now(),
+      },
+    }, 'zh-CN');
+
+    expect(container.querySelector('select')?.getAttribute('aria-label')).toBe('自动刷新间隔');
   });
 });

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
+import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 import FilterTagBar, { type FilterTagItem } from './FilterTagBar.svelte';
 
 describe('FilterTagBar Component', () => {
@@ -39,6 +40,17 @@ describe('FilterTagBar Component', () => {
       await fireEvent.click(firstRemoveBtn);
       expect(onRemove).toHaveBeenCalledWith('f1');
     }
+  });
+
+  it('localizes the remove filter accessible name', () => {
+    const { container } = renderWithI18n(FilterTagBar, {
+      props: {
+        filters: sampleFilters,
+      },
+    }, 'zh-CN');
+
+    const removeBtns = container.querySelectorAll('button[aria-label="移除筛选条件"]');
+    expect(removeBtns.length).toBe(2);
   });
 
   it('triggers onclear callback when clear all is clicked', async () => {
