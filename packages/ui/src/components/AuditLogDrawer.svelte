@@ -229,8 +229,8 @@
       </div>
 
       <div class="relative w-32">
-        <select
-          class="w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary capitalize"
+        <select data-size="compact"
+          class="svadmin-select w-full capitalize"
           bind:value={actionFilter}
           onchange={(e) => { actionFilter = e.currentTarget.value; }}
           data-svadmin-field="audit-action-filter"

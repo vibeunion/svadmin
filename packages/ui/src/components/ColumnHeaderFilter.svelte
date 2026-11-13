@@ -106,10 +106,10 @@
 
       <div class="space-y-1">
         <label class="block text-[11px] text-muted-foreground" for="header_filter_op_{field.key}">Operator</label>
-        <select
+        <select data-size="compact"
           id="header_filter_op_{field.key}"
           bind:value={operator}
-          class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-select h-7.5 w-full"
         >
           {#each applicableOperators as op (op.value)}
             <option value={op.value}>{op.label}</option>
@@ -120,10 +120,10 @@
       <div class="space-y-1">
         <label class="block text-[11px] text-muted-foreground" for="header_filter_val_{field.key}">Value</label>
         {#if field.type === 'select' && field.options}
-          <select
+          <select data-size="compact"
             id="header_filter_val_{field.key}"
             bind:value={filterVal}
-            class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-select h-7.5 w-full"
           >
             <option value="">All</option>
             {#each field.options as opt (opt.value)}
@@ -131,10 +131,10 @@
             {/each}
           </select>
         {:else if field.type === 'boolean'}
-          <select
+          <select data-size="compact"
             id="header_filter_val_{field.key}"
             bind:value={filterVal}
-            class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-select h-7.5 w-full"
           >
             <option value="">{i18n.t('common.all')}</option>
             <option value="true">{i18n.t('common.yesTrue')}</option>

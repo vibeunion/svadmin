@@ -3,9 +3,9 @@
   import { cn } from '../utils.js';
 
   export interface InputGroupProps {
-    /** Leading addon rendered before the control (Arco `addBefore`). */
+    /** Leading addon rendered before the control (design-system `addBefore` slot). */
     addBefore?: string | Snippet | undefined;
-    /** Trailing addon rendered after the control (Arco `addAfter`). */
+    /** Trailing addon rendered after the control (design-system `addAfter` slot). */
     addAfter?: string | Snippet | undefined;
     size?: 'default' | 'compact' | undefined;
     invalid?: boolean | undefined;

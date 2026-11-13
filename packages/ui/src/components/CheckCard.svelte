@@ -92,7 +92,7 @@
   {#if loading}
     <Loader2 class="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
   {/if}
-  <!-- Active Checkmark Ribbon in Top-Right Corner (Arco style) -->
+  <!-- Active checkmark ribbon in the top-right corner -->
   {#if isChecked}
     <div
       class="absolute top-0 right-0 w-0 h-0 border-t-[22px] border-l-[22px] border-t-primary border-l-transparent rounded-tr-[3px]"

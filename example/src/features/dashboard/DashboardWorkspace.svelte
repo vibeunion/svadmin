@@ -6,7 +6,7 @@
   import DashboardView from '../../../../packages/ui/src/components/DashboardView.svelte';
   import { Button } from '../../../../packages/ui/src/components/ui/button/index.js';
   import { Input } from '../../../../packages/ui/src/components/ui/input/index.js';
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import type { WorkspaceDrilldownTarget } from './dashboard-workspace-data';
 
   export interface DashboardWorkspaceRecordView {
@@ -34,9 +34,10 @@
     defaultRegion = 'east', defaultFrom = '2026-10-01', defaultTo = '2026-10-31',
   }: Props = $props();
 
-  const DEFAULT_REGION = defaultRegion;
-  const DEFAULT_FROM = defaultFrom;
-  const DEFAULT_TO = defaultTo;
+  // Route defaults are captured once at mount; later prop changes do not rewrite the URL state.
+  const DEFAULT_REGION = untrack(() => defaultRegion);
+  const DEFAULT_FROM = untrack(() => defaultFrom);
+  const DEFAULT_TO = untrack(() => defaultTo);
   type WorkspaceRoute = 'dashboard' | 'drilldown';
   interface DrillState {
     widgetId: string;
@@ -255,7 +256,7 @@
     <form onsubmit={applyFilters}>
       <label>
         <span>{isZh ? '区域' : 'Region'}</span>
-        <select class="svadmin-input" aria-label="Region filter" bind:value={draftRegion}>
+        <select class="svadmin-select--inline svadmin-select" aria-label="Region filter" bind:value={draftRegion}>
           <option value="">{isZh ? '全部区域' : 'All regions'}</option>
           <option value="east">{isZh ? '东区' : 'East'}</option>
           <option value="west">{isZh ? '西区' : 'West'}</option>

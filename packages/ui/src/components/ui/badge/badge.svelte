@@ -42,7 +42,7 @@
 	const config = useComponentConfig();
 	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
 
-	const isArcoMode = $derived(count !== undefined || dot || status !== undefined);
+	const isStatusMode = $derived(count !== undefined || dot || status !== undefined);
 
 	const displayCount = $derived.by(() => {
 		if (count === undefined) return null;
@@ -102,7 +102,7 @@
 			<span class="svadmin-badge-status-text select-none text-xs">{text}</span>
 		{/if}
 	</svelte:element>
-{:else if isArcoMode && children}
+{:else if isStatusMode && children}
 	<!-- 包裹宿主元素右上角角标 (Wrapped Badge) -->
 	<svelte:element
 		this={href ? "a" : "span"}
@@ -138,7 +138,7 @@
 			{/if}
 		{/if}
 	</svelte:element>
-{:else if isArcoMode && !children && hasBadge}
+{:else if isStatusMode && !children && hasBadge}
 	<!-- 独立数字角标或小红点 (Standalone Badge) -->
 	<svelte:element
 		this={href ? "a" : "span"}

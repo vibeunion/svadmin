@@ -88,7 +88,7 @@
     background: #165dff;
     margin-top: 4px;
     margin-right: 8px;
-    shrink: 0;
+    flex-shrink: 0;
   }
   .lite-dot-warn { background: #ff7d00; }
   .lite-dot-danger { background: #f53f3f; }

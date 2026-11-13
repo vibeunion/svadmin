@@ -13,9 +13,9 @@ copying. The default visual style is already represented by the `default` color
 preset and the `clean-flat` layout preset.
 
 Parity here means capability, interaction, and feedback on the Svelte 5
-boundary. It does not mean Arco or Arco Pro component API compatibility.
-Published SVAdmin props stay as they are: reference `props`, `events`, and
-`Form.Item` call shapes are not part of this contract.
+boundary. It does not mean reference component API compatibility. Published
+SVAdmin props stay as they are: reference `props`, `events`, and `Form.Item`
+call shapes are not part of this contract.
 
 Legend: ✅ direct capability · 🔁 compatibility alias · ⚠️ partial or different
 API shape · ❌ missing · ➖ internal / not a public contract.
@@ -55,7 +55,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Grid | `Grid`, `GridCell`, `Row`, `Col` | ✅ | |
 | Icon | `@lucide/svelte` | ✅ | Ecosystem icon package |
 | Image | `Image`, `ImagePreview`, `MediaThumbnail` | ✅ | Fallback and preview states included |
-| Input | `Input`, `InputGroup`, `Textarea`, `PasswordInput` | ✅ | `InputGroup` merges Arco `addBefore` / `addAfter` affixes onto one hairline border |
+| Input | `Input`, `InputGroup`, `Textarea`, `PasswordInput` | ✅ | `InputGroup` merges leading/trailing affixes onto one hairline border |
 | InputNumber | `NumberInput`, alias `InputNumber` | 🔁 | |
 | InputTag | `TagsInput`, alias `InputTag` | 🔁 | |
 | Layout | `Layout`, `AdminApp` | ✅ | |
@@ -155,7 +155,7 @@ table drifts. Regenerate it with `bun run check:parity`.
 | @arco-design/web-react/icon | Resolve an icon by name, including sprite sheets and remote SVG templates | `registerIcons`, `registerIconSource`, `Icon` | ✅ adopted | Components stay the default. Sprite sources render server-side `<svg><use>` and stay inside the icon source budget. |
 | @formily/arco | Schema-driven conditional visibility and derived field values | `visibleWhen` combinators, `equalsField`, `computed`, `applySchemaFormComputed` | ⚠️ partial | Closed derivations plus declarative `layout` (grid, section, steps). Expression evaluation and `Form.Item` stay rejected. |
 | @arco-plugins/vite-react lazy load | Preload a module when the user hovers, focuses, or scrolls it into view | `intentPreload` action and `preloadModule` | ✅ adopted | SSR does not call the loader. The inflight budget is two modules; this is not a component import-rewrite plugin. |
-| Arco design site | Generate a props table, state matrix, and copyable Svelte snippet per registered component | `scripts/component-docs.ts` | ✅ adopted | Built from the existing component registry and design contract. It does not introduce a second documentation runtime. |
+| reference design documentation site | Generate a props table, state matrix, and copyable Svelte snippet per registered component | `scripts/component-docs.ts` | ✅ adopted | Built from the existing component registry and design contract. It does not introduce a second documentation runtime. |
 | @arco-plugins/vite-react, @arco-plugins/webpack-react, unplugin-react, babel-plugin-import | On-demand component/style imports, Less variable replacement, lazy loading, icon substitution | Not ported | ➖ non-goal | ESM tree-shaking and CSS variables replace import-on-demand and `modifyVars`. `pack:check` and `bundle:check` guard the real risk (exports and bundle shape). |
 | @arco-design/mobile-react | Mobile-first component set with touch gestures | `@svadmin/lite` SSR + responsive table/form layouts | ➖ non-goal | Admin consoles are covered by responsive surfaces and SSR parity. A gesture component library is a separate product with its own accessibility budget. |
 <!-- ecosystem-matrix:end -->
@@ -271,7 +271,7 @@ not read `componentDefaults`. Explicit props continue to win.
    forms; adding a parallel compound API would fragment validation ownership.
 2. **`Trigger` / `Portal` public parity.** These are internal implementation
    seams in bits-ui and should stay out of the public contract.
-3. **Full Arco / Arco Pro component API compatibility.** Matching capability,
+3. **Full reference component API compatibility.** Matching capability,
    interaction, and feedback does not include copying reference props, events,
    or `Form.Item`. Published SVAdmin APIs stay stable.
 

@@ -84,7 +84,7 @@
     <div class="divide-y divide-border">
       <SettingsFieldRow label={i18n.t('settings.language')} description={localeNames[currentLocale] ?? currentLocale} controlId={`${controlId}-language`}>
         {#snippet control()}
-          <select id={`${controlId}-language`} class="h-9 max-w-44 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" value={currentLocale} onchange={(event) => i18n.setLocale((event.target as HTMLSelectElement).value)}>
+          <select id={`${controlId}-language`} class="svadmin-select h-9 max-w-44" value={currentLocale} onchange={(event) => i18n.setLocale((event.target as HTMLSelectElement).value)}>
             {#each availableLocales as locale (locale)}<option value={locale}>{localeNames[locale] ?? locale}</option>{/each}
           </select>
         {/snippet}

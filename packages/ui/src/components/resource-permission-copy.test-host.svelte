@@ -21,7 +21,7 @@
     get dataProvider() { return provider; },
     get resources() { return resources; },
     get tenant() { return { tenantId: 'test' }; },
-    accessControlProvider,
+    accessControlProvider: untrack(() => accessControlProvider),
     routerProvider: { go: () => {}, back: () => {}, parse: () => ({ pathname: '/posts', params: {} }) },
   });
 </script>

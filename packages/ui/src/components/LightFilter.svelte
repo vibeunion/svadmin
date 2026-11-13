@@ -233,8 +233,8 @@
           <div class="space-y-1">
             <div class="text-xs font-medium text-foreground">{item.label}</div>
             {#if item.options}
-              <select
-                class="w-full h-8 px-2 text-xs rounded-[4px] border border-input bg-background"
+              <select data-size="compact"
+                class="svadmin-select w-full h-8"
                 value={String(values[item.key] ?? '')}
                 onchange={(e) => setFieldValue(item.key, (e.target as HTMLSelectElement).value)}
               >
