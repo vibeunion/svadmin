@@ -42,6 +42,7 @@
     "packages/refine-adapter/src/**/*.test.ts",
     "packages/strapi-graphql/src/**/*.test.ts",
     "packages/rest/src/**/*.test.ts",
+    "packages/s3/src/**/*.test.ts",
     "packages/sanity/src/**/*.test.ts",
     "packages/simple-rest/src/**/*.test.ts",
     "packages/sso/src/**/*.test.ts",

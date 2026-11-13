@@ -121,6 +121,7 @@
 | `@svadmin/keycloak`     | Keycloak enterprise OIDC/PKCE authentication provider |
 | `@svadmin/kinde`        | Kinde identity and authentication provider  |
 | `@svadmin/clickhouse`   | ClickHouse analytical column-oriented OLAP provider |
+| `@svadmin/s3`           | Read-only S3-compatible object DataProvider (S3, R2, MinIO). Uploads stay in `@svadmin/storage`. |
 | `@svadmin/openfga`      | OpenFGA relationship-based fine-grained access control (ReBAC) |
 | `@svadmin/casbin`       | Casbin policy-based authorization and multi-tenant RBAC |
 | `@svadmin/cerbos`       | Cerbos policy decision point access control adapter |
