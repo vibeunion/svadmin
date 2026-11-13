@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.126.0](https://github.com/vibeunion/svadmin/compare/ui-v0.125.0...ui-v0.126.0) (2026-11-13)
+
+
+### 🚀 Features
+
+* **ui:** add InputGroup affixes, animate Steps progress, and add table fullscreen toggle ([#772](https://github.com/vibeunion/svadmin/issues/772)) ([3f8a87c](https://github.com/vibeunion/svadmin/commit/3f8a87c7205bd1fd932faa4933c650edbf161114))
+* **ui:** enhance Rate hover, Spin overlay, Timeline dot, and Result icon with Arco patterns ([#770](https://github.com/vibeunion/svadmin/issues/770)) ([9df281b](https://github.com/vibeunion/svadmin/commit/9df281b0301c992a18c454a1a791b20ff699ffc6))
+* **ui:** micro-app sandbox, route sync and cross-app state bus suite ([#775](https://github.com/vibeunion/svadmin/issues/775)) ([362274f](https://github.com/vibeunion/svadmin/commit/362274f51dccbdbc235bbcdb03fa8249e02639d0))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** complete native select style migration ([3aceb33](https://github.com/vibeunion/svadmin/commit/3aceb336ee901372bde0849a542e1f54a7e2441d))
+* **ui:** unify native selects on the design-system styling and clear runtime warnings ([#774](https://github.com/vibeunion/svadmin/issues/774)) ([3f706a1](https://github.com/vibeunion/svadmin/commit/3f706a18fa45b67d56ecdc58eae677292de9923d))
+
 ## [0.125.0](https://github.com/vibeunion/svadmin/compare/ui-v0.124.0...ui-v0.125.0) (2026-11-12)
 
 
