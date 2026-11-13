@@ -605,22 +605,19 @@ export function createS3DataProvider(options: S3DataProviderOptions = {}): DataP
     let matched = 0;
     let scanned = 0;
     let token: string | undefined;
-    let truncated = true;
-    while (truncated) {
+    for (;;) {
       if (scanned >= config.maxListKeys) {
         throw new Error(`@svadmin/s3 stopped after scanning ${config.maxListKeys} keys. Narrow the prefix or use cursor pagination.`);
       }
       const page = await listPage(config, constraints.prefix, token, Math.min(MAX_PAGE_SIZE, config.maxListKeys - scanned));
       const rawCount = page.objects.length + page.prefixes.length;
-      if (rawCount === 0) break;
       const entries = mergePage(page).filter((entry) => matches(entry, constraints));
       scanned += rawCount;
       for (const entry of entries) {
         if (matched >= offset && selected.length < limit) selected.push(entry);
         matched += 1;
       }
-      truncated = page.isTruncated;
-      if (!truncated) break;
+      if (rawCount === 0 || !page.isTruncated) break;
       if (page.nextContinuationToken === null || page.nextContinuationToken === token) {
         throw new Error('@svadmin/s3 listing was truncated without a new continuation token');
       }
