@@ -142,7 +142,7 @@
   <div class="flex items-center gap-2 text-xs font-mono">
     <!-- Method Selector -->
     <select
-      class={cn('rounded-md border px-2.5 py-1.5 font-bold outline-none cursor-pointer', getMethodTone(method))}
+      class={cn('svadmin-select svadmin-select--inline font-bold cursor-pointer', getMethodTone(method))}
       bind:value={method}
       disabled={isExecuting}
     >
