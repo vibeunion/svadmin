@@ -47,4 +47,12 @@ describe('DataFreshnessIndicator Component', () => {
       expect(onSync).toHaveBeenCalledTimes(1);
     }
   });
+
+  it('uses the active locale for the poll interval accessible name', () => {
+    const { container } = render(DataFreshnessIndicator, {
+      props: { lastUpdated: Date.now(), pollInterval: 0 },
+    });
+
+    expect(container.querySelector('select[aria-label="Poll interval"]')).toBeTruthy();
+  });
 });
