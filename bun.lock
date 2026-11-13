@@ -702,6 +702,13 @@
         "@svadmin/core",
       ],
     },
+    "packages/s3": {
+      "name": "@svadmin/s3",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/sanity": {
       "name": "@svadmin/sanity",
       "version": "0.11.32",
@@ -1743,6 +1750,8 @@
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
 
     "@svadmin/rest": ["@svadmin/rest@workspace:packages/rest"],
+
+    "@svadmin/s3": ["@svadmin/s3@workspace:packages/s3"],
 
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 

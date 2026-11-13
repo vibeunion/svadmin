@@ -37,6 +37,7 @@
   "packages/elasticsearch": "0.2.6",
   "packages/pusher": "0.2.6",
   "packages/storage": "0.2.6",
+  "packages/s3": "0.1.0",
   "packages/charts": "0.2.2",
   "packages/dock": "0.2.2",
   "packages/auth0": "0.2.4",

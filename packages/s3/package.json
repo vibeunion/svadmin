@@ -1,0 +1,51 @@
+{
+  "name": "@svadmin/s3",
+  "version": "0.1.0",
+  "description": "Read-only S3-compatible object DataProvider for svadmin (AWS S3, Cloudflare R2, MinIO)",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*",
+    "README.md"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "keywords": [
+    "svadmin",
+    "s3",
+    "minio",
+    "r2",
+    "object-storage",
+    "data-provider"
+  ],
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/s3"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  },
+  "svadmin": {
+    "capabilities": [
+      "data"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  }
+}
