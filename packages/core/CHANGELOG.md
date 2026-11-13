@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.1](https://github.com/vibeunion/svadmin/compare/core-v0.81.0...core-v0.81.1) (2026-11-13)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** localize filter and freshness aria labels ([#779](https://github.com/vibeunion/svadmin/issues/779)) ([5485836](https://github.com/vibeunion/svadmin/commit/54858363e3af8bc5bf1f4f0464dbf1e4571bb345))
+
 ## [0.81.0](https://github.com/vibeunion/svadmin/compare/core-v0.80.0...core-v0.81.0) (2026-11-12)
 
 
