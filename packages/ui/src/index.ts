@@ -357,6 +357,7 @@ export {
 
 // Base UI components (shadcn-svelte)
 export { Button, buttonVariants } from './components/ui/button/index.js';
+export { default as TooltipButton } from './components/TooltipButton.svelte';
 export { Input } from './components/ui/input/index.js';
 export { default as InputGroup } from './components/InputGroup.svelte';
 export type { InputGroupProps } from './components/InputGroup.svelte';

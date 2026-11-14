@@ -264,6 +264,7 @@ import {
   Watermark,
   EllipsisText,
   CopyableText,
+  TooltipButton,
   FullscreenButton,
   FullScreenButton,
   message,
@@ -366,6 +367,7 @@ describe('public compatibility aliases', () => {
     expect(Mention).toBe(MentionsInput);
     expect(Paragraph).toBe(TypographyText);
     expect(Typography).toBe(Title);
+    expect(TooltipButton).toBeDefined();
   });
 
   it('keeps compound namespace aliases bound to canonical namespaces', () => {
