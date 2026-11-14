@@ -137,13 +137,19 @@ import {
   CrossAppStateBus,
   MicroAppRouteSync,
   SubAppUrlSynchronizer,
+  ShiftScheduler,
+  WorkShiftCalendar,
   useMicroAppState,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
   FieldMappingTable,
+  FieldMappingBuilder,
+  ColumnMappingBuilder,
   ImportPreviewValidator,
   ImportDataValidator,
+  DataImportPipeline,
+  BatchImportPipeline,
   PlanUsageQuotaBar,
   MultiQuotaProgress,
   TierFeatureComparison,
@@ -277,9 +283,17 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  IpAccessRuleEditor,
+  IpWhitelistDrawer,
+  IpAccessControlDrawer,
+
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
+  ServiceDeskTicketCard,
+  SupportTicketCard,
+  CannedResponsePicker,
+  QuickReplyDrawer,
   message,
   notification,
   toast,
@@ -502,13 +516,19 @@ describe('public compatibility aliases', () => {
     expect(CrossAppStateBus).toBe(MicroAppStateBusIndicator);
     expect(MicroAppRouteSync).toBeDefined();
     expect(SubAppUrlSynchronizer).toBe(MicroAppRouteSync);
+    expect(ShiftScheduler).toBeDefined();
+    expect(WorkShiftCalendar).toBe(ShiftScheduler);
     expect(useMicroAppState).toBeDefined();
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();
     expect(FieldMappingTable).toBe(ColumnMappingTable);
+    expect(FieldMappingBuilder).toBeDefined();
+    expect(ColumnMappingBuilder).toBe(FieldMappingBuilder);
     expect(ImportPreviewValidator).toBeDefined();
     expect(ImportDataValidator).toBe(ImportPreviewValidator);
+    expect(DataImportPipeline).toBeDefined();
+    expect(BatchImportPipeline).toBe(DataImportPipeline);
     expect(PlanUsageQuotaBar).toBeDefined();
     expect(MultiQuotaProgress).toBe(PlanUsageQuotaBar);
     expect(TierFeatureComparison).toBeDefined();
@@ -553,11 +573,19 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(IpAccessRuleEditor).toBeDefined();
+    expect(IpWhitelistDrawer).toBeDefined();
+    expect(IpAccessControlDrawer).toBe(IpWhitelistDrawer);
+
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
     expect(I18nStudio).toBeDefined();
     expect(TranslationManager).toBe(I18nStudio);
+    expect(ServiceDeskTicketCard).toBeDefined();
+    expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
+    expect(CannedResponsePicker).toBeDefined();
+    expect(QuickReplyDrawer).toBe(CannedResponsePicker);
   });
 
   it('keeps service aliases bound to canonical services', () => {
