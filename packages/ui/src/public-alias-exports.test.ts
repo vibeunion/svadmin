@@ -288,6 +288,10 @@ import {
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
+  ServiceDeskTicketCard,
+  SupportTicketCard,
+  CannedResponsePicker,
+  QuickReplyDrawer,
   message,
   notification,
   toast,
@@ -574,6 +578,10 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(ServiceDeskTicketCard).toBeDefined();
+    expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
+    expect(CannedResponsePicker).toBeDefined();
+    expect(QuickReplyDrawer).toBe(CannedResponsePicker);
   });
 
   it('keeps service aliases bound to canonical services', () => {
