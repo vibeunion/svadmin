@@ -10,6 +10,8 @@ import {
   ComplianceEvidenceCard,
   MediaGallery,
   MultiModalMediaGallery,
+  I18nStudio,
+  TranslationManager,
   HotkeysHelpModal,
   HotkeysGuideModal,
   ResizableSplitter,
@@ -590,6 +592,8 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(I18nStudio).toBeDefined();
+    expect(TranslationManager).toBe(I18nStudio);
     expect(ContractClauseDiffViewer).toBeDefined();
     expect(LegalClauseComparator).toBe(ContractClauseDiffViewer);
     expect(ElectronicSealInspector).toBeDefined();

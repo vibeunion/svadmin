@@ -1032,6 +1032,12 @@ export {
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
 
+// Enterprise i18n translation management & hot reloading studio suite
+export {
+  default as I18nStudio,
+  default as TranslationManager,
+  type I18nStudioProps,
+} from './components/I18nStudio.svelte';
 // Enterprise contract clause diff viewer & legal compliance suite
 export {
   default as ContractClauseDiffViewer,
