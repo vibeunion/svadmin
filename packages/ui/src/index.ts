@@ -975,13 +975,13 @@ export { default as AbacPolicyMatrix, default as AttributeBasedAccessControlMatr
 export { default as PermissionSimulator, default as RolePermissionSandbox, type PermissionSimulatorProps, type SimulationTargetUser, type SimulatedMenuNode, type SimulatedAction } from './components/PermissionSimulator.svelte';
 export { default as WorkflowNodeInspector, default as ApprovalNodeDrawer, type WorkflowNodeInspectorProps, type WorkflowNodeData } from './components/WorkflowNodeInspector.svelte';
 
+// Enterprise multimodal media gallery, hotkeys guide & resizable splitter suite
+export { default as MediaGallery, default as MultiModalMediaGallery, type MediaGalleryProps, type MediaGalleryItem } from './components/MediaGallery.svelte';
+export { default as HotkeysHelpModal, default as HotkeysGuideModal, type HotkeysHelpModalProps, type HotkeysHelpEntry } from './components/HotkeysHelpModal.svelte';
+export { default as ResizableSplitter, default as DynamicSplitter, type ResizableSplitterProps } from './components/ResizableSplitter.svelte';
+
 // Enterprise micro-app isolated sandbox runtime, state bus & route sync suite
 export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type MicroAppSandboxProps } from './components/MicroAppSandbox.svelte';
 export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
-
-// Enterprise multimodal media gallery, hotkeys guide & resizable splitter suite
-export { default as MediaGallery, default as MultiModalMediaGallery, type MediaGalleryProps, type MediaGalleryItem } from './components/MediaGallery.svelte';
-export { default as HotkeysHelpModal, default as HotkeysGuideModal, type HotkeysHelpModalProps, type HotkeysHelpEntry } from './components/HotkeysHelpModal.svelte';
-export { default as ResizableSplitter, default as DynamicSplitter, type ResizableSplitterProps } from './components/ResizableSplitter.svelte';

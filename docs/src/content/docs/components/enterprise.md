@@ -3126,51 +3126,6 @@ Workflow node property drawer and resolution configuration inspector:
 <WorkflowNodeInspector bind:open />
 ```
 
-### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
-
-Micro-frontend isolated sandbox runtime container:
-- Shadow DOM and isolated iframe runtime with automatic auth token injection and theme synchronization.
-- **Lifecycle Self-Healing**: Handles loading skeleton, healthy mounted, and crash boundary states with instant restart.
-- **Fullscreen & Popout**: Expands the sub-app into a dedicated fullscreen workspace or opens it in a new tab.
-
-```svelte
-<script lang="ts">
-  import { MicroAppSandbox } from '@svadmin/ui';
-</script>
-
-<MicroAppSandbox appName="BI Financial Analytics" src="https://bi.example.com/embed" />
-```
-
-### `<MicroAppStateBusIndicator>` / `<CrossAppStateBus>`
-
-Cross-app reactive state bus and event message stream:
-- PostMessage and BroadcastChannel state distribution mechanism across heterogeneous sub-apps.
-- **Multichannel State Sync**: Broadcasts tenant switching, token refresh, and theme mode changes in milliseconds.
-- **Message Stream Inspector**: Inspects connected sub-apps and recent message payloads with mock broadcast capabilities.
-
-```svelte
-<script lang="ts">
-  import { MicroAppStateBusIndicator } from '@svadmin/ui';
-</script>
-
-<MicroAppStateBusIndicator />
-```
-
-### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
-
-Micro-frontend parent-child SPA route synchronization coordinator:
-- Eliminates 404 page refresh failures and broken browser back/forward history in embedded micro-apps.
-- **Bi-Directional Mapping**: Maps sub-app internal routes to host query parameters and synchronizes on popstate events.
-- **Route Breadcrumb Stack**: Provides history back navigation and deep-link copying.
-
-```svelte
-<script lang="ts">
-  import { MicroAppRouteSync } from '@svadmin/ui';
-</script>
-
-<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
-```
-
 ### `<MediaGallery>` / `<MultiModalMediaGallery>`
 
 Enterprise multimodal media gallery & immersive fullscreen lightbox:
@@ -3236,3 +3191,48 @@ Enterprise multi-pane drag-to-resize splitter suite:
 Media previews and shortcut help reuse the shared Dialog focus/Escape behavior. Media controls retain their own arrow keys; removing the active item closes its preview. `enableDownload={false}` hides every built-in download action. Default downloads support HTTP, HTTPS, and blob URLs; `onDownload` can supply host behavior.
 
 Splitters enforce both pane limits together and preserve a total of 100%. Collapse/restore retains the last allocation. Double-click recenters within the limits; Home/End selects the minimum/maximum allocation. Invalid saved ratios fall back to the initial allocation, and active pointer listeners are removed on unmount.
+
+### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
+
+Micro-frontend isolated sandbox runtime container:
+- Shadow DOM and isolated iframe runtime with automatic auth token injection and theme synchronization.
+- **Lifecycle Self-Healing**: Handles loading skeleton, healthy mounted, and crash boundary states with instant restart.
+- **Fullscreen & Popout**: Expands the sub-app into a dedicated fullscreen workspace or opens it in a new tab.
+
+```svelte
+<script lang="ts">
+  import { MicroAppSandbox } from '@svadmin/ui';
+</script>
+
+<MicroAppSandbox appName="BI Financial Analytics" src="https://bi.example.com/embed" />
+```
+
+### `<MicroAppStateBusIndicator>` / `<CrossAppStateBus>`
+
+Cross-app reactive state bus and event message stream:
+- PostMessage and BroadcastChannel state distribution mechanism across heterogeneous sub-apps.
+- **Multichannel State Sync**: Broadcasts tenant switching, token refresh, and theme mode changes in milliseconds.
+- **Message Stream Inspector**: Inspects connected sub-apps and recent message payloads with mock broadcast capabilities.
+
+```svelte
+<script lang="ts">
+  import { MicroAppStateBusIndicator } from '@svadmin/ui';
+</script>
+
+<MicroAppStateBusIndicator />
+```
+
+### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
+
+Micro-frontend parent-child SPA route synchronization coordinator:
+- Eliminates 404 page refresh failures and broken browser back/forward history in embedded micro-apps.
+- **Bi-Directional Mapping**: Maps sub-app internal routes to host query parameters and synchronizes on popstate events.
+- **Route Breadcrumb Stack**: Provides history back navigation and deep-link copying.
+
+```svelte
+<script lang="ts">
+  import { MicroAppRouteSync } from '@svadmin/ui';
+</script>
+
+<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
+```

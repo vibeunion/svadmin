@@ -3017,51 +3017,6 @@ AI 规则语义解释卡片：
 <WorkflowNodeInspector bind:open />
 ```
 
-### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
-
-企业级微前端子应用隔离运行时沙箱套件：
-- 基于 Shadow DOM 或隔离 iframe 的全生命周期子应用载体，支持鉴权 Token 自动注入与主题风格透传。
-- **全生命周期自愈保护**：内置骨架加载中（loading）、正常挂载（mounted）与异常崩溃降级拦截（crash boundary），支持一键自愈重启。
-- **全屏聚焦与独立开窗**：支持将子应用一键放大为全屏独占工作台，或在新标签页中独立调试。
-
-```svelte
-<script lang="ts">
-  import { MicroAppSandbox } from '@svadmin/ui';
-</script>
-
-<MicroAppSandbox appName="财务营收分析子应用" src="https://bi.example.com/embed" />
-```
-
-### `<MicroAppStateBusIndicator>` / `<CrossAppStateBus>`
-
-父子微应用跨端轻量响应式状态总线中枢：
-- 基于 BroadcastChannel 与 PostMessage 的跨技术栈双向状态广播机制。
-- **多频道状态流转**：支持租户上下文变更、用户 Token 刷新、全局暗色主题切换等核心事件毫秒级广播与订阅响应。
-- **可视化消息流监控**：实时呈现各子应用连接状态与最近广播报文 Payload，支持一键清空与模拟广播。
-
-```svelte
-<script lang="ts">
-  import { MicroAppStateBusIndicator } from '@svadmin/ui';
-</script>
-
-<MicroAppStateBusIndicator />
-```
-
-### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
-
-微前端父子单页应用路由双向无感同步协调器：
-- 解决微前端经典架构痛点：子应用内部切页后刷新丢失、404 以及浏览器前进后退断裂。
-- **双向无感映射**：将子应用单页路由编码映射为宿主查询参数（如 `?subAppRoute=/reports/details`），并在宿主 popstate 时反向通知子应用。
-- **路由栈历史回放**：直观展示快捷路由栈与一键复制带深层路径的完整分享链接。
-
-```svelte
-<script lang="ts">
-  import { MicroAppRouteSync } from '@svadmin/ui';
-</script>
-
-<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
-```
-
 ### `<MediaGallery>` / `<MultiModalMediaGallery>`
 
 企业多模态媒体画廊与全屏沉浸灯箱套件：
@@ -3121,8 +3076,55 @@ AI 规则语义解释卡片：
     {/snippet}
   </ResizableSplitter>
 </div>
+```
+
 <!-- PR #793 交互约定 -->
 
 媒体预览和快捷键指引复用共享 Dialog 的焦点与 Esc 关闭行为。播放控件保留自身方向键操作；活动资源从列表移除时关闭预览。`enableDownload={false}` 隐藏所有内置下载入口。默认下载支持 HTTP、HTTPS 和 blob URL，宿主可通过 `onDownload` 自定义下载。
 
 分栏同时约束两侧尺寸，总和始终为 100%。折叠恢复保留原比例；双击在允许范围内居中，Home/End 调整至最小/最大比例。无效持久化数据回退到初始比例，卸载时移除拖拽监听。
+
+### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
+
+企业级微前端子应用隔离运行时沙箱套件：
+- 基于 Shadow DOM 或隔离 iframe 的全生命周期子应用载体，支持鉴权 Token 自动注入与主题风格透传。
+- **全生命周期自愈保护**：内置骨架加载中（loading）、正常挂载（mounted）与异常崩溃降级拦截（crash boundary），支持一键自愈重启。
+- **全屏聚焦与独立开窗**：支持将子应用一键放大为全屏独占工作台，或在新标签页中独立调试。
+
+```svelte
+<script lang="ts">
+  import { MicroAppSandbox } from '@svadmin/ui';
+</script>
+
+<MicroAppSandbox appName="财务营收分析子应用" src="https://bi.example.com/embed" />
+```
+
+### `<MicroAppStateBusIndicator>` / `<CrossAppStateBus>`
+
+父子微应用跨端轻量响应式状态总线中枢：
+- 基于 BroadcastChannel 与 PostMessage 的跨技术栈双向状态广播机制。
+- **多频道状态流转**：支持租户上下文变更、用户 Token 刷新、全局暗色主题切换等核心事件毫秒级广播与订阅响应。
+- **可视化消息流监控**：实时呈现各子应用连接状态与最近广播报文 Payload，支持一键清空与模拟广播。
+
+```svelte
+<script lang="ts">
+  import { MicroAppStateBusIndicator } from '@svadmin/ui';
+</script>
+
+<MicroAppStateBusIndicator />
+```
+
+### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
+
+微前端父子单页应用路由双向无感同步协调器：
+- 解决微前端经典架构痛点：子应用内部切页后刷新丢失、404 以及浏览器前进后退断裂。
+- **双向无感映射**：将子应用单页路由编码映射为宿主查询参数（如 `?subAppRoute=/reports/details`），并在宿主 popstate 时反向通知子应用。
+- **路由栈历史回放**：直观展示快捷路由栈与一键复制带深层路径的完整分享链接。
+
+```svelte
+<script lang="ts">
+  import { MicroAppRouteSync } from '@svadmin/ui';
+</script>
+
+<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
+```

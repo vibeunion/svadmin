@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MediaGallery,
+  MultiModalMediaGallery,
+  HotkeysHelpModal,
+  HotkeysGuideModal,
+  ResizableSplitter,
+  DynamicSplitter,
   Comment,
   CommentThread,
   Descriptions,
@@ -267,12 +273,6 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
-  MediaGallery,
-  MultiModalMediaGallery,
-  HotkeysHelpModal,
-  HotkeysGuideModal,
-  ResizableSplitter,
-  DynamicSplitter,
   message,
   notification,
   toast,
@@ -280,6 +280,12 @@ import {
 
 describe('public compatibility aliases', () => {
   it('keeps Reference-style component aliases bound to canonical components', () => {
+    expect(MediaGallery).toBeDefined();
+    expect(MultiModalMediaGallery).toBe(MediaGallery);
+    expect(HotkeysHelpModal).toBeDefined();
+    expect(HotkeysGuideModal).toBe(HotkeysHelpModal);
+    expect(ResizableSplitter).toBeDefined();
+    expect(DynamicSplitter).toBe(ResizableSplitter);
     expect(Comment).toBe(CommentThread);
     expect(Descriptions).toBe(DescriptionList);
     expect(InputTag).toBe(TagsInput);
@@ -538,12 +544,6 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
-    expect(MediaGallery).toBeDefined();
-    expect(MultiModalMediaGallery).toBe(MediaGallery);
-    expect(HotkeysHelpModal).toBeDefined();
-    expect(HotkeysGuideModal).toBe(HotkeysHelpModal);
-    expect(ResizableSplitter).toBeDefined();
-    expect(DynamicSplitter).toBe(ResizableSplitter);
   });
 
   it('keeps service aliases bound to canonical services', () => {
