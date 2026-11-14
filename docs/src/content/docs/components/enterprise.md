@@ -3445,6 +3445,41 @@ Enterprise legal contract clause comparison and compliance decision suite:
       originalContent: 'Buyer shall pay within 30 days of receiving the invoice.',
       proposedContent: 'Buyer shall pay 70% within 60 days following acceptance inspection.',
       decision: 'pending',
+## StepUpAuthModal
+High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.
+  import { StepUpAuthModal } from '@svadmin/ui';
+  let open = $state(false);
+  async function handleVerify(payload: { method: string; code: string }) {
+    return payload.code === '123456';
+  }
+</script>
+<button onclick={() => { open = true; }}>Execute High-Risk Operation</button>
+<StepUpAuthModal
+  bind:open
+  title="Step-Up Privilege Elevation"
+  operationName="Full Export of Production Database"
+  riskLevel="critical"
+  clientIp="10.12.88.42"
+  methods={['totp', 'sms', 'supervisor']}
+  onverify={handleVerify}
+  onlockout={() => console.warn('Privilege channel locked')}
+/>
+```
+## AuditSnapshotCapture
+Immutable compliance evidence snapshot card designed for regulatory audit trails and forensics. Features SHA-256 digital fingerprint validation, tamper-evident anti-leak watermark overlay, structured before/after diff table, and one-click PNG / SVG snapshot export. Public alias: `ComplianceEvidenceCard`.
+  import { AuditSnapshotCapture } from '@svadmin/ui';
+  const diffItems = [
+    { field: 'role', label: 'Authorized Role', before: 'operator', after: 'super_admin' },
+    { field: 'mfaEnforced', label: 'Enforce MFA', before: false, after: true },
+  ];
+<AuditSnapshotCapture
+  recordId="AUDIT-20261114-8899"
+  operatorName="Li Si"
+  operatorId="EMP-90021"
+  actionType="privilege_grant"
+  actionLabel="Privilege Elevation Approved"
+  changes={diffItems}
+  onexport={(format) => console.log('Export format:', format)}
 ### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
 Enterprise service desk ticket lifecycle and support collaboration card:
 - **SLA Breach Countdown**: Real-time resolution and first-response SLA timer with urgency alerts and breach warning badges.
