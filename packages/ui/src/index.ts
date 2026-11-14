@@ -915,7 +915,9 @@ export { default as IncidentWarRoomDrawer, default as AlertIncidentTimeline, typ
 // Enterprise bulk data import, column mapping & inline error validator suite
 export { default as DataImportDropzone, default as BatchImportDropzone, type DataImportDropzoneProps } from './components/DataImportDropzone.svelte';
 export { default as ColumnMappingTable, default as FieldMappingTable, type ColumnMappingTableProps, type TargetFieldConfig } from './components/ColumnMappingTable.svelte';
+export { default as FieldMappingBuilder, default as ColumnMappingBuilder, type FieldMappingBuilderProps, type SourceField, type TargetField, type FieldMappingRule, type TransformType } from './components/FieldMappingBuilder.svelte';
 export { default as ImportPreviewValidator, default as ImportDataValidator, type ImportPreviewValidatorProps, type RowValidationError } from './components/ImportPreviewValidator.svelte';
+export { default as DataImportPipeline, default as BatchImportPipeline, type DataImportPipelineProps, type ValidationRule, type PipelineValidationError } from './components/DataImportPipeline.svelte';
 
 // Enterprise multi-dimensional pivot matrix & cross-tabulation analysis suite
 export { default as PivotMatrix, default as CrossTableSummary, type PivotMatrixProps, type PivotDimension, type PivotMeasure } from './components/PivotMatrix.svelte';
@@ -1003,6 +1005,23 @@ export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessa
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
 
+// Enterprise network security IP access rule editor & whitelist drawer suite
+export {
+  default as IpAccessRuleEditor,
+  validateIpRuleValue,
+  type IpAccessRuleEditorProps,
+  type IpAccessRule,
+  type IpRuleType,
+  type IpRuleAction,
+} from './components/IpAccessRuleEditor.svelte';
+export {
+  default as IpWhitelistDrawer,
+  default as IpAccessControlDrawer,
+  type IpWhitelistDrawerProps,
+} from './components/IpWhitelistDrawer.svelte';
+// Enterprise staff shift scheduler & multi-shift rotation calendar suite
+export { default as ShiftScheduler, default as WorkShiftCalendar, type ShiftSchedulerProps, type ShiftType, type StaffMember, type ShiftAssignment, type ShiftConflictAlert } from './components/ShiftScheduler.svelte';
+
 // Enterprise global notification drawer suite
 export {
   default as NotificationDrawer,
@@ -1025,3 +1044,6 @@ export {
   default as ComplianceEvidenceCard,
   type AuditSnapshotDiffItem,
 } from './components/AuditSnapshotCapture.svelte';
+// Enterprise service desk support ticket card & canned response picker suite
+export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
+export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
