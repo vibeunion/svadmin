@@ -4,8 +4,10 @@ import {
   exportThemeTokens,
   generateColorScale,
   hexToOklch,
+  interactionRamps,
   parseThemeTokens,
   pickReadableForeground,
+  withPrimaryInteractionRamps,
 } from './color-scale';
 
 describe('color scale generation', () => {
@@ -60,6 +62,31 @@ describe('derived presets', () => {
 
   it('requires a name', () => {
     expect(() => deriveColorPreset({ name: '  ', color: '#165DFF' })).toThrow(TypeError);
+  });
+
+  it('keeps the written Arco default ramps and derives the rest from the OKLCH step', () => {
+    expect(interactionRamps('#165DFF')).toEqual({
+      hover: '#4080FF',
+      pressed: '#0E42D2',
+      disabled: '#94BFFF',
+    });
+    expect(interactionRamps('#3C7EFF')).toEqual({
+      hover: '#306FFF',
+      pressed: '#689FFF',
+      disabled: '#0E32A6',
+    });
+    const custom = interactionRamps('#0EA5E9');
+    expect(custom.hover.startsWith('oklch(')).toBe(true);
+    expect(custom.pressed.startsWith('oklch(')).toBe(true);
+    const source = hexToOklch('#0EA5E9');
+    const hover = Number(/oklch\(([\d.]+)/.exec(custom.hover)?.[1]);
+    const pressed = Number(/oklch\(([\d.]+)/.exec(custom.pressed)?.[1]);
+    expect(hover).toBeGreaterThan(source.l);
+    expect(pressed).toBeLessThan(source.l);
+    const preset = deriveColorPreset({ name: 'ocean', color: '#0EA5E9' });
+    expect(preset.light['--primary-5']).toBeTruthy();
+    expect(preset.dark['--primary-7']).toBeTruthy();
+    expect(withPrimaryInteractionRamps({ '--primary': '#165DFF' })['--primary-5']).toBe('#4080FF');
   });
 });
 

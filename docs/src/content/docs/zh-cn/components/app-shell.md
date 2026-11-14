@@ -101,16 +101,17 @@ description: 为自带路由和数据层的宿主提供的路由无关应用外�
 
 | Token | 默认值 | 含义 |
 | --- | --- | --- |
-| `--svadmin-control-h-sm` | `1.75rem` | 紧凑控件 |
-| `--svadmin-control-h` | `2.25rem` | 默认控件高度 |
-| `--svadmin-control-h-lg` | `2.5rem` | 大号控件 |
-| `--svadmin-row-h` | `3rem` | 表格/列表行节奏 |
-| `--svadmin-table-head-h` | `2.75rem` | 表头高度 |
+| `--svadmin-control-h-mini` | `1.5rem` | 迷你控件（24px），紧凑密度使用 |
+| `--svadmin-control-h-sm` | `1.75rem` | 小号控件（28px） |
+| `--svadmin-control-h` | `2rem` | 默认控件高度（32px） |
+| `--svadmin-control-h-lg` | `2.25rem` | 大号控件（36px） |
+| `--svadmin-row-h` | `2.5rem` | 表格/列表行节奏（40px） |
+| `--svadmin-table-head-h` | `2.5rem` | 表头高度（40px） |
 | `--svadmin-table-state-min-h` | `8rem` | 表格空态/加载高度 |
 | `--svadmin-space-1…6` | `4px … 32px` | 间距刻度 |
 | `--svadmin-section-gap` | `--svadmin-space-5` | 页面区块间距 |
 | `--svadmin-text-caption/label/body/section/title` | `12/13/14/16/20px` | 字号 |
-| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.5` | 行高 |
+| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.4` | 行高，正文为 1.4 |
 | `--svadmin-measure` | `65ch` | 描述文本阅读宽度 |
 | `--svadmin-shell-sidebar-w` | `15rem` | 展开导航宽度 |
 | `--svadmin-shell-sidebar-w-collapsed` | `3.5rem` | 收起导航宽度 |

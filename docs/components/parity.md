@@ -10,7 +10,9 @@ This audit compares the current `@svadmin/ui` surface with:
 
 The goal is migration compatibility and missing admin capability, not pixel
 copying. The default visual style is already represented by the `default` color
-preset and the `clean-flat` layout preset.
+preset and the `clean-flat` layout preset. A ✅ here is not pixel acceptance.
+Mask, hover ramps, and typography live in `docs/components/theming.md` and
+`packages/ui/src/app.css`.
 
 Parity here means capability, interaction, and feedback on the Svelte 5
 boundary. It does not mean reference component API compatibility. Published

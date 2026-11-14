@@ -217,8 +217,8 @@ export type {
   AdminTool, ToolResult,
 } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerColorTheme, exportColorThemes, importColorThemes, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
-export { deriveColorPreset, exportThemeTokens, generateColorScale, hexContrastRatio, hexLuminance, hexToOklch, oklchToHex, parseThemeTokens, pickReadableForeground } from './color-scale';
-export type { ColorScaleStep, DerivedColorPreset, ThemeTokenDocument } from './color-scale';
+export { deriveColorPreset, exportThemeTokens, generateColorScale, hexContrastRatio, hexLuminance, hexToOklch, interactionRamps, oklchToHex, parseThemeTokens, pickReadableForeground, withPrimaryInteractionRamps } from './color-scale';
+export type { ColorScaleStep, DerivedColorPreset, InteractionRamps, ThemeTokenDocument } from './color-scale';
 export type { ThemeMode, ColorTheme, BuiltinColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';
 export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier, resetUnsavedChanges } from './unsaved-changes.svelte';
 export { setAdminOptions, getAdminOptions, getTextTransformers } from './options.svelte';

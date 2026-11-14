@@ -15,6 +15,24 @@
           "aaa": false
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#4480FF",
+          "ratio": 3.63,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#0044DC",
+          "ratio": 7.34,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#155DFF",
@@ -83,6 +101,24 @@
           "foreground": "#111111",
           "background": "#5A90FF",
           "ratio": 6.18,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#82ACFF",
+          "ratio": 8.36,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#2F70FF",
+          "ratio": 4.39,
           "aa": true,
           "aaa": false
         },
@@ -165,6 +201,24 @@
           "aaa": false
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#0095D4",
+          "ratio": 3.36,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#006490",
+          "ratio": 6.51,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#007CB2",
@@ -233,6 +287,24 @@
           "foreground": "#111111",
           "background": "#74CAFF",
           "ratio": 10.46,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#B1E0FF",
+          "ratio": 13.47,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#2BB2F7",
+          "ratio": 7.93,
           "aa": true,
           "aaa": true
         },
@@ -315,6 +387,24 @@
           "aaa": false
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#00A147",
+          "ratio": 3.39,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#006B2D",
+          "ratio": 6.69,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#00853A",
@@ -383,6 +473,24 @@
           "foreground": "#111111",
           "background": "#51E57D",
           "ratio": 11.56,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#76FF99",
+          "ratio": 14.87,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#2DCB64",
+          "ratio": 8.85,
           "aa": true,
           "aaa": true
         },
@@ -465,6 +573,24 @@
           "aaa": false
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#E16400",
+          "ratio": 3.49,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#9B4200",
+          "ratio": 6.62,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#BD5300",
@@ -533,6 +659,24 @@
           "foreground": "#111111",
           "background": "#FFAE85",
           "ratio": 10.47,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FFD3BD",
+          "ratio": 13.76,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FF843E",
+          "ratio": 7.75,
           "aa": true,
           "aaa": true
         },
@@ -615,6 +759,24 @@
           "aaa": false
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#FC4865",
+          "ratio": 3.36,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#BF003B",
+          "ratio": 6.41,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#DF274E",
@@ -683,6 +845,24 @@
           "foreground": "#111111",
           "background": "#FF8B93",
           "ratio": 8.42,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FFB5B8",
+          "ratio": 11.29,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#FF556C",
+          "ratio": 6.09,
           "aa": true,
           "aaa": true
         },
@@ -765,6 +945,24 @@
           "aaa": false
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#9A74FF",
+          "ratio": 3.32,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#6E39D2",
+          "ratio": 6.61,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#8454EE",
@@ -833,6 +1031,24 @@
           "foreground": "#111111",
           "background": "#AB91FF",
           "ratio": 7.4,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#C1B2FF",
+          "ratio": 9.96,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#966DFF",
+          "ratio": 5.33,
           "aa": true,
           "aaa": true
         },
@@ -915,6 +1131,24 @@
           "aaa": true
         },
         {
+          "pair": "primary hover text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#232B3B",
+          "ratio": 14.19,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "light",
+          "foreground": "#FFFFFF",
+          "background": "#030714",
+          "ratio": 20.11,
+          "aa": true,
+          "aaa": true
+        },
+        {
           "pair": "primary on surface",
           "mode": "light",
           "foreground": "#111827",
@@ -983,6 +1217,24 @@
           "foreground": "#111111",
           "background": "#757F92",
           "ratio": 4.68,
+          "aa": true,
+          "aaa": false
+        },
+        {
+          "pair": "primary hover text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#8C96AB",
+          "ratio": 6.35,
+          "aa": true,
+          "aaa": true
+        },
+        {
+          "pair": "primary pressed text",
+          "mode": "dark",
+          "foreground": "#111111",
+          "background": "#5E687A",
+          "ratio": 3.36,
           "aa": true,
           "aaa": false
         },

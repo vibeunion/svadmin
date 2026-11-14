@@ -24,7 +24,7 @@
 
   const variantMap = {
     danger: 'destructive' as const,
-    warning: 'destructive' as const,
+    warning: 'default' as const,
     info: 'default' as const,
   };
 
@@ -63,7 +63,7 @@
       </AlertDialog.Cancel>
       <AlertDialog.Action>
         {#snippet child({ props })}
-          <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} disabled={confirming} onclick={handleConfirm}>
+          <Button {...props} variant={variantMap[variant as keyof typeof variantMap]} data-status={variant === 'warning' ? 'warning' : undefined} disabled={confirming} onclick={handleConfirm}>
             {#if confirming}
               <Loader2 class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             {/if}

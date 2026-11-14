@@ -125,6 +125,7 @@ describe('size token contract', () => {
   it('declares the size rhythm the chrome and host overrides depend on', () => {
     const declared = declaredCustomProperties();
     for (const token of [
+      '--svadmin-control-h-mini',
       '--svadmin-control-h-sm',
       '--svadmin-control-h',
       '--svadmin-control-h-lg',
@@ -139,6 +140,11 @@ describe('size token contract', () => {
       '--svadmin-text-body',
       '--svadmin-text-section',
       '--svadmin-text-title',
+      '--svadmin-text-title-3',
+      '--svadmin-text-display-1',
+      '--svadmin-text-display-2',
+      '--svadmin-text-display-3',
+      '--svadmin-paragraph-gap',
       '--svadmin-leading-tight',
       '--svadmin-leading-body',
       '--svadmin-focus-width',

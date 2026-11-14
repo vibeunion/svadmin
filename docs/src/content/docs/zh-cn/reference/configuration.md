@@ -109,8 +109,8 @@ interface FieldDefinition {
 
 ## 主题配置
 
-使用 `themeConfig` 选择配色预设和布局风格。默认布局为 `default`；
-`clean-flat` 提供默认使用的克制、高对比后台布局。
+使用 `themeConfig` 选择配色预设和布局风格。UI 默认布局是 `clean-flat`；
+`default` 是显式退回。
 
 ```svelte
 <AdminApp
@@ -130,7 +130,7 @@ interface FieldDefinition {
 |------|------|--------|------|
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | 控制暗色模式添加 `.dark`，还是亮色模式添加 `.light` |
 | `colorPreset` | `ColorPreset \| string` | `'default'` | 内置或注册的配色预设；已持久化或显式选择的主题优先 |
-| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | 应用外壳的布局风格 |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'clean-flat'` | 应用外壳的布局风格。`'default'` 表示显式退回 |
 | `cssOverrides` | `Record<string, string>` | — | 注入 `<html>` 的 CSS 变量 |
 | `disableColorScheme` | `boolean` | `false` | 跳过内置的 `color-scheme` 属性 |
 

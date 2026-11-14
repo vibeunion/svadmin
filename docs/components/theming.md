@@ -104,7 +104,7 @@ Using `border-color: var(--border)` with channel-only values is invalid CSS and 
 | `cssOverrides` | `Record<string, string>` | — | CSS variables to inject on `<html>` / 注入到 `<html>` 的 CSS 变量 |
 | `disableColorScheme` | `boolean` | `false` | Skip setting `color-scheme` attribute / 跳过 `color-scheme` 属性 |
 | `colorPreset` | `ColorPreset \| string` | `'default'` | Built-in or registered color preset; the built-in preset is used when no selection exists / 内置或注册的配色预设；未选择时使用内置配色 |
-| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout composition / 布局结构 |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'clean-flat'` | Layout composition. `'default'` is an explicit opt-out / 布局结构，`'default'` 是显式退回 |
 
 ## Color Themes / 多色主题
 
@@ -171,12 +171,13 @@ The built-in sidebar provides:
 
 | Token | Tailwind Class | Default (Light) | Default (Dark) | Usage / 用途 |
 |-------|---------------|-----------------|----------------|-------------|
-| `--success` | `bg-success` | `142 71% 45%` | `142 71% 45%` | Positive status / 成功状态 |
-| `--success-foreground` | `text-success-foreground` | `0 0% 100%` | `0 0% 100%` | Text on success / 成功文本 |
-| `--warning` | `bg-warning` | `38 92% 50%` | `38 92% 50%` | Caution / 警告状态 |
-| `--warning-foreground` | `text-warning-foreground` | `0 0% 100%` | `0 0% 100%` | Text on warning / 警告文本 |
-| `--info` | `bg-info` | `217 91% 60%` | `217 91% 60%` | Informational / 信息状态 |
-| `--info-foreground` | `text-info-foreground` | `0 0% 100%` | `0 0% 100%` | Text on info / 信息文本 |
+| `--success` | `bg-success` | `#00B42A` | `#27C346` | Positive status / 成功状态 |
+| `--success-foreground` | `text-success-foreground` | `#FFFFFF` | `#FFFFFF` | Text on success / 成功文本 |
+| `--warning` | `bg-warning` | `#FF7D00` | `#FF9A2E` | Caution / 警告状态 |
+| `--warning-foreground` | `text-warning-foreground` | `#1D2129` | `#1D2129` | Text on warning. Stays dark, not white / 警告文本，保持深色 |
+| `--info` | `bg-info` | `#3491FA` | `#57A9FB` | Informational / 信息状态 |
+| `--info-foreground` | `text-info-foreground` | `#FFFFFF` | `#FFFFFF` | Text on info / 信息文本 |
+| `--destructive` | `bg-destructive` | `#F53F3F` | `#F76965` | Danger / 危险状态 |
 
 Override in your `app.css` or via `configureTheme({ cssOverrides })` API:
 
@@ -184,8 +185,8 @@ Override in your `app.css` or via `configureTheme({ cssOverrides })` API:
 
 ```css
 :root {
-  --success: 160 84% 39%;          /* Teal instead of green */
-  --warning: 25 95% 53%;           /* Orange instead of amber */
+  --success: #14C9C9;
+  --warning: #F7BA1E;
 }
 ```
 
@@ -210,20 +211,25 @@ instead of re-writing component CSS.
 
 | Token | Default | Meaning / 含义 |
 |-------|---------|----------------|
-| `--svadmin-control-h-sm` | `1.75rem` | Compact control / 紧凑控件 |
-| `--svadmin-control-h` | `2.25rem` | Default control height / 默认控件高度 |
-| `--svadmin-control-h-lg` | `2.5rem` | Large control / 大号控件 |
-| `--svadmin-row-h` | `3rem` | Table and list row rhythm / 行节奏 |
-| `--svadmin-table-head-h` | `2.75rem` | Table header height / 表头高度 |
+| `--svadmin-control-h-mini` | `1.5rem` (24px) | Mini control. Compact density uses this / 迷你控件，紧凑密度使用 |
+| `--svadmin-control-h-sm` | `1.75rem` (28px) | Small control / 小号控件 |
+| `--svadmin-control-h` | `2rem` (32px) | Default control height / 默认控件高度 |
+| `--svadmin-control-h-lg` | `2.25rem` (36px) | Large control / 大号控件 |
+| `--svadmin-row-h` | `2.5rem` (40px) | Table and list row rhythm / 行节奏 |
+| `--svadmin-table-head-h` | `2.5rem` (40px) | Table header height / 表头高度 |
 | `--svadmin-table-state-min-h` | `8rem` | Table empty/loading state height / 表格状态高度 |
 | `--svadmin-space-1…6` | `4px … 32px` | Spacing scale / 间距刻度 |
 | `--svadmin-section-gap` | `--svadmin-space-5` | Gap between page sections / 区块间距 |
-| `--svadmin-text-caption`…`--svadmin-text-title` | `12px … 20px` | Type scale / 字号刻度 |
-| `--svadmin-leading-tight`…`--svadmin-leading-body` | `1.25 … 1.5` | Line heights / 行高 |
+| `--svadmin-text-caption`…`--svadmin-text-title` | `12 / 13 / 14 / 16 / 20px` | Existing type scale / 既有字号 |
+| `--svadmin-text-title-3` | `1.5rem` (24px) | Large title / 大标题 |
+| `--svadmin-text-display-1…3` | `36 / 48 / 56px` | Display sizes / 运营标题 |
+| `--svadmin-leading-tight` / `snug` / `body` | `1.25 / 1.35 / 1.4` | Line heights. Body copy uses `1.4` / 行高，正文 1.4 |
+| `--svadmin-paragraph-gap` | `1.3125rem` (21px) | Gap inside `.svadmin-copy > p + p` only / 仅多段正文 |
 | `--svadmin-measure` | `65ch` | Reading measure / 阅读宽度 |
-| `--svadmin-shell-topbar-h` | `3.5rem` | App shell topbar / 顶栏高度 |
-| `--svadmin-shell-sidebar-w` | `15rem` | Expanded navigation rail / 展开导航 |
-| `--svadmin-shell-gutter` | `--svadmin-space-5` | Page gutter / 页面留白 |
+| `--svadmin-shell-topbar-h` | `3.5rem` (56px) | Intentional SVAdmin topbar / 顶栏，有意保持 |
+| `--svadmin-shell-sidebar-w` | `15rem` (240px) | Intentional SVAdmin rail / 展开导航，有意保持 |
+| `--svadmin-shell-sidebar-w-collapsed` | `3.5rem` (56px) | Collapsed rail / 收起导航 |
+| `--svadmin-shell-gutter` | `1.5rem` (24px) | Intentional page gutter / 页面留白，有意保持 |
 | `--svadmin-shell-max` | `74rem` | Content max width / 内容最大宽度 |
 
 Override them where the component tree is rooted. Never duplicate a token in a
@@ -274,3 +280,48 @@ explicit component `size` always wins.
 
 `DatePicker` 与 `Calendar` 消费 `locale`。解析顺序是组件 `locale` 属性、`ConfigProvider.locale`、i18n，最后才是 `en`。
 文案扩展点在 `packages/ui/src/components/component-messages.ts`：优先使用同名 i18n key，缺失时回退到内置中文 / 英文。
+
+## Visual contract / 视觉契约
+
+Token source of truth is `packages/ui/src/app.css` `:root`. This page follows that file.
+Default product skin is palette `default` plus `layoutPreset: 'clean-flat'`.
+
+令牌以 `packages/ui/src/app.css` 的 `:root` 为准。默认产品皮肤是配色 `default` 加布局 `clean-flat`。
+
+### Shell geometry / 外壳尺寸
+
+These sizes are the intentional SVAdmin default. They are not retuned to Arco Pro Vue.
+
+这些尺寸是 SVAdmin 有意保留的默认值，不向 Arco Pro Vue 的官方默认靠拢：
+
+| | SVAdmin | Arco Pro Vue（仅作参照） |
+| --- | --- | --- |
+| Sidebar | `15rem` / 240px | `menuWidth: 220` |
+| Top bar | `3.5rem` / 56px | navbar `paddingTop: 60px` |
+| Gutter | `1.5rem` / 24px | — |
+| Collapsed rail | `3.5rem` / 56px | — |
+| Canvas | `#F7F8FA` | full-page `#FFF` is not the SVAdmin canvas |
+
+`Layout` always renders `[data-svadmin-layout-footer]` for docked devtools. It does not copy Pro footer copy. `WorkspaceTabBar` stays opt-in, so the shell tab bar default matches Pro's `tabBar: false`.
+
+`Layout` 始终渲染页脚槽，用来放停靠的开发工具，不复制 Pro 的页脚文案。工作区标签栏默认不挂载，对应 Pro 的 `tabBar: false`。
+
+### Mask, ramps, type / 遮罩、色阶、排版
+
+- `--svadmin-mask` and `--color-mask-bg` are `#1D2129` at 60% in both themes. Dialog, AlertDialog, Sheet, and Drawer (`.svadmin-drawer-overlay`) use it. Blur is off unless the overlay has `.svadmin-overlay-blur` or an ancestor has `data-svadmin-overlay-blur="on"`. The style guideline states this scrim. Arco's compiled dark stylesheet uses `rgba(23, 23, 26, 0.6)` instead; SVAdmin keeps one scrim so dark mode does not invert the mask.
+- Hover and pressed states are `--primary-5` / `--primary-7` (and the success, warning, danger, info equivalents). The written default `#165DFF` keeps the official hex `#4080FF` / `#0E42D2`. Other brand colors get 5/7 from `interactionRamps()` in `packages/core/src/color-scale.ts`. Warning button text stays `#1D2129`.
+- Disabled controls use text-4 (`--svadmin-text-4`) or the color-3 disabled fill. They do not use a blanket `opacity: 0.5`.
+- Light text-3 / text-4 are `#86909C` / `#C9CDD4`. Dark text-3 / text-4 are white at 50% / 30%. Fill 1–4 and bg-4 / bg-5 are aliases beside the existing neutrals. `--foreground`, `--muted-foreground`, `--muted`, and `--primary` are not renamed.
+- Body copy is `0.875rem` with `line-height: var(--svadmin-leading-body)` (`1.4`). Paragraph spacing `21px` applies only inside `.svadmin-copy > p + p`.
+- `.layout-clean-flat[data-theme="default"]` uses a system stack: Helvetica Neue, system UI, PingFang SC, Microsoft YaHei. Nunito and Byte Number are not loaded. Other presets, including Stripe, keep their own stack.
+- Shadow names `--shadow-special`, `--shadow-1`, `--shadow1-center`, `--shadow-2`, and `--shadow-3` alias the existing shadow tokens. The clean-flat shadow numbers are unchanged.
+- `formatAdminTime`, `formatAdminNumber`, and `spaceCjkLatin` in `packages/ui/src/copy-format.ts` cover 24-hour time, thousands separators, and CJK–Latin spacing. They are not applied to every existing timestamp.
+
+### Checking the contract / 怎么核对
+
+```bash
+bun scripts/audit-theme-contrast.ts --check
+bunx playwright test --config playwright.visual-contract.config.ts
+```
+
+The Playwright spec asserts computed mask, type, and button tokens, and can refresh `docs/evidence/visual-contract/` with `UPDATE_VISUAL_CONTRACT=1`. Those images are review evidence, not a pixel-perfect Arco diff. `docs/components/parity.md` remains a capability list.

@@ -216,6 +216,88 @@ function contrastAdjusted(
   return { value: formatOklch(current, chroma, hue), hex };
 }
 
+/** Lightness step used by `generateColorScale` (step 1 → 10). */
+const SCALE_LIGHTNESS_STEP = (0.975 - 0.26) / 9;
+
+/**
+ * Official Arco hover (5) / pressed (7) / disabled fill (3) for the written
+ * product bases. `#165DFF` is the CSS default and must not be regenerated.
+ * Dark values are the compiled `body[arco-theme=dark]` channels from
+ * `@arco-design/web-react` 2.66.1, not the light scale reversed by hand.
+ */
+const OFFICIAL_INTERACTION_RAMPS: Record<string, { hover: string; pressed: string; disabled: string }> = {
+  '#165DFF': { hover: '#4080FF', pressed: '#0E42D2', disabled: '#94BFFF' },
+  '#3C7EFF': { hover: '#306FFF', pressed: '#689FFF', disabled: '#0E32A6' },
+  '#00B42A': { hover: '#23C343', pressed: '#009A29', disabled: '#7BE188' },
+  '#27C346': { hover: '#1DB440', pressed: '#50D266', disabled: '#0A802D' },
+  '#FF7D00': { hover: '#FF9A2E', pressed: '#D25F00', disabled: '#FFCF8B' },
+  '#FF9626': { hover: '#FF8D1F', pressed: '#FFB357', disabled: '#A64B0A' },
+  '#F53F3F': { hover: '#F76560', pressed: '#CB272D', disabled: '#FBACA3' },
+  '#F76965': { hover: '#F54E4E', pressed: '#F98D86', disabled: '#A1161F' },
+  '#3491FA': { hover: '#57A9FB', pressed: '#206CCF', disabled: '#9FD4FD' },
+  '#5AAAFB': { hover: '#469AFA', pressed: '#7DC1FC', disabled: '#134CA3' },
+};
+
+export interface InteractionRamps {
+  /** color-5, hover. */
+  hover: string;
+  /** color-7, pressed. */
+  pressed: string;
+  /** color-3, general disabled fill. */
+  disabled: string;
+}
+
+function normalizeHexColor(color: string): string | undefined {
+  const trimmed = color.trim();
+  if (!HEX_PATTERN.test(trimmed)) return undefined;
+  let body = trimmed.slice(1);
+  if (body.length === 3) body = body.split('').map((digit) => digit + digit).join('');
+  return `#${body.toUpperCase()}`;
+}
+
+function parseOklchColor(color: string): { l: number; c: number; h: number } | undefined {
+  const match = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)/i.exec(color.trim());
+  if (!match) return undefined;
+  return { l: Number(match[1]), c: Number(match[2]), h: Number(match[3]) };
+}
+
+/**
+ * Hover / pressed / disabled fills for one brand color.
+ * Known Arco bases return the official hex. Every other color shifts lightness
+ * by the existing OKLCH scale step so imported themes stay on the same ramp.
+ */
+export function interactionRamps(color: string): InteractionRamps {
+  const official = normalizeHexColor(color);
+  if (official && OFFICIAL_INTERACTION_RAMPS[official]) return OFFICIAL_INTERACTION_RAMPS[official];
+  const parsed = official ? hexToOklch(official) : parseOklchColor(color);
+  if (!parsed) throw new TypeError(`Cannot derive interaction ramps from: ${String(color)}`);
+  const { l, c, h } = parsed;
+  return {
+    hover: formatOklch(clamp01(l + SCALE_LIGHTNESS_STEP), c, h),
+    pressed: formatOklch(clamp01(l - SCALE_LIGHTNESS_STEP), c, h),
+    disabled: formatOklch(clamp01(l + SCALE_LIGHTNESS_STEP * 3), c, h),
+  };
+}
+
+/** Add primary 3/5/7 when a preset did not already declare them. */
+export function withPrimaryInteractionRamps(variables: Record<string, string>): Record<string, string> {
+  const primary = variables['--primary'];
+  if (!primary || variables['--primary-5'] || variables['--primary-7'] || variables['--primary-3']) {
+    return variables;
+  }
+  try {
+    const ramps = interactionRamps(primary);
+    return {
+      ...variables,
+      '--primary-5': ramps.hover,
+      '--primary-7': ramps.pressed,
+      '--primary-3': ramps.disabled,
+    };
+  } catch {
+    return variables;
+  }
+}
+
 function chartPalette(
   scale: ColorScaleStep[],
   hue: number,
@@ -246,6 +328,8 @@ export function deriveColorPreset(input: { name: string; label?: string; color: 
   const darkForeground = '#111111';
   const lightPrimary = contrastAdjusted(source.l, source.c, source.h, '#FFFFFF', 4.5);
   const darkPrimary = contrastAdjusted(Math.min(0.82, source.l + 0.12), source.c, source.h, '#111111', 4.5);
+  const lightRamps = interactionRamps(lightPrimary.value);
+  const darkRamps = interactionRamps(darkPrimary.value);
 
   return {
     name,
@@ -254,6 +338,9 @@ export function deriveColorPreset(input: { name: string; label?: string; color: 
     light: {
       '--primary': lightPrimary.value,
       '--primary-foreground': lightForeground,
+      '--primary-5': lightRamps.hover,
+      '--primary-7': lightRamps.pressed,
+      '--primary-3': lightRamps.disabled,
       '--ring': lightPrimary.value,
       '--sidebar-primary': lightPrimary.value,
       '--sidebar-primary-foreground': lightForeground,
@@ -263,6 +350,9 @@ export function deriveColorPreset(input: { name: string; label?: string; color: 
     dark: {
       '--primary': darkPrimary.value,
       '--primary-foreground': darkForeground,
+      '--primary-5': darkRamps.hover,
+      '--primary-7': darkRamps.pressed,
+      '--primary-3': darkRamps.disabled,
       '--ring': scale[4]?.value as string,
       '--sidebar-primary': darkPrimary.value,
       '--sidebar-primary-foreground': darkForeground,

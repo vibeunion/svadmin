@@ -275,6 +275,8 @@ export function auditThemeContrast(preset: DerivedColorPreset): ContrastCheck[] 
   const checks: ContrastCheck[] = [];
   const pairs: Array<[string, string, string, number]> = [
     ['primary text', '--primary-foreground', '--primary', 4.5],
+    ['primary hover text', '--primary-foreground', '--primary-5', 3],
+    ['primary pressed text', '--primary-foreground', '--primary-7', 3],
     ['primary on surface', '--primary', '#surface', 3],
     ['sidebar primary text', '--sidebar-primary-foreground', '--sidebar-primary', 4.5],
     ['chart-1 on surface', '--chart-1', '#surface', 3],
