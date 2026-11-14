@@ -91,7 +91,9 @@ describe('EmployeeOffboardingAuditor', () => {
 
     // 点击第一项的“设为交接中”
     const inProgressButtons = screen.getAllByRole('button', { name: '设为交接中' });
-    await fireEvent.click(inProgressButtons[0]);
+    const first = inProgressButtons[0];
+    if (!first) throw new Error('missing element');
+    await fireEvent.click(first);
 
     expect(onItemStatusChange).toHaveBeenCalledWith(mockItems[0], 'in_progress');
   });
@@ -106,7 +108,9 @@ describe('EmployeeOffboardingAuditor', () => {
 
     // 点击第一项的“阻断异常”
     const blockButtons = screen.getAllByRole('button', { name: '阻断异常' });
-    await fireEvent.click(blockButtons[0]);
+    const first = blockButtons[0];
+    if (!first) throw new Error('missing element');
+    await fireEvent.click(first);
 
     // 检查弹层
     expect(screen.getByText('标记交接事项阻断与异常')).toBeTruthy();
@@ -142,7 +146,9 @@ describe('EmployeeOffboardingAuditor', () => {
 
     // 部门主管已确认，IT 待签署
     const signButtons = screen.getAllByRole('button', { name: '点击盖章签署' });
-    await fireEvent.click(signButtons[0]); // 第一个是 IT 或直属根据已确认项过滤
+    const first = signButtons[0];
+    if (!first) throw new Error('missing element');
+    await fireEvent.click(first); // 第一个是 IT 或直属根据已确认项过滤
 
     expect(onSignoff).toHaveBeenCalled();
 

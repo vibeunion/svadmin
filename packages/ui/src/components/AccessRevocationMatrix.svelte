@@ -76,7 +76,7 @@
       case 'superadmin':
         return 'bg-destructive/15 text-destructive border-destructive/30 font-semibold';
       case 'admin':
-        return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30';
+        return 'bg-warning/15 text-warning dark:text-warning border-warning/30';
       case 'write':
         return 'bg-primary/10 text-primary border-primary/20';
       case 'read':
@@ -104,12 +104,12 @@
       case 'revoked':
         return {
           label: '已回收注销',
-          className: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+          className: 'bg-success/15 text-success dark:text-success border-success/30',
         };
       case 'revoking':
         return {
           label: '回收注销中...',
-          className: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30 animate-pulse',
+          className: 'bg-info/15 text-info dark:text-info border-info/30 animate-pulse',
         };
       case 'failed':
         return {
@@ -120,7 +120,7 @@
       default:
         return {
           label: '特权活跃中',
-          className: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+          className: 'bg-warning/15 text-warning dark:text-warning border-warning/30',
         };
     }
   }
@@ -170,7 +170,7 @@
       <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
         <span>被审计离职人: <strong class="font-medium text-foreground">{employeeName}</strong></span>
         <span>员工工号: <code class="rounded bg-muted px-1.5 py-0.5 font-mono">{employeeId}</code></span>
-        <span>待回收系统数: <strong class="text-amber-600 dark:text-amber-400">{pendingRevocationCount}</strong></span>
+        <span>待回收系统数: <strong class="text-warning dark:text-warning">{pendingRevocationCount}</strong></span>
       </div>
     </div>
 
@@ -186,7 +186,7 @@
       </div>
       <div class="flex flex-col rounded border border-border/60 bg-background p-2.5 text-center">
         <span class="text-[11px] text-muted-foreground">回收完成率</span>
-        <span class="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{revokedPercentage}%</span>
+        <span class="text-base font-bold tabular-nums text-success dark:text-success">{revokedPercentage}%</span>
       </div>
       <div class="flex flex-col rounded border border-border/60 bg-background p-2.5 text-center">
         <span class="text-[11px] text-muted-foreground">回收失败</span>
@@ -310,7 +310,7 @@
               </td>
               <td class="px-4 py-3 text-muted-foreground">
                 {#if system.status === 'revoked' && system.revokedAt}
-                  <span class="text-emerald-600 dark:text-emerald-400">已于 {system.revokedAt} 回收</span>
+                  <span class="text-success dark:text-success">已于 {system.revokedAt} 回收</span>
                 {:else if system.lastAccessedAt}
                   <span>活跃于: {system.lastAccessedAt}</span>
                 {:else}
@@ -337,7 +337,7 @@
                 {:else if system.status === 'revoking'}
                   <span class="text-xs text-muted-foreground">回收执行中</span>
                 {:else}
-                  <span class="text-xs text-emerald-600 dark:text-emerald-400">✓ 权限已终结</span>
+                  <span class="text-xs text-success dark:text-success">✓ 权限已终结</span>
                 {/if}
               </td>
             </tr>

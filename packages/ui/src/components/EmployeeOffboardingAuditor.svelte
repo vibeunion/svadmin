@@ -206,7 +206,7 @@
         { key: 'account', label: '系统权限' },
         { key: 'finance', label: '财务报销' },
         { key: 'project', label: '业务交接' },
-      ] as tab}
+      ] as tab (tab.key)}
         <button
           type="button"
           role="tab"
@@ -252,9 +252,9 @@
               <h3 class="text-sm font-semibold tracking-tight text-foreground">{item.title}</h3>
               <span
                 class="rounded-full px-2 py-0.5 text-[10px] font-medium {item.status === 'completed'
-                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                  ? 'bg-success/15 text-success dark:text-success'
                   : item.status === 'in_progress'
-                  ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400'
+                  ? 'bg-info/15 text-info dark:text-info'
                   : item.status === 'blocked'
                   ? 'bg-destructive/15 text-destructive font-semibold'
                   : 'bg-muted text-muted-foreground'}"
@@ -286,7 +286,7 @@
             </button>
             <button
               type="button"
-              class="rounded border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
+              class="rounded border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success transition-colors hover:bg-success/20 disabled:opacity-50 dark:text-success"
               disabled={item.status === 'completed'}
               onclick={() => handleMarkStatus(item, 'completed')}
             >
@@ -343,7 +343,7 @@
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between">
         <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">多部门离职归档联合签署 (Sign-off Matrix)</h4>
-        <span class="text-xs font-medium {allSignedOff ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}">
+        <span class="text-xs font-medium {allSignedOff ? 'text-success dark:text-success' : 'text-warning dark:text-warning'}">
           {allSignedOff ? '✓ 四方签署已就绪' : '等待全部门签核'}
         </span>
       </div>
@@ -354,13 +354,13 @@
           { key: 'it', label: 'IT 信息技术部', approved: signoffStatus.itApproved },
           { key: 'finance', label: '财务资产部', approved: signoffStatus.financeApproved },
           { key: 'hr', label: '人力资源 HR', approved: signoffStatus.hrApproved },
-        ] as dept}
+        ] as dept (dept.key)}
           <div class="flex flex-col justify-between rounded border border-border/60 bg-background p-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-foreground">{dept.label}</span>
               <span
                 class="rounded-full px-1.5 py-0.5 text-[10px] font-semibold {dept.approved
-                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                  ? 'bg-success/15 text-success dark:text-success'
                   : 'bg-muted text-muted-foreground'}"
               >
                 {dept.approved ? '已签署' : '待签署'}

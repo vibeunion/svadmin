@@ -69,7 +69,9 @@ describe('AccessRevocationMatrix', () => {
     });
 
     const revokeButtons = screen.getAllByRole('button', { name: '注销回收' });
-    await fireEvent.click(revokeButtons[0]);
+    const first = revokeButtons[0];
+    if (!first) throw new Error('missing element');
+    await fireEvent.click(first);
 
     expect(onRevokeSingle).toHaveBeenCalledWith('sys-aws');
   });
