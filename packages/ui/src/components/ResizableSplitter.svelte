@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { onMount, type Snippet } from 'svelte';
 
   export interface ResizableSplitterProps {
@@ -32,7 +33,8 @@
   }: ResizableSplitterProps = $props();
 
   let containerEl = $state<HTMLDivElement | null>(null);
-  let sizes = $state<[number, number]>([initialSizes[0], initialSizes[1]]);
+  // Seeded from the initial prop; drag/collapse interactions own the value afterwards.
+  let sizes = $state<[number, number]>(untrack(() => [initialSizes[0], initialSizes[1]]));
   let isDragging = $state<boolean>(false);
   let collapsedPane = $state<'first' | 'second' | null>(null);
 
