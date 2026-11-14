@@ -296,6 +296,10 @@ import {
   SupportTicketCard,
   CannedResponsePicker,
   QuickReplyDrawer,
+  TrafficTopologyInspector,
+  ClusterTrafficVisualizer,
+  SslCertificateMonitorCard,
+  TlsCertExpiryRadar,
   message,
   notification,
   toast,
@@ -590,6 +594,10 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(TrafficTopologyInspector).toBeDefined();
+    expect(ClusterTrafficVisualizer).toBe(TrafficTopologyInspector);
+    expect(SslCertificateMonitorCard).toBeDefined();
+    expect(TlsCertExpiryRadar).toBe(SslCertificateMonitorCard);
   });
 
   it('keeps service aliases bound to canonical services', () => {

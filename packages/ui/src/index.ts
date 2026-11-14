@@ -1047,3 +1047,21 @@ export {
 // Enterprise service desk support ticket card & canned response picker suite
 export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
 export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
+
+// Enterprise cluster traffic topology & SSL certificate monitor suite
+export {
+  default as TrafficTopologyInspector,
+  default as ClusterTrafficVisualizer,
+  type TrafficTopologyInspectorProps,
+  type TopologyNode,
+  type TopologyEdge,
+  type TopologyNodeStatus,
+  type TopologyNodeType,
+} from './components/TrafficTopologyInspector.svelte';
+export {
+  default as SslCertificateMonitorCard,
+  default as TlsCertExpiryRadar,
+  type SslCertificateMonitorCardProps,
+  type SslCertificateData,
+  type CertSecurityLevel,
+} from './components/SslCertificateMonitorCard.svelte';
