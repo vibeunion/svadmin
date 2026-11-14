@@ -915,7 +915,9 @@ export { default as IncidentWarRoomDrawer, default as AlertIncidentTimeline, typ
 // Enterprise bulk data import, column mapping & inline error validator suite
 export { default as DataImportDropzone, default as BatchImportDropzone, type DataImportDropzoneProps } from './components/DataImportDropzone.svelte';
 export { default as ColumnMappingTable, default as FieldMappingTable, type ColumnMappingTableProps, type TargetFieldConfig } from './components/ColumnMappingTable.svelte';
+export { default as FieldMappingBuilder, default as ColumnMappingBuilder, type FieldMappingBuilderProps, type SourceField, type TargetField, type FieldMappingRule, type TransformType } from './components/FieldMappingBuilder.svelte';
 export { default as ImportPreviewValidator, default as ImportDataValidator, type ImportPreviewValidatorProps, type RowValidationError } from './components/ImportPreviewValidator.svelte';
+export { default as DataImportPipeline, default as BatchImportPipeline, type DataImportPipelineProps, type ValidationRule, type PipelineValidationError } from './components/DataImportPipeline.svelte';
 
 // Enterprise multi-dimensional pivot matrix & cross-tabulation analysis suite
 export { default as PivotMatrix, default as CrossTableSummary, type PivotMatrixProps, type PivotDimension, type PivotMeasure } from './components/PivotMatrix.svelte';
