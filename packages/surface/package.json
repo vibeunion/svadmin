@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/surface",
-  "version": "0.22.1",
+  "version": "0.22.2",
   "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
   "sideEffects": [
@@ -75,7 +75,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": ">=0.82.0 <0.84.0",
-    "@svadmin/ui": ">=0.127.0 <0.130.0",
+    "@svadmin/ui": ">=0.130.0",
     "svelte": "^5.56.10"
   },
   "dependencies": {
