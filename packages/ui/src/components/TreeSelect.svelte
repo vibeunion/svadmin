@@ -934,8 +934,8 @@
   }
   .tree-select-trigger:focus-visible,
   .tree-select-action:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
   }
   .tree-select-control[data-disabled] {
     opacity: 0.5;

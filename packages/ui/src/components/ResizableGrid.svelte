@@ -228,7 +228,7 @@
     color: var(--muted-foreground, currentColor);
     cursor: pointer;
   }
-  .svadmin-resizable-grid__handle:focus-visible { outline: 2px solid var(--ring, currentColor); outline-offset: -2px; }
+  .svadmin-resizable-grid__handle:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring, currentColor); outline-offset: calc(-1 * var(--svadmin-focus-offset)); }
 
   .svadmin-resizable-grid__handle--move {
     top: 0;

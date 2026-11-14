@@ -286,5 +286,5 @@
   .svadmin-tour__button { min-height: var(--svadmin-control-h-sm); padding-inline: var(--svadmin-space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); color: var(--foreground); font-size: var(--svadmin-text-label); cursor: pointer; }
   .svadmin-tour__button:disabled { opacity: 0.45; cursor: not-allowed; }
   .svadmin-tour__button.is-primary { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); }
-  .svadmin-tour__button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .svadmin-tour__button:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
 </style>

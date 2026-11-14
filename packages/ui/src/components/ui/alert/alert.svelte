@@ -69,5 +69,5 @@
 		cursor: pointer;
 	}
 	.svadmin-alert__close:hover { background: var(--muted); color: var(--foreground); }
-	.svadmin-alert__close:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+	.svadmin-alert__close:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
 </style>

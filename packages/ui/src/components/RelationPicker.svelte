@@ -363,7 +363,7 @@
     max-width: 100%;
   }
   .svadmin-relation-picker__option:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
   }
 </style>

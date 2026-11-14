@@ -123,8 +123,8 @@
   }
 
   .svadmin-tags-input:focus-within {
-    outline: 2px solid var(--ring);
-    outline-offset: 1px;
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
   }
 
   .svadmin-tags-input[data-invalid='true'] {

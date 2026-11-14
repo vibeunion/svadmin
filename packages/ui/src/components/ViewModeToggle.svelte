@@ -42,6 +42,6 @@
   .svadmin-view-mode-toggle { display: inline-flex; padding: 2px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--muted); }
   .svadmin-view-mode-toggle button { display: inline-flex; align-items: center; gap: var(--svadmin-space-1); min-height: 1.75rem; padding-inline: var(--svadmin-space-2); border: 0; border-radius: calc(var(--radius-sm) - 1px); background: transparent; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); cursor: pointer; }
   .svadmin-view-mode-toggle button[aria-pressed='true'] { background: var(--card); color: var(--foreground); box-shadow: var(--svadmin-shadow-control); font-weight: 600; }
-  .svadmin-view-mode-toggle button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .svadmin-view-mode-toggle button:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
   .svadmin-view-mode-toggle button:disabled { cursor: not-allowed; opacity: 0.5; }
 </style>

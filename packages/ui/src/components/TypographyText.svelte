@@ -216,8 +216,8 @@
   }
   .svadmin-typography-text__editor input:focus,
   .svadmin-typography-text__editor textarea:focus {
-    outline: 2px solid var(--ring);
-    outline-offset: var(--svadmin-focus-offset, 1px);
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset, 2px);
   }
   .svadmin-typography-text__action {
     display: inline-flex;
