@@ -3160,6 +3160,80 @@ AI 规则语义解释卡片：
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
 
+### `<IpAccessRuleEditor>` / `<IpWhitelistDrawer>`（`<IpAccessControlDrawer>`）
+
+企业级网络安全访问控制与 IP/CIDR 黑白名单配置器：
+- **全模式 IP 模式支持**：覆盖单点独立 IP（IPv4 / IPv6）、CIDR 网段掩码（`172.16.0.0/16`）与连续 IP 范围（`10.0.0.1 - 10.0.0.50`）。
+- **严格语法校验**：CIDR 前缀必须为十进制整数，范围必须同族且正序；支持 IPv6 与 IPv4-mapped 归一化。CIDR 主机位按所在网段解释，不代表提供任意两条规则的重叠审计。
+- **本地误锁预防**：每次编辑、删除、启停和模式切换均检查完整候选策略及未来生效/到期边界。DENY 始终优先，不依赖数组顺序或 `priority` 元数据；未知当前 IP 时阻止修改。
+- **规则生命周期**：支持可选 `startsAt` 生效时间、动态倒计时和已生效/已过期/待生效状态；有效期支持永久、2 小时、24 小时、7 天，从生效时间与当前时间的较晚者起算。编辑默认保留原到期时间，只有明确选择才变更。
+- **白名单/黑名单双模切换**：灵活切换严格白名单模式（仅允许放行列表访问）或恶意黑名单拦截模式。
+
+```svelte
+<script lang="ts">
+  import { IpWhitelistDrawer, type IpAccessRule } from '@svadmin/ui';
+
+  let open = $state(false);
+  let rules = $state<IpAccessRule[]>([
+    {
+      id: 'rule-1',
+      type: 'SINGLE',
+      value: '192.168.1.100',
+      action: 'ALLOW',
+      description: '办公内网网关',
+      enabled: true,
+      expiresAt: null,
+    },
+    {
+      id: 'rule-2',
+      type: 'CIDR',
+      value: '10.0.0.0/16',
+      action: 'ALLOW',
+      description: '专线 VPN 网段',
+      enabled: true,
+      expiresAt: null,
+    },
+  ]);
+</script>
+
+<button onclick={() => (open = true)}>打开 IP 规则配置抽屉</button>
+<IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+```
+
+上述地址仅用于文档示例。实际应通过已认证后端提供 `currentClientIp`，或传入 `resolveClientIp: () => Promise<string>`，在编辑器挂载时自动解析。解析器须经宿主 DataProvider/服务边界调用，不应使用第三方 IP 查询或在视图内直接发起网络请求。已传入的地址优先；检测失败会展示错误，不会伪造回退 IP。
+
+`onChange(rules)` 与抽屉 `onModeChange(mode)` 支持 Promise。可绑定 `rules` / `mode`，或通过已认证、租户隔离的服务持久化回调提供的独立快照。相关回调成功后才更新界面，等待期间阻止重复提交及模式切换。`onAddMyIp(ip)` 仅为保存后的通知，不是服务端执行凭据。编辑器可绑定 `busy` 观察等待状态。
+
+“Trust My IP” 会新增或续期为永久 SINGLE ALLOW，不会自动删除或覆盖冲突 DENY，冲突必须显式解决。过期编辑草稿会被拒绝，规则或模式异步保存期间也会保护宿主传入的新快照。本地安全预览不等同于防火墙、服务端授权、持久化、审计日志，也不能保证 IP 变化后的访问。后端必须重新校验整套策略、通过可信代理配置识别真实请求 IP、采用一致的地址归一化及 DENY 优先语义、使用服务端时间，并在策略写入事务中拒绝误锁；同时使用策略版本号等并发控制拒绝过期写入。不能信任前端提供的 IP 或 `priority` 绕过校验。生产 ACL 和代理链仍需独立集成验收。
+
+浏览器验证示例：`bun run vite --config scripts/fixtures/ip-access-rules/vite.config.ts`（端口 4198）。
+
+
+### `<ShiftScheduler>` / `<WorkShiftCalendar>`
+
+企业级人员轮值与多班次排班日程表：
+- **多班次色彩与标签**：支持自定义早班、中班、晚班、休息等多班次类型，设定标准起止时间与工时定额。
+- **动态周期导航**：支持上一周、本周、下一周日历周期快速切换，周末日期列与当日高亮。
+- **快捷画笔与批量填报**：支持顶部快速点选班次画笔，一键批量为员工分配工作日标准班或清空排班。
+- **工时合规与疲劳预警**：实时汇总员工周度出勤工时，单周工时超标（如 > 40h）或连续工作超限自动标红告警。
+
+```svelte
+<script lang="ts">
+  import { ShiftScheduler } from '@svadmin/ui';
+
+  const staffList = [
+    { id: '1', name: '张经理', department: '技术运维部' },
+    { id: '2', name: '李工', department: '基础架构组' },
+  ];
+
+  const shiftTypes = [
+    { id: 'morning', name: '早班', code: 'M', hours: 8, colorToken: 'emerald' },
+    { id: 'night', name: '晚班', code: 'N', hours: 8, colorToken: 'indigo' },
+    { id: 'off', name: '休息', code: 'OFF', hours: 0, isRest: true, colorToken: 'slate' },
+  ];
+</script>
+
+<ShiftScheduler {staffList} {shiftTypes} />
 
 ### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
 
@@ -3263,6 +3337,38 @@ AI 规则语义解释卡片：
       originalContent: '买方应在收到发票后 30 个工作日内支付全部款项。',
       proposedContent: '买方应在收到发票并完成现场验收后 60 个工作日内支付首期款 70%。',
       decision: 'pending',
+### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
+企业级服务台工单与客户支持流转卡片：
+- **SLA 履约倒计时**：首响 SLA 与结单 SLA 动态推演，临近超时黄色预警，超时违约呼吸灯闪烁。
+- **流转生命周期**：涵盖待受理、技术处理中、等待客户反馈、问题已解决与工单已结案全链路。
+- **人员协同群组**：清晰展现提单人、责任处理人以及协同工程师头像堆叠。
+- **快捷协同操作**：内置一键催单通知、工单快速转派与完结归档快捷动作组。
+  import { ServiceDeskTicketCard } from '@svadmin/ui';
+  const reporter = { id: 'u1', name: '李经理' };
+  const assignee = { id: 'u2', name: '王工' };
+</script>
+<ServiceDeskTicketCard
+  ticketId="TCK-20261114-001"
+  title="生产环境连接池达到告警阈值"
+  priority="P1"
+  status="in_progress"
+  {reporter}
+  {assignee}
+  categoryTags={['数据库', '稳定性']}
+/>
+```
+### `<CannedResponsePicker>` / `<QuickReplyDrawer>`
+客服与工单高效预设话术与快捷回复抽屉：
+- **话术分类与模糊检索**：支持常见接待、故障解释、财务开票、安全核验等多维度分类及关键词即时高亮匹配。
+- **动态占位符提取注入**：自动解析模版中的 `{{customer_name}}`、`{{ticket_id}}` 等占位符，支持参数字典自动渲染或手动调整。
+- **一键回填流转**：点击模版一键将推演正文回填至工单沟通流或客服对话框中。
+  import { CannedResponsePicker } from '@svadmin/ui';
+  const templates = [
+      id: '1',
+      title: '工单受理问候',
+      category: '常见接待',
+      shortcut: '/hello',
+      content: '尊敬的 {{customer_name}} 客户您好，您的工单 {{ticket_id}} 已受理，工程师正火速排查中。',
     },
   ];
 </script>
@@ -3318,5 +3424,8 @@ AI 规则语义解释卡片：
   {seal}
   onExportReport={(s) => console.log('导出验真报告:', s.sealName)}
   onRevalidate={(id) => console.log('重新验真:', id)}
+<CannedResponsePicker
+  {templates}
+  contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
 />
 ```

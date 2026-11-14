@@ -56,6 +56,7 @@
 		onClose?: () => void;
 		onCloseRequest?: (close: () => void) => void;
 		closeLabel?: string;
+		closeOnOverlayClick?: boolean;
 	};
 
 	let {
@@ -65,6 +66,7 @@
 		onClose,
 		onCloseRequest,
 		closeLabel = i18n.t("common.close"),
+		closeOnOverlayClick = true,
 		class: className,
 		tabindex = -1,
 		children,
@@ -169,7 +171,7 @@
 	<div
 		role="presentation"
 		class="svadmin-sheet-overlay"
-		onclick={close}
+		onclick={() => { if (closeOnOverlayClick) close(); }}
 	></div>
 
 	<!-- Sheet panel -->

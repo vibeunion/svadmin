@@ -3268,6 +3268,80 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
 
+### `<IpAccessRuleEditor>` / `<IpWhitelistDrawer>` (`<IpAccessControlDrawer>`)
+
+Enterprise network security IP access rule editor and whitelist/blacklist drawer:
+- **Multiple IP Pattern Types**: Supports single IPv4/IPv6 addresses, CIDR subnet masks (`172.16.0.0/16`), and IP ranges (`10.0.0.1 - 10.0.0.50`).
+- **Strict Syntax**: Decimal integer CIDR prefixes, ascending same-family ranges, IPv6 parsing and mapped IPv4 normalization. CIDR host bits are interpreted as their enclosing network; no pairwise overlap audit is implied.
+- **Local Lockout Prevention**: Every edit, deletion, enable/disable and mode change checks the current address against the complete candidate policy, including future activation/expiration boundaries. DENY overrides ALLOW independent of order and `priority` metadata. Unknown current addresses block mutations.
+- **Rule Lifecycle**: Optional `startsAt` activation, live countdowns, active/expired/scheduled states and Permanent / 2 Hours / 24 Hours / 7 Days durations. Durations start at activation or now, whichever is later. Editing keeps the original expiration unless explicitly changed.
+- **Dual Enforcement Modes**: Switch seamlessly between Whitelist (Allowlist) and Blacklist (Blocklist).
+
+```svelte
+<script lang="ts">
+  import { IpWhitelistDrawer, type IpAccessRule } from '@svadmin/ui';
+
+  let open = $state(false);
+  let rules = $state<IpAccessRule[]>([
+    {
+      id: 'rule-1',
+      type: 'SINGLE',
+      value: '192.168.1.100',
+      action: 'ALLOW',
+      description: 'Office Gateway',
+      enabled: true,
+      expiresAt: null,
+    },
+    {
+      id: 'rule-2',
+      type: 'CIDR',
+      value: '10.0.0.0/16',
+      action: 'ALLOW',
+      description: 'Corporate VPN',
+      enabled: true,
+      expiresAt: null,
+    },
+  ]);
+</script>
+
+<button onclick={() => (open = true)}>Configure IP Rules</button>
+<IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+```
+
+The address above is documentation-only. Supply `currentClientIp` from the authenticated backend, or pass `resolveClientIp: () => Promise<string>` to automatically resolve it when the editor mounts. The resolver must use the host's DataProvider/service boundary, not a third-party IP lookup or raw view-level network call. A supplied address takes precedence over the resolver. Failed detection shows an error and never invents an address.
+
+`onChange(rules)` and drawer `onModeChange(mode)` may return promises. Bind `rules` / `mode` or persist their detached snapshots through an authenticated tenant-scoped service. Mutations update the UI only after the relevant callback succeeds; pending operations prevent repeated submissions and mode changes. `onAddMyIp(ip)` is a post-save notification, not an enforcement receipt. The editor's bindable `busy` exposes its pending state.
+
+"Trust My IP" creates or renews a permanent SINGLE ALLOW. It never removes or overrides a conflicting DENY; resolve that conflict explicitly. Stale edit drafts are rejected, and newer host snapshots are preserved during asynchronous rule or mode saves. The safety preview is not a firewall, server-side authorization, durable persistence, audit logging or protection against future IP changes. The backend must independently validate the entire policy, use trusted proxy configuration to determine the effective request IP, enforce the same family normalization and DENY-first semantics, use server time, and atomically reject self-lockout with the policy write. Use backend policy revisions or equivalent concurrency control to reject stale writes. Do not trust client-provided IPs or `priority` to bypass that check. Production ACL behavior and proxy-chain acceptance require separate integration tests.
+
+Browser fixture: `bun run vite --config scripts/fixtures/ip-access-rules/vite.config.ts` (port 4198).
+
+
+### `<ShiftScheduler>` / `<WorkShiftCalendar>`
+
+Enterprise staff shift scheduling and multi-shift rotation calendar:
+- **Shift Type Tokens**: Define morning, evening, night, and off shifts with custom duration quotas, timeframes, and semantic color badges.
+- **Dynamic Weekly Navigation**: Previous/next week jump controls, current week anchor, and automated weekend highlighting.
+- **Quick Shift Painter & Batching**: Select active shift paintbrush to paint schedule cells directly or one-click populate full weekday shifts.
+- **Fatigue & Overtime Alerts**: Instant weekly accumulated hour calculations with automated compliance threshold and consecutive-workday alerts.
+
+```svelte
+<script lang="ts">
+  import { ShiftScheduler } from '@svadmin/ui';
+
+  const staffList = [
+    { id: '1', name: 'Alex Zhang', department: 'Operations' },
+    { id: '2', name: 'David Li', department: 'Infrastructure' },
+  ];
+
+  const shiftTypes = [
+    { id: 'morning', name: 'Morning', code: 'M', hours: 8, colorToken: 'emerald' },
+    { id: 'night', name: 'Night', code: 'N', hours: 8, colorToken: 'indigo' },
+    { id: 'off', name: 'Off', code: 'OFF', hours: 0, isRest: true, colorToken: 'slate' },
+  ];
+</script>
+
+<ShiftScheduler {staffList} {shiftTypes} />
 
 ### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
 
@@ -3371,6 +3445,38 @@ Enterprise legal contract clause comparison and compliance decision suite:
       originalContent: 'Buyer shall pay within 30 days of receiving the invoice.',
       proposedContent: 'Buyer shall pay 70% within 60 days following acceptance inspection.',
       decision: 'pending',
+### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
+Enterprise service desk ticket lifecycle and support collaboration card:
+- **SLA Breach Countdown**: Real-time resolution and first-response SLA timer with urgency alerts and breach warning badges.
+- **Ticket Lifecycle Capsule**: Distinct indicators across unassigned, in progress, pending customer, resolved, and closed states.
+- **Collaborator Stacks**: Structured display for reporter, current technician, and collaborator avatar chips.
+- **Quick Desk Actions**: One-click urge notification, reassign technician, and resolve ticket actions.
+  import { ServiceDeskTicketCard } from '@svadmin/ui';
+  const reporter = { id: 'u1', name: 'Alex' };
+  const assignee = { id: 'u2', name: 'David' };
+</script>
+<ServiceDeskTicketCard
+  ticketId="TCK-20261114-001"
+  title="Production connection pool reached critical threshold"
+  priority="P1"
+  status="in_progress"
+  {reporter}
+  {assignee}
+  categoryTags={['Database', 'Infrastructure']}
+/>
+```
+### `<CannedResponsePicker>` / `<QuickReplyDrawer>`
+Helpdesk and customer support quick reply template drawer:
+- **Category Filter & Fuzzy Search**: Fast template retrieval with category pills and instant query keyword matching.
+- **Dynamic Variable Extraction**: Automatically parse and populate `{{customer_name}}`, `{{ticket_id}}`, and contextual variables.
+- **Instant Injection**: Render and inject formatted text into ticket comments or conversation inputs with a single click.
+  import { CannedResponsePicker } from '@svadmin/ui';
+  const templates = [
+      id: '1',
+      title: 'Ticket intake greeting',
+      category: 'General',
+      shortcut: '/hello',
+      content: 'Hello {{customer_name}}, your ticket {{ticket_id}} is being reviewed by our engineering team.',
     },
   ];
 </script>
@@ -3426,5 +3532,8 @@ Enterprise electronic seal anti-tampering verification and CA certificate inspec
   {seal}
   onExportReport={(s) => console.log('Export verification report:', s.sealName)}
   onRevalidate={(id) => console.log('Revalidate seal:', id)}
+<CannedResponsePicker
+  {templates}
+  contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}
 />
 ```

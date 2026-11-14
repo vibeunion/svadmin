@@ -135,6 +135,8 @@ import {
   CrossAppStateBus,
   MicroAppRouteSync,
   SubAppUrlSynchronizer,
+  ShiftScheduler,
+  WorkShiftCalendar,
   useMicroAppState,
   DataImportDropzone,
   BatchImportDropzone,
@@ -279,6 +281,10 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  IpAccessRuleEditor,
+  IpWhitelistDrawer,
+  IpAccessControlDrawer,
+
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
@@ -286,6 +292,10 @@ import {
   LegalClauseComparator,
   ElectronicSealInspector,
   StampAuthenticityCard,
+  ServiceDeskTicketCard,
+  SupportTicketCard,
+  CannedResponsePicker,
+  QuickReplyDrawer,
   message,
   notification,
   toast,
@@ -508,6 +518,8 @@ describe('public compatibility aliases', () => {
     expect(CrossAppStateBus).toBe(MicroAppStateBusIndicator);
     expect(MicroAppRouteSync).toBeDefined();
     expect(SubAppUrlSynchronizer).toBe(MicroAppRouteSync);
+    expect(ShiftScheduler).toBeDefined();
+    expect(WorkShiftCalendar).toBe(ShiftScheduler);
     expect(useMicroAppState).toBeDefined();
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
@@ -563,6 +575,10 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(IpAccessRuleEditor).toBeDefined();
+    expect(IpWhitelistDrawer).toBeDefined();
+    expect(IpAccessControlDrawer).toBe(IpWhitelistDrawer);
+
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
@@ -570,6 +586,10 @@ describe('public compatibility aliases', () => {
     expect(LegalClauseComparator).toBe(ContractClauseDiffViewer);
     expect(ElectronicSealInspector).toBeDefined();
     expect(StampAuthenticityCard).toBe(ElectronicSealInspector);
+    expect(ServiceDeskTicketCard).toBeDefined();
+    expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
+    expect(CannedResponsePicker).toBeDefined();
+    expect(QuickReplyDrawer).toBe(CannedResponsePicker);
   });
 
   it('keeps service aliases bound to canonical services', () => {

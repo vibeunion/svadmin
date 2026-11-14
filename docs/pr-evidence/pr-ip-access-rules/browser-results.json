@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "environment": "Local Chrome, documentation-range fixture IPs, in-memory callbacks",
+  "browser": "157.0.8103.51",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "dark": false,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "dark": true,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dark": false,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dark": true,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 375,
+      "height": 812,
+      "dark": false,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 375,
+      "height": 812,
+      "dark": true,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "dark": false,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "dark": true,
+      "nestedKeyboard": "PASS",
+      "lockout": "PASS",
+      "expirationPreserved": "PASS",
+      "noPageOverflow": "PASS"
+    }
+  ],
+  "staleEdit": "PASS",
+  "staleSave": "PASS",
+  "staleMode": "PASS",
+  "pendingCloseProtection": "PASS",
+  "runtimeErrors": []
+}
