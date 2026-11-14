@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import I18nStudio from './I18nStudio.svelte';
 
 describe('I18nStudio component', () => {
@@ -50,7 +50,7 @@ describe('I18nStudio component', () => {
     searchInput.value = 'revenue';
     searchInput.dispatchEvent(new Event('input'));
 
-    expect(container.textContent).toContain('dashboard.metrics.revenue');
+    await waitFor(() => expect(container.textContent).toContain('dashboard.metrics.revenue'));
     expect(container.textContent).not.toContain('auth.login.title');
   });
 
