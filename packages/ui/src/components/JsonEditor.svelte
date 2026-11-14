@@ -149,7 +149,7 @@
     color: var(--card-foreground, var(--foreground, currentColor));
   }
 
-  .svadmin-json-editor:focus-within { outline: 2px solid var(--ring, currentColor); outline-offset: 1px; }
+  .svadmin-json-editor:focus-within { outline: var(--svadmin-focus-width) solid var(--ring, currentColor); outline-offset: var(--svadmin-focus-offset); }
   .svadmin-json-editor__surface { width: 100%; }
   .svadmin-json-editor__fallback {
     display: block;

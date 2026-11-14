@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/elasticsearch",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Elasticsearch & OpenSearch DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

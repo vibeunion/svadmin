@@ -69,7 +69,7 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Menu | `Menu` | ✅ | Keyboard and nested menu behavior covered |
 | Message | `toast`, `message`, `Message` | 🔁 | Global service, not a component tree |
 | Modal | `Dialog` namespace, alias `Modal` | 🔁 | Namespace alias; compound API differs from the reference |
-| Notification | `notification`, `Notification`, `NotificationHost` | ✅ | Service, host and four placements |
+| Notification | `notification`, `Notification`, `NotificationHost` | ✅ | Service, host and four placements. Default duration is 3000ms |
 | PageHeader | `PageHeader`, `ContentPageHeader` | ✅ | |
 | Pagination | `Pagination`, `ListPagination` | ✅ | |
 | Popconfirm | `Popconfirm` | ✅ | |
@@ -80,14 +80,14 @@ Current snapshot: **55 direct**, **13 alias**, **1 partial**, **0 missing**,
 | Rate | `Rate`, `RatingField` | ✅ | |
 | ResizeBox | `ResizeBox` | ✅ | |
 | Result | `Result`, template `ResultTemplate` | ✅ | Success and error statuses supported |
-| Select | `Select`, `SelectField`, `MultiSelectField` | ✅ | |
+| Select | `Select`, `SelectField`, `MultiSelectField` | ✅ | Native select heights 24 / 28 / 32 / 36 and a borderless type. Combobox menus reveal about half of the last visible option |
 | Skeleton | `Skeleton`, `PageSkeleton` | ✅ | |
 | Slider | `Slider`, `RangeSlider` | ✅ | |
-| Space | `Space` | ✅ | |
+| Space | `Space` | ✅ | Official mini / small / medium / large are 4 / 8 / 16 / 24. The 12px `md` size is removed. `lg` stays 16px |
 | Spin | `Spin` | ✅ | |
 | Statistic | `Statistic`, `StatsCard`, `MetricBlock` | ✅ | |
 | Steps | `Steps`, `WorkspaceStageStepper` | ✅ | Connector progress animates between steps; the active node carries a subtle halo |
-| Switch | `Switch` | ✅ | |
+| Switch | `Switch` | ✅ | Default 40×24, small 28×16. Disabled and loading use fill colors |
 | Table | `Table` namespace, `AutoTable`, `GroupedTable`, `TreeTable` | ✅ | `AutoTable` toolbar covers refresh, density, column visibility and an opt-out fullscreen toggle (`showFullscreen`) |
 | Tabs | `Tabs`, `EditableTabs`, `StatusTabs` | ✅ | |
 | Tag | `Tag`, `LiteTag` | ✅ | Closable, checkable, disabled and compact states |

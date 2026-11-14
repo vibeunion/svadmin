@@ -119,7 +119,7 @@
     color: var(--card-foreground, var(--foreground, currentColor));
   }
 
-  .svadmin-code-editor:focus-within { outline: 2px solid var(--ring, currentColor); outline-offset: 1px; }
+  .svadmin-code-editor:focus-within { outline: var(--svadmin-focus-width) solid var(--ring, currentColor); outline-offset: var(--svadmin-focus-offset); }
   .svadmin-code-editor__fallback {
     display: block;
     width: 100%;

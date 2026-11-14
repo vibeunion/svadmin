@@ -561,7 +561,11 @@ describe('Registered rich text field contract', () => {
         field, value: '<p>Details</p>', onchange: vi.fn(), invalid: true, errorId: `error-${index}`,
       });
       const { content } = await activeEditor(view.container);
-      expect(within(view.container).getByRole('textbox', { name: 'Body *' })).toBe(content);
+      expect(within(view.container).getByRole('textbox', { name: 'Body' })).toBe(content);
+      const marker = view.container.querySelector('[data-svadmin-required]');
+      const labelText = view.container.querySelector('label')?.textContent ?? '';
+      expect(marker?.getAttribute('aria-hidden')).toBe('true');
+      expect(labelText.trim().startsWith('*')).toBe(true);
       const label = requireValue(view.container.querySelector('label'));
       const description = requireValue(view.container.querySelector('[data-svadmin-field-description]'));
       expect(content.getAttribute('aria-labelledby')).toBe(label.id);

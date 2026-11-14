@@ -363,7 +363,7 @@
   }
   .svadmin-tree__row:hover { background: var(--accent); }
   .svadmin-tree__row.is-selected { background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); }
-  .svadmin-tree__row:focus-visible { box-shadow: inset 0 0 0 2px var(--ring); }
+  .svadmin-tree__row:focus-visible { box-shadow: inset 0 0 0 var(--svadmin-focus-width) var(--ring); }
   .svadmin-tree__row.is-disabled { cursor: not-allowed; opacity: 0.5; }
   .svadmin-tree__row.is-dragging { opacity: 0.45; }
   .svadmin-tree__row[data-drop-position='inside'] { background: color-mix(in srgb, var(--primary) 14%, transparent); }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.1](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.15.0...ai-elements-v0.15.1) (2026-11-14)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.0
+
 ## [0.15.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.14.6...ai-elements-v0.15.0) (2026-11-14)
 
 

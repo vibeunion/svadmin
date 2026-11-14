@@ -64,7 +64,7 @@ export function createNotificationController(): NotificationController {
       id: nextId++,
       tone: options.tone ?? 'info',
       placement: options.placement ?? 'top-right',
-      duration: options.duration ?? 5000,
+      duration: options.duration ?? 3000,
     };
     items = [...items, item];
     if (item.duration > 0) {

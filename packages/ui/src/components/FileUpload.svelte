@@ -31,6 +31,8 @@
     cancelUpload?: UploadCancelHandler | undefined;
     onChange?: ((items: UploadItem[]) => void) | undefined;
     onReject?: ((file: File, reason: string) => void) | undefined;
+    /** 返回 false 时不移除。异步检查完成前文件仍留在列表里。 */
+    beforeRemove?: ((item: UploadItem) => boolean | Promise<boolean>) | undefined;
     class?: string | undefined;
   }
 
@@ -50,6 +52,7 @@
     cancelUpload,
     onChange,
     onReject,
+    beforeRemove,
     class: className = '',
   }: Props = $props();
 
@@ -359,11 +362,17 @@
     if (upload) target.value = '';
   }
 
-  function remove(id: string): void {
+  async function remove(id: string): Promise<void> {
     if (disabled) return;
+    const item = items.find(entry => entry.id === id);
+    if (!item) return;
+    if (beforeRemove) {
+      const allowed = await beforeRemove(item);
+      if (!allowed || disabled || !items.some(entry => entry.id === id)) return;
+    }
     retire(id, 'remove');
     latestAttempts.delete(id);
-    items = items.filter(item => item.id !== id);
+    items = items.filter(entry => entry.id !== id);
     if (input && upload) input.value = '';
     emitChange();
   }

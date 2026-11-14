@@ -370,7 +370,7 @@
   p { margin: 0; padding: 0.75rem; }
   button { font: inherit; color: inherit; background: var(--card, Canvas); border: var(--wx-border); border-radius: var(--radius, 6px); padding: 0.375rem 0.75rem; cursor: pointer; }
   button:disabled { cursor: not-allowed; opacity: 0.5; }
-  button:focus-visible { outline: 2px solid var(--ring, Highlight); outline-offset: 2px; }
+  button:focus-visible { outline: var(--svadmin-focus-width, 2px) solid var(--ring, Highlight); outline-offset: var(--svadmin-focus-offset, 2px); }
   [role='alert'] { color: var(--destructive, CanvasText); }
   .static-preview { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; }

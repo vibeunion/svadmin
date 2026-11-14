@@ -214,3 +214,23 @@ export function formatAdminDate(value: Date | number | string, options: AdminDat
   if (options.timeZone) fields.timeZone = options.timeZone;
   return new Intl.DateTimeFormat(options.locale, fields).format(date);
 }
+
+/** 中文破折号是两字宽，写成两个 em dash。单独的 — 和半角 -- 都换成 ——。 */
+export function formatAdminEmDash(text: string): string {
+  return text.replace(/—{2,}|--+/g, '——').replace(/(?<!—)—(?!—)/g, '——');
+}
+
+/** 小于等于用 ≤。只替换半角 <=。 */
+export function formatAdminLessThanOrEqual(text: string): string {
+  return text.replace(/<=/g, '≤');
+}
+
+/** 数字区间用 ~。已经写成 ~ 的保持不动。 */
+export function formatAdminNumericRange(text: string): string {
+  return text.replace(/(\d(?:[\d,.]*\d)?)\s*(?:-|—)\s*(\d(?:[\d,.]*\d)?)/g, '$1~$2');
+}
+
+/** 英文标点后面补一个空格。小数点、中文标点和已有空格不动。 */
+export function formatAdminEnglishPunctuation(text: string): string {
+  return text.replace(/([,;:!?])(?=[A-Za-z])/g, '$1 ');
+}

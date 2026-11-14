@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminCurrency, formatAdminNumber, formatAdminPercent } from '@svadmin/core/copy-format';
   import { Value } from 'typebox/value';
   import { surfaceMetric } from '../recipes.js';
   import '../styles.css';
@@ -18,20 +19,12 @@
     const value = data.value;
     if (typeof value !== 'number') return '—';
     if (metricProps.format === 'currency') {
-      return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: metricProps.currency,
-        useGrouping: true,
-      }).format(value).replace(/^(\p{Sc})\s+/u, '$1');
+      return formatAdminCurrency(value, { locale, currency: metricProps.currency });
     }
     if (metricProps.format === 'percent') {
-      return new Intl.NumberFormat(locale, {
-        style: 'percent',
-        maximumFractionDigits: 1,
-        useGrouping: true,
-      }).format(value).replace(/\s+(?=%)/g, '');
+      return formatAdminPercent(value, { locale, maximumFractionDigits: 1 });
     }
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: true }).format(value);
+    return formatAdminNumber(value, { locale, maximumFractionDigits: 2 });
   });
 </script>
 

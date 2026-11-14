@@ -115,6 +115,7 @@
 | `@svadmin/elasticsearch`| Full-text search and document provider       |
 | `@svadmin/pusher`       | Realtime event provider                     |
 | `@svadmin/ably`         | Ably Pub/Sub realtime event provider        |
+| `@svadmin/sse`          | Server-Sent Events (SSE) realtime live provider |
 | `@svadmin/webhooks`     | Outgoing webhook dispatcher and HMAC signing |
 | `@svadmin/clerk`        | External authentication provider            |
 | `@svadmin/auth0`        | Auth0 identity and authentication provider  |

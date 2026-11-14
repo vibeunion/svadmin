@@ -444,6 +444,11 @@
       "release-type": "node",
       "component": "postgrest",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/sse": {
+      "release-type": "node",
+      "component": "sse",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

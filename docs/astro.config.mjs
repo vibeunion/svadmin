@@ -98,6 +98,7 @@ export default defineConfig({
             { slug: 'providers/router' },
             { slug: 'providers/live' },
             { slug: 'providers/ably' },
+            { slug: 'providers/sse' },
             { slug: 'providers/clickhouse' },
             { slug: 'providers/openfga' },
             { slug: 'providers/casbin' },

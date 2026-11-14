@@ -304,9 +304,17 @@
     cursor: pointer;
   }
 
+  .svadmin-radio-group__option input[type='radio'] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    flex: 0 0 auto;
+    accent-color: var(--primary);
+  }
+
   .svadmin-radio-group__option--disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    color: var(--svadmin-text-4);
   }
 
   .svadmin-radio-group__copy {

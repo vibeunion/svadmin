@@ -21,8 +21,8 @@ test('dark color-scheme contract works without JavaScript and keeps switch hit a
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--background').trim())).toBe('#17171A');
 
   const switchBox = await probe.getByRole('switch').boundingBox();
-  expect(switchBox?.width).toBe(36);
-  expect(switchBox?.height).toBe(20);
+  expect(switchBox?.width).toBe(40);
+  expect(switchBox?.height).toBe(24);
   const hitArea = await probe.getByRole('switch').evaluate((element) => getComputedStyle(element, '::before').inset);
   expect(hitArea).toBe('-8px');
 

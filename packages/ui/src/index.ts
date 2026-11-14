@@ -250,7 +250,7 @@ export { default as NumberInput } from './components/NumberInput.svelte';
 export { default as InputNumber } from './components/NumberInput.svelte';
 export { NUMERIC_INPUT_LOCALES, isNumericInputLocale } from './components/numeric-format.js';
 export type { NumericInputLocale, NumericParseResult } from './components/numeric-format.js';
-export { formatAdminCopy, formatAdminCurrency, formatAdminDate, formatAdminEllipsis, formatAdminNumber, formatAdminPercent, formatAdminTime, spaceCjkLatin } from './copy-format.js';
+export { formatAdminCopy, formatAdminCurrency, formatAdminDate, formatAdminEllipsis, formatAdminEmDash, formatAdminEnglishPunctuation, formatAdminLessThanOrEqual, formatAdminNumber, formatAdminNumericRange, formatAdminPercent, formatAdminTime, spaceCjkLatin } from './copy-format.js';
 export type { AdminCurrencyOptions, AdminDateOptions, AdminNumberOptions, AdminPercentOptions, AdminTimeOptions } from './copy-format.js';
 export { default as MoneyInput } from './components/MoneyInput.svelte';
 export { default as PercentInput } from './components/PercentInput.svelte';

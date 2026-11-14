@@ -49,7 +49,10 @@ import {
 
 ```svelte
 <Textarea placeholder="Write something..." bind:value={content} />
+<Textarea status="error" disabled />
 ```
+
+`data-input-state` follows Input: default, focus, selected, complete, disabled, loading, success, error.
 
 ---
 
@@ -60,7 +63,10 @@ import {
   <option value="active">Active</option>
   <option value="draft">Draft</option>
 </Select>
+<Select size="mini" borderless />
 ```
+
+`size` is `mini` (24), `small` or `compact` (28), `default` (32), or `large` (36). `borderless` removes the border.
 
 ---
 
@@ -69,9 +75,10 @@ import {
 ```svelte
 <Switch bind:checked={enabled} />
 <Switch checked={true} disabled />
+<Switch size="small" loading />
 ```
 
-**Props:** `checked` (bindable), `disabled`, `onCheckedChange`
+**Props:** `checked` (bindable), `disabled`, `loading`, `size` (`default` 40×24, `small` 28×16), `onCheckedChange`
 
 ---
 

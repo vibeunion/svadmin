@@ -94,7 +94,7 @@
   .svadmin-float-button[data-type='primary'] { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); }
   .svadmin-float-button:hover { background: var(--accent); box-shadow: var(--svadmin-shadow-surface-hover); }
   .svadmin-float-button[data-type='primary']:hover { background: color-mix(in srgb, var(--primary) 88%, black); }
-  .svadmin-float-button:focus-visible { outline: 2px solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
+  .svadmin-float-button:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
   .svadmin-float-button[disabled], .svadmin-float-button[aria-disabled='true'] { opacity: 0.5; cursor: not-allowed; }
   .svadmin-float-button__icon { display: inline-flex; align-items: center; justify-content: center; }
   .svadmin-float-button__text { display: grid; text-align: start; }

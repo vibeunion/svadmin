@@ -145,10 +145,10 @@
   data-svadmin-field-key={field.key}
 >
   <Label {...definedOptions({ for: !children && (['array', 'transfer'].includes(field.type) || field.type === 'richtext' && getRichTextEditor()) ? undefined : labelTarget })} id={labelId} data-svadmin-field-label>
-    {field.label}
     {#if field.required}
-      <span class="text-destructive" data-svadmin-required>*</span>
+      <span class="text-destructive" data-svadmin-required aria-hidden="true">*</span>
     {/if}
+    {field.label}
   </Label>
 
   {#if children}
