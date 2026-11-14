@@ -3170,3 +3170,42 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
+
+Enterprise global notification center and pending task drawer:
+- **Header Micro-Interaction Trigger**: Bell icon, breathing pulse animation on unread messages, numeric badge with 99+ ceiling, and do-not-disturb (DND) mode.
+- **Categorized Multi-Channel Tabs**: Filter notifications across All, Tasks (Pending Approvals), Announcements, and Security Alerts.
+- **Quick Action Bar**: One-click "Mark All as Read", "Clear Read", and DND mode toggle.
+- **Embedded Action Buttons**: Execute inline actions directly from notification cards (e.g., Approve, Reject, Download Export, View Details).
+
+```svelte
+<script lang="ts">
+  import { NotificationCenter } from '@svadmin/ui';
+
+  let notifications = [
+    {
+      id: 'task-1',
+      title: 'Expense Reimbursement Pending',
+      description: 'Employee submitted travel expense receipt for $320.',
+      category: 'TASKS',
+      read: false,
+      createdAt: '5m ago',
+      actions: [
+        { id: 'approve', label: 'Approve', variant: 'primary' },
+        { id: 'reject', label: 'Reject', variant: 'destructive' },
+      ],
+    },
+    {
+      id: 'sec-1',
+      title: 'New Device Login Alert',
+      description: 'Signed in from Chrome on macOS in Shanghai, CN.',
+      category: 'SECURITY_ALERTS',
+      read: false,
+      createdAt: '1h ago',
+    },
+  ];
+</script>
+
+<NotificationCenter bind:items={notifications} />
+```

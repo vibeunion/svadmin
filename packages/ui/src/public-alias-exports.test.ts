@@ -267,6 +267,9 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  NotificationCenter,
+  NotificationDrawer,
+  GlobalNoticeDrawer,
   message,
   notification,
   toast,
@@ -532,6 +535,9 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(NotificationCenter).toBeDefined();
+    expect(NotificationDrawer).toBeDefined();
+    expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
   });
 
   it('keeps service aliases bound to canonical services', () => {

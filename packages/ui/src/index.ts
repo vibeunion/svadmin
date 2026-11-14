@@ -980,3 +980,13 @@ export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type Micro
 export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
+
+// Enterprise global notification drawer suite
+export {
+  default as NotificationDrawer,
+  default as GlobalNoticeDrawer,
+  type NotificationDrawerProps,
+  type NotificationItem as NotificationDrawerItem,
+  type NotificationAction,
+  type NotificationCategory,
+} from './components/NotificationDrawer.svelte';

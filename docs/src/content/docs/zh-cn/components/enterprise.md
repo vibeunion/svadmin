@@ -3061,3 +3061,42 @@ AI 规则语义解释卡片：
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<NotificationCenter>` / `<NotificationDrawer>`（`<GlobalNoticeDrawer>`）
+
+企业级全局通知中心与待办消息抽屉：
+- **顶栏微交互感知入口**：铃铛图标、未读呼吸灯微动效、数字角标（支持 99+ 封顶与免打扰静音状态）。
+- **多通道分类与交互过滤**：全部（All）、待办审批（Tasks）、系统公告（Notices）、安全告警（Security）。
+- **批量操作工具栏**：支持“一键全部标为已读”、“清空已读”与快捷开启免打扰（DND）。
+- **卡片内嵌动作流**：消息卡片支持直接内嵌快捷操作（如“通过审批”、“驳回”、“下载报表”或“查看详情”跳转路由）。
+
+```svelte
+<script lang="ts">
+  import { NotificationCenter } from '@svadmin/ui';
+
+  let notifications = [
+    {
+      id: 'task-1',
+      title: '差旅报销审批待处理',
+      description: '市场部提交了 1,280 元客户招待差旅费用单。',
+      category: 'TASKS',
+      read: false,
+      createdAt: '5分钟前',
+      actions: [
+        { id: 'approve', label: '通过审批', variant: 'primary' },
+        { id: 'reject', label: '驳回', variant: 'destructive' },
+      ],
+    },
+    {
+      id: 'sec-1',
+      title: '新设备登录告警',
+      description: '账号在上海新设备登录（macOS / Chrome）。',
+      category: 'SECURITY_ALERTS',
+      read: false,
+      createdAt: '1小时前',
+    },
+  ];
+</script>
+
+<NotificationCenter bind:items={notifications} />
+```
