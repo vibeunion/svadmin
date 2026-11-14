@@ -3425,3 +3425,37 @@ AI 规则语义解释卡片：
   contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
 />
 ```
+
+### `<DataRetentionPolicyEditor>` / `<DataArchiveStudio>`
+
+企业数据生命周期与合规归档策略中心：
+- **资源级留存期限定义**：支持针对各业务数据表（如操作审计日志、订单历史、临时导出报表）设置保留天数。
+- **多元化到期处置**：支持转入低成本冷存储（S3 Glacier / OSS）、定期物理安全擦除、数据脱敏归档以及软删除标记。
+- **策略冲突预警**：内置冲突诊断分析算法，实时检测同一数据源上并行的重叠策略并给出互斥建议。
+- **存储收益与合规大盘**：汇总展示预估月度释放存储体积（GB/TB）、预估受影响数据行数与归档执行计划。
+
+```svelte
+<script lang="ts">
+  import { DataRetentionPolicyEditor } from '@svadmin/ui';
+
+  const policies = [
+    {
+      id: 'p-1',
+      name: '审计日志定期下沉冷存',
+      resource: 'audit_logs',
+      retentionDays: 180,
+      action: 'archive_cold_storage',
+      status: 'active',
+      targetStorage: 's3://corp-glacier/audit/',
+      estimatedRows: 500000,
+      estimatedStorageMb: 1200,
+    },
+  ];
+</script>
+
+<DataRetentionPolicyEditor
+  {policies}
+  onSave={(p) => console.log('保存生命周期策略:', p)}
+  onRunManualArchive={(p) => console.log('触发测试执行:', p)}
+/>
+```

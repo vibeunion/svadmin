@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DataRetentionPolicyEditor,
+  DataArchiveStudio,
   StepUpAuthModal,
   PrivilegeElevationModal,
   AuditSnapshotCapture,
@@ -590,6 +592,8 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(DataRetentionPolicyEditor).toBeDefined();
+    expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
   });
 
   it('keeps service aliases bound to canonical services', () => {

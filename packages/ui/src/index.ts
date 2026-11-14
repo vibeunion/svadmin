@@ -1047,3 +1047,18 @@ export {
 // Enterprise service desk support ticket card & canned response picker suite
 export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
 export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
+
+// Enterprise data lifecycle retention policy editor & archive studio suite
+export {
+  default as DataRetentionPolicyEditor,
+  default as DataArchiveStudio,
+  type DataRetentionPolicyEditorProps,
+} from './components/DataRetentionPolicyEditor.svelte';
+export {
+  calculateRetentionMetrics,
+  detectPolicyConflicts,
+  type RetentionAction,
+  type RetentionStatus,
+  type RetentionPolicy,
+  type RetentionSummaryMetrics,
+} from './components/retention-utils.js';
