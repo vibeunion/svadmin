@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SensitiveWordAuditor,
+  ComplianceWordFilter,
+  ContentModerationCenter,
+  ContentReviewWorkbench,
   StepUpAuthModal,
   PrivilegeElevationModal,
   AuditSnapshotCapture,
@@ -590,6 +594,10 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(SensitiveWordAuditor).toBeDefined();
+    expect(ComplianceWordFilter).toBe(SensitiveWordAuditor);
+    expect(ContentModerationCenter).toBeDefined();
+    expect(ContentReviewWorkbench).toBe(ContentModerationCenter);
   });
 
   it('keeps service aliases bound to canonical services', () => {
