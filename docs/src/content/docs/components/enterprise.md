@@ -3532,3 +3532,74 @@ Helpdesk and customer support quick reply template drawer:
   contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}
 />
 ```
+
+## Enterprise Employee Offboarding & Access Revocation Suite
+
+### `<EmployeeOffboardingAuditor>` / `<HandoverChecklistDrawer>`
+
+Enterprise employee offboarding lifecycle auditor and handover checklist drawer:
+- **Profile & Progress Overview**: Visual indicator displaying department, last working date, designated successor, and overall checklist completion percentage.
+- **Categorized Checklist Management**: Standardized categories covering hardware assets, technical docs, accounts, finance reimbursements, and project handovers.
+- **Anomaly Blocking & Incident Records**: Mark disputed items as blocked with required reason input, pausing downstream approval until resolved.
+- **Four-Party Sign-off Matrix**: Department manager, IT security, Finance assets, and HR joint sign-off workflow unlocking the final offboarding certificate.
+
+```svelte
+<script lang="ts">
+  import { EmployeeOffboardingAuditor } from '@svadmin/ui';
+
+  const employee = {
+    id: 'EMP-9021',
+    name: 'Xiaowei Zhang',
+    department: 'Architecture Center',
+    role: 'Staff Platform Engineer',
+    lastWorkingDate: '2026-12-31',
+    handoverTarget: 'Ming Li (Staff Engineer)',
+  };
+
+  const items = [
+    {
+      id: '1',
+      category: 'hardware' as const,
+      title: 'MacBook Pro 16 & 4K Monitor',
+      description: 'Return assigned laptop and accessories to IT inventory',
+      status: 'completed' as const,
+      assignee: 'IT Asset Admin',
+      updatedAt: '2026-11-14 10:00',
+    },
+  ];
+</script>
+
+<EmployeeOffboardingAuditor {employee} {items} />
+```
+
+### `<AccessRevocationMatrix>` / `<PrivilegeDeprovisionCard>`
+
+Enterprise privilege deprovisioning and access revocation matrix:
+- **Multi-Cloud & Heterogeneous System Convergence**: Manage access across cloud infra (AWS/GCP/Aliyun), code repos (GitLab), VPN gateways, databases, and ERP systems.
+- **Privilege Level Classification**: High-visibility badges for Root/Superadmin, Admin, Read/Write, and Read-only permissions.
+- **Batch Deprovisioning & Circuit-Breaker**: Terminate active sessions, invalidate API tokens, and apply revocation policies with batch confirmation.
+- **Audit Compliance Trail**: Real-time status tracking, automated retry for failed revocations, and one-click exportable audit compliance reports.
+
+```svelte
+<script lang="ts">
+  import { AccessRevocationMatrix } from '@svadmin/ui';
+
+  const systems = [
+    {
+      id: 'sys-aws',
+      systemName: 'AWS Global Production Infrastructure',
+      systemType: 'cloud' as const,
+      accountIdentifier: 'iam/admin-zhangxw',
+      privilegeLevel: 'superadmin' as const,
+      status: 'active' as const,
+      lastAccessedAt: '2026-11-14 09:12',
+    },
+  ];
+</script>
+
+<AccessRevocationMatrix
+  employeeId="EMP-9021"
+  employeeName="Xiaowei Zhang"
+  {systems}
+/>
+```

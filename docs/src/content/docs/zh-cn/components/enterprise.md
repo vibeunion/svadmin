@@ -3425,3 +3425,74 @@ AI 规则语义解释卡片：
   contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
 />
 ```
+
+## 企业员工离职交接与特权访问回收套件
+
+### `<EmployeeOffboardingAuditor>` / `<HandoverChecklistDrawer>`
+
+企业级员工离职交接全流程追踪与审计抽屉套件：
+- **离职档案与交接进度摘要**：直观呈现离职员工部门、生效日、交接责任人以及事项整体完成率百分比。
+- **多维度交接分类过滤**：标准化划分硬件设备归还、技术文档归档、账号权限收回、财务报销结算及业务事项交接。
+- **异常阻断与违规留痕**：支持对争议事项即时标记阻断状态并填报异常原因（如设备损坏、借款未结），流程锁定直至隐患消除。
+- **四方会签矩阵 (Sign-off Matrix)**：联动部门主管、IT信息、财务资产及人力资源 HR 四方联合审批会签，全员核准后解锁归档报告。
+
+```svelte
+<script lang="ts">
+  import { EmployeeOffboardingAuditor } from '@svadmin/ui';
+
+  const employee = {
+    id: 'EMP-9021',
+    name: '张晓薇',
+    department: '架构设计中心',
+    role: '资深平台工程师',
+    lastWorkingDate: '2026-12-31',
+    handoverTarget: '李明 (Staff Engineer)',
+  };
+
+  const items = [
+    {
+      id: '1',
+      category: 'hardware' as const,
+      title: 'MacBook Pro 16 & 4K 办公显示器',
+      description: '归还公司配置的笔记本与外设至 IT 资产库房',
+      status: 'completed' as const,
+      assignee: 'IT 资产管理员',
+      updatedAt: '2026-11-14 10:00',
+    },
+  ];
+</script>
+
+<EmployeeOffboardingAuditor {employee} {items} />
+```
+
+### `<AccessRevocationMatrix>` / `<PrivilegeDeprovisionCard>`
+
+企业级账号特权回收与合规降权防泄密矩阵：
+- **跨平台多受管系统收敛**：集中纳管云基础设施（AWS/阿里云/GCP）、代码仓库（GitLab）、网络网关（VPN/Zero-Trust）、生产数据库与财务ERP。
+- **特权分级风险预警**：清晰标识超级管理员 (Root)、运维管理员、读写授权等权限等级，超管权限高危红标高亮。
+- **一键批量特权熔断注销**：支持批量多选与高风险二次弹窗确认，自动注销在线 Session、轮转 API Key 并下发阻断策略。
+- **合规审计留痕**：实时追踪回收中状态、失败原因重试机制与一键导出防泄密合规审计留痕清单。
+
+```svelte
+<script lang="ts">
+  import { AccessRevocationMatrix } from '@svadmin/ui';
+
+  const systems = [
+    {
+      id: 'sys-aws',
+      systemName: 'AWS Global Production Infrastructure',
+      systemType: 'cloud' as const,
+      accountIdentifier: 'iam/admin-zhangxw',
+      privilegeLevel: 'superadmin' as const,
+      status: 'active' as const,
+      lastAccessedAt: '2026-11-14 09:12',
+    },
+  ];
+</script>
+
+<AccessRevocationMatrix
+  employeeId="EMP-9021"
+  employeeName="张晓薇"
+  {systems}
+/>
+```

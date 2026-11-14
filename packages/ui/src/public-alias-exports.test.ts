@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  EmployeeOffboardingAuditor,
+  HandoverChecklistDrawer,
+  AccessRevocationMatrix,
+  PrivilegeDeprovisionCard,
   StepUpAuthModal,
   PrivilegeElevationModal,
   AuditSnapshotCapture,
@@ -590,6 +594,11 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+
+    expect(EmployeeOffboardingAuditor).toBeDefined();
+    expect(HandoverChecklistDrawer).toBe(EmployeeOffboardingAuditor);
+    expect(AccessRevocationMatrix).toBeDefined();
+    expect(PrivilegeDeprovisionCard).toBe(AccessRevocationMatrix);
   });
 
   it('keeps service aliases bound to canonical services', () => {
