@@ -62,8 +62,8 @@
 </script>
 
 <Sheet bind:open {...(onClose ? { onClose } : {})} closeLabel="Close IP whitelist drawer" class="svadmin-ip-drawer {className}"
-  data-svadmin-component="IpWhitelistDrawer" role="dialog" aria-modal="true" aria-labelledby={`${uid}-title`}
   onCloseRequest={close => { if (!pending && !editorBusy) close(); }}>
+  <div data-svadmin-component="IpWhitelistDrawer" role="dialog" aria-modal="true" aria-labelledby={`${uid}-title`}>
   <header><h2 id={`${uid}-title`}>Network Security &amp; IP Access Rules</h2></header>
   <div class="ip-mode-bar">
     <label for={`${uid}-mode`}>Enforcement Mode</label>
@@ -77,6 +77,7 @@
     <IpAccessRuleEditor bind:rules bind:busy={editorBusy} {mode} currentClientIp={clientIp}
       {...(resolveClientIp ? { resolveClientIp: resolveIp } : {})}
       {...(onChange ? { onChange } : {})} {...(onAddMyIp ? { onAddMyIp } : {})} />
+  </div>
   </div>
 </Sheet>
 

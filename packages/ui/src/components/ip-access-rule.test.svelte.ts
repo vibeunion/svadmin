@@ -89,11 +89,11 @@ describe('IpAccessRuleEditor Component', () => {
 
 describe('IpWhitelistDrawer Component', () => {
   it('renders drawer with data-svadmin-component when open is true', () => {
-    const { container } = render(IpWhitelistDrawer, {
+    render(IpWhitelistDrawer, {
       open: true,
       rules: [],
     });
-    const drawer = container.querySelector('[data-svadmin-component="IpWhitelistDrawer"]');
+    const drawer = document.querySelector('[data-svadmin-component="IpWhitelistDrawer"]');
     expect(drawer).not.toBeNull();
     expect(screen.getByText(/network security & ip access rules/i)).toBeDefined();
   });
@@ -222,8 +222,10 @@ describe('IP security editor contracts', () => {
     await rerender({ rules: [{ ...ownRule, action: 'DENY' }] });
     finishSave();
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Policy changed while saving'));
-    expect(screen.getByText('DENY')).toBeDefined();
-    expect(screen.queryByText('ALLOW')).toBeNull();
+    const ruleBadges = [...document.querySelectorAll('[data-svadmin-component="IpAccessRuleEditor"] tbody td span')]
+      .map(node => node.textContent?.trim());
+    expect(ruleBadges).toContain('DENY');
+    expect(ruleBadges).not.toContain('ALLOW');
   });
 
   it('keeps the original activation ISO across a DST repeated local hour', async () => {
