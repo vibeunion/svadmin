@@ -7,7 +7,7 @@ describe('MetricWidget admin formatters', () => {
     const currency = render(MetricWidget, { props: {
       widgetId: 'revenue',
       props: { label: 'Revenue', format: 'currency', currency: 'USD' },
-      data: { status: 'ready', value: 1234 },
+      data: { status: 'ready', sourceId: 'revenue', value: 1234 },
       locale: 'en-US',
     } });
     expect(currency.container.textContent).toContain('$1,234.00');
@@ -15,7 +15,7 @@ describe('MetricWidget admin formatters', () => {
     const percent = render(MetricWidget, { props: {
       widgetId: 'rate',
       props: { label: 'Rate', format: 'percent' },
-      data: { status: 'ready', value: 0.12 },
+      data: { status: 'ready', sourceId: 'rate', value: 0.12 },
       locale: 'en-US',
     } });
     expect(percent.container.textContent).toContain('12%');
@@ -23,7 +23,7 @@ describe('MetricWidget admin formatters', () => {
     const number = render(MetricWidget, { props: {
       widgetId: 'count',
       props: { label: 'Count', format: 'number' },
-      data: { status: 'ready', value: 1234.5 },
+      data: { status: 'ready', sourceId: 'count', value: 1234.5 },
       locale: 'en-US',
     } });
     expect(number.container.textContent).toContain('1,234.5');
