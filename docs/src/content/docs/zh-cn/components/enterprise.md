@@ -3240,3 +3240,59 @@ AI 规则语义解释卡片：
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+## StepUpAuthModal 高敏特权二次认证弹窗
+
+面向严重高危操作（如生产库清空、全量秘钥轮换、高权限提权），提供阶梯式多因子认证、防暴力破解锁定机制与审批授权联动。公共别名为 `PrivilegeElevationModal`。
+
+```svelte
+<script lang="ts">
+  import { StepUpAuthModal } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function handleVerify(payload: { method: string; code: string }) {
+    // 调用后端特权鉴权接口校验动态口令或短信
+    return payload.code === '123456';
+  }
+</script>
+
+<button onclick={() => { open = true; }}>执行高敏敏感操作</button>
+
+<StepUpAuthModal
+  bind:open
+  title="高敏特权二次认证"
+  operationName="核心生产数据库全量导出"
+  riskLevel="critical"
+  clientIp="10.12.88.42"
+  methods={['totp', 'sms', 'supervisor']}
+  onverify={handleVerify}
+  onlockout={() => console.warn('特权通道已被锁定')}
+/>
+```
+
+## AuditSnapshotCapture 不可篡改操作存证快照
+
+专为等保三级、金融审计与合规追溯设计，支持生成包含 SHA-256 数字指纹、操作人防篡改动态水印、字段级变更 Diff 对比以及一键导出 PNG / SVG 存证凭证。公共别名为 `ComplianceEvidenceCard`。
+
+```svelte
+<script lang="ts">
+  import { AuditSnapshotCapture } from '@svadmin/ui';
+
+  const diffItems = [
+    { field: 'role', label: '授权角色', before: 'operator', after: 'super_admin' },
+    { field: 'mfaEnforced', label: '强制 MFA', before: false, after: true },
+  ];
+</script>
+
+<AuditSnapshotCapture
+  recordId="AUDIT-20261114-8899"
+  operatorName="李四 (Li Si)"
+  operatorId="EMP-90021"
+  clientIp="10.12.88.42"
+  actionType="privilege_grant"
+  actionLabel="特权角色审批通过"
+  changes={diffItems}
+  onexport={(format) => console.log('导出快照格式:', format)}
+/>
+```
