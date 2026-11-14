@@ -267,6 +267,12 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  MediaGallery,
+  MultiModalMediaGallery,
+  HotkeysHelpModal,
+  HotkeysGuideModal,
+  ResizableSplitter,
+  DynamicSplitter,
   message,
   notification,
   toast,
@@ -532,6 +538,12 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(MediaGallery).toBeDefined();
+    expect(MultiModalMediaGallery).toBe(MediaGallery);
+    expect(HotkeysHelpModal).toBeDefined();
+    expect(HotkeysGuideModal).toBe(HotkeysHelpModal);
+    expect(ResizableSplitter).toBeDefined();
+    expect(DynamicSplitter).toBe(ResizableSplitter);
   });
 
   it('keeps service aliases bound to canonical services', () => {
