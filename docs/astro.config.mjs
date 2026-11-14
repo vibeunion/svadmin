@@ -113,6 +113,7 @@ export default defineConfig({
             { slug: 'providers/elasticsearch' },
             { slug: 'providers/pusher' },
             { slug: 'providers/sveltekit' },
+            { slug: 'providers/qdrant' },
           ],
         },
         {
