@@ -195,8 +195,7 @@
 </script>
 
 <div
-  class={cn(
-    'rounded-xl border border-border/80 bg-card text-card-foreground shadow-sm transition-all',
+  class={cn( 'rounded-xl border border-border/80 bg-card text-card-foreground shadow-sm transition-all',
     className
   )}
   data-svadmin-component="FieldMappingBuilder"
@@ -218,11 +217,10 @@
     <div class="flex items-center gap-2">
       <!-- 映射完成度指示徽标 -->
       <div
-        class={cn(
-          'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
+        class={cn( 'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
           stats.isValid
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+            ? 'bg-success/10 text-success '
+            : 'bg-warning/10 text-warning '
         )}
       >
         {#if stats.isValid}
@@ -288,9 +286,8 @@
       {@const isMissingRequired = target.required && !isMapped}
 
       <div
-        class={cn(
-          'grid grid-cols-12 items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted/30',
-          isMissingRequired ? 'bg-amber-500/5' : ''
+        class={cn( 'grid grid-cols-12 items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted/30',
+          isMissingRequired ? 'bg-warning/5' : ''
         )}
       >
         <!-- 目标字段描述 -->
@@ -299,7 +296,7 @@
             <span class="font-medium text-foreground">{target.label}</span>
             <code class="rounded bg-muted px-1 py-0.5 text-[11px] text-muted-foreground">{target.name}</code>
             {#if target.required}
-              <span class="rounded bg-rose-500/10 px-1 py-0.2 text-[10px] font-semibold text-rose-500">必填</span>
+              <span class="rounded bg-destructive/10 px-1 py-0.2 text-[10px] font-semibold text-destructive">必填</span>
             {/if}
           </div>
           {#if target.description}
@@ -318,8 +315,7 @@
             disabled={disabled}
             value={rule?.sourceField ?? ''}
             onchange={(e) => updateRule(target.name, { sourceField: e.currentTarget.value || undefined })}
-            class={cn(
-              'svadmin-select h-9 text-xs',
+            class={cn( 'svadmin-select h-9 text-xs',
               isMissingRequired ? 'border-warning ring-1 ring-warning/30' : ''
             )}
           >

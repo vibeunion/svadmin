@@ -277,8 +277,7 @@
 </script>
 
 <div
-  class={cn(
-    'flex flex-col rounded-xl border border-border/80 bg-card text-card-foreground shadow-sm transition-all',
+  class={cn( 'flex flex-col rounded-xl border border-border/80 bg-card text-card-foreground shadow-sm transition-all',
     className
   )}
   data-svadmin-component="DataImportPipeline"
@@ -301,12 +300,11 @@
         ] as s (s.step)}
           <div class="flex items-center gap-2">
             <div
-              class={cn(
-                'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors',
+              class={cn( 'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors',
                 currentStep === s.step
                   ? 'bg-primary text-primary-foreground'
                   : currentStep > s.step
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    ? 'bg-success/10 text-success '
                     : 'bg-muted text-muted-foreground'
               )}
             >
@@ -317,8 +315,7 @@
               {/if}
             </div>
             <span
-              class={cn(
-                'text-xs font-medium',
+              class={cn( 'text-xs font-medium',
                 currentStep === s.step ? 'text-foreground' : 'text-muted-foreground'
               )}
             >
@@ -406,15 +403,15 @@
           <span class="text-xs text-muted-foreground">总导入记录</span>
           <p class="text-xl font-bold text-foreground">{rawRows.length}</p>
         </div>
-        <div class="rounded-lg border border-border/60 bg-emerald-500/5 p-3">
-          <span class="text-xs text-emerald-600 dark:text-emerald-400">合规有效记录</span>
-          <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+        <div class="rounded-lg border border-border/60 bg-success/5 p-3">
+          <span class="text-xs text-success ">合规有效记录</span>
+          <p class="text-xl font-bold text-success ">
             {rawRows.length - rowErrorMap.size}
           </p>
         </div>
-        <div class="rounded-lg border border-border/60 bg-amber-500/5 p-3">
-          <span class="text-xs text-amber-600 dark:text-amber-400">存在校验异常</span>
-          <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{rowErrorMap.size}</p>
+        <div class="rounded-lg border border-border/60 bg-warning/5 p-3">
+          <span class="text-xs text-warning ">存在校验异常</span>
+          <p class="text-xl font-bold text-warning ">{rowErrorMap.size}</p>
         </div>
         <div class="rounded-lg border border-border/60 bg-muted/20 p-3">
           <span class="text-xs text-muted-foreground">错误总项数</span>
@@ -427,8 +424,7 @@
         <div class="flex items-center gap-1 rounded-lg border border-border bg-background p-1 text-xs">
           <button
             type="button"
-            class={cn(
-              'rounded px-2.5 py-1 transition-colors',
+            class={cn( 'rounded px-2.5 py-1 transition-colors',
               errorFilter === 'all' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'
             )}
             onclick={() => (errorFilter = 'all')}
@@ -437,9 +433,8 @@
           </button>
           <button
             type="button"
-            class={cn(
-              'rounded px-2.5 py-1 transition-colors',
-              errorFilter === 'errors' ? 'bg-amber-500 text-white' : 'text-muted-foreground hover:bg-muted'
+            class={cn( 'rounded px-2.5 py-1 transition-colors',
+              errorFilter === 'errors' ? 'bg-warning text-warning-foreground' : 'text-muted-foreground hover:bg-muted'
             )}
             onclick={() => (errorFilter = 'errors')}
           >
@@ -447,9 +442,8 @@
           </button>
           <button
             type="button"
-            class={cn(
-              'rounded px-2.5 py-1 transition-colors',
-              errorFilter === 'valid' ? 'bg-emerald-600 text-white' : 'text-muted-foreground hover:bg-muted'
+            class={cn( 'rounded px-2.5 py-1 transition-colors',
+              errorFilter === 'valid' ? 'bg-success text-success-foreground' : 'text-muted-foreground hover:bg-muted'
             )}
             onclick={() => (errorFilter = 'valid')}
           >
@@ -476,16 +470,16 @@
           <tbody class="divide-y divide-border/40 font-mono">
             {#each displayRowsWithIndex as item (item.index)}
               {@const hasErr = item.errors.length > 0}
-              <tr class={cn('hover:bg-muted/30 transition-colors', hasErr ? 'bg-amber-500/5' : '')}>
+              <tr class={cn('hover:bg-muted/30 transition-colors', hasErr ? 'bg-warning/5' : '')}>
                 <td class="px-3 py-2 text-center text-muted-foreground">{item.index + 1}</td>
                 <td class="px-3 py-2">
                   {#if hasErr}
-                    <span class="inline-flex items-center gap-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600 dark:text-amber-400" title={item.errors.map((e) => e.message).join('; ')}>
+                    <span class="inline-flex items-center gap-1 rounded bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning " title={item.errors.map((e) => e.message).join('; ')}>
                       <AlertCircle class="h-3 w-3" />
                       <span>{item.errors.length}</span>
                     </span>
                   {:else}
-                    <span class="inline-flex items-center rounded bg-emerald-500/10 p-0.5 text-emerald-600 dark:text-emerald-400">
+                    <span class="inline-flex items-center rounded bg-success/10 p-0.5 text-success ">
                       <CheckCircle2 class="h-3.5 w-3.5" />
                     </span>
                   {/if}
@@ -498,10 +492,9 @@
                       type="text"
                       value={String(item.row[target.name] ?? '')}
                       oninput={(e) => updateCell(item.index, target.name, e.currentTarget.value)}
-                      class={cn(
-                        'h-8 w-full rounded border bg-transparent px-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-1',
+                      class={cn( 'h-8 w-full rounded border bg-transparent px-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-1',
                         cellErr
-                          ? 'border-amber-500/80 bg-amber-500/10 text-amber-900 dark:text-amber-100 focus-visible:ring-amber-500'
+                          ? 'border-warning/80 bg-warning/10 text-warning  focus-visible:ring-warning'
                           : 'border-transparent hover:border-input focus-visible:border-input focus-visible:ring-ring'
                       )}
                       title={cellErr ? cellErr.message : undefined}
@@ -562,14 +555,14 @@
           </div>
         </div>
       {:else if importResult}
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success ">
           <CheckCircle2 class="h-6 w-6" />
         </div>
         <h3 class="mt-4 text-base font-semibold">批量数据导入完成</h3>
         <p class="mt-1 text-xs text-muted-foreground">
-          成功入库 <span class="font-bold text-emerald-600 dark:text-emerald-400">{importResult.successCount}</span> 条数据
+          成功入库 <span class="font-bold text-success ">{importResult.successCount}</span> 条数据
           {#if importResult.failCount > 0}
-            ，未导入/被剔除 <span class="font-bold text-amber-600 dark:text-amber-400">{importResult.failCount}</span> 条
+            ，未导入/被剔除 <span class="font-bold text-warning ">{importResult.failCount}</span> 条
           {/if}
         </p>
 
