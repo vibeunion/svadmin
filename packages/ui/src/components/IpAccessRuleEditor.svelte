@@ -358,7 +358,7 @@
               <!-- Expiration -->
               <td class="px-4 py-3 text-muted-foreground">
                 {#if rule.expiresAt}
-                  <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  <span class="text-xs text-warning font-medium">
                     Exp: {new Date(rule.expiresAt).toLocaleTimeString()}
                   </span>
                 {:else}
