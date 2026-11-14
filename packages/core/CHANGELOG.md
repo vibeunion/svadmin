@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.83.0](https://github.com/vibeunion/svadmin/compare/core-v0.82.0...core-v0.83.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** finish remaining Arco control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
+
 ## [0.82.0](https://github.com/vibeunion/svadmin/compare/core-v0.81.1...core-v0.82.0) (2026-11-14)
 
 

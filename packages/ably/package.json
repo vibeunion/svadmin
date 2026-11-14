@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/ably",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Ably Pub/Sub LiveProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

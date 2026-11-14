@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.128.0](https://github.com/vibeunion/svadmin/compare/ui-v0.127.0...ui-v0.128.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** finish remaining Arco control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** separate command palette close affordances ([#788](https://github.com/vibeunion/svadmin/issues/788)) ([b9e1bba](https://github.com/vibeunion/svadmin/commit/b9e1bba11c74ccf27f1c577b52e4b8891718c729))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.13
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.0
+
 ## [0.127.0](https://github.com/vibeunion/svadmin/compare/ui-v0.126.1...ui-v0.127.0) (2026-11-14)
 
 
