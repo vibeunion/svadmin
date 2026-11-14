@@ -915,7 +915,9 @@ export { default as IncidentWarRoomDrawer, default as AlertIncidentTimeline, typ
 // Enterprise bulk data import, column mapping & inline error validator suite
 export { default as DataImportDropzone, default as BatchImportDropzone, type DataImportDropzoneProps } from './components/DataImportDropzone.svelte';
 export { default as ColumnMappingTable, default as FieldMappingTable, type ColumnMappingTableProps, type TargetFieldConfig } from './components/ColumnMappingTable.svelte';
+export { default as FieldMappingBuilder, default as ColumnMappingBuilder, type FieldMappingBuilderProps, type SourceField, type TargetField, type FieldMappingRule, type TransformType } from './components/FieldMappingBuilder.svelte';
 export { default as ImportPreviewValidator, default as ImportDataValidator, type ImportPreviewValidatorProps, type RowValidationError } from './components/ImportPreviewValidator.svelte';
+export { default as DataImportPipeline, default as BatchImportPipeline, type DataImportPipelineProps, type ValidationRule, type PipelineValidationError } from './components/DataImportPipeline.svelte';
 
 // Enterprise multi-dimensional pivot matrix & cross-tabulation analysis suite
 export { default as PivotMatrix, default as CrossTableSummary, type PivotMatrixProps, type PivotDimension, type PivotMeasure } from './components/PivotMatrix.svelte';
@@ -1002,6 +1004,9 @@ export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type Micro
 export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
+
+// Enterprise staff shift scheduler & multi-shift rotation calendar suite
+export { default as ShiftScheduler, default as WorkShiftCalendar, type ShiftSchedulerProps, type ShiftType, type StaffMember, type ShiftAssignment, type ShiftConflictAlert } from './components/ShiftScheduler.svelte';
 
 // Enterprise global notification drawer suite
 export {

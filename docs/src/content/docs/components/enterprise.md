@@ -3268,6 +3268,79 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
 
+
+### `<ShiftScheduler>` / `<WorkShiftCalendar>`
+
+Enterprise staff shift scheduling and multi-shift rotation calendar:
+- **Shift Type Tokens**: Define morning, evening, night, and off shifts with custom duration quotas, timeframes, and semantic color badges.
+- **Dynamic Weekly Navigation**: Previous/next week jump controls, current week anchor, and automated weekend highlighting.
+- **Quick Shift Painter & Batching**: Select active shift paintbrush to paint schedule cells directly or one-click populate full weekday shifts.
+- **Fatigue & Overtime Alerts**: Instant weekly accumulated hour calculations with automated compliance threshold and consecutive-workday alerts.
+
+```svelte
+<script lang="ts">
+  import { ShiftScheduler } from '@svadmin/ui';
+
+  const staffList = [
+    { id: '1', name: 'Alex Zhang', department: 'Operations' },
+    { id: '2', name: 'David Li', department: 'Infrastructure' },
+  ];
+
+  const shiftTypes = [
+    { id: 'morning', name: 'Morning', code: 'M', hours: 8, colorToken: 'emerald' },
+    { id: 'night', name: 'Night', code: 'N', hours: 8, colorToken: 'indigo' },
+    { id: 'off', name: 'Off', code: 'OFF', hours: 0, isRest: true, colorToken: 'slate' },
+  ];
+</script>
+
+<ShiftScheduler {staffList} {shiftTypes} />
+
+### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
+
+Enterprise cross-system field mapping and schema transformer builder:
+- **Cross-system Field Alignment**: Visually map imported CSV, JSON, or external API fields to internal entity schemas.
+- **Heuristic Auto-matching**: Automatic fuzzy matching across snake_case, camelCase, and bilingual label variations.
+- **Transformation Pipeline**: Support direct passthrough, trim, uppercase, lowercase, number parsing, and fallback values.
+- **Real-time Sample Deduction**: Preview transformed output rows dynamically before committing to data imports.
+
+```svelte
+<script lang="ts">
+  import { FieldMappingBuilder } from '@svadmin/ui';
+
+  const sourceFields = [
+    { name: 'user_name', label: 'User Name', sample: 'Alice' },
+    { name: 'contact_email', label: 'Email', sample: 'alice@example.com' },
+  ];
+
+  const targetFields = [
+    { name: 'username', label: 'Account Name', required: true },
+    { name: 'email', label: 'Email Address', required: true },
+  ];
+</script>
+
+<FieldMappingBuilder {sourceFields} {targetFields} />
+```
+
+### `<DataImportPipeline>` / `<BatchImportPipeline>`
+
+Enterprise bulk data import pipeline with inline spreadsheet-style error correction:
+- **4-Stage Workflow**: Complete staging across source entry, field mapping, data inspection, and batch committing.
+- **Inline Cell Correction**: In-place cell correction with real-time reactive re-validation and contextual error messages.
+- **Quality Filtering**: Instant tab toggling across all rows, anomaly-only view, and compliant records.
+- **Batch Progress Feedback**: Dynamic importing progress tracker with comprehensive error aggregation and retry support.
+
+```svelte
+<script lang="ts">
+  import { DataImportPipeline } from '@svadmin/ui';
+
+  const targetFields = [
+    { name: 'name', label: 'Name', required: true },
+    { name: 'email', label: 'Email', required: true },
+  ];
+</script>
+
+<DataImportPipeline {targetFields} />
+
 ### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
 
 The compact bell popover remains compatible with its existing `items`, `onread` and `onreadall` API. Set `showDrawerButton` and `onopendrawer` to open the full drawer.

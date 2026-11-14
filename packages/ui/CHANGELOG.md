@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.130.0](https://github.com/vibeunion/svadmin/compare/ui-v0.129.0...ui-v0.130.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** add FeatureFlagStudio and GrayReleaseManager enterprise suite ([#794](https://github.com/vibeunion/svadmin/issues/794)) ([17c6329](https://github.com/vibeunion/svadmin/commit/17c632940abf5381e1cf7af5aacecb91dfb3f0ca))
+* **ui:** add MediaGallery, HotkeysHelpModal, and ResizableSplitter enterprise suite ([#793](https://github.com/vibeunion/svadmin/issues/793)) ([48c1a00](https://github.com/vibeunion/svadmin/commit/48c1a00326f154370e03986eaba5707b97349fa4))
+* **ui:** add NotificationDrawer and enhance NotificationCenter enterprise suite ([#795](https://github.com/vibeunion/svadmin/issues/795)) ([04177c3](https://github.com/vibeunion/svadmin/commit/04177c321c521f985913ae394d57e14f74cf6fc5))
+
 ## [0.129.0](https://github.com/vibeunion/svadmin/compare/ui-v0.128.0...ui-v0.129.0) (2026-11-14)
 
 

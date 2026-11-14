@@ -135,13 +135,19 @@ import {
   CrossAppStateBus,
   MicroAppRouteSync,
   SubAppUrlSynchronizer,
+  ShiftScheduler,
+  WorkShiftCalendar,
   useMicroAppState,
   DataImportDropzone,
   BatchImportDropzone,
   ColumnMappingTable,
   FieldMappingTable,
+  FieldMappingBuilder,
+  ColumnMappingBuilder,
   ImportPreviewValidator,
   ImportDataValidator,
+  DataImportPipeline,
+  BatchImportPipeline,
   PlanUsageQuotaBar,
   MultiQuotaProgress,
   TierFeatureComparison,
@@ -504,13 +510,19 @@ describe('public compatibility aliases', () => {
     expect(CrossAppStateBus).toBe(MicroAppStateBusIndicator);
     expect(MicroAppRouteSync).toBeDefined();
     expect(SubAppUrlSynchronizer).toBe(MicroAppRouteSync);
+    expect(ShiftScheduler).toBeDefined();
+    expect(WorkShiftCalendar).toBe(ShiftScheduler);
     expect(useMicroAppState).toBeDefined();
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();
     expect(FieldMappingTable).toBe(ColumnMappingTable);
+    expect(FieldMappingBuilder).toBeDefined();
+    expect(ColumnMappingBuilder).toBe(FieldMappingBuilder);
     expect(ImportPreviewValidator).toBeDefined();
     expect(ImportDataValidator).toBe(ImportPreviewValidator);
+    expect(DataImportPipeline).toBeDefined();
+    expect(BatchImportPipeline).toBe(DataImportPipeline);
     expect(PlanUsageQuotaBar).toBeDefined();
     expect(MultiQuotaProgress).toBe(PlanUsageQuotaBar);
     expect(TierFeatureComparison).toBeDefined();
