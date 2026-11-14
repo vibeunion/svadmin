@@ -199,7 +199,7 @@ describe('native component CSS', () => {
       expect(css).toContain('[data-svadmin-collapsible][data-open="true"]');
       expect(css).toContain('[data-svadmin-sidebar] .svadmin-collapsible-trigger');
       expect(css).toContain('[data-svadmin-sidebar] .svadmin-collapsible-trigger:focus-visible');
-      expect(css).toContain('outline: 2px solid var(--ring);');
+      expect(css).toContain('outline: var(--svadmin-focus-width) solid var(--ring);');
       expect(css).toContain('padding-block: 0.375rem;');
       expect(css).not.toMatch(/^\s*details:not\(\[open\]\)/m);
     }
@@ -274,7 +274,7 @@ describe('native component CSS', () => {
     const css = readAppCss();
     expect(css).toContain('.svadmin-switch[aria-invalid="true"]');
     expect(css).toMatch(/@media \(forced-colors: active\) \{[\s\S]*?\.svadmin-switch \{[\s\S]*?border-color: ButtonText;/);
-    expect(css).toContain('outline: 2px solid Highlight;');
+    expect(css).toContain('outline: var(--svadmin-focus-width) solid Highlight;');
     expect(css).toContain('.svadmin-button, .svadmin-input, .svadmin-select, .svadmin-textarea, .svadmin-switch');
   });
 });

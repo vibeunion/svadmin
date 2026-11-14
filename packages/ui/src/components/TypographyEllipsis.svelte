@@ -119,7 +119,7 @@
   }
   .svadmin-typography-ellipsis__toggle:hover { text-decoration: underline; }
   .svadmin-typography-ellipsis__toggle:focus-visible {
-    outline: 2px solid var(--ring);
+    outline: var(--svadmin-focus-width) solid var(--ring);
     outline-offset: var(--svadmin-focus-offset);
     border-radius: var(--radius-sm);
   }

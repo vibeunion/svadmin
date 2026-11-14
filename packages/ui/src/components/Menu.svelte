@@ -190,7 +190,7 @@
     align-items: center;
     gap: var(--svadmin-space-2);
     width: 100%;
-    min-height: var(--svadmin-control-h);
+    min-height: 2.5rem;
     padding-inline: var(--svadmin-space-3);
     border: 0;
     border-radius: var(--radius-sm);
@@ -201,16 +201,16 @@
     text-decoration: none;
     cursor: pointer;
   }
-  .svadmin-menu__link:hover { background: var(--muted); color: var(--foreground); }
-  .svadmin-menu__link[data-selected='true'] { background: var(--accent); color: var(--accent-foreground); font-weight: 600; }
-  .svadmin-menu__link[data-disabled='true'] { opacity: 0.45; cursor: not-allowed; }
-  .svadmin-menu__link:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .svadmin-menu__link:hover { background: var(--svadmin-fill-2, var(--muted)); color: var(--foreground); }
+  .svadmin-menu__link[data-selected='true'] { background: var(--svadmin-fill-2, var(--muted)); color: var(--primary); font-weight: 500; }
+  .svadmin-menu__link[data-disabled='true'] { opacity: 1; color: var(--svadmin-text-4); cursor: not-allowed; }
+  .svadmin-menu__link:focus-visible { outline: var(--svadmin-focus-width) solid color-mix(in oklch, var(--ring) 48%, transparent); outline-offset: var(--svadmin-focus-offset); }
   .svadmin-menu__icon { display: inline-flex; flex: 0 0 auto; }
   .svadmin-menu__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .svadmin-menu__badge { margin-inline-start: auto; padding-inline: var(--svadmin-space-2); border-radius: 999px; background: var(--muted); color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-menu__chevron { margin-inline-start: auto; transition: transform 120ms ease; }
   .svadmin-menu__item[data-open='true'] > .svadmin-menu__link .svadmin-menu__chevron { transform: rotate(180deg); }
-  .svadmin-menu__list[data-depth]:not([data-depth='0']) { margin-block-start: var(--svadmin-space-1); margin-inline-start: var(--svadmin-space-4); }
+  .svadmin-menu__list[data-depth]:not([data-depth='0']) { margin-block-start: var(--svadmin-space-1); margin-inline-start: 1.25rem; }
   .svadmin-menu[data-collapsed='true'] .svadmin-menu__label,
   .svadmin-menu[data-collapsed='true'] .svadmin-menu__badge,
   .svadmin-menu[data-collapsed='true'] .svadmin-menu__chevron { display: none; }

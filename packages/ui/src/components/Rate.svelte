@@ -127,8 +127,8 @@
   }
 
   .svadmin-rate button:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
   }
 
   .svadmin-rate button:disabled {

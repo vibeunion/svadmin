@@ -48,14 +48,43 @@ describe('Arco remainder style contract', () => {
     expect(rule('.svadmin-title[data-level="3"]')).toContain('var(--svadmin-text-section)');
     expect(rule('.svadmin-title[data-level="4"]')).toContain('var(--svadmin-text-body)');
     expect(css).not.toContain('.svadmin-title[data-level="2"] { font-size: 1.125rem; }');
+    expect(css).not.toContain('font-size: 1.125rem;');
+    expect(rule('.svadmin-dialog-title')).toContain('var(--svadmin-text-section)');
+    expect(rule('.svadmin-sheet-title')).toContain('font-weight: 500');
     expect(css).toContain('--svadmin-text-display-1: 2.25rem;');
+  });
+
+  it('keeps one focus width on the rings that were still hardcoded', () => {
+    for (const selector of [
+      '.svadmin-input:focus-visible',
+      '.svadmin-textarea:focus-visible',
+      '.svadmin-select:focus-visible',
+      '.svadmin-tabs-trigger:focus-visible',
+      '.svadmin-sheet-close:focus-visible',
+      '.svadmin-navigation-link:focus-visible',
+      'details.svadmin-collapsible > summary:focus-visible',
+    ]) {
+      const block = rule(selector);
+      expect(block, selector).not.toContain('0 0 0 2px');
+      expect(block, selector).not.toContain('outline: 2px');
+    }
+    expect(rule('.svadmin-tabs-trigger:focus-visible')).toContain('var(--svadmin-focus-width)');
+    expect(rule('.svadmin-checkbox')).toContain('width: 14px');
+    expect(rule('.svadmin-checkbox')).toContain('border: 2px solid');
+    expect(rule('[data-slot="tooltip-content"]')).toContain('padding: 8px 12px');
+    expect(rule('[data-slot="tooltip-content"][data-size="mini"]')).toContain('padding: 4px 12px');
+    expect(rule('[data-slot="tooltip-content"][data-size="mini"]')).toContain('min-height: 30px');
   });
 
   it('names official motion durations without replacing the existing easings', () => {
     expect(css).toContain('--svadmin-duration-1: 0.1s;');
     expect(css).toContain('--svadmin-duration-5: 0.5s;');
+    expect(css).toContain('--svadmin-duration-loading: 1s;');
+    expect(css).toContain('--svadmin-easing-linear: cubic-bezier(0, 0, 1, 1);');
     expect(css).toContain('--svadmin-easing-standard: cubic-bezier(0.34, 0.69, 0.1, 1);');
+    expect(css).toContain('--svadmin-easing-overshoot: cubic-bezier(0.3, 1.3, 0.3, 1);');
     expect(css).toContain('--svadmin-easing-decelerate: cubic-bezier(0.4, 0.8, 0.74, 1);');
+    expect(css).toContain('--svadmin-easing-accelerate: cubic-bezier(0.26, 0, 0.6, 0.2);');
     expect(css).toContain('--svadmin-motion-fast: 150ms;');
     expect(css).toContain('--svadmin-motion-easing: ease-out;');
   });

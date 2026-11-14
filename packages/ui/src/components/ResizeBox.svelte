@@ -142,5 +142,5 @@
   }
   .svadmin-resize-box[data-direction='horizontal'] .svadmin-resize-box__handle { cursor: ew-resize; }
   .svadmin-resize-box[data-direction='vertical'] .svadmin-resize-box__handle { cursor: ns-resize; }
-  .svadmin-resize-box__handle:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .svadmin-resize-box__handle:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
 </style>

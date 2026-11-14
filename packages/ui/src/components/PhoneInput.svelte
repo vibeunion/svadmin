@@ -105,7 +105,7 @@
     color: var(--foreground, currentColor);
   }
 
-  .svadmin-phone-input:focus-within { outline: 2px solid var(--ring, currentColor); outline-offset: 1px; }
+  .svadmin-phone-input:focus-within { outline: var(--svadmin-focus-width) solid var(--ring, currentColor); outline-offset: var(--svadmin-focus-offset); }
   .svadmin-phone-input[data-invalid='true'] { border-color: var(--destructive, currentColor); }
   .svadmin-phone-input[data-disabled='true'] { cursor: not-allowed; opacity: 0.6; }
 
