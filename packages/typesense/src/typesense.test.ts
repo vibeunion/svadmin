@@ -260,13 +260,15 @@ describe('@svadmin/typesense DataProvider', () => {
     expect(provider.custom).toBeDefined();
     expect(provider.getApiUrl).toBeDefined();
 
-    const customRes = await provider.custom!({
-      url: '/collections',
-      method: 'get',
-    });
+    const custom = provider.custom;
+    const getApiUrl = provider.getApiUrl;
+    expect(custom).toBeDefined();
+    expect(getApiUrl).toBeDefined();
+
+    const customRes = await custom?.({ url: '/collections', method: 'get' });
 
     expect(capturedMethod).toBe('GET');
-    expect(customRes.data).toEqual([{ name: 'collection1' }]);
-    expect(provider.getApiUrl!()).toBe('http://localhost:8108');
+    expect(customRes?.data).toEqual([{ name: 'collection1' }]);
+    expect(getApiUrl?.()).toBe('http://localhost:8108');
   });
 });
