@@ -3173,39 +3173,34 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 ### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
 
-Enterprise global notification center and pending task drawer:
-- **Header Micro-Interaction Trigger**: Bell icon, breathing pulse animation on unread messages, numeric badge with 99+ ceiling, and do-not-disturb (DND) mode.
-- **Categorized Multi-Channel Tabs**: Filter notifications across All, Tasks (Pending Approvals), Announcements, and Security Alerts.
-- **Quick Action Bar**: One-click "Mark All as Read", "Clear Read", and DND mode toggle.
-- **Embedded Action Buttons**: Execute inline actions directly from notification cards (e.g., Approve, Reject, Download Export, View Details).
+The compact bell popover remains compatible with its existing `items`, `onread` and `onreadall` API. Set `showDrawerButton` and `onopendrawer` to open the full drawer.
+
+The drawer supports All, Unread, Tasks, Notices and Security filters, immutable read-state updates, global mark-all/clear-read controls, and keyboard focus containment with Escape and opener focus restoration. Actions wait for completion, prevent repeated submissions and show failures without applying optimistic read-state changes. An action's `onClick` overrides the drawer-level `onAction` handler.
+
+`dndEnabled` is a bindable quiet-mode preference. `onToggleDnd` lets the host integrate its alert delivery policy; the drawer does not suppress the incoming feed. Quiet mode dims ordinary badges while keeping security messages and their badges visible.
 
 ```svelte
 <script lang="ts">
-  import { NotificationCenter } from '@svadmin/ui';
+  import { NotificationCenter, NotificationDrawer, type NotificationDrawerItem } from '@svadmin/ui';
 
-  let notifications = [
+  let drawerOpen = $state(false);
+  let notifications = $state<NotificationDrawerItem[]>([
     {
-      id: 'task-1',
-      title: 'Expense Reimbursement Pending',
-      description: 'Employee submitted travel expense receipt for $320.',
-      category: 'TASKS',
-      read: false,
-      createdAt: '5m ago',
-      actions: [
-        { id: 'approve', label: 'Approve', variant: 'primary' },
-        { id: 'reject', label: 'Reject', variant: 'destructive' },
-      ],
+      id: 'task-1', title: 'Expense reimbursement pending', category: 'TASKS',
+      read: false, createdAt: '5m ago',
+      actions: [{ id: 'approve', label: 'Approve', variant: 'primary' }],
     },
     {
-      id: 'sec-1',
-      title: 'New Device Login Alert',
-      description: 'Signed in from Chrome on macOS in Shanghai, CN.',
-      category: 'SECURITY_ALERTS',
-      read: false,
-      createdAt: '1h ago',
+      id: 'security-1', title: 'New device login alert', category: 'SECURITY_ALERTS',
+      read: false, createdAt: '1h ago',
     },
-  ];
+  ]);
 </script>
 
-<NotificationCenter bind:items={notifications} />
+<NotificationCenter
+  items={notifications.map(item => ({ ...item, time: item.createdAt }))}
+  showDrawerButton
+  onopendrawer={() => { drawerOpen = true; }}
+/>
+<NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```

@@ -1,15 +1,13 @@
-<script lang="ts">
+<script lang="ts" module>
   import type { Snippet } from 'svelte';
 
   export type NotificationCategory = 'TASKS' | 'ANNOUNCEMENTS' | 'SECURITY_ALERTS';
-
   export interface NotificationAction {
     id: string;
     label: string;
     variant?: 'primary' | 'destructive' | 'default';
-    onClick?: (item: NotificationItem) => void;
+    onClick?: (item: NotificationItem) => void | Promise<void>;
   }
-
   export interface NotificationItem {
     id: string;
     title: string;
@@ -22,315 +20,223 @@
     actions?: NotificationAction[];
     meta?: Record<string, unknown>;
   }
-
   export interface NotificationDrawerProps {
     open?: boolean;
     items?: NotificationItem[];
     dndEnabled?: boolean;
     class?: string;
-    onClose?: () => void;
-    onItemClick?: (item: NotificationItem) => void;
-    onMarkAllRead?: () => void;
-    onClearRead?: () => void;
-    onToggleDnd?: (enabled: boolean) => void;
-    onAction?: (actionId: string, item: NotificationItem) => void;
+    onClose?: () => void | Promise<void>;
+    onItemClick?: (item: NotificationItem) => void | Promise<void>;
+    onMarkAllRead?: () => void | Promise<void>;
+    onClearRead?: () => void | Promise<void>;
+    onToggleDnd?: (enabled: boolean) => void | Promise<void>;
+    onAction?: (actionId: string, item: NotificationItem) => void | Promise<void>;
+    onError?: (error: unknown) => void;
     customItem?: Snippet<[{ item: NotificationItem; index: number }]>;
   }
+</script>
+
+<script lang="ts">
+  import { Sheet } from './ui/sheet/index.js';
 
   let {
-    open = $bindable(false),
-    items = $bindable([]),
-    dndEnabled = $bindable(false),
-    class: className = '',
-    onClose,
-    onItemClick,
-    onMarkAllRead,
-    onClearRead,
-    onToggleDnd,
-    onAction,
-    customItem,
+    open = $bindable(false), items = $bindable([]), dndEnabled = $bindable(false),
+    class: className = '', onClose, onItemClick, onMarkAllRead, onClearRead,
+    onToggleDnd, onAction, onError, customItem,
   }: NotificationDrawerProps = $props();
 
-  let activeTab = $state<'ALL' | NotificationCategory>('ALL');
-
-  // Filtered list based on active tab
-  const filteredItems = $derived<NotificationItem[]>(() => {
-    if (activeTab === 'ALL') return items;
-    return items.filter((item) => item.category === activeTab);
-  });
-
-  // Unread count per category
-  const unreadCounts = $derived<Record<string, number>>(() => {
-    const counts: Record<string, number> = {
-      ALL: 0,
-      TASKS: 0,
-      ANNOUNCEMENTS: 0,
-      SECURITY_ALERTS: 0,
-    };
+  type Filter = 'ALL' | 'UNREAD' | NotificationCategory;
+  const categories: { key: Filter; label: string }[] = [
+    { key: 'ALL', label: 'All' }, { key: 'UNREAD', label: 'Unread' },
+    { key: 'TASKS', label: 'Tasks' }, { key: 'ANNOUNCEMENTS', label: 'Notices' },
+    { key: 'SECURITY_ALERTS', label: 'Security' },
+  ];
+  let activeTab = $state<Filter>('ALL');
+  let pendingOperation = $state<string | null>(null);
+  let errorMessage = $state('');
+  const filteredItems = $derived(items.filter(item => activeTab === 'ALL'
+    || (activeTab === 'UNREAD' ? !item.read : item.category === activeTab)));
+  const unreadCounts = $derived.by(() => {
+    const counts: Record<Filter, number> = { ALL: 0, UNREAD: 0, TASKS: 0, ANNOUNCEMENTS: 0, SECURITY_ALERTS: 0 };
     for (const item of items) {
-      if (!item.read) {
-        counts.ALL = (counts.ALL ?? 0) + 1;
-        counts[item.category] = (counts[item.category] ?? 0) + 1;
-      }
+      if (!item.read) { counts.ALL++; counts.UNREAD++; counts[item.category]++; }
     }
     return counts;
   });
 
+  function reportError(error: unknown) {
+    errorMessage = error instanceof Error ? error.message : 'The notification operation failed. Please try again.';
+    try { void Promise.resolve(onError?.(error)).catch(() => {}); } catch { /* 错误观察者不能打断组件恢复。 */ }
+  }
+  async function runOperation(key: string, operation: () => void | Promise<void>) {
+    if (pendingOperation) return;
+    pendingOperation = key;
+    errorMessage = '';
+    try { await operation(); } catch (error) { reportError(error); }
+    finally { pendingOperation = null; }
+  }
   function handleMarkAllAsRead() {
-    items = items.map((i) => ({ ...i, read: true }));
-    onMarkAllRead?.();
+    return runOperation('mark-all', async () => {
+      const ids = new Set(items.map(item => item.id));
+      await onMarkAllRead?.();
+      items = items.map(item => ids.has(item.id) ? { ...item, read: true } : item);
+    });
   }
-
   function handleClearRead() {
-    items = items.filter((i) => !i.read);
-    onClearRead?.();
+    return runOperation('clear-read', async () => {
+      const ids = new Set(items.filter(item => item.read).map(item => item.id));
+      await onClearRead?.();
+      items = items.filter(item => !ids.has(item.id));
+    });
   }
-
   function toggleDndMode() {
-    dndEnabled = !dndEnabled;
-    onToggleDnd?.(dndEnabled);
+    return runOperation('dnd', async () => {
+      const enabled = !dndEnabled;
+      await onToggleDnd?.(enabled);
+      dndEnabled = enabled;
+    });
   }
-
   function markSingleRead(item: NotificationItem) {
-    item.read = true;
-    items = [...items];
-    onItemClick?.(item);
+    return runOperation(`read:${item.id}`, async () => {
+      const updated = { ...item, read: true };
+      await onItemClick?.(updated);
+      // 不修改调用方传入对象，允许冻结快照和受控 props。
+      items = items.map(current => current.id === item.id ? { ...current, read: true } : current);
+    });
   }
-
-  function handleActionClick(e: MouseEvent, action: NotificationAction, item: NotificationItem) {
-    e.stopPropagation();
-    action.onClick?.(item);
-    onAction?.(action.id, item);
+  function handleActionClick(action: NotificationAction, item: NotificationItem) {
+    return runOperation(`action:${item.id}:${action.id}`, async () => {
+      if (action.onClick) await action.onClick(item);
+      else await onAction?.(action.id, item);
+    });
+  }
+  function handleClose() {
+    try { void Promise.resolve(onClose?.()).catch(reportError); } catch (error) { reportError(error); }
   }
 </script>
 
-{#if open}
-  <!-- Backdrop -->
-  <div
-    class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-opacity"
-    onclick={() => {
-      open = false;
-      onClose?.();
-    }}
-    onkeydown={(e) => {
-      if (e.key === 'Escape') {
-        open = false;
-        onClose?.();
-      }
-    }}
-    tabindex="-1"
-    role="presentation"
-  ></div>
-
-  <!-- Right Slide-over Drawer Panel -->
-  <div
-    class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-card text-card-foreground shadow-2xl transition-transform duration-300 ease-in-out {className}"
-    data-svadmin-component="NotificationDrawer"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Notification Center Drawer"
-  >
-    <!-- Header -->
-    <div class="flex items-center justify-between border-b border-border p-4">
-      <div class="flex items-center gap-2">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-        </div>
-        <div>
-          <h2 class="text-base font-semibold text-foreground">Notification Center</h2>
-          <p class="text-xs text-muted-foreground">
-            {unreadCounts().ALL} unread notification{unreadCounts().ALL === 1 ? '' : 's'}
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <!-- Do Not Disturb Toggle -->
-        <button
-          type="button"
-          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors {dndEnabled ? 'bg-destructive/10 text-destructive' : 'text-muted-foreground hover:bg-muted'}"
-          title={dndEnabled ? 'Do Not Disturb is ON' : 'Turn on Do Not Disturb'}
-          onclick={toggleDndMode}
-        >
-          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-          </svg>
-          <span>{dndEnabled ? 'DND On' : 'DND'}</span>
-        </button>
-
-        <!-- Close button -->
-        <button
-          type="button"
-          class="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-          aria-label="Close notification drawer"
-          onclick={() => {
-            open = false;
-            onClose?.();
-          }}
-        >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+<Sheet
+  bind:open
+  onClose={handleClose}
+  closeLabel="Close notification drawer"
+  class="svadmin-notification-drawer {className}"
+  data-svadmin-component="NotificationDrawer"
+  data-dnd-enabled={dndEnabled}
+  role="dialog"
+  aria-modal="true"
+  aria-label="Notification Center Drawer"
+>
+  <header class="notification-header">
+    <div>
+      <h2>Notification Center</h2>
+      <p>{unreadCounts.ALL} unread notification{unreadCounts.ALL === 1 ? '' : 's'}</p>
     </div>
+    <button class="notification-dnd" type="button" aria-pressed={dndEnabled} disabled={pendingOperation !== null}
+      title="Quiet mode preference" onclick={toggleDndMode}>
+      {dndEnabled ? 'DND On' : 'DND'}
+    </button>
+  </header>
 
-    <!-- Category Tabs -->
-    <div class="flex border-b border-border bg-muted/40 px-3 pt-2 text-xs font-medium">
-      <button
-        type="button"
-        class="relative px-3 py-2 transition-colors {activeTab === 'ALL' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => (activeTab = 'ALL')}
-      >
-        All
-        {#if unreadCounts().ALL > 0}
-          <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-            {unreadCounts().ALL > 99 ? '99+' : unreadCounts().ALL}
+  {#if dndEnabled}
+    <p class="notification-quiet-status" role="status">Quiet mode is on. Security alerts remain visible.</p>
+  {/if}
+  <nav class="notification-categories" aria-label="Notification categories">
+    {#each categories as category (category.key)}
+      <button type="button" aria-pressed={activeTab === category.key} onclick={() => (activeTab = category.key)}>
+        {category.label}
+        {#if unreadCounts[category.key] > 0}
+          <span class="notification-count" data-security={category.key === 'SECURITY_ALERTS'} data-muted={dndEnabled && category.key !== 'SECURITY_ALERTS'}>
+            {unreadCounts[category.key] > 99 ? '99+' : unreadCounts[category.key]}
           </span>
         {/if}
       </button>
-
-      <button
-        type="button"
-        class="relative px-3 py-2 transition-colors {activeTab === 'TASKS' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => (activeTab = 'TASKS')}
-      >
-        Tasks
-        {#if (unreadCounts().TASKS ?? 0) > 0}
-          <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-            {unreadCounts().TASKS}
-          </span>
-        {/if}
-      </button>
-
-      <button
-        type="button"
-        class="relative px-3 py-2 transition-colors {activeTab === 'ANNOUNCEMENTS' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => (activeTab = 'ANNOUNCEMENTS')}
-      >
-        Notices
-        {#if (unreadCounts().ANNOUNCEMENTS ?? 0) > 0}
-          <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-            {unreadCounts().ANNOUNCEMENTS}
-          </span>
-        {/if}
-      </button>
-
-      <button
-        type="button"
-        class="relative px-3 py-2 transition-colors {activeTab === 'SECURITY_ALERTS' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => (activeTab = 'SECURITY_ALERTS')}
-      >
-        Security
-        {#if (unreadCounts().SECURITY_ALERTS ?? 0) > 0}
-          <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
-            {unreadCounts().SECURITY_ALERTS}
-          </span>
-        {/if}
-      </button>
-    </div>
-
-    <!-- Actions toolbar: Mark all read / Clear read -->
-    <div class="flex items-center justify-between border-b border-border/60 bg-card px-4 py-2 text-xs text-muted-foreground">
-      <span>{filteredItems().length} item{filteredItems().length === 1 ? '' : 's'}</span>
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          class="hover:text-primary transition-colors disabled:opacity-50"
-          disabled={unreadCounts().ALL === 0}
-          onclick={handleMarkAllAsRead}
-        >
-          Mark all as read
-        </button>
-        <span class="text-border">|</span>
-        <button
-          type="button"
-          class="hover:text-destructive transition-colors disabled:opacity-50"
-          disabled={filteredItems().every((i) => !i.read)}
-          onclick={handleClearRead}
-        >
-          Clear read
-        </button>
-      </div>
-    </div>
-
-    <!-- Notification List Content -->
-    <div class="flex-1 overflow-y-auto divide-y divide-border/60 p-2">
-      {#if filteredItems().length === 0}
-        <div class="flex h-64 flex-col items-center justify-center p-6 text-center text-muted-foreground">
-          <svg class="h-10 w-10 stroke-1 text-muted-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-          <p class="mt-2 text-xs">No notifications in this category</p>
-        </div>
-      {:else}
-        {#each filteredItems() as item, index (item.id)}
-          {#if customItem}
-            {@render customItem({ item, index })}
-          {:else}
-            <!-- Default Notification Item Card -->
-            <div
-              class="group relative flex flex-col gap-2 rounded-md p-3 transition-colors hover:bg-muted/40 {item.read ? 'opacity-80' : 'bg-card font-medium'}"
-              role="button"
-              tabindex="0"
-              onclick={() => markSingleRead(item)}
-              onkeydown={(e) => {
-                if (e.key === 'Enter') markSingleRead(item);
-              }}
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-start gap-2.5">
-                  <!-- Unread indicator dot -->
-                  <div class="mt-1 h-2 w-2 shrink-0 rounded-full {item.read ? 'bg-transparent' : 'bg-primary'}"></div>
-
-                  <!-- Category icon -->
-                  <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-muted text-foreground">
-                    {#if item.category === 'TASKS'}
-                      <svg class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                      </svg>
-                    {:else if item.category === 'SECURITY_ALERTS'}
-                      <svg class="h-4 w-4 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                    {:else}
-                      <svg class="h-4 w-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                      </svg>
-                    {/if}
-                  </div>
-
-                  <div class="flex-1">
-                    <div class="text-xs font-semibold text-foreground">{item.title}</div>
-                    {#if item.description}
-                      <p class="mt-1 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
-                    {/if}
-                  </div>
-                </div>
-
-                <!-- Time string -->
-                <span class="text-[10px] text-muted-foreground shrink-0">{item.createdAt}</span>
-              </div>
-
-              <!-- Quick action buttons -->
-              {#if item.actions && item.actions.length > 0}
-                <div class="mt-2 flex flex-wrap items-center gap-2 pl-9">
-                  {#each item.actions as action}
-                    <button
-                      type="button"
-                      class="rounded px-2 py-1 text-[11px] font-medium transition-colors {action.variant === 'primary' ? 'bg-primary text-primary-foreground hover:opacity-90' : action.variant === 'destructive' ? 'bg-destructive/10 text-destructive hover:bg-destructive/20' : 'border border-input bg-background text-foreground hover:bg-muted'}"
-                      onclick={(e) => handleActionClick(e, action, item)}
-                    >
-                      {action.label}
-                    </button>
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          {/if}
-        {/each}
-      {/if}
-    </div>
+    {/each}
+  </nav>
+  <div class="notification-toolbar">
+    <span>{filteredItems.length} item{filteredItems.length === 1 ? '' : 's'}</span>
+    <button type="button" disabled={pendingOperation !== null || unreadCounts.ALL === 0} onclick={handleMarkAllAsRead}>Mark all as read</button>
+    <button type="button" disabled={pendingOperation !== null || !items.some(item => item.read)} onclick={handleClearRead}>Clear read</button>
   </div>
-{/if}
+  {#if errorMessage}<p class="notification-error" role="alert">{errorMessage}</p>{/if}
+  <div class="notification-list" aria-busy={pendingOperation !== null}>
+    {#if filteredItems.length === 0}
+      <p class="notification-empty">No notifications in this category</p>
+    {:else}
+      {#each filteredItems as item, index (item.id)}
+        {#if customItem}
+          {@render customItem({ item, index })}
+        {:else}
+          <article class="notification-item" data-read={item.read} data-security={item.category === 'SECURITY_ALERTS'}>
+            <button class="notification-item-open" type="button" disabled={pendingOperation !== null} onclick={() => markSingleRead(item)}>
+              <span class="notification-dot" data-read={item.read} data-muted={dndEnabled && item.category !== 'SECURITY_ALERTS'} data-security={item.category === 'SECURITY_ALERTS'} aria-hidden="true"></span>
+              <span class="notification-copy">
+                <strong>{item.title}</strong>
+                {#if item.description}<span>{item.description}</span>{/if}
+                <time>{item.createdAt}</time>
+              </span>
+              {#if item.badge}<span class="notification-badge">{item.badge}</span>{/if}
+            </button>
+            {#if item.actions && item.actions.length > 0}
+              <div class="notification-actions">
+                {#each item.actions as action (action.id)}
+                  <button type="button" data-variant={action.variant ?? 'default'} disabled={pendingOperation !== null}
+                    onclick={() => handleActionClick(action, item)}>
+                    {pendingOperation === `action:${item.id}:${action.id}` ? 'Working…' : action.label}
+                  </button>
+                {/each}
+              </div>
+            {/if}
+          </article>
+        {/if}
+      {/each}
+    {/if}
+  </div>
+</Sheet>
+
+<style>
+  :global(.svadmin-notification-drawer) {
+    display: flex;
+    flex-direction: column;
+    width: min(30rem, 100vw);
+    max-width: 100vw;
+    padding: 0;
+    color: var(--foreground);
+    background: var(--card);
+  }
+  .notification-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 3rem 1rem 1rem; border-bottom: 1px solid var(--border); }
+  .notification-header h2 { margin: 0; font-size: var(--svadmin-text-section); font-weight: 500; }
+  .notification-header p { margin: 0.25rem 0 0; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
+  button { font: inherit; cursor: pointer; }
+  button:disabled { cursor: default; opacity: 0.5; }
+  button:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
+  .notification-dnd { padding: 0.375rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--background); color: var(--muted-foreground); font-size: var(--svadmin-text-caption); white-space: nowrap; }
+  .notification-dnd[aria-pressed='true'] { color: var(--primary); background: var(--accent); }
+  .notification-categories { display: flex; flex-wrap: wrap; padding: 0.5rem; gap: 0.25rem; border-bottom: 1px solid var(--border); }
+  .notification-categories > button { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.5rem; border: 0; border-radius: var(--radius); background: transparent; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
+  .notification-categories > button[aria-pressed='true'] { color: var(--primary); background: var(--accent); }
+  .notification-count { display: inline-grid; place-items: center; min-width: 1rem; padding: 0.125rem 0.25rem; border-radius: 1rem; background: var(--primary); color: var(--primary-foreground); font-size: var(--svadmin-text-caption); }
+  .notification-count[data-muted='true'] { background: var(--muted); color: var(--muted-foreground); }
+  .notification-count[data-security='true'] { background: var(--destructive); color: var(--destructive-foreground); }
+  .notification-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: var(--svadmin-text-caption); }
+  .notification-toolbar > span { margin-right: auto; color: var(--muted-foreground); }
+  .notification-toolbar > button { padding: 0; border: 0; background: transparent; color: var(--primary); }
+  .notification-list { flex: 1; overflow-y: auto; padding: 0.5rem; min-height: 0; }
+  .notification-item { border-bottom: 1px solid var(--border); padding: 0.75rem 0.5rem; }
+  .notification-item-open { display: flex; gap: 0.5rem; width: 100%; padding: 0.25rem; border: 0; text-align: start; background: transparent; color: var(--foreground); }
+  .notification-item-open:hover { background: var(--accent); }
+  .notification-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 0.375rem; font-size: var(--svadmin-text-label); }
+  .notification-copy strong { font-weight: 600; }
+  .notification-copy > span, .notification-copy time { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); line-height: 1.5; overflow-wrap: anywhere; }
+  .notification-dot { width: 0.5rem; height: 0.5rem; margin-top: 0.375rem; border-radius: 50%; flex-shrink: 0; background: var(--primary); }
+  .notification-dot[data-muted='true'] { background: var(--muted-foreground); }
+  .notification-dot[data-security='true'] { background: var(--destructive); }
+  .notification-dot[data-read='true'] { background: transparent; }
+  .notification-badge { align-self: flex-start; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.125rem 0.25rem; font-size: var(--svadmin-text-caption); }
+  .notification-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem 0 0 1rem; }
+  .notification-actions button { padding: 0.375rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--background); color: var(--foreground); font-size: var(--svadmin-text-caption); }
+  .notification-actions button[data-variant='primary'] { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+  .notification-actions button[data-variant='destructive'] { color: var(--destructive); border-color: var(--destructive); }
+  .notification-error { margin: 0; padding: 0.75rem 1rem; color: var(--destructive); background: var(--card); font-size: var(--svadmin-text-label); }
+  .notification-empty { padding: 3rem 1rem; margin: 0; color: var(--muted-foreground); text-align: center; font-size: var(--svadmin-text-label); }
+  .notification-quiet-status { margin: 0; padding: 0.75rem 1rem; color: var(--muted-foreground); background: var(--muted); font-size: var(--svadmin-text-caption); }
+</style>

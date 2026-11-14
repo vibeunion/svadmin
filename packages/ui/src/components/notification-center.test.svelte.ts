@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import NotificationCenter from './NotificationCenter.svelte';
 import NotificationDrawer, { type NotificationItem as DrawerItem } from './NotificationDrawer.svelte';
 
@@ -91,11 +91,11 @@ describe('NotificationCenter Component', () => {
 
 describe('NotificationDrawer Component', () => {
   it('renders categorized tabs and items with data-svadmin-component', () => {
-    const { container } = render(NotificationDrawer, {
+    render(NotificationDrawer, {
       open: true,
       items: drawerItems,
     });
-    const drawer = container.querySelector('[data-svadmin-component="NotificationDrawer"]');
+    const drawer = screen.getByRole('dialog', { name: 'Notification Center Drawer' });
     expect(drawer).not.toBeNull();
     expect(screen.getByText('Quarterly Audit Review')).toBeDefined();
     expect(screen.getByText('System Maintenance Window')).toBeDefined();
@@ -130,4 +130,119 @@ describe('NotificationDrawer Component', () => {
 
     expect(triggeredAction).toBe('sign');
   });
+  it('adds unread filtering and reacts when parent data changes', async () => {
+    const view = render(NotificationDrawer, { open: true, items: drawerItems });
+    await fireEvent.click(screen.getByRole('button', { name: /^Unread/ }));
+    expect(screen.queryByText('Brute-force attack blocked')).toBeNull();
+    await view.rerender({ items: [...drawerItems, { id: 'd4', title: 'New Task', category: 'TASKS', read: false, createdAt: 'now' }] });
+    expect(screen.getByText('New Task')).toBeDefined();
+    expect(screen.getByText('3 unread notifications')).toBeDefined();
+  });
+
+  it('marks a frozen notification without mutating caller data', async () => {
+    const firstItem = drawerItems[0];
+    if (!firstItem) throw new Error('Missing notification fixture');
+    const source = Object.freeze({ ...firstItem });
+    const onItemClick = vi.fn();
+    render(NotificationDrawer, { open: true, items: [source], onItemClick });
+    await fireEvent.click(screen.getByRole('button', { name: /Quarterly Audit Review/ }));
+    await waitFor(() => expect(screen.getByText('0 unread notifications')).toBeDefined());
+    expect(source.read).toBe(false);
+    expect(onItemClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'd1', read: true }));
+  });
+
+  it('keeps failed operations visible and prevents duplicate quick actions', async () => {
+    let rejectOperation: (error: Error) => void = () => {};
+    const task = new Promise<void>((_resolve, reject) => { rejectOperation = reject; });
+    const onAction = vi.fn(() => task);
+    const onError = vi.fn();
+    render(NotificationDrawer, { open: true, items: drawerItems, onAction, onError });
+    const sign = screen.getByRole('button', { name: 'Sign Document' });
+    await fireEvent.click(sign);
+    await fireEvent.click(sign);
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(sign.hasAttribute('disabled')).toBe(true);
+    rejectOperation(new Error('Approval service unavailable'));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Approval service unavailable'));
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(sign.hasAttribute('disabled')).toBe(false);
+    expect(screen.getByText('2 unread notifications')).toBeDefined();
+  });
+
+  it('runs an item-specific action once instead of also dispatching the global handler', async () => {
+    const ownAction = vi.fn(); const globalAction = vi.fn();
+    const firstItem = drawerItems[0];
+    if (!firstItem) throw new Error('Missing notification fixture');
+    render(NotificationDrawer, { open: true, items: [{ ...firstItem, actions: [{ id: 'sign', label: 'Sign Document', onClick: ownAction }] }], onAction: globalAction });
+    await fireEvent.click(screen.getByRole('button', { name: 'Sign Document' }));
+    await waitFor(() => expect(ownAction).toHaveBeenCalledTimes(1));
+    expect(globalAction).not.toHaveBeenCalled();
+  });
+
+  it('does not mark items as read when the persistence callback rejects', async () => {
+    render(NotificationDrawer, { open: true, items: drawerItems, onMarkAllRead: async () => { throw new Error('Save failed'); } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Mark all as read' }));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Save failed'));
+    expect(screen.getByText('2 unread notifications')).toBeDefined();
+  });
+
+  it('applies global mark/read/clear controls even when a category is selected', async () => {
+    const onClearRead = vi.fn();
+    render(NotificationDrawer, { open: true, items: drawerItems, onClearRead });
+    await fireEvent.click(screen.getByRole('button', { name: /^Tasks/ }));
+    const clearRead = screen.getByRole('button', { name: 'Clear read' });
+    expect(clearRead.hasAttribute('disabled')).toBe(false);
+    await fireEvent.click(clearRead);
+    await waitFor(() => expect(onClearRead).toHaveBeenCalledTimes(1));
+    await fireEvent.click(screen.getByRole('button', { name: /^Security/ }));
+    expect(screen.queryByText('Brute-force attack blocked')).toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: 'Mark all as read' }));
+    await waitFor(() => expect(screen.getByText('0 unread notifications')).toBeDefined());
+  });
+
+  it('does not mark newly received messages while a bulk save is in flight', async () => {
+    let finish: () => void = () => {};
+    const task = new Promise<void>(resolve => { finish = resolve; });
+    const view = render(NotificationDrawer, { open: true, items: drawerItems, onMarkAllRead: () => task });
+    await fireEvent.click(screen.getByRole('button', { name: 'Mark all as read' }));
+    await view.rerender({ items: [...drawerItems, { id: 'new', title: 'New arrival', category: 'TASKS', read: false, createdAt: 'now' }] });
+    finish();
+    await waitFor(() => expect(screen.getByText('1 unread notification')).toBeDefined());
+    await fireEvent.click(screen.getByRole('button', { name: /^Unread/ }));
+    expect(screen.getByText('New arrival')).toBeDefined();
+    expect(screen.queryByText('Quarterly Audit Review')).toBeNull();
+  });
+
+  it('preserves security alert visibility and tone when quiet mode is enabled', async () => {
+    const onToggleDnd = vi.fn();
+    const items: DrawerItem[] = drawerItems.map(item => ({ ...item, read: false }));
+    render(NotificationDrawer, { open: true, items, onToggleDnd });
+    await fireEvent.click(screen.getByRole('button', { name: 'DND' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'DND On' }).getAttribute('aria-pressed')).toBe('true'));
+    expect(onToggleDnd).toHaveBeenCalledWith(true);
+    expect(screen.getByText('Brute-force attack blocked')).toBeDefined();
+    const securityButton = screen.getByRole('button', { name: /^Security/ });
+    expect(securityButton.querySelector('[data-security="true"]')?.getAttribute('data-muted')).toBe('false');
+  });
+
+  it('closes with Escape, traps Tab focus, and restores the opener', async () => {
+    const opener = document.createElement('button');
+    opener.textContent = 'Open notifications';
+    document.body.append(opener); opener.focus();
+    const onClose = vi.fn();
+    const view = render(NotificationDrawer, { open: true, items: drawerItems, onClose });
+    try {
+      const drawer = screen.getByRole('dialog');
+      await waitFor(() => expect(drawer.contains(document.activeElement)).toBe(true));
+      const first = screen.getByRole('button', { name: 'DND' });
+      first.focus();
+      await fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close notification drawer' }));
+      await fireEvent.keyDown(document, { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(document.activeElement).toBe(opener);
+    } finally { view.unmount(); opener.remove(); }
+  });
+
 });

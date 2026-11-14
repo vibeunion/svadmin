@@ -3062,41 +3062,36 @@ AI 规则语义解释卡片：
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
 
-### `<NotificationCenter>` / `<NotificationDrawer>`（`<GlobalNoticeDrawer>`）
+### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
 
-企业级全局通知中心与待办消息抽屉：
-- **顶栏微交互感知入口**：铃铛图标、未读呼吸灯微动效、数字角标（支持 99+ 封顶与免打扰静音状态）。
-- **多通道分类与交互过滤**：全部（All）、待办审批（Tasks）、系统公告（Notices）、安全告警（Security）。
-- **批量操作工具栏**：支持“一键全部标为已读”、“清空已读”与快捷开启免打扰（DND）。
-- **卡片内嵌动作流**：消息卡片支持直接内嵌快捷操作（如“通过审批”、“驳回”、“下载报表”或“查看详情”跳转路由）。
+紧凑铃铛弹层保持现有 `items`、`onread`、`onreadall` API 兼容。通过 `showDrawerButton` 和 `onopendrawer` 打开完整通知抽屉。
+
+抽屉支持全部、未读、任务、公告和安全筛选，不原地修改调用方数据；提供全局全部已读、清理已读，以及 Escape 关闭、焦点约束和焦点恢复。异步操作等待成功后更新状态，阻止重复提交并展示失败。单个操作的 `onClick` 优先于抽屉级 `onAction`，避免重复执行。
+
+`dndEnabled` 是可绑定的免打扰偏好；宿主可通过 `onToggleDnd` 接入自己的提醒投递策略。抽屉不会丢弃消息；免打扰仅弱化普通徽标，安全消息及其徽标始终可见。
 
 ```svelte
 <script lang="ts">
-  import { NotificationCenter } from '@svadmin/ui';
+  import { NotificationCenter, NotificationDrawer, type NotificationDrawerItem } from '@svadmin/ui';
 
-  let notifications = [
+  let drawerOpen = $state(false);
+  let notifications = $state<NotificationDrawerItem[]>([
     {
-      id: 'task-1',
-      title: '差旅报销审批待处理',
-      description: '市场部提交了 1,280 元客户招待差旅费用单。',
-      category: 'TASKS',
-      read: false,
-      createdAt: '5分钟前',
-      actions: [
-        { id: 'approve', label: '通过审批', variant: 'primary' },
-        { id: 'reject', label: '驳回', variant: 'destructive' },
-      ],
+      id: 'task-1', title: 'Expense reimbursement pending', category: 'TASKS',
+      read: false, createdAt: '5m ago',
+      actions: [{ id: 'approve', label: 'Approve', variant: 'primary' }],
     },
     {
-      id: 'sec-1',
-      title: '新设备登录告警',
-      description: '账号在上海新设备登录（macOS / Chrome）。',
-      category: 'SECURITY_ALERTS',
-      read: false,
-      createdAt: '1小时前',
+      id: 'security-1', title: 'New device login alert', category: 'SECURITY_ALERTS',
+      read: false, createdAt: '1h ago',
     },
-  ];
+  ]);
 </script>
 
-<NotificationCenter bind:items={notifications} />
+<NotificationCenter
+  items={notifications.map(item => ({ ...item, time: item.createdAt }))}
+  showDrawerButton
+  onopendrawer={() => { drawerOpen = true; }}
+/>
+<NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
