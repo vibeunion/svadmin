@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.17](https://github.com/vibeunion/svadmin/compare/strapi-graphql-v0.2.16...strapi-graphql-v0.2.17) (2026-11-14)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.13
+  * peerDependencies
+    * @svadmin/core bumped to 0.82.0
+
 ## [0.2.16](https://github.com/vibeunion/svadmin/compare/strapi-graphql-v0.2.15...strapi-graphql-v0.2.16) (2026-11-13)
 
 

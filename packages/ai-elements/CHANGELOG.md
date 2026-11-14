@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.14.6...ai-elements-v0.15.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.82.0
+
 ## [0.14.6](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.14.5...ai-elements-v0.14.6) (2026-11-13)
 
 

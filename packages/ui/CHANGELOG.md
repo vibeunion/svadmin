@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.127.0](https://github.com/vibeunion/svadmin/compare/ui-v0.126.1...ui-v0.127.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** align admin UI and workspace scope ([9714dfb](https://github.com/vibeunion/svadmin/commit/9714dfba3d4bab9f6c340780d63bf6e5ce63ee94))
+* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.12
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.82.0
+
 ## [0.126.1](https://github.com/vibeunion/svadmin/compare/ui-v0.126.0...ui-v0.126.1) (2026-11-13)
 
 

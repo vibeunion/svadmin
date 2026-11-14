@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.21.0](https://github.com/vibeunion/svadmin/compare/surface-v0.20.29...surface-v0.21.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.53.0 <0.82.0 to >=0.82.0
+    * @svadmin/ui bumped from >=0.73.0 <0.127.0 to >=0.127.0
+
 ## [0.20.29](https://github.com/vibeunion/svadmin/compare/surface-v0.20.28...surface-v0.20.29) (2026-11-13)
 
 

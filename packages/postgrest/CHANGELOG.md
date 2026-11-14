@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.4](https://github.com/vibeunion/svadmin/compare/postgrest-v0.2.3...postgrest-v0.2.4) (2026-11-14)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.82.0
+
 ## [0.2.3](https://github.com/vibeunion/svadmin/compare/postgrest-v0.2.2...postgrest-v0.2.3) (2026-11-13)
 
 
