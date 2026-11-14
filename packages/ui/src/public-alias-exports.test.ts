@@ -296,6 +296,10 @@ import {
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
+  ContractClauseDiffViewer,
+  LegalClauseComparator,
+  ElectronicSealInspector,
+  StampAuthenticityCard,
   ServiceDeskTicketCard,
   SupportTicketCard,
   CannedResponsePicker,
@@ -586,6 +590,10 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(ContractClauseDiffViewer).toBeDefined();
+    expect(LegalClauseComparator).toBe(ContractClauseDiffViewer);
+    expect(ElectronicSealInspector).toBeDefined();
+    expect(StampAuthenticityCard).toBe(ElectronicSealInspector);
     expect(GatewayRouteEditor).toBeDefined();
     expect(ApiRouteRuleCard).toBe(GatewayRouteEditor);
     expect(RateLimitPolicyPanel).toBeDefined();

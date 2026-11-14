@@ -1032,6 +1032,30 @@ export {
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
 
+// Enterprise contract clause diff viewer & legal compliance suite
+export {
+  default as ContractClauseDiffViewer,
+  default as LegalClauseComparator,
+  type ContractClauseDiffViewerProps,
+  type ContractClause,
+  type ClauseChangeType,
+  type ClauseRiskLevel,
+  type ClauseDecisionStatus,
+  type ClauseAnnotation,
+} from './components/ContractClauseDiffViewer.svelte';
+
+// Enterprise electronic seal authenticity inspector & CA verification suite
+export {
+  default as ElectronicSealInspector,
+  default as StampAuthenticityCard,
+  type ElectronicSealInspectorProps,
+  type ElectronicSealInfo,
+  type SealValidationStatus,
+  type SealType as ElectronicSealValidationType,
+  type SealCertificateInfo,
+  type SealTimestampInfo,
+  type SealVerificationLog,
+} from './components/ElectronicSealInspector.svelte';
 // Enterprise microservice API gateway route & rate limit circuit breaker governance suite
 export {
   default as GatewayRouteEditor,
