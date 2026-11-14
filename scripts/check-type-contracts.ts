@@ -54,6 +54,7 @@ for (const project of [
   'packages/ably/tsconfig.json',
   'packages/cerbos/tsconfig.json',
   'packages/meilisearch/tsconfig.json',
+  'packages/qdrant/tsconfig.json',
   'packages/typesense/tsconfig.json',
   'packages/postgrest/tsconfig.json',
   'packages/sse/tsconfig.json',

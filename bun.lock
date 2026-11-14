@@ -672,6 +672,13 @@
         "@svadmin/core": "workspace:*",
       },
     },
+    "packages/qdrant": {
+      "name": "@svadmin/qdrant",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/refine-adapter": {
       "name": "@svadmin/refine-adapter",
       "version": "0.15.14",
@@ -1761,6 +1768,8 @@
     "@svadmin/postgrest": ["@svadmin/postgrest@workspace:packages/postgrest"],
 
     "@svadmin/pusher": ["@svadmin/pusher@workspace:packages/pusher"],
+
+    "@svadmin/qdrant": ["@svadmin/qdrant@workspace:packages/qdrant"],
 
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
 

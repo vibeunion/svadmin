@@ -3507,15 +3507,25 @@ Immutable compliance evidence snapshot card designed for regulatory audit trails
   actionLabel="Privilege Elevation Approved"
   changes={diffItems}
   onexport={(format) => console.log('Export format:', format)}
+/>
+```
+
 ### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
+
 Enterprise service desk ticket lifecycle and support collaboration card:
 - **SLA Breach Countdown**: Real-time resolution and first-response SLA timer with urgency alerts and breach warning badges.
 - **Ticket Lifecycle Capsule**: Distinct indicators across unassigned, in progress, pending customer, resolved, and closed states.
 - **Collaborator Stacks**: Structured display for reporter, current technician, and collaborator avatar chips.
 - **Quick Desk Actions**: One-click urge notification, reassign technician, and resolve ticket actions.
+
+```svelte
+<script lang="ts">
   import { ServiceDeskTicketCard } from '@svadmin/ui';
+
   const reporter = { id: 'u1', name: 'Alex' };
   const assignee = { id: 'u2', name: 'David' };
+</script>
+
 <ServiceDeskTicketCard
   ticketId="TCK-20261114-001"
   title="Production connection pool reached critical threshold"
@@ -3526,12 +3536,18 @@ Enterprise service desk ticket lifecycle and support collaboration card:
   categoryTags={['Database', 'Infrastructure']}
 />
 ```
+
 ### `<CannedResponsePicker>` / `<QuickReplyDrawer>`
+
 Helpdesk and customer support quick reply template drawer:
 - **Category Filter & Fuzzy Search**: Fast template retrieval with category pills and instant query keyword matching.
 - **Dynamic Variable Extraction**: Automatically parse and populate `{{customer_name}}`, `{{ticket_id}}`, and contextual variables.
 - **Instant Injection**: Render and inject formatted text into ticket comments or conversation inputs with a single click.
+
+```svelte
+<script lang="ts">
   import { CannedResponsePicker } from '@svadmin/ui';
+
   const templates = [
     {
       id: '1',
@@ -3541,6 +3557,9 @@ Helpdesk and customer support quick reply template drawer:
       content: 'Hello {{customer_name}}, your ticket {{ticket_id}} is being reviewed by our engineering team.',
   ];
     },
+  ];
+</script>
+
 <CannedResponsePicker
   {templates}
   contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}
