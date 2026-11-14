@@ -1012,3 +1012,16 @@ export {
   type NotificationAction,
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
+
+// Enterprise step-up authentication & audit snapshot compliance suite
+export {
+  default as StepUpAuthModal,
+  default as PrivilegeElevationModal,
+  type StepUpAuthMethod,
+  type StepUpRiskLevel,
+} from './components/StepUpAuthModal.svelte';
+export {
+  default as AuditSnapshotCapture,
+  default as ComplianceEvidenceCard,
+  type AuditSnapshotDiffItem,
+} from './components/AuditSnapshotCapture.svelte';
