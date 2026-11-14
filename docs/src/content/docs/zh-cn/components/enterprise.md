@@ -3240,3 +3240,83 @@ AI 规则语义解释卡片：
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+
+企业法务合同条款版本对比与决策套件：
+- **条款逐句对比**：支持双侧对比（Split）与合并对比（Unified）自由切换，高亮新增、删除、修订条款。
+- **条款目录索引**：左侧展示条款大纲、风险等级（高/中/低）与决策状态（待决/已采纳/已驳回）。
+- **行内合规批注**：支持查看法务批注流，并直接就地追加法务审查意见。
+- **采纳与驳回控制**：支持单条款独立采纳/驳回，以及一键全局全量采纳/驳回。
+
+```svelte
+<script lang="ts">
+  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
+
+  let clauses: ContractClause[] = [
+    {
+      id: 'c1',
+      clauseNumber: '3.1',
+      title: '付款期限与结算周期',
+      changeType: 'modified',
+      riskLevel: 'high',
+      originalContent: '买方应在收到发票后 30 个工作日内支付全部款项。',
+      proposedContent: '买方应在收到发票并完成现场验收后 60 个工作日内支付首期款 70%。',
+      decision: 'pending',
+    },
+  ];
+</script>
+
+<ContractClauseDiffViewer
+  {clauses}
+  originalVersionLabel="标准版 v1.0"
+  proposedVersionLabel="对手方修订版 v2.0"
+  onDecisionChange={(id, dec) => console.log('决策变更:', id, dec)}
+/>
+```
+
+### `<ElectronicSealInspector>` / `<StampAuthenticityCard>`
+
+企业级电子印章防伪验真与 CA 数字证书认证套件：
+- **逼真矢量印章预览**：纯 SVG 矢量防伪印章，支持企业名称环形路径、星徽与防伪编码展示。
+- **验真状态与防伪预警**：实时展示验真结果（真实有效、已过期、已被吊销、文档被篡改）。
+- **CA 数字证书链**：详细展示证书颁发机构（如 CFCA）、证书使用者、算法（SM2/RSA）、序列号与 SHA-256 证书指纹。
+- **可信时间戳 (TSA)**：集成国家授时中心时间戳存证、盖章时间与令牌哈希校验。
+- **审计验真链路**：逐步呈现证书有效性、文档完整性与防伪核验日志，支持一键导出验真凭据。
+
+```svelte
+<script lang="ts">
+  import { ElectronicSealInspector, type ElectronicSealInfo } from '@svadmin/ui';
+
+  const seal: ElectronicSealInfo = {
+    id: 'seal-001',
+    sealName: '北京某某科技有限公司 合同专用章',
+    sealType: 'contract',
+    enterpriseName: '北京某某科技有限公司',
+    creditCode: '91110108MA01ABCD12',
+    status: 'valid',
+    documentHashMatch: true,
+    certificate: {
+      issuer: '中国金融认证中心 (CFCA)',
+      subject: 'CN=北京某某科技有限公司',
+      serialNumber: '7B3A99201F82E601C2',
+      algorithm: 'SM2-with-SM3',
+      validFrom: '2024-01-01',
+      validTo: '2027-01-01',
+      fingerprintSha256: '9A:B3:7C:12:...',
+    },
+    timestamp: {
+      tsaName: '国家授时中心可信时间戳服务',
+      stampedAt: '2026-11-14 15:32:08 CST',
+      timestampTokenId: 'TSA-TOKEN-SHA256-VALID',
+      verified: true,
+    },
+  };
+</script>
+
+<ElectronicSealInspector
+  {seal}
+  onExportReport={(s) => console.log('导出验真报告:', s.sealName)}
+  onRevalidate={(id) => console.log('重新验真:', id)}
+/>
+```

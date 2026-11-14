@@ -282,6 +282,10 @@ import {
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
+  ContractClauseDiffViewer,
+  LegalClauseComparator,
+  ElectronicSealInspector,
+  StampAuthenticityCard,
   message,
   notification,
   toast,
@@ -562,6 +566,10 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(ContractClauseDiffViewer).toBeDefined();
+    expect(LegalClauseComparator).toBe(ContractClauseDiffViewer);
+    expect(ElectronicSealInspector).toBeDefined();
+    expect(StampAuthenticityCard).toBe(ElectronicSealInspector);
   });
 
   it('keeps service aliases bound to canonical services', () => {
