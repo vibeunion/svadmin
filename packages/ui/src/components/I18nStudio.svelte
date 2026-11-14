@@ -36,10 +36,8 @@
 
   // Internal reactive copy of dictionaries
   let localDictionaries = $state<Record<string, Record<string, string>>>({});
-  let activeSourceOverride = $state<string | null>(null);
-  let activeTargetOverride = $state<string | null>(null);
-  const activeSource = $derived(activeSourceOverride ?? sourceLocale);
-  const activeTarget = $derived(activeTargetOverride ?? targetLocale);
+  let activeSource = $derived(sourceLocale);
+  let activeTarget = $derived(targetLocale);
   let searchQuery = $state('');
   let selectedNamespace = $state('all');
   let statusFilter = $state<'all' | 'missing' | 'modified'>('all');
@@ -80,19 +78,11 @@
     liveSuccessMessage = null;
   });
 
-  $effect(() => {
-    activeSourceOverride = sourceLocale;
-  });
-
-  $effect(() => {
-    activeTargetOverride = targetLocale;
-  });
-
   // Ensure dictionaries have objects for selected locales
-  function ensureLocale(loc: string) {
-    if (!Object.hasOwn(localDictionaries, loc)) {
-      localDictionaries[loc] = {};
-    }
+  function ensureLocale(loc: string): Record<string, string> {
+    const existing = localDictionaries[loc];
+    if (Object.hasOwn(localDictionaries, loc) && existing) return existing;
+    localDictionaries[loc] = {};
     return localDictionaries[loc];
   }
 
@@ -444,7 +434,7 @@
       <span class="text-xs text-muted-foreground">Source:</span>
       <select
         value={activeSource}
-        onchange={(event) => { activeSourceOverride = (event.currentTarget as HTMLSelectElement).value; }}
+        onchange={(event) => { activeSource = (event.currentTarget as HTMLSelectElement).value; }}
         class="svadmin-select svadmin-select--inline"
         data-size="compact"
       >
@@ -456,7 +446,7 @@
       <span class="text-xs text-muted-foreground">➔ Target:</span>
       <select
         value={activeTarget}
-        onchange={(event) => { activeTargetOverride = (event.currentTarget as HTMLSelectElement).value; }}
+        onchange={(event) => { activeTarget = (event.currentTarget as HTMLSelectElement).value; }}
         class="svadmin-select svadmin-select--inline"
         data-size="compact"
       >

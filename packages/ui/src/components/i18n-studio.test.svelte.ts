@@ -129,7 +129,7 @@ describe('I18nStudio component', () => {
     await fireEvent.click(getByRole('button', { name: 'Modified' }));
     expect(getByText('No translation keys match the selected filters.')).toBeTruthy();
     await rerender({ targetLocale: 'fr-FR' });
-    await fireEvent.click(getByRole('button', { name: 'All', exact: true }));
+    await fireEvent.click(getByRole('button', { name: 'All' }));
     expect(getAllByRole('columnheader').some((cell) => cell.textContent === 'Target: fr-FR')).toBe(true);
     await rerender({ targetLocale: 'en-US' });
     expect(getByDisplayValue('OK')).toBeTruthy();
@@ -143,7 +143,7 @@ describe('I18nStudio component', () => {
     const saved = onSave.mock.calls[0]?.[0];
     await fireEvent.click(getByRole('button', { name: 'Modified' }));
     expect(getByText('No translation keys match the selected filters.')).toBeTruthy();
-    await fireEvent.click(getByRole('button', { name: 'All', exact: true }));
+    await fireEvent.click(getByRole('button', { name: 'All' }));
     await fireEvent.input(getByDisplayValue('Saved OK'), { target: { value: 'Next draft' } });
     expect(saved?.['en-US']?.['common.ok']).toBe('Saved OK');
     expect(initialDictionaries['en-US']['common.ok']).toBe('OK');
