@@ -13,9 +13,9 @@ describe('@svadmin/sse parseSseChunk', () => {
 
     expect(remainder).toBe('');
     expect(messages.length).toBe(1);
-    expect(messages[0].event).toBe('created');
-    expect(messages[0].data).toBe('{"id": 1, "title": "Hello"}');
-    expect(messages[0].id).toBe('101');
+    expect(messages[0]?.event).toBe('created');
+    expect(messages[0]?.data).toBe('{"id": 1, "title": "Hello"}');
+    expect(messages[0]?.id).toBe('101');
   });
 
   it('handles multi-line data fields and ignores comments', () => {
@@ -28,8 +28,8 @@ describe('@svadmin/sse parseSseChunk', () => {
 
     expect(remainder).toBe('');
     expect(messages.length).toBe(1);
-    expect(messages[0].event).toBe('updated');
-    expect(messages[0].data).toBe('line 1\nline 2');
+    expect(messages[0]?.event).toBe('updated');
+    expect(messages[0]?.data).toBe('line 1\nline 2');
   });
 
   it('keeps partial chunk in remainder buffer until next block completes', () => {
@@ -47,7 +47,7 @@ describe('@svadmin/sse parseSseChunk', () => {
     });
     expect(buffer).toBe('');
     expect(messages.length).toBe(1);
-    expect(messages[0].data).toBe('{"a": 42}');
+    expect(messages[0]?.data).toBe('{"a": 42}');
   });
 });
 
@@ -87,9 +87,9 @@ describe('@svadmin/sse LiveProvider adapter', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(onConnected).toHaveBeenCalled();
     expect(receivedEvents.length).toBe(1);
-    expect(receivedEvents[0].type).toBe('INSERT');
-    expect(receivedEvents[0].resource).toBe('posts');
-    expect(receivedEvents[0].payload).toEqual({
+    expect(receivedEvents[0]?.type).toBe('INSERT');
+    expect(receivedEvents[0]?.resource).toBe('posts');
+    expect(receivedEvents[0]?.payload).toEqual({
       id: 10,
       resource: 'posts',
       title: 'New Post',

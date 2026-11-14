@@ -106,10 +106,10 @@ export interface SseLiveOptions {
   onError?: (error: unknown) => void;
 }
 
-interface SseParsedMessage {
-  event?: string;
+export interface SseParsedMessage {
+  event?: string | undefined;
   data: string;
-  id?: string;
+  id?: string | undefined;
 }
 
 export function parseSseChunk(
@@ -143,11 +143,16 @@ export function parseSseChunk(
     }
 
     if (dataLines.length > 0 || eventName) {
-      onMessage({
-        event: eventName,
+      const msg: SseParsedMessage = {
         data: dataLines.join('\n'),
-        id: messageId,
-      });
+      };
+      if (eventName !== undefined) {
+        msg.event = eventName;
+      }
+      if (messageId !== undefined) {
+        msg.id = messageId;
+      }
+      onMessage(msg);
     }
   }
 
