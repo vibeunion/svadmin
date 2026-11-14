@@ -319,8 +319,8 @@
             value={rule?.sourceField ?? ''}
             onchange={(e) => updateRule(target.name, { sourceField: e.currentTarget.value || undefined })}
             class={cn(
-              'h-9 w-full rounded-md border bg-background px-3 py-1 text-xs text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-              isMissingRequired ? 'border-amber-500/60 ring-amber-500/30' : 'border-input'
+              'svadmin-select h-9 text-xs',
+              isMissingRequired ? 'border-warning ring-1 ring-warning/30' : ''
             )}
           >
             <option value="">-- 未映射 (使用空值或回退值) --</option>
@@ -338,7 +338,7 @@
             disabled={disabled}
             value={rule?.transform ?? 'direct'}
             onchange={(e) => updateRule(target.name, { transform: e.currentTarget.value as TransformType })}
-            class="h-9 w-28 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-select svadmin-select--inline h-9 w-28 text-xs"
           >
             <option value="direct">直接映射</option>
             <option value="trim">去除前后空格</option>
@@ -374,15 +374,15 @@
         <table class="w-full text-left text-xs">
           <thead class="border-b border-border/60 bg-muted/40 font-medium text-muted-foreground">
             <tr>
-              {#each targetFields as target}
+              {#each targetFields as target (target.name)}
                 <th class="px-3 py-2 whitespace-nowrap">{target.label}</th>
               {/each}
             </tr>
           </thead>
           <tbody class="divide-y divide-border/40">
-            {#each transformedSamples as sampleRow, idx}
+            {#each transformedSamples as sampleRow, sampleIndex (sampleIndex)}
               <tr class="hover:bg-muted/30">
-                {#each targetFields as target}
+                {#each targetFields as target (target.name)}
                   <td class="px-3 py-1.5 text-foreground whitespace-nowrap font-mono text-[11px]">
                     {String(sampleRow[target.name] ?? '-')}
                   </td>

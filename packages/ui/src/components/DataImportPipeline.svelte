@@ -1,14 +1,12 @@
 <script lang="ts">
   import {
     UploadCloud,
-    FileSpreadsheet,
     ArrowRight,
     ArrowLeft,
     CheckCircle2,
     AlertCircle,
     RotateCcw,
     Trash2,
-    Filter,
     Play,
     Check,
     Loader2,
@@ -300,7 +298,7 @@
           { step: 2, label: '字段映射' },
           { step: 3, label: '质检纠错' },
           { step: 4, label: '批量入库' },
-        ] as s}
+        ] as s (s.step)}
           <div class="flex items-center gap-2">
             <div
               class={cn(
@@ -469,7 +467,7 @@
             <tr>
               <th class="px-3 py-2 text-center w-12">#</th>
               <th class="px-3 py-2 w-16">状态</th>
-              {#each targetFields as target}
+              {#each targetFields as target (target.name)}
                 <th class="px-3 py-2 whitespace-nowrap">{target.label}</th>
               {/each}
               <th class="px-3 py-2 text-center w-16">操作</th>
@@ -493,7 +491,7 @@
                   {/if}
                 </td>
 
-                {#each targetFields as target}
+                {#each targetFields as target (target.name)}
                   {@const cellErr = item.errors.find((e) => e.field === target.name)}
                   <td class="px-2 py-1">
                     <input
