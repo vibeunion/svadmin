@@ -6,16 +6,10 @@
     RotateCcw,
     Volume2,
     VolumeX,
-    AlertCircle,
     CheckCircle2,
-    Clock,
     FileAudio,
     FileVideo,
-    Tag,
-    Sliders,
-    MessageSquare,
-    ChevronRight,
-    Sparkles
+    Tag
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
@@ -119,6 +113,11 @@
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
+  // 通知宿主综合判定与得分变更
+  $effect(() => {
+    onResultChange?.(scoring.result, scoring.finalScore);
+  });
+
   function handleSeekTo(seconds: number) {
     currentTime = Math.max(0, Math.min(media.durationSeconds, seconds));
     onSeek?.(currentTime);
@@ -137,22 +136,22 @@
   function getLevelConfig(level: InspectionViolationLevel) {
     switch (level) {
       case 'critical':
-        return { label: '合规红线 / 严重', class: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400' };
+        return { label: '合规红线 / 严重', class: 'bg-destructive/15 text-destructive border-destructive/30 dark:text-destructive' };
       case 'major':
-        return { label: '业务违规 / 中度', class: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400' };
+        return { label: '业务违规 / 中度', class: 'bg-warning/15 text-warning border-warning/30 dark:text-warning' };
       default:
-        return { label: '话术瑕疵 / 轻微', class: 'bg-blue-500/15 text-blue-600 border-blue-500/30 dark:text-blue-400' };
+        return { label: '话术瑕疵 / 轻微', class: 'bg-info/15 text-info border-info/30 dark:text-info' };
     }
   }
 
   function getResultConfig(result: InspectionOverallResult) {
     switch (result) {
       case 'passed':
-        return { label: '质检合格', class: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 dark:text-emerald-400' };
+        return { label: '质检合格', class: 'bg-success/15 text-success border-success/30 dark:text-success' };
       case 'rework':
-        return { label: '待复核整改', class: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400' };
+        return { label: '待复核整改', class: 'bg-warning/15 text-warning border-warning/30 dark:text-warning' };
       default:
-        return { label: '质检不合格', class: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400' };
+        return { label: '质检不合格', class: 'bg-destructive/15 text-destructive border-destructive/30 dark:text-destructive' };
     }
   }
 
@@ -238,7 +237,7 @@
           type="button"
           class={cn(
             'absolute -bottom-1 z-20 -translate-x-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-125',
-            v.level === 'critical' ? 'bg-rose-500 text-white h-4 w-4 text-[10px]' : 'bg-amber-500 text-white h-3.5 w-3.5 text-[9px]'
+            v.level === 'critical' ? 'bg-destructive text-white h-4 w-4 text-[10px]' : 'bg-warning text-white h-3.5 w-3.5 text-[9px]'
           )}
           style="left: {posPercent}%;"
           onclick={() => handleSeekTo(v.timestampSeconds)}
@@ -330,7 +329,7 @@
           aria-label={isMuted ? '取消静音' : '静音'}
         >
           {#if isMuted}
-            <VolumeX class="h-3.5 w-3.5 text-rose-500" />
+            <VolumeX class="h-3.5 w-3.5 text-destructive" />
           {:else}
             <Volume2 class="h-3.5 w-3.5" />
           {/if}
@@ -345,7 +344,7 @@
     <div class="flex flex-col gap-2 p-4 lg:col-span-7">
       <div class="flex items-center justify-between">
         <span class="font-semibold text-foreground">质检违规扣分点 ({violations.length})</span>
-        <span class="text-rose-600 dark:text-rose-400 font-mono">累计扣分：-{scoring.totalDeduction} 分</span>
+        <span class="text-destructive dark:text-destructive font-mono">累计扣分：-{scoring.totalDeduction} 分</span>
       </div>
 
       <div class="flex flex-col gap-1.5 pt-1">
@@ -381,7 +380,7 @@
               <span class={cn('rounded border px-1.5 py-0.2 text-[10px] font-medium', levelBadge.class)}>
                 {levelBadge.label}
               </span>
-              <span class="font-mono font-semibold text-rose-600 dark:text-rose-400">
+              <span class="font-mono font-semibold text-destructive dark:text-destructive">
                 -{v.deduction}分
               </span>
             </div>
@@ -390,7 +389,7 @@
 
         {#if violations.length === 0}
           <div class="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-            <CheckCircle2 class="h-6 w-6 text-emerald-500 mb-1" />
+            <CheckCircle2 class="h-6 w-6 text-success mb-1" />
             <span>未发现违规扣分项，质检表现良好</span>
           </div>
         {/if}

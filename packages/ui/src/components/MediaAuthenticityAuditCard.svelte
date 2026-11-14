@@ -4,16 +4,8 @@
     Camera,
     MapPin,
     ShieldCheck,
-    ShieldAlert,
-    ShieldX,
-    FileCheck2,
-    Calendar,
-    Cpu,
-    Fingerprint,
     Download,
     RefreshCw,
-    SlidersHorizontal,
-    ExternalLink,
     AlertTriangle
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
@@ -112,24 +104,24 @@
         return {
           label: '原始可信 · 未见篡改',
           tone: 'success',
-          border: 'border-emerald-500/30',
-          badgeClass: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 dark:text-emerald-400',
+          border: 'border-success/30',
+          badgeClass: 'bg-success/15 text-success border-success/30 dark:text-success',
           desc: 'EXIF 链路完整，拍摄时间与数字化时间一致，未检出图像处理软件二次重编码痕迹。'
         };
       case 'low':
         return {
           label: '低风险 · 元数据轻度修剪',
           tone: 'warning',
-          border: 'border-amber-500/30',
-          badgeClass: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400',
+          border: 'border-warning/30',
+          badgeClass: 'bg-warning/15 text-warning border-warning/30 dark:text-warning',
           desc: '存在常规重命名或无损压缩痕迹，核心拍摄参数与设备特征仍保持一致。'
         };
       case 'suspicious':
         return {
           label: '疑似篡改 · 存在二次编辑',
           tone: 'danger',
-          border: 'border-rose-500/30',
-          badgeClass: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400',
+          border: 'border-destructive/30',
+          badgeClass: 'bg-destructive/15 text-destructive border-destructive/30 dark:text-destructive',
           desc: '检测到图像处理软件签名或时间戳跳变，建议法务与合规团队人工核验原件。'
         };
       default:
@@ -197,7 +189,7 @@
             <div
               class={cn(
                 'h-full transition-all',
-                data.tamperConfidencePercent > 50 ? 'bg-rose-500' : 'bg-emerald-500'
+                data.tamperConfidencePercent > 50 ? 'bg-destructive' : 'bg-success'
               )}
               style="width: {data.tamperConfidencePercent}%;"
             ></div>
@@ -282,11 +274,11 @@
     <div class="flex flex-col gap-2.5 p-5 bg-muted/10">
       <div class="flex items-center justify-between border-b border-border pb-2">
         <span class="flex items-center gap-1.5 font-semibold text-foreground">
-          <MapPin class="h-4 w-4 text-emerald-500" />
+          <MapPin class="h-4 w-4 text-success" />
           拍摄地理位置与隐形水印
         </span>
         {#if data.watermark?.detected}
-          <span class="rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-1.5 py-0.2 text-[10px]">
+          <span class="rounded bg-success/10 text-success border border-success/20 px-1.5 py-0.2 text-[10px]">
             检出数字水印
           </span>
         {:else}
@@ -332,9 +324,9 @@
         {#each data.auditFindings as finding, idx (idx)}
           <div class="flex items-center gap-1.5 rounded-md border border-border bg-muted/30 px-2.5 py-1 text-muted-foreground">
             {#if data.riskLevel === 'safe'}
-              <ShieldCheck class="h-3.5 w-3.5 text-emerald-500" />
+              <ShieldCheck class="h-3.5 w-3.5 text-success" />
             {:else}
-              <AlertTriangle class="h-3.5 w-3.5 text-amber-500" />
+              <AlertTriangle class="h-3.5 w-3.5 text-warning" />
             {/if}
             <span>{finding}</span>
           </div>
