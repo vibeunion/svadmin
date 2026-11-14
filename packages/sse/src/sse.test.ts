@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'bun:test';
 import type { LiveEvent } from '@svadmin/core';
-import { createSseLiveProvider, parseSseChunk } from './sse-live-provider';
+import { createSseLiveProvider, parseSseChunk, type SseParsedMessage } from './sse-live-provider';
 
 describe('@svadmin/sse parseSseChunk', () => {
   it('correctly parses event, data and id from a standard SSE block', () => {
-    const messages: Array<{ event?: string; data: string; id?: string }> = [];
+    const messages: SseParsedMessage[] = [];
     const chunk = 'event: created\ndata: {"id": 1, "title": "Hello"}\nid: 101\n\n';
 
     const remainder = parseSseChunk(chunk, '', (msg) => {
@@ -19,7 +19,7 @@ describe('@svadmin/sse parseSseChunk', () => {
   });
 
   it('handles multi-line data fields and ignores comments', () => {
-    const messages: Array<{ event?: string; data: string }> = [];
+    const messages: SseParsedMessage[] = [];
     const chunk = ': heartbeat comment\nevent: updated\ndata: line 1\ndata: line 2\n\n';
 
     const remainder = parseSseChunk(chunk, '', (msg) => {
@@ -33,7 +33,7 @@ describe('@svadmin/sse parseSseChunk', () => {
   });
 
   it('keeps partial chunk in remainder buffer until next block completes', () => {
-    const messages: Array<{ event?: string; data: string }> = [];
+    const messages: SseParsedMessage[] = [];
     let buffer = '';
 
     buffer = parseSseChunk('event: insert\ndata: {"a":', buffer, (msg) => {
