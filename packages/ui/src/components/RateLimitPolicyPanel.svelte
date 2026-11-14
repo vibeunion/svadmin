@@ -1,18 +1,16 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import {
     Activity,
-    Zap,
     ShieldOff,
     ShieldCheck,
     Gauge,
     RotateCcw,
-    Sliders,
     AlertOctagon,
     ServerCrash,
     Check,
     Save,
-    Info,
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
 
   export type CircuitBreakerState = 'closed' | 'open' | 'half_open';
   export type RateLimitDimension = 'client_ip' | 'user_id' | 'api_key' | 'tenant_id';
@@ -68,7 +66,7 @@
     onresetCircuitBreaker,
   }: Props = $props();
 
-  let policy = $state<RateLimitPolicyConfig>({ ...defaultConfig, ...config });
+  let policy = $state<RateLimitPolicyConfig>(untrack(() => ({ ...defaultConfig, ...config })));
   let saveSuccess = $state(false);
 
   function handleResetCircuitBreaker() {

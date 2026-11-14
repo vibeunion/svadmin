@@ -1017,7 +1017,7 @@ export {
 export {
   default as GatewayRouteEditor,
   default as ApiRouteRuleCard,
-  type HttpMethod,
+  type HttpMethod as GatewayHttpMethod,
   type HeaderMatchRule,
   type GatewayRouteConfig,
 } from './components/GatewayRouteEditor.svelte';

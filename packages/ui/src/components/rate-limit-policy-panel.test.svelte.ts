@@ -16,10 +16,10 @@ describe('RateLimitPolicyPanel', () => {
       },
     });
 
-    expect(screen.getByText('API 限流熔断与自愈治理看板')).toBeInTheDocument();
-    expect(screen.getByText('熔断器状态：CLOSED (闭合通行)')).toBeInTheDocument();
-    expect(screen.getByText('600 次/秒')).toBeInTheDocument();
-    expect(screen.getByText('1200 并发令牌')).toBeInTheDocument();
+    expect(screen.getByText('API 限流熔断与自愈治理看板')).toBeTruthy();
+    expect(screen.getByText('熔断器状态：CLOSED (闭合通行)')).toBeTruthy();
+    expect(screen.getByText('600 次/秒')).toBeTruthy();
+    expect(screen.getByText('1200 并发令牌')).toBeTruthy();
   });
 
   it('displays warning style when circuit breaker state is open or half_open', () => {
@@ -31,7 +31,7 @@ describe('RateLimitPolicyPanel', () => {
       },
     });
 
-    expect(screen.getByText('熔断器状态：OPEN (阻断降级中)')).toBeInTheDocument();
+    expect(screen.getByText('熔断器状态：OPEN (阻断降级中)')).toBeTruthy();
   });
 
   it('resets circuit breaker state when reset button is clicked', async () => {
@@ -50,7 +50,7 @@ describe('RateLimitPolicyPanel', () => {
     await fireEvent.click(resetBtn);
 
     expect(onreset).toHaveBeenCalled();
-    expect(screen.getByText('熔断器状态：CLOSED (闭合通行)')).toBeInTheDocument();
+    expect(screen.getByText('熔断器状态：CLOSED (闭合通行)')).toBeTruthy();
   });
 
   it('triggers onsave callback when saving configuration', async () => {

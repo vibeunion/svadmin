@@ -23,11 +23,11 @@ describe('GatewayRouteEditor', () => {
       },
     });
 
-    expect(screen.getByText('微服务 API 网关路由编排')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('订单微服务路由')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('/api/v1/orders/**')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('http://order-cluster.internal:8080')).toBeInTheDocument();
-    expect(screen.getByText('规则已生效')).toBeInTheDocument();
+    expect(screen.getByText('微服务 API 网关路由编排')).toBeTruthy();
+    expect(screen.getByDisplayValue('订单微服务路由')).toBeTruthy();
+    expect(screen.getByDisplayValue('/api/v1/orders/**')).toBeTruthy();
+    expect(screen.getByDisplayValue('http://order-cluster.internal:8080')).toBeTruthy();
+    expect(screen.getByText('规则已生效')).toBeTruthy();
   });
 
   it('toggles HTTP methods on click', async () => {
@@ -51,7 +51,7 @@ describe('GatewayRouteEditor', () => {
 
     const postBtn = screen.getByRole('button', { name: 'POST' });
     await fireEvent.click(postBtn);
-    expect(postBtn).toHaveClass('bg-primary');
+    expect(postBtn.className).toContain('bg-primary');
   });
 
   it('runs sandbox match test and displays simulated result', async () => {
@@ -76,7 +76,7 @@ describe('GatewayRouteEditor', () => {
     const runBtn = screen.getByRole('button', { name: /执行推演/ });
     await fireEvent.click(runBtn);
 
-    expect(screen.getByText(/未满足前缀或模式匹配要求|测试路径与规则匹配成功/)).toBeInTheDocument();
+    expect(screen.getByText(/未满足前缀或模式匹配要求|测试路径与规则匹配成功/)).toBeTruthy();
   });
 
   it('triggers onsave callback when save button is clicked', async () => {

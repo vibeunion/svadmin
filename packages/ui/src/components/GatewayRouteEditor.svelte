@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import {
     Network,
     Plus,
@@ -6,15 +7,11 @@
     Check,
     Play,
     Split,
-    ArrowRight,
     Sliders,
     Server,
-    FileCode,
-    Sparkles,
     CheckCircle2,
     XCircle,
-    Info,
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
 
   export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | 'ALL';
 
@@ -79,7 +76,7 @@
     ondelete,
   }: Props = $props();
 
-  let currentRoute = $state<GatewayRouteConfig>({ ...route });
+  let currentRoute = $state<GatewayRouteConfig>(untrack(() => ({ ...route })));
   let testInputPath = $state('/api/v1/users/profile');
   let testResult = $state<{ matched: boolean; targetUpstream: string; message: string } | null>(null);
   let isTesting = $state(false);
@@ -188,7 +185,7 @@
           checked={currentRoute.enabled}
           onchange={(e) => currentRoute.enabled = (e.target as HTMLInputElement).checked}
         />
-        <div class="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+        <div class="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-border after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
         <span class="ml-2 text-xs font-medium text-foreground">路由启用</span>
       </label>
 
@@ -274,7 +271,7 @@
       <div class="text-xs space-y-2">
         <span class="block font-medium text-muted-foreground">允许 HTTP 方法</span>
         <div class="flex flex-wrap gap-1.5">
-          {#each availableMethods as method}
+          {#each availableMethods as method (method)}
             <button
               type="button"
               class="rounded-md px-2.5 py-1 text-[11px] font-mono font-semibold transition-colors
@@ -309,7 +306,7 @@
           </div>
         {:else}
           <div class="space-y-2">
-            {#each currentRoute.headers as header}
+            {#each currentRoute.headers as header (header.id)}
               <div class="flex items-center gap-2">
                 <input
                   type="text"
