@@ -15,11 +15,16 @@
   import { registerToastHost, type ToastHostRegistration } from './toast-host.svelte.js';
   import UndoableNotification from './UndoableNotification.svelte';
 
+  let { placement }: { placement?: 'top' | 'bottom' } = $props();
   let host = $state<ToastHostRegistration | null>(null);
   let sheetOpen = $state(false);
   const isActiveHost = $derived(host?.isActive() ?? false);
   const theme = $derived(getResolvedTheme() === 'dark' ? 'dark' : 'light');
-  const toastPosition = $derived<'top-right' | 'bottom-left'>(sheetOpen ? 'bottom-left' : 'top-right');
+  // 默认仍是 top-right，抽屉打开时改到 bottom-left，避开底部居中的撤销条。
+  // 显式 placement 才用 Arco 的顶部 / 底部居中。
+  const toastPosition = $derived<'top-right' | 'bottom-left' | 'top-center' | 'bottom-center'>(
+    placement === 'top' ? 'top-center' : placement === 'bottom' ? 'bottom-center' : sheetOpen ? 'bottom-left' : 'top-right',
+  );
 
   onMount(() => {
     const syncSheetState = (): void => {
@@ -48,6 +53,7 @@
           case 'error': sonner.error(t.message, options); break;
           case 'warning': sonner.warning(t.message, options); break;
           case 'info': sonner.info(t.message, options); break;
+          case 'normal': sonner.message(t.message, options); break;
         }
       }
       consumeToastQueue();

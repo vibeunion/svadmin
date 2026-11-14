@@ -15,6 +15,7 @@
   import * as Sheet from './ui/sheet/index.js';
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
+  import { formatAdminNumber, formatAdminTime } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   export type BackgroundTaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
@@ -97,7 +98,7 @@
   function formatTime(dateVal: string | Date): string {
     const d = typeof dateVal === 'string' ? new Date(dateVal) : dateVal;
     if (isNaN(d.getTime())) return String(dateVal);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return formatAdminTime(d);
   }
 
   function formatDuration(seconds: number | undefined): string {
@@ -384,7 +385,7 @@
                   <div class="flex items-center justify-between text-xs text-muted-foreground">
                     <span>
                       {#if task.processedCount != null && task.totalCount != null}
-                        {task.processedCount.toLocaleString()} / {task.totalCount.toLocaleString()}
+                        {formatAdminNumber(task.processedCount, { locale: null })} / {formatAdminNumber(task.totalCount, { locale: null })}
                       {:else}
                         {task.progress ?? 0}%
                       {/if}

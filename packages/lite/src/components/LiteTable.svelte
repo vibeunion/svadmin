@@ -3,7 +3,8 @@
    * LiteTable — Pure HTML table with <a> sort links.
    * No JavaScript required — sorting and pagination are URL-driven.
    */
-  import type { ResourceDefinition, FieldDefinition } from "@svadmin/core";
+  import { formatAdminDate } from '@svadmin/core/copy-format';
+  import type { ResourceDefinition, FieldDefinition } from '@svadmin/core';
   import { t } from "@svadmin/core/i18n";
   import { isExplicitBooleanTrue, getStatusBadgeClass } from "../value-normalization";
   import { liteFragmentId } from "../fragment-id";
@@ -83,7 +84,7 @@
     if (value == null) return "—";
     if (field.type === "boolean") return "";
     if (field.type === "date") {
-      try { return new Date(value as string).toLocaleDateString(); } catch { return String(value); }
+      try { return formatAdminDate(value as string) || String(value); } catch { return String(value); }
     }
     if (field.type === "select" && field.options) {
       const opt = field.options.find(o => String(o.value) === String(value));

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminNumber } from '@svadmin/core/copy-format';
   interface QuotaItem {
     id: string;
     resourceName: string;
@@ -52,7 +53,7 @@
       <div class="lite-quota-card">
         <div class="lite-card-top">
           <span class="lite-card-name">{q.resourceName}</span>
-          <span class="lite-card-usage">{q.used.toLocaleString()} / {q.limit.toLocaleString()} {q.unit}</span>
+          <span class="lite-card-usage">{formatAdminNumber(q.used, { locale: null })} / {formatAdminNumber(q.limit, { locale: null })} {q.unit}</span>
         </div>
         <div class="lite-card-track">
           <div

@@ -77,7 +77,7 @@ export function displayTableValue(value: JsonValue | undefined, options: TableVa
   if (value === undefined || value === null) return '—';
   if (format === 'boolean') return value === true ? messages.booleanTrue : value === false ? messages.booleanFalse : '—';
   if (format === 'number' && typeof value === 'number') {
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: true }).format(value);
   }
   if (format === 'date' && (typeof value === 'string' || typeof value === 'number')) {
     return formatTableDate(value, locale) ?? String(value);

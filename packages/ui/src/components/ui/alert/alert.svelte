@@ -34,6 +34,7 @@
 	bind:this={ref}
 	data-slot="alert"
 	role="alert"
+	data-feedback="static"
 	data-variant={variant}
 	data-closable={closable || undefined}
 	class={cn(resolveAlertVariants({ variant }), className)}

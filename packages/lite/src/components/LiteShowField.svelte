@@ -5,7 +5,8 @@
    * LiteShowField — SSR-compatible field renderer for detail views.
    * Renders a single field value based on its type definition.
    */
-  import type { FieldDefinition } from "@svadmin/core";
+  import { formatAdminTime } from '@svadmin/core/copy-format';
+  import type { FieldDefinition } from '@svadmin/core';
   import { toSafeHref, toSafeText } from "../security";
   import { isExplicitBooleanTrue, getStatusBadgeClass } from "../value-normalization";
   import LiteMediaThumbnail from "./LiteMediaThumbnail.svelte";
@@ -26,7 +27,10 @@
   function formatValue(v: unknown, f: FieldDefinition): string {
     if (v == null) return "—";
     if (f.type === "date") {
-      try { return new Date(v as string).toLocaleString(); } catch { return String(v); }
+      try {
+        const formatted = formatAdminTime(v as string, { dateStyle: 'medium' });
+        return formatted || String(v);
+      } catch { return String(v); }
     }
     if (f.type === "select" && f.options) {
       const opt = f.options.find(o => String(o.value) === String(v));

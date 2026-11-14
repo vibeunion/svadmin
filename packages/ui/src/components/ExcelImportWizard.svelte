@@ -561,7 +561,7 @@
             class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
             onclick={handleConfirmImport}
           >
-            <span>{isSubmitting ? '正在提交...' : i18n.t('excel.startImport')}</span>
+            <span>{isSubmitting ? '正在提交…' : i18n.t('excel.startImport')}</span>
             <Check size={14} />
           </button>
         {/if}

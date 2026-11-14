@@ -851,11 +851,11 @@ describe('contract-bound AutoTable', () => {
     await fireEvent.click(retry);
     await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
     expect(app.view.queryByRole('button', { name: /^(Retry|重试)$/ })).toBeNull();
-    expect(app.view.getByText(/^(Loading|加载中)\.\.\.$/)).toBeTruthy();
+    expect(app.view.getByText(/^(Loading|加载中)…$/)).toBeTruthy();
     pending.resolve([{ id: 'recovered', name: 'Recovered team', state }]);
     await app.view.findByRole('option', { name: 'Recovered team' });
     expect(app.view.getByRole('option', { name: 'Personal retry' })).toBeTruthy();
-    expect(app.view.queryByText(/^(Loading|加载中)\.\.\.$/)).toBeNull();
+    expect(app.view.queryByText(/^(Loading|加载中)…$/)).toBeNull();
   });
 
   it.each(['success', 'error'] as const)('ignores obsolete retry %s while the next tenant is loading', async outcome => {
@@ -886,7 +886,7 @@ describe('contract-bound AutoTable', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
     expect(app.view.queryByRole('option', { name: 'Obsolete retry' })).toBeNull();
     expect(app.view.queryByRole('button', { name: /^(Retry|重试)$/ })).toBeNull();
-    expect(app.view.getByText(/^(Loading|加载中)\.\.\.$/)).toBeTruthy();
+    expect(app.view.getByText(/^(Loading|加载中)…$/)).toBeTruthy();
     next.resolve([{ id: 'current', name: 'Current tenant', state }]);
     await app.view.findByRole('option', { name: 'Current tenant' });
   });

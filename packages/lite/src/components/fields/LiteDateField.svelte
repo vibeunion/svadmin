@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminDate } from '@svadmin/core/copy-format';
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -54,7 +55,7 @@
   function displayDate(v: unknown): string {
     if (!v) return '—';
     try {
-      return new Date(v as string).toLocaleDateString();
+      return formatAdminDate(v as string) || String(v);
     } catch {
       return String(v);
     }

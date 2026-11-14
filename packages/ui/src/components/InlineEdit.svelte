@@ -149,7 +149,7 @@
     <Button type="button" variant="ghost" size="icon-sm" disabled={saving} title={i18n.t('common.save')}
       aria-label={i18n.t('common.save')} aria-busy={saving} onclick={save}>
       {#if saving}
-        <Loader2 class="h-4 w-4 animate-spin" role="status" aria-label="Saving..." />
+        <Loader2 class="h-4 w-4 animate-spin" role="status" aria-label="Saving…" />
       {:else}
         <Check class="h-4 w-4" />
       {/if}

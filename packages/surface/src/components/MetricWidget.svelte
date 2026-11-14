@@ -21,12 +21,17 @@
       return new Intl.NumberFormat(locale, {
         style: 'currency',
         currency: metricProps.currency,
-      }).format(value);
+        useGrouping: true,
+      }).format(value).replace(/^(\p{Sc})\s+/u, '$1');
     }
     if (metricProps.format === 'percent') {
-      return new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(value);
+      return new Intl.NumberFormat(locale, {
+        style: 'percent',
+        maximumFractionDigits: 1,
+        useGrouping: true,
+      }).format(value).replace(/\s+(?=%)/g, '');
     }
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: true }).format(value);
   });
 </script>
 

@@ -166,6 +166,23 @@ export { buildPivot, buildPivotCacheKey, buildPivotDrilldown, buildPivotExportRe
 export type { PivotAggregation, PivotCache, PivotDimension, PivotDimensionValue, PivotOptions, PivotPayload, PivotProvider, PivotQuery, PivotResult, PivotDrilldown, PivotExportRequest, PivotExportTaskResult } from './pivot';
 export { civilDateTimeToInstant, parseDateTimeInstant, formatCivilDateTime } from './date-time';
 export type { DateTimeValueMode, DateTimeDisambiguation } from './date-time';
+export {
+  formatAdminCopy,
+  formatAdminCurrency,
+  formatAdminDate,
+  formatAdminEllipsis,
+  formatAdminNumber,
+  formatAdminPercent,
+  formatAdminTime,
+  spaceCjkLatin,
+} from './copy-format';
+export type {
+  AdminCurrencyOptions,
+  AdminDateOptions,
+  AdminNumberOptions,
+  AdminPercentOptions,
+  AdminTimeOptions,
+} from './copy-format';
 export { validateGantt, GANTT_LIMITS } from './gantt';
 export type { GanttTaskShape, GanttValidationError } from './gantt';
 export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider, withValidatedAuditProvider, AuditError } from './audit';
@@ -217,8 +234,8 @@ export type {
   AdminTool, ToolResult,
 } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerColorTheme, exportColorThemes, importColorThemes, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
-export { deriveColorPreset, exportThemeTokens, generateColorScale, hexContrastRatio, hexLuminance, hexToOklch, oklchToHex, parseThemeTokens, pickReadableForeground } from './color-scale';
-export type { ColorScaleStep, DerivedColorPreset, ThemeTokenDocument } from './color-scale';
+export { deriveColorPreset, exportThemeTokens, generateColorScale, hexContrastRatio, hexLuminance, hexToOklch, interactionRamps, oklchToHex, parseThemeTokens, pickReadableForeground, withPrimaryInteractionRamps } from './color-scale';
+export type { ColorScaleStep, DerivedColorPreset, InteractionRamps, ThemeTokenDocument } from './color-scale';
 export type { ThemeMode, ColorTheme, BuiltinColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';
 export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier, resetUnsavedChanges } from './unsaved-changes.svelte';
 export { setAdminOptions, getAdminOptions, getTextTransformers } from './options.svelte';

@@ -108,7 +108,7 @@
     <div class="svadmin-activity-feed__composer">
       <textarea
         bind:value={newComment}
-        placeholder="Add an internal comment or update note..."
+        placeholder="Add an internal comment or update note…"
         class="svadmin-activity-feed__textarea"
       ></textarea>
       <div class="svadmin-activity-feed__send">

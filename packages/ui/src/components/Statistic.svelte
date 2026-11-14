@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { formatAdminNumber } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   interface Props {
@@ -30,7 +31,7 @@
 
   const display = $derived(
     typeof value === 'number'
-      ? new Intl.NumberFormat(undefined, { minimumFractionDigits: precision, maximumFractionDigits: precision }).format(value)
+      ? formatAdminNumber(value, { locale: null, minimumFractionDigits: precision, maximumFractionDigits: precision })
       : value,
   );
 </script>

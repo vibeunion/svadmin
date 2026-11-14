@@ -280,7 +280,7 @@
             bind:this={searchInputRef}
             type="text"
             bind:value={query}
-            placeholder={chinese ? '搜索快捷键名称、描述或按键 (如 Mod+S, J/K)...' : 'Search shortcuts by action, category, or key...'}
+            placeholder={chinese ? '搜索快捷键名称、描述或按键 (如 Mod+S, J/K)…' : 'Search shortcuts by action, category, or key…'}
             class="flex h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 py-1 text-sm shadow-2xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
           {#if query}

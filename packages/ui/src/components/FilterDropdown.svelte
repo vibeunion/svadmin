@@ -34,7 +34,7 @@
     active,
     value = $bindable(undefined),
     options,
-    placeholder = 'Search...',
+    placeholder = 'Search…',
     applyLabel = 'Apply',
     resetLabel = 'Reset',
     align = 'right',
@@ -199,7 +199,7 @@
               <Search class="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 bind:value={optionSearch}
-                placeholder="Search options..."
+                placeholder="Search options…"
                 class="h-7 pl-7 text-xs"
               />
             </div>

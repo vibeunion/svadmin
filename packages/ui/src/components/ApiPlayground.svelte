@@ -171,7 +171,7 @@
     >
       {#if isExecuting}
         <Loader2 class="h-3.5 w-3.5 animate-spin" />
-        <span>请求中...</span>
+        <span>请求中…</span>
       {:else}
         <Play class="h-3.5 w-3.5 fill-current" />
         <span>发送请求</span>
@@ -189,7 +189,7 @@
         id="api-request-body"
         class="w-full h-24 rounded-md border border-input bg-background p-3 font-mono text-xs leading-relaxed text-foreground outline-none focus:ring-1 focus:ring-primary"
         bind:value={requestBody}
-        placeholder="输入 JSON 正文..."
+        placeholder="输入 JSON 正文…"
       ></textarea>
     </div>
   {/if}

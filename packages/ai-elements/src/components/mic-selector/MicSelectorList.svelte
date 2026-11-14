@@ -7,4 +7,4 @@
   const selector = useMicSelectorContext();
 </script>
 
-{#if selector.loading}<p class={cn('svadmin-ai__muted text-xs', className)}>Loading microphones...</p>{:else if selector.error}<p class={cn('text-destructive text-xs', className)} role="alert">{selector.error}</p>{:else}{@render children?.(selector.devices)}{/if}
+{#if selector.loading}<p class={cn('svadmin-ai__muted text-xs', className)}>Loading microphones…</p>{:else if selector.error}<p class={cn('text-destructive text-xs', className)} role="alert">{selector.error}</p>{:else}{@render children?.(selector.devices)}{/if}

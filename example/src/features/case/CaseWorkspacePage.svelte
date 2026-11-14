@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
+  import { formatAdminTime } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageShell, ContentPageHeader, MediaThumbnail, MetricBlock, StatusBadge, WorkspaceStageStepper, type WorkspaceStage } from '@svadmin/ui';
   import { createCaseWorkspaceState, isCaseStageId } from './case-workspace.svelte';
@@ -31,7 +32,7 @@
     try {
       action();
       caseState.markSaved();
-      events = [...events, { time: new Date().toLocaleTimeString(), action: label }];
+      events = [...events, { time: formatAdminTime(new Date()), action: label }];
       feedback = isZh ? '已更新本次演示状态，刷新后重置。' : 'Demo state updated for this page session; refresh resets it.';
     } catch (error) { feedback = error instanceof Error ? error.message : (isZh ? '操作失败' : 'Operation failed'); }
   }

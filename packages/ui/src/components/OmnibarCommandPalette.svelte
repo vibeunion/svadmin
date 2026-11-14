@@ -40,7 +40,7 @@
   let {
     open = $bindable(false),
     shortcutKey = 'k',
-    placeholder = '输入命令、查找页面或搜索实体资源... (⌘K)',
+    placeholder = '输入命令、查找页面或搜索实体资源… (⌘K)',
     emptyText = '未找到匹配的命令或资源',
     items = [
       { id: 'nav-dashboard', title: '运营与财务仪表盘', category: 'navigation', categoryLabel: '系统导航', description: '高管大屏与实时多维指标看板', shortcut: 'G D' },

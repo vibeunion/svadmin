@@ -17,7 +17,7 @@
 
   const statusConfigs = {
     connected: { variant: 'default' as const, dotClass: 'bg-success', label: 'Live', icon: Wifi },
-    connecting: { variant: 'secondary' as const, dotClass: 'bg-warning', label: 'Connecting...', icon: Loader2 as typeof Wifi },
+    connecting: { variant: 'secondary' as const, dotClass: 'bg-warning', label: 'Connecting…', icon: Loader2 as typeof Wifi },
     disconnected: { variant: 'destructive' as const, dotClass: 'bg-destructive', label: 'Offline', icon: WifiOff },
   } as const;
   type StatusKey = 'connected' | 'connecting' | 'disconnected';

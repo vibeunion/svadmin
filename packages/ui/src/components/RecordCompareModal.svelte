@@ -240,7 +240,7 @@
             <input
               type="text"
               bind:value={searchQuery}
-              placeholder="Filter attributes..."
+              placeholder="Filter attributes…"
               class="h-8 w-full rounded-sm border border-input bg-background pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             />
           </div>

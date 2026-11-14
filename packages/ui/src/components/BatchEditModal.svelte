@@ -202,7 +202,7 @@
                     type="text"
                     class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary flex-1 min-w-[120px]"
                     bind:value={row.value}
-                    placeholder="输入新内容..."
+                    placeholder="输入新内容…"
                     disabled={isSubmitting}
                   />
                 {/if}
@@ -255,7 +255,7 @@
         >
           {#if isSubmitting}
             <Loader2 class="h-3.5 w-3.5 animate-spin" />
-            <span>正在更新...</span>
+            <span>正在更新…</span>
           {:else}
             <span>确认批量修改</span>
           {/if}

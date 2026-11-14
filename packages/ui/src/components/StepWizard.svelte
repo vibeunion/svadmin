@@ -497,7 +497,7 @@
           >
             {#if isValidating || isSubmitting}
               <Loader2 class="h-4 w-4 animate-spin" />
-              <span>{chinese ? '校验处理中...' : 'Processing...'}</span>
+              <span>{chinese ? '校验处理中…' : 'Processing…'}</span>
             {:else if isLastStep}
               <Check class="h-4 w-4" />
               <span>{resolvedSubmitText}</span>

@@ -108,7 +108,7 @@
       open = false;
     } catch {
       if (!isCurrentRequest(token)) return;
-      submitError = i18n.t('common.operationFailed');
+      submitError = i18n.t('common.submitRejected');
     } finally {
       if (activeRequest === token) {
         activeRequest = undefined;

@@ -1,3 +1,5 @@
+import { formatAdminTime } from '@svadmin/core';
+
 export type CaseStageId = 'overview' | 'execution' | 'evidence' | 'report';
 
 export function isCaseStageId(value: string): value is CaseStageId {
@@ -68,6 +70,6 @@ export function createCaseWorkspaceState(): CaseWorkspaceState {
       if (!executionComplete || !evidenceName || !magnification) throw new Error('请提供证据和放大倍数 / Provide evidence and magnification');
       evidenceComplete = true;
     },
-    markSaved() { savedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); },
+    markSaved() { savedAt = formatAdminTime(new Date(), { seconds: false }); },
   };
 }

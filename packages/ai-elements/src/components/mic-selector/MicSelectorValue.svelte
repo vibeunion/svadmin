@@ -3,7 +3,7 @@
   import { cn } from '../../utils.js';
   import { useMicSelectorContext } from './context.svelte.js';
   type Props = { class?: string; children?: Snippet; placeholder?: string };
-  let { class: className = '', children, placeholder = 'Select microphone...' }: Props = $props();
+  let { class: className = '', children, placeholder = 'Select microphone…' }: Props = $props();
   const selector = useMicSelectorContext();
   const selected = $derived(selector.devices.find((device) => device.deviceId === selector.value));
 </script>

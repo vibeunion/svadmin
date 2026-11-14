@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminCurrency } from '@svadmin/core';
   import type { DemoRow } from '../../resource-schemas';
   import { valueText, valueNumber, countBy, sumBy, averageBy, findLabel } from '../../rendering-values';
   import { demoRenderers } from '../../resource-rendering';
@@ -115,7 +116,7 @@
   const copy = (pair: CopyPair) => isZh ? pair[1] : pair[0];
   const findName = <T extends { id: number }>(records: readonly T[], id: unknown, key?: keyof T) =>
     findLabel(records, id, isZh ? '未分配' : 'Unassigned', key);
-  const money = (amount: number) => new Intl.NumberFormat(isZh ? 'zh-CN' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  const money = (amount: number) => formatAdminCurrency(amount, { locale: isZh ? 'zh-CN' : 'en-US', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const percent = (amount: number, total: number) => total > 0 ? Math.round((amount / total) * 100) : 0;
 
   const statusLabel = (status: unknown) => {
@@ -457,7 +458,7 @@
           <SectionHeader title={isZh ? '会话活动' : 'Session activity'} description={isZh ? '按设备、地点和最近活动识别异常会话。' : 'Identify unusual sessions by device, location, and recency.'} />
           {#if rows.some((row) => !row['current'] && row['status'] !== 'revoked')}
             <Button variant="outline" size="sm" disabled={revokingSessionId !== null} onclick={() => requestSessionRevoke('others')}>
-              {revokingSessionId === '*' ? (isZh ? '撤销中...' : 'Revoking...') : (isZh ? '撤销其他会话' : 'Revoke other sessions')}
+              {revokingSessionId === '*' ? (isZh ? '撤销中…' : 'Revoking…') : (isZh ? '撤销其他会话' : 'Revoke other sessions')}
             </Button>
           {/if}
         </div>
@@ -466,7 +467,7 @@
             <article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
               <span class="flex size-9 items-center justify-center rounded-md border border-border"><Activity class="size-4 text-muted-foreground" /></span>
               <div><div class="flex flex-wrap items-center gap-2"><p class="text-sm font-semibold">{valueText(row, 'device')}</p>{#if row['current']}<Badge>{isZh ? '当前' : 'Current'}</Badge>{/if}</div><p class="mt-1 font-mono text-xs text-muted-foreground">{valueText(row, 'ipAddress')} · {valueText(row, 'location')} · {valueText(row, 'lastActive')}</p></div>
-              <div class="flex items-center gap-2"><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge>{#if !row['current'] && row['status'] !== 'revoked'}<Button variant="outline" size="sm" disabled={revokingSessionId !== null} onclick={() => requestSessionRevoke(row)} aria-label={`${isZh ? '撤销' : 'Revoke'} ${valueText(row, 'device')}`}>{revokingSessionId === row['id'] ? (isZh ? '撤销中...' : 'Revoking...') : (isZh ? '撤销' : 'Revoke')}</Button>{/if}</div>
+              <div class="flex items-center gap-2"><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge>{#if !row['current'] && row['status'] !== 'revoked'}<Button variant="outline" size="sm" disabled={revokingSessionId !== null} onclick={() => requestSessionRevoke(row)} aria-label={`${isZh ? '撤销' : 'Revoke'} ${valueText(row, 'device')}`}>{revokingSessionId === row['id'] ? (isZh ? '撤销中…' : 'Revoking…') : (isZh ? '撤销' : 'Revoke')}</Button>{/if}</div>
             </article>
           {/each}
         </div>

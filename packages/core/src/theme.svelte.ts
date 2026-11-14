@@ -2,7 +2,9 @@ import { definedOptions } from './defined-options';
 import {
   deriveColorPreset,
   exportThemeTokens,
+  interactionRamps,
   parseThemeTokens,
+  withPrimaryInteractionRamps,
   type DerivedColorPreset,
   type ThemeTokenDocument,
 } from './color-scale';
@@ -423,13 +425,39 @@ function applyThemeClasses(themeMode: ThemeMode,config: ThemeConfig): void {
 function applyColorPreset(preset: ColorPreset,themeMode: ThemeMode): void {
   if(typeof document==='undefined') return;
   const resolved=themeMode==='system'? getSystemPreference():themeMode;
-  const variables=resolved==='dark'? preset.dark:preset.light;
+  const variables=withPrimaryInteractionRamps(resolved==='dark'? preset.dark:preset.light);
   const root=document.documentElement;
 
   for(const [key,value] of Object.entries(variables)) {
     const cssVar=key.startsWith('--')? key:'--'+key;
     root.style.setProperty(cssVar,value);
     activePresetVars.push(cssVar);
+  }
+}
+
+const SEMANTIC_RAMP_BASES = [
+  ['--primary', '--primary-5', '--primary-7', '--primary-3'],
+  ['--success', '--success-5', '--success-7', '--success-3'],
+  ['--warning', '--warning-5', '--warning-7', '--warning-3'],
+  ['--destructive', '--danger-5', '--danger-7', '--danger-3'],
+  ['--info', '--info-5', '--info-7', '--info-3'],
+] as const;
+
+function applyOverrideRamps(overrides: Record<string, string>, root: HTMLElement): void {
+  const explicit = new Set(Object.keys(overrides).map((key) => key.startsWith('--') ? key : `--${key}`));
+  for (const [base, hover, pressed, disabled] of SEMANTIC_RAMP_BASES) {
+    const value = overrides[base] ?? overrides[base.slice(2)];
+    if (!value || explicit.has(hover) || explicit.has(pressed) || explicit.has(disabled)) continue;
+    let ramps;
+    try {
+      ramps = interactionRamps(value);
+    } catch {
+      continue;
+    }
+    for (const [key, ramp] of [[hover, ramps.hover], [pressed, ramps.pressed], [disabled, ramps.disabled]] as const) {
+      root.style.setProperty(key, ramp);
+      activeCssOverrideVars.push(key);
+    }
   }
 }
 
@@ -442,6 +470,7 @@ function applyCssOverrides(overrides: Record<string,string>): void {
     root.style.setProperty(cssVar,value);
     activeCssOverrideVars.push(cssVar);
   }
+  applyOverrideRamps(overrides, root);
 }
 
 function applyEffectiveTheme(): void {

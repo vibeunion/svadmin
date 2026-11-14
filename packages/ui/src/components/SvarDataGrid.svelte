@@ -64,7 +64,7 @@
   const isZh = $derived(locale.startsWith('zh'));
   const resolvedLabel = $derived(label ?? (isZh ? '数据表格' : 'Data grid'));
   const resolvedEmptyLabel = $derived(emptyLabel ?? (isZh ? '暂无记录' : 'No records'));
-  const resolvedLoadingLabel = $derived(loadingLabel ?? (isZh ? '加载中...' : 'Loading'));
+  const resolvedLoadingLabel = $derived(loadingLabel ?? (isZh ? '加载中…' : 'Loading'));
   const resolvedDisabledLabel = $derived(disabledLabel ?? (isZh ? '表格已禁用' : 'Grid is disabled'));
   const resolvedFallbackLabel = $derived(fallbackLabel ?? (isZh ? '静态预览（最多 20 行）' : 'Static preview (up to 20 rows)'));
   const treeKey = $derived(loadChildren ? childrenKey ?? 'children' : childrenKey);

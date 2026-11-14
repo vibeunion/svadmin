@@ -525,7 +525,7 @@ describe('enterprise provider settings', () => {
     await oldResult.catch(() => undefined);
     await new Promise(resolve => setTimeout(resolve, 0));
     expect(notificationProvider.open).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Testing...' })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: 'Testing…' })).toHaveProperty('disabled', true);
     resolveNew({ success: true });
     await waitFor(() => expect(notificationProvider.open).toHaveBeenCalledTimes(1));
     for (const button of screen.getAllByRole('button', { name: 'Test' })) {

@@ -455,7 +455,7 @@
             >
               {#if isVerifying}
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
-                <span>{chinese ? '联签核验中...' : 'Verifying...'}</span>
+                <span>{chinese ? '联签核验中…' : 'Verifying…'}</span>
               {:else}
                 <ShieldCheck class="h-3.5 w-3.5" />
                 <span>{chinese ? '确认双人联签' : 'Dual Approve'}</span>
@@ -471,7 +471,7 @@
             >
               {#if isVerifying}
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
-                <span>{chinese ? '创建复核请求中...' : 'Creating review request...'}</span>
+                <span>{chinese ? '创建复核请求中…' : 'Creating review request…'}</span>
               {:else}
                 <QrCode class="h-3.5 w-3.5" />
                 <span>{chinese ? '请求远程复核' : 'Request Remote Review'}</span>

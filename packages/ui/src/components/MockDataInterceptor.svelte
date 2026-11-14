@@ -269,7 +269,7 @@
             class="w-full rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
             onclick={() => runTest(currentRule)}
           >
-            {isTesting ? '正在模拟请求与网络延迟...' : '立即发起模拟请求验证'}
+            {isTesting ? '正在模拟请求与网络延迟…' : '立即发起模拟请求验证'}
           </button>
 
           {#if testStatus !== null}

@@ -127,7 +127,7 @@
             onclick={triggerSync}
           >
             <RefreshCw class={cn('h-3 w-3', isSyncing ? 'animate-spin' : '')} />
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
+            {isSyncing ? 'Syncing…' : 'Sync Now'}
           </Button>
         {/if}
       </div>

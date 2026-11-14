@@ -131,7 +131,7 @@
   }
 
   const resolvedPlaceholder = $derived(
-    placeholder ?? (chinese ? '输入动作名称、拼音首字母或按键 (如 ⌘. 呼出)...' : 'Type action name or shortcut...'),
+    placeholder ?? (chinese ? '输入动作名称、拼音首字母或按键 (如 ⌘. 呼出)…' : 'Type action name or shortcut…'),
   );
 </script>
 
@@ -247,7 +247,7 @@
               bind:this={paramInput}
               type="text"
               bind:value={paramValue}
-              placeholder={pendingAction.paramPlaceholder ?? (chinese ? '输入执行参数...' : 'Enter parameter...')}
+              placeholder={pendingAction.paramPlaceholder ?? (chinese ? '输入执行参数…' : 'Enter parameter…')}
               class="h-9 w-full rounded-lg border border-input bg-background px-3 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
             <Button

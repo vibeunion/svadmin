@@ -39,7 +39,7 @@
   </ul>
 
   <form {action} method="POST" class="lite-comment-form">
-    <textarea name="content" required placeholder="Leave a reply..." class="lite-comment-input"></textarea>
+    <textarea name="content" required placeholder="Leave a reply…" class="lite-comment-input"></textarea>
     <button type="submit" class="lite-comment-btn">Submit Reply</button>
   </form>
 </div>

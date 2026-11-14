@@ -298,7 +298,7 @@
         <textarea
           id="json-sample"
           bind:value={rawImportText}
-          placeholder="输入或粘贴 JSON 数据样例..."
+          placeholder="输入或粘贴 JSON 数据样例…"
           rows="8"
           class="w-full rounded-lg border border-input bg-muted/20 p-3 font-mono text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         ></textarea>

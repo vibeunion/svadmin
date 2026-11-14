@@ -232,7 +232,7 @@
         <input
           type="text"
           bind:value={filterText}
-          placeholder={i18n.t('common.search', { defaultValue: 'Search columns...' })}
+          placeholder={i18n.t('common.search', { defaultValue: 'Search columns…' })}
           class="h-7.5 w-full rounded-md border border-input bg-muted/40 pl-7 pr-2 text-xs placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       </div>

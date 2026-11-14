@@ -229,7 +229,7 @@
     >
       {#if isSubmitting}
         <Loader2 class="h-3.5 w-3.5 animate-spin" />
-        <span>正在入库提交...</span>
+        <span>正在入库提交…</span>
       {:else}
         <span>确认导入 ({validCount} 条正常数据)</span>
         <ArrowRight class="h-3.5 w-3.5" />

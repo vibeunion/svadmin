@@ -108,7 +108,7 @@
         <Search class="h-3 w-3 absolute left-2 text-muted-foreground pointer-events-none" />
         <input
           type="text"
-          placeholder="关键词匹配..."
+          placeholder="关键词匹配…"
           bind:value={searchQuery}
           class="h-7 w-32 md:w-44 rounded-md border border-border bg-background pl-6 pr-2 text-xs text-foreground outline-none focus:border-primary"
         />

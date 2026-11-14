@@ -137,6 +137,6 @@
   {#if children}
     {@render children()}
   {:else}
-    <span>{loading ? '正在导出...' : i18n.t('excel.export')}</span>
+    <span>{loading ? '正在导出…' : i18n.t('excel.export')}</span>
   {/if}
 </button>

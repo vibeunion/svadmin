@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useList, useUpdateMany } from '@svadmin/core';
+  import { formatAdminCurrency, useList, useUpdateMany } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageShell, ContentPageHeader } from '@svadmin/ui';
   import { demoContracts } from '../../resource-contracts';
@@ -68,7 +68,7 @@
   const openDeals = $derived(deals.filter(item => !['won', 'lost'].includes(item.stage)));
   const stages = ['discovery', 'proposal', 'negotiation', 'won', 'lost'];
   const stageLabels: Record<string, string> = { discovery: '发现', proposal: '方案', negotiation: '谈判', won: '赢单', lost: '丢单' };
-  const money = (value: number) => new Intl.NumberFormat(isZh ? 'zh-CN' : 'en-US', { style: 'currency', currency: 'USD' }).format(value);
+  const money = (value: number) => formatAdminCurrency(value, { locale: isZh ? 'zh-CN' : 'en-US', currency: 'USD' });
   async function completeActivity(id: number): Promise<void> {
     if (busy) return;
     busy = true; feedback = '';

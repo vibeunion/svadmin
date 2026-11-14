@@ -226,7 +226,7 @@
             type="text"
             aria-label={titles[0]}
             bind:value={leftSearch}
-            placeholder={i18n.t('common.search', undefined) ?? '搜索...'}
+            placeholder={i18n.t('common.search', undefined) ?? '搜索…'}
             class="h-8 pl-8 pr-2 text-xs"
             {disabled}
           />
@@ -355,7 +355,7 @@
             type="text"
             aria-label={titles[1]}
             bind:value={rightSearch}
-            placeholder={i18n.t('common.search', undefined) ?? '搜索...'}
+            placeholder={i18n.t('common.search', undefined) ?? '搜索…'}
             class="h-8 pl-8 pr-2 text-xs"
             {disabled}
           />

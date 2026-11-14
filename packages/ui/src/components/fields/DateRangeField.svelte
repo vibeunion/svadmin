@@ -9,6 +9,7 @@
 
 <script lang="ts">
   import { Calendar } from '@lucide/svelte';
+  import { formatAdminDate, formatAdminTime } from '@svadmin/core';
   import { cn } from '../../utils.js';
 
   interface Props {
@@ -61,20 +62,13 @@
     if (isNaN(d.getTime())) return null;
 
     if (format === 'iso') return d.toISOString();
-
-    const defaultOptions: Intl.DateTimeFormatOptions =
-      options ??
-      (format === 'datetime'
-        ? { dateStyle: 'medium', timeStyle: 'short' }
-        : format === 'time'
-          ? { timeStyle: 'medium' }
-          : { dateStyle: 'medium' });
-
-    try {
-      return new Intl.DateTimeFormat(locale, defaultOptions).format(d);
-    } catch {
-      return d.toLocaleDateString();
+    if (options) {
+      try { return new Intl.DateTimeFormat(locale, options).format(d); }
+      catch { return formatAdminDate(d, { locale }); }
     }
+    if (format === 'datetime') return formatAdminTime(d, { locale, dateStyle: 'medium', seconds: false });
+    if (format === 'time') return formatAdminTime(d, { locale });
+    return formatAdminDate(d, { locale, dateStyle: 'medium' });
   }
 
   const startFormatted = $derived(formatDate(start));

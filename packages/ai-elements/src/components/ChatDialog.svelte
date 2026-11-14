@@ -1265,7 +1265,7 @@
                 <Message from={message.role} id={message.id}>
                   <MessageContent class={message.role === 'user' ? 'bg-primary text-primary-foreground' : ''}>
                     {#if message.parts.length === 0 && message.status === 'streaming'}
-                      <p class="svadmin-ai__muted text-sm">Thinking...</p>
+                      <p class="svadmin-ai__muted text-sm">Thinking…</p>
                     {/if}
                     {#each message.parts as part, partIndex (part.id ?? `${message.id}-part-${partIndex}`)}
                       {#if part.type === 'text'}
@@ -1340,7 +1340,7 @@
                                 disabled={approvalPending}
                                 onclick={() => void respondToApproval(part.approvalId, part.id, 'approved')}
                               >
-                                {approvalPending ? 'Submitting...' : 'Approve'}
+                                {approvalPending ? 'Submitting…' : 'Approve'}
                               </button>
                               <button
                                 type="button"
@@ -1402,7 +1402,7 @@
               bind:attachments={inputAttachments}
               disabled={isStreaming}
               loading={isStreaming}
-              placeholder="Type a message..."
+              placeholder="Type a message…"
               ariaLabel="Message AI assistant"
               onsubmit={(detail) => { void sendMessage(detail.value, detail.attachments); }}
               onstop={stopStreaming}

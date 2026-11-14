@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminNumber } from '@svadmin/core/copy-format';
   interface Props {
     title?: string;
     value: number | string;
@@ -26,7 +27,7 @@
 
   const display = $derived(
     typeof value === 'number'
-      ? new Intl.NumberFormat(undefined, { minimumFractionDigits: precision, maximumFractionDigits: precision }).format(value)
+      ? formatAdminNumber(value, { locale: null, minimumFractionDigits: precision, maximumFractionDigits: precision })
       : value,
   );
 </script>

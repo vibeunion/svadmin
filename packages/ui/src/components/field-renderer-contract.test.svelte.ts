@@ -89,7 +89,7 @@ describe('FieldRenderer form contract', () => {
     expect(trigger.getAttribute('aria-describedby')).toBe(`${description.id} owner-error`);
     expect(trigger.getAttribute('aria-invalid')).toBe('true');
     await fireEvent.click(trigger);
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await waitFor(() => expect(document.activeElement).toBe(search));
     await view.rerender({ relationInvalid: false, relationDescription: 'Updated owner help' });
     expect(trigger.getAttribute('aria-describedby')).toBe(description.id);

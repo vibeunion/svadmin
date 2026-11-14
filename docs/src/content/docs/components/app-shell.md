@@ -106,16 +106,17 @@ host that needs larger or tighter controls overrides the size tokens once:
 
 | Token | Default | Meaning |
 | --- | --- | --- |
-| `--svadmin-control-h-sm` | `1.75rem` | Compact control |
-| `--svadmin-control-h` | `2.25rem` | Default control height |
-| `--svadmin-control-h-lg` | `2.5rem` | Large control |
-| `--svadmin-row-h` | `3rem` | Table/list row rhythm |
-| `--svadmin-table-head-h` | `2.75rem` | Table header height |
+| `--svadmin-control-h-mini` | `1.5rem` | Mini control (24px). Compact density uses it |
+| `--svadmin-control-h-sm` | `1.75rem` | Small control (28px) |
+| `--svadmin-control-h` | `2rem` | Default control height (32px) |
+| `--svadmin-control-h-lg` | `2.25rem` | Large control (36px) |
+| `--svadmin-row-h` | `2.5rem` | Table/list row rhythm (40px) |
+| `--svadmin-table-head-h` | `2.5rem` | Table header height (40px) |
 | `--svadmin-table-state-min-h` | `8rem` | Table empty/loading state height |
 | `--svadmin-space-1…6` | `4px … 32px` | Spacing scale |
 | `--svadmin-section-gap` | `--svadmin-space-5` | Gap between page sections |
 | `--svadmin-text-caption/label/body/section/title` | `12/13/14/16/20px` | Type sizes |
-| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.5` | Line heights |
+| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.4` | Line heights. Body is 1.4 |
 | `--svadmin-measure` | `65ch` | Reading measure for descriptions |
 | `--svadmin-shell-sidebar-w` | `15rem` | Expanded rail width |
 | `--svadmin-shell-sidebar-w-collapsed` | `3.5rem` | Collapsed rail width |

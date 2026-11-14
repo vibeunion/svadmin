@@ -303,7 +303,7 @@ test('pending workspace restore resources are scoped and cleared by a real menu 
   await enterWorkspaceViaMenu(page);
 
   const accounts = pane(page, 'crm_accounts');
-  await accounts.getByPlaceholder('Search...').fill('e');
+  await accounts.getByPlaceholder('Search…').fill('e');
   await expect(accounts.getByText('Helio Manufacturing').first()).toBeVisible();
   await expect.poll(async () => {
     const envelope = await readPersistedQuery(page, 'crm_accounts') as { snapshot?: { search?: string } } | null;
@@ -432,7 +432,7 @@ test('pending workspace restore resources are scoped and cleared by a real menu 
   await page.setViewportSize({ width: 1280, height: 420 });
   await enterWorkspaceViaMenu(page);
   const reentered = pane(page, 'crm_accounts');
-  await expect(reentered.getByPlaceholder('Search...')).toHaveValue('e');
+  await expect(reentered.getByPlaceholder('Search…')).toHaveValue('e');
   await expect.poll(
     () => page.locator('[data-workspace-scroll="crm_accounts"]').evaluate(element => element.scrollTop),
     { message: 're-entering the workspace must restore the saved position' },
@@ -458,7 +458,7 @@ test('real menu SPA round trip restores account query and scroll without reloadi
   await enterWorkspaceViaMenu(page);
 
   const accounts = pane(page, 'crm_accounts');
-  await accounts.getByPlaceholder('Search...').fill('e');
+  await accounts.getByPlaceholder('Search…').fill('e');
   await expect(accounts.getByText('Helio Manufacturing').first()).toBeVisible();
   await expect.poll(async () => {
     const envelope = await readPersistedQuery(page, 'crm_accounts') as { snapshot?: { search?: string } } | null;
@@ -477,7 +477,7 @@ test('real menu SPA round trip restores account query and scroll without reloadi
   expect((await readWorkspaceLifecycleProbe(page)).documentId, 'menu round trip must not create a new document').toBe(documentId);
 
   const reentered = pane(page, 'crm_accounts');
-  await expect(reentered.getByPlaceholder('Search...')).toHaveValue('e');
+  await expect(reentered.getByPlaceholder('Search…')).toHaveValue('e');
   await expect.poll(
     () => page.locator('[data-workspace-scroll="crm_accounts"]').evaluate(element => element.scrollTop),
   ).toBe(captured);
@@ -695,7 +695,7 @@ test('account search and page are persisted as a real snapshot and restored afte
   await openWorkspace(page, 'crm_accounts');
 
   const accounts = pane(page, 'crm_accounts');
-  const search = accounts.getByPlaceholder('Search...');
+  const search = accounts.getByPlaceholder('Search…');
   await search.fill('e');
   await expect(accounts.getByText('Helio Manufacturing').first()).toBeVisible();
   await expect(accounts.getByText('Lumen Clinics').first()).toBeVisible();
@@ -722,7 +722,7 @@ test('account search and page are persisted as a real snapshot and restored afte
   await page.reload();
   await expect(page.getByRole('heading', { name: /Operations multi-tab workspace|运营多标签工作区/ })).toBeVisible({ timeout: 20_000 });
   const reloaded = pane(page, 'crm_accounts');
-  await expect(reloaded.getByPlaceholder('Search...')).toHaveValue('e');
+  await expect(reloaded.getByPlaceholder('Search…')).toHaveValue('e');
   await expect.poll(() => currentPageLabel(reloaded)).toBe('2');
   await expect(reloaded.getByText('Summit Field Services').first()).toBeVisible();
   await expect(reloaded.getByText('Helio Manufacturing')).toHaveCount(0);
@@ -739,7 +739,7 @@ test('reload restores active deal filters and keeps non-active account query iso
   await openWorkspace(page, 'crm_accounts');
 
   const accounts = pane(page, 'crm_accounts');
-  await accounts.getByPlaceholder('Search...').fill('e');
+  await accounts.getByPlaceholder('Search…').fill('e');
   await expect(accounts.getByText('Helio Manufacturing').first()).toBeVisible();
   await expect.poll(async () => {
     const envelope = await readPersistedQuery(page, 'crm_accounts') as { snapshot?: { search?: string } } | null;
@@ -754,7 +754,7 @@ test('reload restores active deal filters and keeps non-active account query iso
   await tab(page, /Customer Accounts|客户账户/).click();
   await tab(page, /Revenue Opportunities|收入机会/).click();
   const deals = pane(page, 'crm_deals');
-  await deals.getByPlaceholder('Search...').fill('Summit');
+  await deals.getByPlaceholder('Search…').fill('Summit');
   await expect(deals.getByText('Summit dispatch upgrade').first()).toBeVisible();
   await installPersistedQueryOnNextLoad(page, 'crm_deals', {
     search: 'Summit',
@@ -767,7 +767,7 @@ test('reload restores active deal filters and keeps non-active account query iso
   await expect(page.getByRole('heading', { name: /Operations multi-tab workspace|运营多标签工作区/ })).toBeVisible({ timeout: 20_000 });
   await expectActiveTab(page, /Revenue Opportunities|收入机会/);
   const reloadedDeals = pane(page, 'crm_deals');
-  await expect(reloadedDeals.getByPlaceholder('Search...')).toHaveValue('Summit');
+  await expect(reloadedDeals.getByPlaceholder('Search…')).toHaveValue('Summit');
   await expect(reloadedDeals.getByText('Stage: discovery')).toBeVisible();
   await expect(reloadedDeals.getByText('Summit dispatch upgrade').first()).toBeVisible();
   await expect(reloadedDeals.getByText('Helio multi-site launch')).toHaveCount(0);
@@ -775,7 +775,7 @@ test('reload restores active deal filters and keeps non-active account query iso
 
   await tab(page, /Customer Accounts|客户账户/).click();
   const reloadedAccounts = pane(page, 'crm_accounts');
-  await expect(reloadedAccounts.getByPlaceholder('Search...')).toHaveValue('e');
+  await expect(reloadedAccounts.getByPlaceholder('Search…')).toHaveValue('e');
   await expect.poll(() => currentPageLabel(reloadedAccounts)).toBe('2');
   await expect(reloadedAccounts.getByText('Summit Field Services').first()).toBeVisible();
   await expect(reloadedAccounts.getByText('Stage: discovery')).toHaveCount(0);
@@ -791,7 +791,7 @@ test('reopening a closed account tab starts from an empty query', async ({ page 
   await useSmallPages(page);
   await openWorkspace(page, 'crm_accounts');
 
-  await pane(page, 'crm_accounts').getByPlaceholder('Search...').fill('Helio');
+  await pane(page, 'crm_accounts').getByPlaceholder('Search…').fill('Helio');
   await expect(pane(page, 'crm_accounts').getByText('Helio Manufacturing').first()).toBeVisible();
   await expect(pane(page, 'crm_accounts').getByText('Lumen Clinics')).toHaveCount(0);
 
@@ -801,7 +801,7 @@ test('reopening a closed account tab starts from an empty query', async ({ page 
   await expectActiveTab(page, /Customer Accounts|客户账户/);
 
   const reopened = pane(page, 'crm_accounts');
-  await expect(reopened.getByPlaceholder('Search...')).toHaveValue('');
+  await expect(reopened.getByPlaceholder('Search…')).toHaveValue('');
   await expect.poll(() => currentPageLabel(reopened)).toBe('1');
   await expect(reopened.getByText('Helio Manufacturing').first()).toBeVisible();
   await expect(reopened.getByText('Lumen Clinics').first()).toBeVisible();
@@ -827,20 +827,20 @@ test('existing resources keep independent AutoTable search and page state', asyn
   await tab(page, /Revenue Opportunities|收入机会/).click();
   const deals = pane(page, 'crm_deals');
   await expect(deals.getByText('Helio multi-site launch').first()).toBeVisible();
-  await deals.getByPlaceholder('Search...').fill('Summit');
+  await deals.getByPlaceholder('Search…').fill('Summit');
   await expect(deals.getByText('Summit dispatch upgrade').first()).toBeVisible();
   await expect(deals.getByText('Helio multi-site launch')).toHaveCount(0);
 
   await tab(page, /Customer Accounts|客户账户/).click();
   await expect(accounts.getByText('Summit Field Services').first()).toBeVisible();
-  await expect(accounts.getByPlaceholder('Search...')).toHaveValue('');
+  await expect(accounts.getByPlaceholder('Search…')).toHaveValue('');
 
-  await accounts.getByPlaceholder('Search...').fill('Helio');
+  await accounts.getByPlaceholder('Search…').fill('Helio');
   await expect(accounts.getByText('Helio Manufacturing').first()).toBeVisible();
   await expect(accounts.getByText('Summit Field Services')).toHaveCount(0);
 
   await tab(page, /Revenue Opportunities|收入机会/).click();
-  await expect(deals.getByPlaceholder('Search...')).toHaveValue('Summit');
+  await expect(deals.getByPlaceholder('Search…')).toHaveValue('Summit');
   await expect(deals.getByText('Summit dispatch upgrade').first()).toBeVisible();
   await expect(deals.getByText('Helio multi-site launch')).toHaveCount(0);
 
@@ -881,13 +881,13 @@ test('closing and eviction clear only their tab while reload restores allowed st
   await openWorkspace(page, 'crm_deals');
 
   const deals = pane(page, 'crm_deals');
-  await deals.getByPlaceholder('Search...').fill('Summit');
+  await deals.getByPlaceholder('Search…').fill('Summit');
   await expect(deals.getByText('Summit dispatch upgrade').first()).toBeVisible();
 
   await page.locator('[data-open-workspace-resource="crm_activities"]').click();
   await expectActiveTab(page, /Customer Activities|客户活动/);
   const activities = pane(page, 'crm_activities');
-  await activities.getByPlaceholder('Search...').fill('Lumen');
+  await activities.getByPlaceholder('Search…').fill('Lumen');
   await expect(activities.getByText('Lumen renewal checkpoint').first()).toBeVisible();
 
   await page.locator('[data-open-workspace-resource="crm_contacts"]').click();
@@ -895,21 +895,21 @@ test('closing and eviction clear only their tab while reload restores allowed st
   await expect(tab(page, /Customer Accounts|客户账户/)).toHaveCount(0);
 
   await tab(page, /Revenue Opportunities|收入机会/).click();
-  await expect(deals.getByPlaceholder('Search...')).toHaveValue('Summit');
+  await expect(deals.getByPlaceholder('Search…')).toHaveValue('Summit');
   await expect(deals.getByText('Summit dispatch upgrade').first()).toBeVisible();
 
   await tab(page, /Customer Contacts|客户联系人/).click();
   await closeTab(page, /Customer Contacts|客户联系人/);
   await expectActiveTab(page, /Customer Activities|客户活动/);
-  await expect(activities.getByPlaceholder('Search...')).toHaveValue('Lumen');
+  await expect(activities.getByPlaceholder('Search…')).toHaveValue('Lumen');
 
   await closeTab(page, /Customer Activities|客户活动/);
   await expectActiveTab(page, /Revenue Opportunities|收入机会/);
-  await expect(deals.getByPlaceholder('Search...')).toHaveValue('Summit');
+  await expect(deals.getByPlaceholder('Search…')).toHaveValue('Summit');
 
   await page.locator('[data-open-workspace-resource="crm_activities"]').click();
   await expectActiveTab(page, /Customer Activities|客户活动/);
-  await expect(pane(page, 'crm_activities').getByPlaceholder('Search...')).toHaveValue('');
+  await expect(pane(page, 'crm_activities').getByPlaceholder('Search…')).toHaveValue('');
   await closeTab(page, /Customer Activities|客户活动/);
   await expectActiveTab(page, /Revenue Opportunities|收入机会/);
 
@@ -940,7 +940,7 @@ test('same-session windows synchronize tab collection without sharing list state
 
     const peerDeals = pane(peer, 'crm_deals');
     await tab(peer, /Revenue Opportunities|收入机会/).click();
-    await peerDeals.getByPlaceholder('Search...').fill('Summit');
+    await peerDeals.getByPlaceholder('Search…').fill('Summit');
     await expect(peerDeals.getByText('Summit dispatch upgrade').first()).toBeVisible();
 
     await tab(page, /Revenue Opportunities|收入机会/).click();
@@ -954,13 +954,13 @@ test('same-session windows synchronize tab collection without sharing list state
     await expect(tab(page, /Customer Accounts|客户账户/)).toHaveCount(0);
     await expect(tab(peer, /Customer Accounts|客户账户/)).toHaveCount(0);
     await expect(tab(peer, /Customer Contacts|客户联系人/)).toHaveCount(1);
-    await expect(peerDeals.getByPlaceholder('Search...')).toHaveValue('Summit');
+    await expect(peerDeals.getByPlaceholder('Search…')).toHaveValue('Summit');
     await expect(peerDeals.getByText('Summit dispatch upgrade').first()).toBeVisible();
 
     await closeTab(page, /Customer Contacts|客户联系人/);
     await expect(tab(peer, /Customer Contacts|客户联系人/)).toHaveCount(0);
     await expect(tab(peer, /Revenue Opportunities|收入机会/)).toHaveCount(1);
-    await expect(peerDeals.getByPlaceholder('Search...')).toHaveValue('Summit');
+    await expect(peerDeals.getByPlaceholder('Search…')).toHaveValue('Summit');
 
     expect(errors).toEqual([]);
     expect(peerErrors).toEqual([]);

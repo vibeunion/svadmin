@@ -25,7 +25,7 @@
 
   let {
     value = $bindable(''),
-    placeholder = 'Type @ to mention team members, or # to link tags...',
+    placeholder = 'Type @ to mention team members, or # to link tags…',
     triggers = ['@', '#'],
     users = [],
     tags = [],

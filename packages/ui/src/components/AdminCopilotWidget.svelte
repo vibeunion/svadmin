@@ -60,7 +60,7 @@
     {
       id: 'msg-init',
       role: 'assistant',
-      content: '您好！我是您的智能数据副驾驶。您可以随时向我询问报表洞察，或用自然语言让我帮您直接过滤表格数据。',
+      content: '你好。可以询问报表洞察，或用自然语言过滤表格数据。',
       timestamp: '刚刚',
     },
   ]);
@@ -97,11 +97,11 @@
       } else {
         // Built-in intelligent simulation with auto filter extraction
         await new Promise((r) => setTimeout(r, 650));
-        let replyContent = `已为您检索并分析关于“${q}”的数据记录。`;
+        let replyContent = `已检索并分析关于“${q}”的数据记录。`;
         let filterSuggestion: CopilotFilterSuggestion | undefined;
 
         if (q.includes('华东') || q.includes('大额') || q.includes('筛选') || q.includes('订单')) {
-          replyContent = `已根据您的指令分析业务规则：建议对当前表格应用复合过滤【所属大区 = 华东大区 且 订单金额 >= ¥50,000】。`;
+          replyContent = `已根据这条指令分析业务规则：建议对当前表格应用复合过滤【所属大区 = 华东大区 且 订单金额 >= ¥50,000】。`;
           filterSuggestion = {
             field: 'region',
             operator: '=',
@@ -268,7 +268,7 @@
         {#if isThinking}
           <div class="flex items-center gap-2 text-xs text-muted-foreground p-2 rounded-lg bg-muted/20 w-fit">
             <Loader2 class="h-3.5 w-3.5 animate-spin text-primary" />
-            <span class="font-mono text-[11px]">正在解析业务意图并检索数据...</span>
+            <span class="font-mono text-[11px]">正在解析业务意图并检索数据…</span>
           </div>
         {/if}
       </div>

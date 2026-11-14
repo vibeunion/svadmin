@@ -32,6 +32,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { ArrowRight, Globe } from '@lucide/svelte';
+  import { formatAdminTime } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../../utils.js';
@@ -95,7 +96,7 @@
     if (typeof val === 'string' && !/^\d{4}-\d{2}-\d{2}T/.test(val)) return val;
     try {
       const d = typeof val === 'number' ? new Date(val) : new Date(val);
-      return isNaN(d.getTime()) ? String(val) : d.toLocaleString();
+      return isNaN(d.getTime()) ? String(val) : formatAdminTime(d, { dateStyle: 'medium' });
     } catch {
       return String(val);
     }

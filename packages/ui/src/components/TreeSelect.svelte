@@ -811,7 +811,7 @@
           >
             {#if selectedValues.length === 0}
               <span class="text-muted-foreground">
-                {placeholder ?? (i18n.t('field.selectPlaceholder', undefined) ?? '请选择...')}
+                {placeholder ?? (i18n.t('field.selectPlaceholder', undefined) ?? '请选择…')}
               </span>
             {:else if multiple}
               {#each selectedValues as val (val)}
@@ -873,7 +873,7 @@
             aria-label={i18n.t('common.search')}
             aria-controls={treeId}
             onkeydown={handleSearchKeydown}
-            placeholder={i18n.t('common.search', undefined) ?? '搜索...'}
+            placeholder={i18n.t('common.search', undefined) ?? '搜索…'}
             class="h-8 pl-8 pr-2 text-xs"
           />
         </div>

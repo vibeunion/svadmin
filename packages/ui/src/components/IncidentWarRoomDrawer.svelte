@@ -181,7 +181,7 @@
         <input
           type="text"
           bind:value={newNoteText}
-          placeholder={chinese ? '同步应急进展或处置备注...' : 'Add progress note...'}
+          placeholder={chinese ? '同步应急进展或处置备注…' : 'Add progress note…'}
           class="h-8.5 flex-1 rounded-md border border-input bg-background px-3 text-xs focus-visible:outline-none"
         />
         <Button size="sm" onclick={handleSendNote} disabled={!newNoteText.trim()} class="h-8.5 px-3 gap-1">

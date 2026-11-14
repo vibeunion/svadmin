@@ -218,7 +218,7 @@
     >
       {#if isSending}
         <Loader2 class="h-3.5 w-3.5 animate-spin" />
-        <span>正在投递...</span>
+        <span>正在投递…</span>
       {:else}
         <Send class="h-3.5 w-3.5" />
         <span>发起模拟投递测试</span>

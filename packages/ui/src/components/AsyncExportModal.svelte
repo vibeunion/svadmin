@@ -132,7 +132,7 @@
     if (selectedColumnKeys.length === 0 || !fileName.trim()) return;
     taskStatus = 'exporting';
     exportProgress = 15;
-    statusMessage = '正在分析数据并生成报表任务...';
+    statusMessage = '正在分析数据并生成报表任务…';
 
     const fullFileName = `${fileName.trim()}.${currentFormat}`;
     const startTime = Date.now();
@@ -140,7 +140,7 @@
     try {
       if (onexport) {
         exportProgress = 40;
-        statusMessage = '正在提取所选字段及筛选记录...';
+        statusMessage = '正在提取所选字段及筛选记录…';
 
         const result = await onexport({
           fileName: fullFileName,
@@ -156,10 +156,10 @@
         // Built-in simulated asynchronous export progression
         await new Promise((r) => setTimeout(r, 600));
         exportProgress = 55;
-        statusMessage = '正在序列化结构与压缩数据流...';
+        statusMessage = '正在序列化结构与压缩数据流…';
         await new Promise((r) => setTimeout(r, 700));
         exportProgress = 85;
-        statusMessage = '正在生成云端下载凭证...';
+        statusMessage = '正在生成云端下载凭证…';
         await new Promise((r) => setTimeout(r, 400));
         exportProgress = 100;
 
@@ -428,7 +428,7 @@
           <div class="py-6 flex flex-col items-center justify-center text-center space-y-3">
             <Loader2 class="h-8 w-8 text-primary animate-spin" />
             <div class="space-y-1">
-              <h4 class="font-semibold text-foreground text-sm">正在后台异步生成数据报表...</h4>
+              <h4 class="font-semibold text-foreground text-sm">正在后台异步生成数据报表…</h4>
               <p class="text-muted-foreground text-xs">{statusMessage}</p>
             </div>
 
@@ -503,7 +503,7 @@
             开始生成报表
           </button>
         {:else if taskStatus === 'exporting'}
-          <span class="text-muted-foreground text-xs italic">任务执行中，请勿关闭...</span>
+          <span class="text-muted-foreground text-xs italic">任务仍在执行。离开页面会中断导出。</span>
         {:else if taskStatus === 'completed'}
           {#if exportResult?.fileUrl}
             <button

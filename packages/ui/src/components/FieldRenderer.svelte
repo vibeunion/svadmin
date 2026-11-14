@@ -140,7 +140,7 @@
 </script>
 
 <div
-  class="space-y-1.5"
+  class="svadmin-field"
   data-svadmin-field
   data-svadmin-field-key={field.key}
 >
@@ -150,9 +150,6 @@
       <span class="text-destructive" data-svadmin-required>*</span>
     {/if}
   </Label>
-  {#if field.description}
-    <p id={descriptionId} data-svadmin-field-description class="text-xs text-muted-foreground">{field.description}</p>
-  {/if}
 
   {#if children}
     {@render children()}
@@ -693,5 +690,8 @@
       aria-describedby={describedBy}
       {disabled}
     />
+  {/if}
+  {#if field.description}
+    <p id={descriptionId} data-svadmin-field-description class="svadmin-field-help text-xs text-muted-foreground">{field.description}</p>
   {/if}
 </div>

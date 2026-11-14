@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN" class="layout-clean-flat" data-theme="default">
+  <head>
+    <meta charset="utf-8" />
+    <title>SVAdmin visual contract</title>
+    <link rel="stylesheet" href="/packages/ui/src/app.css" />
+    <style>
+      body { margin: 0; }
+      .shell {
+        display: grid;
+        grid-template-columns: var(--svadmin-shell-sidebar-w) minmax(0, 1fr);
+        min-height: 100vh;
+      }
+      .rail, .top {
+        background: var(--sidebar);
+        color: var(--sidebar-foreground);
+      }
+      .rail { padding: 16px; }
+      .top { height: var(--svadmin-shell-topbar-h); display: flex; align-items: center; padding-inline: var(--svadmin-shell-gutter); background: var(--card); border-bottom: 1px solid var(--border); }
+      main { background: var(--background); padding: var(--svadmin-shell-gutter); display: grid; gap: 16px; align-content: start; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    </style>
+  </head>
+  <body>
+    <div class="shell" data-svadmin-shell>
+      <aside class="rail" data-svadmin-sidebar>导航</aside>
+      <div>
+        <header class="top" data-svadmin-topbar>SVAdmin</header>
+        <main>
+          <p class="svadmin-text" id="body-copy">正文 14 / 1.4。Body copy stays on the token.</p>
+          <div class="svadmin-copy copy">
+            <p>第一段说明。</p>
+            <p id="second-paragraph">第二段与上一段之间使用段落间距。</p>
+          </div>
+          <div class="row" id="buttons">
+            <button class="svadmin-button svadmin-button--default" id="primary">主要</button>
+            <button class="svadmin-button svadmin-button--default" id="primary-disabled" disabled>主要禁用</button>
+            <button class="svadmin-button" data-status="danger" id="danger">危险</button>
+            <button class="svadmin-button" data-status="danger" id="danger-disabled" disabled>危险禁用</button>
+            <button class="svadmin-button" data-status="warning" id="warning">警告</button>
+            <button class="svadmin-button" data-status="warning" id="warning-disabled" disabled>警告禁用</button>
+          </div>
+          <a class="svadmin-link" id="link" href="#link">链接</a>
+          <div class="svadmin-dialog-overlay" id="mask" style="position:relative;inset:auto;height:72px"></div>
+          <div class="svadmin-popconfirm" id="popconfirm" data-confirm-weight="light">
+            <p>确认保存这条记录？</p>
+          </div>
+          <div class="svadmin-dialog-content" id="dialog-sm" data-dialog-size="sm" data-close-on-overlay="true" style="position:relative;top:auto;left:auto;transform:none">信息</div>
+          <div class="svadmin-dialog-content" id="dialog-md" data-dialog-size="md" data-close-on-overlay="false" style="position:relative;top:auto;left:auto;transform:none">录入</div>
+          <div class="svadmin-dialog-content" id="dialog-lg" data-dialog-size="lg" style="position:relative;top:auto;left:auto;transform:none">宽对话框</div>
+          <div class="svadmin-alert svadmin-alert--warning" id="alert-static" data-feedback="static" role="alert">磁盘空间不足，导出已暂停。</div>
+          <div class="svadmin-field" id="field">
+            <label data-svadmin-field-label for="input-default">名称</label>
+            <input class="svadmin-input" id="input-default" data-input-state="default" data-size="default" placeholder="选填">
+            <p class="svadmin-field-help" id="field-help">用于检索，不是唯一标识。</p>
+          </div>
+          <input class="svadmin-input" id="input-error" data-input-state="error" aria-invalid="true" value="已填写">
+          <input class="svadmin-input" id="input-disabled" data-input-state="disabled" disabled value="不可编辑">
+          <div data-svadmin-table-state="loading" id="table-loading" role="status" aria-busy="true">加载中…</div>
+          <div data-svadmin-data-state="empty" id="table-empty" role="status">暂无数据</div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

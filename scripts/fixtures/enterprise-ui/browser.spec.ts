@@ -2018,7 +2018,7 @@ test('enterprise connection tests share a pending lock and recover after failure
   await tests.nth(2).click();
   await expect(controls.getByTestId('connection-target')).toHaveText('saml');
   await expect(controls.getByTestId('connection-calls')).toHaveText('1');
-  await expect(settings.getByRole('button', { name: 'Testing...', exact: true })).toBeDisabled();
+  await expect(settings.getByRole('button', { name: 'Testing…', exact: true })).toBeDisabled();
   await expect(tests.nth(0)).toBeDisabled();
   await expect(tests.nth(1)).toBeDisabled();
   await mkdir('../../../output/playwright/enterprise-settings', { recursive: true });

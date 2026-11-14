@@ -605,7 +605,7 @@
                 <span class="svadmin-cascader-tag">+{selectedMultiOptions.length - maxTagCount}</span>
               {/if}
             {:else}
-              <span class="truncate">{displayLabel || (placeholder ?? (i18n.t('field.selectPlaceholder', undefined) ?? '请选择...'))}</span>
+              <span class="truncate">{displayLabel || (placeholder ?? (i18n.t('field.selectPlaceholder', undefined) ?? '请选择…'))}</span>
             {/if}
           </span>
 
@@ -635,7 +635,7 @@
           <input
             type="search"
             class="h-7 w-full min-w-0 border-0 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
-            placeholder={searchPlaceholder ?? (i18n.t('common.search', undefined) ?? 'Search...')}
+            placeholder={searchPlaceholder ?? (i18n.t('common.search', undefined) ?? 'Search…')}
             bind:value={searchTerm}
             aria-label={searchPlaceholder ?? 'Search options'}
           />
@@ -705,7 +705,7 @@
               {@const parentKey = pathId(activePath.slice(0, colIndex))}
               {#if parent && loadingValues.has(parentKey)}
                 <div role="status" class="py-4 text-center text-xs text-muted-foreground">
-                  {i18n.t('common.loading', undefined) ?? '加载中...'}
+                  {i18n.t('common.loading', undefined) ?? '加载中…'}
                 </div>
               {:else if parent && loadErrors.has(parentKey)}
                 <div role="alert" class="py-4 text-center text-xs text-muted-foreground">

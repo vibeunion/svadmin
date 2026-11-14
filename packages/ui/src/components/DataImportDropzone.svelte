@@ -198,7 +198,7 @@
       <div class="flex justify-between text-muted-foreground">
         <span class="flex items-center gap-1">
           <RefreshCw class="h-3 w-3 animate-spin text-primary" />
-          <span>正在解析文件数据结构并校验列头...</span>
+          <span>正在解析文件数据结构并校验列头…</span>
         </span>
         {#if progress !== undefined}
           <span class="font-bold text-foreground">{progress}%</span>

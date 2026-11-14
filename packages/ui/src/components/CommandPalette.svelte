@@ -53,7 +53,7 @@
         <Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <Command.Input
           bind:value={searchValue}
-          placeholder={hasAI ? (i18n.t('commandPalette.searchOrAsk') || 'Search or ask AI...') : i18n.t('common.search')}
+          placeholder={hasAI ? (i18n.t('commandPalette.searchOrAsk') || 'Search or ask AI…') : i18n.t('common.search')}
           class="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         />
         <kbd class="ml-2 text-[10px] font-mono font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">ESC</kbd>

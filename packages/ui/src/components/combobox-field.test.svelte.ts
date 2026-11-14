@@ -124,7 +124,7 @@ describe('ComboboxField', () => {
     trigger.focus();
     if (action === 'click') await fireEvent.click(trigger);
     else await fireEvent.keyDown(trigger, { key: action });
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await waitFor(() => expect(document.activeElement).toBe(search));
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     expect(trigger.getAttribute('aria-controls')).toBe(view.getByRole('listbox').id);
@@ -135,7 +135,7 @@ describe('ComboboxField', () => {
     const view = mount({ value: 2, onchange });
     const trigger = view.getByRole('button', { name: 'Record' });
     await fireEvent.click(trigger);
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await waitFor(() => expect(document.activeElement).toBe(search));
     await fireEvent.keyDown(search, { key: 'Escape' });
     await waitFor(() => expect(view.queryByRole('listbox')).toBeNull());
@@ -161,7 +161,7 @@ describe('ComboboxField', () => {
       view.container.append(outside);
 
       await fireEvent.click(trigger);
-      const search = await view.findByPlaceholderText('Search...');
+      const search = await view.findByPlaceholderText('Search…');
       await view.findByRole('option', { name: 'Initial 1' });
       await fireEvent.input(search, { target: { value: 'Match' } });
       expect(search).toHaveProperty('value', 'Match');
@@ -181,7 +181,7 @@ describe('ComboboxField', () => {
 
       if (closeBy === 'disabled') await view.rerender({ disabled: false });
       await fireEvent.click(trigger);
-      const reopened = await view.findByPlaceholderText('Search...');
+      const reopened = await view.findByPlaceholderText('Search…');
       expect(reopened).toHaveProperty('value', '');
       await view.findByRole('option', { name: 'Initial 1' });
       expect(view.queryByRole('option', { name: 'Search result' })).toBeNull();
@@ -214,16 +214,16 @@ describe('ComboboxField', () => {
 
     await fireEvent.click(trigger);
     await view.findByRole('option', { name: 'Initial 1' });
-    await fireEvent.input(view.getByPlaceholderText('Search...'), { target: { value: 'Match' } });
+    await fireEvent.input(view.getByPlaceholderText('Search…'), { target: { value: 'Match' } });
     await view.findByRole('option', { name: 'Match 101' });
     await fireEvent.click(view.getByRole('button', { name: 'Load more' }));
     await view.findByRole('option', { name: 'Match 111' });
 
-    await fireEvent.keyDown(view.getByPlaceholderText('Search...'), { key: 'Escape' });
+    await fireEvent.keyDown(view.getByPlaceholderText('Search…'), { key: 'Escape' });
     await waitFor(() => expect(view.queryByRole('listbox')).toBeNull());
 
     await fireEvent.click(trigger);
-    const reopened = await view.findByPlaceholderText('Search...');
+    const reopened = await view.findByPlaceholderText('Search…');
     expect(reopened).toHaveProperty('value', '');
     await view.findByRole('option', { name: 'Initial 1' });
     expect(view.queryByRole('option', { name: 'Match 101' })).toBeNull();
@@ -254,7 +254,7 @@ describe('ComboboxField', () => {
     const onchange = vi.fn();
     const view = mount({ onchange }, { getList });
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     const initial = await view.findByRole('option', { name: 'Initial 1' });
 
     // 输入尚未应用时旧结果仍可见，但不能被选中。
@@ -293,7 +293,7 @@ describe('ComboboxField', () => {
     const view = mount({ onchange }, { getList });
     const trigger = view.getByRole('button', { name: 'Record' });
     await fireEvent.click(trigger);
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await view.findByRole('option', { name: 'Initial 1' });
     await fireEvent.input(search, { target: { value: 'Match' } });
     await waitFor(() => expect(getList).toHaveBeenCalledWith(expect.objectContaining({
@@ -303,7 +303,7 @@ describe('ComboboxField', () => {
     await fireEvent.keyDown(search, { key: 'Escape' });
     await waitFor(() => expect(view.queryByRole('listbox')).toBeNull());
     await fireEvent.click(trigger);
-    const reopened = await view.findByPlaceholderText('Search...');
+    const reopened = await view.findByPlaceholderText('Search…');
     expect(reopened).toHaveProperty('value', '');
     await view.findByRole('option', { name: 'Initial 1' });
 
@@ -334,7 +334,7 @@ describe('ComboboxField', () => {
     const onchange = vi.fn();
     const view = mount({ onchange }, { getList });
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await view.findByRole('option', { name: 'Initial 1' });
 
     await fireEvent.input(search, { target: { value: 'Old' } });
@@ -401,7 +401,7 @@ describe('ComboboxField', () => {
     await fireEvent.keyDown(trigger, { key: 'ArrowDown' });
     const command = await view.findByRole('application');
     await waitFor(() => expect(document.activeElement).toBe(command));
-    expect(view.queryByPlaceholderText('Search...')).toBeNull();
+    expect(view.queryByPlaceholderText('Search…')).toBeNull();
     await fireEvent.keyDown(command, { key: 'Escape' });
     await waitFor(() => expect(document.activeElement).toBe(trigger));
     expect(view.queryByRole('listbox')).toBeNull();
@@ -411,7 +411,7 @@ describe('ComboboxField', () => {
     const view = mount();
     const trigger = view.getByRole('button', { name: 'Record' });
     await fireEvent.click(trigger);
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await waitFor(() => expect(document.activeElement).toBe(search));
     const outside = document.createElement('button');
     outside.textContent = 'Next field';
@@ -436,10 +436,10 @@ describe('ComboboxField', () => {
     }
     expect(triggerKeydown).toHaveBeenCalledTimes(3);
     await fireEvent.click(trigger);
-    await waitFor(() => expect(document.activeElement).toBe(view.getByPlaceholderText('Search...')));
+    await waitFor(() => expect(document.activeElement).toBe(view.getByPlaceholderText('Search…')));
     trigger.focus();
     await fireEvent.keyDown(trigger, { key: 'ArrowUp' });
-    expect(document.activeElement).toBe(view.getByPlaceholderText('Search...'));
+    expect(document.activeElement).toBe(view.getByPlaceholderText('Search…'));
     trigger.focus();
     await fireEvent.keyDown(trigger, { key: 'Escape' });
     expect(view.queryByRole('listbox')).toBeNull();
@@ -452,7 +452,7 @@ describe('ComboboxField', () => {
     const view = mount({ triggerKeydown });
     const trigger = view.getByRole('button', { name: 'Record' });
     await fireEvent.click(trigger);
-    await waitFor(() => expect(document.activeElement).toBe(view.getByPlaceholderText('Search...')));
+    await waitFor(() => expect(document.activeElement).toBe(view.getByPlaceholderText('Search…')));
     trigger.focus();
     const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
     await fireEvent(trigger, event);
@@ -480,7 +480,7 @@ describe('ComboboxField', () => {
     const view = mount({ onchange });
     const trigger = view.getByRole('button', { name: 'Record' });
     await fireEvent.click(trigger);
-    await waitFor(() => expect(document.activeElement).toBe(view.getByPlaceholderText('Search...')));
+    await waitFor(() => expect(document.activeElement).toBe(view.getByPlaceholderText('Search…')));
     await view.rerender({ disabled: true });
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     expect(view.queryByRole('listbox')).toBeNull();
@@ -488,7 +488,7 @@ describe('ComboboxField', () => {
     expect(view.queryByRole('listbox')).toBeNull();
 
     await fireEvent.click(trigger);
-    const oldSearch = view.getByPlaceholderText('Search...');
+    const oldSearch = view.getByPlaceholderText('Search…');
     await waitFor(() => expect(document.activeElement).toBe(oldSearch));
     await view.rerender({ tenant: 'second' });
     expect(view.queryByRole('listbox')).toBeNull();
@@ -521,7 +521,7 @@ describe('ComboboxField', () => {
     const view = mount({ fetchSize: 10, multiple: true, onchange }, { getList });
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
     await view.findByRole('option', { name: 'Initial 1' });
-    await fireEvent.input(view.getByPlaceholderText('Search...'), { target: { value: 'Match' } });
+    await fireEvent.input(view.getByPlaceholderText('Search…'), { target: { value: 'Match' } });
     await view.findByRole('option', { name: 'Match 1' });
     expect(view.queryByRole('option', { name: 'Initial 1' })).toBeNull();
     await fireEvent.click(view.getByRole('option', { name: 'Match 1' }));
@@ -718,7 +718,7 @@ describe('ComboboxField', () => {
   it('localizes search and empty state', async () => {
     const view = mount({}, { getList: async () => ({ data: [], total: 0 }) }, 'zh-CN');
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
-    expect(view.getByPlaceholderText('搜索...')).toBeTruthy();
+    expect(view.getByPlaceholderText('搜索…')).toBeTruthy();
     await view.findByText('无匹配结果。');
   });
 
@@ -735,12 +735,12 @@ describe('ComboboxField', () => {
 
     expect(changes).toEqual([[1]]);
     expect(view.getByRole('listbox')).toBeTruthy();
-    expect(document.activeElement).toBe(view.getByPlaceholderText('Search...'));
+    expect(document.activeElement).toBe(view.getByPlaceholderText('Search…'));
 
     await waitFor(() => expect(view.getByRole('button', { name: 'Record' }).textContent).toContain('First'));
     await fireEvent.click(view.getByRole('option', { name: 'First' }));
     expect(changes).toEqual([[1], []]);
-    expect(document.activeElement).toBe(view.getByPlaceholderText('Search...'));
+    expect(document.activeElement).toBe(view.getByPlaceholderText('Search…'));
   });
 
   it('loads selected records separately so a filtered list does not lose the selection', async () => {
@@ -768,7 +768,7 @@ describe('ComboboxField', () => {
     });
     const view = mount({ onchange: vi.fn() }, { getList });
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await view.findByRole('option', { name: 'Initial 1' });
 
     await fireEvent.input(search, { target: { value: 'Old' } });
@@ -846,7 +846,7 @@ describe('ComboboxField', () => {
     const onchange = vi.fn();
     const view = mount({ fetchSize: 200, onchange }, { getList });
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await view.findByRole('option', { name: 'Item 0' });
     const activeText = (): string | null => {
       const id = search.getAttribute('aria-activedescendant');

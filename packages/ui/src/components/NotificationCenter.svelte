@@ -3,6 +3,7 @@
   import { Bell, CheckCheck } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
   import * as Popover from './ui/popover/index.js';
+  import { formatAdminTime } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   export interface NotificationItem {
@@ -69,7 +70,7 @@
     if (!value) return '';
     const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    return formatAdminTime(date, { dateStyle: 'medium', seconds: false });
   }
 
   async function read(item: NotificationItem): Promise<void> {

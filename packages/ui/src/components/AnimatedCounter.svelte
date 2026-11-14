@@ -1,5 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { formatAdminNumber } from '@svadmin/core';
 
   interface Props {
     /** The target number to animate to */
@@ -33,7 +34,7 @@
       // Ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = Math.round(start + (target - start) * eased);
-      displayValue = current.toLocaleString();
+      displayValue = formatAdminNumber(current, { locale: null, maximumFractionDigits: 0 });
 
       if (progress < 1) {
         currentRaf = requestAnimationFrame(tick);

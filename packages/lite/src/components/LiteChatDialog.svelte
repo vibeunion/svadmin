@@ -4,6 +4,7 @@
    * Relies on standard <form> POST without polling or WebSockets.
    * No client-side JS required.
    */
+  import { formatAdminTime } from '@svadmin/core/copy-format';
   import type { ChatMessage } from '@svadmin/core';
 
   interface Props {
@@ -23,13 +24,13 @@
     actionRoute,
     isLoading = false,
     title = 'AI Assistant',
-    placeholder = 'Type your message...',
+    placeholder = 'Type your message…',
     submitLabel = 'Send'
   }: Props = $props();
 
   function formatDate(ts: number) {
     if (!ts) return '';
-    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatAdminTime(ts, { seconds: false });
   }
 
   function messageText(message: ChatMessage): string {

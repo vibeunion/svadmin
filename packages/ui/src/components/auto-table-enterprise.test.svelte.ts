@@ -64,7 +64,7 @@ describe('AutoTable enterprise enhancements', () => {
     });
 
     expect(await view.findByRole('heading', { level: 1, name: '用户管理' })).toBeTruthy();
-    expect(await view.findByPlaceholderText('搜索...')).toBeTruthy();
+    expect(await view.findByPlaceholderText('搜索…')).toBeTruthy();
     expect(await view.findByRole('button', { name: '刷新' })).toBeTruthy();
     expect(await view.findByRole('button', { name: '列' })).toBeTruthy();
   });
@@ -79,7 +79,7 @@ describe('AutoTable enterprise enhancements', () => {
       expect(view.queryByRole('heading', { level: 1, name: '用户管理' })).toBeNull();
     });
     // Toolbar controls should still be present
-    expect(await view.findByPlaceholderText('搜索...')).toBeTruthy();
+    expect(await view.findByPlaceholderText('搜索…')).toBeTruthy();
     expect(await view.findByRole('button', { name: '刷新' })).toBeTruthy();
   });
 
@@ -136,7 +136,7 @@ describe('AutoTable enterprise enhancements', () => {
 
   it('gives active-filter clear buttons accessible names', async () => {
     const view = render(AutoTableEnterpriseHarness, { viewMode: 'table' });
-    const search = await view.findByPlaceholderText('搜索...');
+    const search = await view.findByPlaceholderText('搜索…');
     await fireEvent.input(search, { target: { value: 'user1' } });
 
     const clearSearch = await view.findByRole('button', { name: /^清除: 搜索/ });
@@ -147,7 +147,7 @@ describe('AutoTable enterprise enhancements', () => {
 
   it('distinguishes filtered-empty from an initially empty resource list', async () => {
     const view = render(AutoTableEnterpriseHarness, { viewMode: 'table' });
-    const search = await view.findByPlaceholderText('搜索...');
+    const search = await view.findByPlaceholderText('搜索…');
     await fireEvent.input(search, { target: { value: '不存在的用户' } });
 
     await waitFor(() => {
@@ -158,7 +158,7 @@ describe('AutoTable enterprise enhancements', () => {
 
   it('keeps the filtered-empty description independent from neutral empty copy', async () => {
     const view = render(AutoTableEnterpriseHarness, { viewMode: 'table', locale: 'en' });
-    const search = await view.findByPlaceholderText('Search...');
+    const search = await view.findByPlaceholderText('Search…');
     await fireEvent.input(search, { target: { value: 'missing-user' } });
 
     await waitFor(() => {

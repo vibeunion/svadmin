@@ -107,7 +107,7 @@
       {/snippet}
       {#snippet filterToolbar()}
         <FilterToolbar
-          placeholder="搜索用户..."
+          placeholder="搜索用户…"
         />
       {/snippet}
     </ListPage>

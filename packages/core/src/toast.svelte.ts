@@ -1,5 +1,5 @@
 import { definedOptions } from './defined-options';
-export type ToastType='success'|'error'|'info'|'warning'|'undoable';
+export type ToastType='success'|'error'|'info'|'warning'|'normal'|'undoable';
 
 export interface ToastItem {
   id: number;
@@ -69,6 +69,7 @@ export const toast={
   success: (msg: string,duration?: number,opts?: { key?: string }) => addToast('success',msg,duration,opts),
   error: (msg: string,duration?: number,opts?: { key?: string }) => addToast('error',msg,duration??5000,opts),
   info: (msg: string,duration?: number,opts?: { key?: string }) => addToast('info',msg,duration,opts),
+  normal: (msg: string,duration?: number,opts?: { key?: string }) => addToast('normal',msg,duration,opts),
   warning: (msg: string,duration?: number,opts?: { key?: string }) => addToast('warning',msg,duration??4000,opts),
   undoable: (msg: string,duration: number,onUndo: () => void,onTimeout: () => void) =>
     addToast('undoable',msg,duration,{ onUndo,onTimeout }),

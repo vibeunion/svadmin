@@ -53,8 +53,9 @@ business code inside `src/features/<module>/` and expose it through the module's
   presentation unframed, use existing semantic tokens, and inspect rendered
   long labels, dense data, empty results, and errors before calling it complete.
 - Start with `AdminApp`, a provider bundle, and schema-backed resources. Its
-  default layout is clean-flat; the default color is Stripe unless the user has
-  saved another selection. Keep explicit theme overrides only for intentional changes.
+  default layout is clean-flat; the default color preset is `default`
+  (`#165DFF`) unless the user has saved another selection. Keep explicit theme
+  overrides only for intentional changes.
 - Keep the built-in list/create/edit/show routes unless the business workflow
   needs a different composition. Do not replace CRUD with static demo tables.
 - Use `ResourceOverview` for a permission-aware resource entry page.

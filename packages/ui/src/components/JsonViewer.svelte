@@ -130,7 +130,7 @@
           <input
             type="text"
             bind:value={searchQuery}
-            placeholder="搜索 Key 或 Value..."
+            placeholder="搜索 Key 或 Value…"
             class="w-full pl-8 pr-2.5 py-1 text-xs rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary"
           />
         </div>

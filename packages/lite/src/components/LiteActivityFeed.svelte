@@ -67,7 +67,7 @@
   <form {action} {method} class="lite-activity-form">
     <div style="margin-bottom: 8px;">
       <label for="lite_act_comment" class="lite-label">Add Note / Comment:</label>
-      <textarea id="lite_act_comment" name="comment" class="lite-textarea" style="height: 50px;" placeholder="Write a comment..."></textarea>
+      <textarea id="lite_act_comment" name="comment" class="lite-textarea" style="height: 50px;" placeholder="Write a comment…"></textarea>
     </div>
     <div style="text-align: right;">
       <button type="submit" class="lite-btn lite-btn-primary lite-btn-sm">

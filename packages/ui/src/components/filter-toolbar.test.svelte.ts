@@ -8,9 +8,9 @@ import PageChromeHarness from '../../test/fixtures/PageChromeHarness.svelte';
 describe('FilterToolbar', () => {
   it('renders search input with clear button when query is present', async () => {
     const query = 'test-query';
-    render(FilterToolbar, { query, placeholder: 'Search records...' });
+    render(FilterToolbar, { query, placeholder: 'Search records…' });
 
-    const input = screen.getByLabelText('Search records...') as HTMLInputElement;
+    const input = screen.getByLabelText('Search records…') as HTMLInputElement;
     expect(input.value).toBe('test-query');
 
     const clearButton = screen.getByRole('button', { name: 'Clear search' });
@@ -22,9 +22,9 @@ describe('FilterToolbar', () => {
   });
 
   it.each(['{Enter}', ' '])('returns focus to the search input when clearing with %s', async key => {
-    render(FilterToolbar, { query: 'test-query', placeholder: 'Search records...' });
+    render(FilterToolbar, { query: 'test-query', placeholder: 'Search records…' });
 
-    const input = screen.getByLabelText('Search records...') as HTMLInputElement;
+    const input = screen.getByLabelText('Search records…') as HTMLInputElement;
     const clearButton = screen.getByRole('button', { name: 'Clear search' });
     const user = userEvent.setup();
     input.focus();

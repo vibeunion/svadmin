@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminNumber, formatAdminPercent } from '@svadmin/core';
   interface Stage {
     label: string;
     value: number;
@@ -57,9 +58,8 @@
           {stage.label}
         </text>
         {#if showValue}
-          {@const ratio = total > 0 ? ((stage.value / total) * 100).toFixed(1) : '0.0'}
           <text x={width / 2} y={top + 37} text-anchor="middle" fill="var(--muted-foreground)" font-size="11">
-            {stage.value.toLocaleString()} · {ratio}%
+            {formatAdminNumber(stage.value, { locale: null })} · {formatAdminPercent(total > 0 ? stage.value / total : 0, { locale: null, minimumFractionDigits: 1, maximumFractionDigits: 1 })}
           </text>
         {/if}
       {/each}

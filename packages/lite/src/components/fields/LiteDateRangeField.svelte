@@ -8,6 +8,7 @@
 </script>
 
 <script lang="ts">
+  import { formatAdminDate, formatAdminTime } from '@svadmin/core/copy-format';
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -70,20 +71,13 @@
     if (isNaN(d.getTime())) return null;
 
     if (format === 'iso') return d.toISOString();
-
-    const defaultOptions: Intl.DateTimeFormatOptions =
-      options ??
-      (format === 'datetime'
-        ? { dateStyle: 'medium', timeStyle: 'short' }
-        : format === 'time'
-          ? { timeStyle: 'medium' }
-          : { dateStyle: 'medium' });
-
-    try {
-      return new Intl.DateTimeFormat(locale, defaultOptions).format(d);
-    } catch {
-      return d.toLocaleDateString();
+    if (options) {
+      try { return new Intl.DateTimeFormat(locale, options).format(d); }
+      catch { return formatAdminDate(d, { locale }); }
     }
+    if (format === 'datetime') return formatAdminTime(d, { locale, dateStyle: 'medium', seconds: false });
+    if (format === 'time') return formatAdminTime(d, { locale });
+    return formatAdminDate(d, { locale, dateStyle: 'medium' });
   }
 
   function toIsoDateInput(val: string | number | Date | null | undefined): string {

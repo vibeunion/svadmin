@@ -56,7 +56,7 @@
   });
 
   const relativeText = $derived.by(() => {
-    if (loading) return '正在同步数据...';
+    if (loading) return '正在同步数据…';
     if (elapsedSeconds < 5) return '刚刚更新';
     if (elapsedSeconds < 60) return `${elapsedSeconds} 秒前`;
     const mins = Math.floor(elapsedSeconds / 60);

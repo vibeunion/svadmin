@@ -184,13 +184,13 @@
         <input
           type="text"
           bind:value={newPresetName}
-          placeholder="输入大屏方案名称 (如：双十一作战指挥大屏)..."
+          placeholder="输入大屏方案名称 (如：双十一作战指挥大屏)…"
           class="w-full sm:flex-1 px-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <input
           type="text"
           bind:value={newPresetDesc}
-          placeholder="方案简要说明 (可选)..."
+          placeholder="方案简要说明 (可选)…"
           class="w-full sm:w-64 px-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <Button

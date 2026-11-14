@@ -176,7 +176,7 @@ describe('AuditTimeline enterprise component', () => {
       items: [{ id: 'old', title: 'Old event' }],
     });
     await view.wrapper.setLocale('zh-CN');
-    expect(view.getByRole('status', { name: '加载中...' })).toBeTruthy();
+    expect(view.getByRole('status', { name: '加载中…' })).toBeTruthy();
     expect(view.queryByText('Old event')).toBeNull();
     await view.rerender({ state: 'error' });
     expect(view.queryByText('Old event')).toBeNull();

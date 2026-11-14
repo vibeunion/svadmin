@@ -109,7 +109,7 @@
           type="text"
           class="w-full bg-transparent outline-none text-foreground text-xs"
           bind:value={secretKey}
-          placeholder="请输入密钥..."
+          placeholder="请输入密钥…"
         />
       </div>
     </div>
@@ -178,7 +178,7 @@
         type="text"
         class="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
         bind:value={expectedSignature}
-        placeholder="例如粘贴 X-Svadmin-Signature 标头值..."
+        placeholder="例如粘贴 X-Svadmin-Signature 标头值…"
       />
 
       {#if isMatched !== null}

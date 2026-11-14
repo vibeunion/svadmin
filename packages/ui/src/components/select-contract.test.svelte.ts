@@ -1008,7 +1008,7 @@ describe('Combobox contract consumer', () => {
     await fireEvent.click(trigger);
     await waitFor(() => expect(field.getAllByRole('option').length).toBeGreaterThan(0));
     await app.read().logout.mutate();
-    await waitFor(() => expect(trigger.textContent).toContain('Select...'));
+    await waitFor(() => expect(trigger.textContent).toContain('Select…'));
     expect(field.queryAllByRole('option')).toHaveLength(0);
     expect(captureAuthLiveScope(session).available).toBe(false);
   });
@@ -1023,7 +1023,7 @@ describe('Combobox contract consumer', () => {
     await waitFor(() => expect(trigger.textContent).toContain('Selected 3'));
     const clear = app.view.getByRole('button', { name: /clear/i });
     await fireEvent.click(clear);
-    await waitFor(() => expect(trigger.textContent).toContain('Select...'));
+    await waitFor(() => expect(trigger.textContent).toContain('Select…'));
   });
 
   it.each([null, undefined, ''] as const)('loads relation options without fetching an empty selection (%s)', async value => {
@@ -1084,7 +1084,7 @@ describe('Combobox contract consumer', () => {
     await app.view.rerender({ field: true, onchange });
     await fireEvent.click(app.view.getByRole('button', { name: 'Record' }));
     await waitFor(() => expect(app.view.getAllByRole('option')).toHaveLength(2));
-    const input = app.view.getByPlaceholderText('Search...');
+    const input = app.view.getByPlaceholderText('Search…');
     await fireEvent.input(input, { target: { value: 'remote' } });
     await waitFor(() => expect(getList.mock.calls.at(-1)?.[0].filters).toEqual(search('remote')));
     await waitFor(() => expect(app.view.getAllByRole('option')).toHaveLength(2));
@@ -1094,7 +1094,7 @@ describe('Combobox contract consumer', () => {
     await fireEvent.click(second);
     expect(onchange).toHaveBeenCalledWith(2);
     await fireEvent.click(app.view.getByRole('button', { name: 'Record' }));
-    const reopened = app.view.getByPlaceholderText('Search...');
+    const reopened = app.view.getByPlaceholderText('Search…');
     if (!(reopened instanceof HTMLInputElement)) throw new Error('Expected a search input');
     expect(reopened.value).toBe('');
     await waitFor(() => {

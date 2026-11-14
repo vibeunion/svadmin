@@ -113,8 +113,8 @@ interface FieldDefinition {
 
 ## Theme Configuration
 
-Use `themeConfig` to select the color preset and layout style. The default
-layout is `default`; `clean-flat` enables the default admin canvas.
+Use `themeConfig` to select the color preset and layout style. The UI default
+layout is `clean-flat`; `default` is an explicit opt-out.
 
 ```svelte
 <AdminApp
@@ -134,7 +134,7 @@ layout is `default`; `clean-flat` enables the default admin canvas.
 |----------|------|---------|-------------|
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Controls whether dark mode adds `.dark` or light mode adds `.light` |
 | `colorPreset` | `ColorPreset \| string` | `'default'` | Built-in or registered color preset; persisted or explicit selections still take precedence |
-| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout treatment for the application shell |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'clean-flat'` | Layout treatment for the application shell. `'default'` opts out |
 | `cssOverrides` | `Record<string, string>` | — | CSS variables injected on `<html>` |
 | `disableColorScheme` | `boolean` | `false` | Skip the built-in `color-scheme` attribute |
 

@@ -220,7 +220,7 @@
         <Search class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Filter by user or action..."
+          placeholder="Filter by user or action…"
           class="w-full rounded-md border border-input bg-background pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           bind:value={searchQuery}
           oninput={(e) => { searchQuery = e.currentTarget.value; }}

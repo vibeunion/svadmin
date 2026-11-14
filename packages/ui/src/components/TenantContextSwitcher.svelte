@@ -60,7 +60,7 @@
     isSwitching = false,
     allowCreate = true,
     placeholder = '选择工作区/租户',
-    searchPlaceholder = '搜索租户名称或编号...',
+    searchPlaceholder = '搜索租户名称或编号…',
     class: className = '',
     onTenantSelect,
     onCreateTenant,

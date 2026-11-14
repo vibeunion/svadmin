@@ -53,7 +53,7 @@
 <div class="contents">
   {#await editorModulePromise}
     <div class="flex min-h-40 items-center justify-center" role="status" aria-live="polite">
-      <span class="text-sm text-muted-foreground">Loading editor...</span>
+      <span class="text-sm text-muted-foreground">Loading editor…</span>
     </div>
   {:then editorModule}
     {@const Editor = editorModule.default}

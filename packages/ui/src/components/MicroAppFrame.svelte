@@ -245,7 +245,7 @@
         data-svadmin-frame-loading="true"
       >
         <Loader2 class="h-7 w-7 animate-spin text-primary mb-2" />
-        <span class="text-xs text-muted-foreground font-medium">Connecting micro application...</span>
+        <span class="text-xs text-muted-foreground font-medium">Connecting micro application…</span>
       </div>
     {/if}
 

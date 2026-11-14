@@ -224,7 +224,7 @@
         <textarea
           id={`${controlId}-reject-reason`}
           bind:value={rejectReason}
-          placeholder={isZh ? '请说明驳回原因…' : 'Please explain why this request is being rejected...'}
+          placeholder={isZh ? '请说明驳回原因…' : 'Please explain why this request is being rejected…'}
           class="svadmin-approval-card__textarea svadmin-approval-card__textarea--reject"
           required
         ></textarea>

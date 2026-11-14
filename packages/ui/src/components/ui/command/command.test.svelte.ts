@@ -41,7 +41,7 @@ describe('Command', () => {
 		const { unmount } = render(CommandHarness, { props: { dialog: true } });
 
 		const input = screen.getByRole('combobox', { name: 'Dialog actions' });
-		expect(screen.getByRole('progressbar', { name: 'Loading...' }).getAttribute('aria-valuenow')).toBe('50');
+		expect(screen.getByRole('progressbar', { name: 'Loading…' }).getAttribute('aria-valuenow')).toBe('50');
 		expect(document.querySelector('[data-cmdk-dialog]')).toBeTruthy();
 		expect(document.querySelector('[data-cmdk-separator]')).toBeTruthy();
 

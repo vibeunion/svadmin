@@ -1335,7 +1335,7 @@ async function runWorkspaceEngine(
     await waitForAuthState(pageA, 'signed-in', `${engine} workspace signed-in state`);
 
     const search = pageA.locator(
-      '[data-svadmin-resource-operations="browser_records"] input[placeholder="Search..."]',
+      '[data-svadmin-resource-operations="browser_records"] input[placeholder="Search…"]',
     ).first();
     await search.waitFor({ state: 'visible', timeout: WAIT_TIMEOUT_MS });
     await search.fill(searchText);

@@ -854,7 +854,7 @@
         <div class="space-y-5 py-2">
           <div class="space-y-2">
             <div class="flex items-center justify-between text-xs">
-              <span class="text-muted-foreground">{cancelled ? i18n.t('import.stopped') : isImporting ? i18n.t('common.importing', { defaultValue: 'Importing...' }) : importError ? i18n.t('common.operationFailed', { defaultValue: 'Import failed' }) : i18n.t('common.completed', { defaultValue: 'Completed' })}</span>
+              <span class="text-muted-foreground">{cancelled ? i18n.t('import.stopped') : isImporting ? i18n.t('common.importing', { defaultValue: 'Importing…' }) : importError ? i18n.t('common.operationFailed', { defaultValue: 'Import failed' }) : i18n.t('common.completed', { defaultValue: 'Completed' })}</span>
               {#if !cancelled}<span class="font-semibold text-foreground tabular-nums">{progressPercent}%</span>{/if}
             </div>
             {#if !cancelled}<Progress value={progressPercent} class="h-2" />{/if}
@@ -904,7 +904,7 @@
               <Button variant="outline" size="sm" onclick={cancelImport}>{i18n.t('common.cancel')}</Button>
               <Button size="sm" disabled class="gap-2">
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
-                {i18n.t('common.processing', { defaultValue: 'Processing...' })}
+                {i18n.t('common.processing', { defaultValue: 'Processing…' })}
               </Button>
             {/if}
           </div>

@@ -53,7 +53,7 @@ describe('PivotDrilldownModal', () => {
       records: sampleRecords,
     });
 
-    const searchInput = container.querySelector('input[placeholder="搜索明细内容..."]');
+    const searchInput = container.querySelector('input[placeholder="搜索明细内容…"]');
     expect(searchInput).toBeTruthy();
 
     if (searchInput) {

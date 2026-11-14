@@ -6,6 +6,8 @@ import {
   bodyStyleMigration,
   createMigrationReference,
   lightTokenMigration,
+  visualContractAdditions,
+  visualContractDisabledSelector,
   stripeDarkTokenMigration,
   stripeLightTokenMigration,
   tableSizeMigration,
@@ -24,7 +26,7 @@ test('reference changes only explicitly approved token, body and table declarati
   assert.equal(Object.keys(stripeDarkTokenMigration).length, 7);
   assert.equal(Object.keys(productLightTokenMigration).length, 38);
   assert.equal(Object.keys(productDarkTokenMigration).length, 38);
-  assert.equal(Object.keys(bodyStyleMigration).length, 1);
+  assert.equal(Object.keys(bodyStyleMigration).length, 2);
   assert.deepEqual(tableSizeMigration, {
     '.svadmin-table-head': {
       height: ['2.25rem', '2.5rem'],
@@ -35,6 +37,10 @@ test('reference changes only explicitly approved token, body and table declarati
     '.svadmin-table-cell': { height: [null, '2.5rem'], 'font-size': [null, '0.8125rem'] },
   });
   const reference = postcss.parse(createMigrationReference(baseline));
+  reference.walkDecls('--primary-3', (declaration) => declaration.remove());
+  reference.walkRules(visualContractDisabledSelector, (rule) => rule.remove());
+  assert.equal(visualContractAdditions.light['--primary-3'], '#94BFFF');
+  assert.equal(visualContractAdditions.dark['--primary-3'], '#0E32A6');
   const migrations = [
     { selector: ':root', values: lightTokenMigration },
     { selector: ':root', values: stripeLightTokenMigration },

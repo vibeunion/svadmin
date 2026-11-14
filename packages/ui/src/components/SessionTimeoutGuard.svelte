@@ -61,7 +61,7 @@
   const resolvedDesc = $derived(
     description ??
       (chinese
-        ? '为了您的账户与数据安全，系统检测到您已长时间未进行操作。倒计时结束后将自动锁定会话。'
+        ? '为了账户与数据安全，检测到长时间没有操作。倒计时结束后将锁定会话。'
         : 'For your security, your session will automatically lock due to inactivity.'),
   );
 

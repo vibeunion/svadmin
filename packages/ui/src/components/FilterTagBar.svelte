@@ -153,7 +153,7 @@
             if (preset) applyPreset(preset);
           }}
         >
-          <option value="">常用视图预设...</option>
+          <option value="">常用视图预设…</option>
           {#each savedPresets as p (p.id)}
             <option value={p.id}>{p.name} ({p.filters.length} 项)</option>
           {/each}

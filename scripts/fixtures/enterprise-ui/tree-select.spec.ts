@@ -274,7 +274,7 @@ test('TreeSelect preserves outside input and another instance focus after dismis
   await expect(first).toHaveAttribute('aria-expanded', 'false');
   await expect(other).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByRole('dialog')).toHaveCount(1);
-  const otherSearch = page.getByRole('textbox', { name: 'Search...', exact: true });
+  const otherSearch = page.getByRole('textbox', { name: 'Search…', exact: true });
   await expect(otherSearch).toBeFocused();
   await page.keyboard.type('Backend');
   await expect(otherSearch).toHaveValue('Backend');
@@ -288,7 +288,7 @@ test(`TreeSelect leaf-only mode never commits parents and handles lazy leaves (s
   await page.goto(`/?view=tree-select&onlyLeaf=true&searchable=true&single=${single}`);
   const trigger = page.getByRole('button', { name: 'Departments', exact: true });
   await trigger.press('Enter');
-  const search = page.getByRole('textbox', { name: 'Search...', exact: true });
+  const search = page.getByRole('textbox', { name: 'Search…', exact: true });
   await expect(search).toBeFocused();
   await page.keyboard.press('ArrowDown');
   const engineering = page.getByRole('treeitem', { name: 'Engineering', exact: true });

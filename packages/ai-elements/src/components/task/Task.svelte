@@ -125,7 +125,7 @@
   {#if status === 'running' && oncancel || status === 'failed' && onretry || status === 'cancelled' && onresume}
     <footer class="svadmin-ai-task__actions">
       {#if status === 'running' && oncancel}<button type="button" class="svadmin-ai-task__button svadmin-ai-task__button--ghost" disabled={disabled || busy} onclick={() => invoke(oncancel)}><Square size={14} aria-hidden="true" /> Cancel</button>{/if}
-      {#if status === 'failed' && onretry}<button type="button" class="svadmin-ai-task__button" disabled={disabled || busy} onclick={() => invoke(onretry)}><RotateCcw size={14} aria-hidden="true" /> {busy ? 'Retrying...' : 'Retry'}</button>{/if}
+      {#if status === 'failed' && onretry}<button type="button" class="svadmin-ai-task__button" disabled={disabled || busy} onclick={() => invoke(onretry)}><RotateCcw size={14} aria-hidden="true" /> {busy ? 'Retrying…' : 'Retry'}</button>{/if}
       {#if status === 'cancelled' && onresume}<button type="button" class="svadmin-ai-task__button" disabled={disabled || busy} onclick={() => invoke(onresume)}><Play size={14} aria-hidden="true" /> Resume</button>{/if}
     </footer>
   {/if}

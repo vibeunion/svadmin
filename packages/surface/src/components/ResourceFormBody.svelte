@@ -20,7 +20,7 @@
   const labels = $derived(zh ? {
     submit: '提交操作提案', confirm: '确认这些参数', execute: '执行已批准操作', refresh: '查询状态', reject: '取消提案', reset: '开始新操作',
     disabled: '预览模式：业务操作尚未启用', pending: '等待确认或独立审批', approved: '已批准，尚未执行',
-    executing: '正在执行，请勿重复提交', succeeded: '操作已完成', indeterminate: '结果不明确，需要服务端核对，禁止直接重试', rejected: '提案已取消',
+    executing: '正在执行，等待这次提交结束', succeeded: '操作已完成', indeterminate: '结果不明确，需要服务端核对，禁止直接重试', rejected: '提案已取消',
     error: '操作未完成。请先查询状态，避免重复执行。', args: '待确认参数',
   } : {
     submit: 'Propose action', confirm: 'Confirm these arguments', execute: 'Execute approved action', refresh: 'Check status', reject: 'Cancel proposal', reset: 'Start another action',

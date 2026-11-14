@@ -60,6 +60,22 @@ export const bodyStyleMigration = Object.freeze({
     "'Inter', ui-sans-serif, system-ui, sans-serif",
     'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   ],
+  // 正文行高跟 --svadmin-leading-body（1.4）。这里写成字面量，历史样式表没有这个变量。
+  'line-height': ['1.5', '1.4'],
+});
+
+export const visualContractDisabledSelector = ':is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled]), :is([data-svadmin-button], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled])';
+
+export const visualContractAdditions = Object.freeze({
+  light: Object.freeze({ '--primary-3': '#94BFFF' }),
+  dark: Object.freeze({ '--primary-3': '#0E32A6' }),
+  disabled: Object.freeze({
+    'pointer-events': 'none',
+    opacity: '1',
+    background: 'var(--primary-3)',
+    color: 'var(--primary-foreground)',
+    'border-color': 'transparent',
+  }),
 });
 
 // 已合并的尺寸基线；常量独立于候选 CSS，null 表示历史规则没有该声明。
@@ -138,5 +154,32 @@ export function createMigrationReference(baselineCss) {
   replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
   migrateComponentDeclarations(root, tableSizeMigration);
   migrateComponentDeclarations(root, productComponentSizeMigration);
+  appendVisualContract(root);
   return root.toString();
+}
+
+function appendToken(root, selector, prop, value) {
+  let found = 0;
+  root.walkRules(selector, (rule) => {
+    if (!isBaseToken(rule)) return;
+    rule.append({ prop, value });
+    found += 1;
+  });
+  assert.equal(found, 1, `${selector} ${prop}: expected one base rule for the visual-contract addition`);
+}
+
+function appendVisualContract(root) {
+  for (const [prop, value] of Object.entries(visualContractAdditions.light)) appendToken(root, ':root', prop, value);
+  for (const [prop, value] of Object.entries(visualContractAdditions.dark)) appendToken(root, '.dark', prop, value);
+  let layer;
+  root.walkRules((rule) => {
+    if (rule.parent?.type === 'atrule' && rule.parent.name === 'layer' && rule.parent.params === 'components'
+      && rule.selector.includes(':disabled') && rule.selector.includes('svadmin-button')) {
+      layer = rule.parent;
+    }
+  });
+  assert.ok(layer, 'historical button disabled rule is missing');
+  const rule = postcss.rule({ selector: visualContractDisabledSelector });
+  for (const [prop, value] of Object.entries(visualContractAdditions.disabled)) rule.append({ prop, value });
+  layer.append(rule);
 }

@@ -18,6 +18,7 @@ describe('Alert', () => {
 
     render(Alert, { children: message('Info') });
     expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByRole('alert').getAttribute('data-feedback')).toBe('static');
   });
 
   it('keeps alert title semantics', () => {
