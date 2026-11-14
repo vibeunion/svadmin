@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  GatewayRouteEditor,
+  ApiRouteRuleCard,
+  RateLimitPolicyPanel,
+  CircuitBreakerCard,
   StepUpAuthModal,
   PrivilegeElevationModal,
   AuditSnapshotCapture,
@@ -590,6 +594,10 @@ describe('public compatibility aliases', () => {
     expect(LegalClauseComparator).toBe(ContractClauseDiffViewer);
     expect(ElectronicSealInspector).toBeDefined();
     expect(StampAuthenticityCard).toBe(ElectronicSealInspector);
+    expect(GatewayRouteEditor).toBeDefined();
+    expect(ApiRouteRuleCard).toBe(GatewayRouteEditor);
+    expect(RateLimitPolicyPanel).toBeDefined();
+    expect(CircuitBreakerCard).toBe(RateLimitPolicyPanel);
     expect(StepUpAuthModal).toBeDefined();
     expect(PrivilegeElevationModal).toBe(StepUpAuthModal);
     expect(AuditSnapshotCapture).toBeDefined();
