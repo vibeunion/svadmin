@@ -1,3 +1,4 @@
+<!-- // @vibe-escape: Level 3 Headless / custom office workspace domain state engine -->
 <script lang="ts">
   import { onMount } from 'svelte';
   import { beforeEach, formatAdminTime } from '@svadmin/core';

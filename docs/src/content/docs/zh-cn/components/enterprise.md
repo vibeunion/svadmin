@@ -3240,3 +3240,38 @@ AI 规则语义解释卡片：
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+### `<I18nStudio>` (`<TranslationManager>`)
+
+`<I18nStudio>` 提供企业级多语言翻译字典管理工作台，支持词条翻译完整度核验与运行时热更新（Hot Reloading）。
+
+核心特性：
+- **命名空间层级化管理**：基于点分路径（如 `auth.*`, `dashboard.*`, `common.*`）自动生成命名空间树与过滤；
+- **翻译完整度度量**：实时统计翻译完成率百分比（`% Translated`）及缺失词条数；
+- **双语对照编辑**：左侧展示源语言参考文案，右侧支持目标语言即时编辑，带有草稿（Draft）与缺失（Missing）状态徽章；
+- **免刷新热重载（`allowLiveApply`）**：修改后可一键热更新注入当前 `@svadmin/core` 运行时词典，即时预览文案生效效果；
+- **导入与导出**：支持一键导出标准 JSON 词典文件，并支持快速粘贴合并 JSON 词典。
+
+```svelte
+<script lang="ts">
+  import { I18nStudio } from '@svadmin/ui';
+
+  let dictionaries = $state({
+    'zh-CN': {
+      'auth.login.title': '欢迎登录',
+      'common.ok': '确定',
+    },
+    'en-US': {
+      'auth.login.title': 'Welcome Back',
+      'common.ok': 'OK',
+    },
+  });
+</script>
+
+<I18nStudio
+  {dictionaries}
+  sourceLocale="zh-CN"
+  targetLocale="en-US"
+  onSave={(updated) => console.log('保存翻译词典:', updated)}
+/>
+```

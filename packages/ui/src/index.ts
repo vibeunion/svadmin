@@ -1014,3 +1014,10 @@ export {
   type NotificationAction,
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
+
+// Enterprise i18n translation management & hot reloading studio suite
+export {
+  default as I18nStudio,
+  default as TranslationManager,
+  type I18nStudioProps,
+} from './components/I18nStudio.svelte';
