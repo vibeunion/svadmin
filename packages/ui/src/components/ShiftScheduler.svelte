@@ -268,15 +268,15 @@
   function getShiftBadgeClass(token?: string) {
     switch (token) {
       case 'emerald':
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30';
+        return 'bg-success/10 text-success border-success/30';
       case 'amber':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30';
+        return 'bg-warning/10 text-warning border-warning/30';
       case 'rose':
-        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30';
+        return 'bg-destructive/10 text-destructive border-destructive/30';
       case 'indigo':
-        return 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30';
+        return 'bg-info/10 text-info border-info/30';
       case 'purple':
-        return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30';
+        return 'bg-accent text-accent-foreground border-accent-foreground/20';
       case 'slate':
         return 'bg-muted text-muted-foreground border-border';
       default:
@@ -339,8 +339,8 @@
         class={cn(
           'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
           summary.totalAlerts === 0
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+            ? 'bg-success/10 text-success'
+            : 'bg-warning/10 text-warning'
         )}
       >
         {#if summary.totalAlerts === 0}
@@ -396,7 +396,7 @@
         {#each staffList as staff (staff.id)}
           {@const st = staffStats.get(staff.id)}
           {@const hasAlert = Boolean(st && st.alerts.length > 0)}
-          <tr class={cn('hover:bg-muted/20 transition-colors', hasAlert ? 'bg-amber-500/5' : '')}>
+          <tr class={cn('hover:bg-muted/20 transition-colors', hasAlert ? 'bg-warning/5' : '')}>
             <!-- 人员信息 -->
             <td class="px-4 py-3">
               <div class="flex items-center gap-2.5">
@@ -452,7 +452,7 @@
                 {st?.workDays ?? 0}天出勤
               </div>
               {#if hasAlert && st}
-                <div class="mt-0.5 flex items-center justify-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400" title={st.alerts.map((a) => a.message).join('; ')}>
+                <div class="mt-0.5 flex items-center justify-center gap-1 text-[10px] font-semibold text-warning" title={st.alerts.map((a) => a.message).join('; ')}>
                   <AlertTriangle class="h-3 w-3" />
                   <span>超标</span>
                 </div>
