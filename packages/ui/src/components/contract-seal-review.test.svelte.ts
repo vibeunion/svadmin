@@ -27,7 +27,7 @@ describe('合同与印章审查回归', () => {
 
   it('替换条款列表后恢复有效选择，并响应外部选择', async () => {
     const { container, rerender } = render(ContractClauseDiffViewer, { clauses, selectedClauseId: 'low' });
-    await rerender({ clauses: [clauses[1]!] });
+    await rerender({ clauses: clauses.slice(1) });
     expect(container.querySelector('article')?.textContent).toContain('风险内容');
     await rerender({ clauses, selectedClauseId: 'low' });
     expect(container.querySelector('article')?.textContent).toContain('普通内容');
@@ -81,7 +81,7 @@ describe('合同与印章审查回归', () => {
     it(`${locale || 'en'} 文档中的新增及相邻示例可独立编译`, () => {
       const source = readFileSync(resolve(process.cwd(), `../../docs/src/content/docs/${locale}components/enterprise.md`), 'utf8');
       const examples = [...source.matchAll(/```svelte\n([\s\S]*?)\n```/g)]
-        .map((match) => match[1]!)
+        .map((match) => match[1] ?? '')
         .filter((code) => /import.*\b(?:ContractClauseDiffViewer|ElectronicSealInspector|StepUpAuthModal|AuditSnapshotCapture|CannedResponsePicker)\b/.test(code));
       expect(examples).toHaveLength(5);
       for (const example of examples) {
