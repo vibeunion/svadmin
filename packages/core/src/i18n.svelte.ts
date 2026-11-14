@@ -2046,10 +2046,8 @@ const baseLocales: Record<string, Record<string, string>> = {
     'pivot.totalRecords': '{count} records found',
   },
 };
-
 let locales = $state(structuredClone(baseLocales));
 const initialLocales = structuredClone(baseLocales);
-
 /** Detect best locale from browser language; server rendering always starts in English. */
 function detectLocale(): string {
   // Node 22+ exposes a global navigator, so gate SSR on the browser window instead.
@@ -2065,7 +2063,6 @@ function detectLocale(): string {
 }
 
 let currentLocale = $state(detectLocale());
-
 /**
  * I18nProvider — pluggable translation boundary.
  * When set, all t/getLocale/getAvailableLocales delegates to it first,
