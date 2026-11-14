@@ -7,7 +7,7 @@
   type Movement = DemoRow<'stock_movements'>;
 
   import { captureAdminContext, createEnterpriseRequestContext, useList, type DashboardProvider } from '@svadmin/core';
-  import { useTranslation } from '@svadmin/core/i18n';
+  import { addTranslations, useTranslation } from '@svadmin/core/i18n';
   import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, StatusPill, type AuditDataState } from '@svadmin/ui';
   import {
     Bell,
@@ -26,7 +26,7 @@
   } from '@lucide/svelte';
   import { registerDashboardTranslations } from './dashboard-i18n';
 
-  registerDashboardTranslations();
+  registerDashboardTranslations(addTranslations);
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
@@ -37,7 +37,6 @@
   } from './dashboard-workspace-data';
 
   let declarativeSurfacePromise = $state(import('../../components/DeclarativeSurfaceExample.svelte'));
-  let secondaryOpen = $state(false);
 
   function retryDeclarativeSurface(): void {
     declarativeSurfacePromise = import('../../components/DeclarativeSurfaceExample.svelte');
@@ -63,27 +62,18 @@
     pagination: { mode: 'off' },
     sorters: [{ field: 'startDate', order: 'asc' }],
     errorNotification: false,
-    get queryOptions() {
-      return { enabled: secondaryOpen };
-    },
   });
   const conversationsQuery = useList({
     resource: demoContracts.ai_conversations,
     pagination: { mode: 'off' },
     sorters: [{ field: 'updatedAt', order: 'desc' }],
     errorNotification: false,
-    get queryOptions() {
-      return { enabled: secondaryOpen };
-    },
   });
   const notificationsQuery = useList({
     resource: demoContracts.notifications,
     pagination: { mode: 'off' },
     sorters: [{ field: 'createdAt', order: 'desc' }],
     errorNotification: false,
-    get queryOptions() {
-      return { enabled: secondaryOpen };
-    },
   });
 
   const locale = $derived(i18n.locale);
@@ -203,7 +193,7 @@
     },
     {
       label: i18n.t('dashboard.module.calendar'),
-      value: secondaryOpen ? (calendarQuery.data?.total ?? 0) : '—',
+      value: calendarQuery.data?.total ?? 0,
       meta: i18n.t('dashboard.module.calendarMeta'),
       href: '#/calendar_events',
       Icon: CalendarDays,
@@ -211,7 +201,7 @@
     },
     {
       label: i18n.t('dashboard.module.aiChat'),
-      value: secondaryOpen ? openConversations : '—',
+      value: openConversations,
       meta: i18n.t('dashboard.module.aiChatMeta'),
       href: '#/ai_conversations',
       Icon: Bot,
@@ -219,7 +209,7 @@
     },
     {
       label: i18n.t('dashboard.module.notificationCenter'),
-      value: secondaryOpen ? unreadNotifications : '—',
+      value: unreadNotifications,
       meta: i18n.t('dashboard.module.notificationCenterMeta'),
       href: '#/notifications',
       Icon: Bell,
@@ -291,11 +281,10 @@
   }
 </script>
 
+<div class="operations-dashboard-view" data-svadmin-component="OperationsDashboard" data-svadmin-resource="dashboard">
 <DashboardPage pageId="operations-dashboard"
   title={i18n.t('dashboard.pageTitle')}
-  description={i18n.t('dashboard.pageDescription')}
-  data-svadmin-component="OperationsDashboard"
-  data-svadmin-resource="dashboard">
+  description={i18n.t('dashboard.pageDescription')}>
   {#snippet actions()}
     <span role="status">
       <StatusPill tone={hasError ? 'warning' : isRefreshing ? 'info' : 'success'}
@@ -328,24 +317,26 @@
       defaultTo="2026-06-30" />
   </section>
   {#snippet metrics()}
-    <MetricBlock label={i18n.t('dashboard.metric.stockAtRisk')} value={productsQuery.isError ? '—' : lowStockProducts.length}
-      trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
-      detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} ${i18n.t('dashboard.metric.outOfStock')}`)}
-      loading={productsQuery.isLoading}
-      data-svadmin-component="StockRiskMetric"
-      data-svadmin-resource="products" />
-    <MetricBlock label={i18n.t('dashboard.metric.openWork')}
-      value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
-      detail={i18n.t('dashboard.metric.workDetail')}
-      loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading}
-      data-svadmin-component="OpenWorkMetric"
-      data-svadmin-resource="todos" />
-    <MetricBlock label={i18n.t('dashboard.metric.inventoryValue')}
-      value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
-      detail={productsQuery.isError ? '' : `${totalStock.toLocaleString(locale)} ${i18n.t('dashboard.metric.unitsInStock')}`}
-      loading={productsQuery.isLoading}
-      data-svadmin-component="InventoryValueMetric"
-      data-svadmin-resource="products" />
+    <div class="contents" data-svadmin-component="DashboardMetrics" data-svadmin-resource="dashboard">
+      <div class="contents" data-svadmin-component="StockRiskMetric" data-svadmin-resource="products">
+        <MetricBlock label={i18n.t('dashboard.metric.stockAtRisk')} value={productsQuery.isError ? '—' : lowStockProducts.length}
+          trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
+          detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} ${i18n.t('dashboard.metric.outOfStock')}`)}
+          loading={productsQuery.isLoading} />
+      </div>
+      <div class="contents" data-svadmin-component="OpenWorkMetric" data-svadmin-resource="todos">
+        <MetricBlock label={i18n.t('dashboard.metric.openWork')}
+          value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
+          detail={i18n.t('dashboard.metric.workDetail')}
+          loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
+      </div>
+      <div class="contents" data-svadmin-component="InventoryValueMetric" data-svadmin-resource="products">
+        <MetricBlock label={i18n.t('dashboard.metric.inventoryValue')}
+          value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
+          detail={productsQuery.isError ? '' : `${totalStock.toLocaleString(locale)} ${i18n.t('dashboard.metric.unitsInStock')}`}
+          loading={productsQuery.isLoading} />
+      </div>
+    </div>
   {/snippet}
 
   <!-- Inventory Health + Operations Queue -->
@@ -428,9 +419,8 @@
     </section>
   </details>
 
-  <!-- Calendar / AI / Notifications columns (Gated lazy loading via secondaryOpen) -->
-  <details class="svadmin-collapsible dashboard-secondary"
-    ontoggle={(e) => { secondaryOpen = (e.currentTarget as HTMLDetailsElement).open; }}>
+  <!-- Calendar / AI / Notifications columns -->
+  <details class="svadmin-collapsible dashboard-secondary">
     <summary>{i18n.t('dashboard.section.scheduleCollaboration')}</summary>
     <div class="dashboard-support-grid" data-svadmin-component="DashboardSupportGrid">
       <AuditSection title={i18n.t('dashboard.section.calendar')} accent="neutral"
@@ -518,7 +508,7 @@
         </div>
       </ChartContainer>
 
-      <AuditSection title={i18n.t('dashboard.module.userManagement')} accent="neutral"
+      <AuditSection title={i18n.t('dashboard.section.teamMembers')} accent="neutral"
         state={sectionState(usersQuery, teamMembers.length)} retry={() => void usersQuery.refetch()}>
         {#snippet actions()}
           <a class="text-sm font-medium text-primary hover:underline" href="#/users">{i18n.t('dashboard.section.viewAll')}</a>
@@ -626,3 +616,4 @@
     />
   {/await}
 </DashboardPage>
+</div>

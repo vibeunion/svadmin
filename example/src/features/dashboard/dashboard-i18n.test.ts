@@ -7,7 +7,10 @@ import {
 
 describe('dashboard-i18n dictionary registration', () => {
   it('registers all required bilingual entries without missing keys', () => {
-    registerDashboardTranslations();
+    const registered: Record<string, Record<string, string>> = {};
+    registerDashboardTranslations((locale, dict) => {
+      registered[locale] = dict;
+    });
 
     // Verify critical dashboard headers and metrics
     expect(dashboardTranslationsZh['dashboard.pageTitle']).toBe('运营工作台');
