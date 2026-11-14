@@ -81,25 +81,10 @@
     class: className = ''
   }: ContractClauseDiffViewerProps = $props();
 
-  // 内部选中的条款
-  let activeId = $state(selectedClauseId || '');
   // 临时批注输入内容字典
   let newAnnotationInputs = $state<Record<string, string>>({});
   // 展开批注列表的条款集合
   let expandedAnnotations = $state<Record<string, boolean>>({});
-
-  $effect(() => {
-    const firstClause = clauses[0];
-    if (!activeId && firstClause) {
-      activeId = firstClause.id;
-    }
-  });
-
-  $effect(() => {
-    if (selectedClauseId && selectedClauseId !== activeId) {
-      activeId = selectedClauseId;
-    }
-  });
 
   const filteredClauses = $derived.by(() => {
     return clauses.filter((clause) => {
@@ -112,6 +97,13 @@
       return true;
     });
   });
+
+  // 过滤或替换数据后，明细始终回退到可见条款。
+  const activeId = $derived(
+    filteredClauses.some((clause) => clause.id === selectedClauseId)
+      ? selectedClauseId
+      : (filteredClauses[0]?.id ?? '')
+  );
 
   const statistics = $derived.by(() => {
     let added = 0;
@@ -138,7 +130,6 @@
   });
 
   function handleSelect(id: string) {
-    activeId = id;
     selectedClauseId = id;
     onSelectClause?.(id);
   }

@@ -83,7 +83,7 @@
     /** 验真报告导出回调 */
     onExportReport?: (seal: ElectronicSealInfo) => void;
     /** 重新触发验真回调 */
-    onRevalidate?: (sealId: string) => void;
+    onRevalidate?: (sealId: string) => void | Promise<void>;
     /** 自定义操作区插槽 */
     actions?: Snippet | undefined;
     class?: string | undefined;
@@ -101,20 +101,23 @@
 
   let isExpanded = $state(untrack(() => defaultExpanded));
   let isRevalidating = $state(false);
+  let revalidationError = $state('');
+  const sealTextPathId = $props.id();
 
   async function handleRevalidate() {
-    if (isRevalidating) return;
+    if (isRevalidating || !onRevalidate) return;
     isRevalidating = true;
+    revalidationError = '';
     try {
-      onRevalidate?.(seal.id);
+      await onRevalidate(seal.id);
+    } catch {
+      revalidationError = '验真失败，请重试。';
     } finally {
-      setTimeout(() => {
-        isRevalidating = false;
-      }, 500);
+      isRevalidating = false;
     }
   }
 
-  function getStatusConfig(status: SealValidationStatus, hashMatch: boolean) {
+  function getStatusConfig(status: SealValidationStatus, hashMatch: boolean, timestampVerified: boolean) {
     if (!hashMatch || status === 'tampered') {
       return {
         label: '文档已被篡改',
@@ -127,6 +130,16 @@
     }
     switch (status) {
       case 'valid':
+        if (!timestampVerified) {
+          return {
+            label: '时间戳校验未通过',
+            tone: 'warning',
+            desc: '文档哈希一致，但时间戳尚未通过可信校验，请重新验真。',
+            icon: ShieldAlert,
+            badgeClass: 'bg-warning/15 text-warning border-warning/30',
+            cardBorder: 'border-warning/30'
+          };
+        }
         return {
           label: '验真通过 · 真实有效',
           tone: 'success',
@@ -180,7 +193,7 @@
     }
   }
 
-  const statusConfig = $derived(getStatusConfig(seal.status, seal.documentHashMatch));
+  const statusConfig = $derived(getStatusConfig(seal.status, seal.documentHashMatch, seal.timestamp.verified));
 </script>
 
 <div
@@ -220,9 +233,9 @@
             {getSealTypeLabel(seal.sealType).slice(0, 5)}
           </text>
           <!-- 环形企业名称路径 -->
-          <path id="seal-text-path" d="M 12,50 A 38,38 0 1,1 88,50" fill="none" />
+          <path id={sealTextPathId} d="M 12,50 A 38,38 0 1,1 88,50" fill="none" />
           <text font-size="6" fill="currentColor" font-weight="600" opacity="0.85">
-            <textPath href="#seal-text-path" startOffset="50%" text-anchor="middle">
+            <textPath href={`#${sealTextPathId}`} startOffset="50%" text-anchor="middle">
               {seal.enterpriseName}
             </textPath>
           </text>
@@ -230,7 +243,7 @@
 
         <!-- 角标防伪状态徽标 -->
         <div class="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5 shadow-xs">
-          {#if seal.status === 'valid' && seal.documentHashMatch}
+          {#if seal.status === 'valid' && seal.documentHashMatch && seal.timestamp.verified}
             <ShieldCheck class="h-5 w-5 text-success" />
           {:else}
             <ShieldAlert class="h-5 w-5 text-destructive" />
@@ -273,7 +286,7 @@
       <button
         type="button"
         class="flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-        disabled={isRevalidating}
+        disabled={isRevalidating || !onRevalidate}
         onclick={handleRevalidate}
         title="向 CA 与时间戳服务器重新发起验真"
       >
@@ -313,6 +326,10 @@
       {/if}
     </div>
   </div>
+
+  {#if revalidationError}
+    <p role="alert" class="px-5 pb-3 text-xs text-destructive">{revalidationError}</p>
+  {/if}
 
   <!-- 可折叠详细凭证区 -->
   {#if isExpanded}

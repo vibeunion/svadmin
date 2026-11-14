@@ -3315,38 +3315,24 @@ AI 规则语义解释卡片：
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
 
-### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+## StepUpAuthModal 高敏特权二次认证弹窗
 
-企业法务合同条款版本对比与决策套件：
-- **条款逐句对比**：支持双侧对比（Split）与合并对比（Unified）自由切换，高亮新增、删除、修订条款。
-- **条款目录索引**：左侧展示条款大纲、风险等级（高/中/低）与决策状态（待决/已采纳/已驳回）。
-- **行内合规批注**：支持查看法务批注流，并直接就地追加法务审查意见。
-- **采纳与驳回控制**：支持单条款独立采纳/驳回，以及一键全局全量采纳/驳回。
+面向严重高危操作（如生产库清空、全量秘钥轮换、高权限提权），提供阶梯式多因子认证、防暴力破解锁定机制与审批授权联动。公共别名为 `PrivilegeElevationModal`。
 
 ```svelte
 <script lang="ts">
-  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
-
-  let clauses: ContractClause[] = [
-    {
-      id: 'c1',
-      clauseNumber: '3.1',
-      title: '付款期限与结算周期',
-      changeType: 'modified',
-      riskLevel: 'high',
-      originalContent: '买方应在收到发票后 30 个工作日内支付全部款项。',
-      proposedContent: '买方应在收到发票并完成现场验收后 60 个工作日内支付首期款 70%。',
-      decision: 'pending',
-## StepUpAuthModal 高敏特权二次认证弹窗
-面向严重高危操作（如生产库清空、全量秘钥轮换、高权限提权），提供阶梯式多因子认证、防暴力破解锁定机制与审批授权联动。公共别名为 `PrivilegeElevationModal`。
   import { StepUpAuthModal } from '@svadmin/ui';
+
   let open = $state(false);
+
   async function handleVerify(payload: { method: string; code: string }) {
     // 调用后端特权鉴权接口校验动态口令或短信
     return payload.code === '123456';
   }
 </script>
+
 <button onclick={() => { open = true; }}>执行高敏敏感操作</button>
+
 <StepUpAuthModal
   bind:open
   title="高敏特权二次认证"
@@ -3358,17 +3344,26 @@ AI 规则语义解释卡片：
   onlockout={() => console.warn('特权通道已被锁定')}
 />
 ```
+
 ## AuditSnapshotCapture 不可篡改操作存证快照
+
 专为等保三级、金融审计与合规追溯设计，支持生成包含 SHA-256 数字指纹、操作人防篡改动态水印、字段级变更 Diff 对比以及一键导出 PNG / SVG 存证凭证。公共别名为 `ComplianceEvidenceCard`。
+
+```svelte
+<script lang="ts">
   import { AuditSnapshotCapture } from '@svadmin/ui';
+
   const diffItems = [
     { field: 'role', label: '授权角色', before: 'operator', after: 'super_admin' },
     { field: 'mfaEnforced', label: '强制 MFA', before: false, after: true },
   ];
+</script>
+
 <AuditSnapshotCapture
   recordId="AUDIT-20261114-8899"
   operatorName="李四 (Li Si)"
   operatorId="EMP-90021"
+  clientIp="10.12.88.42"
   actionType="privilege_grant"
   actionLabel="特权角色审批通过"
   changes={diffItems}
@@ -3415,6 +3410,7 @@ AI 规则语义解释卡片：
   import { CannedResponsePicker } from '@svadmin/ui';
 
   const templates = [
+    {
       id: '1',
       title: '工单受理问候',
       category: '常见接待',
@@ -3424,11 +3420,43 @@ AI 规则语义解释卡片：
   ];
 </script>
 
+<CannedResponsePicker
+  {templates}
+  contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
+/>
+```
+
+### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+
+企业法务合同条款版本对比与决策套件：
+- **条款版本对比**：支持双侧对比（Split）与合并对比（Unified）自由切换，高亮新增、删除、修订条款。
+- **条款目录索引**：左侧展示条款大纲、风险等级（高/中/低）与决策状态（待决/已采纳/已驳回）。
+- **行内合规批注**：支持查看法务批注流，并直接就地追加法务审查意见。
+- **采纳与驳回控制**：支持单条款独立采纳/驳回，以及一键全局全量采纳/驳回。
+
+```svelte
+<script lang="ts">
+  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
+
+  let clauses = $state<ContractClause[]>([
+    {
+      id: 'c1',
+      clauseNumber: '3.1',
+      title: '付款期限与结算周期',
+      changeType: 'modified',
+      riskLevel: 'high',
+      originalContent: '买方应在收到发票后 30 个工作日内支付全部款项。',
+      proposedContent: '买方应在收到发票并完成现场验收后 60 个工作日内支付首期款 70%。',
+      decision: 'pending',
+    },
+  ]);
+</script>
+
 <ContractClauseDiffViewer
   {clauses}
   originalVersionLabel="标准版 v1.0"
   proposedVersionLabel="对手方修订版 v2.0"
-  onDecisionChange={(id, dec) => console.log('决策变更:', id, dec)}
+  onDecisionChange={(id, decision) => { clauses = clauses.map((clause) => clause.id === id ? { ...clause, decision } : clause); }}
 />
 ```
 
@@ -3438,7 +3466,7 @@ AI 规则语义解释卡片：
 - **逼真矢量印章预览**：纯 SVG 矢量防伪印章，支持企业名称环形路径、星徽与防伪编码展示。
 - **验真状态与防伪预警**：实时展示验真结果（真实有效、已过期、已被吊销、文档被篡改）。
 - **CA 数字证书链**：详细展示证书颁发机构（如 CFCA）、证书使用者、算法（SM2/RSA）、序列号与 SHA-256 证书指纹。
-- **可信时间戳 (TSA)**：集成国家授时中心时间戳存证、盖章时间与令牌哈希校验。
+- **可信时间戳 (TSA)**：展示调用方提供的时间戳校验结果、盖章时间与令牌哈希。
 - **审计验真链路**：逐步呈现证书有效性、文档完整性与防伪核验日志，支持一键导出验真凭据。
 
 ```svelte
@@ -3475,8 +3503,7 @@ AI 规则语义解释卡片：
   {seal}
   onExportReport={(s) => console.log('导出验真报告:', s.sealName)}
   onRevalidate={(id) => console.log('重新验真:', id)}
-<CannedResponsePicker
-  {templates}
-  contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
 />
 ```
+
+组件展示调用方提供的验真数据；通过 `onRevalidate` 接入实际验真服务并更新数据。

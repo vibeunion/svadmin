@@ -3423,37 +3423,23 @@ The drawer supports All, Unread, Tasks, Notices and Security filters, immutable 
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
 
-### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+## StepUpAuthModal
 
-Enterprise legal contract clause comparison and compliance decision suite:
-- **Sentence-level Clause Comparison**: Seamlessly switch between side-by-side (Split) and unified diff views, clearly highlighting additions, deletions, and modifications.
-- **Clause Navigation Outline**: Displays clause index, risk level (high/medium/low), and decision statuses (pending/accepted/rejected).
-- **Inline Legal Annotations**: Review legal counsel comment threads and submit in-place compliance advice.
-- **Acceptance & Rejection Governance**: Supports per-clause decision making and batch one-click accept/reject actions.
+High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.
 
 ```svelte
 <script lang="ts">
-  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
-
-  let clauses: ContractClause[] = [
-    {
-      id: 'c1',
-      clauseNumber: '3.1',
-      title: 'Payment Terms and Billing Cycle',
-      changeType: 'modified',
-      riskLevel: 'high',
-      originalContent: 'Buyer shall pay within 30 days of receiving the invoice.',
-      proposedContent: 'Buyer shall pay 70% within 60 days following acceptance inspection.',
-      decision: 'pending',
-## StepUpAuthModal
-High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.
   import { StepUpAuthModal } from '@svadmin/ui';
+
   let open = $state(false);
+
   async function handleVerify(payload: { method: string; code: string }) {
     return payload.code === '123456';
   }
 </script>
+
 <button onclick={() => { open = true; }}>Execute High-Risk Operation</button>
+
 <StepUpAuthModal
   bind:open
   title="Step-Up Privilege Elevation"
@@ -3465,17 +3451,26 @@ High-privilege step-up authentication modal designed for critical security opera
   onlockout={() => console.warn('Privilege channel locked')}
 />
 ```
+
 ## AuditSnapshotCapture
+
 Immutable compliance evidence snapshot card designed for regulatory audit trails and forensics. Features SHA-256 digital fingerprint validation, tamper-evident anti-leak watermark overlay, structured before/after diff table, and one-click PNG / SVG snapshot export. Public alias: `ComplianceEvidenceCard`.
+
+```svelte
+<script lang="ts">
   import { AuditSnapshotCapture } from '@svadmin/ui';
+
   const diffItems = [
     { field: 'role', label: 'Authorized Role', before: 'operator', after: 'super_admin' },
     { field: 'mfaEnforced', label: 'Enforce MFA', before: false, after: true },
   ];
+</script>
+
 <AuditSnapshotCapture
   recordId="AUDIT-20261114-8899"
   operatorName="Li Si"
   operatorId="EMP-90021"
+  clientIp="10.12.88.42"
   actionType="privilege_grant"
   actionLabel="Privilege Elevation Approved"
   changes={diffItems}
@@ -3522,6 +3517,7 @@ Helpdesk and customer support quick reply template drawer:
   import { CannedResponsePicker } from '@svadmin/ui';
 
   const templates = [
+    {
       id: '1',
       title: 'Ticket intake greeting',
       category: 'General',
@@ -3531,11 +3527,43 @@ Helpdesk and customer support quick reply template drawer:
   ];
 </script>
 
+<CannedResponsePicker
+  {templates}
+  contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}
+/>
+```
+
+### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+
+Enterprise legal contract clause comparison and compliance decision suite:
+- **Clause Comparison**: Seamlessly switch between side-by-side (Split) and unified diff views, clearly highlighting additions, deletions, and modifications.
+- **Clause Navigation Outline**: Displays clause index, risk level (high/medium/low), and decision statuses (pending/accepted/rejected).
+- **Inline Legal Annotations**: Review legal counsel comment threads and submit in-place compliance advice.
+- **Acceptance & Rejection Governance**: Supports per-clause decision making and batch one-click accept/reject actions.
+
+```svelte
+<script lang="ts">
+  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
+
+  let clauses = $state<ContractClause[]>([
+    {
+      id: 'c1',
+      clauseNumber: '3.1',
+      title: 'Payment Terms and Billing Cycle',
+      changeType: 'modified',
+      riskLevel: 'high',
+      originalContent: 'Buyer shall pay within 30 days of receiving the invoice.',
+      proposedContent: 'Buyer shall pay 70% within 60 days following acceptance inspection.',
+      decision: 'pending',
+    },
+  ]);
+</script>
+
 <ContractClauseDiffViewer
   {clauses}
   originalVersionLabel="Standard v1.0"
   proposedVersionLabel="Counterparty Revision v2.0"
-  onDecisionChange={(id, dec) => console.log('Decision change:', id, dec)}
+  onDecisionChange={(id, decision) => { clauses = clauses.map((clause) => clause.id === id ? { ...clause, decision } : clause); }}
 />
 ```
 
@@ -3545,7 +3573,7 @@ Enterprise electronic seal anti-tampering verification and CA certificate inspec
 - **Authentic Vector Stamp Simulation**: Pure SVG vector official seal rendering, complete with circular enterprise name text paths, star emblems, and anti-counterfeiting codes.
 - **Verification Status & Warnings**: Real-time authenticity feedback (Valid, Expired, Revoked, Tampered).
 - **CA Digital Certificate Chain**: In-depth inspection of certificate issuer (e.g. CFCA), subject, algorithm (SM2/RSA), serial number, and SHA-256 fingerprint.
-- **Trusted Timestamp (TSA)**: Integrated National Time Service Center timestamp verification, stamping datetime, and token hash validation.
+- **Trusted Timestamp (TSA)**: Displays caller-supplied timestamp verification results, stamping datetime, and token hash validation.
 - **Audit Verification Trail**: Multi-step audit log covering certificate chain validity, document digest integrity, and timestamp trustworthiness with exportable compliance credentials.
 
 ```svelte
@@ -3582,8 +3610,7 @@ Enterprise electronic seal anti-tampering verification and CA certificate inspec
   {seal}
   onExportReport={(s) => console.log('Export verification report:', s.sealName)}
   onRevalidate={(id) => console.log('Revalidate seal:', id)}
-<CannedResponsePicker
-  {templates}
-  contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}
 />
 ```
+
+The component displays caller-supplied verification data. Connect `onRevalidate` to your verification service to refresh it.
