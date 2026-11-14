@@ -1012,3 +1012,20 @@ export {
   type NotificationAction,
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
+
+// Enterprise microservice API gateway route & rate limit circuit breaker governance suite
+export {
+  default as GatewayRouteEditor,
+  default as ApiRouteRuleCard,
+  type HttpMethod,
+  type HeaderMatchRule,
+  type GatewayRouteConfig,
+} from './components/GatewayRouteEditor.svelte';
+export {
+  default as RateLimitPolicyPanel,
+  default as CircuitBreakerCard,
+  type CircuitBreakerState,
+  type RateLimitDimension,
+  type FallbackStrategy,
+  type RateLimitPolicyConfig,
+} from './components/RateLimitPolicyPanel.svelte';

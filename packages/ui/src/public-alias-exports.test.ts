@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  GatewayRouteEditor,
+  ApiRouteRuleCard,
+  RateLimitPolicyPanel,
+  CircuitBreakerCard,
   MediaGallery,
   MultiModalMediaGallery,
   HotkeysHelpModal,
@@ -554,6 +558,10 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(GatewayRouteEditor).toBeDefined();
+    expect(ApiRouteRuleCard).toBe(GatewayRouteEditor);
+    expect(RateLimitPolicyPanel).toBeDefined();
+    expect(CircuitBreakerCard).toBe(RateLimitPolicyPanel);
   });
 
   it('keeps service aliases bound to canonical services', () => {

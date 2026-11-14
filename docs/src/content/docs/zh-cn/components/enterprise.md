@@ -3193,3 +3193,58 @@ AI 规则语义解释卡片：
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+## GatewayRouteEditor 微服务 API 网关路由编排
+
+面向企业微服务 API 网关架构，提供 URI 路径模式匹配、HTTP 方法约束、Header 动态过滤、上游后端集群分发、URL 重写以及金丝雀（Canary）灰度流量权重滑动分配。公共别名为 `ApiRouteRuleCard`。
+
+```svelte
+<script lang="ts">
+  import { GatewayRouteEditor, type GatewayRouteConfig } from '@svadmin/ui';
+
+  let routeConfig = $state<GatewayRouteConfig>({
+    id: 'route-order-01',
+    name: '订单核心交易微服务分流规则',
+    enabled: true,
+    pathPattern: '/api/v1/orders/**',
+    matchType: 'prefix',
+    methods: ['GET', 'POST', 'PUT'],
+    headers: [{ id: 'h1', name: 'X-Tenant-ID', value: 'tenant-*', op: 'prefix' }],
+    upstreamUrl: 'http://order-cluster.internal:8080',
+    stripPrefix: true,
+    canaryEnabled: true,
+    canaryUpstreamUrl: 'http://order-canary.internal:8080',
+    canaryWeight: 20,
+  });
+</script>
+
+<GatewayRouteEditor
+  bind:route={routeConfig}
+  onsave={(cfg) => console.log('保存路由规则:', cfg)}
+  ontest={(path) => path.startsWith('/api/v1/orders')}
+/>
+```
+
+## RateLimitPolicyPanel API 限流熔断与自愈治理看板
+
+专为企业服务高可用性治理设计，集成基于令牌桶算法（Token Bucket）的精细化 QPS 限流控制、熔断器三态健康流转机（Closed 正常闭合 / Open 阻断降级 / Half-Open 半开探针试探）以及自动化故障降级兜底策略。公共别名为 `CircuitBreakerCard`。
+
+```svelte
+<script lang="ts">
+  import { RateLimitPolicyPanel } from '@svadmin/ui';
+</script>
+
+<RateLimitPolicyPanel
+  config={{
+    qps: 600,
+    burst: 1200,
+    dimension: 'client_ip',
+    circuitBreakerState: 'closed',
+    failureRateThreshold: 50,
+    slowCallDurationMs: 1500,
+    fallbackStrategy: 'mock_json',
+  }}
+  onsave={(cfg) => console.log('同步限流熔断策略:', cfg)}
+  onresetCircuitBreaker={() => console.log('手动复位熔断状态')}
+/>
+```

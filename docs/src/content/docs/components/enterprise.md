@@ -3301,3 +3301,58 @@ The drawer supports All, Unread, Tasks, Notices and Security filters, immutable 
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+## GatewayRouteEditor
+
+Enterprise microservice API gateway route orchestrator supporting URI path pattern matching, HTTP method filters, header match conditions, upstream cluster dispatch, prefix stripping/rewriting, and canary deployment traffic weighting sliders. Public alias: `ApiRouteRuleCard`.
+
+```svelte
+<script lang="ts">
+  import { GatewayRouteEditor, type GatewayRouteConfig } from '@svadmin/ui';
+
+  let routeConfig = $state<GatewayRouteConfig>({
+    id: 'route-order-01',
+    name: 'Order Microservice Core Route',
+    enabled: true,
+    pathPattern: '/api/v1/orders/**',
+    matchType: 'prefix',
+    methods: ['GET', 'POST', 'PUT'],
+    headers: [{ id: 'h1', name: 'X-Tenant-ID', value: 'tenant-*', op: 'prefix' }],
+    upstreamUrl: 'http://order-cluster.internal:8080',
+    stripPrefix: true,
+    canaryEnabled: true,
+    canaryUpstreamUrl: 'http://order-canary.internal:8080',
+    canaryWeight: 20,
+  });
+</script>
+
+<GatewayRouteEditor
+  bind:route={routeConfig}
+  onsave={(cfg) => console.log('Saved route configuration:', cfg)}
+  ontest={(path) => path.startsWith('/api/v1/orders')}
+/>
+```
+
+## RateLimitPolicyPanel
+
+High-availability governance dashboard for API rate limiting and circuit breaking. Features token bucket QPS limiting, three-state circuit breaker state machine (`closed`, `open`, `half_open`), error threshold monitoring, and automatic fallback response strategies. Public alias: `CircuitBreakerCard`.
+
+```svelte
+<script lang="ts">
+  import { RateLimitPolicyPanel } from '@svadmin/ui';
+</script>
+
+<RateLimitPolicyPanel
+  config={{
+    qps: 600,
+    burst: 1200,
+    dimension: 'client_ip',
+    circuitBreakerState: 'closed',
+    failureRateThreshold: 50,
+    slowCallDurationMs: 1500,
+    fallbackStrategy: 'mock_json',
+  }}
+  onsave={(cfg) => console.log('Synced policy config:', cfg)}
+  onresetCircuitBreaker={() => console.log('Manual reset')}
+/>
+```
