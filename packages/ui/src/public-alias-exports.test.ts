@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   MediaGallery,
   MultiModalMediaGallery,
+  I18nStudio,
+  TranslationManager,
   HotkeysHelpModal,
   HotkeysGuideModal,
   ResizableSplitter,
@@ -554,6 +556,8 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(I18nStudio).toBeDefined();
+    expect(TranslationManager).toBe(I18nStudio);
   });
 
   it('keeps service aliases bound to canonical services', () => {
