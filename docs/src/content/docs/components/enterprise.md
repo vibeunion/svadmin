@@ -3423,38 +3423,6 @@ The drawer supports All, Unread, Tasks, Notices and Security filters, immutable 
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
 
-### `<I18nStudio>` (`<TranslationManager>`)
-
-`<I18nStudio>` provides a comprehensive management workspace for multilingual dictionaries, translation completeness auditing, and runtime hot reloading.
-
-Features:
-- **Namespace-aware key hierarchy**: automatically derives namespace groupings from dot notation (e.g. `auth.*`, `dashboard.*`, `common.*`).
-- **Completeness metrics**: real-time calculation of translation percentage and missing key counts.
-- **Side-by-side editing**: source language reference on the left, editable target language on the right with draft and missing state badges.
-- **Hot reloading (`allowLiveApply`)**: injects updated dictionaries directly into the active `@svadmin/core` runtime without requiring full page reload or rebuilding.
-- **Import & Export**: export locale dictionaries to JSON files and merge imported JSON dictionaries with validation.
-
-```svelte
-<script lang="ts">
-  import { I18nStudio } from '@svadmin/ui';
-
-  let dictionaries = $state({
-    'zh-CN': {
-      'auth.login.title': '欢迎登录',
-      'common.ok': '确定',
-    },
-    'en-US': {
-      'auth.login.title': 'Welcome Back',
-      'common.ok': 'OK',
-    },
-  });
-</script>
-
-<I18nStudio
-  {dictionaries}
-  sourceLocale="zh-CN"
-  targetLocale="en-US"
-  onSave={(updated) => console.log('Saved translations:', updated)}
 ## StepUpAuthModal
 
 High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.
@@ -3555,7 +3523,6 @@ Helpdesk and customer support quick reply template drawer:
       category: 'General',
       shortcut: '/hello',
       content: 'Hello {{customer_name}}, your ticket {{ticket_id}} is being reviewed by our engineering team.',
-  ];
     },
   ];
 </script>
@@ -3563,5 +3530,40 @@ Helpdesk and customer support quick reply template drawer:
 <CannedResponsePicker
   {templates}
   contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}
+/>
+```
+
+### `<I18nStudio>` (`<TranslationManager>`)
+
+`<I18nStudio>` provides a comprehensive management workspace for multilingual dictionaries, translation completeness auditing, and runtime hot reloading.
+
+Features:
+- **Namespace-aware key hierarchy**: automatically derives namespace groupings from dot notation (e.g. `auth.*`, `dashboard.*`, `common.*`).
+- **Completeness metrics**: real-time calculation of translation percentage and missing key counts.
+- **Side-by-side editing**: source language reference on the left, editable target language on the right with draft and missing state badges.
+- **Hot reloading (`allowLiveApply`)**: injects updated dictionaries directly into the active `@svadmin/core` runtime without requiring full page reload or rebuilding.
+- **Import & Export**: export locale dictionaries to JSON files and merge imported JSON dictionaries with validation.
+
+```svelte
+<script lang="ts">
+  import { I18nStudio } from '@svadmin/ui';
+
+  let dictionaries = $state({
+    'zh-CN': {
+      'auth.login.title': '欢迎登录',
+      'common.ok': '确定',
+    },
+    'en-US': {
+      'auth.login.title': 'Welcome Back',
+      'common.ok': 'OK',
+    },
+  });
+</script>
+
+<I18nStudio
+  {dictionaries}
+  sourceLocale="zh-CN"
+  targetLocale="en-US"
+  onSave={(updated) => console.log('Saved translations:', updated)}
 />
 ```

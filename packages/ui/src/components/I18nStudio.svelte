@@ -13,7 +13,7 @@
     /** Whether to allow hot-reloading translations directly into current runtime memory */
     allowLiveApply?: boolean;
     /** Callback when user saves all translation modifications */
-    onSave?: (dictionaries: Record<string, Record<string, string>>) => void;
+    onSave?: (dictionaries: Record<string, Record<string, string>>) => void | Promise<void>;
     /** Callback when user live-applies translations */
     onApplyLive?: (locale: string, dict: Record<string, string>) => void;
     /** Callback when user exports dictionary */
@@ -49,16 +49,48 @@
   let importJsonText = $state('');
   let showImportModal = $state(false);
   let liveSuccessMessage = $state<string | null>(null);
-  let initialTargetSnapshot = $state<Record<string, string>>({});
+  let savedDictionaries = $state<Record<string, Record<string, string>>>({});
+  const initialTargetSnapshot = $derived(savedDictionaries[activeTarget] ?? {});
+  let isSaving = $state(false);
+  let errorMessage = $state<string | null>(null);
+  let previousInput: Record<string, Record<string, string>> | undefined;
+  let previousInputSnapshot = '';
+  let inputGeneration = 0;
+
+  function copyDictionaries(value: Record<string, Record<string, string>>): Record<string, Record<string, string>> {
+    return Object.fromEntries(Object.entries(value).map(([locale, dict]): [string, Record<string, string>] => [locale, { ...dict }]));
+  }
+
+  function translation(dict: Record<string, string>, key: string): string {
+    return Object.hasOwn(dict, key) ? (dict[key] ?? '') : '';
+  }
 
   $effect(() => {
-    localDictionaries = JSON.parse(JSON.stringify(dictionaries));
-    initialTargetSnapshot = JSON.parse(JSON.stringify(dictionaries[targetLocale] || {}));
+    const incoming = copyDictionaries(dictionaries);
+    const snapshot = JSON.stringify(incoming);
+    // 其他属性更新触发 effect 时，不覆盖同一份输入对应的本地草稿。
+    if (dictionaries === previousInput && snapshot === previousInputSnapshot) return;
+    previousInput = dictionaries;
+    previousInputSnapshot = snapshot;
+    inputGeneration++;
+    localDictionaries = incoming;
+    savedDictionaries = copyDictionaries(incoming);
+    isSaving = false;
+    errorMessage = null;
+    liveSuccessMessage = null;
+  });
+
+  $effect(() => {
+    activeSourceOverride = sourceLocale;
+  });
+
+  $effect(() => {
+    activeTargetOverride = targetLocale;
   });
 
   // Ensure dictionaries have objects for selected locales
   function ensureLocale(loc: string) {
-    if (!localDictionaries[loc]) {
+    if (!Object.hasOwn(localDictionaries, loc)) {
       localDictionaries[loc] = {};
     }
     return localDictionaries[loc];
@@ -102,8 +134,8 @@
         if (ns !== selectedNamespace) return false;
       }
 
-      const sVal = sourceDict[key] || '';
-      const tVal = targetDict[key] || '';
+      const sVal = translation(sourceDict, key);
+      const tVal = translation(targetDict, key);
 
       // Search query filter
       if (searchQuery.trim()) {
@@ -116,7 +148,7 @@
 
       // Status filter
       const isMissing = !tVal || tVal.trim() === '';
-      const isModified = initialTargetSnapshot[key] !== tVal;
+      const isModified = translation(initialTargetSnapshot, key) !== tVal;
 
       if (statusFilter === 'missing' && !isMissing) return false;
       if (statusFilter === 'modified' && !isModified) return false;
@@ -132,7 +164,7 @@
     const targetDict = localDictionaries[activeTarget] || {};
     let translatedCount = 0;
     for (const k of keys) {
-      const value = targetDict[k] ?? '';
+      const value = translation(targetDict, k);
       if (value.trim() !== '') {
         translatedCount++;
       }
@@ -150,16 +182,28 @@
     dict[key] = value;
   }
 
-  function handleSaveAll() {
-    onSave?.(localDictionaries);
-    liveSuccessMessage = `Translations saved successfully (${filteredKeys.length} keys)`;
-    setTimeout(() => {
-      liveSuccessMessage = null;
-    }, 3000);
+  async function handleSaveAll() {
+    if (!onSave || isSaving) return;
+    isSaving = true;
+    errorMessage = null;
+    liveSuccessMessage = null;
+    const snapshot = copyDictionaries(localDictionaries);
+    const count = allKeys.length;
+    const generation = inputGeneration;
+    try {
+      await onSave(copyDictionaries(snapshot));
+      if (generation !== inputGeneration) return;
+      savedDictionaries = snapshot;
+      liveSuccessMessage = `Translations saved successfully (${count} keys)`;
+    } catch {
+      if (generation === inputGeneration) errorMessage = 'Translation save failed. Please retry.';
+    } finally {
+      if (generation === inputGeneration) isSaving = false;
+    }
   }
 
   function handleLiveApply() {
-    const targetDict = localDictionaries[activeTarget] || {};
+    const targetDict = { ...localDictionaries[activeTarget] };
     // Directly inject into core runtime dictionary
     addTranslations(activeTarget, targetDict);
     onApplyLive?.(activeTarget, targetDict);
@@ -170,7 +214,7 @@
   }
 
   function handleExport() {
-    const targetDict = localDictionaries[activeTarget] || {};
+    const targetDict = { ...localDictionaries[activeTarget] };
     onExport?.(activeTarget, targetDict);
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(targetDict, null, 2));
     const downloadAnchor = document.createElement('a');
@@ -182,18 +226,23 @@
   }
 
   function handleImportSubmit() {
+    errorMessage = null;
+    liveSuccessMessage = null;
     try {
-      const parsed = JSON.parse(importJsonText);
-      if (typeof parsed !== 'object' || parsed === null) {
-        throw new Error('Invalid JSON dictionary');
+      const parsed: unknown = JSON.parse(importJsonText);
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+        throw new Error('Expected a flat dictionary of strings');
       }
-      const dict = ensureLocale(activeTarget);
-      for (const [k, v] of Object.entries(parsed)) {
-        if (typeof v === 'string') {
-          dict[k] = v;
-        }
+      const entries: [string, unknown][] = Object.entries(parsed);
+      const importedEntries: [string, string][] = [];
+      for (const [k, v] of entries) {
+        if (typeof v !== 'string') throw new Error('Dictionary values must be strings');
+        importedEntries.push([k, v]);
       }
-      onImport?.(activeTarget, dict);
+      const imported = Object.fromEntries(importedEntries);
+      const dict = { ...localDictionaries[activeTarget], ...imported };
+      onImport?.(activeTarget, { ...dict });
+      localDictionaries = { ...localDictionaries, [activeTarget]: dict };
       showImportModal = false;
       importJsonText = '';
       liveSuccessMessage = `Imported translations into [${activeTarget}]`;
@@ -201,7 +250,7 @@
         liveSuccessMessage = null;
       }, 3000);
     } catch (e) {
-      alert(`JSON import failed: ${(e as Error).message}`);
+      errorMessage = `JSON import failed: ${e instanceof Error ? e.message : 'Invalid dictionary'}`;
     }
   }
 
@@ -287,6 +336,7 @@
         type="button"
         class="inline-flex items-center rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
         onclick={handleSaveAll}
+        disabled={isSaving || !onSave}
       >
         Save Changes
       </button>
@@ -294,6 +344,10 @@
   </div>
 
   <!-- Notification Banner -->
+  {#if errorMessage}
+    <p role="alert" class="text-xs text-destructive">{errorMessage}</p>
+  {/if}
+
   {#if liveSuccessMessage}
     <div
       role="status"
@@ -519,10 +573,10 @@
           </tr>
         {:else}
           {#each filteredKeys as key (key)}
-            {@const sourceVal = (localDictionaries[activeSource] || {})[key] || ''}
-            {@const targetVal = (localDictionaries[activeTarget] || {})[key] || ''}
+            {@const sourceVal = translation(localDictionaries[activeSource] ?? {}, key)}
+            {@const targetVal = translation(localDictionaries[activeTarget] ?? {}, key)}
             {@const isMissing = !targetVal || targetVal.trim() === ''}
-            {@const isModified = initialTargetSnapshot[key] !== targetVal}
+            {@const isModified = translation(initialTargetSnapshot, key) !== targetVal}
             <tr class="hover:bg-muted/30 transition">
               <!-- Key -->
               <td class="py-3 pl-4 pr-3 align-top font-mono text-[11px]">
