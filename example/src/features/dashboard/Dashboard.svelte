@@ -1,3 +1,4 @@
+<!-- // @vibe-escape: Level 3 Headless / custom operations cockpit composition -->
 <script lang="ts">
   import { demoRenderers } from '../../resource-rendering';
   import { demoContracts } from '../../resource-contracts';
@@ -6,7 +7,7 @@
   type Movement = DemoRow<'stock_movements'>;
 
   import { captureAdminContext, createEnterpriseRequestContext, useList, type DashboardProvider } from '@svadmin/core';
-  import { useTranslation } from '@svadmin/core/i18n';
+  import { addTranslations, useTranslation } from '@svadmin/core/i18n';
   import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, StatusPill, type AuditDataState } from '@svadmin/ui';
   import {
     Bell,
@@ -23,6 +24,9 @@
     Truck,
     Users,
   } from '@lucide/svelte';
+  import { registerDashboardTranslations } from './dashboard-i18n';
+
+  registerDashboardTranslations(addTranslations);
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
@@ -31,7 +35,9 @@
   import {
     buildDashboardWorkspace, loadWorkspaceDrilldownRecords, type WorkspaceDrilldownTarget,
   } from './dashboard-workspace-data';
+
   let declarativeSurfacePromise = $state(import('../../components/DeclarativeSurfaceExample.svelte'));
+  let secondaryOpen = $state(false);
 
   function retryDeclarativeSurface(): void {
     declarativeSurfacePromise = import('../../components/DeclarativeSurfaceExample.svelte');
@@ -50,23 +56,34 @@
   const todosQuery = useList({ resource: demoContracts.todos, pagination: { mode: 'off' }, errorNotification: false });
   const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' }, errorNotification: false });
   const rolesQuery = useList({ resource: demoContracts.roles, pagination: { current: 1, pageSize: 1 }, errorNotification: false });
+
+  // P1: Secondary queries are lazy-loaded upon opening the schedule & collaboration details section
   const calendarQuery = useList({
     resource: demoContracts.calendar_events,
     pagination: { mode: 'off' },
     sorters: [{ field: 'startDate', order: 'asc' }],
     errorNotification: false,
+    get queryOptions() {
+      return { enabled: secondaryOpen };
+    },
   });
   const conversationsQuery = useList({
     resource: demoContracts.ai_conversations,
     pagination: { mode: 'off' },
     sorters: [{ field: 'updatedAt', order: 'desc' }],
     errorNotification: false,
+    get queryOptions() {
+      return { enabled: secondaryOpen };
+    },
   });
   const notificationsQuery = useList({
     resource: demoContracts.notifications,
     pagination: { mode: 'off' },
     sorters: [{ field: 'createdAt', order: 'desc' }],
     errorNotification: false,
+    get queryOptions() {
+      return { enabled: secondaryOpen };
+    },
   });
 
   const locale = $derived(i18n.locale);
@@ -157,55 +174,53 @@
   const teamMembers = $derived(users.slice(0, 4));
 
   const stats = $derived([
-    { label: isZh ? '资产价值' : 'Total Asset Value', value: `$${Math.round(totalAssetValue / 1000)}K`, href: '#/products', Icon: TrendingUp, tone: 'bg-primary/10 text-primary border-primary/20' },
-    { label: isZh ? '可用商品' : 'Available', value: availableProducts.length, href: '#/products', Icon: Package, tone: 'bg-success/10 text-success border-success/20' },
-    { label: isZh ? '库存件数' : 'Stock Units', value: totalStock, href: '#/products', Icon: Package, tone: 'bg-info/10 text-info border-info/20' },
-    { label: isZh ? '仓库' : 'Warehouses', value: warehousesQuery.data?.total ?? 0, href: '#/warehouses', Icon: Home, tone: 'bg-success/10 text-success border-success/20' },
-    { label: isZh ? '供应商' : 'Suppliers', value: suppliersQuery.data?.total ?? 0, href: '#/suppliers', Icon: Truck, tone: 'bg-warning/10 text-warning border-warning/20' },
-    { label: isZh ? '库存设置' : 'Settings', value: reorderRules.length, href: '#/reorder_rules', Icon: Settings, tone: 'bg-muted text-muted-foreground border-border' },
+    { label: i18n.t('dashboard.stat.totalAssetValue'), value: `$${Math.round(totalAssetValue / 1000)}K`, href: '#/products', Icon: TrendingUp, tone: 'bg-primary/10 text-primary border-primary/20' },
+    { label: i18n.t('dashboard.stat.available'), value: availableProducts.length, href: '#/products', Icon: Package, tone: 'bg-success/10 text-success border-success/20' },
+    { label: i18n.t('dashboard.stat.stockUnits'), value: totalStock, href: '#/products', Icon: Package, tone: 'bg-info/10 text-info border-info/20' },
+    { label: i18n.t('dashboard.stat.warehouses'), value: warehousesQuery.data?.total ?? 0, href: '#/warehouses', Icon: Home, tone: 'bg-success/10 text-success border-success/20' },
+    { label: i18n.t('dashboard.stat.suppliers'), value: suppliersQuery.data?.total ?? 0, href: '#/suppliers', Icon: Truck, tone: 'bg-warning/10 text-warning border-warning/20' },
+    { label: i18n.t('dashboard.stat.settings'), value: reorderRules.length, href: '#/reorder_rules', Icon: Settings, tone: 'bg-muted text-muted-foreground border-border' },
   ]);
 
   const orderSummary = $derived([
-    { label: isZh ? '采购订单' : 'Purchase Orders', value: purchaseOrdersQuery.data?.total ?? 0, href: '#/purchase_orders', Icon: ClipboardCheck },
-    { label: isZh ? '销售订单' : 'Sales Orders', value: salesOrdersQuery.data?.total ?? 0, href: '#/sales_orders', Icon: CreditCard },
-    { label: isZh ? '待办未结' : 'Open Todo', value: openTodos, href: '#/todos', Icon: TrendingUp },
-    { label: isZh ? '库存调拨' : 'Stock Transfers', value: activeTransfers, href: '#/stock_transfers', Icon: Shuffle },
-    { label: isZh ? '循环盘点' : 'Cycle Counts', value: activeCycleCounts, href: '#/cycle_counts', Icon: ClipboardCheck },
-    { label: isZh ? '库存调整' : 'Adjustments', value: pendingAdjustments, href: '#/inventory_adjustments', Icon: Sliders },
-    { label: isZh ? '补货规则' : 'Reorder Rules', value: reviewReorderRules, href: '#/reorder_rules', Icon: Settings },
+    { label: i18n.t('dashboard.order.purchaseOrders'), value: purchaseOrdersQuery.data?.total ?? 0, href: '#/purchase_orders', Icon: ClipboardCheck },
+    { label: i18n.t('dashboard.order.salesOrders'), value: salesOrdersQuery.data?.total ?? 0, href: '#/sales_orders', Icon: CreditCard },
+    { label: i18n.t('dashboard.order.openTodo'), value: openTodos, href: '#/todos', Icon: TrendingUp },
+    { label: i18n.t('dashboard.order.stockTransfers'), value: activeTransfers, href: '#/stock_transfers', Icon: Shuffle },
+    { label: i18n.t('dashboard.order.cycleCounts'), value: activeCycleCounts, href: '#/cycle_counts', Icon: ClipboardCheck },
+    { label: i18n.t('dashboard.order.adjustments'), value: pendingAdjustments, href: '#/inventory_adjustments', Icon: Sliders },
+    { label: i18n.t('dashboard.order.reorderRules'), value: reviewReorderRules, href: '#/reorder_rules', Icon: Settings },
   ]);
 
   const roadmapModules = $derived([
     {
-      label: isZh ? '用户管理' : 'User Management',
+      label: i18n.t('dashboard.module.userManagement'),
       value: usersQuery.data?.total ?? 0,
-      meta: isZh
-        ? `${displayValue('#/roles', rolesQuery.data?.total ?? 0)} 个角色`
-        : `${displayValue('#/roles', rolesQuery.data?.total ?? 0)} roles`,
+      meta: `${displayValue('#/roles', rolesQuery.data?.total ?? 0)} ${i18n.t('dashboard.module.roles')}`,
       href: '#/users',
       Icon: Users,
       tone: 'bg-primary/10 text-primary border-primary/20',
     },
     {
-      label: isZh ? '日历' : 'Calendar',
-      value: calendarQuery.data?.total ?? 0,
-      meta: isZh ? '采购与盘点计划' : 'purchase and count planning',
+      label: i18n.t('dashboard.module.calendar'),
+      value: secondaryOpen ? (calendarQuery.data?.total ?? 0) : '—',
+      meta: i18n.t('dashboard.module.calendarMeta'),
       href: '#/calendar_events',
       Icon: CalendarDays,
       tone: 'bg-info/10 text-info border-info/20',
     },
     {
-      label: isZh ? 'AI 对话' : 'AI Chat',
-      value: openConversations,
-      meta: isZh ? '进行中的运营对话' : 'open operations threads',
+      label: i18n.t('dashboard.module.aiChat'),
+      value: secondaryOpen ? openConversations : '—',
+      meta: i18n.t('dashboard.module.aiChatMeta'),
       href: '#/ai_conversations',
       Icon: Bot,
       tone: 'bg-primary/10 text-primary border-primary/20',
     },
     {
-      label: isZh ? '通知中心' : 'Notification Center',
-      value: unreadNotifications,
-      meta: isZh ? '未读提醒' : 'unread notices',
+      label: i18n.t('dashboard.module.notificationCenter'),
+      value: secondaryOpen ? unreadNotifications : '—',
+      meta: i18n.t('dashboard.module.notificationCenterMeta'),
       href: '#/notifications',
       Icon: Bell,
       tone: 'bg-warning/10 text-warning border-warning/20',
@@ -224,167 +239,158 @@
   }
 
   function eventTypeLabel(type: string): string {
-    if (!isZh) return type;
-    if (type === 'cycle_count') return '盘点';
-    if (type === 'receiving') return '收货';
-    if (type === 'purchase') return '采购';
-    return type;
+    const key = `dashboard.eventType.${type}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : type;
   }
 
   function eventTitle(title: string): string {
-    if (!isZh) return title;
-    if (title === 'Warehouse cycle count') return '仓库循环盘点';
-    if (title === 'Supplier delivery window') return '供应商到货窗口';
-    if (title === 'Monthly purchase review') return '月度采购复盘';
-    return title;
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const key = `dashboard.eventTitle.${slug}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : title;
   }
 
   function conversationTitle(title: string): string {
-    if (!isZh) return title;
-    if (title === 'Reorder planning assistant') return '补货计划助手';
-    if (title === 'Forecast variance review') return '预测偏差复核';
-    if (title === 'Receiving exception triage') return '收货异常分诊';
-    return title;
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const key = `dashboard.conversationTitle.${slug}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : title;
   }
 
   function notificationTitle(title: string): string {
-    if (!isZh) return title;
-    if (title === 'Two products below minimum stock') return '两个商品低于最低库存';
-    if (title === 'PO-2026-002 delivery scheduled') return 'PO-2026-002 已安排到货';
-    if (title === 'New analyst invitation pending') return '新分析师邀请待完成';
-    return title;
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const key = `dashboard.notificationTitle.${slug}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : title;
   }
 
   function movementNote(note: string): string {
-    if (!isZh) return note;
-    if (note === 'Initial receiving') return '初始入库';
-    if (note === 'Sales order shipment') return '销售订单出库';
-    if (note === 'Supplier delivery') return '供应商到货';
-    if (note === 'Packing line consumption') return '包装线消耗';
-    return note;
+    const slug = note.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const key = `dashboard.movementNote.${slug}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : note;
   }
 
   function conversationStatusLabel(status: string): string {
-    if (!isZh) return status;
-    if (status === 'open') return '进行中';
-    if (status === 'waiting') return '等待';
-    if (status === 'resolved') return '已解决';
-    return status;
+    const key = `dashboard.conversationStatus.${status}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : status;
   }
 
   function severityLabel(severity: string): string {
-    if (!isZh) return severity;
-    if (severity === 'critical') return '紧急';
-    if (severity === 'warning') return '预警';
-    if (severity === 'info') return '信息';
-    return severity;
+    const key = `dashboard.severity.${severity}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : severity;
   }
 
   function orderStatusLabel(status: string): string {
-    if (!isZh) return status;
-    if (status === 'pending') return '待处理';
-    if (status === 'processing') return '处理中';
-    if (status === 'shipped') return '已发货';
-    if (status === 'cancelled') return '已取消';
-    return status;
+    const key = `dashboard.orderStatus.${status}`;
+    const translation = i18n.t(key);
+    return translation !== key ? translation : status;
   }
 </script>
 
-<DashboardPage pageId="operations-dashboard" title={isZh ? '运营工作台' : 'Operations workspace'}
-    description={isZh ? '库存风险、订单与团队待办' : 'Inventory health, orders and team priorities'}>
-    {#snippet actions()}
-      <span role="status">
-        <StatusPill tone={hasError ? 'warning' : isRefreshing ? 'info' : 'success'}
-          label={hasError ? (isZh ? '部分数据不可用' : 'Some data unavailable') : isRefreshing ? (isZh ? '更新中' : 'Updating') : (isZh ? '已同步' : 'Up to date')} />
-      </span>
-    {/snippet}
+<div class="operations-dashboard-view" data-svadmin-component="OperationsDashboard" data-svadmin-resource="dashboard">
+<DashboardPage pageId="operations-dashboard"
+  title={i18n.t('dashboard.pageTitle')}
+  description={i18n.t('dashboard.pageDescription')}>
+  {#snippet actions()}
+    <span role="status">
+      <StatusPill tone={hasError ? 'warning' : isRefreshing ? 'info' : 'success'}
+        label={hasError ? i18n.t('dashboard.status.unavailable') : isRefreshing ? i18n.t('dashboard.status.updating') : i18n.t('dashboard.status.synced')} />
+    </span>
+  {/snippet}
 
   {#if hasError}
-    <DataState state="error" title={isZh ? '部分数据未能更新' : 'Some data could not be updated'}
-      description={isZh ? '暂不可用的指标显示为 —，请重试后再作判断。' : 'Unavailable metrics show —. Retry before making a decision.'}
+    <DataState state="error" title={i18n.t('dashboard.error.title')}
+      description={i18n.t('dashboard.error.description')}
       retry={retryFailedQueries} />
   {/if}
-  <section class="grid gap-3" aria-labelledby="dashboard-workspace-heading" data-testid="example-dashboard-workspace">
+  <section class="grid gap-3" aria-labelledby="dashboard-workspace-heading" data-testid="example-dashboard-workspace" data-svadmin-component="DashboardWorkspaceSection">
     <div>
       <h2 id="dashboard-workspace-heading" class="text-base font-semibold text-foreground">
-        {isZh ? '企业仪表盘工作区' : 'Enterprise dashboard workspace'}
+        {i18n.t('dashboard.workspace.heading')}
       </h2>
       <p class="text-sm text-muted-foreground">
-        {isZh ? '全局筛选、时间范围与钻取会写入当前仪表盘路由的 hash。' : 'Global filters, time range and drill-down are stored in the current dashboard route hash.'}
+        {i18n.t('dashboard.workspace.description')}
       </p>
     </div>
     <DashboardWorkspace
       provider={workspaceProvider}
       dashboardId="operations-dashboard"
       requestContext={workspaceRequestContext}
-      title={isZh ? '企业运营仪表盘' : 'Enterprise operations dashboard'}
+      title={i18n.t('dashboard.workspace.title')}
       isZh={isZh}
       loadDrilldownRecords={loadWorkspaceRecords}
       defaultFrom="2026-06-01"
       defaultTo="2026-06-30" />
   </section>
   {#snippet metrics()}
-    <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
-      trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
-      detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} out of stock`)}
-      loading={productsQuery.isLoading} />
-    <MetricBlock label={isZh ? '待处理' : 'Open work'}
-      value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
-      detail={isZh ? '待办、调拨与审批' : 'Todos, transfers, approvals'} loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
-    <MetricBlock label={isZh ? '库存资产' : 'Inventory value'}
-      value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
-      detail={productsQuery.isError ? '' : isZh ? `${totalStock} 件库存` : `${totalStock.toLocaleString(locale)} units in stock`}
-      loading={productsQuery.isLoading} />
+    <div class="contents" data-svadmin-component="DashboardMetrics" data-svadmin-resource="dashboard">
+      <MetricBlock label={i18n.t('dashboard.metric.stockAtRisk')} value={productsQuery.isError ? '—' : lowStockProducts.length}
+        trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
+        detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} ${i18n.t('dashboard.metric.outOfStock')}`)}
+        loading={productsQuery.isLoading} />
+      <MetricBlock label={i18n.t('dashboard.metric.openWork')}
+        value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
+        detail={i18n.t('dashboard.metric.workDetail')}
+        loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
+      <MetricBlock label={i18n.t('dashboard.metric.inventoryValue')}
+        value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
+        detail={productsQuery.isError ? '' : `${totalStock.toLocaleString(locale)} ${i18n.t('dashboard.metric.unitsInStock')}`}
+        loading={productsQuery.isLoading} />
+    </div>
   {/snippet}
 
   <!-- Inventory Health + Operations Queue -->
-  <div class="dashboard-primary-grid">
-    <AuditSection title={isZh ? '库存风险清单' : 'Stock risk queue'}
+  <div class="dashboard-primary-grid" data-svadmin-component="DashboardPrimaryGrid">
+    <AuditSection title={i18n.t('dashboard.section.stockRisk')}
       accent={lowStockProducts.length ? 'warning' : 'neutral'}
       state={sectionState(productsQuery, lowStockProducts.length)}
-      message={!productsQuery.isError && !productsQuery.isLoading && !lowStockProducts.length ? (isZh ? '所有跟踪商品均高于库存下限' : 'All tracked products are above threshold') : undefined}
+      message={!productsQuery.isError && !productsQuery.isLoading && !lowStockProducts.length ? i18n.t('dashboard.section.stockHealthy') : undefined}
       retry={() => void productsQuery.refetch()}>
       {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
+        <a class="text-sm font-medium text-primary hover:underline" href="#/products">{i18n.t('dashboard.section.products')}</a>
       {/snippet}
-        <div class="divide-y">
-          {#each lowStockProducts as product (product.id)}
-            <div class="flex items-center justify-between gap-4 py-3">
-              <div class="min-w-0">
-                <a href={recordLink('products', product.id, adminContext.currentPath())} class="block truncate text-sm font-medium text-foreground hover:text-primary hover:underline">{product.name}</a>
-                <p class="text-xs text-muted-foreground">{product.sku}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-sm font-semibold text-destructive">{product.stock} / {product.minStock}</p>
-                <p class="text-xs text-muted-foreground">{isZh ? '现有 / 下限' : 'on hand / minimum'}</p>
-              </div>
+      <div class="divide-y" data-svadmin-component="StockRiskList" data-svadmin-resource="products">
+        {#each lowStockProducts as product (product.id)}
+          <div class="flex items-center justify-between gap-4 py-3" data-svadmin-component="StockRiskItem" data-svadmin-field="stock">
+            <div class="min-w-0">
+              <a href={recordLink('products', product.id, adminContext.currentPath())} class="block truncate text-sm font-medium text-foreground hover:text-primary hover:underline">{product.name}</a>
+              <p class="text-xs text-muted-foreground">{product.sku}</p>
             </div>
-          {:else}
-            <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '所有跟踪商品均高于库存下限。' : 'All tracked products are above threshold.'}</div>
-          {/each}
-        </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold text-destructive">{product.stock} / {product.minStock}</p>
+              <p class="text-xs text-muted-foreground">{i18n.t('dashboard.section.onHandMin')}</p>
+            </div>
+          </div>
+        {:else}
+          <div class="px-6 py-8 text-sm text-muted-foreground">{i18n.t('dashboard.section.stockHealthy')}</div>
+        {/each}
+      </div>
     </AuditSection>
 
-    <AuditSection title={isZh ? '运营队列' : 'Operations Queue'} accent="neutral">
-        <div class="grid gap-x-5 sm:grid-cols-2" data-dashboard-queue>
-          {#each orderSummary as item (item.label)}
-            <a href={item.href} class="flex items-center justify-between gap-3 border-b border-border py-3 transition hover:bg-muted/50">
-              <div class="flex items-center gap-3">
-                <item.Icon class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm font-medium">{item.label}</span>
-              </div>
-              <span class="text-sm font-semibold tabular-nums text-foreground">{displayValue(item.href, item.value)}</span>
-            </a>
-          {/each}
-        </div>
+    <AuditSection title={i18n.t('dashboard.section.operationsQueue')} accent="neutral">
+      <div class="grid gap-x-5 sm:grid-cols-2" data-dashboard-queue data-svadmin-component="OperationsQueue" data-svadmin-resource="sales_orders">
+        {#each orderSummary as item (item.label)}
+          <a href={item.href} class="flex items-center justify-between gap-3 border-b border-border py-3 transition hover:bg-muted/50" data-svadmin-component="QueueItem">
+            <div class="flex items-center gap-3">
+              <item.Icon class="h-4 w-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{item.label}</span>
+            </div>
+            <span class="text-sm font-semibold tabular-nums text-foreground">{displayValue(item.href, item.value)}</span>
+          </a>
+        {/each}
+      </div>
     </AuditSection>
   </div>
 
   <details class="svadmin-collapsible dashboard-secondary" data-dashboard-summary>
-    <summary>{isZh ? '资源概览' : 'Resource overview'}</summary>
-    <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
+    <summary>{i18n.t('dashboard.stat.settings')}</summary>
+    <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3" data-svadmin-component="DashboardStatsGrid">
       {#each stats as stat (stat.label)}
-        <a href={stat.href} class="block py-2 hover:text-primary">
+        <a href={stat.href} class="block py-2 hover:text-primary" data-svadmin-component="DashboardStatCard">
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
               <p class="min-h-7 text-xs font-medium leading-tight text-muted-foreground sm:min-h-0">{stat.label}</p>
@@ -398,54 +404,55 @@
       {/each}
     </section>
 
-  <!-- Roadmap modules -->
-  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    {#each roadmapModules as module (module.label)}
-      <a href={module.href} class="dashboard-module border-b py-3 transition hover:bg-muted/50">
-        <div class="flex items-center justify-between gap-3">
-          <span class="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">
-            <module.Icon class="h-4 w-4" />
-          </span>
-          <span class="text-lg font-semibold tabular-nums text-foreground">{displayValue(module.href, module.value)}</span>
-        </div>
-        <div class="mt-2">
-          <p class="text-sm font-semibold text-foreground">{module.label}</p>
-          <p class="mt-1 text-xs text-muted-foreground">{module.meta}</p>
-        </div>
-      </a>
-    {/each}
-  </section>
+    <!-- Roadmap modules -->
+    <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-svadmin-component="DashboardRoadmapModules">
+      {#each roadmapModules as module (module.label)}
+        <a href={module.href} class="dashboard-module border-b py-3 transition hover:bg-muted/50" data-svadmin-component="DashboardModuleCard">
+          <div class="flex items-center justify-between gap-3">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">
+              <module.Icon class="h-4 w-4" />
+            </span>
+            <span class="text-lg font-semibold tabular-nums text-foreground">{displayValue(module.href, module.value)}</span>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm font-semibold text-foreground">{module.label}</p>
+            <p class="mt-1 text-xs text-muted-foreground">{module.meta}</p>
+          </div>
+        </a>
+      {/each}
+    </section>
   </details>
 
-  <!-- Calendar / AI / Notifications columns -->
-  <details class="svadmin-collapsible dashboard-secondary">
-  <summary>{isZh ? '日程与协作' : 'Schedule and collaboration'}</summary>
-  <div class="dashboard-support-grid">
-    <AuditSection title={isZh ? '日历' : 'Calendar'} accent="neutral"
-      state={sectionState(calendarQuery, calendarEvents.length)} retry={() => void calendarQuery.refetch()}>
-      {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/calendar_events">{isZh ? '查看全部' : 'View all'}</a>
-      {/snippet}
-        <div class="divide-y">
+  <!-- Calendar / AI / Notifications columns (Gated lazy loading via secondaryOpen) -->
+  <details class="svadmin-collapsible dashboard-secondary"
+    ontoggle={(e) => { secondaryOpen = (e.currentTarget as HTMLDetailsElement).open; }}>
+    <summary>{i18n.t('dashboard.section.scheduleCollaboration')}</summary>
+    <div class="dashboard-support-grid" data-svadmin-component="DashboardSupportGrid">
+      <AuditSection title={i18n.t('dashboard.section.calendar')} accent="neutral"
+        state={sectionState(calendarQuery, calendarEvents.length)} retry={() => void calendarQuery.refetch()}>
+        {#snippet actions()}
+          <a class="text-sm font-medium text-primary hover:underline" href="#/calendar_events">{i18n.t('dashboard.section.viewAll')}</a>
+        {/snippet}
+        <div class="divide-y" data-svadmin-component="CalendarEventsList" data-svadmin-resource="calendar_events">
           {#each calendarEvents.slice(0, 3) as event (event.id)}
-            <div class="px-6 py-4">
+            <div class="px-6 py-4" data-svadmin-component="CalendarEventItem" data-svadmin-field="title">
               <p class="truncate text-sm font-medium text-foreground">{eventTitle(event.title)}</p>
               <p class="mt-1 text-xs text-muted-foreground">{event.startDate} / {eventTypeLabel(event.type)}</p>
             </div>
           {:else}
-            <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无计划日程。' : 'No scheduled events.'}</div>
+            <div class="px-6 py-8 text-sm text-muted-foreground">{i18n.t('dashboard.section.noEvents')}</div>
           {/each}
         </div>
-    </AuditSection>
+      </AuditSection>
 
-    <AuditSection title={isZh ? 'AI 运营' : 'AI Operations'} accent="neutral"
-      state={sectionState(conversationsQuery, conversations.length)} retry={() => void conversationsQuery.refetch()}>
-      {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/ai_conversations">{isZh ? '查看全部' : 'View all'}</a>
-      {/snippet}
-        <div class="divide-y">
+      <AuditSection title={i18n.t('dashboard.section.aiOperations')} accent="neutral"
+        state={sectionState(conversationsQuery, conversations.length)} retry={() => void conversationsQuery.refetch()}>
+        {#snippet actions()}
+          <a class="text-sm font-medium text-primary hover:underline" href="#/ai_conversations">{i18n.t('dashboard.section.viewAll')}</a>
+        {/snippet}
+        <div class="divide-y" data-svadmin-component="AIConversationsList" data-svadmin-resource="ai_conversations">
           {#each conversations.slice(0, 3) as conversation (conversation.id)}
-            <div class="flex items-center justify-between gap-4 px-6 py-4">
+            <div class="flex items-center justify-between gap-4 px-6 py-4" data-svadmin-component="AIConversationItem" data-svadmin-field="title">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{conversationTitle(conversation.title)}</p>
                 <p class="text-xs text-muted-foreground">{conversation.updatedAt}</p>
@@ -453,19 +460,19 @@
               <StatusPill tone={conversation.status === 'resolved' ? 'success' : 'info'} label={conversationStatusLabel(conversation.status)} />
             </div>
           {:else}
-            <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无 AI 对话。' : 'No AI threads yet.'}</div>
+            <div class="px-6 py-8 text-sm text-muted-foreground">{i18n.t('dashboard.section.noAI')}</div>
           {/each}
         </div>
-    </AuditSection>
+      </AuditSection>
 
-    <AuditSection title={isZh ? '通知' : 'Notifications'} accent="neutral"
-      state={sectionState(notificationsQuery, notifications.length)} retry={() => void notificationsQuery.refetch()}>
-      {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/notifications">{isZh ? '查看全部' : 'View all'}</a>
-      {/snippet}
-        <div class="divide-y">
+      <AuditSection title={i18n.t('dashboard.section.notifications')} accent="neutral"
+        state={sectionState(notificationsQuery, notifications.length)} retry={() => void notificationsQuery.refetch()}>
+        {#snippet actions()}
+          <a class="text-sm font-medium text-primary hover:underline" href="#/notifications">{i18n.t('dashboard.section.viewAll')}</a>
+        {/snippet}
+        <div class="divide-y" data-svadmin-component="NotificationsList" data-svadmin-resource="notifications">
           {#each notifications.slice(0, 3) as notification (notification.id)}
-            <div class="flex items-center justify-between gap-4 px-6 py-4">
+            <div class="flex items-center justify-between gap-4 px-6 py-4" data-svadmin-component="NotificationItem" data-svadmin-field="title">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{notificationTitle(notification.title)}</p>
                 <p class="text-xs text-muted-foreground">{notification.createdAt}</p>
@@ -473,19 +480,19 @@
               <StatusPill tone={notification.severity === 'critical' ? 'danger' : notification.severity === 'warning' ? 'warning' : 'info'} label={severityLabel(notification.severity)} />
             </div>
           {:else}
-            <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无通知。' : 'No notifications yet.'}</div>
+            <div class="px-6 py-8 text-sm text-muted-foreground">{i18n.t('dashboard.section.noNotifications')}</div>
           {/each}
         </div>
-    </AuditSection>
-  </div>
+      </AuditSection>
+    </div>
 
-  <div class="dashboard-primary-grid">
-    <ChartContainer title={isZh ? '库存排行' : 'Stock ranking'}
-      state={sectionState(productsQuery, bestSellers.length)} retry={() => void productsQuery.refetch()}>
-      {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
-      {/snippet}
-        <div class="divide-y">
+    <div class="dashboard-primary-grid mt-4">
+      <ChartContainer title={i18n.t('dashboard.section.bestSellers')}
+        state={sectionState(productsQuery, bestSellers.length)} retry={() => void productsQuery.refetch()}>
+        {#snippet actions()}
+          <a class="text-sm font-medium text-primary hover:underline" href="#/products">{i18n.t('dashboard.section.products')}</a>
+        {/snippet}
+        <div class="divide-y" data-svadmin-component="BestSellersList" data-svadmin-resource="products">
           {#each bestSellers as product (product.id)}
             <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div class="min-w-0">
@@ -494,24 +501,24 @@
               </div>
               <div class="min-w-40">
                 <div class="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{isZh ? '可售库存' : 'sellable stock'}</span>
+                  <span>{i18n.t('dashboard.section.fastMoving')}</span>
                   <span>{product.stock}</span>
                 </div>
                 <div class="mt-2 h-2 rounded-full bg-muted">
-                  <div class="h-2 rounded-full bg-primary" style:width={`${totalStock ? product.stock / totalStock * 100 : 0}%`} aria-label={isZh ? '占总库存比例' : 'Share of total stock'}></div>
+                  <div class="h-2 rounded-full bg-primary" style:width={`${totalStock ? product.stock / totalStock * 100 : 0}%`}></div>
                 </div>
               </div>
             </div>
           {/each}
         </div>
-    </ChartContainer>
+      </ChartContainer>
 
-    <AuditSection title={isZh ? '团队成员' : 'Team members'} accent="neutral"
-      state={sectionState(usersQuery, teamMembers.length)} retry={() => void usersQuery.refetch()}>
-      {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/users">{isZh ? '用户管理' : 'Users'}</a>
-      {/snippet}
-        <div class="divide-y">
+      <AuditSection title={i18n.t('dashboard.module.userManagement')} accent="neutral"
+        state={sectionState(usersQuery, teamMembers.length)} retry={() => void usersQuery.refetch()}>
+        {#snippet actions()}
+          <a class="text-sm font-medium text-primary hover:underline" href="#/users">{i18n.t('dashboard.section.viewAll')}</a>
+        {/snippet}
+        <div class="divide-y" data-svadmin-component="TeamMembersList" data-svadmin-resource="users">
           {#each teamMembers as member (member.id)}
             <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div class="min-w-0">
@@ -519,73 +526,73 @@
                 <p class="text-xs text-muted-foreground">{member.department}</p>
               </div>
               <div class="flex items-center gap-3">
-                <a class="text-sm text-primary hover:underline" href={recordLink('users', member.id, adminContext.currentPath())}>{isZh ? '查看成员' : 'View member'}</a>
+                <a class="text-sm text-primary hover:underline" href={recordLink('users', member.id, adminContext.currentPath())}>{i18n.t('dashboard.section.viewAll')}</a>
               </div>
             </div>
           {/each}
         </div>
-    </AuditSection>
-  </div>
+      </AuditSection>
+    </div>
   </details>
 
-  <div class="dashboard-primary-grid">
-    <AuditSection title={isZh ? '销售活动' : 'Sales Activity'} accent="neutral"
+  <div class="dashboard-primary-grid" data-svadmin-component="DashboardSalesGrid">
+    <AuditSection title={i18n.t('dashboard.section.salesActivity')} accent="neutral"
       state={sectionState(salesOrdersQuery, salesOrders.length)} retry={() => void salesOrdersQuery.refetch()}>
-      <div class="dashboard-sales">
+      <div class="dashboard-sales" data-svadmin-component="SalesActivityCard" data-svadmin-resource="sales_orders">
         <div class="border-b pb-4">
-          <p class="text-xs font-medium text-muted-foreground">{isZh ? '销售订单' : 'Sales orders'}</p>
+          <p class="text-xs font-medium text-muted-foreground">{i18n.t('dashboard.order.salesOrders')}</p>
           <p class="mt-2 text-xl font-semibold tabular-nums text-foreground">{salesOrders.length}</p>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="p-3">
             <p class="text-lg font-semibold">{salesOrders.filter((order) => order.status === 'pending').length}</p>
-            <p class="text-xs text-muted-foreground">{isZh ? '待处理' : 'Pending'}</p>
+            <p class="text-xs text-muted-foreground">{i18n.t('dashboard.section.pending')}</p>
           </div>
           <div class="border-x p-3">
             <p class="text-lg font-semibold">{salesOrders.filter((order) => order.status === 'processing').length}</p>
-            <p class="text-xs text-muted-foreground">{isZh ? '处理中' : 'Processing'}</p>
+            <p class="text-xs text-muted-foreground">{i18n.t('dashboard.section.processing')}</p>
           </div>
           <div class="p-3">
             <p class="text-lg font-semibold">{salesOrders.filter((order) => order.status === 'shipped').length}</p>
-            <p class="text-xs text-muted-foreground">{isZh ? '已发货' : 'Shipped'}</p>
+            <p class="text-xs text-muted-foreground">{i18n.t('dashboard.section.shipped')}</p>
           </div>
         </div>
       </div>
     </AuditSection>
 
-    <AuditSection title={isZh ? '近期订单' : 'Recent Orders'} accent="neutral"
+    <AuditSection title={i18n.t('dashboard.section.recentOrders')} accent="neutral"
       state={sectionState(salesOrdersQuery, salesOrders.length)} retry={() => void salesOrdersQuery.refetch()}>
       {#snippet actions()}
-        <a class="text-sm font-medium text-primary hover:underline" href="#/sales_orders">{isZh ? '销售订单' : 'Sales Orders'}</a>
+        <a class="text-sm font-medium text-primary hover:underline" href="#/sales_orders">{i18n.t('dashboard.order.salesOrders')}</a>
       {/snippet}
-        <div class="divide-y">
-          {#each salesOrders.slice(0, 5) as order (order.id)}
-            <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto_auto] sm:items-center">
-              <div class="min-w-0">
-                <p class="truncate text-sm font-medium text-foreground">{order.orderNumber}</p>
-                <p class="text-xs text-muted-foreground">{order.customerName} · {order.orderDate}</p>
-              </div>
-              <StatusPill label={orderStatusLabel(order.status)} tone={order.status === 'cancelled' ? 'danger' : order.status === 'shipped' ? 'success' : 'neutral'} />
-              <p class="text-sm font-semibold tabular-nums text-foreground">${order.totalAmount}</p>
+      <div class="divide-y" data-svadmin-component="RecentOrdersList" data-svadmin-resource="sales_orders">
+        {#each salesOrders.slice(0, 5) as order (order.id)}
+          <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto_auto] sm:items-center" data-svadmin-component="OrderItem">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-foreground">{order.orderNumber}</p>
+              <p class="text-xs text-muted-foreground">{order.customerName} · {order.orderDate}</p>
             </div>
-          {:else}
-            <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无近期订单。' : 'No recent orders.'}</div>
-          {/each}
-        </div>
+            <StatusPill label={orderStatusLabel(order.status)} tone={order.status === 'cancelled' ? 'danger' : order.status === 'shipped' ? 'success' : 'neutral'} />
+            <p class="text-sm font-semibold tabular-nums text-foreground">${order.totalAmount}</p>
+          </div>
+        {:else}
+          <div class="px-6 py-8 text-sm text-muted-foreground">{i18n.t('dashboard.section.noRecentOrders')}</div>
+        {/each}
+      </div>
     </AuditSection>
   </div>
 
   <!-- Recent Stock Movements -->
   <details class="svadmin-collapsible dashboard-secondary">
-    <summary>{isZh ? '库存流水与扩展' : 'Stock movements and extensions'}</summary>
-  <AuditSection title={isZh ? '近期库存流水' : 'Recent Stock Movements'} accent="neutral"
-    state={sectionState(movementsQuery, movements.length)} retry={() => void movementsQuery.refetch()}>
-    {#snippet actions()}
-      <a class="text-sm font-medium text-primary hover:underline" href="#/stock_movements">{isZh ? '查看全部' : 'View all'}</a>
-    {/snippet}
-      <div class="divide-y">
+    <summary>{i18n.t('dashboard.section.stockMovementsExt')}</summary>
+    <AuditSection title={i18n.t('dashboard.section.recentMovements')} accent="neutral"
+      state={sectionState(movementsQuery, movements.length)} retry={() => void movementsQuery.refetch()}>
+      {#snippet actions()}
+        <a class="text-sm font-medium text-primary hover:underline" href="#/stock_movements">{i18n.t('dashboard.section.viewAll')}</a>
+      {/snippet}
+      <div class="divide-y" data-svadmin-component="StockMovementsList" data-svadmin-resource="stock_movements">
         {#each movements.slice(0, 5) as movement (movement.id)}
-          <div class="flex items-center justify-between gap-4 px-6 py-4">
+          <div class="flex items-center justify-between gap-4 px-6 py-4" data-svadmin-component="StockMovementItem">
             <div class="min-w-0">
               <p class="truncate text-sm font-medium text-foreground">{movementNote(movement.note)}</p>
               <p class="text-xs text-muted-foreground">{movement.date}</p>
@@ -594,24 +601,24 @@
               {signedQuantity(movement)}
             </span>
           </div>
-      {:else}
-          <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无库存流水。' : 'No movements recorded yet.'}</div>
-      {/each}
+        {:else}
+          <div class="px-6 py-8 text-sm text-muted-foreground">{i18n.t('dashboard.section.noMovements')}</div>
+        {/each}
       </div>
-  </AuditSection>
-
+    </AuditSection>
   </details>
 
   {#await declarativeSurfacePromise}
-    <DataState state="loading" title={isZh ? '正在加载声明式 Surface' : 'Loading declarative Surface'} />
+    <DataState state="loading" title={i18n.t('dashboard.section.loadingDeclarativeSurface')} />
   {:then declarativeSurfaceModule}
     {@const DeclarativeSurfaceExample = declarativeSurfaceModule.default}
     <DeclarativeSurfaceExample {isZh} />
   {:catch}
     <DataState
       state="error"
-      title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'}
+      title={i18n.t('dashboard.section.failedDeclarativeSurface')}
       retry={retryDeclarativeSurface}
     />
   {/await}
 </DashboardPage>
+</div>

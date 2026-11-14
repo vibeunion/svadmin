@@ -1,3 +1,4 @@
+<!-- // @vibe-escape: Level 3 Headless / composite user management and permission matrix view -->
 <script lang="ts">
   import { demoRenderers } from '../../resource-rendering';
   import { demoRendering } from '../../resource-rendering';

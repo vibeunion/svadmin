@@ -10,6 +10,7 @@ function manualChunks(id: string): string | undefined {
 
   if (/\/node_modules\/prosemirror-[^/]+\//.test(normalizedId)) return 'editor-prosemirror';
   if (normalizedId.includes('/node_modules/@tiptap/')) return 'editor-tiptap';
+  if (normalizedId.includes('/node_modules/katex/')) return 'katex';
   if (/\/node_modules\/(?:highlight\.js|lowlight|linkifyjs|rope-sequence|dompurify|isomorphic-dompurify)\//.test(normalizedId)) return 'editor-support';
   if (normalizedId.includes('/node_modules/@tanstack/')) return 'tanstack';
   // 这两个库被 core 启动图引用。单独成块，避免共享模块落进懒加载页面后把整页拉回首屏。

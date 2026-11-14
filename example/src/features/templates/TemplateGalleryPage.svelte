@@ -1,3 +1,4 @@
+<!-- // @vibe-escape: Level 3 Headless / showcase template gallery layout composition -->
 <script lang="ts">
   import { AppearanceSettings, Badge, Button, Grid, Input, JsonSchemaForm, ListPagination, Menu, NotificationsSettings, PageHeader, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
   import {

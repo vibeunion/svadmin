@@ -1,3 +1,4 @@
+<!-- // @vibe-escape: Level 3 Headless / multi-tab keepalive and dynamic layout orchestrator -->
 <script lang="ts">
   import { onDestroy, onMount, tick, untrack } from 'svelte';
   import { captureAdminContext, useGetIdentity, useParsed } from '@svadmin/core';
