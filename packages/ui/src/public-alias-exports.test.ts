@@ -140,8 +140,12 @@ import {
   BatchImportDropzone,
   ColumnMappingTable,
   FieldMappingTable,
+  FieldMappingBuilder,
+  ColumnMappingBuilder,
   ImportPreviewValidator,
   ImportDataValidator,
+  DataImportPipeline,
+  BatchImportPipeline,
   PlanUsageQuotaBar,
   MultiQuotaProgress,
   TierFeatureComparison,
@@ -505,8 +509,12 @@ describe('public compatibility aliases', () => {
     expect(BatchImportDropzone).toBe(DataImportDropzone);
     expect(ColumnMappingTable).toBeDefined();
     expect(FieldMappingTable).toBe(ColumnMappingTable);
+    expect(FieldMappingBuilder).toBeDefined();
+    expect(ColumnMappingBuilder).toBe(FieldMappingBuilder);
     expect(ImportPreviewValidator).toBeDefined();
     expect(ImportDataValidator).toBe(ImportPreviewValidator);
+    expect(DataImportPipeline).toBeDefined();
+    expect(BatchImportPipeline).toBe(DataImportPipeline);
     expect(PlanUsageQuotaBar).toBeDefined();
     expect(MultiQuotaProgress).toBe(PlanUsageQuotaBar);
     expect(TierFeatureComparison).toBeDefined();
