@@ -1048,6 +1048,18 @@ export {
   type FallbackStrategy,
   type RateLimitPolicyConfig,
 } from './components/RateLimitPolicyPanel.svelte';
+// Enterprise step-up authentication & audit snapshot compliance suite
+export {
+  default as StepUpAuthModal,
+  default as PrivilegeElevationModal,
+  type StepUpAuthMethod,
+  type StepUpRiskLevel,
+} from './components/StepUpAuthModal.svelte';
+export {
+  default as AuditSnapshotCapture,
+  default as ComplianceEvidenceCard,
+  type AuditSnapshotDiffItem,
+} from './components/AuditSnapshotCapture.svelte';
 // Enterprise service desk support ticket card & canned response picker suite
 export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
 export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';

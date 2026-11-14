@@ -4,6 +4,10 @@ import {
   ApiRouteRuleCard,
   RateLimitPolicyPanel,
   CircuitBreakerCard,
+  StepUpAuthModal,
+  PrivilegeElevationModal,
+  AuditSnapshotCapture,
+  ComplianceEvidenceCard,
   MediaGallery,
   MultiModalMediaGallery,
   HotkeysHelpModal,
@@ -586,6 +590,10 @@ describe('public compatibility aliases', () => {
     expect(ApiRouteRuleCard).toBe(GatewayRouteEditor);
     expect(RateLimitPolicyPanel).toBeDefined();
     expect(CircuitBreakerCard).toBe(RateLimitPolicyPanel);
+    expect(StepUpAuthModal).toBeDefined();
+    expect(PrivilegeElevationModal).toBe(StepUpAuthModal);
+    expect(AuditSnapshotCapture).toBeDefined();
+    expect(ComplianceEvidenceCard).toBe(AuditSnapshotCapture);
     expect(ServiceDeskTicketCard).toBeDefined();
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
