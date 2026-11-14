@@ -128,6 +128,7 @@
 | `@svadmin/casbin`       | Casbin policy-based authorization and multi-tenant RBAC |
 | `@svadmin/cerbos`       | Cerbos policy decision point access control adapter |
 | `@svadmin/qdrant`       | Qdrant vector database similarity search & payload store |
+| `@svadmin/orama`        | Orama in-memory edge hybrid full-text & vector search provider |
 
 The dedicated `@svadmin/parse` wrapper has been retired. Host applications can
 initialize a Parse provider and pass it to `createRefineAdapter`; see the

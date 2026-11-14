@@ -459,6 +459,11 @@
       "release-type": "node",
       "component": "qdrant",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/orama": {
+      "release-type": "node",
+      "component": "orama",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

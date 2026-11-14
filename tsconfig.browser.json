@@ -52,6 +52,7 @@
     "packages/supabase/src/**/*.test.ts",
     "packages/sse/src/**/*.test.ts",
     "packages/qdrant/src/**/*.test.ts",
+    "packages/orama/src/**/*.test.ts",
     "example/src/**/*.test.ts"
   ]
 }

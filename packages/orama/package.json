@@ -1,0 +1,52 @@
+{
+  "name": "@svadmin/orama",
+  "version": "0.1.0",
+  "description": "Orama in-memory edge hybrid full-text and vector search DataProvider for svadmin",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "keywords": [
+    "svadmin",
+    "orama",
+    "search",
+    "in-memory",
+    "edge-search",
+    "vector-search",
+    "full-text",
+    "data-provider"
+  ],
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/orama"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  },
+  "svadmin": {
+    "capabilities": [
+      "data"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  }
+}

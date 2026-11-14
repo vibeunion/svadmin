@@ -114,6 +114,7 @@ export default defineConfig({
             { slug: 'providers/pusher' },
             { slug: 'providers/sveltekit' },
             { slug: 'providers/qdrant' },
+            { slug: 'providers/orama' },
           ],
         },
         {
