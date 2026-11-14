@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import * as Dialog from './ui/dialog/index.js';
 
   export interface HotkeysHelpEntry {
     id: string;
@@ -10,7 +11,6 @@
     scope?: string;
   }
 
-  export type HotkeyItem = HotkeysHelpEntry;
 
   export interface HotkeysHelpModalProps {
     open?: boolean;
@@ -45,16 +45,12 @@
 
   let searchQuery = $state<string>('');
   let selectedCategory = $state<string>('all');
-  let isMac = $state<boolean>(false);
+  let detectedMac = $state(false);
+  const isMac = $derived(platform === 'mac' || (platform === 'auto' && detectedMac));
+  let searchInput: HTMLInputElement | undefined;
 
   onMount(() => {
-    if (platform === 'mac') {
-      isMac = true;
-    } else if (platform === 'windows') {
-      isMac = false;
-    } else if (typeof navigator !== 'undefined') {
-      isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-    }
+    detectedMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   });
 
   const categories = $derived(() => {
@@ -84,8 +80,12 @@
     });
   });
 
+  $effect(() => {
+    if (selectedCategory !== 'all' && !categories().includes(selectedCategory)) selectedCategory = 'all';
+  });
+
   const groupedHotkeys = $derived(() => {
-    const map = new Map<string, HotkeyItem[]>();
+    const map = new Map<string, HotkeysHelpEntry[]>();
     for (const item of filteredHotkeys()) {
       const cat = item.category || '通用快捷键';
       const list = map.get(cat);
@@ -103,23 +103,20 @@
     onOpenChange?.(val);
     if (!val) {
       searchQuery = '';
+      selectedCategory = 'all';
     }
   }
 
   function handleWindowKeydown(e: KeyboardEvent) {
-    // Escape closes modal
-    if (e.key === 'Escape' && open) {
-      setOpen(false);
-      return;
-    }
-
-    if (!enableGlobalTrigger || open) return;
+    if (!enableGlobalTrigger || open || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
 
     // Check if user is typing in an input/textarea/editable
     const target = e.target as HTMLElement | null;
     const isEditing =
       target?.tagName === 'INPUT' ||
       target?.tagName === 'TEXTAREA' ||
+      target?.tagName === 'SELECT' ||
+      target?.closest('[role="dialog"], [contenteditable="true"]') ||
       target?.isContentEditable;
 
     if (isEditing) return;
@@ -165,15 +162,12 @@
 
 <svelte:window onkeydown={handleWindowKeydown} />
 
-{#if open}
-  <div
-    class="hotkeys-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm transition-all"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="hotkeys-modal-title"
-    tabindex="-1"
-    onclick={(e) => e.target === e.currentTarget && setOpen(false)}
-    onkeydown={(e) => e.key === 'Escape' && setOpen(false)}
+<Dialog.Root {open} onOpenChange={setOpen}>
+  <Dialog.Content
+    showCloseButton={false}
+    class="hotkeys-modal-overlay"
+    style="padding: 0; width: min(42rem, calc(100vw - 2rem)); max-width: 42rem;"
+    onOpenAutoFocus={(event) => { event.preventDefault(); searchInput?.focus(); }}
   >
     <div
       class="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl {className}"
@@ -182,12 +176,12 @@
       <!-- Modal Header -->
       <div class="flex items-start justify-between border-b border-border/60 p-5">
         <div>
-          <h2 id="hotkeys-modal-title" class="text-base font-semibold tracking-tight text-foreground">
+          <Dialog.Title class="text-base font-semibold tracking-tight text-foreground">
             {title}
-          </h2>
-          <p class="mt-1 text-xs text-muted-foreground">
+          </Dialog.Title>
+          <Dialog.Description class="mt-1 text-xs text-muted-foreground">
             {description}
-          </p>
+          </Dialog.Description>
         </div>
 
         <button
@@ -208,6 +202,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
+            bind:this={searchInput}
+            aria-label="搜索快捷键"
             type="search"
             bind:value={searchQuery}
             placeholder="搜索快捷键或功能名称..."
@@ -286,5 +282,5 @@
         <span>当前识别平台: {isMac ? 'macOS (⌘)' : 'Windows/Linux (Ctrl)'}</span>
       </div>
     </div>
-  </div>
-{/if}
+  </Dialog.Content>
+</Dialog.Root>

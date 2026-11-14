@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import * as Dialog from './ui/dialog/index.js';
 
   export interface MediaGalleryItem {
     id: string | number;
@@ -45,7 +46,8 @@
     customThumbnail,
   }: MediaGalleryProps = $props();
 
-  let activeIndex = $state<number | null>(null);
+  let activeId = $state<MediaGalleryItem['id'] | null>(null);
+  const activeIndex = $derived(activeId === null ? null : items.findIndex(item => item.id === activeId));
   let showDrawer = $state<boolean>(false);
   let scale = $state<number>(1);
   let rotate = $state<number>(0);
@@ -69,6 +71,10 @@
       : null
   );
 
+  $effect(() => {
+    if (activeIndex === -1) closeLightbox();
+  });
+
   const gridClass = $derived(
     gridCols === 2
       ? 'grid-cols-2'
@@ -80,7 +86,7 @@
   );
 
   function openLightbox(index: number) {
-    activeIndex = index;
+    activeId = items[index]?.id ?? null;
     scale = 1;
     rotate = 0;
     translateX = 0;
@@ -92,17 +98,18 @@
   }
 
   function closeLightbox() {
-    activeIndex = null;
+    activeId = null;
     scale = 1;
     rotate = 0;
     translateX = 0;
     translateY = 0;
     showDrawer = false;
+    isDragging = false;
   }
 
   function prevItem() {
     if (activeIndex === null || items.length === 0) return;
-    activeIndex = (activeIndex - 1 + items.length) % items.length;
+    activeId = items[(activeIndex - 1 + items.length) % items.length]?.id ?? null;
     scale = 1;
     rotate = 0;
     translateX = 0;
@@ -111,7 +118,7 @@
 
   function nextItem() {
     if (activeIndex === null || items.length === 0) return;
-    activeIndex = (activeIndex + 1) % items.length;
+    activeId = items[(activeIndex + 1) % items.length]?.id ?? null;
     scale = 1;
     rotate = 0;
     translateX = 0;
@@ -146,7 +153,7 @@
   }
 
   function handleWheel(e: WheelEvent) {
-    if (!enableZoom || activeIndex === null) return;
+    if (!enableZoom || activeIndex === null || (currentItem?.type && currentItem.type !== 'image')) return;
     e.preventDefault();
     if (e.deltaY < 0) {
       zoomIn();
@@ -156,7 +163,7 @@
   }
 
   function handleMouseDown(e: MouseEvent) {
-    if (scale <= 1) return;
+    if (e.button !== 0 || scale <= 1 || (currentItem?.type && currentItem.type !== 'image')) return;
     isDragging = true;
     startX = e.clientX - translateX;
     startY = e.clientY - translateY;
@@ -173,23 +180,32 @@
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (activeIndex === null) return;
-    if (e.key === 'Escape') {
-      closeLightbox();
-    } else if (e.key === 'ArrowLeft') {
-      prevItem();
-    } else if (e.key === 'ArrowRight') {
-      nextItem();
+    if (activeIndex === null || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
+    const target = e.target;
+    if (target instanceof Element && target.closest('video, audio, input, textarea, select, [contenteditable="true"]')) return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (e.key === 'ArrowLeft') prevItem();
+      else nextItem();
     }
+  }
+  function downloadUrl(src: string): string | undefined {
+    try {
+      const url = new URL(src, typeof document === 'undefined' ? 'https://svadmin.invalid' : document.baseURI);
+      return ['http:', 'https:', 'blob:'].includes(url.protocol) ? url.href : undefined;
+    } catch { return undefined; }
   }
 
   function handleDownloadClick(item: MediaGalleryItem) {
+    if (!enableDownload) return;
     if (onDownload) {
       onDownload(item);
       return;
     }
+    const href = downloadUrl(item.src);
+    if (!href) return;
     const a = document.createElement('a');
-    a.href = item.src;
+    a.href = href;
     a.download = item.title || `media-${item.id}`;
     document.body.appendChild(a);
     a.click();
@@ -197,7 +213,7 @@
   }
 </script>
 
-<svelte:window onkeydown={handleKeyDown} onmouseup={handleMouseUp} />
+<svelte:window onmouseup={handleMouseUp} onmousemove={handleMouseMove} />
 
 <div
   class="media-gallery relative w-full {className}"
@@ -207,12 +223,11 @@
   <div class="grid gap-3.5 {gridClass}">
     {#each displayItems as item, idx (item.id)}
       {@const isLastWithMore = idx === maxDisplay - 1 && hiddenCount > 0}
-      <div
+      <button
+        type="button"
+        aria-label={item.title || `预览媒体 ${item.id}`}
         class="group relative aspect-video cursor-pointer overflow-hidden rounded-xl border border-border bg-muted/30 shadow-xs transition-all hover:border-primary/50 hover:shadow-md"
-        role="button"
-        tabindex="0"
         onclick={() => openLightbox(idx)}
-        onkeydown={(e) => e.key === 'Enter' && openLightbox(idx)}
       >
         {#if customThumbnail}
           {@render customThumbnail({ item, index: idx })}
@@ -262,17 +277,19 @@
             <span class="text-xl font-bold tracking-tight text-primary">+{hiddenCount + 1}</span>
           </div>
         {/if}
-      </div>
+      </button>
     {/each}
   </div>
 
   <!-- Lightbox Modal -->
+  <Dialog.Root open={currentItem !== null} onOpenChange={(value) => { if (!value) closeLightbox(); }}>
   {#if activeIndex !== null && currentItem}
     {@const item = currentItem}
-    <div
-      class="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-md"
-      role="dialog"
-      aria-modal="true"
+    <Dialog.Content
+      showCloseButton={false}
+      class="flex flex-col bg-background/95 backdrop-blur-md"
+      style="inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; transform: none; padding: 0; gap: 0; border-radius: 0;"
+      onkeydown={handleKeyDown}
     >
       <!-- Watermark Protection Layer -->
       {#if watermarkText}
@@ -294,9 +311,10 @@
           <span class="text-xs font-semibold tabular-nums text-muted-foreground">
             {activeIndex + 1} / {items.length}
           </span>
-          <span class="max-w-[200px] truncate text-sm font-medium text-foreground sm:max-w-md">
+          <Dialog.Title class="max-w-[200px] truncate text-sm font-medium text-foreground sm:max-w-md">
             {item.title || `媒体资源 #${item.id}`}
-          </span>
+          </Dialog.Title>
+          <Dialog.Description class="sr-only">媒体预览，可查看详情并切换资源</Dialog.Description>
         </div>
 
         <!-- Controls -->
@@ -353,6 +371,7 @@
               type="button"
               class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
               title="下载文件"
+              disabled={!onDownload && !downloadUrl(item.src)}
               onclick={() => handleDownloadClick(item)}
             >
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -403,7 +422,6 @@
           class="relative flex flex-1 items-center justify-center overflow-hidden p-4 select-none"
           onwheel={handleWheel}
           onmousedown={handleMouseDown}
-          onmousemove={handleMouseMove}
           ondblclick={resetZoom}
           role="region"
           aria-label="媒体视口"
@@ -438,13 +456,16 @@
               </span>
               <h4 class="text-base font-semibold text-foreground">{item.title || '文档文件'}</h4>
               <p class="text-xs text-muted-foreground">该文件暂不支持内嵌预览，请下载查看</p>
+              {#if enableDownload}
               <button
                 type="button"
+                disabled={!onDownload && !downloadUrl(item.src)}
                 class="mt-2 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
                 onclick={() => handleDownloadClick(item)}
               >
                 下载此文档
               </button>
+              {/if}
             </div>
           {:else}
             <!-- Image with interactive scale & rotate -->
@@ -548,6 +569,7 @@
           </aside>
         {/if}
       </div>
-    </div>
+    </Dialog.Content>
   {/if}
+  </Dialog.Root>
 </div>

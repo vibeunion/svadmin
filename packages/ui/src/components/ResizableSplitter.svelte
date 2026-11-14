@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, type Snippet } from 'svelte';
+  import { onDestroy, untrack, type Snippet } from 'svelte';
 
   export interface ResizableSplitterProps {
     direction?: 'horizontal' | 'vertical';
@@ -32,126 +32,124 @@
   }: ResizableSplitterProps = $props();
 
   let containerEl = $state<HTMLDivElement | null>(null);
-  let sizes = $state<[number, number]>([initialSizes[0], initialSizes[1]]);
-  let isDragging = $state<boolean>(false);
+  let sizes = $state<[number, number]>(untrack(() => normalize(initialSizes)));
+  let isDragging = $state(false);
   let collapsedPane = $state<'first' | 'second' | null>(null);
+  let stopDragging = () => {};
+  let layoutConfiguration = '';
 
-  onMount(() => {
-    if (storageKey && typeof localStorage !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(`svadmin_splitter_${storageKey}`);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length === 2) {
-            sizes = [parsed[0], parsed[1]];
-          }
-        }
-      } catch {
-        // Ignore localStorage error
-      }
+  function bounds(): [number, number] {
+    const lower = Math.max(0, minSizes[0], 100 - maxSizes[1]);
+    const upper = Math.min(100, maxSizes[0], 100 - minSizes[1]);
+    return [lower, Math.max(lower, upper)];
+  }
+  function normalize(input: unknown): [number, number] {
+    const [lower, upper] = bounds();
+    function validPair(value: unknown): value is [number, number] {
+      return Array.isArray(value) && value.length === 2 &&
+        typeof value[0] === 'number' && Number.isFinite(value[0]) && value[0] >= 0 &&
+        typeof value[1] === 'number' && Number.isFinite(value[1]) && value[1] >= 0 &&
+        Number.isFinite(value[0] + value[1]) && value[0] + value[1] > 0;
     }
-  });
-
-  function saveSizes(newSizes: [number, number]) {
-    sizes = newSizes;
-    onResize?.(newSizes);
-    if (storageKey && typeof localStorage !== 'undefined') {
-      try {
-        localStorage.setItem(`svadmin_splitter_${storageKey}`, JSON.stringify(newSizes));
-      } catch {
-        // Ignore error
-      }
-    }
+    const pair = validPair(input) ? input : validPair(initialSizes) ? initialSizes : [50, 50];
+    let first = (pair[0] ?? 50) / ((pair[0] ?? 50) + (pair[1] ?? 50)) * 100;
+    first = Number(Math.max(lower, Math.min(upper, first)).toFixed(2));
+    return [first, Number((100 - first).toFixed(2))];
   }
 
-  function handleMouseDown(e: MouseEvent) {
-    if (e.button !== 0 || !containerEl) return;
-    e.preventDefault();
-    isDragging = true;
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const rect = containerEl.getBoundingClientRect();
-    const totalSize = direction === 'horizontal' ? rect.width : rect.height;
-    const startSizes: [number, number] = [sizes[0], sizes[1]];
-
-    function onMouseMove(moveEvent: MouseEvent) {
-      if (!isDragging || totalSize <= 0) return;
-
-      const deltaPx = direction === 'horizontal'
-        ? moveEvent.clientX - startX
-        : moveEvent.clientY - startY;
-
-      const deltaPercent = (deltaPx / totalSize) * 100;
-      let newFirst = startSizes[0] + deltaPercent;
-      let newSecond = startSizes[1] - deltaPercent;
-
-      // Bound clamping
-      const min1 = minSizes[0];
-      const max1 = maxSizes[0];
-      const min2 = minSizes[1];
-      const max2 = maxSizes[1];
-
-      if (newFirst < min1) {
-        newFirst = min1;
-        newSecond = 100 - min1;
-      } else if (newFirst > max1) {
-        newFirst = max1;
-        newSecond = 100 - max1;
+  $effect(() => {
+    const settings = { direction, initialSizes, minSizes, maxSizes, storageKey };
+    const signature = JSON.stringify(settings);
+    if (signature === layoutConfiguration) return;
+    layoutConfiguration = signature;
+    untrack(() => {
+      // 配置切换时终止旧拖拽，避免把旧布局的移动写入新的存储键。
+      stopDragging();
+      let next: unknown = settings.initialSizes;
+      if (settings.storageKey && typeof localStorage !== 'undefined') {
+        try {
+          const saved = localStorage.getItem(`svadmin_splitter_${settings.storageKey}`);
+          if (saved) next = JSON.parse(saved);
+        } catch { /* 存储不可用时使用传入的初始比例。 */ }
       }
-
-      if (newSecond < min2) {
-        newSecond = min2;
-        newFirst = 100 - min2;
-      } else if (newSecond > max2) {
-        newSecond = max2;
-        newFirst = 100 - max2;
-      }
-
+      sizes = normalize(next);
       collapsedPane = null;
-      saveSizes([Number(newFirst.toFixed(2)), Number(newSecond.toFixed(2))]);
-    }
+    });
+  });
+  onDestroy(() => stopDragging());
 
-    function onMouseUp() {
-      isDragging = false;
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+  function saveSizes(input: [number, number]) {
+    const [lower, upper] = bounds();
+    const first = Number(Math.max(lower, Math.min(upper, input[0])).toFixed(2));
+    sizes = [first, Number((100 - first).toFixed(2))];
+    onResize?.([...sizes]);
+    if (storageKey && typeof localStorage !== 'undefined') {
+      try { localStorage.setItem(`svadmin_splitter_${storageKey}`, JSON.stringify(sizes)); }
+      catch { /* 禁用浏览器存储不影响拖拽。 */ }
     }
-
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
   }
-
+  function handlePointerDown(event: PointerEvent) {
+    if (event.button !== 0 || !containerEl || (event.target instanceof Element && event.target.closest('button'))) return;
+    event.preventDefault();
+    stopDragging();
+    const horizontal = direction === 'horizontal';
+    const rect = containerEl.getBoundingClientRect();
+    const total = horizontal ? rect.width : rect.height;
+    if (total <= 0) return;
+    isDragging = true;
+    const start = horizontal ? event.clientX : event.clientY;
+    const first = sizes[0];
+    function move(next: PointerEvent) {
+      if (next.pointerId !== event.pointerId) return;
+      const position = horizontal ? next.clientX : next.clientY;
+      const changed = first + (position - start) / total * 100;
+      saveSizes([changed, 100 - changed]);
+    }
+    stopDragging = () => {
+      isDragging = false;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stopDragging);
+      window.removeEventListener('pointercancel', stopDragging);
+      window.removeEventListener('blur', stopDragging);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stopDragging);
+    window.addEventListener('pointercancel', stopDragging);
+    window.addEventListener('blur', stopDragging);
+  }
   function handleDoubleClick() {
     collapsedPane = null;
-    saveSizes([50, 50]);
+    saveSizes(normalize([50, 50]));
     onCollapse?.(null);
   }
-
   function toggleCollapse(pane: 'first' | 'second') {
-    if (!collapsible) return;
-    if (collapsedPane === pane) {
-      collapsedPane = null;
-      saveSizes([50, 50]);
-      onCollapse?.(null);
-    } else {
-      collapsedPane = pane;
-      onCollapse?.(pane);
-    }
+    if (!collapsible && collapsedPane !== pane) return;
+    stopDragging();
+    collapsedPane = collapsedPane === pane ? null : pane;
+    onCollapse?.(collapsedPane);
   }
-
-  const isHorizontal = $derived(() => direction === 'horizontal');
+  function handleKeydown(event: KeyboardEvent) {
+    const previous = direction === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
+    const next = direction === 'horizontal' ? 'ArrowRight' : 'ArrowDown';
+    if (![previous, next, 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const [lower, upper] = bounds();
+    const first = event.key === 'Home' ? lower : event.key === 'End' ? upper :
+      Math.max(lower, Math.min(upper, sizes[0] + (event.key === previous ? -2 : 2)));
+    saveSizes([first, 100 - first]);
+  }
+  const isHorizontal = $derived(direction === 'horizontal');
 </script>
 
 <div
   bind:this={containerEl}
-  class="resizable-splitter relative flex h-full w-full overflow-hidden {isHorizontal() ? 'flex-row' : 'flex-col'} {isDragging ? 'select-none' : ''} {className}"
+  class="resizable-splitter relative flex h-full w-full overflow-hidden {isHorizontal ? 'flex-row' : 'flex-col'} {isDragging ? 'select-none' : ''} {className}"
   data-svadmin-component="ResizableSplitter"
 >
   <!-- First Pane -->
   <div
-    class="relative overflow-auto transition-all duration-75 {collapsedPane === 'first' ? 'hidden' : ''}"
-    style="{isHorizontal() ? `width: ${collapsedPane === 'second' ? 100 : sizes[0]}%` : `height: ${collapsedPane === 'second' ? 100 : sizes[0]}%`};"
+    class="relative min-h-0 min-w-0 overflow-auto transition-all duration-75 {collapsedPane === 'first' ? 'hidden' : ''}"
+    style:flex="{sizes[0]} 1 0%"
   >
     {#if firstPane}
       {@render firstPane()}
@@ -164,31 +162,23 @@
 
   <!-- Splitter Gutter Divider -->
   {#if collapsedPane === null}
-    <!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions (可调整的分隔线支持键盘和指针操作。) -->
     <div
-      class="group relative z-10 flex shrink-0 items-center justify-center bg-border/60 transition-colors hover:bg-primary/30 active:bg-primary {isHorizontal() ? 'cursor-col-resize h-full' : 'cursor-row-resize w-full'} {isDragging ? 'bg-primary' : ''}"
-      style="{isHorizontal() ? `width: ${gutterSize}px` : `height: ${gutterSize}px`};"
+      class="group relative z-10 flex shrink-0 items-center justify-center bg-border/60 transition-colors hover:bg-primary/30 active:bg-primary {isHorizontal ? 'cursor-col-resize h-full' : 'cursor-row-resize w-full'} {isDragging ? 'bg-primary' : ''}"
+      style="{isHorizontal ? `width: ${gutterSize}px` : `height: ${gutterSize}px`}; touch-action: none;"
       role="separator"
       tabindex="0"
       aria-label="拖拽调整分栏大小"
-      aria-orientation={direction}
+      aria-orientation={isHorizontal ? 'vertical' : 'horizontal'}
       aria-valuenow={sizes[0]}
-      aria-valuemin={minSizes[0]}
-      aria-valuemax={maxSizes[0]}
-      onmousedown={handleMouseDown}
+      aria-valuemin={bounds()[0]}
+      aria-valuemax={bounds()[1]}
+      onpointerdown={handlePointerDown}
       ondblclick={handleDoubleClick}
-      onkeydown={(e) => {
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-          saveSizes([Math.max(minSizes[0], sizes[0] - 2), Math.min(maxSizes[1], sizes[1] + 2)]);
-        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-          saveSizes([Math.min(maxSizes[0], sizes[0] + 2), Math.max(minSizes[1], sizes[1] - 2)]);
-        } else if (e.key === 'Home') {
-          handleDoubleClick();
-        }
-      }}
+      onkeydown={handleKeydown}
     >
       <!-- Center Grip Dots -->
-      <div class="pointer-events-none flex items-center justify-center opacity-60 group-hover:opacity-100 {isHorizontal() ? 'flex-col gap-1' : 'flex-row gap-1'}">
+      <div class="pointer-events-none flex items-center justify-center opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 {isHorizontal ? 'flex-col gap-1' : 'flex-row gap-1'}">
         <span class="h-1 w-1 rounded-full bg-foreground/60"></span>
         <span class="h-1 w-1 rounded-full bg-foreground/60"></span>
         <span class="h-1 w-1 rounded-full bg-foreground/60"></span>
@@ -196,7 +186,7 @@
 
       <!-- Quick collapse helper triggers on hover -->
       {#if collapsible}
-        <div class="absolute flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 {isHorizontal() ? 'flex-col' : 'flex-row'}">
+        <div class="absolute flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 {isHorizontal ? 'flex-col' : 'flex-row'}">
           <button
             type="button"
             class="flex h-4 w-4 items-center justify-center rounded-full bg-card text-[9px] text-muted-foreground shadow-xs hover:bg-primary hover:text-primary-foreground"
@@ -206,7 +196,7 @@
               toggleCollapse('first');
             }}
           >
-            {isHorizontal() ? '‹' : '▲'}
+            {isHorizontal ? '‹' : '▲'}
           </button>
           <button
             type="button"
@@ -217,7 +207,7 @@
               toggleCollapse('second');
             }}
           >
-            {isHorizontal() ? '›' : '▼'}
+            {isHorizontal ? '›' : '▼'}
           </button>
         </div>
       {/if}
@@ -225,7 +215,7 @@
   {:else}
     <!-- Collapsed Restore Bar -->
     <div
-      class="relative z-10 flex shrink-0 items-center justify-center border-border bg-muted/40 p-1 {isHorizontal() ? 'h-full border-x' : 'w-full border-y'}"
+      class="relative z-10 flex shrink-0 items-center justify-center border-border bg-muted/40 p-1 {isHorizontal ? 'h-full border-x' : 'w-full border-y'}"
     >
       <button
         type="button"
@@ -242,8 +232,8 @@
 
   <!-- Second Pane -->
   <div
-    class="relative overflow-auto transition-all duration-75 {collapsedPane === 'second' ? 'hidden' : ''}"
-    style="{isHorizontal() ? `width: ${collapsedPane === 'first' ? 100 : sizes[1]}%` : `height: ${collapsedPane === 'first' ? 100 : sizes[1]}%`};"
+    class="relative min-h-0 min-w-0 overflow-auto transition-all duration-75 {collapsedPane === 'second' ? 'hidden' : ''}"
+    style:flex="{sizes[1]} 1 0%"
   >
     {#if secondPane}
       {@render secondPane()}

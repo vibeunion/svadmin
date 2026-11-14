@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { render, fireEvent, waitFor } from '@testing-library/svelte';
 import MediaGallery, { type MediaGalleryItem } from './MediaGallery.svelte';
 
 describe('MediaGallery Component', () => {
@@ -137,4 +137,45 @@ describe('MediaGallery Component', () => {
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog?.textContent).toContain('CONFIDENTIAL-CORP-SEC');
   });
+  it('disables every document download path and unsafe download protocols', async () => {
+    const onDownload = vi.fn();
+    const { container, unmount } = render(MediaGallery, { props: { items: [mockItems[3] as MediaGalleryItem], enableDownload: false, onDownload } });
+    const thumbnail = container.querySelector('button');
+    if (!thumbnail) throw new Error('missing thumbnail');
+    await fireEvent.click(thumbnail);
+    expect(document.querySelector('[role="dialog"]')?.textContent).not.toContain('下载此文档');
+    expect(document.querySelector('button[title="下载文件"]')).toBeNull();
+    unmount();
+    const unsafe = render(MediaGallery, { props: { items: [{ id: 'unsafe', type: 'document', src: 'javascript:alert(1)' }] } });
+    const unsafeThumbnail = unsafe.container.querySelector('button');
+    if (unsafeThumbnail) await fireEvent.click(unsafeThumbnail);
+    expect(document.querySelector<HTMLButtonElement>('button[title="下载文件"]')?.disabled).toBe(true);
+    expect(onDownload).not.toHaveBeenCalled();
+  });
+  it('tracks the active media by ID and closes when that media is removed', async () => {
+    const { container, rerender } = render(MediaGallery, { props: { items: mockItems } });
+    const thumbnail = container.querySelector('button');
+    if (thumbnail) await fireEvent.click(thumbnail);
+    await rerender({ items: [...mockItems].reverse() });
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain('设计稿大图');
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain('5 / 5');
+    await rerender({ items: [] });
+    await waitFor(() => expect(document.querySelector('[role="dialog"]')).toBeNull());
+    await rerender({ items: mockItems });
+    await fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+  it('preserves media control arrow keys and closes through the dialog Escape handler', async () => {
+    const { container } = render(MediaGallery, { props: { items: mockItems } });
+    const thumbnails = container.querySelectorAll('button');
+    const videoThumbnail = thumbnails[1];
+    if (videoThumbnail) await fireEvent.click(videoThumbnail);
+    const video = document.querySelector('video');
+    if (!video) throw new Error('missing video');
+    await fireEvent.keyDown(video, { key: 'ArrowRight' });
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain('2 / 5');
+    await fireEvent.keyDown(video, { key: 'Escape' });
+    await waitFor(() => expect(document.querySelector('[role="dialog"]')).toBeNull());
+  });
+
 });

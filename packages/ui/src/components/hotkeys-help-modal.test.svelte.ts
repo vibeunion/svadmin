@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { render, fireEvent, waitFor } from '@testing-library/svelte';
 import HotkeysHelpModal from './HotkeysHelpModal.svelte';
 
 describe('HotkeysHelpModal Component', () => {
   it('renders modal when open is true', () => {
-    const { container } = render(HotkeysHelpModal, {
+    const { baseElement: container } = render(HotkeysHelpModal, {
       props: {
         open: true,
       },
@@ -17,7 +17,7 @@ describe('HotkeysHelpModal Component', () => {
   });
 
   it('filters hotkeys based on search query', async () => {
-    const { container } = render(HotkeysHelpModal, {
+    const { baseElement: container } = render(HotkeysHelpModal, {
       props: {
         open: true,
       },
@@ -35,7 +35,7 @@ describe('HotkeysHelpModal Component', () => {
   });
 
   it('filters hotkeys based on category selection', async () => {
-    const { container } = render(HotkeysHelpModal, {
+    const { baseElement: container } = render(HotkeysHelpModal, {
       props: {
         open: true,
       },
@@ -54,7 +54,7 @@ describe('HotkeysHelpModal Component', () => {
   });
 
   it('formats keys properly for mac platform', () => {
-    const { container } = render(HotkeysHelpModal, {
+    const { baseElement: container } = render(HotkeysHelpModal, {
       props: {
         open: true,
         platform: 'mac',
@@ -68,7 +68,7 @@ describe('HotkeysHelpModal Component', () => {
 
   it('invokes onOpenChange when closing via close button', async () => {
     const onOpenChange = vi.fn();
-    const { container } = render(HotkeysHelpModal, {
+    const { baseElement: container } = render(HotkeysHelpModal, {
       props: {
         open: true,
         onOpenChange,
@@ -83,4 +83,32 @@ describe('HotkeysHelpModal Component', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+  it('moves focus to search and closes once on Escape, restoring the trigger', async () => {
+    const trigger = document.createElement('button');
+    document.body.append(trigger);
+    trigger.focus();
+    const onOpenChange = vi.fn();
+    const { baseElement, unmount } = render(HotkeysHelpModal, { props: { open: true, onOpenChange } });
+    const search = baseElement.querySelector<HTMLInputElement>('input[type="search"]');
+    expect(search).toBeTruthy();
+    await waitFor(() => expect(document.activeElement).toBe(search));
+    if (search) await fireEvent.keyDown(search, { key: 'Escape' });
+    await waitFor(() => expect(baseElement.querySelector('[role="dialog"]')).toBeNull());
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+    unmount(); trigger.remove();
+  });
+  it('reacts to platform and category changes', async () => {
+    const { baseElement, rerender } = render(HotkeysHelpModal, { props: {
+      open: true, platform: 'mac', hotkeys: [{ id: 'a', name: 'Old action', keys: ['Meta'], category: 'Old' }],
+    } });
+    const oldTab = Array.from(baseElement.querySelectorAll('button')).find(button => button.textContent?.includes('Old ('));
+    if (!oldTab) throw new Error('missing category tab');
+    await fireEvent.click(oldTab);
+    await rerender({ open: true, platform: 'windows', hotkeys: [{ id: 'b', name: 'New action', keys: ['Meta'], category: 'New' }] });
+    expect(baseElement.textContent).toContain('New action');
+    expect(baseElement.textContent).toContain('Win');
+    expect(baseElement.textContent).not.toContain('macOS');
+  });
+
 });
