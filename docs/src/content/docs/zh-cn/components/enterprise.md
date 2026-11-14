@@ -3266,3 +3266,59 @@ AI 规则语义解释卡片：
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+
+### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
+
+企业级服务台工单与客户支持流转卡片：
+- **SLA 履约倒计时**：首响 SLA 与结单 SLA 动态推演，临近超时黄色预警，超时违约呼吸灯闪烁。
+- **流转生命周期**：涵盖待受理、技术处理中、等待客户反馈、问题已解决与工单已结案全链路。
+- **人员协同群组**：清晰展现提单人、责任处理人以及协同工程师头像堆叠。
+- **快捷协同操作**：内置一键催单通知、工单快速转派与完结归档快捷动作组。
+
+```svelte
+<script lang="ts">
+  import { ServiceDeskTicketCard } from '@svadmin/ui';
+
+  const reporter = { id: 'u1', name: '李经理' };
+  const assignee = { id: 'u2', name: '王工' };
+</script>
+
+<ServiceDeskTicketCard
+  ticketId="TCK-20261114-001"
+  title="生产环境连接池达到告警阈值"
+  priority="P1"
+  status="in_progress"
+  {reporter}
+  {assignee}
+  categoryTags={['数据库', '稳定性']}
+/>
+```
+
+### `<CannedResponsePicker>` / `<QuickReplyDrawer>`
+
+客服与工单高效预设话术与快捷回复抽屉：
+- **话术分类与模糊检索**：支持常见接待、故障解释、财务开票、安全核验等多维度分类及关键词即时高亮匹配。
+- **动态占位符提取注入**：自动解析模版中的 `{{customer_name}}`、`{{ticket_id}}` 等占位符，支持参数字典自动渲染或手动调整。
+- **一键回填流转**：点击模版一键将推演正文回填至工单沟通流或客服对话框中。
+
+```svelte
+<script lang="ts">
+  import { CannedResponsePicker } from '@svadmin/ui';
+
+  const templates = [
+    {
+      id: '1',
+      title: '工单受理问候',
+      category: '常见接待',
+      shortcut: '/hello',
+      content: '尊敬的 {{customer_name}} 客户您好，您的工单 {{ticket_id}} 已受理，工程师正火速排查中。',
+    },
+  ];
+</script>
+
+<CannedResponsePicker
+  {templates}
+  contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
+/>
+```

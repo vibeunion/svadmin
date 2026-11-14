@@ -1017,3 +1017,7 @@ export {
   type NotificationAction,
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
+
+// Enterprise service desk support ticket card & canned response picker suite
+export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
+export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
