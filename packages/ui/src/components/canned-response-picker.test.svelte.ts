@@ -28,10 +28,11 @@ describe('CannedResponsePicker', () => {
     });
 
     expect(screen.getByText('快捷客服与工单回复模版')).toBeTruthy();
-    expect(screen.getByText('工单受理问候')).toBeTruthy();
-    expect(screen.getByText('故障修复结单')).toBeTruthy();
-    expect(screen.getByText('常见接待')).toBeTruthy();
-    expect(screen.getByText('结单致谢')).toBeTruthy();
+    // The title is rendered in both the list row and the live preview.
+    expect(screen.getAllByText('工单受理问候').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('故障修复结单').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('常见接待').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('结单致谢').length).toBeGreaterThan(0);
   });
 
   it('substitutes dynamic variables from contextVariables and calls onselect', async () => {

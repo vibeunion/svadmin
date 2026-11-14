@@ -1,13 +1,8 @@
 <script lang="ts">
   import {
     Clock,
-    AlertCircle,
-    CheckCircle2,
-    ArrowRight,
-    User,
-    Users,
     Tag,
-    ChevronRight,
+    CheckCircle2,
     Send,
     UserCheck,
     Flame,
@@ -90,9 +85,9 @@
   function getPriorityMeta(p: TicketPriority) {
     switch (p) {
       case 'P0':
-        return { label: 'P0 致命阻塞', badgeClass: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30' };
+        return { label: 'P0 致命阻塞', badgeClass: 'bg-destructive/10 text-destructive border-destructive/30' };
       case 'P1':
-        return { label: 'P1 严重影响', badgeClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' };
+        return { label: 'P1 严重影响', badgeClass: 'bg-warning/10 text-warning border-warning/30' };
       case 'P2':
         return { label: 'P2 一般诉求', badgeClass: 'bg-primary/10 text-primary border-primary/30' };
       case 'P3':
@@ -104,13 +99,13 @@
   function getStatusMeta(s: TicketStatus) {
     switch (s) {
       case 'unassigned':
-        return { label: '待受理分配', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' };
+        return { label: '待受理分配', color: 'bg-warning/10 text-warning border-warning/30' };
       case 'in_progress':
         return { label: '技术处理中', color: 'bg-primary/10 text-primary border-primary/30' };
       case 'pending_customer':
-        return { label: '等待客户反馈', color: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30' };
+        return { label: '等待客户反馈', color: 'bg-info/10 text-info border-info/30' };
       case 'resolved':
-        return { label: '问题已解决', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { label: '问题已解决', color: 'bg-success/10 text-success border-success/30' };
       case 'closed':
         return { label: '工单已结案', color: 'bg-muted text-muted-foreground border-border' };
     }
@@ -145,7 +140,7 @@
 <div
   class={cn(
     'group relative flex flex-col justify-between rounded-xl border border-border/80 bg-card p-5 text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md',
-    priority === 'P0' ? 'ring-1 ring-rose-500/30' : '',
+    priority === 'P0' ? 'ring-1 ring-destructive/30' : '',
     className
   )}
   data-svadmin-component="ServiceDeskTicketCard"
@@ -156,6 +151,7 @@
       <code class="rounded bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-foreground">
         {ticketId}
       </code>
+      <span class="text-[11px] text-muted-foreground">{createdAt}</span>
 
       <!-- 优先级 Badge -->
       <span class={cn('rounded-full border px-2 py-0.5 text-[11px] font-medium', priorityMeta.badgeClass)}>
@@ -174,10 +170,10 @@
         class={cn(
           'flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border transition-colors',
           slaRemaining.isBreached
-            ? 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400 animate-pulse'
+            ? 'border-destructive/40 bg-destructive/10 text-destructive animate-pulse'
             : slaRemaining.urgent
-              ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+              ? 'border-warning/40 bg-warning/10 text-warning'
+              : 'border-success/40 bg-success/10 text-success'
         )}
       >
         {#if slaRemaining.isBreached}
@@ -203,7 +199,7 @@
 
     {#if categoryTags.length > 0}
       <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
-        {#each categoryTags as tag}
+        {#each categoryTags as tag (tag)}
           <span class="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
             <Tag class="h-2.5 w-2.5" />
             <span>{tag}</span>
@@ -229,7 +225,7 @@
         {#if assignee}
           <span class="font-medium text-primary">{assignee.name}</span>
         {:else}
-          <span class="rounded bg-amber-500/10 px-1.5 py-0.2 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+          <span class="rounded bg-warning/10 px-1.5 py-0.2 text-[11px] font-medium text-warning">
             待认领
           </span>
         {/if}
@@ -238,7 +234,7 @@
       <!-- 协同人头像组 -->
       {#if collaborators.length > 0}
         <div class="flex -space-x-1.5">
-          {#each collaborators.slice(0, 3) as c}
+          {#each collaborators.slice(0, 3) as c (c.name ?? c.id ?? c)}
             <div
               class="flex h-5 w-5 items-center justify-center rounded-full border border-card bg-muted text-[10px] font-semibold text-muted-foreground"
               title={`协作者: ${c.name}`}

@@ -1,14 +1,10 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import {
     MessageSquare,
     Search,
-    Check,
-    Copy,
-    Tag,
     Variable,
-    Sparkles,
     Send,
-    Filter,
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
@@ -43,7 +39,8 @@
 
   let searchQuery = $state('');
   let selectedCategory = $state<string>('all');
-  let activeTemplateId = $state<string>(templates[0]?.id ?? '');
+  // Seeded from the initial prop; selection owns the value afterwards.
+  let activeTemplateId = $state<string>(untrack(() => templates[0]?.id ?? ''));
   let variableOverrides = $state<Record<string, string>>({});
 
   // 提取分类列表
@@ -108,6 +105,7 @@
     className
   )}
   data-svadmin-component="CannedResponsePicker"
+  data-compact={compact ? 'true' : undefined}
 >
   <!-- 头部搜索与检索控制栏 -->
   <div class="border-b border-border/60 p-4">
@@ -134,7 +132,7 @@
 
     <!-- 分类横向滚动标签栏 -->
     <div class="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-      {#each categories as cat}
+      {#each categories as cat (cat)}
         <button
           type="button"
           class={cn(
@@ -208,7 +206,7 @@
                 <span>动态参数智能注入 ({templatePlaceholders.length})</span>
               </div>
               <div class="grid grid-cols-2 gap-2">
-                {#each templatePlaceholders as ph}
+                {#each templatePlaceholders as ph (ph)}
                   <div>
                     <label for={`var-input-${ph}`} class="text-[10px] text-muted-foreground block mb-0.5">
                       {ph}
