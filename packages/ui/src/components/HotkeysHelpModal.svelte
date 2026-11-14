@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  export interface HotkeyItem {
+  export interface HotkeysHelpEntry {
     id: string;
     name: string;
     keys: string[];
@@ -10,9 +10,11 @@
     scope?: string;
   }
 
+  export type HotkeyItem = HotkeysHelpEntry;
+
   export interface HotkeysHelpModalProps {
     open?: boolean;
-    hotkeys?: HotkeyItem[];
+    hotkeys?: HotkeysHelpEntry[];
     title?: string;
     description?: string;
     enableGlobalTrigger?: boolean;

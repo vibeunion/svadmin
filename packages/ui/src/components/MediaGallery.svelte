@@ -55,22 +55,29 @@
   let startX = $state<number>(0);
   let startY = $state<number>(0);
 
-  const displayItems = $derived(() => {
-    if (items.length <= maxDisplay) return items;
-    return items.slice(0, maxDisplay);
-  });
+  const displayItems = $derived(
+    items.length <= maxDisplay ? items : items.slice(0, maxDisplay)
+  );
 
-  const hiddenCount = $derived(() => {
-    if (items.length <= maxDisplay) return 0;
-    return items.length - maxDisplay;
-  });
+  const hiddenCount = $derived(
+    items.length <= maxDisplay ? 0 : items.length - maxDisplay
+  );
 
-  const currentItem = $derived<MediaGalleryItem | null>(() => {
-    if (activeIndex === null || activeIndex < 0 || activeIndex >= items.length) {
-      return null;
-    }
-    return items[activeIndex];
-  });
+  const currentItem = $derived<MediaGalleryItem | null>(
+    activeIndex !== null && activeIndex >= 0 && activeIndex < items.length
+      ? items[activeIndex] ?? null
+      : null
+  );
+
+  const gridClass = $derived(
+    gridCols === 2
+      ? 'grid-cols-2'
+      : gridCols === 4
+        ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
+        : gridCols === 6
+          ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6'
+          : 'grid-cols-2 sm:grid-cols-3'
+  );
 
   function openLightbox(index: number) {
     activeIndex = index;
@@ -78,7 +85,10 @@
     rotate = 0;
     translateX = 0;
     translateY = 0;
-    onItemClick?.(items[index], index);
+    const item = items[index];
+    if (item) {
+      onItemClick?.(item, index);
+    }
   }
 
   function closeLightbox() {
@@ -185,20 +195,6 @@
     a.click();
     document.body.removeChild(a);
   }
-
-  const gridClass = $derived(() => {
-    switch (gridCols) {
-      case 2:
-        return 'grid-cols-2';
-      case 4:
-        return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
-      case 6:
-        return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6';
-      case 3:
-      default:
-        return 'grid-cols-2 sm:grid-cols-3';
-    }
-  });
 </script>
 
 <svelte:window onkeydown={handleKeyDown} onmouseup={handleMouseUp} />
@@ -208,9 +204,9 @@
   data-svadmin-component="MediaGallery"
 >
   <!-- Grid thumbnails -->
-  <div class="grid gap-3.5 {gridClass()}">
-    {#each displayItems() as item, idx (item.id)}
-      {@const isLastWithMore = idx === maxDisplay - 1 && hiddenCount() > 0}
+  <div class="grid gap-3.5 {gridClass}">
+    {#each displayItems as item, idx (item.id)}
+      {@const isLastWithMore = idx === maxDisplay - 1 && hiddenCount > 0}
       <div
         class="group relative aspect-video cursor-pointer overflow-hidden rounded-xl border border-border bg-muted/30 shadow-xs transition-all hover:border-primary/50 hover:shadow-md"
         role="button"
@@ -263,7 +259,7 @@
         <!-- Overflow Badge -->
         {#if isLastWithMore}
           <div class="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-xs">
-            <span class="text-xl font-bold tracking-tight text-primary">+{hiddenCount() + 1}</span>
+            <span class="text-xl font-bold tracking-tight text-primary">+{hiddenCount + 1}</span>
           </div>
         {/if}
       </div>
@@ -271,14 +267,13 @@
   </div>
 
   <!-- Lightbox Modal -->
-  {#if activeIndex !== null && currentItem()}
-    {@const item = currentItem()}
-    {#if item}
-      <div
-        class="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-md"
-        role="dialog"
-        aria-modal="true"
-      >
+  {#if activeIndex !== null && currentItem}
+    {@const item = currentItem}
+    <div
+      class="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+    >
       <!-- Watermark Protection Layer -->
       {#if watermarkText}
         <div class="pointer-events-none absolute inset-0 select-none overflow-hidden opacity-10">
@@ -543,7 +538,7 @@
                     {#each Object.entries(item.metadata) as [k, v] (k)}
                       <div class="flex justify-between gap-2">
                         <dt class="text-muted-foreground">{k}:</dt>
-                        <dd class="truncate font-mono text-foreground" title={v}>{v}</dd>
+                        <dd class="truncate font-mono text-foreground" title={String(v)}>{String(v)}</dd>
                       </div>
                     {/each}
                   </dl>
@@ -554,6 +549,5 @@
         {/if}
       </div>
     </div>
-    {/if}
   {/if}
 </div>

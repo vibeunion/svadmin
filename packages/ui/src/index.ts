@@ -983,5 +983,5 @@ export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type Mi
 
 // Enterprise multimodal media gallery, hotkeys guide & resizable splitter suite
 export { default as MediaGallery, default as MultiModalMediaGallery, type MediaGalleryProps, type MediaGalleryItem } from './components/MediaGallery.svelte';
-export { default as HotkeysHelpModal, default as HotkeysGuideModal, type HotkeysHelpModalProps, type HotkeyItem } from './components/HotkeysHelpModal.svelte';
+export { default as HotkeysHelpModal, default as HotkeysGuideModal, type HotkeysHelpModalProps, type HotkeysHelpEntry } from './components/HotkeysHelpModal.svelte';
 export { default as ResizableSplitter, default as DynamicSplitter, type ResizableSplitterProps } from './components/ResizableSplitter.svelte';
