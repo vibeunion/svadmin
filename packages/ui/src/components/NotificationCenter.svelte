@@ -29,6 +29,8 @@
     allLabel?: string | undefined;
     loading?: boolean | undefined;
     open?: boolean | undefined;
+    showDrawerButton?: boolean | undefined;
+    onopendrawer?: (() => void) | undefined;
     children?: Snippet | undefined;
     onread?: ((item: NotificationItem) => void | Promise<void>) | undefined;
     onreadall?: (() => void | Promise<void>) | undefined;
@@ -48,6 +50,8 @@
     allLabel = 'All',
     loading = false,
     open = $bindable(false),
+    showDrawerButton = false,
+    onopendrawer,
     children,
     onread,
     onreadall,
@@ -87,7 +91,7 @@
 <Popover.Root bind:open>
   <Popover.Trigger>
     {#snippet child({ props })}
-      <span class="svadmin-notification-center__trigger-wrap">
+      <span class="svadmin-notification-center__trigger-wrap" data-svadmin-component="NotificationCenter">
         <Button {...props} variant="ghost" size="icon-sm" aria-label={`${title}${resolvedUnread ? `, ${resolvedUnread} unread` : ''}`} class={className}>
           <Bell size={16} aria-hidden="true" />
           {#if resolvedUnread > 0}
@@ -159,6 +163,21 @@
             </li>
           {/each}
         </ul>
+      {/if}
+      {#if showDrawerButton}
+        <div class="svadmin-notification-center__footer">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="w-full text-xs text-primary"
+            onclick={() => {
+              open = false;
+              onopendrawer?.();
+            }}
+          >
+            Open Full Drawer →
+          </Button>
+        </div>
       {/if}
       {#if children}<div class="svadmin-notification-center__footer">{@render children()}</div>{/if}
     </div>

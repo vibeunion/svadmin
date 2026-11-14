@@ -3170,3 +3170,37 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
+
+The compact bell popover remains compatible with its existing `items`, `onread` and `onreadall` API. Set `showDrawerButton` and `onopendrawer` to open the full drawer.
+
+The drawer supports All, Unread, Tasks, Notices and Security filters, immutable read-state updates, global mark-all/clear-read controls, and keyboard focus containment with Escape and opener focus restoration. Actions wait for completion, prevent repeated submissions and show failures without applying optimistic read-state changes. An action's `onClick` overrides the drawer-level `onAction` handler.
+
+`dndEnabled` is a bindable quiet-mode preference. `onToggleDnd` lets the host integrate its alert delivery policy; the drawer does not suppress the incoming feed. Quiet mode dims ordinary badges while keeping security messages and their badges visible.
+
+```svelte
+<script lang="ts">
+  import { NotificationCenter, NotificationDrawer, type NotificationDrawerItem } from '@svadmin/ui';
+
+  let drawerOpen = $state(false);
+  let notifications = $state<NotificationDrawerItem[]>([
+    {
+      id: 'task-1', title: 'Expense reimbursement pending', category: 'TASKS',
+      read: false, createdAt: '5m ago',
+      actions: [{ id: 'approve', label: 'Approve', variant: 'primary' }],
+    },
+    {
+      id: 'security-1', title: 'New device login alert', category: 'SECURITY_ALERTS',
+      read: false, createdAt: '1h ago',
+    },
+  ]);
+</script>
+
+<NotificationCenter
+  items={notifications.map(item => ({ ...item, time: item.createdAt }))}
+  showDrawerButton
+  onopendrawer={() => { drawerOpen = true; }}
+/>
+<NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
+```
