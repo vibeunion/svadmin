@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PrintTemplateDesigner,
+  DocumentPrintStudio,
+  PrintPreviewModal,
+  DocumentPrintPreview,
   StepUpAuthModal,
   PrivilegeElevationModal,
   AuditSnapshotCapture,
@@ -590,6 +594,10 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(PrintTemplateDesigner).toBeDefined();
+    expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
+    expect(PrintPreviewModal).toBeDefined();
+    expect(DocumentPrintPreview).toBe(PrintPreviewModal);
   });
 
   it('keeps service aliases bound to canonical services', () => {
