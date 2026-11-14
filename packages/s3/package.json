@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/s3",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Read-only S3-compatible object DataProvider for svadmin (AWS S3, Cloudflare R2, MinIO)",
   "type": "module",
   "sideEffects": false,

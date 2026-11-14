@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/webhooks",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Enterprise outgoing webhook dispatcher and HMAC-SHA256 signature suite for svadmin",
   "type": "module",
   "sideEffects": false,

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/keycloak",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Enterprise Keycloak OIDC/PKCE AuthProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.3](https://github.com/vibeunion/svadmin/compare/meilisearch-v0.3.2...meilisearch-v0.3.3) (2026-11-14)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.82.0
+
 ## [0.3.2](https://github.com/vibeunion/svadmin/compare/meilisearch-v0.3.1...meilisearch-v0.3.2) (2026-11-13)
 
 

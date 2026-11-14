@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.82.0](https://github.com/vibeunion/svadmin/compare/core-v0.81.1...core-v0.82.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+
 ## [0.81.1](https://github.com/vibeunion/svadmin/compare/core-v0.81.0...core-v0.81.1) (2026-11-13)
 
 

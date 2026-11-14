@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.32.0](https://github.com/vibeunion/svadmin/compare/lite-v0.31.1...lite-v0.32.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.82.0 to >=0.34.2 <0.83.0
+
 ## [0.31.1](https://github.com/vibeunion/svadmin/compare/lite-v0.31.0...lite-v0.31.1) (2026-11-13)
 
 

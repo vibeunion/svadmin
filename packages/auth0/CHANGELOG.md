@@ -1,5 +1,14 @@
 # @svadmin/auth0
 
+## [0.2.6](https://github.com/vibeunion/svadmin/compare/auth0-v0.2.5...auth0-v0.2.6) (2026-11-14)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.82.0
+
 ## [0.2.5](https://github.com/vibeunion/svadmin/compare/auth0-v0.2.4...auth0-v0.2.5) (2026-11-13)
 
 
