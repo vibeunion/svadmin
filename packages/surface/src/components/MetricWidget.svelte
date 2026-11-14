@@ -5,7 +5,6 @@
   import StatsCard from '@svadmin/ui/components/StatsCard.svelte';
   import { styledMetricPropsSchema as metricPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
-  import { formatAdminCurrency, formatAdminNumber, formatAdminPercent } from '@svadmin/core';
   import { resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
 
   let { widgetId, props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
@@ -19,12 +18,20 @@
     const value = data.value;
     if (typeof value !== 'number') return '—';
     if (metricProps.format === 'currency') {
-      return formatAdminCurrency(value, { locale, currency: metricProps.currency });
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: metricProps.currency,
+        useGrouping: true,
+      }).format(value).replace(/^(\p{Sc})\s+/u, '$1');
     }
     if (metricProps.format === 'percent') {
-      return formatAdminPercent(value, { locale, maximumFractionDigits: 1 });
+      return new Intl.NumberFormat(locale, {
+        style: 'percent',
+        maximumFractionDigits: 1,
+        useGrouping: true,
+      }).format(value).replace(/\s+(?=%)/g, '');
     }
-    return formatAdminNumber(value, { locale, maximumFractionDigits: 2 });
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: true }).format(value);
   });
 </script>
 
