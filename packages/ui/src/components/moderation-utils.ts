@@ -79,7 +79,7 @@ export function scanContent(
         severity: item.severity,
         index: pos,
         length: item.word.length,
-        replacement: item.replacement,
+        ...(item.replacement ? { replacement: item.replacement } : {}),
       });
       pos += item.word.length;
     }

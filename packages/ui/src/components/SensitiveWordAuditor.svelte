@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type {
     ModerationCategory,
     ModerationAction,
@@ -20,10 +21,7 @@
   }: SensitiveWordAuditorProps = $props();
 
   // Internal reactive word dictionary
-  let wordList = $state<SensitiveWordItem[]>([]);
-
-  $effect(() => {
-    wordList = initialWords.length > 0
+  let wordList = $state<SensitiveWordItem[]>(untrack(() => initialWords.length > 0
       ? initialWords.map(w => ({ ...w }))
       : [
           { id: 'sw-1', word: '高额返现', category: 'spam', action: 'mask', severity: 'medium', replacement: '***', enabled: true },
@@ -31,8 +29,7 @@
           { id: 'sw-3', word: '枪支弹药', category: 'violence', action: 'block', severity: 'critical', enabled: true },
           { id: 'sw-4', word: '博彩下注', category: 'custom', action: 'block', severity: 'high', enabled: true },
           { id: 'sw-5', word: '内幕暴利', category: 'spam', action: 'review', severity: 'high', enabled: true },
-        ];
-  });
+        ]));
 
   // Filters & search
   let searchQuery = $state('');
@@ -84,7 +81,7 @@
       category: newCategory,
       action: newAction,
       severity: newSeverity,
-      replacement: newReplacement.trim() || undefined,
+      ...(newReplacement.trim() ? { replacement: newReplacement.trim() } : {}),
       enabled: true,
     };
     wordList = [item, ...wordList];
@@ -98,9 +95,9 @@
       case 'critical':
         return 'bg-destructive/15 text-destructive border-destructive/30';
       case 'high':
-        return 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30';
+        return 'bg-warning/15 text-warning dark:text-warning border-warning/30';
       case 'medium':
-        return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30';
+        return 'bg-warning/15 text-warning dark:text-warning border-warning/30';
       case 'low':
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -113,7 +110,7 @@
       case 'mask':
         return 'bg-primary/10 text-primary border-primary/20';
       case 'review':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+        return 'bg-warning/10 text-warning dark:text-warning border-warning/20';
     }
   }
 </script>
@@ -159,11 +156,11 @@
         <span class="text-[11px] text-muted-foreground">键入待检测文本实时识别命中违规词与处理决策</span>
       </div>
       {#if scanResult.hasViolation}
-        <span class="text-xs px-2.5 py-1 rounded-full font-semibold border {scanResult.blockRequired ? 'bg-destructive/15 text-destructive border-destructive/30' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'}">
+        <span class="text-xs px-2.5 py-1 rounded-full font-semibold border {scanResult.blockRequired ? 'bg-destructive/15 text-destructive border-destructive/30' : 'bg-warning/15 text-warning dark:text-warning border-warning/30'}">
           {scanResult.blockRequired ? '⚠️ 触发高危拦截规则' : '⚡ 建议人工复审 / 自动脱敏'}
         </span>
       {:else}
-        <span class="text-xs px-2.5 py-1 rounded-full font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+        <span class="text-xs px-2.5 py-1 rounded-full font-semibold bg-success/15 text-success dark:text-success border border-success/30">
           ✓ 合规检测通过
         </span>
       {/if}
@@ -193,7 +190,7 @@
           {#if scanResult.matches.length > 0}
             <div class="flex items-center gap-1.5 flex-wrap pt-2 mt-2 border-t border-border/50">
               <span class="text-muted-foreground font-medium text-[10px]">命中词条:</span>
-              {#each scanResult.matches as match}
+              {#each scanResult.matches as match, i (i)}
                 <span class="text-[10px] px-1.5 py-0.5 rounded border {getSeverityBadge(match.severity)}">
                   {match.word} ({match.action})
                 </span>
@@ -283,7 +280,7 @@
                 <button
                   type="button"
                   onclick={() => toggleWord(item)}
-                  class="text-[11px] px-2 py-0.5 rounded font-medium transition-colors {item.enabled ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}"
+                  class="text-[11px] px-2 py-0.5 rounded font-medium transition-colors {item.enabled ? 'bg-success/15 text-success dark:text-success' : 'bg-muted text-muted-foreground'}"
                 >
                   {item.enabled ? '启用中' : '已停用'}
                 </button>

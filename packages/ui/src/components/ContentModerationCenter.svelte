@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { ModerationTicket } from './moderation-utils.js';
 
   export interface ContentModerationCenterProps {
@@ -17,10 +18,7 @@
     onMaskPublish,
   }: ContentModerationCenterProps = $props();
 
-  let ticketList = $state<ModerationTicket[]>([]);
-
-  $effect(() => {
-    ticketList = initialTickets.length > 0
+  let ticketList = $state<ModerationTicket[]>(untrack(() => initialTickets.length > 0
       ? initialTickets.map(t => ({ ...t, matches: [...t.matches] }))
       : [
           {
@@ -60,8 +58,7 @@
             riskScore: 0,
             matches: [],
           },
-        ];
-  });
+        ]));
 
   let filterStatus = $state<'ALL' | 'pending' | 'approved' | 'rejected'>('pending');
 
@@ -138,7 +135,7 @@
             <div class="flex items-center gap-2 flex-wrap">
               <span class="font-bold text-sm text-foreground">{ticket.title}</span>
               <span class="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono">{ticket.sourceModule}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold {ticket.riskScore >= 80 ? 'bg-destructive/15 text-destructive border border-destructive/20' : ticket.riskScore >= 50 ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'}">
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold {ticket.riskScore >= 80 ? 'bg-destructive/15 text-destructive border border-destructive/20' : ticket.riskScore >= 50 ? 'bg-warning/15 text-warning dark:text-warning border border-warning/20' : 'bg-success/15 text-success dark:text-success border border-success/20'}">
                 风险分: {ticket.riskScore}
               </span>
             </div>
@@ -155,7 +152,7 @@
               {#if ticket.matches.length > 0}
                 <div class="flex items-center gap-1.5 ml-2">
                   <span class="text-destructive font-medium">命中敏感词:</span>
-                  {#each ticket.matches as m}
+                  {#each ticket.matches as m, i (i)}
                     <span class="px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20 font-semibold font-mono">
                       {m.word}
                     </span>
@@ -171,7 +168,7 @@
               <button
                 type="button"
                 onclick={() => handleApprove(ticket)}
-                class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-colors"
+                class="px-3 py-1.5 rounded-lg bg-success text-background hover:bg-success font-semibold transition-colors"
               >
                 放行通过
               </button>
@@ -190,7 +187,7 @@
                 违规驳回
               </button>
             {:else}
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold border {ticket.status === 'approved' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : ticket.status === 'masked' ? 'bg-primary/15 text-primary border-primary/20' : 'bg-destructive/15 text-destructive border-destructive/20'} capitalize">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold border {ticket.status === 'approved' ? 'bg-success/15 text-success dark:text-success border-success/20' : ticket.status === 'masked' ? 'bg-primary/15 text-primary border-primary/20' : 'bg-destructive/15 text-destructive border-destructive/20'} capitalize">
                 {ticket.status}
               </span>
             {/if}
