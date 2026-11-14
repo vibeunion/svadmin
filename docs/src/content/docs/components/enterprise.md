@@ -3455,6 +3455,58 @@ Features:
   sourceLocale="zh-CN"
   targetLocale="en-US"
   onSave={(updated) => console.log('Saved translations:', updated)}
+## StepUpAuthModal
+
+High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.
+
+```svelte
+<script lang="ts">
+  import { StepUpAuthModal } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function handleVerify(payload: { method: string; code: string }) {
+    return payload.code === '123456';
+  }
+</script>
+
+<button onclick={() => { open = true; }}>Execute High-Risk Operation</button>
+
+<StepUpAuthModal
+  bind:open
+  title="Step-Up Privilege Elevation"
+  operationName="Full Export of Production Database"
+  riskLevel="critical"
+  clientIp="10.12.88.42"
+  methods={['totp', 'sms', 'supervisor']}
+  onverify={handleVerify}
+  onlockout={() => console.warn('Privilege channel locked')}
+/>
+```
+
+## AuditSnapshotCapture
+
+Immutable compliance evidence snapshot card designed for regulatory audit trails and forensics. Features SHA-256 digital fingerprint validation, tamper-evident anti-leak watermark overlay, structured before/after diff table, and one-click PNG / SVG snapshot export. Public alias: `ComplianceEvidenceCard`.
+
+```svelte
+<script lang="ts">
+  import { AuditSnapshotCapture } from '@svadmin/ui';
+
+  const diffItems = [
+    { field: 'role', label: 'Authorized Role', before: 'operator', after: 'super_admin' },
+    { field: 'mfaEnforced', label: 'Enforce MFA', before: false, after: true },
+  ];
+</script>
+
+<AuditSnapshotCapture
+  recordId="AUDIT-20261114-8899"
+  operatorName="Li Si"
+  operatorId="EMP-90021"
+  clientIp="10.12.88.42"
+  actionType="privilege_grant"
+  actionLabel="Privilege Elevation Approved"
+  changes={diffItems}
+  onexport={(format) => console.log('Export format:', format)}
 ### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
 Enterprise service desk ticket lifecycle and support collaboration card:
 - **SLA Breach Countdown**: Real-time resolution and first-response SLA timer with urgency alerts and breach warning badges.
@@ -3488,6 +3540,7 @@ Helpdesk and customer support quick reply template drawer:
       shortcut: '/hello',
       content: 'Hello {{customer_name}}, your ticket {{ticket_id}} is being reviewed by our engineering team.',
   ];
+    },
 <CannedResponsePicker
   {templates}
   contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}

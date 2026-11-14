@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  StepUpAuthModal,
+  PrivilegeElevationModal,
+  AuditSnapshotCapture,
+  ComplianceEvidenceCard,
   MediaGallery,
   MultiModalMediaGallery,
   I18nStudio,
@@ -582,6 +586,10 @@ describe('public compatibility aliases', () => {
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
     expect(I18nStudio).toBeDefined();
     expect(TranslationManager).toBe(I18nStudio);
+    expect(StepUpAuthModal).toBeDefined();
+    expect(PrivilegeElevationModal).toBe(StepUpAuthModal);
+    expect(AuditSnapshotCapture).toBeDefined();
+    expect(ComplianceEvidenceCard).toBe(AuditSnapshotCapture);
     expect(ServiceDeskTicketCard).toBeDefined();
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
