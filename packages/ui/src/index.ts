@@ -980,3 +980,18 @@ export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type Micro
 export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
+
+// Enterprise feature flag & gray release control suite
+export { default as FeatureFlagStudio, default as GrayReleaseManager, type FeatureFlagStudioProps } from './components/FeatureFlagStudio.svelte';
+export {
+  useFeatureFlag,
+  evaluateFeatureFlag,
+  registerFeatureFlags,
+  setFeatureFlag,
+  getFeatureFlag,
+  clearFeatureFlags,
+  hashStringToPercentage,
+  type FeatureFlag,
+  type FeatureFlagRule,
+  type FeatureFlagContext,
+} from './components/useFeatureFlag.svelte.js';

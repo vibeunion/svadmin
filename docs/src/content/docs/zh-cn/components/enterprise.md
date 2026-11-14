@@ -3061,3 +3061,42 @@ AI 规则语义解释卡片：
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
+
+企业特性开关与灰度放量控制中心：
+- **百分比渐进灰度放量**：支持 0%~100% 平滑滑块微调，结合实体确定性哈希算法，保证相同用户刷新后状态绝对稳定。
+- **紧急熔断开关（Kill Switch）**：生产故障时秒级一键切断，配备高危双重确认模态弹窗，杜绝误触。
+- **租户/用户定向白名单**：支持特定内部员工、灰度企业租户或指定角色优先放行。
+- **内置仿真评估工作台（Playground）**：实时录入自定义 User ID、Tenant ID 与 Role，秒级演算判定规则命中路径。
+- **响应式 Runes 钩子**：前台业务代码直接调用 `useFeatureFlag(key)`，无感集成。
+
+```svelte
+<script lang="ts">
+  import { FeatureFlagStudio, useFeatureFlag } from '@svadmin/ui';
+
+  const flags = [
+    {
+      key: 'billing_v2',
+      name: '计费中心 V2',
+      description: '全新升级的企业级统一聚合账单开具引擎',
+      enabled: true,
+      percentage: 25,
+      tags: ['billing', 'beta'],
+    },
+    {
+      key: 'ai_copilot',
+      name: 'AI 表格伴侣',
+      description: '自然语言驱动的智能表格生成与透视',
+      enabled: false,
+      percentage: 0,
+      tags: ['ai'],
+    },
+  ];
+
+  // 在业务子组件中无感使用：
+  const billingFlag = useFeatureFlag('billing_v2');
+</script>
+
+<FeatureFlagStudio {flags} showSimulator={true} />
+```

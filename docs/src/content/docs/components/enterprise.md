@@ -3170,3 +3170,42 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
+
+Enterprise feature flag and gradual rollout control center:
+- **Gradual Percentage Rollout**: Deterministic entity hashing for 0% to 100% phased releases.
+- **Emergency Kill Switch**: High-risk modal with two-step confirmation for immediate production fail-safes.
+- **User & Tenant Whitelist**: Direct rule evaluation targeting specific users, organizations, or roles.
+- **Interactive Evaluation Playground**: Live simulator testing evaluation results against custom context payloads.
+- **Reactive Hook**: Consumable via `useFeatureFlag(key)` in Svelte 5 rune apps.
+
+```svelte
+<script lang="ts">
+  import { FeatureFlagStudio, useFeatureFlag } from '@svadmin/ui';
+
+  const flags = [
+    {
+      key: 'billing_v2',
+      name: 'Billing Engine V2',
+      description: 'New unified invoice calculator',
+      enabled: true,
+      percentage: 25,
+      tags: ['billing', 'beta'],
+    },
+    {
+      key: 'ai_copilot',
+      name: 'AI Table Copilot',
+      description: 'Natural language table generation',
+      enabled: false,
+      percentage: 0,
+      tags: ['ai'],
+    },
+  ];
+
+  // In child views:
+  const billingFeature = useFeatureFlag('billing_v2');
+</script>
+
+<FeatureFlagStudio {flags} showSimulator={true} />
+```
