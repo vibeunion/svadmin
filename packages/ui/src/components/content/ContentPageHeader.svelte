@@ -33,7 +33,7 @@
   data-density={density}
 >
   {#if breadcrumbs.length > 0}
-    <nav aria-label="Breadcrumb" class={styles.breadcrumbs}>
+    <nav aria-label="Breadcrumb" class="{styles.breadcrumbs} svadmin-page-header__breadcrumbs">
       {#each breadcrumbs as crumb, index (crumb)}
         {#if index > 0}<span aria-hidden="true">/</span>{/if}
         <span class={index === breadcrumbs.length - 1 ? styles.currentCrumb : ''}>{crumb}</span>
@@ -42,7 +42,7 @@
   {/if}
   <div class={styles.row}>
     <div class={styles.heading}>
-      {#if eyebrow}<p class={styles.eyebrow}>{eyebrow}</p>{/if}
+      {#if eyebrow}<p class="{styles.eyebrow} svadmin-page-header__eyebrow">{eyebrow}</p>{/if}
       <svelte:element this={headingLevel} class={styles.title}>{title}</svelte:element>
       {#if description}<p class={styles.description}>{description}</p>{/if}
     </div>

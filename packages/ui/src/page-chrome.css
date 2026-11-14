@@ -19,6 +19,11 @@
   }
   .svadmin-page-header__breadcrumbs {
     margin-bottom: var(--svadmin-space-4);
+    line-height: 1.5;
+  }
+  /* 说明文字保持 1.5，正文才是 1.4。历史内容基线把 eyebrow 钉在 1.5。 */
+  .svadmin-page-header__eyebrow {
+    line-height: 1.5;
   }
   .svadmin-page-header__row, .svadmin-filter-toolbar__row {
     display: flex;

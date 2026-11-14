@@ -758,22 +758,36 @@ h6,
 }
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive),
-:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive),
+:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive) {
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--destructive);
+}
+
+:is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):hover,
+:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):hover {
+  background: var(--border);
+  color: var(--foreground);
+  border-color: var(--danger-5, var(--destructive));
+}
+
+:is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):active,
+:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):active {
+  border-color: var(--danger-7, var(--destructive));
+}
+
 :is([data-slot="button"], .svadmin-button)[data-status="danger"],
 :is([data-svadmin-button], .svadmin-button)[data-status="danger"] {
   background: var(--destructive);
   color: var(--destructive-foreground);
+  border-color: transparent;
 }
 
-:is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):hover,
-:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):hover,
 :is([data-slot="button"], .svadmin-button)[data-status="danger"]:hover,
 :is([data-svadmin-button], .svadmin-button)[data-status="danger"]:hover {
   background: var(--danger-5, var(--destructive));
 }
 
-:is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):active,
-:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):active,
 :is([data-slot="button"], .svadmin-button)[data-status="danger"]:active,
 :is([data-svadmin-button], .svadmin-button)[data-status="danger"]:active {
   background: var(--danger-7, var(--destructive));
@@ -880,8 +894,6 @@ h6,
   border-color: transparent;
 }
 
-:is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):is(:disabled, [aria-disabled="true"], [data-disabled]),
-:is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):is(:disabled, [aria-disabled="true"], [data-disabled]),
 :is([data-slot="button"], .svadmin-button)[data-status="danger"]:is(:disabled, [aria-disabled="true"], [data-disabled]),
 :is([data-svadmin-button], .svadmin-button)[data-status="danger"]:is(:disabled, [aria-disabled="true"], [data-disabled]) {
   background: var(--danger-3, var(--svadmin-fill-2));

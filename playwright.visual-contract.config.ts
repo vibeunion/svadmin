@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './scripts/visual-contract',
   testMatch: 'visual-contract.spec.ts',
   fullyParallel: false,
   retries: 0,
