@@ -296,6 +296,10 @@ import {
   SupportTicketCard,
   CannedResponsePicker,
   QuickReplyDrawer,
+  AudioVisualInspector,
+  MediaInspectionCard,
+  MediaAuthenticityAuditCard,
+  ExifMetadataAuditor,
   message,
   notification,
   toast,
@@ -590,6 +594,10 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(AudioVisualInspector).toBeDefined();
+    expect(MediaInspectionCard).toBe(AudioVisualInspector);
+    expect(MediaAuthenticityAuditCard).toBeDefined();
+    expect(ExifMetadataAuditor).toBe(MediaAuthenticityAuditCard);
   });
 
   it('keeps service aliases bound to canonical services', () => {
