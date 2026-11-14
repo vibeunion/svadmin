@@ -5,9 +5,6 @@
     Check,
     X,
     MessageSquare,
-    AlertTriangle,
-    ShieldAlert,
-    ChevronRight,
     Split,
     Columns,
     Filter,
@@ -92,8 +89,9 @@
   let expandedAnnotations = $state<Record<string, boolean>>({});
 
   $effect(() => {
-    if (!activeId && clauses.length > 0) {
-      activeId = clauses[0].id;
+    const firstClause = clauses[0];
+    if (!activeId && firstClause) {
+      activeId = firstClause.id;
     }
   });
 
@@ -170,11 +168,11 @@
   function getChangeBadge(type: ClauseChangeType) {
     switch (type) {
       case 'added':
-        return { label: '新增', class: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 dark:text-emerald-400' };
+        return { label: '新增', class: 'bg-success/15 text-success border-success/30' };
       case 'removed':
-        return { label: '删除', class: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400' };
+        return { label: '删除', class: 'bg-destructive/15 text-destructive border-destructive/30' };
       case 'modified':
-        return { label: '修订', class: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400' };
+        return { label: '修订', class: 'bg-warning/15 text-warning border-warning/30' };
       default:
         return { label: '未变更', class: 'bg-muted text-muted-foreground border-border' };
     }
@@ -185,7 +183,7 @@
       case 'high':
         return { label: '高风险', class: 'bg-destructive/15 text-destructive border-destructive/30' };
       case 'medium':
-        return { label: '中风险', class: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400' };
+        return { label: '中风险', class: 'bg-warning/15 text-warning border-warning/30' };
       default:
         return { label: '低风险', class: 'bg-muted/80 text-muted-foreground border-border' };
     }
@@ -194,11 +192,11 @@
   function getDecisionBadge(status?: ClauseDecisionStatus) {
     switch (status) {
       case 'accepted':
-        return { label: '已采纳', class: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30' };
+        return { label: '已采纳', class: 'bg-success/15 text-success border-success/30' };
       case 'rejected':
-        return { label: '已驳回', class: 'bg-rose-500/15 text-rose-600 border-rose-500/30' };
+        return { label: '已驳回', class: 'bg-destructive/15 text-destructive border-destructive/30' };
       default:
-        return { label: '待决策', class: 'bg-amber-500/15 text-amber-600 border-amber-500/30' };
+        return { label: '待决策', class: 'bg-warning/15 text-warning border-warning/30' };
     }
   }
 </script>
@@ -257,7 +255,7 @@
         <div class="flex items-center gap-1.5 border-l border-border pl-2">
           <button
             type="button"
-            class="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
+            class="flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success transition-colors hover:bg-success/20 "
             onclick={() => handleBatch('accepted')}
           >
             <Check class="h-3.5 w-3.5" />
@@ -265,7 +263,7 @@
           </button>
           <button
             type="button"
-            class="flex items-center gap-1 rounded-md border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-500/20 dark:text-rose-400"
+            class="flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20 "
             onclick={() => handleBatch('rejected')}
           >
             <X class="h-3.5 w-3.5" />
@@ -286,13 +284,13 @@
     <div class="flex flex-wrap items-center gap-2 text-muted-foreground">
       <span>总计 <strong class="font-semibold text-foreground">{statistics.total}</strong> 条</span>
       <span class="text-border">|</span>
-      <span class="text-emerald-600 dark:text-emerald-400">新增 +{statistics.added}</span>
-      <span class="text-rose-600 dark:text-rose-400">删除 -{statistics.removed}</span>
-      <span class="text-amber-600 dark:text-amber-400">修改 ~{statistics.modified}</span>
+      <span class="text-success ">新增 +{statistics.added}</span>
+      <span class="text-destructive ">删除 -{statistics.removed}</span>
+      <span class="text-warning ">修改 ~{statistics.modified}</span>
       <span class="text-border">|</span>
-      <span>待决 <strong class="text-amber-600 dark:text-amber-400">{statistics.pending}</strong></span>
-      <span>已采纳 <strong class="text-emerald-600 dark:text-emerald-400">{statistics.accepted}</strong></span>
-      <span>已驳回 <strong class="text-rose-600 dark:text-rose-400">{statistics.rejected}</strong></span>
+      <span>待决 <strong class="text-warning ">{statistics.pending}</strong></span>
+      <span>已采纳 <strong class="text-success ">{statistics.accepted}</strong></span>
+      <span>已驳回 <strong class="text-destructive ">{statistics.rejected}</strong></span>
     </div>
 
     <!-- 过滤器 -->
@@ -391,7 +389,6 @@
         {#if !activeId || activeId === clause.id}
           {@const change = getChangeBadge(clause.changeType)}
           {@const risk = getRiskBadge(clause.riskLevel)}
-          {@const decision = getDecisionBadge(clause.decision)}
           {@const isExpanded = expandedAnnotations[clause.id] ?? false}
           <article class="flex flex-col gap-3 p-4">
             <!-- 条款头：编号、标题、标签与采纳驳回操作 -->
@@ -418,8 +415,8 @@
                     class={cn(
                       'flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
                       clause.decision === 'accepted'
-                        ? 'border-emerald-500 bg-emerald-500 text-white shadow-xs'
-                        : 'border-border bg-card text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600'
+                        ? 'border-success bg-success text-success-foreground shadow-xs'
+                        : 'border-border bg-card text-muted-foreground hover:bg-success/10 hover:text-success'
                     )}
                     onclick={() => handleDecision(clause.id, 'accepted')}
                     title="采纳修订方案"
@@ -432,8 +429,8 @@
                     class={cn(
                       'flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
                       clause.decision === 'rejected'
-                        ? 'border-rose-500 bg-rose-500 text-white shadow-xs'
-                        : 'border-border bg-card text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600'
+                        ? 'border-destructive bg-destructive text-destructive-foreground shadow-xs'
+                        : 'border-border bg-card text-muted-foreground hover:bg-destructive/10 hover:text-destructive'
                     )}
                     onclick={() => handleDecision(clause.id, 'rejected')}
                     title="驳回修订方案"
@@ -469,7 +466,7 @@
                   </div>
                   <div class="min-h-[90px] whitespace-pre-wrap text-xs leading-relaxed text-foreground/90 font-mono">
                     {#if clause.originalContent}
-                      <span class={cn(clause.changeType === 'modified' ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 rounded px-1 py-0.5' : '')}>
+                      <span class={cn(clause.changeType === 'modified' ? 'bg-destructive/15 text-destructive rounded px-1 py-0.5' : '')}>
                         {clause.originalContent}
                       </span>
                     {:else}
@@ -487,8 +484,8 @@
                   <div class="min-h-[90px] whitespace-pre-wrap text-xs leading-relaxed text-foreground font-mono">
                     {#if clause.proposedContent}
                       <span class={cn(
-                        clause.changeType === 'modified' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 rounded px-1 py-0.5' : '',
-                        clause.changeType === 'added' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 rounded px-1 py-0.5' : ''
+                        clause.changeType === 'modified' ? 'bg-success/15 text-success rounded px-1 py-0.5' : '',
+                        clause.changeType === 'added' ? 'bg-success/15 text-success rounded px-1 py-0.5' : ''
                       )}>
                         {clause.proposedContent}
                       </span>
@@ -506,12 +503,12 @@
                   <div class="text-foreground">{clause.proposedContent || clause.originalContent}</div>
                 {:else}
                   {#if clause.originalContent}
-                    <div class="rounded bg-rose-500/10 p-2 text-rose-700 line-through dark:text-rose-300 mb-1.5">
+                    <div class="rounded bg-destructive/10 p-2 text-destructive line-through mb-1.5">
                       - {clause.originalContent}
                     </div>
                   {/if}
                   {#if clause.proposedContent}
-                    <div class="rounded bg-emerald-500/10 p-2 text-emerald-700 dark:text-emerald-300">
+                    <div class="rounded bg-success/10 p-2 text-success">
                       + {clause.proposedContent}
                     </div>
                   {/if}

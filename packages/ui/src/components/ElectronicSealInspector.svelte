@@ -1,15 +1,13 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { Snippet } from 'svelte';
   import {
     ShieldCheck,
     ShieldAlert,
     ShieldX,
-    FileCheck2,
     Clock,
-    Key,
     Building2,
     Award,
-    Hash,
     ChevronDown,
     ChevronUp,
     Download,
@@ -102,7 +100,7 @@
     class: className = ''
   }: ElectronicSealInspectorProps = $props();
 
-  let isExpanded = $state(defaultExpanded);
+  let isExpanded = $state(untrack(() => defaultExpanded));
   let isRevalidating = $state(false);
 
   async function handleRevalidate() {
@@ -124,8 +122,8 @@
         tone: 'danger',
         desc: '数字签名与文档哈希比对不一致，正文或附件在盖章后发生变动，印章失效。',
         icon: ShieldAlert,
-        badgeClass: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400',
-        cardBorder: 'border-rose-500/30'
+        badgeClass: 'bg-destructive/15 text-destructive border-destructive/30',
+        cardBorder: 'border-destructive/30'
       };
     }
     switch (status) {
@@ -135,8 +133,8 @@
           tone: 'success',
           desc: 'CA 机构数字证书有效，时间戳存证可信，签名文档哈希一致且未被篡改。',
           icon: ShieldCheck,
-          badgeClass: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 dark:text-emerald-400',
-          cardBorder: 'border-emerald-500/30'
+          badgeClass: 'bg-success/15 text-success border-success/30',
+          cardBorder: 'border-success/30'
         };
       case 'expired':
         return {
@@ -144,8 +142,8 @@
           tone: 'warning',
           desc: '数字证书已超出有效截止时间，盖章当时的时间戳需进一步核验有效性。',
           icon: ShieldAlert,
-          badgeClass: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400',
-          cardBorder: 'border-amber-500/30'
+          badgeClass: 'bg-warning/15 text-warning border-warning/30',
+          cardBorder: 'border-warning/30'
         };
       case 'revoked':
         return {
@@ -153,8 +151,8 @@
           tone: 'danger',
           desc: '颁发 CA 机构 CRL 吊销列表中查询到该证书已被撤销，印章失效。',
           icon: ShieldX,
-          badgeClass: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400',
-          cardBorder: 'border-rose-500/30'
+          badgeClass: 'bg-destructive/15 text-destructive border-destructive/30',
+          cardBorder: 'border-destructive/30'
         };
       default:
         return {
@@ -162,8 +160,8 @@
           tone: 'warning',
           desc: '根证书颁发机构不在权威信任链清单中，请核对自签名或第三方 CA。',
           icon: ShieldAlert,
-          badgeClass: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400',
-          cardBorder: 'border-amber-500/30'
+          badgeClass: 'bg-warning/15 text-warning border-warning/30',
+          cardBorder: 'border-warning/30'
         };
     }
   }
@@ -198,8 +196,8 @@
   <div class="flex flex-wrap items-start justify-between gap-4 p-5">
     <div class="flex items-start gap-4">
       <!-- 纯 SVG 矢量电子印章预览模拟器 -->
-      <div class="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/5 p-2">
-        <svg viewBox="0 0 100 100" class="h-full w-full text-rose-500 select-none">
+      <div class="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-2">
+        <svg viewBox="0 0 100 100" class="h-full w-full text-destructive select-none">
           <!-- 外圆圈 -->
           <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.85" />
           <!-- 内同心细圈 -->
@@ -234,9 +232,9 @@
         <!-- 角标防伪状态徽标 -->
         <div class="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5 shadow-xs">
           {#if seal.status === 'valid' && seal.documentHashMatch}
-            <ShieldCheck class="h-5 w-5 text-emerald-500" />
+            <ShieldCheck class="h-5 w-5 text-success" />
           {:else}
-            <ShieldAlert class="h-5 w-5 text-rose-500" />
+            <ShieldAlert class="h-5 w-5 text-destructive" />
           {/if}
         </div>
       </div>
@@ -364,13 +362,13 @@
         <div class="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-4">
           <div class="flex items-center justify-between border-b border-border pb-2">
             <span class="flex items-center gap-1.5 font-semibold text-foreground">
-              <Clock class="h-4 w-4 text-emerald-500" />
+              <Clock class="h-4 w-4 text-success" />
               权威可信时间戳 (TSA)
             </span>
             <span class={cn('rounded px-1.5 py-0.2 text-[10px] font-medium border',
               seal.timestamp.verified
-                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                ? 'bg-success/10 text-success border-success/20'
+                : 'bg-destructive/10 text-destructive border-destructive/20'
             )}>
               {seal.timestamp.verified ? '时间戳验真有效' : '时间戳无效'}
             </span>
@@ -414,11 +412,11 @@
               <div class="flex items-center justify-between rounded-lg border border-border bg-card p-2.5">
                 <div class="flex items-center gap-2.5">
                   {#if log.status === 'pass'}
-                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 text-xs font-bold">✓</span>
+                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-success/15 text-success text-xs font-bold">✓</span>
                   {:else if log.status === 'warn'}
-                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 text-xs font-bold">!</span>
+                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-warning/15 text-warning text-xs font-bold">!</span>
                   {:else}
-                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 text-xs font-bold">✕</span>
+                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-destructive/15 text-destructive text-xs font-bold">✕</span>
                   {/if}
                   <div class="flex flex-col">
                     <span class="font-medium text-foreground">{log.step}</span>
