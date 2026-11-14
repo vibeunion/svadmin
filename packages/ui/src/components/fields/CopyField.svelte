@@ -40,7 +40,7 @@
 
   function maskText(str: string): string {
     if (str.length <= 8) return '****';
-    return `${str.slice(0, 4)}...${str.slice(-4)}`;
+    return `${str.slice(0, 4)}…${str.slice(-4)}`;
   }
 
   const rawString = $derived(value != null && value !== '' ? String(value) : '');

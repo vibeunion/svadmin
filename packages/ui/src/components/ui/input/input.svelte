@@ -16,8 +16,15 @@
 	type InputSize = "mini" | "compact" | "sm" | "default" | "lg";
 	type InputState = "default" | "focus" | "selected" | "complete" | "disabled" | "loading" | "success" | "error";
 
+	type InputHandlers = {
+		onfocus?: HTMLInputAttributes["onfocus"];
+		onblur?: HTMLInputAttributes["onblur"];
+		onselect?: HTMLInputAttributes["onselect"];
+	};
+
 	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value" | "size" | "onfocus" | "onblur" | "onselect">> &
-			{ size?: InputSize; nativeSize?: number; status?: InputStatus } &
+			{ size?: InputSize; nativeSize?: number; status?: InputStatus | undefined } &
+			InputHandlers &
 			(Type extends "file"
 				? { type: "file"; files?: FileList | undefined; value?: never }
 				: { type?: Type; files?: undefined; value?: InputValue });
