@@ -3161,6 +3161,32 @@ AI 规则语义解释卡片：
 ```
 
 
+### `<ShiftScheduler>` / `<WorkShiftCalendar>`
+
+企业级人员轮值与多班次排班日程表：
+- **多班次色彩与标签**：支持自定义早班、中班、晚班、休息等多班次类型，设定标准起止时间与工时定额。
+- **动态周期导航**：支持上一周、本周、下一周日历周期快速切换，周末日期列与当日高亮。
+- **快捷画笔与批量填报**：支持顶部快速点选班次画笔，一键批量为员工分配工作日标准班或清空排班。
+- **工时合规与疲劳预警**：实时汇总员工周度出勤工时，单周工时超标（如 > 40h）或连续工作超限自动标红告警。
+
+```svelte
+<script lang="ts">
+  import { ShiftScheduler } from '@svadmin/ui';
+
+  const staffList = [
+    { id: '1', name: '张经理', department: '技术运维部' },
+    { id: '2', name: '李工', department: '基础架构组' },
+  ];
+
+  const shiftTypes = [
+    { id: 'morning', name: '早班', code: 'M', hours: 8, colorToken: 'emerald' },
+    { id: 'night', name: '晚班', code: 'N', hours: 8, colorToken: 'indigo' },
+    { id: 'off', name: '休息', code: 'OFF', hours: 0, isRest: true, colorToken: 'slate' },
+  ];
+</script>
+
+<ShiftScheduler {staffList} {shiftTypes} />
+
 ### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
 
 企业级跨系统字段可视化连线与映射构建器：

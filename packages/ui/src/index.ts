@@ -1005,6 +1005,9 @@ export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessa
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
 
+// Enterprise staff shift scheduler & multi-shift rotation calendar suite
+export { default as ShiftScheduler, default as WorkShiftCalendar, type ShiftSchedulerProps, type ShiftType, type StaffMember, type ShiftAssignment, type ShiftConflictAlert } from './components/ShiftScheduler.svelte';
+
 // Enterprise global notification drawer suite
 export {
   default as NotificationDrawer,
