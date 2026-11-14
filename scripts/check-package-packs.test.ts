@@ -40,15 +40,16 @@ test('Surface declared minimum and peer floors agree with the published UI requi
     expect(Bun.semver.satisfies(current.version, range)).toBe(true);
   }
   expect(Bun.semver.satisfies('0.52.999', surface.peerDependencies['@svadmin/core'])).toBe(false);
+  expect(Bun.semver.satisfies('0.81.1', surface.peerDependencies['@svadmin/core'])).toBe(false);
   expect(Bun.semver.satisfies('0.72.999', surface.peerDependencies['@svadmin/ui'])).toBe(false);
   expect(Bun.semver.satisfies('5.56.9', surface.peerDependencies.svelte)).toBe(false);
   expect(compatibility.minimumSupported).toEqual({
-    '@svadmin/core': '0.53.0',
+    '@svadmin/core': '0.82.0',
     '@svadmin/ui': '0.73.0',
     svelte: '5.56.10',
   });
   expect(compatibility.testedCombinations).toContainEqual({
-    name: 'minimum-supported', core: '0.53.0', ui: '0.73.0', svelte: '5.56.10',
+    name: 'minimum-supported', core: '0.82.0', ui: '0.73.0', svelte: '5.56.10',
   });
 });
 

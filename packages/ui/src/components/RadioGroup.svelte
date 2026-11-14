@@ -306,7 +306,7 @@
 
   .svadmin-radio-group__option--disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    color: var(--svadmin-text-4);
   }
 
   .svadmin-radio-group__copy {

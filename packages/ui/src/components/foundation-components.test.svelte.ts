@@ -24,10 +24,18 @@ afterEach(() => {
 const text = (value: string) => createRawSnippet(() => ({ render: () => `<span>${value}</span>` }));
 
 describe('foundation components', () => {
-  it('renders space, grid and row layouts with token gaps', () => {
+  it('renders space, grid and row layouts with token gaps', async () => {
     const view = render(Space, { props: { size: 'lg', children: text('A') } });
     const space = view.container.querySelector('.svadmin-space') as HTMLElement;
     expect(space.style.getPropertyValue('--svadmin-space-gap')).toBe('var(--svadmin-space-4)');
+    await view.rerender({ size: 'medium', children: text('A') });
+    expect(space.style.getPropertyValue('--svadmin-space-gap')).toBe('var(--svadmin-space-4)');
+    await view.rerender({ size: 'large', children: text('A') });
+    expect(space.style.getPropertyValue('--svadmin-space-gap')).toBe('var(--svadmin-space-5)');
+    await view.rerender({ size: 'small', children: text('A') });
+    expect(space.style.getPropertyValue('--svadmin-space-gap')).toBe('var(--svadmin-space-2)');
+    await view.rerender({ size: 'mini', children: text('A') });
+    expect(space.style.getPropertyValue('--svadmin-space-gap')).toBe('var(--svadmin-space-1)');
 
     const gridView = render(Grid, { props: { columns: 3, children: createRawSnippet(() => ({ render: () => '<span>A</span><span>B</span>' })) } });
     const grid = gridView.container.querySelector('.svadmin-grid') as HTMLElement;

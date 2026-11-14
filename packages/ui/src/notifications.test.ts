@@ -24,7 +24,10 @@ describe('notification service', () => {
     expect(getNotifications()).toEqual([]);
 
     notification.info('Reminder', 'One minute');
-    vi.advanceTimersByTime(5000);
+    expect(getNotifications()[0]?.duration).toBe(3000);
+    vi.advanceTimersByTime(2999);
+    expect(getNotifications()).toHaveLength(1);
+    vi.advanceTimersByTime(1);
     expect(getNotifications()).toEqual([]);
   });
 });

@@ -5,9 +5,12 @@
 
 	// Use HTMLElement instead of HTMLSelectElement to avoid TS error:
 	// HTMLSelectElement.remove() returns void, incompatible with HTMLElement's Element return
+	type SelectSize = "mini" | "small" | "default" | "large" | "compact";
 	type Props = Omit<WithElementRef<HTMLSelectAttributes, HTMLElement>, "size"> & {
 		placeholder?: string;
-		size?: "default" | "compact";
+		size?: SelectSize;
+		/** 无边框选择。和高度尺寸分开。 */
+		borderless?: boolean;
 	};
 
 	let {
@@ -16,6 +19,7 @@
 		class: className,
 		placeholder,
 		size: sizeProp,
+		borderless = false,
 		children,
 		...restProps
 	}: Props = $props();
@@ -28,6 +32,7 @@
 	bind:this={ref}
 	data-slot="select"
 	data-size={size}
+	data-select-type={borderless ? "borderless" : "default"}
 	class={cn(
 		"svadmin-select",
 		className
