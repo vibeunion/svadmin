@@ -116,8 +116,8 @@
         bind:rules
         {mode}
         {currentClientIp}
-        {onChange}
-        {onAddMyIp}
+        {...(onChange ? { onChange } : {})}
+        {...(onAddMyIp ? { onAddMyIp } : {})}
       />
     </div>
   </div>

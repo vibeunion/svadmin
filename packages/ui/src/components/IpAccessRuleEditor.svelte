@@ -16,8 +16,6 @@
 
   // IPv4 regex
   const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
-  // IPv4 CIDR regex
-  const CIDR_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\/(?:3[0-2]|[12]?\d)$/;
 
   export function validateIpRuleValue(type: IpRuleType, value: string): { valid: boolean; error?: string } {
     const val = value.trim();
@@ -89,7 +87,7 @@
   let validationError = $state<string | null>(null);
 
   // Filtered rules
-  const filteredRules = $derived<IpAccessRule[]>(() => {
+  const filteredRules = $derived.by((): IpAccessRule[] => {
     return rules.filter((rule) => {
       if (typeFilter !== 'ALL' && rule.type !== typeFilter) return false;
       if (actionFilter !== 'ALL' && rule.action !== actionFilter) return false;
@@ -179,14 +177,17 @@
       // Edit existing
       const index = rules.findIndex((r) => r.id === editId);
       if (index >= 0) {
-        rules[index] = {
-          ...rules[index]!,
-          type: editType,
-          value: editValue.trim(),
-          action: editAction,
-          description: editDescription.trim() || undefined,
-          expiresAt,
-        };
+        const existing = rules[index];
+        if (existing) {
+          rules[index] = {
+            ...existing,
+            type: editType,
+            value: editValue.trim(),
+            action: editAction,
+            ...(editDescription.trim() ? { description: editDescription.trim() } : {}),
+            expiresAt,
+          };
+        }
       }
     } else {
       // Create new
@@ -195,7 +196,7 @@
         type: editType,
         value: editValue.trim(),
         action: editAction,
-        description: editDescription.trim() || undefined,
+        ...(editDescription.trim() ? { description: editDescription.trim() } : {}),
         enabled: true,
         expiresAt,
         createdAt: new Date().toISOString(),
@@ -270,7 +271,7 @@
 
       <select
         bind:value={typeFilter}
-        class="rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        data-size="compact" class="svadmin-select--inline svadmin-select"
       >
         <option value="ALL">All Types</option>
         <option value="SINGLE">Single IP</option>
@@ -280,7 +281,7 @@
 
       <select
         bind:value={actionFilter}
-        class="rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        data-size="compact" class="svadmin-select--inline svadmin-select"
       >
         <option value="ALL">All Actions</option>
         <option value="ALLOW">Allow (Whitelist)</option>
@@ -304,14 +305,14 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-border/60 bg-card">
-        {#if filteredRules().length === 0}
+        {#if filteredRules.length === 0}
           <tr>
             <td colspan="7" class="px-4 py-8 text-center text-xs text-muted-foreground">
               No IP access rules found. Click "Add IP Rule" to create one.
             </td>
           </tr>
         {:else}
-          {#each filteredRules() as rule (rule.id)}
+          {#each filteredRules as rule (rule.id)}
             <tr class="hover:bg-muted/40 transition-colors">
               <!-- Switch toggle -->
               <td class="px-4 py-3">
@@ -419,7 +420,7 @@
             <select
               id="rule-type-select"
               bind:value={editType}
-              class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-select"
             >
               <option value="SINGLE">Single IP (e.g. 192.168.1.100)</option>
               <option value="CIDR">CIDR Subnet (e.g. 172.16.0.0/16)</option>
@@ -448,7 +449,7 @@
             <select
               id="rule-action-select"
               bind:value={editAction}
-              class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-select"
             >
               <option value="ALLOW">ALLOW (Permit Connection)</option>
               <option value="DENY">DENY (Block Connection)</option>
@@ -461,7 +462,7 @@
             <select
               id="rule-expiration-select"
               bind:value={editExpiration}
-              class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-select"
             >
               <option value="PERMANENT">Permanent (Never expires)</option>
               <option value="2H">Temporary: 2 Hours</option>
