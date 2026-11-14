@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type {
     RetentionAction,
-    RetentionStatus,
     RetentionPolicy,
   } from './retention-utils.js';
   import {
@@ -24,10 +24,7 @@
   }: DataRetentionPolicyEditorProps = $props();
 
   // Internal reactive policies
-  let policyList = $state<RetentionPolicy[]>([]);
-
-  $effect(() => {
-    policyList = initialPolicies.length > 0
+  let policyList = $state<RetentionPolicy[]>(untrack(() => initialPolicies.length > 0
       ? initialPolicies.map(p => ({ ...p }))
       : [
           {
@@ -81,8 +78,7 @@
             estimatedRows: 220000,
             estimatedStorageMb: 450,
           },
-        ];
-  });
+        ]));
 
   const metrics = $derived(calculateRetentionMetrics(policyList));
   const conflicts = $derived(detectPolicyConflicts(policyList));
@@ -146,8 +142,8 @@
       retentionDays: editDays,
       action: editAction,
       status: 'active',
-      targetStorage: editTargetStorage.trim() || undefined,
-      filterCondition: editCondition.trim() || undefined,
+      ...(editTargetStorage.trim() ? { targetStorage: editTargetStorage.trim() } : {}),
+      ...(editCondition.trim() ? { filterCondition: editCondition.trim() } : {}),
       estimatedRows: 10000,
       estimatedStorageMb: 500,
     };
@@ -183,7 +179,7 @@
       case 'archive_cold_storage':
         return 'bg-primary/15 text-primary border-primary/25';
       case 'mask_and_archive':
-        return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25';
+        return 'bg-warning/15 text-warning dark:text-warning border-warning/25';
       case 'soft_delete':
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -238,11 +234,11 @@
 
   <!-- Conflict Warnings Banner -->
   {#if conflicts.length > 0}
-    <div class="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col gap-1 text-xs text-amber-700 dark:text-amber-400">
+    <div class="p-3.5 rounded-lg bg-warning/10 border border-warning/30 flex flex-col gap-1 text-xs text-warning dark:text-warning">
       <span class="font-bold flex items-center gap-1.5">
         ⚠️ 检测到规则重叠与潜在冲突提示:
       </span>
-      {#each conflicts as warn}
+      {#each conflicts as warn, i (i)}
         <p class="text-[11px] leading-relaxed pl-4">• {warn}</p>
       {/each}
     </div>
@@ -264,7 +260,7 @@
     </div>
     <div class="p-3 rounded-lg bg-card border border-border flex flex-col gap-1">
       <span class="text-xs text-muted-foreground">预计释放线上存储</span>
-      <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+      <span class="text-xl font-bold text-success dark:text-success font-mono">
         {metrics.totalEstimatedStorageGb} GB
       </span>
     </div>
@@ -360,7 +356,7 @@
                 <button
                   type="button"
                   onclick={() => toggleStatus(item)}
-                  class="text-[11px] px-2 py-0.5 rounded font-medium transition-colors {item.status === 'active' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}"
+                  class="text-[11px] px-2 py-0.5 rounded font-medium transition-colors {item.status === 'active' ? 'bg-success/15 text-success dark:text-success' : 'bg-muted text-muted-foreground'}"
                 >
                   {item.status === 'active' ? '已生效' : '已暂停'}
                 </button>
