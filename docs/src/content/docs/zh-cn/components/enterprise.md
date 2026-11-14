@@ -3114,6 +3114,37 @@ AI 规则语义解释卡片：
 <MicroAppStateBusIndicator />
 ```
 
+### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
+
+功能开关配置编辑器与渐进发布模拟器。组件在当前注册表中评估配置，通过 `onChange` 通知编辑结果；持久化由宿主应用对接自己的服务完成。
+
+- 全局关闭与紧急熔断优先于其他规则。
+- 命中 `notIn` 排除名单时始终关闭，不受 `in` / `equals` 白名单顺序影响。
+- 白名单可提前向指定用户、租户或角色开放。未命中者遵循发布比例；未设置比例时，有白名单的开关仅向白名单开放。
+- 按开关和用户／租户稳定分桶；渐进发布缺少稳定实体身份时返回关闭。
+- 熔断弹窗支持键盘焦点、Escape 取消与显式确认。
+
+在每个应用根组件中创建独立注册表，SSR 每个请求各自创建，并向编辑器和消费方传入同一个实例：
+
+```svelte
+<script lang="ts">
+  import { FeatureFlagStudio, createFeatureFlagRegistry, useFeatureFlag, type FeatureFlag } from '@svadmin/ui';
+
+  const flags: FeatureFlag[] = [
+    { key: 'billing_v2', name: 'Billing Engine V2', enabled: true, percentage: 25, tags: ['billing', 'beta'] },
+  ];
+  const registry = createFeatureFlagRegistry(flags);
+  const billingFeature = useFeatureFlag('billing_v2', () => ({ userId: 'user_123' }), false, registry);
+</script>
+
+<FeatureFlagStudio {flags} {registry} showSimulator={true} />
+<p>当前用户：{billingFeature.enabled ? '已开放' : '未开放'}</p>
+```
+
+`useFeatureFlag` 随注册表写入和响应式上下文变化更新。读写均隔离配置快照。`registerFeatureFlags`、`setFeatureFlag`、`getFeatureFlag`、`clearFeatureFlags` 的最后一个参数可传入注册表；默认注册表仅供浏览器使用，SSR 必须显式传入请求实例。没有传入注册表的 Studio 拥有独立状态，不会写入浏览器默认注册表。
+
+替换 `flags` 属性会同步编辑器快照，并从关联注册表移除过期条目。`onChange(flag)` 提供用于持久化的独立快照，修改它不会影响编辑器或最初的输入对象。设置 0% 比例并配置白名单，可实现仅向试用用户开放。
+
 ### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
 
 微前端父子单页应用路由双向无感同步协调器：

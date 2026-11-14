@@ -42,6 +42,8 @@ import {
   LightFilter,
   LockScreen,
   ScreenLock,
+  FeatureFlagStudio,
+  GrayReleaseManager,
   GlobalShortcuts,
   TreeTransfer,
   OrgTreePicker,
@@ -413,6 +415,8 @@ describe('public compatibility aliases', () => {
     expect(LightFilter).toBeDefined();
     expect(LockScreen).toBeDefined();
     expect(ScreenLock).toBeDefined();
+    expect(FeatureFlagStudio).toBeDefined();
+    expect(GrayReleaseManager).toBe(FeatureFlagStudio);
     expect(GlobalShortcuts).toBeDefined();
     expect(PricingTable).toBeDefined();
     expect(UsageCard).toBeDefined();

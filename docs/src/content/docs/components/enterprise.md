@@ -3222,6 +3222,37 @@ Cross-app reactive state bus and event message stream:
 <MicroAppStateBusIndicator />
 ```
 
+### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
+
+Feature flag configuration editor and gradual rollout simulator. It evaluates the current registry and reports edits through `onChange`; the host application persists those changes through its own service integration.
+
+- Disabled flags and kill switches override all other rules.
+- Matching `notIn` exclusions take precedence over matching `in` / `equals` allow rules, regardless of order.
+- Allow rules can opt selected users, tenants, or roles into a rollout. Unmatched contexts follow the configured percentage; without a percentage, a flag with allow rules is whitelist-only.
+- Percentage buckets are deterministic per flag and user/tenant. Partial rollouts without a stable user or tenant identity evaluate to false.
+- Kill-switch confirmation supports keyboard focus, Escape, and an explicit confirmation button.
+
+Create one registry in each application root (and each SSR request) and pass that same registry to the editor and consumers:
+
+```svelte
+<script lang="ts">
+  import { FeatureFlagStudio, createFeatureFlagRegistry, useFeatureFlag, type FeatureFlag } from '@svadmin/ui';
+
+  const flags: FeatureFlag[] = [
+    { key: 'billing_v2', name: 'Billing Engine V2', enabled: true, percentage: 25, tags: ['billing', 'beta'] },
+  ];
+  const registry = createFeatureFlagRegistry(flags);
+  const billingFeature = useFeatureFlag('billing_v2', () => ({ userId: 'user_123' }), false, registry);
+</script>
+
+<FeatureFlagStudio {flags} {registry} showSimulator={true} />
+<p>Current user: {billingFeature.enabled ? 'enabled' : 'disabled'}</p>
+```
+
+`useFeatureFlag` reacts to registry writes and reactive context values. Registry reads/writes use detached snapshots. `registerFeatureFlags`, `setFeatureFlag`, `getFeatureFlag`, and `clearFeatureFlags` accept an optional registry as their final argument. Their default registry is browser-only; SSR callers must provide a request-local instance. A studio without an explicit registry owns an isolated registry and does not publish to the browser default.
+
+Replacing the `flags` prop replaces the editor snapshot and removes stale entries from its connected registry. `onChange(flag)` receives a detached snapshot for persistence; updating it does not mutate the editor or the caller's original input. A 0% rollout with allow rules is useful for early-access whitelists.
+
 ### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
 
 Micro-frontend parent-child SPA route synchronization coordinator:
