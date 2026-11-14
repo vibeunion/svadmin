@@ -7,7 +7,7 @@
   type Movement = DemoRow<'stock_movements'>;
 
   import { captureAdminContext, createEnterpriseRequestContext, useList, type DashboardProvider } from '@svadmin/core';
-  import { useTranslation } from '@svadmin/core/i18n';
+  import { addTranslations, useTranslation } from '@svadmin/core/i18n';
   import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, StatusPill, type AuditDataState } from '@svadmin/ui';
   import {
     Bell,
@@ -26,7 +26,7 @@
   } from '@lucide/svelte';
   import { registerDashboardTranslations } from './dashboard-i18n';
 
-  registerDashboardTranslations();
+  registerDashboardTranslations(addTranslations);
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
@@ -291,11 +291,10 @@
   }
 </script>
 
+<div class="operations-dashboard-view" data-svadmin-component="OperationsDashboard" data-svadmin-resource="dashboard">
 <DashboardPage pageId="operations-dashboard"
   title={i18n.t('dashboard.pageTitle')}
-  description={i18n.t('dashboard.pageDescription')}
-  data-svadmin-component="OperationsDashboard"
-  data-svadmin-resource="dashboard">
+  description={i18n.t('dashboard.pageDescription')}>
   {#snippet actions()}
     <span role="status">
       <StatusPill tone={hasError ? 'warning' : isRefreshing ? 'info' : 'success'}
@@ -328,24 +327,20 @@
       defaultTo="2026-06-30" />
   </section>
   {#snippet metrics()}
-    <MetricBlock label={i18n.t('dashboard.metric.stockAtRisk')} value={productsQuery.isError ? '—' : lowStockProducts.length}
-      trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
-      detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} ${i18n.t('dashboard.metric.outOfStock')}`)}
-      loading={productsQuery.isLoading}
-      data-svadmin-component="StockRiskMetric"
-      data-svadmin-resource="products" />
-    <MetricBlock label={i18n.t('dashboard.metric.openWork')}
-      value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
-      detail={i18n.t('dashboard.metric.workDetail')}
-      loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading}
-      data-svadmin-component="OpenWorkMetric"
-      data-svadmin-resource="todos" />
-    <MetricBlock label={i18n.t('dashboard.metric.inventoryValue')}
-      value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
-      detail={productsQuery.isError ? '' : `${totalStock.toLocaleString(locale)} ${i18n.t('dashboard.metric.unitsInStock')}`}
-      loading={productsQuery.isLoading}
-      data-svadmin-component="InventoryValueMetric"
-      data-svadmin-resource="products" />
+    <div class="contents" data-svadmin-component="DashboardMetrics" data-svadmin-resource="dashboard">
+      <MetricBlock label={i18n.t('dashboard.metric.stockAtRisk')} value={productsQuery.isError ? '—' : lowStockProducts.length}
+        trendTone={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'warning' : 'neutral'}
+        detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} ${i18n.t('dashboard.metric.outOfStock')}`)}
+        loading={productsQuery.isLoading} />
+      <MetricBlock label={i18n.t('dashboard.metric.openWork')}
+        value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
+        detail={i18n.t('dashboard.metric.workDetail')}
+        loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
+      <MetricBlock label={i18n.t('dashboard.metric.inventoryValue')}
+        value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
+        detail={productsQuery.isError ? '' : `${totalStock.toLocaleString(locale)} ${i18n.t('dashboard.metric.unitsInStock')}`}
+        loading={productsQuery.isLoading} />
+    </div>
   {/snippet}
 
   <!-- Inventory Health + Operations Queue -->
@@ -626,3 +621,4 @@
     />
   {/await}
 </DashboardPage>
+</div>

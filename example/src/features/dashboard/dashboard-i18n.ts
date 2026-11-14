@@ -1,5 +1,3 @@
-import { addTranslations } from '@svadmin/core';
-
 export const dashboardTranslationsZh: Record<string, string> = {
   'dashboard.pageTitle': '运营工作台',
   'dashboard.pageDescription': '库存风险、订单与团队待办',
@@ -224,9 +222,11 @@ export const dashboardTranslationsEn: Record<string, string> = {
 
 let registered = false;
 
-export function registerDashboardTranslations(): void {
-  if (registered) return;
-  addTranslations('zh-CN', dashboardTranslationsZh);
-  addTranslations('en', dashboardTranslationsEn);
+export function registerDashboardTranslations(
+  addFn?: (locale: string, translations: Record<string, string>) => void,
+): void {
+  if (registered || !addFn) return;
+  addFn('zh-CN', dashboardTranslationsZh);
+  addFn('en', dashboardTranslationsEn);
   registered = true;
 }
