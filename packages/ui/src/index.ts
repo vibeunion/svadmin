@@ -1019,6 +1019,8 @@ export {
   default as IpAccessControlDrawer,
   type IpWhitelistDrawerProps,
 } from './components/IpWhitelistDrawer.svelte';
+// Enterprise staff shift scheduler & multi-shift rotation calendar suite
+export { default as ShiftScheduler, default as WorkShiftCalendar, type ShiftSchedulerProps, type ShiftType, type StaffMember, type ShiftAssignment, type ShiftConflictAlert } from './components/ShiftScheduler.svelte';
 
 // Enterprise global notification drawer suite
 export {

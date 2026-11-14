@@ -3317,6 +3317,32 @@ The address above is documentation-only. Supply `currentClientIp` from the authe
 Browser fixture: `bun run vite --config scripts/fixtures/ip-access-rules/vite.config.ts` (port 4198).
 
 
+### `<ShiftScheduler>` / `<WorkShiftCalendar>`
+
+Enterprise staff shift scheduling and multi-shift rotation calendar:
+- **Shift Type Tokens**: Define morning, evening, night, and off shifts with custom duration quotas, timeframes, and semantic color badges.
+- **Dynamic Weekly Navigation**: Previous/next week jump controls, current week anchor, and automated weekend highlighting.
+- **Quick Shift Painter & Batching**: Select active shift paintbrush to paint schedule cells directly or one-click populate full weekday shifts.
+- **Fatigue & Overtime Alerts**: Instant weekly accumulated hour calculations with automated compliance threshold and consecutive-workday alerts.
+
+```svelte
+<script lang="ts">
+  import { ShiftScheduler } from '@svadmin/ui';
+
+  const staffList = [
+    { id: '1', name: 'Alex Zhang', department: 'Operations' },
+    { id: '2', name: 'David Li', department: 'Infrastructure' },
+  ];
+
+  const shiftTypes = [
+    { id: 'morning', name: 'Morning', code: 'M', hours: 8, colorToken: 'emerald' },
+    { id: 'night', name: 'Night', code: 'N', hours: 8, colorToken: 'indigo' },
+    { id: 'off', name: 'Off', code: 'OFF', hours: 0, isRest: true, colorToken: 'slate' },
+  ];
+</script>
+
+<ShiftScheduler {staffList} {shiftTypes} />
+
 ### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
 
 Enterprise cross-system field mapping and schema transformer builder:
