@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { formatAdminDate, type FieldDefinition } from '@svadmin/core';
+  import { formatAdminDate } from '@svadmin/core/copy-format';
+  import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   interface Props {

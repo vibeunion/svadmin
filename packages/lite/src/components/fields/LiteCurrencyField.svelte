@@ -3,7 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { formatAdminCurrency, formatAdminNumber, type FieldDefinition } from '@svadmin/core';
+  import { formatAdminCurrency, formatAdminNumber } from '@svadmin/core/copy-format';
+  import type { FieldDefinition } from '@svadmin/core';
 
   interface Props {
     field?: FieldDefinition;

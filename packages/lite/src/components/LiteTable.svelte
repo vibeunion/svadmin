@@ -3,7 +3,8 @@
    * LiteTable — Pure HTML table with <a> sort links.
    * No JavaScript required — sorting and pagination are URL-driven.
    */
-  import { formatAdminDate, type ResourceDefinition, type FieldDefinition } from "@svadmin/core";
+  import { formatAdminDate } from '@svadmin/core/copy-format';
+  import type { ResourceDefinition, FieldDefinition } from '@svadmin/core';
   import { t } from "@svadmin/core/i18n";
   import { isExplicitBooleanTrue, getStatusBadgeClass } from "../value-normalization";
   import { liteFragmentId } from "../fragment-id";

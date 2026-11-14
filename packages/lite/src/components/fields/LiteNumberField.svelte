@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { formatAdminNumber, type FieldDefinition } from '@svadmin/core';
+  import { formatAdminNumber } from '@svadmin/core/copy-format';
+  import type { FieldDefinition } from '@svadmin/core';
 
   interface Props {
     field: FieldDefinition;

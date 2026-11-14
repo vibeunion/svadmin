@@ -4,7 +4,8 @@
    * Relies on standard <form> POST without polling or WebSockets.
    * No client-side JS required.
    */
-  import { formatAdminTime, type ChatMessage } from '@svadmin/core';
+  import { formatAdminTime } from '@svadmin/core/copy-format';
+  import type { ChatMessage } from '@svadmin/core';
 
   interface Props {
     /** History of messages */

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatAdminNumber } from '@svadmin/core';
+  import { formatAdminNumber } from '@svadmin/core/copy-format';
   interface QuotaItem {
     id: string;
     resourceName: string;

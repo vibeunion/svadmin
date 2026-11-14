@@ -8,7 +8,8 @@
 </script>
 
 <script lang="ts">
-  import { formatAdminDate, formatAdminTime, type FieldDefinition } from '@svadmin/core';
+  import { formatAdminDate, formatAdminTime } from '@svadmin/core/copy-format';
+  import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   interface Props {

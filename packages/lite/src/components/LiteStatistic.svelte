@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatAdminNumber } from '@svadmin/core';
+  import { formatAdminNumber } from '@svadmin/core/copy-format';
   interface Props {
     title?: string;
     value: number | string;

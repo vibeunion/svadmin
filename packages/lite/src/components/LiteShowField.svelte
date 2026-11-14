@@ -5,7 +5,8 @@
    * LiteShowField — SSR-compatible field renderer for detail views.
    * Renders a single field value based on its type definition.
    */
-  import { formatAdminTime, type FieldDefinition } from "@svadmin/core";
+  import { formatAdminTime } from '@svadmin/core/copy-format';
+  import type { FieldDefinition } from '@svadmin/core';
   import { toSafeHref, toSafeText } from "../security";
   import { isExplicitBooleanTrue, getStatusBadgeClass } from "../value-normalization";
   import LiteMediaThumbnail from "./LiteMediaThumbnail.svelte";

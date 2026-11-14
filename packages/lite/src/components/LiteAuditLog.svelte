@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatAdminTime } from '@svadmin/core';
+  import { formatAdminTime } from '@svadmin/core/copy-format';
   /**
    * LiteAuditLog — SSR-compatible audit log viewer.
    * Accepts both the legacy AuthProvider AuditLog shape and the current

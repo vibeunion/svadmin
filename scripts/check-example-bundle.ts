@@ -20,8 +20,9 @@ const maximumInitialBytes = 1_400_000;
 // PR #681 measured 402140 gzip bytes; PR #691 with enterprise workflow, org
 // and excel suites measured 402903 gzip bytes. The tailwind-variants v4 upgrade
 // ships its merge tables instead of the separate tailwind-merge peer and measured
-// 407081 gzip bytes; keep a narrow headroom for runner variation.
-const maximumInitialGzipBytes = 408_000;
+// 407081 gzip bytes. Copy formatting for numbers, dates and ellipsis measured
+// 408538 gzip bytes on 2026-11-14; keep a narrow headroom for runner variation.
+const maximumInitialGzipBytes = 409_500;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
