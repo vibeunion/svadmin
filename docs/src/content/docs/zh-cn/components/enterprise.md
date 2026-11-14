@@ -3064,39 +3064,31 @@ AI 规则语义解释卡片：
 
 ### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
 
-企业特性开关与灰度放量控制中心：
-- **百分比渐进灰度放量**：支持 0%~100% 平滑滑块微调，结合实体确定性哈希算法，保证相同用户刷新后状态绝对稳定。
-- **紧急熔断开关（Kill Switch）**：生产故障时秒级一键切断，配备高危双重确认模态弹窗，杜绝误触。
-- **租户/用户定向白名单**：支持特定内部员工、灰度企业租户或指定角色优先放行。
-- **内置仿真评估工作台（Playground）**：实时录入自定义 User ID、Tenant ID 与 Role，秒级演算判定规则命中路径。
-- **响应式 Runes 钩子**：前台业务代码直接调用 `useFeatureFlag(key)`，无感集成。
+功能开关配置编辑器与渐进发布模拟器。组件在当前注册表中评估配置，通过 `onChange` 通知编辑结果；持久化由宿主应用对接自己的服务完成。
+
+- 全局关闭与紧急熔断优先于其他规则。
+- 命中 `notIn` 排除名单时始终关闭，不受 `in` / `equals` 白名单顺序影响。
+- 白名单可提前向指定用户、租户或角色开放。未命中者遵循发布比例；未设置比例时，有白名单的开关仅向白名单开放。
+- 按开关和用户／租户稳定分桶；渐进发布缺少稳定实体身份时返回关闭。
+- 熔断弹窗支持键盘焦点、Escape 取消与显式确认。
+
+在每个应用根组件中创建独立注册表，SSR 每个请求各自创建，并向编辑器和消费方传入同一个实例：
 
 ```svelte
 <script lang="ts">
-  import { FeatureFlagStudio, useFeatureFlag } from '@svadmin/ui';
+  import { FeatureFlagStudio, createFeatureFlagRegistry, useFeatureFlag, type FeatureFlag } from '@svadmin/ui';
 
-  const flags = [
-    {
-      key: 'billing_v2',
-      name: '计费中心 V2',
-      description: '全新升级的企业级统一聚合账单开具引擎',
-      enabled: true,
-      percentage: 25,
-      tags: ['billing', 'beta'],
-    },
-    {
-      key: 'ai_copilot',
-      name: 'AI 表格伴侣',
-      description: '自然语言驱动的智能表格生成与透视',
-      enabled: false,
-      percentage: 0,
-      tags: ['ai'],
-    },
+  const flags: FeatureFlag[] = [
+    { key: 'billing_v2', name: 'Billing Engine V2', enabled: true, percentage: 25, tags: ['billing', 'beta'] },
   ];
-
-  // 在业务子组件中无感使用：
-  const billingFlag = useFeatureFlag('billing_v2');
+  const registry = createFeatureFlagRegistry(flags);
+  const billingFeature = useFeatureFlag('billing_v2', () => ({ userId: 'user_123' }), false, registry);
 </script>
 
-<FeatureFlagStudio {flags} showSimulator={true} />
+<FeatureFlagStudio {flags} {registry} showSimulator={true} />
+<p>当前用户：{billingFeature.enabled ? '已开放' : '未开放'}</p>
 ```
+
+`useFeatureFlag` 随注册表写入和响应式上下文变化更新。读写均隔离配置快照。`registerFeatureFlags`、`setFeatureFlag`、`getFeatureFlag`、`clearFeatureFlags` 的最后一个参数可传入注册表；默认注册表仅供浏览器使用，SSR 必须显式传入请求实例。没有传入注册表的 Studio 拥有独立状态，不会写入浏览器默认注册表。
+
+替换 `flags` 属性会同步编辑器快照，并从关联注册表移除过期条目。`onChange(flag)` 提供用于持久化的独立快照，修改它不会影响编辑器或最初的输入对象。设置 0% 比例并配置白名单，可实现仅向试用用户开放。

@@ -985,6 +985,7 @@ export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type Mi
 export { default as FeatureFlagStudio, default as GrayReleaseManager, type FeatureFlagStudioProps } from './components/FeatureFlagStudio.svelte';
 export {
   useFeatureFlag,
+  createFeatureFlagRegistry,
   evaluateFeatureFlag,
   registerFeatureFlags,
   setFeatureFlag,
@@ -994,4 +995,5 @@ export {
   type FeatureFlag,
   type FeatureFlagRule,
   type FeatureFlagContext,
+  type FeatureFlagRegistry,
 } from './components/useFeatureFlag.svelte.js';

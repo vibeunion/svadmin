@@ -1,6 +1,4 @@
-/**
- * Enterprise Feature Flag & Gray Release Evaluation Engine
- */
+import { SvelteMap } from 'svelte/reactivity';
 
 export interface FeatureFlagRule {
   field: 'userId' | 'tenantId' | 'role' | string;
@@ -13,9 +11,9 @@ export interface FeatureFlag {
   name: string;
   description?: string;
   enabled: boolean;
-  percentage?: number; // 0 - 100
+  percentage?: number;
   rules?: FeatureFlagRule[];
-  killSwitch?: boolean; // Emergency kill switch overrides all
+  killSwitch?: boolean;
   tags?: string[];
   updatedAt?: string;
 }
@@ -27,129 +25,110 @@ export interface FeatureFlagContext {
   [key: string]: unknown;
 }
 
-// In-memory feature flag registry
-const flagRegistry = new Map<string, FeatureFlag>();
-
-/**
- * Deterministic string hash to percentage (0 - 99)
- */
-export function hashStringToPercentage(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash) % 100;
+export interface FeatureFlagRegistry {
+  get(key: string): FeatureFlag | undefined;
+  set(flag: FeatureFlag): void;
+  register(flags: readonly FeatureFlag[]): void;
+  replace(flags: readonly FeatureFlag[]): void;
+  clear(): void;
 }
 
-/**
- * Evaluate a single feature flag against the given context
- */
-export function evaluateFeatureFlag(
-  flag: FeatureFlag,
-  context: FeatureFlagContext = {}
-): boolean {
-  // 1. Emergency Kill Switch always takes highest precedence
-  if (flag.killSwitch) {
-    return false;
+/** 快照隔离调用方、不同 Studio 以及消费组件，写入必须经过 registry.set。 */
+export function cloneFeatureFlag(flag: FeatureFlag): FeatureFlag {
+  return {
+    ...flag,
+    ...(flag.rules ? { rules: flag.rules.map(rule => ({ ...rule, values: [...rule.values] })) } : {}),
+    ...(flag.tags ? { tags: [...flag.tags] } : {}),
+  };
+}
+
+/** 每个应用或 SSR 请求创建自己的注册表；不向模块级服务端状态写入数据。 */
+export function createFeatureFlagRegistry(initialFlags: readonly FeatureFlag[] = []): FeatureFlagRegistry {
+  const flags = new SvelteMap<string, FeatureFlag>();
+  const registry: FeatureFlagRegistry = {
+    get(key) {
+      const flag = flags.get(key);
+      return flag ? cloneFeatureFlag(flag) : undefined;
+    },
+    set(flag) { flags.set(flag.key, cloneFeatureFlag(flag)); },
+    register(values) { for (const flag of values) registry.set(flag); },
+    replace(values) {
+      flags.clear();
+      registry.register(values);
+    },
+    clear() { flags.clear(); },
+  };
+  registry.register(initialFlags);
+  return registry;
+}
+
+let browserRegistry: FeatureFlagRegistry | undefined;
+function defaultRegistry(): FeatureFlagRegistry {
+  if (typeof window === 'undefined') {
+    throw new Error('SSR feature flags require an explicit createFeatureFlagRegistry() instance');
   }
+  return browserRegistry ??= createFeatureFlagRegistry();
+}
 
-  // 2. If globally disabled and no whitelist rules override
-  if (!flag.enabled) {
-    return false;
+/** FNV-1a：同一实体在不同调用中始终落入相同的 0–99 分桶。 */
+export function hashStringToPercentage(value: string): number {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index++) {
+    hash = Math.imul(hash ^ value.charCodeAt(index), 0x01000193);
   }
+  return (hash >>> 0) % 100;
+}
 
-  // 3. Evaluate whitelist / rule matching if present
-  if (flag.rules && flag.rules.length > 0) {
-    for (const rule of flag.rules) {
-      const contextVal = context[rule.field];
-      if (contextVal === undefined || contextVal === null) continue;
-      const strVal = String(contextVal);
+export function evaluateFeatureFlag(flag: FeatureFlag, context: FeatureFlagContext = {}): boolean {
+  if (flag.killSwitch || !flag.enabled) return false;
 
-      if (rule.operator === 'in' && rule.values.includes(strVal)) {
-        return true;
-      }
-      if (rule.operator === 'equals' && rule.values.includes(strVal)) {
-        return true;
-      }
-      if (rule.operator === 'notIn' && rule.values.includes(strVal)) {
-        return false;
-      }
-    }
-  }
+  const rules = flag.rules ?? [];
+  const matches = (rule: FeatureFlagRule) => {
+    const value = context[rule.field];
+    return (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')
+      && rule.values.includes(String(value));
+  };
+  // 排除规则优先，不能因为白名单排在前面而绕过排除名单。
+  if (rules.some(rule => rule.operator === 'notIn' && matches(rule))) return false;
+  const allowRules = rules.filter(rule => rule.operator === 'in' || rule.operator === 'equals');
+  if (allowRules.some(matches)) return true;
 
-  // 4. Percentage rollout evaluation
-  if (typeof flag.percentage === 'number') {
-    if (flag.percentage <= 0) return false;
+  if (flag.percentage !== undefined) {
+    if (!Number.isFinite(flag.percentage) || flag.percentage <= 0) return false;
     if (flag.percentage >= 100) return true;
-
-    // Use userId or tenantId as deterministic rollout key
-    const entityKey = context.userId || context.tenantId || '';
-    if (entityKey) {
-      const bucket = hashStringToPercentage(`${flag.key}:${entityKey}`);
-      return bucket < flag.percentage;
-    }
-    // If no entity key provided in context, default to percentage threshold against flag key
-    return hashStringToPercentage(flag.key) < flag.percentage;
+    const entityKey = context.userId || context.tenantId;
+    // 渐进发布必须有稳定实体；缺失身份时不把所有匿名访问者一起放行。
+    if (!entityKey) return false;
+    return hashStringToPercentage(`${flag.key}:${entityKey}`) < flag.percentage;
   }
-
-  return flag.enabled;
+  return allowRules.length === 0;
 }
 
-/**
- * Register initial feature flags into global registry
- */
-export function registerFeatureFlags(flags: FeatureFlag[]): void {
-  for (const flag of flags) {
-    flagRegistry.set(flag.key, flag);
-  }
+export function registerFeatureFlags(flags: FeatureFlag[], registry: FeatureFlagRegistry = defaultRegistry()): void {
+  registry.register(flags);
+}
+export function setFeatureFlag(flag: FeatureFlag, registry: FeatureFlagRegistry = defaultRegistry()): void {
+  registry.set(flag);
+}
+export function getFeatureFlag(key: string, registry: FeatureFlagRegistry = defaultRegistry()): FeatureFlag | undefined {
+  return registry.get(key);
+}
+export function clearFeatureFlags(registry: FeatureFlagRegistry = defaultRegistry()): void {
+  registry.clear();
 }
 
-/**
- * Set or update a feature flag
- */
-export function setFeatureFlag(flag: FeatureFlag): void {
-  flagRegistry.set(flag.key, flag);
-}
-
-/**
- * Get a registered feature flag by key
- */
-export function getFeatureFlag(key: string): FeatureFlag | undefined {
-  return flagRegistry.get(key);
-}
-
-/**
- * Clear all registered feature flags
- */
-export function clearFeatureFlags(): void {
-  flagRegistry.clear();
-}
-
-/**
- * Reactive Svelte 5 rune hook for feature flag consumption in UI
- */
+/** 在组件初始化时捕获注册表，在响应式表达式中读取 enabled / flag。 */
 export function useFeatureFlag(
   key: string,
   contextGetter?: () => FeatureFlagContext,
-  defaultFallback = false
+  defaultFallback = false,
+  registry: FeatureFlagRegistry = defaultRegistry(),
 ) {
-  let isEnabled = $state<boolean>(() => {
-    const flag = flagRegistry.get(key);
-    if (!flag) return defaultFallback;
-    const ctx = contextGetter ? contextGetter() : {};
-    return evaluateFeatureFlag(flag, ctx);
-  });
-
   return {
     get enabled() {
-      const flag = flagRegistry.get(key);
-      if (!flag) return defaultFallback;
-      const ctx = contextGetter ? contextGetter() : {};
-      return evaluateFeatureFlag(flag, ctx);
+      const flag = registry.get(key);
+      return flag ? evaluateFeatureFlag(flag, contextGetter?.() ?? {}) : defaultFallback;
     },
-    get flag() {
-      return flagRegistry.get(key);
-    },
+    get flag() { return registry.get(key); },
   };
 }

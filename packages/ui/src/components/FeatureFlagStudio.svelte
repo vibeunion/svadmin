@@ -1,13 +1,16 @@
 <script lang="ts">
-  import type { FeatureFlag, FeatureFlagContext } from './useFeatureFlag.svelte.js';
+  import { untrack } from 'svelte';
+  import * as Dialog from './ui/dialog/index.js';
+  import type { FeatureFlag, FeatureFlagContext, FeatureFlagRegistry } from './useFeatureFlag.svelte.js';
   import {
     evaluateFeatureFlag,
-    setFeatureFlag,
-    registerFeatureFlags,
+    cloneFeatureFlag,
+    createFeatureFlagRegistry,
   } from './useFeatureFlag.svelte.js';
 
   export interface FeatureFlagStudioProps {
     flags?: FeatureFlag[];
+    registry?: FeatureFlagRegistry;
     class?: string;
     showSimulator?: boolean;
     onChange?: (flag: FeatureFlag) => void;
@@ -16,6 +19,7 @@
 
   const {
     flags = [],
+    registry = createFeatureFlagRegistry(),
     class: className = '',
     showSimulator = true,
     onChange,
@@ -23,7 +27,8 @@
   }: FeatureFlagStudioProps = $props();
 
   // Internal reactive state
-  let flagList = $state<FeatureFlag[]>(flags.map((f) => ({ ...f })));
+  let flagList = $derived(flags.map(cloneFeatureFlag));
+  const idPrefix = $props.id();
   let searchQuery = $state<string>('');
   let statusFilter = $state<'ALL' | 'ENABLED' | 'DISABLED' | 'KILL_SWITCH'>('ALL');
   let selectedTag = $state<string>('ALL');
@@ -36,7 +41,7 @@
   let editKey = $state<string>('');
   let editName = $state<string>('');
   let editDescription = $state<string>('');
-  let editPercentage = $state<number>(100);
+  let editPercentage = $state<number | undefined>(100);
   let editTags = $state<string>('');
   let editWhitelist = $state<string>('');
 
@@ -46,16 +51,15 @@
   let simTenantId = $state<string>('tenant_alpha');
   let simRole = $state<string>('admin');
 
-  // Synchronize initial flags with global registry
+  // 只写入显式传入或本实例拥有的注册表，不污染其他组件树。
   $effect(() => {
-    if (flags.length > 0 && flagList.length === 0) {
-      flagList = flags.map((f) => ({ ...f }));
-    }
-    registerFeatureFlags(flagList);
+    const values = flagList;
+    const target = registry;
+    untrack(() => target.replace(values));
   });
 
   // Extract all unique tags
-  const allTags = $derived<string[]>(() => {
+  const allTags = $derived.by(() => {
     const set = new Set<string>();
     for (const flag of flagList) {
       if (flag.tags) {
@@ -65,8 +69,13 @@
     return Array.from(set);
   });
 
+  $effect(() => {
+    if (selectedTag !== 'ALL' && !allTags.includes(selectedTag)) selectedTag = 'ALL';
+    if (simFlagKey && !flagList.some(flag => flag.key === simFlagKey)) simFlagKey = '';
+  });
+
   // Filtered flag list
-  const filteredFlags = $derived<FeatureFlag[]>(() => {
+  const filteredFlags = $derived.by(() => {
     return flagList.filter((flag) => {
       // Status filter
       if (statusFilter === 'ENABLED' && (!flag.enabled || flag.killSwitch)) return false;
@@ -92,15 +101,15 @@
   });
 
   // Simulation result calculation
-  const simResult = $derived<{ enabled: boolean; reason: string }>(() => {
+  const simResult = $derived.by((): { enabled: boolean; reason: string } => {
     if (!simFlagKey) return { enabled: false, reason: 'No flag selected' };
     const flag = flagList.find((f) => f.key === simFlagKey);
     if (!flag) return { enabled: false, reason: 'Flag not found' };
 
     const ctx: FeatureFlagContext = {
-      userId: simUserId.trim() || undefined,
-      tenantId: simTenantId.trim() || undefined,
-      role: simRole.trim() || undefined,
+      ...(simUserId.trim() ? { userId: simUserId.trim() } : {}),
+      ...(simTenantId.trim() ? { tenantId: simTenantId.trim() } : {}),
+      ...(simRole.trim() ? { role: simRole.trim() } : {}),
     };
 
     if (flag.killSwitch) {
@@ -117,40 +126,33 @@
     return { enabled: false, reason: 'Outside rollout percentage or rule mismatch' };
   });
 
+  function updateFlag(flag: FeatureFlag, updates: Partial<FeatureFlag>): FeatureFlag {
+    const next = cloneFeatureFlag({ ...flag, ...updates, updatedAt: new Date().toISOString() });
+    flagList = flagList.map(value => value.key === next.key ? next : value);
+    registry.set(next);
+    onChange?.(cloneFeatureFlag(next));
+    return next;
+  }
+
   function toggleFlagEnabled(flag: FeatureFlag) {
-    flag.enabled = !flag.enabled;
-    flag.updatedAt = new Date().toISOString();
-    setFeatureFlag(flag);
-    onChange?.(flag);
+    updateFlag(flag, { enabled: !flag.enabled });
   }
 
   function updatePercentage(flag: FeatureFlag, value: number) {
-    flag.percentage = value;
-    flag.updatedAt = new Date().toISOString();
-    setFeatureFlag(flag);
-    onChange?.(flag);
+    if (Number.isFinite(value) && value >= 0 && value <= 100) updateFlag(flag, { percentage: value });
   }
 
   function triggerKillSwitch(flag: FeatureFlag) {
-    if (!flag.killSwitch) {
-      // Opening confirmation dialog before activating kill switch
-      killSwitchTarget = flag;
-    } else {
-      // Disabling kill switch directly
-      flag.killSwitch = false;
-      flag.updatedAt = new Date().toISOString();
-      setFeatureFlag(flag);
-      onChange?.(flag);
-    }
+    if (!flag.killSwitch) killSwitchTarget = flag;
+    else updateFlag(flag, { killSwitch: false });
   }
 
   function confirmKillSwitch() {
-    if (!killSwitchTarget) return;
-    killSwitchTarget.killSwitch = true;
-    killSwitchTarget.updatedAt = new Date().toISOString();
-    setFeatureFlag(killSwitchTarget);
-    onKillSwitchTriggered?.(killSwitchTarget);
-    onChange?.(killSwitchTarget);
+    const flag = flagList.find(value => value.key === killSwitchTarget?.key);
+    if (flag) {
+      const next = updateFlag(flag, { killSwitch: true });
+      onKillSwitchTriggered?.(cloneFeatureFlag(next));
+    }
     killSwitchTarget = null;
   }
 
@@ -164,8 +166,13 @@
     editWhitelist = '';
   }
 
+  const invalidCreate = $derived(!editKey.trim() || !editName.trim()
+    || editPercentage === undefined || !Number.isFinite(editPercentage)
+    || editPercentage < 0 || editPercentage > 100
+    || flagList.some(flag => flag.key === editKey.trim()));
+
   function saveFlag() {
-    if (!editKey.trim() || !editName.trim()) return;
+    if (invalidCreate || editPercentage === undefined) return;
 
     const tags = editTags
       .split(',')
@@ -177,35 +184,20 @@
       .map((w) => w.trim())
       .filter(Boolean);
 
-    const existingIndex = flagList.findIndex((f) => f.key === editKey);
     const newFlag: FeatureFlag = {
       key: editKey.trim(),
       name: editName.trim(),
       description: editDescription.trim(),
       enabled: true,
       percentage: editPercentage,
-      tags: tags.length > 0 ? tags : undefined,
-      rules:
-        whitelist.length > 0
-          ? [
-              {
-                field: 'userId',
-                operator: 'in',
-                values: whitelist,
-              },
-            ]
-          : undefined,
+      ...(tags.length > 0 ? { tags: [...new Set(tags)] } : {}),
+      ...(whitelist.length > 0 ? { rules: [{ field: 'userId', operator: 'in' as const, values: [...new Set(whitelist)] }] } : {}),
       updatedAt: new Date().toISOString(),
     };
 
-    if (existingIndex >= 0) {
-      flagList[existingIndex] = newFlag;
-    } else {
-      flagList.push(newFlag);
-    }
-
-    setFeatureFlag(newFlag);
-    onChange?.(newFlag);
+    flagList = [...flagList, newFlag];
+    registry.set(newFlag);
+    onChange?.(cloneFeatureFlag(newFlag));
     isEditing = false;
   }
 </script>
@@ -247,27 +239,30 @@
       <div class="relative w-full max-w-sm">
         <input
           type="text"
+          aria-label="Search feature flags"
           placeholder="Search by flag key, name or description..."
           bind:value={searchQuery}
-          class="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          data-size="compact" class="svadmin-input"
         />
       </div>
       <select
+        aria-label="Filter by status"
         bind:value={statusFilter}
-        class="rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        data-size="compact" class="svadmin-select svadmin-select--inline"
       >
         <option value="ALL">All Status</option>
         <option value="ENABLED">Enabled</option>
         <option value="DISABLED">Disabled</option>
         <option value="KILL_SWITCH">Kill Switch Active</option>
       </select>
-      {#if allTags().length > 0}
+      {#if allTags.length > 0}
         <select
+          aria-label="Filter by tag"
           bind:value={selectedTag}
-          class="rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          data-size="compact" class="svadmin-select svadmin-select--inline"
         >
           <option value="ALL">All Tags</option>
-          {#each allTags() as tag}
+          {#each allTags as tag (tag)}
             <option value={tag}>{tag}</option>
           {/each}
         </select>
@@ -277,12 +272,12 @@
 
   <!-- Flag Cards Grid -->
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-    {#if filteredFlags().length === 0}
+    {#if filteredFlags.length === 0}
       <div class="col-span-full rounded-lg border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
         No feature flags matched the current filter.
       </div>
     {:else}
-      {#each filteredFlags() as flag (flag.key)}
+      {#each filteredFlags as flag (flag.key)}
         <div
           class="relative flex flex-col justify-between rounded-lg border border-border bg-card p-4 shadow-sm transition-all hover:border-border/80 {flag.killSwitch ? 'border-destructive/60 bg-destructive/5' : ''}"
         >
@@ -316,7 +311,8 @@
                 <button
                   type="button"
                   role="switch"
-                  aria-checked={flag.enabled}
+                  aria-label={`Enable ${flag.name}`}
+                  aria-checked={flag.enabled && !flag.killSwitch}
                   disabled={flag.killSwitch}
                   class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {flag.enabled && !flag.killSwitch ? 'bg-primary' : 'bg-muted'}"
                   onclick={() => toggleFlagEnabled(flag)}
@@ -335,6 +331,7 @@
                 <span class="font-mono font-medium text-foreground">{flag.percentage ?? 100}%</span>
               </div>
               <input
+                aria-label={`Rollout percentage for ${flag.name}`}
                 type="range"
                 min="0"
                 max="100"
@@ -349,7 +346,7 @@
             <!-- Tags & Rules Badge -->
             {#if flag.tags && flag.tags.length > 0}
               <div class="mt-3 flex flex-wrap gap-1.5">
-                {#each flag.tags as tag}
+                {#each flag.tags as tag, index (`${tag}:${index}`)}
                   <span class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     #{tag}
                   </span>
@@ -389,46 +386,46 @@
       </div>
       <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div>
-          <label for="ffs-target-flag" class="block text-xs font-medium text-muted-foreground">Target Flag</label>
+          <label for={`${idPrefix}-target-flag`} class="block text-xs font-medium text-muted-foreground">Target Flag</label>
           <select
-            id="ffs-target-flag"
+            id={`${idPrefix}-target-flag`}
             bind:value={simFlagKey}
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-select"
           >
             <option value="">Select a flag...</option>
-            {#each flagList as flag}
+            {#each flagList as flag (flag.key)}
               <option value={flag.key}>{flag.name} ({flag.key})</option>
             {/each}
           </select>
         </div>
         <div>
-          <label for="ffs-user-id" class="block text-xs font-medium text-muted-foreground">User ID</label>
+          <label for={`${idPrefix}-user-id`} class="block text-xs font-medium text-muted-foreground">User ID</label>
           <input
-            id="ffs-user-id"
+            id={`${idPrefix}-user-id`}
             type="text"
             bind:value={simUserId}
             placeholder="e.g. user_99"
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-input"
           />
         </div>
         <div>
-          <label for="ffs-tenant-id" class="block text-xs font-medium text-muted-foreground">Tenant ID</label>
+          <label for={`${idPrefix}-tenant-id`} class="block text-xs font-medium text-muted-foreground">Tenant ID</label>
           <input
-            id="ffs-tenant-id"
+            id={`${idPrefix}-tenant-id`}
             type="text"
             bind:value={simTenantId}
             placeholder="e.g. tenant_pro"
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-input"
           />
         </div>
         <div>
-          <label for="ffs-role" class="block text-xs font-medium text-muted-foreground">User Role</label>
+          <label for={`${idPrefix}-role`} class="block text-xs font-medium text-muted-foreground">User Role</label>
           <input
-            id="ffs-role"
+            id={`${idPrefix}-role`}
             type="text"
             bind:value={simRole}
             placeholder="e.g. admin"
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-input"
           />
         </div>
       </div>
@@ -436,7 +433,7 @@
       <div class="mt-4 flex items-center justify-between rounded-md border border-border bg-background p-3">
         <div class="flex items-center gap-3">
           <span class="text-xs font-medium text-muted-foreground">Simulation Result:</span>
-          {#if simResult().enabled}
+          {#if simResult.enabled}
             <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
               ENABLED (TRUE)
             </span>
@@ -446,18 +443,15 @@
             </span>
           {/if}
         </div>
-        <span class="text-xs text-muted-foreground">{simResult().reason}</span>
+        <span class="text-xs text-muted-foreground">{simResult.reason}</span>
       </div>
     </div>
   {/if}
 
   <!-- Kill Switch Confirmation Dialog -->
-  {#if killSwitchTarget}
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-      data-svadmin-component="FeatureFlagStudioKillSwitchDialog"
-    >
-      <div class="w-full max-w-md rounded-lg border border-destructive/50 bg-card p-6 shadow-xl">
+  <Dialog.Root open={killSwitchTarget !== null} onOpenChange={(open) => { if (!open) killSwitchTarget = null; }}>
+    <Dialog.Content data-svadmin-component="FeatureFlagStudioKillSwitchDialog" closeOnOverlayClick={false}>
+      {#if killSwitchTarget}
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -465,14 +459,14 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-base font-bold text-foreground">Emergency Kill Switch Confirmation</h3>
+            <Dialog.Title>Emergency Kill Switch Confirmation</Dialog.Title>
             <p class="text-xs text-muted-foreground">This is a high-risk operational action.</p>
           </div>
         </div>
-        <p class="mt-4 text-xs text-muted-foreground">
+        <Dialog.Description class="mt-4">
           Are you sure you want to activate the emergency kill switch for <strong class="text-foreground">{killSwitchTarget.name}</strong> (<code class="text-destructive">{killSwitchTarget.key}</code>)?
-          This will instantly disable the feature across all tenants and users regardless of rollout rules.
-        </p>
+          This disables evaluation in the connected registry. Persist the change through onChange to apply it to your service.
+        </Dialog.Description>
         <div class="mt-6 flex justify-end gap-3">
           <button
             type="button"
@@ -489,77 +483,80 @@
             Confirm Kill Switch
           </button>
         </div>
-      </div>
-    </div>
-  {/if}
+      {/if}
+    </Dialog.Content>
+  </Dialog.Root>
 
   <!-- Create Flag Modal -->
-  {#if isEditing}
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div class="w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-xl">
-        <h3 class="text-base font-bold text-foreground">Create Feature Flag</h3>
-        <p class="text-xs text-muted-foreground">Define a new toggle and set rollout percentage.</p>
+  <Dialog.Root bind:open={isEditing}>
+    <Dialog.Content closeOnOverlayClick={false}>
+        <Dialog.Title>Create Feature Flag</Dialog.Title>
+        <Dialog.Description>Define a new toggle and set rollout percentage.</Dialog.Description>
 
         <div class="mt-4 space-y-3">
           <div>
-            <label for="ffs-edit-key" class="block text-xs font-medium text-foreground">Flag Key (Unique)</label>
+            <label for={`${idPrefix}-edit-key`} class="block text-xs font-medium text-foreground">Flag Key (Unique)</label>
             <input
-              id="ffs-edit-key"
+              id={`${idPrefix}-edit-key`}
               type="text"
               bind:value={editKey}
               placeholder="e.g. enable_beta_checkout"
-              class="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-input"
             />
+            {#if flagList.some(flag => flag.key === editKey.trim())}
+              <p role="status" class="mt-1 text-xs text-destructive">This flag key already exists.</p>
+            {/if}
           </div>
           <div>
-            <label for="ffs-edit-name" class="block text-xs font-medium text-foreground">Display Name</label>
+            <label for={`${idPrefix}-edit-name`} class="block text-xs font-medium text-foreground">Display Name</label>
             <input
-              id="ffs-edit-name"
+              id={`${idPrefix}-edit-name`}
               type="text"
               bind:value={editName}
               placeholder="e.g. Beta Checkout V2"
-              class="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-input"
             />
           </div>
           <div>
-            <label for="ffs-edit-description" class="block text-xs font-medium text-foreground">Description</label>
+            <label for={`${idPrefix}-edit-description`} class="block text-xs font-medium text-foreground">Description</label>
             <textarea
-              id="ffs-edit-description"
+              id={`${idPrefix}-edit-description`}
               bind:value={editDescription}
               rows="2"
               placeholder="Explain the purpose of this flag..."
-              class="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              class="mt-1 svadmin-textarea"
             ></textarea>
           </div>
           <div>
-            <label for="ffs-edit-percentage" class="block text-xs font-medium text-foreground">Initial Rollout Percentage (0% - 100%)</label>
+            <label for={`${idPrefix}-edit-percentage`} class="block text-xs font-medium text-foreground">Initial Rollout Percentage (0% - 100%)</label>
             <input
-              id="ffs-edit-percentage"
+              id={`${idPrefix}-edit-percentage`}
               type="number"
               min="0"
               max="100"
               bind:value={editPercentage}
-              class="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-input"
             />
           </div>
           <div>
-            <label for="ffs-edit-whitelist" class="block text-xs font-medium text-foreground">User Whitelist (Comma separated User IDs)</label>
+            <label for={`${idPrefix}-edit-whitelist`} class="block text-xs font-medium text-foreground">User Whitelist (Comma separated User IDs)</label>
             <input
-              id="ffs-edit-whitelist"
+              id={`${idPrefix}-edit-whitelist`}
               type="text"
               bind:value={editWhitelist}
               placeholder="user_1, user_2, admin_test"
-              class="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-input"
             />
+            <p class="mt-1 text-xs text-muted-foreground">Matching users bypass the rollout percentage. Use 0% for whitelist-only access.</p>
           </div>
           <div>
-            <label for="ffs-edit-tags" class="block text-xs font-medium text-foreground">Tags (Comma separated)</label>
+            <label for={`${idPrefix}-edit-tags`} class="block text-xs font-medium text-foreground">Tags (Comma separated)</label>
             <input
-              id="ffs-edit-tags"
+              id={`${idPrefix}-edit-tags`}
               type="text"
               bind:value={editTags}
               placeholder="checkout, experiment, billing"
-              class="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              data-size="compact" class="mt-1 svadmin-input"
             />
           </div>
         </div>
@@ -575,12 +572,12 @@
           <button
             type="button"
             class="rounded-md bg-primary px-3.5 py-1.5 text-xs font-medium text-primary-foreground shadow hover:opacity-90"
+            disabled={invalidCreate}
             onclick={saveFlag}
           >
             Save Flag
           </button>
         </div>
-      </div>
-    </div>
-  {/if}
+    </Dialog.Content>
+  </Dialog.Root>
 </div>

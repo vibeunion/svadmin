@@ -3173,39 +3173,31 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 ### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
 
-Enterprise feature flag and gradual rollout control center:
-- **Gradual Percentage Rollout**: Deterministic entity hashing for 0% to 100% phased releases.
-- **Emergency Kill Switch**: High-risk modal with two-step confirmation for immediate production fail-safes.
-- **User & Tenant Whitelist**: Direct rule evaluation targeting specific users, organizations, or roles.
-- **Interactive Evaluation Playground**: Live simulator testing evaluation results against custom context payloads.
-- **Reactive Hook**: Consumable via `useFeatureFlag(key)` in Svelte 5 rune apps.
+Feature flag configuration editor and gradual rollout simulator. It evaluates the current registry and reports edits through `onChange`; the host application persists those changes through its own service integration.
+
+- Disabled flags and kill switches override all other rules.
+- Matching `notIn` exclusions take precedence over matching `in` / `equals` allow rules, regardless of order.
+- Allow rules can opt selected users, tenants, or roles into a rollout. Unmatched contexts follow the configured percentage; without a percentage, a flag with allow rules is whitelist-only.
+- Percentage buckets are deterministic per flag and user/tenant. Partial rollouts without a stable user or tenant identity evaluate to false.
+- Kill-switch confirmation supports keyboard focus, Escape, and an explicit confirmation button.
+
+Create one registry in each application root (and each SSR request) and pass that same registry to the editor and consumers:
 
 ```svelte
 <script lang="ts">
-  import { FeatureFlagStudio, useFeatureFlag } from '@svadmin/ui';
+  import { FeatureFlagStudio, createFeatureFlagRegistry, useFeatureFlag, type FeatureFlag } from '@svadmin/ui';
 
-  const flags = [
-    {
-      key: 'billing_v2',
-      name: 'Billing Engine V2',
-      description: 'New unified invoice calculator',
-      enabled: true,
-      percentage: 25,
-      tags: ['billing', 'beta'],
-    },
-    {
-      key: 'ai_copilot',
-      name: 'AI Table Copilot',
-      description: 'Natural language table generation',
-      enabled: false,
-      percentage: 0,
-      tags: ['ai'],
-    },
+  const flags: FeatureFlag[] = [
+    { key: 'billing_v2', name: 'Billing Engine V2', enabled: true, percentage: 25, tags: ['billing', 'beta'] },
   ];
-
-  // In child views:
-  const billingFeature = useFeatureFlag('billing_v2');
+  const registry = createFeatureFlagRegistry(flags);
+  const billingFeature = useFeatureFlag('billing_v2', () => ({ userId: 'user_123' }), false, registry);
 </script>
 
-<FeatureFlagStudio {flags} showSimulator={true} />
+<FeatureFlagStudio {flags} {registry} showSimulator={true} />
+<p>Current user: {billingFeature.enabled ? 'enabled' : 'disabled'}</p>
 ```
+
+`useFeatureFlag` reacts to registry writes and reactive context values. Registry reads/writes use detached snapshots. `registerFeatureFlags`, `setFeatureFlag`, `getFeatureFlag`, and `clearFeatureFlags` accept an optional registry as their final argument. Their default registry is browser-only; SSR callers must provide a request-local instance. A studio without an explicit registry owns an isolated registry and does not publish to the browser default.
+
+Replacing the `flags` prop replaces the editor snapshot and removes stale entries from its connected registry. `onChange(flag)` receives a detached snapshot for persistence; updating it does not mutate the editor or the caller's original input. A 0% rollout with allow rules is useful for early-access whitelists.
