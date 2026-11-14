@@ -1047,3 +1047,14 @@ export {
 // Enterprise service desk support ticket card & canned response picker suite
 export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
 export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
+
+// Enterprise SSO Connection Studio & Identity Provider Manager suite
+export {
+  default as SsoConnectionStudio,
+  default as IdentityProviderManager,
+  type SsoConnectionStudioProps,
+  type SsoConnection,
+  type SsoProtocol,
+  type SsoStatus,
+  type SsoClaimMapping,
+} from './components/SsoConnectionStudio.svelte';
