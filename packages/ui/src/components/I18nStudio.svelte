@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { addTranslations, getAvailableLocales, getLocale } from '@svadmin/core';
+  import { addTranslations } from '@svadmin/core';
 
   export interface I18nStudioProps {
     /** Map of locale to translation dictionary records */
@@ -36,8 +36,10 @@
 
   // Internal reactive copy of dictionaries
   let localDictionaries = $state<Record<string, Record<string, string>>>({});
-  let activeSource = $state('zh-CN');
-  let activeTarget = $state('en-US');
+  let activeSourceOverride = $state<string | null>(null);
+  let activeTargetOverride = $state<string | null>(null);
+  const activeSource = $derived(activeSourceOverride ?? sourceLocale);
+  const activeTarget = $derived(activeTargetOverride ?? targetLocale);
   let searchQuery = $state('');
   let selectedNamespace = $state('all');
   let statusFilter = $state<'all' | 'missing' | 'modified'>('all');
@@ -49,12 +51,6 @@
   let liveSuccessMessage = $state<string | null>(null);
   let initialTargetSnapshot = $state<Record<string, string>>({});
 
-  $effect(() => {
-    activeSource = sourceLocale;
-  });
-  $effect(() => {
-    activeTarget = targetLocale;
-  });
   $effect(() => {
     localDictionaries = JSON.parse(JSON.stringify(dictionaries));
     initialTargetSnapshot = JSON.parse(JSON.stringify(dictionaries[targetLocale] || {}));
@@ -69,7 +65,7 @@
   }
 
   // All combined keys across all locales
-  const allKeys = $derived(() => {
+  const allKeys = $derived.by(() => {
     const keySet = new Set<string>();
     for (const dict of Object.values(localDictionaries)) {
       for (const k of Object.keys(dict)) {
@@ -80,12 +76,12 @@
   });
 
   // Extract unique namespaces (e.g., 'dashboard' from 'dashboard.title')
-  const namespaces = $derived(() => {
+  const namespaces = $derived.by(() => {
     const nsSet = new Set<string>();
-    for (const k of allKeys()) {
+    for (const k of allKeys) {
       const parts = k.split('.');
       if (parts.length > 1) {
-        nsSet.add(parts[0]!);
+        nsSet.add(parts[0] ?? 'common');
       } else {
         nsSet.add('common');
       }
@@ -94,8 +90,8 @@
   });
 
   // Filtered keys
-  const filteredKeys = $derived(() => {
-    const keys = allKeys();
+  const filteredKeys = $derived.by(() => {
+    const keys = allKeys;
     const sourceDict = localDictionaries[activeSource] || {};
     const targetDict = localDictionaries[activeTarget] || {};
 
@@ -130,13 +126,14 @@
   });
 
   // Completion stats
-  const completionStats = $derived(() => {
-    const keys = allKeys();
+  const completionStats = $derived.by(() => {
+    const keys = allKeys;
     if (keys.length === 0) return { total: 0, translated: 0, percent: 100 };
     const targetDict = localDictionaries[activeTarget] || {};
     let translatedCount = 0;
     for (const k of keys) {
-      if (targetDict[k] && targetDict[k]!.trim() !== '') {
+      const value = targetDict[k] ?? '';
+      if (value.trim() !== '') {
         translatedCount++;
       }
     }
@@ -155,7 +152,7 @@
 
   function handleSaveAll() {
     onSave?.(localDictionaries);
-    liveSuccessMessage = `Translations saved successfully (${filteredKeys().length} keys)`;
+    liveSuccessMessage = `Translations saved successfully (${filteredKeys.length} keys)`;
     setTimeout(() => {
       liveSuccessMessage = null;
     }, 3000);
@@ -223,9 +220,12 @@
   }
 
   function handleDeleteKey(key: string) {
-    for (const dict of Object.values(localDictionaries)) {
-      delete dict[key];
+    const next: Record<string, Record<string, string>> = {};
+    for (const [locale, dict] of Object.entries(localDictionaries)) {
+      const { [key]: _removed, ...rest } = dict;
+      next[locale] = rest;
     }
+    localDictionaries = next;
   }
 </script>
 
@@ -389,20 +389,24 @@
     <div class="flex items-center gap-2">
       <span class="text-xs text-muted-foreground">Source:</span>
       <select
-        bind:value={activeSource}
-        class="rounded border border-border bg-background px-2 py-1 text-xs font-medium text-foreground focus:outline-none"
+        value={activeSource}
+        onchange={(event) => { activeSourceOverride = (event.currentTarget as HTMLSelectElement).value; }}
+        class="svadmin-select svadmin-select--inline"
+        data-size="compact"
       >
-        {#each locales as loc}
+        {#each locales as loc (loc)}
           <option value={loc}>{loc}</option>
         {/each}
       </select>
 
       <span class="text-xs text-muted-foreground">➔ Target:</span>
       <select
-        bind:value={activeTarget}
-        class="rounded border border-border bg-background px-2 py-1 text-xs font-medium text-foreground focus:outline-none"
+        value={activeTarget}
+        onchange={(event) => { activeTargetOverride = (event.currentTarget as HTMLSelectElement).value; }}
+        class="svadmin-select svadmin-select--inline"
+        data-size="compact"
       >
-        {#each locales as loc}
+        {#each locales as loc (loc)}
           <option value={loc}>{loc}</option>
         {/each}
       </select>
@@ -412,16 +416,16 @@
     <div class="flex items-center gap-3">
       <div class="flex flex-col items-end">
         <span class="text-xs font-semibold text-foreground">
-          {completionStats().percent}% Translated
+          {completionStats.percent}% Translated
         </span>
         <span class="text-[10px] text-muted-foreground">
-          {completionStats().translated} / {completionStats().total} keys completed
+          {completionStats.translated} / {completionStats.total} keys completed
         </span>
       </div>
       <div class="h-2 w-24 overflow-hidden rounded-full bg-muted">
         <div
           class="h-full bg-primary transition-all duration-300"
-          style={`width: ${completionStats().percent}%`}
+          style={`width: ${completionStats.percent}%`}
         ></div>
       </div>
     </div>
@@ -443,10 +447,11 @@
       <!-- Namespace dropdown -->
       <select
         bind:value={selectedNamespace}
-        class="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none"
+        class="svadmin-select svadmin-select--inline"
+        data-size="compact"
       >
         <option value="all">All Namespaces</option>
-        {#each namespaces() as ns}
+        {#each namespaces as ns (ns)}
           <option value={ns}>{ns}</option>
         {/each}
       </select>
@@ -490,7 +495,7 @@
     </div>
 
     <span class="text-xs text-muted-foreground">
-      Showing {filteredKeys().length} of {allKeys().length} entries
+      Showing {filteredKeys.length} of {allKeys.length} entries
     </span>
   </div>
 
@@ -506,14 +511,14 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-border bg-background">
-        {#if filteredKeys().length === 0}
+        {#if filteredKeys.length === 0}
           <tr>
             <td colspan="4" class="py-8 text-center text-xs text-muted-foreground">
               No translation keys match the selected filters.
             </td>
           </tr>
         {:else}
-          {#each filteredKeys() as key}
+          {#each filteredKeys as key (key)}
             {@const sourceVal = (localDictionaries[activeSource] || {})[key] || ''}
             {@const targetVal = (localDictionaries[activeTarget] || {})[key] || ''}
             {@const isMissing = !targetVal || targetVal.trim() === ''}

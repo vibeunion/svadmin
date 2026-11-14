@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 // Testable pure logic helper corresponding to I18nStudio's data operations
 export function computeCompletionStats(
@@ -21,7 +21,7 @@ export function extractNamespaces(keys: string[]): string[] {
   for (const k of keys) {
     const parts = k.split('.');
     if (parts.length > 1) {
-      nsSet.add(parts[0]!);
+      nsSet.add(parts[0] ?? 'common');
     } else {
       nsSet.add('common');
     }
