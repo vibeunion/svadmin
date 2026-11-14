@@ -242,6 +242,18 @@ describe('FileUpload', () => {
     expect(upload).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps a file when the remove pre-check refuses', async () => {
+    const beforeRemove = vi.fn(() => false);
+    const view = render(FileUpload, { beforeRemove });
+    const input = view.container.querySelector('input[type="file"]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('Expected file input');
+    await fireEvent.change(input, { target: { files: [file('keep.txt')] } });
+    await fireEvent.click(view.getByRole('button', { name: 'Remove file' }));
+    await act(async () => { await Promise.resolve(); });
+    expect(beforeRemove).toHaveBeenCalledTimes(1);
+    expect(view.getByText('keep.txt')).toBeTruthy();
+  });
+
   it('allows selecting the same filename again after removal', async () => {
     const view = render(FileUpload);
     const input = view.container.querySelector('input[type="file"]');

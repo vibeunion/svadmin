@@ -70,7 +70,7 @@ export class TooltipLayerContext {
 		this.#writeOpen(false);
 	}
 
-	scheduleClose(delay = 80) {
+	scheduleClose(delay = 0) {
 		if (this.#destroyed) return;
 		this.cancelScheduledClose();
 		this.#closeTimer = setTimeout(() => {
