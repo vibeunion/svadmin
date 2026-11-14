@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.131.0](https://github.com/vibeunion/svadmin/compare/ui-v0.130.0...ui-v0.131.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** add FieldMappingBuilder and DataImportPipeline suite ([#797](https://github.com/vibeunion/svadmin/issues/797)) ([aa74b14](https://github.com/vibeunion/svadmin/commit/aa74b1473f787c8e4ed1daf30f5dd5fcb4038c3b))
+* **ui:** add ShiftScheduler enterprise rotation calendar suite ([#799](https://github.com/vibeunion/svadmin/issues/799)) ([74a21d6](https://github.com/vibeunion/svadmin/commit/74a21d6830d2d8cf8ce05240efad92075d3e9939))
+
 ## [0.130.0](https://github.com/vibeunion/svadmin/compare/ui-v0.129.0...ui-v0.130.0) (2026-11-14)
 
 
