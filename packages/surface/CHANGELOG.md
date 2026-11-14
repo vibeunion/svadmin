@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.22.0](https://github.com/vibeunion/svadmin/compare/surface-v0.21.0...surface-v0.22.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** finish remaining Arco control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.82.0 <0.83.0 to >=0.82.0 <0.84.0
+    * @svadmin/ui bumped from >=0.127.0 <0.128.0 to >=0.127.0 <0.129.0
+
 ## [0.21.0](https://github.com/vibeunion/svadmin/compare/surface-v0.20.29...surface-v0.21.0) (2026-11-14)
 
 

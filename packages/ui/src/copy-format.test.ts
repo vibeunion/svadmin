@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAdminCopy, formatAdminCurrency, formatAdminDate, formatAdminEllipsis, formatAdminNumber, formatAdminPercent, formatAdminTime, spaceCjkLatin } from './copy-format';
+import { formatAdminCopy, formatAdminCurrency, formatAdminDate, formatAdminEllipsis, formatAdminEmDash, formatAdminEnglishPunctuation, formatAdminLessThanOrEqual, formatAdminNumber, formatAdminNumericRange, formatAdminPercent, formatAdminTime, spaceCjkLatin } from './copy-format';
 
 describe('admin copy format', () => {
   it('formats clock time on a 24-hour cycle', () => {
@@ -59,6 +59,17 @@ describe('admin copy format', () => {
     const formatted = formatAdminDate(new Date(2026, 0, 2, 15, 4, 5), { locale: 'en-US', dateStyle: 'medium' });
     expect(formatted).toContain('2026');
     expect(formatted).not.toMatch(/15:04|3:04|PM|pm/);
+  });
+
+  it('formats em dashes, comparisons, numeric ranges and English punctuation', () => {
+    expect(formatAdminEmDash('说明--补充')).toBe('说明——补充');
+    expect(formatAdminEmDash('说明—补充')).toBe('说明——补充');
+    expect(formatAdminEmDash('说明——补充')).toBe('说明——补充');
+    expect(formatAdminLessThanOrEqual('数量<=10')).toBe('数量≤10');
+    expect(formatAdminNumericRange('1-10 和 20—30')).toBe('1~10 和 20~30');
+    expect(formatAdminNumericRange('1~10')).toBe('1~10');
+    expect(formatAdminEnglishPunctuation('Hello,world. Next')).toBe('Hello, world. Next');
+    expect(formatAdminCopy('保存Success...')).toBe('保存 Success…');
   });
 
   it('uses the single-character ellipsis on shared copy', () => {

@@ -29,6 +29,15 @@
     searchValue = '';
   }
 
+  function localizedFallback(zh: string, en: string): string {
+    return i18n.locale.toLowerCase().startsWith('zh') ? zh : en;
+  }
+
+  function translateOrFallback(key: string, fallback: string): string {
+    const value = i18n.t(key);
+    return value && value !== key ? value : fallback;
+  }
+
   function act(fn: () => void) {
     fn();
     close();
@@ -49,14 +58,16 @@
   <Dialog.DialogContent class="overflow-hidden p-0 sm:max-w-[560px]">
     <Dialog.DialogTitle class="sr-only">{i18n.t('common.search')}</Dialog.DialogTitle>
     <Command.Root class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground [&_[data-command-group-heading]]:text-muted-foreground [&_[data-command-group-heading]]:px-2 [&_[data-command-group-heading]]:py-1.5 [&_[data-command-group-heading]]:text-xs [&_[data-command-group-heading]]:font-semibold [&_[data-command-group-heading]]:uppercase [&_[data-command-group-heading]]:tracking-wider">
-      <div class="flex items-center border-b px-3" data-cmdk-input-wrapper="">
+      <div class="flex items-center border-b pl-3 pr-12" data-cmdk-input-wrapper="">
         <Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <Command.Input
           bind:value={searchValue}
-          placeholder={hasAI ? (i18n.t('commandPalette.searchOrAsk') || 'Search or ask AI…') : i18n.t('common.search')}
+          placeholder={hasAI
+            ? translateOrFallback('commandPalette.searchOrAsk', localizedFallback('搜索命令或询问 AI…', 'Search commands or ask AI…'))
+            : i18n.t('common.search')}
           class="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         />
-        <kbd class="ml-2 text-[10px] font-mono font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">ESC</kbd>
+        <kbd class="ml-2 shrink-0 text-[10px] font-mono font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">ESC</kbd>
       </div>
       <Command.List class="max-h-[320px] overflow-y-auto overflow-x-hidden p-1">
         <Command.Empty class="py-6 text-center text-sm text-muted-foreground">
@@ -66,7 +77,7 @@
               onclick={askAI}
             >
               <Sparkles class="h-3.5 w-3.5" />
-              {i18n.t('commandPalette.askAI') || 'Ask AI'}: "{searchValue.trim()}"
+              {translateOrFallback('commandPalette.askAI', localizedFallback('询问 AI', 'Ask AI'))}: "{searchValue.trim()}"
             </button>
           {:else}
             {i18n.t('common.noData')}
@@ -82,7 +93,7 @@
               class={itemClass}
             >
               <Sparkles class="h-4 w-4 text-primary" />
-              <span class="text-primary font-medium">{i18n.t('commandPalette.askAI') || 'Ask AI'}</span>
+              <span class="text-primary font-medium">{translateOrFallback('commandPalette.askAI', localizedFallback('询问 AI', 'Ask AI'))}</span>
               <span class="text-muted-foreground truncate ml-1">"{searchValue.trim()}"</span>
             </Command.Item>
           </Command.Group>

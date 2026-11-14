@@ -88,6 +88,12 @@
   const normalizedViewportHeight = $derived(
     Number.isSafeInteger(viewportHeight) && viewportHeight >= 120 && viewportHeight <= 800 ? viewportHeight : 280,
   );
+  // 选项溢出时，滚动面板露出最后一项大约一半，提示下面还有内容。
+  const menuViewportHeight = $derived.by(() => {
+    const item = normalizedItemHeight;
+    const full = Math.max(1, Math.floor(normalizedViewportHeight / item));
+    return full * item + Math.round(item / 2);
+  });
 
   const binding = useResourceContract(() => resource);
   const context = captureAdminContext();
@@ -189,11 +195,11 @@
   const totalOptions = $derived(select.query.data?.total ?? availableOptions.length);
   const shouldVirtualize = $derived(virtualized && availableOptions.length >= 200);
   const virtualTotalHeight = $derived(availableOptions.length * normalizedItemHeight);
-  const virtualMaxScroll = $derived(Math.max(0, virtualTotalHeight - normalizedViewportHeight));
+  const virtualMaxScroll = $derived(Math.max(0, virtualTotalHeight - menuViewportHeight));
   const clampedListScrollTop = $derived(Math.max(0, Math.min(listScrollTop, virtualMaxScroll)));
   const virtualStart = $derived(Math.max(0, Math.floor(clampedListScrollTop / normalizedItemHeight) - 5));
   const virtualEnd = $derived(Math.min(availableOptions.length,
-    Math.ceil((clampedListScrollTop + normalizedViewportHeight) / normalizedItemHeight) + 5));
+    Math.ceil((clampedListScrollTop + menuViewportHeight) / normalizedItemHeight) + 5));
   const renderedOptions = $derived(shouldVirtualize
     ? availableOptions.slice(virtualStart, virtualEnd) : availableOptions);
   const activeOptionId = $derived(shouldVirtualize && activeIndex >= 0 && availableOptions[activeIndex]
@@ -351,8 +357,8 @@
     const top = activeIndex * normalizedItemHeight;
     const bottom = top + normalizedItemHeight;
     if (top < clampedListScrollTop) listScrollTop = top;
-    else if (bottom > clampedListScrollTop + normalizedViewportHeight) {
-      listScrollTop = bottom - normalizedViewportHeight;
+    else if (bottom > clampedListScrollTop + menuViewportHeight) {
+      listScrollTop = bottom - menuViewportHeight;
     }
     if (listElement) listElement.scrollTop = listScrollTop;
   }
@@ -411,8 +417,8 @@
     disabled={select.isFetching || searchInputValue !== appliedSearch}
     value={`${typeof opt.value}:${opt.value}`}
     onSelect={() => handleSelect(opt.value)}
-    style={shouldVirtualize ? `height:${normalizedItemHeight}px;` : undefined}
-    class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected]:bg-accent data-[selected]:text-accent-foreground"
+    style={`height:${normalizedItemHeight}px;`}
+    class="relative box-border flex cursor-default select-none items-center overflow-hidden rounded-sm px-2 text-sm outline-none data-[selected]:bg-accent data-[selected]:text-accent-foreground"
   >
     <Check class="mr-2 h-3.5 w-3.5 {selectedValues.includes(opt.value) ? 'opacity-100' : 'opacity-0'}" />
     {opt.label}
@@ -486,11 +492,12 @@
           aria-activedescendant={activeOptionId}
           aria-multiselectable={multiple || undefined}
           style={shouldVirtualize
-            ? `height:${normalizedViewportHeight}px;max-height:${normalizedViewportHeight}px;overflow-y:auto;` : undefined}
+            ? `height:${menuViewportHeight}px;max-height:${menuViewportHeight}px;overflow-y:auto;`
+            : `max-height:${menuViewportHeight}px;`}
           onscroll={(event: Event) => {
             if (event.currentTarget instanceof HTMLElement) listScrollTop = event.currentTarget.scrollTop;
           }}
-          class="max-h-48 overflow-y-auto p-1"
+          class="overflow-y-auto px-1"
         >
           {#if select.isLoading}
             {#each Array(3) as _, _i (_i)}

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/clickhouse",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "ClickHouse analytical DataProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

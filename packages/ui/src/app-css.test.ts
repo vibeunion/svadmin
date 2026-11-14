@@ -58,8 +58,8 @@ describe('native component CSS', () => {
       rule.walkDecls('outline', (decl) => { outlines.push(decl.value); });
     });
     expect(outlines).toEqual([
-      '2px solid var(--ring)',
-      '2px solid color-mix(in oklch, var(--ring) 48%, transparent)',
+      'var(--svadmin-focus-width) solid var(--ring)',
+      'var(--svadmin-focus-width) solid color-mix(in oklch, var(--ring) 48%, transparent)',
     ]);
   });
 
@@ -260,8 +260,10 @@ describe('native component CSS', () => {
 
   it('tokenizes switch sizing and exposes a coarse-pointer hit area', () => {
     const css = readAppCss();
-    expect(css).toContain('--svadmin-switch-width: 2.25rem;');
-    expect(css).toContain('--svadmin-switch-height: 1.25rem;');
+    expect(css).toContain('--svadmin-switch-width: 2.5rem; /* 40px，官方 default */');
+    expect(css).toContain('--svadmin-switch-height: 1.5rem; /* 24px */');
+    expect(css).toContain('--svadmin-switch-width-sm: 1.75rem; /* 28px，small */');
+    expect(css).toContain('--svadmin-switch-height-sm: 1rem; /* 16px */');
     expect(css).toContain('--svadmin-switch-hit-area: 0.5rem;');
     expect(css).toContain('width: var(--svadmin-switch-width);');
     expect(css).toContain('inset: calc(-1 * var(--svadmin-switch-hit-area));');
