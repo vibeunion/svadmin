@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MediaGallery,
+  MultiModalMediaGallery,
+  HotkeysHelpModal,
+  HotkeysGuideModal,
+  ResizableSplitter,
+  DynamicSplitter,
   Comment,
   CommentThread,
   Descriptions,
@@ -36,6 +42,8 @@ import {
   LightFilter,
   LockScreen,
   ScreenLock,
+  FeatureFlagStudio,
+  GrayReleaseManager,
   GlobalShortcuts,
   TreeTransfer,
   OrgTreePicker,
@@ -271,6 +279,9 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  NotificationCenter,
+  NotificationDrawer,
+  GlobalNoticeDrawer,
   message,
   notification,
   toast,
@@ -278,6 +289,12 @@ import {
 
 describe('public compatibility aliases', () => {
   it('keeps Reference-style component aliases bound to canonical components', () => {
+    expect(MediaGallery).toBeDefined();
+    expect(MultiModalMediaGallery).toBe(MediaGallery);
+    expect(HotkeysHelpModal).toBeDefined();
+    expect(HotkeysGuideModal).toBe(HotkeysHelpModal);
+    expect(ResizableSplitter).toBeDefined();
+    expect(DynamicSplitter).toBe(ResizableSplitter);
     expect(Comment).toBe(CommentThread);
     expect(Descriptions).toBe(DescriptionList);
     expect(InputTag).toBe(TagsInput);
@@ -402,6 +419,8 @@ describe('public compatibility aliases', () => {
     expect(LightFilter).toBeDefined();
     expect(LockScreen).toBeDefined();
     expect(ScreenLock).toBeDefined();
+    expect(FeatureFlagStudio).toBeDefined();
+    expect(GrayReleaseManager).toBe(FeatureFlagStudio);
     expect(GlobalShortcuts).toBeDefined();
     expect(PricingTable).toBeDefined();
     expect(UsageCard).toBeDefined();
@@ -540,6 +559,9 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(NotificationCenter).toBeDefined();
+    expect(NotificationDrawer).toBeDefined();
+    expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
   });
 
   it('keeps service aliases bound to canonical services', () => {
