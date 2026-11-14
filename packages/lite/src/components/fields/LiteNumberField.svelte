@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FieldDefinition } from '@svadmin/core';
+  import { formatAdminNumber, type FieldDefinition } from '@svadmin/core';
 
   interface Props {
     field: FieldDefinition;
@@ -15,7 +15,7 @@
 </script>
 
 {#if mode === 'show'}
-  <span class="lite-field-value {className}">{value == null ? '—' : Number(value).toLocaleString()}</span>
+  <span class="lite-field-value {className}">{value == null || !Number.isFinite(Number(value)) ? '—' : formatAdminNumber(Number(value), { locale: null })}</span>
 {:else}
   <div class="lite-field-edit {className}">
     <input

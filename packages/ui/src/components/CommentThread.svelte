@@ -3,6 +3,7 @@
   import { Avatar } from './ui/avatar/index.js';
   import { Button } from './ui/button/index.js';
   import { Textarea } from './ui/textarea/index.js';
+  import { formatAdminTime } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   export interface CommentItem {
@@ -40,7 +41,7 @@
   function formatTime(value: string | Date | undefined): string {
     if (!value) return '';
     const date = value instanceof Date ? value : new Date(value);
-    return Number.isNaN(date.getTime()) ? String(value) : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    return Number.isNaN(date.getTime()) ? String(value) : formatAdminTime(date, { dateStyle: 'medium', seconds: false });
   }
 
   async function submit(): Promise<void> {

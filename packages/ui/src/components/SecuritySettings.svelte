@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, notifyWithProvider, type SessionInfo } from '@svadmin/core';
+  import { captureAdminContext, formatAdminTime, notifyWithProvider, type SessionInfo } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { AlertTriangle, Monitor, Smartphone, Trash2 } from '@lucide/svelte';
   import * as Alert from './ui/alert/index.js';
@@ -228,7 +228,7 @@
       <div class="divide-y">
         {#each sessions as session (session.id)}
           <div class="flex items-center justify-between gap-4 py-3">
-            <div class="flex min-w-0 items-center gap-3"><div class="rounded-lg bg-muted p-2 text-muted-foreground">{#if (session.os ?? '').toLowerCase().includes('ios') || (session.os ?? '').toLowerCase().includes('android')}<Smartphone class="h-5 w-5" />{:else}<Monitor class="h-5 w-5" />{/if}</div><div class="min-w-0 space-y-1"><div class="flex flex-wrap items-center gap-2"><span class="text-sm font-medium">{session.os ?? (isZh ? '未知系统' : 'Unknown OS')} - {session.browser ?? (isZh ? '未知浏览器' : 'Unknown browser')}</span>{#if session.current}<span class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">{i18n.t('security.currentSession')}</span>{/if}</div><div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span>{session.ipAddress ?? '-'}</span><span>{session.lastActiveAt ? new Date(session.lastActiveAt).toLocaleString() : '-'}</span></div></div></div>
+            <div class="flex min-w-0 items-center gap-3"><div class="rounded-lg bg-muted p-2 text-muted-foreground">{#if (session.os ?? '').toLowerCase().includes('ios') || (session.os ?? '').toLowerCase().includes('android')}<Smartphone class="h-5 w-5" />{:else}<Monitor class="h-5 w-5" />{/if}</div><div class="min-w-0 space-y-1"><div class="flex flex-wrap items-center gap-2"><span class="text-sm font-medium">{session.os ?? (isZh ? '未知系统' : 'Unknown OS')} - {session.browser ?? (isZh ? '未知浏览器' : 'Unknown browser')}</span>{#if session.current}<span class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">{i18n.t('security.currentSession')}</span>{/if}</div><div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span>{session.ipAddress ?? '-'}</span><span>{session.lastActiveAt ? formatAdminTime(session.lastActiveAt, { dateStyle: 'medium' }) : '-'}</span></div></div></div>
             {#if !session.current}<Button variant="ghost" size="icon-sm" disabled={revoking !== null} onclick={() => revokeSession(session.id)} title={i18n.t('security.revokeSession')}><Trash2 class="h-4 w-4" /></Button>{/if}
           </div>
         {/each}

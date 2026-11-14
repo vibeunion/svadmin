@@ -14,11 +14,17 @@
 		portalProps,
 		children,
 		showCloseButton = true,
+		closeOnOverlayClick = true,
+		size,
 		...restProps
 	}: WithoutChildrenOrChild<DialogPrimitive.ContentProps> & {
 		portalProps?: WithoutChildrenOrChild<ComponentProps<typeof DialogPortal>>;
 		children: Snippet;
 		showCloseButton?: boolean;
+		/** 信息展示可点遮罩关闭。录入表单应传 false。 */
+		closeOnOverlayClick?: boolean;
+		/** Arco 建议宽度：400 / 520 / 720。不传则保持现有默认宽度。 */
+		size?: 'sm' | 'md' | 'lg';
 	} = $props();
 </script>
 
@@ -27,6 +33,9 @@
 	<DialogPrimitive.Content
 		bind:ref
 		data-slot="dialog-content"
+		data-dialog-size={size}
+		data-close-on-overlay={closeOnOverlayClick ? 'true' : 'false'}
+		interactOutsideBehavior={closeOnOverlayClick ? 'close' : 'ignore'}
 		class={cn(
 			"svadmin-dialog-content",
 			className

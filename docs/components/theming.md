@@ -315,7 +315,29 @@ These sizes are the intentional SVAdmin default. They are not retuned to Arco Pr
 - Body copy is `0.875rem` with `line-height: var(--svadmin-leading-body)` (`1.4`). Paragraph spacing `21px` applies only inside `.svadmin-copy > p + p`.
 - `.layout-clean-flat[data-theme="default"]` uses a system stack: Helvetica Neue, system UI, PingFang SC, Microsoft YaHei. Nunito and Byte Number are not loaded. Other presets, including Stripe, keep their own stack.
 - Shadow names `--shadow-special`, `--shadow-1`, `--shadow1-center`, `--shadow-2`, and `--shadow-3` alias the existing shadow tokens. The clean-flat shadow numbers are unchanged.
-- `formatAdminTime`, `formatAdminNumber`, and `spaceCjkLatin` in `packages/ui/src/copy-format.ts` cover 24-hour time, thousands separators, and CJK–Latin spacing. They are not applied to every existing timestamp.
+- `formatAdminTime`, `formatAdminNumber`, `spaceCjkLatin`, `formatAdminEllipsis`, and `formatAdminCopy` live in `packages/core/src/copy-format.ts` and are re-exported from `@svadmin/ui`. Clock displays use 24-hour time. Numbers with more than four integer digits always use a thousands separator. Four-digit numbers keep the active locale's separator (`9,999`, `1.234,5`); Arco allows omitting it, and SVAdmin does not strip it. CJK–Latin spacing skips non-quantity tokens such as 「7号线」 and 「3D打印」. Shared catalog copy uses 「…」, states a reason on new error strings, and does not use 「您」 or a default 「请勿」.
+- These helpers are wired through the shared admin formatters: Statistic, KpiCard, QuotaProgressBar, AnimatedCounter, TableAggregationFooter, task/audit/comment/notification times, the lite number/date/audit/chat displays, surface table numbers, and the example office and case clocks. Currency, percent, and date-only calendars stay on their own `Intl` options. Component-local placeholders outside the shared catalog are not all rewritten.
+
+`formatAdminTime`、`formatAdminNumber`、`spaceCjkLatin` 的实现在 `packages/core/src/copy-format.ts`，仍从 `@svadmin/ui` 导出。时间用 24 小时制。超过四位的整数一定千分位；四位数字保留 locale 自己的分节，例如 `9,999` 和 `1.234,5`。中西文空格会跳过「7号线」「3D打印」。共享词条用「…」，新的错误文案写明原因，不用「您」，也不把「请勿」当作默认否定。
+
+### Interaction contract / 交互契约
+
+These follow the current Arco component specs. They are behavior and defaults, not a pixel copy and not an Arco React API.
+
+下面按现行 Arco 组件规范对齐用法和默认值，不复制像素，也不复制 Arco React 的 props。
+
+| Surface | When to use | SVAdmin default |
+| --- | --- | --- |
+| Message (`toast` / `message`) | Lightweight feedback. It does not interrupt. Types are info, normal, success, warning, and error. Placement is top or bottom. | `toast.normal` is the plain type. The built-in host stays `top-right`, and moves to `bottom-left` while a sheet is open, so it does not cover the centered undo stack. Pass `placement="top"` or `"bottom"` for Arco's centered top/bottom. This corner default is intentional. |
+| Popconfirm | Frequent, light confirms. Width stays at or below 320px. | `.svadmin-popconfirm` uses `max-width: 20rem`. `risk` defaults to `light`. `risk="irreversible"` is only a marker; irreversible actions should use `Dialog`. |
+| Modal (`Dialog`) | Interrupt only when the user must respond, see urgent information, or confirm a decision. Suggested widths are 400 / 520 / 720. | Unsized dialogs keep the existing max width. `size="sm" \| "md" \| "lg"` maps to 400 / 520 / 720. Max height is one viewport and horizontal overflow is hidden. `ModalForm` uses `size="md"`, does not close on overlay click, and keeps a stable body min-height while submitting. Info dialogs still close on the mask. Complex flows should use `Sheet` or a new page. |
+| Alert | In-page and static. It does not auto-dismiss. It is not a field error and not a Message. | `data-feedback="static"`. Field errors stay on `[data-svadmin-field-error]`. |
+| Input | Eight states: default, focus, selected, complete, disabled, loading, success, error. The label stays visible. Helper text sits 4px from the field. Placeholder is not the critical information. Heights 24 / 28 / 32 / 36 already exist. | `data-input-state` carries the state. Disabled inputs use text-4 instead of `opacity: 0.5`. `data-size` accepts mini / compact / default / lg. `AutoForm` labels stay above the control; description and error use a 4px gap. |
+| Table | Show loading feedback while rows are loading, and an empty state when there are no rows. | `AutoTable` loading is a skeleton with `role="status"` and `aria-busy`. Empty and filtered-empty go through `DataState`. |
+
+Message 是轻量反馈，不打断操作。类型是 info / normal / success / warning / error。SVAdmin 宿主默认仍停在右上角，抽屉打开时改到左下角，避免盖住居中的撤销条。这是有意保留的默认，和外壳 240 / 56 / 24 一样。需要 Arco 的顶部或底部居中时，给 `Toast` 传 `placement`。
+
+气泡确认框只承担频繁的轻确认，宽度不超过 320px。有风险或不可逆的操作改用对话框。`ModalForm` 不因点击遮罩关闭，加载时正文区保持最小高度。警告提示是页内静态信息，不代替字段错误，也不代替 Message。
 
 ### Checking the contract / 怎么核对
 

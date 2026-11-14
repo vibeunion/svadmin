@@ -96,7 +96,7 @@ export function createOfficeData(now = '2026-09-19T08:00:00.000Z'): OfficeData {
     ],
     suggestions: [{ id: 'DEMO-S001', reportId: 'DEMO-R001', textVersion: 1, original: '检杳', replacement: '检查', start, end: start + 2, state: 'pending', category: '疑似错别字' }],
     rules: [{ id: 'DEMO-RULE001', title: '组合规则配置样例（不执行医学判断）', version: 1, state: 'draft', author: 'admin', reviewer: null, scope: '演示机构·北区', note: '阈值和适用人群须由授权业务方提供；当前为空。' }],
-    dictionary: [], changes: [], messages: [{ id: 'DEMO-M001', reportId: 'DEMO-R001', title: '您有一项一级预警待确认', readBy: [] }, { id: 'DEMO-M002', reportId: 'DEMO-R002', title: '检查任务失败，请进入人工接管流程', readBy: [] }],
+    dictionary: [], changes: [], messages: [{ id: 'DEMO-M001', reportId: 'DEMO-R001', title: '有一项一级预警待确认', readBy: [] }, { id: 'DEMO-M002', reportId: 'DEMO-R002', title: '检查任务失败，请进入人工接管流程', readBy: [] }],
     staff: [{ id: 'worker', name: '演示审核员', active: true }, { id: 'reviewer', name: '演示业务复核员', active: true }], imports: [],
     audit: [{ id: 'EV-1', actor: 'system-demo', department: 'north', action: '载入合成演示数据；无真实服务调用', object: 'demo-session', time: now }],
   };

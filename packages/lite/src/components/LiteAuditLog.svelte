@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminTime } from '@svadmin/core';
   /**
    * LiteAuditLog — SSR-compatible audit log viewer.
    * Accepts both the legacy AuthProvider AuditLog shape and the current
@@ -78,7 +79,7 @@
   const totalPages = $derived(Math.max(1, Math.ceil(effectiveTotal / Math.max(1, pageSize))));
 
   function formatDate(value: string | Date) {
-    return new Date(value).toLocaleString();
+    return formatAdminTime(value, { dateStyle: 'medium' });
   }
 
   function actionClass(action: string): string {

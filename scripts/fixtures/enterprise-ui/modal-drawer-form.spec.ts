@@ -152,7 +152,7 @@ for (const kind of kinds) {
     await input.fill('Quarterly renewal note 42');
     await hostClick(page, 'outcome-reject-sync');
     await submit.click();
-    await expect(target.getByRole('alert')).toContainText(/Operation failed|操作失败/);
+    await expect(target.getByRole('alert')).toContainText(/The submit did not finish because the service did not accept it|提交没有完成，服务没有接受这次操作/);
     await expect(target).toBeVisible();
     await expect(input).toHaveValue('Quarterly renewal note 42');
     await expect(page.getByTestId('host-submits')).toHaveText('1');
@@ -166,7 +166,7 @@ for (const kind of kinds) {
     await submit.click();
     await expect(page.getByTestId('host-submits')).toHaveText('2');
     await flushSettlements(page);
-    await expect(target.getByRole('alert')).toContainText(/Operation failed|操作失败/);
+    await expect(target.getByRole('alert')).toContainText(/The submit did not finish because the service did not accept it|提交没有完成，服务没有接受这次操作/);
     await expect(target).toBeVisible();
     await expect(input).toHaveValue('Quarterly renewal note 42');
     await expect(page.getByTestId('host-open')).toHaveText('open');
@@ -234,6 +234,16 @@ for (const kind of kinds) {
       await expect(target).toBeVisible();
       await expect(submit).toBeEnabled();
       await action.run();
+      // 录入对话框不因遮罩点击关闭，避免丢掉已填内容。抽屉仍可点遮罩关闭。
+      if (kind === 'modal' && action.name === 'overlay') {
+        await expect(target).toBeVisible();
+        await expect(page.getByTestId('host-open')).toHaveText('open');
+        await expect(page.locator('[data-close-on-overlay="false"]')).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(target).toHaveCount(0);
+        await capture(page, testInfo, kind, 'idle-overlay-stays-open');
+        continue;
+      }
       await expect(target).toHaveCount(0);
       await expect(page.getByTestId('host-open')).toHaveText('closed');
       await capture(page, testInfo, kind, `idle-${action.name}-closes`);

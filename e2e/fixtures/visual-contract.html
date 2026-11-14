@@ -42,6 +42,22 @@
           </div>
           <a class="svadmin-link" id="link" href="#link">链接</a>
           <div class="svadmin-dialog-overlay" id="mask" style="position:relative;inset:auto;height:72px"></div>
+          <div class="svadmin-popconfirm" id="popconfirm" data-confirm-weight="light">
+            <p>确认保存这条记录？</p>
+          </div>
+          <div class="svadmin-dialog-content" id="dialog-sm" data-dialog-size="sm" data-close-on-overlay="true" style="position:relative;top:auto;left:auto;transform:none">信息</div>
+          <div class="svadmin-dialog-content" id="dialog-md" data-dialog-size="md" data-close-on-overlay="false" style="position:relative;top:auto;left:auto;transform:none">录入</div>
+          <div class="svadmin-dialog-content" id="dialog-lg" data-dialog-size="lg" style="position:relative;top:auto;left:auto;transform:none">宽对话框</div>
+          <div class="svadmin-alert svadmin-alert--warning" id="alert-static" data-feedback="static" role="alert">磁盘空间不足，导出已暂停。</div>
+          <div class="svadmin-field" id="field">
+            <label data-svadmin-field-label for="input-default">名称</label>
+            <input class="svadmin-input" id="input-default" data-input-state="default" data-size="default" placeholder="选填">
+            <p class="svadmin-field-help" id="field-help">用于检索，不是唯一标识。</p>
+          </div>
+          <input class="svadmin-input" id="input-error" data-input-state="error" aria-invalid="true" value="已填写">
+          <input class="svadmin-input" id="input-disabled" data-input-state="disabled" disabled value="不可编辑">
+          <div data-svadmin-table-state="loading" id="table-loading" role="status" aria-busy="true">加载中…</div>
+          <div data-svadmin-data-state="empty" id="table-empty" role="status">暂无数据</div>
         </main>
       </div>
     </div>

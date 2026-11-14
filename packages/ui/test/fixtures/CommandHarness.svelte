@@ -10,7 +10,7 @@
 	<Command.Dialog open label="Dialog actions" loop bind:value={dialogValue}>
 		<Command.Input placeholder="Search dialog commands..." />
 		<Command.List>
-			<Command.Loading progress={50}>Loading commands...</Command.Loading>
+			<Command.Loading progress={50}>Loading commands…</Command.Loading>
 			<Command.Group heading="Dialog navigation">
 				<Command.Item value="dialog-settings" onSelect={(value) => (selected = value)}>
 					Dialog settings

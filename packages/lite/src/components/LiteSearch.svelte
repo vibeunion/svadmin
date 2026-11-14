@@ -28,7 +28,7 @@
     name="q"
     value={value}
     class="lite-input"
-    placeholder={placeholder || t('common.search') || 'Search...'}
+    placeholder={placeholder || t('common.search') || 'Search…'}
   />
   <button type="submit" class="lite-btn lite-btn-primary">
     {t('common.search') || 'Search'}

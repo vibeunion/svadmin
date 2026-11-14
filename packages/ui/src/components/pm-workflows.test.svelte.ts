@@ -109,7 +109,7 @@ describe('PM workflow acceptance', () => {
     await fireEvent.click(within(drawer).getByRole('button', { name: /Save/ }));
     await waitFor(() => expect(view.queryByRole('dialog', { name: 'Edit Users' })).toBeNull());
     expect(onNavigate).not.toHaveBeenCalled();
-    expect(view.getByPlaceholderText('Search...')).toHaveProperty('value', 'user');
+    expect(view.getByPlaceholderText('Search…')).toHaveProperty('value', 'user');
     expect(checkbox.getAttribute('aria-checked')).toBe('true');
   });
 
@@ -170,6 +170,6 @@ describe('PM workflow acceptance', () => {
     });
     await waitFor(() => expect(view.getAllByRole('button', { name: 'Clear all' }).length).toBeGreaterThanOrEqual(2));
     await fireEvent.click(last(view.getAllByRole('button', { name: 'Clear all' })));
-    await waitFor(() => expect(view.getByPlaceholderText('Search...')).toHaveProperty('value', ''));
+    await waitFor(() => expect(view.getByPlaceholderText('Search…')).toHaveProperty('value', ''));
   });
 });

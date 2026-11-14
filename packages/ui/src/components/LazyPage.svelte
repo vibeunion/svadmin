@@ -35,7 +35,7 @@
 
 {#await pagePromise}
   <div class="flex min-h-40 items-center justify-center" role="status" aria-live="polite">
-    <span class="text-sm text-muted-foreground">Loading...</span>
+    <span class="text-sm text-muted-foreground">Loading…</span>
   </div>
 {:then pageModule}
   {@const Page = pageModule.default as unknown as Component<Record<string, unknown>>}

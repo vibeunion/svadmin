@@ -117,10 +117,10 @@ try {
       if (width === 1440 && mode === 'light') {
         const posts = page.getByRole('region', { name: 'Posts', exact: true });
         const users = page.getByRole('region', { name: 'Users', exact: true });
-        await posts.getByRole('textbox', { name: 'Search...', exact: true }).fill('inventory');
-        await expect(users.getByRole('textbox', { name: 'Search...', exact: true })).toHaveValue('');
+        await posts.getByRole('textbox', { name: 'Search…', exact: true }).fill('inventory');
+        await expect(users.getByRole('textbox', { name: 'Search…', exact: true })).toHaveValue('');
         await expect(page).not.toHaveURL(/[?&]q=/);
-        await posts.getByRole('textbox', { name: 'Search...', exact: true }).fill('');
+        await posts.getByRole('textbox', { name: 'Search…', exact: true }).fill('');
         await posts.getByRole('button', { name: 'Detail', exact: true }).filter({ visible: true }).first().click();
         await expect(page.getByRole('dialog')).toHaveCount(1);
         await expect(page.getByRole('dialog')).toContainText('Review inventory');

@@ -1380,7 +1380,9 @@ main {
 }
 
 .svadmin-file-input[data-disabled="true"] .svadmin-file-input__visual {
-  opacity: 0.5;
+  opacity: 1;
+  color: var(--svadmin-text-4);
+  background: var(--muted);
 }
 
 .svadmin-input {
@@ -1400,10 +1402,20 @@ main {
   font-size: 0.875rem;
 }
 
+.svadmin-input[data-size="mini"]:not([data-input-type="file"]) {
+  height: var(--svadmin-control-h-mini);
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+}
+
 .svadmin-input[data-size="compact"]:not([data-input-type="file"]) {
-  height: 1.75rem;
+  height: var(--svadmin-control-h-sm);
   padding: 0.25rem 0.5rem;
   font-size: 0.8125rem;
+}
+
+.svadmin-input[data-size="lg"]:not([data-input-type="file"]) {
+  height: var(--svadmin-control-h-lg);
 }
 
 .svadmin-input[data-input-type="file"] {
@@ -1423,23 +1435,65 @@ main {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 28%, transparent);
 }
 
-.svadmin-input:focus-visible {
+.svadmin-input:focus-visible,
+.svadmin-input[data-input-state="focus"]:not([data-input-type="file"]),
+.svadmin-input[data-input-state="selected"]:not([data-input-type="file"]) {
   border-color: var(--ring);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 28%, transparent);
 }
 
-.svadmin-input[aria-invalid="true"] {
+.svadmin-input[data-input-state="success"]:not([data-input-type="file"]) {
+  border-color: var(--success, var(--primary));
+}
+
+.svadmin-input[aria-invalid="true"],
+.svadmin-input[data-input-state="error"]:not([data-input-type="file"]) {
   border-color: var(--destructive);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--destructive) 20%, transparent);
 }
 
-.svadmin-input:disabled {
+.svadmin-input[data-input-state="loading"]:not([data-input-type="file"]) {
+  cursor: progress;
+  background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 18%, transparent), transparent);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: svadmin-input-loading 1.1s linear infinite;
+}
+
+.svadmin-input:disabled:not([data-input-type="file"]),
+.svadmin-input[data-input-state="disabled"]:not([data-input-type="file"]) {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 1;
+  color: var(--svadmin-text-4);
+  background: var(--muted);
 }
 
 .svadmin-input::placeholder {
   color: var(--muted-foreground);
+}
+
+.svadmin-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.svadmin-field > [data-svadmin-field-label] {
+  margin-bottom: 4px;
+}
+
+.svadmin-field-help,
+[data-svadmin-field-description],
+[data-svadmin-field-error] {
+  margin-top: 4px;
+}
+
+@keyframes svadmin-input-loading {
+  from { background-position: 0 0; }
+  to { background-position: 100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svadmin-input[data-input-state="loading"] { animation: none; }
 }
 
 .svadmin-card {
@@ -1523,7 +1577,10 @@ main {
   display: grid;
   width: 100%;
   max-width: min(32rem, calc(100% - 2rem));
+  max-height: 100dvh;
   gap: 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   background: var(--background);
@@ -1532,6 +1589,29 @@ main {
   box-shadow: var(--svadmin-shadow-overlay);
   transform: translate(-50%, -50%);
   transition: opacity var(--svadmin-motion-standard) var(--svadmin-motion-easing), transform var(--svadmin-motion-standard) var(--svadmin-motion-easing);
+}
+
+.svadmin-dialog-content[data-dialog-size="sm"] { max-width: min(400px, calc(100% - 2rem)); }
+.svadmin-dialog-content[data-dialog-size="md"] { max-width: min(520px, calc(100% - 2rem)); }
+.svadmin-dialog-content[data-dialog-size="lg"] { max-width: min(720px, calc(100% - 2rem)); }
+
+.svadmin-dialog-form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.svadmin-dialog-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.svadmin-dialog-body {
+  min-height: 4.5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .svadmin-dialog-content[data-state="closed"] {
@@ -1796,7 +1876,7 @@ main {
 .svadmin-result__subtitle { margin: 0; max-width: 36rem; color: var(--muted-foreground); font-size: 0.875rem; }
 .svadmin-result__extra { display: flex; gap: 0.5rem; }
 
-.svadmin-popconfirm { display: grid; gap: 0.75rem; width: 16rem; }
+.svadmin-popconfirm { display: grid; gap: 0.75rem; width: max-content; max-width: 20rem; }
 .svadmin-popconfirm__title { margin: 0; color: var(--foreground); font-size: 0.875rem; }
 .svadmin-popconfirm__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 .svadmin-popconfirm__trigger { display: inline-flex; }

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Calculator, CheckSquare } from '@lucide/svelte';
+  import { formatAdminNumber } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../utils.js';
 
@@ -66,7 +67,8 @@
         break;
     }
 
-    return result.toLocaleString(undefined, {
+    return formatAdminNumber(result, {
+      locale: null,
       minimumFractionDigits: precision,
       maximumFractionDigits: precision,
     });

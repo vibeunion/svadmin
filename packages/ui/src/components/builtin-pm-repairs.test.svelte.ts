@@ -269,7 +269,7 @@ describe('builtin capability boundaries', () => {
       retry.click();
     });
     expect(provider.list).toHaveBeenCalledOnce();
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Loading...' })).toHaveProperty('disabled', true));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Loading…' })).toHaveProperty('disabled', true));
     expect(screen.queryByRole('button', { name: exactRoleName('Retry') })).toBeNull();
     if (outcome === 'success') resolveInvite();
     else rejectInvite(new Error('PRIVATE_INVITE_ERROR'));

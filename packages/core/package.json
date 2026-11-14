@@ -39,6 +39,10 @@
       "types": "./src/date-time.ts",
       "default": "./src/date-time.ts"
     },
+    "./copy-format": {
+      "types": "./src/copy-format.ts",
+      "default": "./src/copy-format.ts"
+    },
     "./pivot": {
       "types": "./src/pivot.ts",
       "default": "./src/pivot.ts"

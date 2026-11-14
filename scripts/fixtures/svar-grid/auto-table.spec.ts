@@ -45,7 +45,7 @@ test('AutoTable server pagination, grid sorting and search continue to synchroni
   await page.locator('[data-svar-pane="center"]').getByText('Stock', { exact: true }).click(); await expect(names(page).first()).toHaveText('SKU:Item 01');
   await expect(page).toHaveURL(/sort=stock/); expect(state.reads.at(-1)?.pagination?.current).toBe(1);
   await page.locator('[data-svar-pane="center"]').getByText('Stock', { exact: true }).click(); await expect(names(page).first()).toHaveText('SKU:Item 40');
-  await page.getByPlaceholder('Search...', { exact: true }).fill('Item 12'); await expect(names(page)).toHaveText(['SKU:Item 12']);
+  await page.getByPlaceholder('Search…', { exact: true }).fill('Item 12'); await expect(names(page)).toHaveText(['SKU:Item 12']);
   await expect(page).toHaveURL(/q=Item/); expect(state.reads.at(-1)?.filters).toContainEqual({ field: 'name', operator: 'contains', value: 'Item 12' });
 });
 

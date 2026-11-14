@@ -34,7 +34,7 @@
     active,
     value = $bindable(undefined),
     options,
-    placeholder = 'Search...',
+    placeholder = 'Search…',
     applyLabel = 'Apply',
     resetLabel = 'Reset',
     align = 'right',

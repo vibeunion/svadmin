@@ -171,7 +171,7 @@ describe('AutoTable interactions', () => {
     });
 
     expect(await view.findByRole('button', { name: 'Columns' })).toBeTruthy();
-    expect(await view.findByPlaceholderText('Search...')).toBeTruthy();
+    expect(await view.findByPlaceholderText('Search…')).toBeTruthy();
   });
 
   it('uses the neutral Chinese empty description without create permission', async () => {
@@ -268,7 +268,7 @@ describe('AutoTable interactions', () => {
   it('waits for a pause before synchronizing a search with the router', async () => {
     const onNavigate = vi.fn();
     const view = render(AutoTableInteractionsHarness, { onNavigate });
-    const searchInput = await view.findByPlaceholderText('搜索...');
+    const searchInput = await view.findByPlaceholderText('搜索…');
 
     searchInput.focus();
     await fireEvent.input(searchInput, { target: { value: 'u' } });
@@ -310,7 +310,7 @@ describe('AutoTable interactions', () => {
       sorters: [{ field: 'email', order: 'desc' }],
       pagination: expect.objectContaining({ current: 2, pageSize: 20 }),
     })));
-    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    const search = await view.findByPlaceholderText('Search…') as HTMLInputElement;
     expect(search.value).toBe('Ada');
     expect(view.getByText('Email: user')).toBeTruthy();
     expect(onListStateChange).not.toHaveBeenCalled();
@@ -344,7 +344,7 @@ describe('AutoTable interactions', () => {
       initialListState,
     });
 
-    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    const search = await view.findByPlaceholderText('Search…') as HTMLInputElement;
     expect(search.value).toBe('Ada');
     expect(await view.findByText('Email: user')).toBeTruthy();
     await waitFor(() => expect(onGetList).toHaveBeenCalledWith(expect.objectContaining({
@@ -412,7 +412,7 @@ describe('AutoTable interactions', () => {
       },
     });
 
-    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    const search = await view.findByPlaceholderText('Search…') as HTMLInputElement;
     expect(search.value).toBe('Initial');
     remote.resolve([{
       id: 'team-default',
@@ -467,7 +467,7 @@ describe('AutoTable interactions', () => {
       },
     });
 
-    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    const search = await view.findByPlaceholderText('Search…') as HTMLInputElement;
     expect(search.value).toBe('Initial');
     await fireEvent.click(await view.findByRole('button', { name: 'Views' }));
     // 初始快照优先时不能把持久化活动视图误标为当前视图，但保存视图本身必须仍可手动应用。
@@ -526,7 +526,7 @@ describe('AutoTable interactions', () => {
       },
     });
 
-    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    const search = await view.findByPlaceholderText('Search…') as HTMLInputElement;
     expect(search.value).toBe('Initial');
     await waitFor(() => expect(list).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'acme' })));
 
@@ -571,7 +571,7 @@ describe('AutoTable interactions', () => {
       },
     });
 
-    const search = await view.findByPlaceholderText('Search...') as HTMLInputElement;
+    const search = await view.findByPlaceholderText('Search…') as HTMLInputElement;
     expect(search.value).toBe('Initial');
     await fireEvent.input(search, { target: { value: 'user-change' } });
     await waitFor(() => expect(search.value).toBe('user-change'), { timeout: 1_500 });
@@ -901,7 +901,7 @@ describe('AutoTable interactions', () => {
     const onNavigate = vi.fn();
     const view = render(AutoTableInteractionsHarness, { onNavigate });
 
-    expect((await view.findByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('pending');
+    expect((await view.findByPlaceholderText('搜索…') as HTMLInputElement).value).toBe('pending');
     expect(await view.findByText('Email: review')).toBeTruthy();
     expect(view.queryByRole('columnheader', { name: /^ID/ })).toBeNull();
     await waitFor(() => expect(onNavigate).toHaveBeenCalledWith({
@@ -940,7 +940,7 @@ describe('AutoTable interactions', () => {
       initialParams: { q: 'deep-link' },
     });
 
-    expect((await view.findByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('deep-link');
+    expect((await view.findByPlaceholderText('搜索…') as HTMLInputElement).value).toBe('deep-link');
     expect(await view.findByRole('columnheader', { name: /^ID/ })).toBeTruthy();
     await fireEvent.click(view.getByRole('button', { name: '视图' }));
     expect((await view.findByLabelText('当前未保存视图') as HTMLSelectElement).value).toBe('');
@@ -1050,7 +1050,7 @@ describe('AutoTable interactions', () => {
       tenantIdentity: 'acme',
     });
 
-    expect((await view.findByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('analytics');
+    expect((await view.findByPlaceholderText('搜索…') as HTMLInputElement).value).toBe('analytics');
     expect(localStorage.getItem(savedListViewsStorageKey(defaultScope))).toBeNull();
     expect(savedListViewsStorageKey({ ...analyticsScope, tenantIdentity: 'other' })).not.toBe(savedListViewsStorageKey(analyticsScope));
     expect(savedListViewsStorageKey({ ...analyticsScope, tenantIdentity: 1 })).not.toBe(savedListViewsStorageKey({ ...analyticsScope, tenantIdentity: '1' }));
@@ -1089,7 +1089,7 @@ describe('AutoTable interactions', () => {
       tenantIdentity: 'acme',
     });
 
-    expect((await view.findByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('analytics');
+    expect((await view.findByPlaceholderText('搜索…') as HTMLInputElement).value).toBe('analytics');
     expect(view.queryByRole('columnheader', { name: /^ID/ })).toBeNull();
 
     await view.rerender({
@@ -1098,7 +1098,7 @@ describe('AutoTable interactions', () => {
       tenantIdentity: 'omega',
     });
 
-    await waitFor(() => expect((view.getByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('reporting'));
+    await waitFor(() => expect((view.getByPlaceholderText('搜索…') as HTMLInputElement).value).toBe('reporting'));
     expect(view.getByRole('columnheader', { name: /^ID/ })).toBeTruthy();
     expect(view.queryByRole('columnheader', { name: 'Email' })).toBeNull();
     expect(localStorage.getItem(columnVisibilityStorageKey(analyticsScope))).toBe(JSON.stringify({ id: false }));
@@ -1127,7 +1127,7 @@ describe('AutoTable interactions', () => {
       tenantIdentity: 'acme',
     });
 
-    expect((await view.findByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('analytics');
+    expect((await view.findByPlaceholderText('搜索…') as HTMLInputElement).value).toBe('analytics');
     expect(await view.findByText('Email: acme')).toBeTruthy();
 
     await view.rerender({
@@ -1136,7 +1136,7 @@ describe('AutoTable interactions', () => {
       tenantIdentity: 'omega',
     });
 
-    await waitFor(() => expect((view.getByPlaceholderText('搜索...') as HTMLInputElement).value).toBe(''));
+    await waitFor(() => expect((view.getByPlaceholderText('搜索…') as HTMLInputElement).value).toBe(''));
     expect(view.queryByText('Email: acme')).toBeNull();
     expect(view.getByRole('columnheader', { name: /^ID/ })).toBeTruthy();
     expect(view.getByRole('columnheader', { name: /^Email/ })).toBeTruthy();
@@ -1527,9 +1527,9 @@ describe('AutoTable interactions', () => {
     const confirm = await view.findByRole('alertdialog');
     await fireEvent.click(within(confirm).getByRole('button', { name: '删除' }));
 
-    await waitFor(() => expect(status.textContent).toBe('处理中...'));
+    await waitFor(() => expect(status.textContent).toBe('处理中…'));
     expect(toolbar.getAttribute('aria-busy')).toBe('true');
-    expect(within(toolbar).getByText('处理中...')).toBeTruthy();
+    expect(within(toolbar).getByText('处理中…')).toBeTruthy();
     expect(status.closest('[aria-busy="true"]')).toBeNull();
     expect(toolbar.querySelector('.svadmin-batch-action-bar__actions')?.hasAttribute('inert')).toBe(true);
     expect(view.getByRole('button', { name: '清除选择' }).hasAttribute('disabled')).toBe(true);
@@ -1902,7 +1902,7 @@ describe('AutoTable interactions', () => {
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
     await waitFor(() => expect(onDeleteMany).toHaveBeenCalledOnce());
 
-    const search = await view.findByPlaceholderText('搜索...');
+    const search = await view.findByPlaceholderText('搜索…');
     await fireEvent.input(search, { target: { value: 'second' } });
     await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
       filters: expect.arrayContaining([expect.objectContaining({ field: 'email' })]),
@@ -1910,7 +1910,7 @@ describe('AutoTable interactions', () => {
     expect(view.queryByText('已选择 1 条记录')).toBeNull();
 
     rejectDelete(new Error('old selection failed'));
-    await waitFor(() => expect(view.queryByText('处理中...')).toBeNull());
+    await waitFor(() => expect(view.queryByText('处理中…')).toBeNull());
     expect(view.queryByText('已选择 1 条记录')).toBeNull();
     expect(view.queryByText('操作失败')).toBeNull();
     expect(onNotify).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({

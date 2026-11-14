@@ -1,3 +1,4 @@
+import { formatAdminNumber } from '@svadmin/core';
 import type { JsonObject, JsonValue } from './types.js';
 import type { SurfaceMessages } from './localization.js';
 
@@ -77,7 +78,7 @@ export function displayTableValue(value: JsonValue | undefined, options: TableVa
   if (value === undefined || value === null) return '—';
   if (format === 'boolean') return value === true ? messages.booleanTrue : value === false ? messages.booleanFalse : '—';
   if (format === 'number' && typeof value === 'number') {
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+    return formatAdminNumber(value, { locale, maximumFractionDigits: 2 });
   }
   if (format === 'date' && (typeof value === 'string' || typeof value === 'number')) {
     return formatTableDate(value, locale) ?? String(value);

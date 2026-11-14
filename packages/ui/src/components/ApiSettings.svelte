@@ -1,7 +1,7 @@
 <script lang="ts">
   import ConfirmDialog from './ConfirmDialog.svelte';
   import { definedOptions } from '@svadmin/core/options';
-  import { captureAdminContext, notifyWithProvider, type ApiCredentialSummary, type WebhookSummary } from '@svadmin/core';
+  import { captureAdminContext, formatAdminTime, notifyWithProvider, type ApiCredentialSummary, type WebhookSummary } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Check, Copy, Plus, ShieldCheck, Trash2 } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
@@ -216,8 +216,8 @@
               class="rounded-none border-0"
               keys={keys.map((key) => definedOptions({
                 id: key.id, name: key.name, prefix: key.prefix,
-                createdAt: new Date(key.createdAt).toLocaleString(),
-                lastUsedAt: key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleString() : undefined,
+                createdAt: formatAdminTime(key.createdAt, { dateStyle: 'medium' }),
+                lastUsedAt: key.lastUsedAt ? formatAdminTime(key.lastUsedAt, { dateStyle: 'medium' }) : undefined,
                 permissions: key.permissions,
               }))}
               stateTitle={i18n.t('api.noKeys')}

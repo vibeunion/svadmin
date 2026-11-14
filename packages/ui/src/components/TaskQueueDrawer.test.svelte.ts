@@ -172,7 +172,7 @@ describe('TaskQueueDrawer', () => {
     expect(screen.getAllByText('Generate poster').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Rendering hero artwork').length).toBeGreaterThan(0);
 
-    const searchInput = screen.getByPlaceholderText('Filter tasks by name, ID, status, or message...');
+    const searchInput = screen.getByPlaceholderText('Filter tasks by name, ID, status, or message…');
     await fireEvent.input(searchInput, { target: { value: 'email' } });
 
     await waitFor(() => {
@@ -266,7 +266,7 @@ describe('TaskQueueDrawer', () => {
     taskListLoading = true;
     taskListFetching = true;
     render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
-    expect(screen.getByRole('status', { name: 'Loading tasks...' }).getAttribute('aria-busy')).toBe('true');
+    expect(screen.getByRole('status', { name: 'Loading tasks…' }).getAttribute('aria-busy')).toBe('true');
     expect(screen.queryByRole('table')).toBeNull();
     expect(screen.queryByText('Generate poster')).toBeNull();
     expect(screen.getByRole('button', { name: 'Refresh' }).hasAttribute('disabled')).toBe(true);
@@ -513,7 +513,7 @@ describe('TaskQueueDrawer', () => {
     detailState.add('loading');
     detailState.add('fetching');
     render(TaskDetails, { taskId: 'task-1', taskProvider: mockTaskProvider });
-    expect(screen.getByRole('status', { name: 'Loading task...' }).getAttribute('aria-busy')).toBe('true');
+    expect(screen.getByRole('status', { name: 'Loading task…' }).getAttribute('aria-busy')).toBe('true');
     expect(screen.queryByText('Generate poster')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull();
   });

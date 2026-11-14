@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { beforeEach } from '@svadmin/core';
+  import { beforeEach, formatAdminTime } from '@svadmin/core';
   import { Button, ContentPageShell, MetricBlock, StatusBadge, SectionHeader } from '@svadmin/ui';
   import { actors, views, can, canView, isView, createOfficeData, visibleReports, visibleAlerts, reportById, completionBlockers, executeOfficeCommand, officeMetrics, reportLabels, checkLabels, alertLabels, type OfficeCommand, type OfficeView, type AlertTask } from './domain';
   import './office.css';
@@ -107,7 +107,7 @@
       feedback = error instanceof Error ? error.message : '操作失败，请保留当前内容后重试'; feedbackError = true; return false;
     }
   }
-  function formatTime(value: string): string { return new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(value)); }
+  function formatTime(value: string): string { return formatAdminTime(value, { locale: 'zh-CN', timeZone: 'Asia/Shanghai', seconds: false, month: '2-digit', day: '2-digit' }); }
   function stateTone(state: string): 'success' | 'warning' | 'neutral' { return ['complete', 'closed', 'manual', 'approved'].includes(state) ? 'success' : ['failed', 'stale', 'blocked', 'review', 'waiting'].includes(state) ? 'warning' : 'neutral'; }
   function manual(check: 'anomaly' | 'proof'): void {
     if (report) run({ type: 'manual', reportId: report.id, revision: formRevision, check, note }, '已记录人工检查和依据，未伪装为自动检查结果。');
@@ -184,7 +184,7 @@
         <div class="office-pagination"><span>共 {filteredReports.length} 份 · 第 {Math.min(reportPage, pageCount)} / {pageCount} 页</span><div class="office-actions"><Button variant="outline" size="sm" disabled={reportPage <= 1} onclick={() => { reportPage -= 1; }}>上一页</Button><Button variant="outline" size="sm" disabled={reportPage >= pageCount} onclick={() => { reportPage += 1; }}>下一页</Button></div></div>
       </section>
     {:else if view === 'imports'}
-      <section class="office-panel"><SectionHeader title="批量导入预检" description="先校验来源与文件，再由接入服务创建解析任务。" /><div class="office-note">本页仅检查文件名、大小和扩展名，不读取内容、不上传、不进行病毒检测或真实格式判定。有效文件显示“等待接入”，不是“解析成功”。</div><form class="office-import" onsubmit={(event) => { event.preventDefault(); if (run({ type: 'import', files: selectedFiles }, '预检清单已建立。所有文件仍保留在本机，未创建报告。')) selectedFiles = []; }}><label>来源机构<select disabled><option>演示机构·北区（固定样例）</option></select></label><label>选择文件（建议每批 100 个、单文件 50 MB）<input type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.xlsx,.docx" aria-label="选择报告文件" onchange={(event) => { selectedFiles = Array.from(event.currentTarget.files ?? []).map((file) => ({ name: file.name, size: file.size })); }} /></label><p>已选择 {selectedFiles.length} 个文件。请勿选择真实健康资料。</p><Button type="submit" disabled={!selectedFiles.length}>建立本地预检清单</Button></form></section>
+      <section class="office-panel"><SectionHeader title="批量导入预检" description="先校验来源与文件，再由接入服务创建解析任务。" /><div class="office-note">本页仅检查文件名、大小和扩展名，不读取内容、不上传、不进行病毒检测或真实格式判定。有效文件显示“等待接入”，不是“解析成功”。</div><form class="office-import" onsubmit={(event) => { event.preventDefault(); if (run({ type: 'import', files: selectedFiles }, '预检清单已建立。所有文件仍保留在本机，未创建报告。')) selectedFiles = []; }}><label>来源机构<select disabled><option>演示机构·北区（固定样例）</option></select></label><label>选择文件（建议每批 100 个、单文件 50 MB）<input type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.xlsx,.docx" aria-label="选择报告文件" onchange={(event) => { selectedFiles = Array.from(event.currentTarget.files ?? []).map((file) => ({ name: file.name, size: file.size })); }} /></label><p>已选择 {selectedFiles.length} 个文件。这里只接受样例，真实健康资料不会在这里处理。</p><Button type="submit" disabled={!selectedFiles.length}>建立本地预检清单</Button></form></section>
       <section class="office-panel"><SectionHeader title="导入项" description="逐项呈现错误，不伪造处理百分比。" /><div class="office-table-wrap"><table><thead><tr><th>文件</th><th>状态</th><th>原因</th><th>操作</th></tr></thead><tbody>{#each data.imports as item (item.id)}<tr><td>{item.filename}<small>{item.id} · {item.size} B</small></td><td>{item.state === 'blocked' ? '等待接入' : item.state === 'rejected' ? '已拒绝' : '已取消'}</td><td>{item.reason}</td><td><Button variant="outline" size="sm" disabled={item.state !== 'blocked'} onclick={() => run({ type: 'cancel-import', jobId: item.id }, '已取消该未上传项，既有报告未被删除。')}>取消</Button></td></tr>{/each}</tbody></table></div>{#if !data.imports.length}<div class="office-empty"><p>尚无导入项。文件预检失败不会影响其他项。</p></div>{/if}</section>
     {:else if view === 'report' || view === 'verification' || view === 'proofreading'}
       {#if !report}<section class="office-empty"><h2>报告不存在或不在授权范围内</h2><p>请从报告中心选择可访问的记录。</p><Button onclick={() => navigate('reports')}>返回报告中心</Button></section>
@@ -218,7 +218,7 @@
               <dl class="office-facts"><div><dt>原始项目结果</dt><dd>{report.observations[0]?.original}</dd></div><div><dt>源单位</dt><dd>{report.observations[0]?.unit}</dd></div><div><dt>来源</dt><dd>固定合成文本；原始文件未接入</dd></div></dl>
               <form onsubmit={verifyReport}>
                 <label>检测项目 A 当前结果<input bind:value={workingValue} aria-label="核对指标结果" required /></label>
-                <label>核对依据与修改原因<textarea bind:value={note} minlength="4" required placeholder="至少 4 个字符，说明核对范围与依据；请勿填写真实健康信息。"></textarea></label>
+                <label>核对依据与修改原因<textarea bind:value={note} minlength="4" required placeholder="至少 4 个字符，说明核对范围与依据。这里只记录样例，不记录真实健康信息。"></textarea></label>
                 <div class="office-actions"><Button type="submit" disabled={report.quality === 'blocked'}>保存并确认核对</Button><Button type="button" variant="outline" onclick={loadForms}>放弃未保存修改</Button>{#if dirty}<span class="office-muted">尚未保存</span>{/if}</div>
               </form>
             </section>

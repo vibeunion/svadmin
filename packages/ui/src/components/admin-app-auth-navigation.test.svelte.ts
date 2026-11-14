@@ -281,7 +281,7 @@ describe('AdminApp authenticated navigation', () => {
     });
 
     expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).toBeNull();
-    expect(view.getByText('Loading...')).not.toBeNull();
+    expect(view.getByText('Loading…')).not.toBeNull();
 
     initialCheck.resolve({ authenticated: true });
     await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
@@ -339,7 +339,7 @@ describe('AdminApp authenticated navigation', () => {
     });
 
     expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).toBeNull();
-    expect(view.getByText('Loading...')).not.toBeNull();
+    expect(view.getByText('Loading…')).not.toBeNull();
 
     replacementCheck.resolve({ authenticated: true });
     await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
@@ -364,7 +364,7 @@ describe('AdminApp authenticated navigation', () => {
 
     expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull();
     expect(view.container.querySelector('[data-svadmin-content-page="auth-2fa"]')).toBeNull();
-    expect(view.getByText('Loading...')).not.toBeNull();
+    expect(view.getByText('Loading…')).not.toBeNull();
 
     recheck.resolve({ authenticated: true });
     await waitFor(() => expect(view.container.querySelector('[data-svadmin-content-page="auth-2fa"]')).not.toBeNull());
@@ -401,7 +401,7 @@ describe('AdminApp authenticated navigation', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull();
-    expect(view.queryByText('Loading...')).toBeNull();
+    expect(view.queryByText('Loading…')).toBeNull();
   });
 
   it('removes the layout and redirects when a route recheck expires', async () => {

@@ -35,7 +35,7 @@
     triggerSize = 'sm',
     submitText = 'Confirm',
     cancelText = 'Cancel',
-    widthClass = 'sm:max-w-lg',
+    widthClass = '',
     isSubmitting = false,
     disabled = false,
     onsubmit,
@@ -106,7 +106,8 @@
       open = false;
     } catch {
       if (!isCurrentRequest(token)) return;
-      submitError = i18n.t('common.operationFailed');
+      // 失败原因用固定文案，不把异常原文写进界面。
+      submitError = i18n.t('common.submitRejected');
     } finally {
       if (activeRequest === token) {
         activeRequest = undefined;
@@ -153,8 +154,8 @@
     </Dialog.Trigger>
   {/if}
 
-  <Dialog.Content class={cn(widthClass, 'max-h-[90vh] overflow-y-auto', className)}>
-    <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="space-y-4">
+  <Dialog.Content closeOnOverlayClick={false} size="md" class={cn('svadmin-dialog-form', widthClass, className)}>
+    <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="svadmin-dialog-form__body">
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>
         {#if description}
@@ -162,11 +163,10 @@
         {/if}
       </Dialog.Header>
 
-      {#if submitError}
-        <FeedbackNotice tone="danger" message={submitError} />
-      {/if}
-
-      <div class="py-2 text-sm text-foreground">
+      <div class="svadmin-dialog-body">
+        {#if submitError}
+          <FeedbackNotice tone="danger" message={submitError} />
+        {/if}
         {#if children}
           {@render children()}
         {/if}

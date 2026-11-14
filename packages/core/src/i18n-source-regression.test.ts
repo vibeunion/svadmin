@@ -39,6 +39,6 @@ test('base locale dictionaries contain unique keys and retain processing labels'
     }
   }
   expect(locales.size).toBeGreaterThanOrEqual(2);
-  expect(processing.get('zh-CN')).toBe('处理中...');
-  expect([...processing.values()]).toContain('Processing...');
+  expect(processing.get('zh-CN')).toBe('处理中…');
+  expect([...processing.values()]).toContain('Processing…');
 });

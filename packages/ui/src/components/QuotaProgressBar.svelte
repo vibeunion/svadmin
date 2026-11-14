@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminNumber } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   export interface QuotaProgressBarProps {
@@ -34,7 +35,7 @@
     warningThreshold = 0.8,
     criticalThreshold = 0.95,
     showPercent = true,
-    formatter = (val) => val.toLocaleString(),
+    formatter = (val) => formatAdminNumber(val, { locale: null }),
     description,
     compact = false,
     class: className = '',

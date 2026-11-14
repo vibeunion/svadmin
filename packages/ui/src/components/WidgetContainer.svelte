@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy, type Snippet } from 'svelte';
   import { Maximize2, Minimize2, RotateCw, AlertCircle, RefreshCw } from '@lucide/svelte';
+  import { formatAdminTime } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   export interface WidgetContainerProps {
@@ -58,7 +59,7 @@
     if (!lastUpdated) return '';
     try {
       const d = new Date(lastUpdated);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      return formatAdminTime(d);
     } catch {
       return String(lastUpdated);
     }

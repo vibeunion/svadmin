@@ -25,6 +25,7 @@ describe("Popconfirm Component", () => {
     await fireEvent.click(trigger);
 
     expect(screen.getByText("确定删除此记录？")).toBeDefined();
+    expect(document.querySelector(".svadmin-popconfirm")?.getAttribute("data-confirm-weight")).toBe("light");
     const okBtn = screen.getByRole("button", { name: "确认删除" });
     expect(okBtn).toBeDefined();
 

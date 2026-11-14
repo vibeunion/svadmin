@@ -9,6 +9,7 @@
     okText = "确定",
     cancelText = "取消",
     okType = "primary",
+    risk = "light",
     icon,
     onConfirm,
     children,
@@ -17,6 +18,8 @@
     okText?: string;
     cancelText?: string;
     okType?: "primary" | "danger";
+    /** 频繁的轻确认用 light。不可逆操作应改用 Dialog，这里只标记，不改成模态。 */
+    risk?: "light" | "irreversible";
     icon?: Snippet;
     onConfirm?: () => void;
     children: Snippet;
@@ -31,7 +34,7 @@
       <span class="svadmin-popconfirm__trigger" {...props}>{@render children()}</span>
     {/snippet}
   </Popover.Trigger>
-  <Popover.Content class="svadmin-popconfirm" sideOffset={8}>
+  <Popover.Content class="svadmin-popconfirm" data-confirm-weight={risk} sideOffset={8}>
     <div class="flex items-start gap-2">
       {#if icon}
         {@render icon()}

@@ -593,7 +593,7 @@
     <div class="flex h-screen items-center justify-center">
       <div class="space-y-4 text-center">
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
-        <p class="text-sm text-muted-foreground">Loading...</p>
+        <p class="text-sm text-muted-foreground">Loading…</p>
       </div>
     </div>
   {:else if route === '/login' && loginPage}
@@ -630,7 +630,7 @@
           <div class="absolute inset-0 z-10 flex min-h-40 items-center justify-center bg-background/80" role="status" aria-live="polite">
             <div class="space-y-3 text-center">
               <div class="h-6 w-6 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
-              <p class="text-sm text-muted-foreground">Loading...</p>
+              <p class="text-sm text-muted-foreground">Loading…</p>
             </div>
           </div>
         {:else}

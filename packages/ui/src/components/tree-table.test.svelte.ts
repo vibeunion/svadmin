@@ -208,7 +208,7 @@ describe('TreeTable Component', () => {
   it('provides loading, error, explicit retry and empty states without exposing stale rows', async () => {
     const onRetry = vi.fn();
     const view = render(TreeTable, { data: treeData, columns, loading: true, onRetry });
-    expect(view.getByRole('status').textContent).toBe('Loading...');
+    expect(view.getByRole('status').textContent).toBe('Loading…');
     expect(view.queryByText('Root Folder')).toBeNull();
     await view.rerender({ loading: false, error: 'PRIVATE_PROVIDER_DIAGNOSTIC: relation "tree_nodes" missing' });
     expect(view.getByRole('alert').textContent).toBe('Operation failed');

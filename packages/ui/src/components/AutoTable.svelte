@@ -1515,7 +1515,8 @@
           {/each}
         </Table.Header>
       </Table.Root>
-      <div class="p-4 space-y-3">
+      <div class="p-4 space-y-3" data-svadmin-table-state="loading" role="status" aria-live="polite" aria-busy="true">
+        <span class="svadmin-sr-only">{i18n.t('common.loading')}</span>
         <div class="flex gap-4 mb-2">
           {#each visibleFields.slice(0, 4) as _, _i (_i)}
             <Skeleton class="h-4 flex-1" />

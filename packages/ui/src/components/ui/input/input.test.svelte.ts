@@ -115,6 +115,34 @@ describe("Input", () => {
 		expect(input.closest(".svadmin-file-input")?.getAttribute("data-disabled")).toBeNull();
 	});
 
+	it("marks the eight input states and keeps a visible label", async () => {
+		const view = render(Input, { "aria-label": "Name", value: "" });
+		const read = () => screen.getByLabelText<HTMLInputElement>("Name");
+		expect(read().getAttribute("data-input-state")).toBe("default");
+		expect(read().getAttribute("aria-label")).toBe("Name");
+
+		await view.rerender({ "aria-label": "Name", value: "Ada", status: undefined });
+		expect(read().getAttribute("data-input-state")).toBe("complete");
+
+		await view.rerender({ "aria-label": "Name", value: "Ada", status: "success" });
+		expect(read().getAttribute("data-input-state")).toBe("success");
+
+		await view.rerender({ "aria-label": "Name", value: "Ada", status: "loading" });
+		expect(read().getAttribute("data-input-state")).toBe("loading");
+		expect(read().getAttribute("aria-busy")).toBe("true");
+
+		await view.rerender({ "aria-label": "Name", value: "Ada", status: "error" });
+		expect(read().getAttribute("data-input-state")).toBe("error");
+
+		await view.rerender({ "aria-label": "Name", value: "Ada", status: undefined, disabled: true });
+		expect(read().getAttribute("data-input-state")).toBe("disabled");
+
+		await view.rerender({ "aria-label": "Name", value: "", status: undefined, disabled: false, size: "mini" });
+		expect(read().getAttribute("data-size")).toBe("mini");
+		await fireEvent.focus(read());
+		expect(read().getAttribute("data-input-state")).toBe("focus");
+	});
+
 	it("renders a single filename and restores the empty label after clearing", async () => {
 		render(InputHarness, { props: { locale: "en" } });
 		const input = screen.getByLabelText<HTMLInputElement>("Attachment");

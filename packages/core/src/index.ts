@@ -166,6 +166,14 @@ export { buildPivot, buildPivotCacheKey, buildPivotDrilldown, buildPivotExportRe
 export type { PivotAggregation, PivotCache, PivotDimension, PivotDimensionValue, PivotOptions, PivotPayload, PivotProvider, PivotQuery, PivotResult, PivotDrilldown, PivotExportRequest, PivotExportTaskResult } from './pivot';
 export { civilDateTimeToInstant, parseDateTimeInstant, formatCivilDateTime } from './date-time';
 export type { DateTimeValueMode, DateTimeDisambiguation } from './date-time';
+export {
+  formatAdminCopy,
+  formatAdminEllipsis,
+  formatAdminNumber,
+  formatAdminTime,
+  spaceCjkLatin,
+} from './copy-format';
+export type { AdminNumberOptions, AdminTimeOptions } from './copy-format';
 export { validateGantt, GANTT_LIMITS } from './gantt';
 export type { GanttTaskShape, GanttValidationError } from './gantt';
 export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider, withValidatedAuditProvider, AuditError } from './audit';

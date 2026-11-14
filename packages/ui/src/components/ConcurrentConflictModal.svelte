@@ -1,7 +1,7 @@
 <script lang="ts">
   import { X, AlertTriangle, Check, Loader2 } from '@lucide/svelte';
   import { cn } from '../utils.js';
-  import { useTranslation } from '@svadmin/core';
+  import { formatAdminTime, useTranslation } from '@svadmin/core';
 
   export interface ConflictFieldDiff {
     field: string;
@@ -76,7 +76,7 @@
     if (!t) return '';
     try {
       const d = typeof t === 'number' ? new Date(t) : new Date(t);
-      return isNaN(d.getTime()) ? String(t) : d.toLocaleTimeString();
+      return isNaN(d.getTime()) ? String(t) : formatAdminTime(d);
     } catch {
       return String(t);
     }
@@ -279,7 +279,7 @@
           >
             {#if loading || isSubmitting}
               <Loader2 class="h-3.5 w-3.5 animate-spin" />
-              <span>处理中...</span>
+              <span>处理中…</span>
             {:else}
               <Check class="h-3.5 w-3.5" />
               <span>应用合并方案并保存</span>

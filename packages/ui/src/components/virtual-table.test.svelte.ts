@@ -131,7 +131,7 @@ describe('VirtualTable Component', () => {
     const onRetry = vi.fn();
     const view = render(VirtualTable, { items, columns, loading: true, onRetry });
     expect(view.getByRole('table').getAttribute('aria-busy')).toBe('true');
-    expect(view.getByRole('status').textContent).toBe('Loading...');
+    expect(view.getByRole('status').textContent).toBe('Loading…');
     expect(view.queryByRole('cell')).toBeNull();
     await view.rerender({ loading: false, error: 'Unable to load records' });
     expect(view.getByRole('alert').textContent).toBe('Unable to load records');

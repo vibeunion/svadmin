@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte';
   import { AlertTriangle, AlertCircle } from '@lucide/svelte';
   import TrendIndicator from './TrendIndicator.svelte';
+  import { formatAdminNumber } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   export interface KpiCardProps {
@@ -64,7 +65,7 @@
 
   const formattedValue = $derived.by(() => {
     if (typeof value === 'number') {
-      return value.toLocaleString('en-US');
+      return formatAdminNumber(value, 'en-US');
     }
     return String(value);
   });

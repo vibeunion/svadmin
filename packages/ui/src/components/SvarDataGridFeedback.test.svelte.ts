@@ -66,7 +66,7 @@ describe('SvarDataGrid locale defaults', () => {
   it('localizes default loading and disabled labels without changing overrides', async () => {
     const columns: SvarInteractiveColumn[] = [{ key: 'title', label: '标题' }];
     const view = render(Host, { columns, items: [], locale: 'zh-CN', loading: true });
-    await waitFor(() => expect(view.getByRole('status').textContent).toBe('加载中...'));
+    await waitFor(() => expect(view.getByRole('status').textContent).toBe('加载中…'));
 
     await view.rerender({ columns, items: [], locale: 'zh-CN', loading: false, disabled: true });
     await waitFor(() => expect(view.getByRole('status').textContent).toBe('表格已禁用'));

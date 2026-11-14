@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminNumber } from '@svadmin/core';
   import type { Snippet } from 'svelte';
 
   interface TargetProgress {
@@ -42,7 +43,7 @@
   }: Props = $props();
 
   const formattedValue = $derived(
-    typeof value === 'number' ? value.toLocaleString('en-US') : String(value)
+    typeof value === 'number' ? formatAdminNumber(value, 'en-US') : String(value)
   );
 
   const progressPercent = $derived.by(() => {

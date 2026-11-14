@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
 
-  import { captureAdminContext } from '@svadmin/core';
+  import { captureAdminContext, formatAdminTime } from '@svadmin/core';
   import type { AuditLog, AuthProvider } from '@svadmin/core';
   import { toast } from '@svadmin/core/toast';
   import * as Table from './ui/table/index.js';
@@ -92,7 +92,7 @@
   }
 
   function formatDate(d: string | Date) {
-    return new Date(d).toLocaleString();
+    return formatAdminTime(d, { dateStyle: 'medium' });
   }
 
   function getActionColor(action: string): 'default' | 'secondary' | 'destructive' | 'outline' {
@@ -127,7 +127,7 @@
       <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         bind:value={searchQuery}
-        placeholder={i18n.t('settings.searchLogs') ?? 'Search by user, action, or resource...'}
+        placeholder={i18n.t('settings.searchLogs') ?? 'Search by user, action, or resource…'}
         class="pl-9"
       />
     </div>

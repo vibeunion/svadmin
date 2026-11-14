@@ -65,6 +65,13 @@ for (const scheme of ['light', 'dark'] as const) {
     const gap = await page.locator('#second-paragraph').evaluate((element) => getComputedStyle(element).marginTop);
     expect(gap).toBe('21px');
 
+    const helpGap = await page.locator('#field-help').evaluate((element) => getComputedStyle(element).marginTop);
+    expect(helpGap).toBe('4px');
+    expect(await paint(page, '#input-disabled', 'opacity')).toBe('1');
+    expect(await page.locator('#alert-static').getAttribute('data-feedback')).toBe('static');
+    expect(await page.locator('#table-loading').getAttribute('aria-busy')).toBe('true');
+    expect(await page.locator('#table-empty').getAttribute('data-svadmin-data-state')).toBe('empty');
+
     await shoot(page, `clean-flat-${scheme}`);
   });
 }
@@ -81,4 +88,11 @@ test('visual contract desktop viewports do not overflow', async ({ page }) => {
     expect(overflow).toBe(false);
     await shoot(page, `clean-flat-light-${viewport.name}`);
   }
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  expect(await paint(page, '#popconfirm', 'max-width')).toBe('320px');
+  expect(Math.round(await page.locator('#dialog-sm').evaluate((element) => element.getBoundingClientRect().width))).toBe(400);
+  expect(Math.round(await page.locator('#dialog-md').evaluate((element) => element.getBoundingClientRect().width))).toBe(520);
+  expect(Math.round(await page.locator('#dialog-lg').evaluate((element) => element.getBoundingClientRect().width))).toBe(720);
+  expect(await page.locator('#dialog-md').getAttribute('data-close-on-overlay')).toBe('false');
 });

@@ -691,13 +691,13 @@ describe('builtin safety follow-up', () => {
     const firstEvent = requireValue(referenceDemoData.securityEvents[0]);
     await screen.findByText(firstEvent.event);
 
-    await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: 'zz-no-match-938' } });
+    await fireEvent.input(screen.getByPlaceholderText('Search…'), { target: { value: 'zz-no-match-938' } });
 
     await waitFor(() => expect(screen.getByText('No matching security events')).toBeTruthy());
     expect(document.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy();
     expect(document.querySelector('[data-svadmin-data-state="empty"]')).toBeNull();
 
-    await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: '' } });
+    await fireEvent.input(screen.getByPlaceholderText('Search…'), { target: { value: '' } });
     await screen.findByText(firstEvent.event);
     expect(screen.queryByText('No matching security events')).toBeNull();
     expect(document.querySelector('[data-svadmin-data-state]')).toBeNull();
@@ -768,7 +768,7 @@ describe('builtin safety follow-up', () => {
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { downloads.push(this.download); });
     if (page === 'security') render(SecurityLog); else render(TeamCrew);
     const query = page === 'security' ? requireValue(referenceDemoData.securityEvents[0]).actor : 'sarah@acme.com';
-    await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: query } });
+    await fireEvent.input(screen.getByPlaceholderText('Search…'), { target: { value: query } });
     await fireEvent.click(screen.getByRole('button', { name: /^Export$/ }));
     expect(create).toHaveBeenCalledTimes(1);
     expect(requireValue(blobs[0]).type).toBe('application/json');
@@ -780,7 +780,7 @@ describe('builtin safety follow-up', () => {
       expect(content).toEqual([{ id: '2', name: 'Sarah Kim', email: 'sarah@acme.com', role: 'Senior Designer', department: 'Design', status: 'active', projects: 8 }]);
     }
     expect(downloads).toEqual([page === 'security' ? 'sample-security-events.json' : 'sample-team.json']);
-    await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: 'zz-no-match-938' } });
+    await fireEvent.input(screen.getByPlaceholderText('Search…'), { target: { value: 'zz-no-match-938' } });
     await fireEvent.click(screen.getByRole('button', { name: /^Export$/ }));
     expect(JSON.parse(await requireValue(blobs[1]).text())).toEqual([]);
     await waitFor(() => expect(revoke).toHaveBeenCalledTimes(2));

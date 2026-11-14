@@ -503,7 +503,7 @@
             开始生成报表
           </button>
         {:else if taskStatus === 'exporting'}
-          <span class="text-muted-foreground text-xs italic">任务执行中，请勿关闭...</span>
+          <span class="text-muted-foreground text-xs italic">任务仍在执行。离开页面会中断导出。</span>
         {:else if taskStatus === 'completed'}
           {#if exportResult?.fileUrl}
             <button

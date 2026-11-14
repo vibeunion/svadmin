@@ -87,7 +87,7 @@
           type="text"
           name="q"
           value={currentSearch ?? ""}
-          placeholder={t("common.search") || "Search..."}
+          placeholder={t("common.search") || "Search…"}
           class="lite-input"
           style="width: 200px; display: inline-block;"
         />

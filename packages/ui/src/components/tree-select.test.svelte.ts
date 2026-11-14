@@ -284,7 +284,7 @@ describe('TreeSelect component', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Departments' }));
     const tree = view.getByRole('tree', { name: 'Departments' });
     expect(tree.tabIndex).toBe(-1);
-    const search = view.getByRole('textbox', { name: 'Search...' });
+    const search = view.getByRole('textbox', { name: 'Search…' });
     expect(search.getAttribute('aria-controls')).toBe(tree.id);
     expect(tree.querySelectorAll('[role="treeitem"][tabindex="0"]')).toHaveLength(1);
     await fireEvent.keyDown(search, { key: 'ArrowDown' });

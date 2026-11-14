@@ -112,14 +112,14 @@ describe('ModalForm and DrawerForm Components', () => {
     await fireEvent.input(draft, { target: { value: 'Changed draft' } });
 
     await clickSave(view);
-    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('Operation failed'));
+    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('The submit did not finish because the service did not accept it.'));
     expect(panel(view, kind)).toBeTruthy();
     expect(draft).toHaveProperty('value', 'Changed draft');
     expect(document.body.textContent).not.toContain('PRIVATE_SYNC_DIAGNOSTIC');
 
     await clickSave(view);
     await waitFor(() => expect(onsubmit).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('Operation failed'));
+    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('The submit did not finish because the service did not accept it.'));
     expect(panel(view, kind)).toBeTruthy();
     expect(draft).toHaveProperty('value', 'Changed draft');
     expect(document.body.textContent).not.toContain('PRIVATE_ASYNC_DIAGNOSTIC');
@@ -186,7 +186,12 @@ describe('ModalForm and DrawerForm Components', () => {
       expect(panel(view, kind)).toBeTruthy();
 
       await dismiss(view, kind, action);
-      await waitFor(() => expect(queryPanel(view, kind)).toBeNull());
+      if (kind === 'modal' && action === 'overlay') {
+        expect(queryPanel(view, kind)).toBeTruthy();
+        expect(document.querySelector('[data-close-on-overlay="false"]')).toBeTruthy();
+      } else {
+        await waitFor(() => expect(queryPanel(view, kind)).toBeNull());
+      }
       view.unmount();
     }
   });
@@ -222,7 +227,11 @@ describe('ModalForm and DrawerForm Components', () => {
           expect(panel(view, kind)).toBeTruthy();
 
           await dismiss(view, kind, action);
-          await waitFor(() => expect(queryPanel(view, kind)).toBeNull());
+          if (kind === 'modal' && action === 'overlay') {
+            expect(queryPanel(view, kind)).toBeTruthy();
+          } else {
+            await waitFor(() => expect(queryPanel(view, kind)).toBeNull());
+          }
         }
         view.unmount();
       }
@@ -254,7 +263,7 @@ describe('ModalForm and DrawerForm Components', () => {
     expect(document.body.textContent).not.toContain('PRIVATE_STALE_DIAGNOSTIC');
 
     second.reject(new Error('PRIVATE_CURRENT_DIAGNOSTIC'));
-    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('Operation failed'));
+    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('The submit did not finish because the service did not accept it.'));
     expect(panel(view, kind)).toBeTruthy();
     expect(view.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
     expect(document.body.textContent).not.toContain('PRIVATE_CURRENT_DIAGNOSTIC');
@@ -351,7 +360,7 @@ describe('ModalForm and DrawerForm Components', () => {
     expect(document.body.textContent).not.toContain('PRIVATE_OLD_FINALLY_DIAGNOSTIC');
 
     second.reject(new Error('PRIVATE_NEW_CURRENT_DIAGNOSTIC'));
-    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('Operation failed'));
+    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('The submit did not finish because the service did not accept it.'));
     expect(panel(view, kind)).toBeTruthy();
     expect(view.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
     expect(document.body.textContent).not.toContain('PRIVATE_NEW_CURRENT_DIAGNOSTIC');

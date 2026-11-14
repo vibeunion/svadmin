@@ -8,6 +8,7 @@ const sonner = vi.hoisted(() => ({
   error: vi.fn(),
   warning: vi.fn(),
   info: vi.fn(),
+  message: vi.fn(),
   promise: vi.fn(),
 }));
 
@@ -171,5 +172,12 @@ describe('Toast host coordination', () => {
     expect(onTimeout).toHaveBeenCalledTimes(1);
     expect(onUndo).not.toHaveBeenCalled();
     await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+  });
+
+  it('sends a normal message without using a status color', async () => {
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+    toast.normal('已保存 12 项');
+    await waitFor(() => expect(sonner.message).toHaveBeenCalledWith('已保存 12 项', expect.objectContaining({ duration: 3000 })));
   });
 });

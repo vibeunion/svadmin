@@ -287,7 +287,7 @@
         >
           {#if loading || isSubmitting}
             <Loader2 class="h-3.5 w-3.5 animate-spin" />
-            <span>{t('common.processing', '处理中...')}</span>
+            <span>{t('common.processing', '处理中…')}</span>
           {:else}
             <span>{resolvedConfirmText}</span>
             {#if isCooldown}
