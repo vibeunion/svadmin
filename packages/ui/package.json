@@ -157,6 +157,7 @@
     "typebox": "^1.4.6",
     "@floating-ui/dom": "^1.8.0",
     "esm-env": "^1.2.2",
+    "ip-address": "10.7.6",
     "@lucide/svelte": "^1.71.0",
     "@svar-ui/svelte-core": "^2.6.2",
     "@svar-ui/svelte-filemanager": "^2.6.0",

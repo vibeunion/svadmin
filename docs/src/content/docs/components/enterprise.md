@@ -3272,9 +3272,9 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 Enterprise network security IP access rule editor and whitelist/blacklist drawer:
 - **Multiple IP Pattern Types**: Supports single IPv4/IPv6 addresses, CIDR subnet masks (`172.16.0.0/16`), and IP ranges (`10.0.0.1 - 10.0.0.50`).
-- **Real-Time Syntax & Conflict Validation**: Validates IP boundaries and detects overlapping subnet rules.
-- **Self-Protection Operator Action**: Provides one-click "Trust My IP" operation to prevent administrators from locking themselves out.
-- **Rule Expirations**: Configurable expiration periods (Permanent, 2 Hours, 24 Hours, 7 Days) for emergency or maintenance windows.
+- **Strict Syntax**: Decimal integer CIDR prefixes, ascending same-family ranges, IPv6 parsing and mapped IPv4 normalization. CIDR host bits are interpreted as their enclosing network; no pairwise overlap audit is implied.
+- **Local Lockout Prevention**: Every edit, deletion, enable/disable and mode change checks the current address against the complete candidate policy, including future activation/expiration boundaries. DENY overrides ALLOW independent of order and `priority` metadata. Unknown current addresses block mutations.
+- **Rule Lifecycle**: Optional `startsAt` activation, live countdowns, active/expired/scheduled states and Permanent / 2 Hours / 24 Hours / 7 Days durations. Durations start at activation or now, whichever is later. Editing keeps the original expiration unless explicitly changed.
 - **Dual Enforcement Modes**: Switch seamlessly between Whitelist (Allowlist) and Blacklist (Blocklist).
 
 ```svelte
@@ -3282,7 +3282,7 @@ Enterprise network security IP access rule editor and whitelist/blacklist drawer
   import { IpWhitelistDrawer, type IpAccessRule } from '@svadmin/ui';
 
   let open = $state(false);
-  let rules: IpAccessRule[] = [
+  let rules = $state<IpAccessRule[]>([
     {
       id: 'rule-1',
       type: 'SINGLE',
@@ -3301,11 +3301,20 @@ Enterprise network security IP access rule editor and whitelist/blacklist drawer
       enabled: true,
       expiresAt: null,
     },
-  ];
+  ]);
 </script>
 
 <button onclick={() => (open = true)}>Configure IP Rules</button>
 <IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+```
+
+The address above is documentation-only. Supply `currentClientIp` from the authenticated backend, or pass `resolveClientIp: () => Promise<string>` to automatically resolve it when the editor mounts. The resolver must use the host's DataProvider/service boundary, not a third-party IP lookup or raw view-level network call. A supplied address takes precedence over the resolver. Failed detection shows an error and never invents an address.
+
+`onChange(rules)` and drawer `onModeChange(mode)` may return promises. Bind `rules` / `mode` or persist their detached snapshots through an authenticated tenant-scoped service. Mutations update the UI only after the relevant callback succeeds; pending operations prevent repeated submissions and mode changes. `onAddMyIp(ip)` is a post-save notification, not an enforcement receipt. The editor's bindable `busy` exposes its pending state.
+
+"Trust My IP" creates or renews a permanent SINGLE ALLOW. It never removes or overrides a conflicting DENY; resolve that conflict explicitly. Stale edit drafts are rejected, and newer host snapshots are preserved during asynchronous rule or mode saves. The safety preview is not a firewall, server-side authorization, durable persistence, audit logging or protection against future IP changes. The backend must independently validate the entire policy, use trusted proxy configuration to determine the effective request IP, enforce the same family normalization and DENY-first semantics, use server time, and atomically reject self-lockout with the policy write. Use backend policy revisions or equivalent concurrency control to reject stale writes. Do not trust client-provided IPs or `priority` to bypass that check. Production ACL behavior and proxy-chain acceptance require separate integration tests.
+
+Browser fixture: `bun run vite --config scripts/fixtures/ip-access-rules/vite.config.ts` (port 4198).
 
 
 ### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
