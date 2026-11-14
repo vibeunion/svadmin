@@ -3340,8 +3340,8 @@ AI 规则语义解释卡片：
 </script>
 
 <GatewayRouteEditor
-  bind:route={routeConfig}
-  onsave={(cfg) => console.log('保存路由规则:', cfg)}
+  route={routeConfig}
+  onsave={(cfg) => { routeConfig = cfg; }}
   ontest={(path) => path.startsWith('/api/v1/orders')}
 />
 ```
@@ -3367,6 +3367,9 @@ AI 规则语义解释卡片：
   }}
   onsave={(cfg) => console.log('同步限流熔断策略:', cfg)}
   onresetCircuitBreaker={() => console.log('手动复位熔断状态')}
+/>
+```
+
 ## StepUpAuthModal 高敏特权二次认证弹窗
 
 面向严重高危操作（如生产库清空、全量秘钥轮换、高权限提权），提供阶梯式多因子认证、防暴力破解锁定机制与审批授权联动。公共别名为 `PrivilegeElevationModal`。

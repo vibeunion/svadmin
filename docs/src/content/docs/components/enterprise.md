@@ -3448,8 +3448,8 @@ Enterprise microservice API gateway route orchestrator supporting URI path patte
 </script>
 
 <GatewayRouteEditor
-  bind:route={routeConfig}
-  onsave={(cfg) => console.log('Saved route configuration:', cfg)}
+  route={routeConfig}
+  onsave={(cfg) => { routeConfig = cfg; }}
   ontest={(path) => path.startsWith('/api/v1/orders')}
 />
 ```
@@ -3475,6 +3475,9 @@ High-availability governance dashboard for API rate limiting and circuit breakin
   }}
   onsave={(cfg) => console.log('Synced policy config:', cfg)}
   onresetCircuitBreaker={() => console.log('Manual reset')}
+/>
+```
+
 ## StepUpAuthModal
 
 High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.

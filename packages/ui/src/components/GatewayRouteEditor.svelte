@@ -43,7 +43,7 @@
     route?: GatewayRouteConfig;
     title?: string;
     subtitle?: string;
-    onsave?: (route: GatewayRouteConfig) => void;
+    onsave?: (route: GatewayRouteConfig) => void | Promise<void>;
     ontest?: (testPath: string) => boolean | Promise<boolean>;
     ondelete?: () => void;
   }
@@ -76,11 +76,25 @@
     ondelete,
   }: Props = $props();
 
-  let currentRoute = $state<GatewayRouteConfig>(untrack(() => ({ ...route })));
+  function copyRoute(value: GatewayRouteConfig): GatewayRouteConfig {
+    return { ...value, methods: [...value.methods], headers: value.headers.map((header) => ({ ...header })) };
+  }
+
+  let currentRoute = $state<GatewayRouteConfig>(untrack(() => copyRoute(route)));
   let testInputPath = $state('/api/v1/users/profile');
   let testResult = $state<{ matched: boolean; targetUpstream: string; message: string } | null>(null);
   let isTesting = $state(false);
-  let saveSuccess = $state(false);
+  let savedSnapshot = $state<string | null>(null);
+  const saveSuccess = $derived(savedSnapshot !== null && savedSnapshot === JSON.stringify(currentRoute));
+  let isSaving = $state(false);
+  let saveError = $state('');
+
+  $effect(() => {
+    currentRoute = copyRoute(route);
+    testResult = null;
+    savedSnapshot = null;
+    saveError = '';
+  });
 
   const availableMethods: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
 
@@ -107,6 +121,7 @@
   }
 
   async function handleTestMatch() {
+    if (isTesting) return;
     isTesting = true;
     testResult = null;
     try {
@@ -139,19 +154,28 @@
           message: matched ? '测试路径与规则匹配成功！' : '路径未满足前缀或模式匹配要求',
         };
       }
+    } catch {
+      testResult = { matched: false, targetUpstream: '无可用上游', message: '路由测试失败，请检查路径规则或测试服务。' };
     } finally {
       isTesting = false;
     }
   }
 
-  function handleSave() {
-    if (onsave) {
-      onsave(currentRoute);
+  async function handleSave() {
+    if (!onsave || isSaving) return;
+    isSaving = true;
+    savedSnapshot = null;
+    saveError = '';
+    try {
+      const payload = copyRoute(currentRoute);
+      const snapshot = JSON.stringify(payload);
+      await onsave(payload);
+      savedSnapshot = snapshot;
+    } catch {
+      saveError = '保存失败，请重试。';
+    } finally {
+      isSaving = false;
     }
-    saveSuccess = true;
-    setTimeout(() => {
-      saveSuccess = false;
-    }, 2000);
   }
 </script>
 
@@ -204,6 +228,7 @@
         type="button"
         class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
         onclick={handleSave}
+        disabled={isSaving || !onsave}
       >
         {#if saveSuccess}
           <Check class="h-3.5 w-3.5 text-primary-foreground" />
@@ -214,6 +239,10 @@
       </button>
     </div>
   </div>
+
+  {#if saveError}
+    <p role="alert" class="pt-3 text-xs text-destructive">{saveError}</p>
+  {/if}
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6">
     <!-- Left Column: Match Rules -->

@@ -37,7 +37,7 @@
     config?: Partial<RateLimitPolicyConfig>;
     title?: string;
     subtitle?: string;
-    onsave?: (config: RateLimitPolicyConfig) => void;
+    onsave?: (config: RateLimitPolicyConfig) => void | Promise<void>;
     onresetCircuitBreaker?: () => void;
   }
 
@@ -67,7 +67,16 @@
   }: Props = $props();
 
   let policy = $state<RateLimitPolicyConfig>(untrack(() => ({ ...defaultConfig, ...config })));
-  let saveSuccess = $state(false);
+  let savedSnapshot = $state<string | null>(null);
+  const saveSuccess = $derived(savedSnapshot !== null && savedSnapshot === JSON.stringify(policy));
+  let isSaving = $state(false);
+  let saveError = $state('');
+
+  $effect(() => {
+    policy = { ...defaultConfig, ...config };
+    savedSnapshot = null;
+    saveError = '';
+  });
 
   function handleResetCircuitBreaker() {
     policy.circuitBreakerState = 'closed';
@@ -76,14 +85,21 @@
     }
   }
 
-  function handleSave() {
-    if (onsave) {
-      onsave(policy);
+  async function handleSave() {
+    if (!onsave || isSaving) return;
+    isSaving = true;
+    savedSnapshot = null;
+    saveError = '';
+    try {
+      const payload = { ...policy };
+      const snapshot = JSON.stringify(payload);
+      await onsave(payload);
+      savedSnapshot = snapshot;
+    } catch {
+      saveError = '保存失败，请重试。';
+    } finally {
+      isSaving = false;
     }
-    saveSuccess = true;
-    setTimeout(() => {
-      saveSuccess = false;
-    }, 2000);
   }
 </script>
 
@@ -124,6 +140,7 @@
         type="button"
         class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
         onclick={handleSave}
+        disabled={isSaving || !onsave}
       >
         {#if saveSuccess}
           <Check class="h-3.5 w-3.5" />
@@ -135,6 +152,10 @@
       </button>
     </div>
   </div>
+
+  {#if saveError}
+    <p role="alert" class="pt-3 text-xs text-destructive">{saveError}</p>
+  {/if}
 
   <!-- Real-time Circuit Breaker Health Status Capsule -->
   <div class="my-5 rounded-lg border border-border bg-muted/20 p-4">
