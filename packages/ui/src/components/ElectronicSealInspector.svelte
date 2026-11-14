@@ -11,8 +11,7 @@
     ChevronDown,
     ChevronUp,
     Download,
-    RefreshCw,
-    ExternalLink
+    RefreshCw
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
