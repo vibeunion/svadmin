@@ -7,7 +7,7 @@ import PivotTable from './PivotTable.svelte';
 describe('MentionsInput, KanbanBoard, and PivotTable Components', () => {
   it('renders MentionsInput with placeholder', () => {
     const view = render(MentionsInput, {
-      placeholder: 'Type @ to mention...',
+      placeholder: 'Type @ to mention…',
       users: [{ id: '1', label: 'Alice' }],
       tags: [{ id: 't1', label: 'Urgent' }],
     });

@@ -16,6 +16,7 @@
 		showCloseButton = true,
 		closeOnOverlayClick = true,
 		size,
+		loading = false,
 		...restProps
 	}: WithoutChildrenOrChild<DialogPrimitive.ContentProps> & {
 		portalProps?: WithoutChildrenOrChild<ComponentProps<typeof DialogPortal>>;
@@ -25,6 +26,8 @@
 		closeOnOverlayClick?: boolean;
 		/** Arco 建议宽度：400 / 520 / 720。不传则保持现有默认宽度。 */
 		size?: 'sm' | 'md' | 'lg';
+		/** 加载中时正文区保持最小高度，避免标题和按钮跳动。 */
+		loading?: boolean;
 	} = $props();
 </script>
 
@@ -35,6 +38,8 @@
 		data-slot="dialog-content"
 		data-dialog-size={size}
 		data-close-on-overlay={closeOnOverlayClick ? 'true' : 'false'}
+		data-loading={loading ? 'true' : undefined}
+		aria-busy={loading ? 'true' : undefined}
 		interactOutsideBehavior={closeOnOverlayClick ? 'close' : 'ignore'}
 		class={cn(
 			"svadmin-dialog-content",
@@ -46,7 +51,7 @@
 		{#if showCloseButton}
 			<DialogPrimitive.Close data-slot="dialog-close">
 				{#snippet child({ props })}
-					<Button variant="ghost" class="absolute top-2 right-2" size="icon-sm" {...props}>
+					<Button variant="ghost" class="svadmin-dialog-dismiss absolute top-2 right-2" size="icon-sm" {...props}>
 						<XIcon  />
 						<span class="svadmin-sr-only">Close</span>
 					</Button>

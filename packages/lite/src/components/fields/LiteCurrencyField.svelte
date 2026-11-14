@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import type { FieldDefinition } from '@svadmin/core';
+  import { formatAdminCurrency, formatAdminNumber, type FieldDefinition } from '@svadmin/core';
 
   interface Props {
     field?: FieldDefinition;
@@ -53,24 +53,22 @@
   const formatted = $derived.by(() => {
     if (numericValue === null) return nullLabel;
 
-    const opts: Intl.NumberFormatOptions = {
-      style: symbol ? 'decimal' : 'currency',
-      currency: symbol ? undefined : currency,
-      minimumFractionDigits: normalizedPrecision,
-      maximumFractionDigits: normalizedPrecision,
-    };
-
-    if (compact) {
-      opts.notation = 'compact';
-      opts.compactDisplay = 'short';
-    }
-
     try {
-      let res = new Intl.NumberFormat(locale, opts).format(numericValue);
       if (symbol) {
-        res = `${symbol}${res}`;
+        const amount = formatAdminNumber(numericValue, {
+          locale,
+          minimumFractionDigits: normalizedPrecision,
+          maximumFractionDigits: normalizedPrecision,
+        });
+        return `${symbol}${amount}`;
       }
-      return res;
+      return formatAdminCurrency(numericValue, {
+        locale,
+        currency,
+        minimumFractionDigits: normalizedPrecision,
+        maximumFractionDigits: normalizedPrecision,
+        ...(compact ? { notation: 'compact' as const } : {}),
+      });
     } catch {
       return String(numericValue);
     }

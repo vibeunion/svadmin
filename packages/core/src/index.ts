@@ -168,12 +168,21 @@ export { civilDateTimeToInstant, parseDateTimeInstant, formatCivilDateTime } fro
 export type { DateTimeValueMode, DateTimeDisambiguation } from './date-time';
 export {
   formatAdminCopy,
+  formatAdminCurrency,
+  formatAdminDate,
   formatAdminEllipsis,
   formatAdminNumber,
+  formatAdminPercent,
   formatAdminTime,
   spaceCjkLatin,
 } from './copy-format';
-export type { AdminNumberOptions, AdminTimeOptions } from './copy-format';
+export type {
+  AdminCurrencyOptions,
+  AdminDateOptions,
+  AdminNumberOptions,
+  AdminPercentOptions,
+  AdminTimeOptions,
+} from './copy-format';
 export { validateGantt, GANTT_LIMITS } from './gantt';
 export type { GanttTaskShape, GanttValidationError } from './gantt';
 export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider, withValidatedAuditProvider, AuditError } from './audit';

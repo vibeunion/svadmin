@@ -20,7 +20,7 @@ describe("Spin Component", () => {
     const { container, rerender } = render(SpinHarness, {
       props: {
         loading: true,
-        tip: "正在同步数据...",
+        tip: "正在同步数据…",
       },
     });
 
@@ -29,7 +29,7 @@ describe("Spin Component", () => {
     const children = container.querySelector(".svadmin-spin-children");
     expect(children?.classList.contains("opacity-40")).toBe(true);
     expect(container.textContent).toContain("Card Content");
-    expect(container.textContent).toContain("正在同步数据...");
+    expect(container.textContent).toContain("正在同步数据…");
 
     rerender({ loading: false, tip: "" });
     const updatedChildren = container.querySelector(".svadmin-spin-children");

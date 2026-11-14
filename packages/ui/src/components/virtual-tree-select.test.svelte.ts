@@ -36,13 +36,13 @@ describe('VirtualTreeSelect Component', () => {
     const { container } = render(VirtualTreeSelect, {
       props: {
         options: testNodes,
-        placeholder: 'Select a department...',
+        placeholder: 'Select a department…',
       },
     });
 
     const root = container.querySelector('[data-svadmin-component="VirtualTreeSelect"]');
     expect(root).not.toBeNull();
-    expect(container.textContent).toContain('Select a department...');
+    expect(container.textContent).toContain('Select a department…');
   });
 
   it('opens dropdown and displays root nodes on trigger click', async () => {

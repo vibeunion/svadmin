@@ -167,7 +167,7 @@
         <input
           type="text"
           bind:value={sourceSearch}
-          placeholder={chinese ? '检索部门或节点...' : 'Search tree...'}
+          placeholder={chinese ? '检索部门或节点…' : 'Search tree…'}
           class="h-7 w-full rounded border border-input bg-muted/20 pl-7.5 pr-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       </div>
@@ -288,7 +288,7 @@
         <input
           type="text"
           bind:value={targetSearch}
-          placeholder={chinese ? '搜索已指派项...' : 'Filter assigned...'}
+          placeholder={chinese ? '搜索已指派项…' : 'Filter assigned…'}
           class="h-7 w-full rounded border border-input bg-muted/20 pl-7.5 pr-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       </div>

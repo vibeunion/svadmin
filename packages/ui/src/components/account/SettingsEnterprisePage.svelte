@@ -220,7 +220,7 @@
     <div class="grid items-start gap-4 lg:grid-cols-2">
       <SettingsGroup title={i18n.t('account.securityPolicy')} description={isZh ? '配置组织级身份、会话与审计策略。' : 'Configure organization-wide identity, session, and audit controls.'} bodyClass="space-y-4">
         {#if organizationProvider}
-          <div class="space-y-2"><Label for={`${controlId}-organization-name`}>{isZh ? '组织名称' : 'Organization name'}</Label><div class="flex gap-2"><Input id={`${controlId}-organization-name`} bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中…' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
+          <div class="space-y-2"><Label for={`${controlId}-organization-name`}>{isZh ? '组织名称' : 'Organization name'}</Label><div class="flex gap-2"><Input id={`${controlId}-organization-name`} bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中…' : 'Saving…') : i18n.t('common.save')}</Button></div></div>
         {/if}
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-2"><Label for={`${controlId}-session-timeout`}>{i18n.t('account.sessionTimeout')}</Label><Input id={`${controlId}-session-timeout`} type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} aria-invalid={policy ? !sessionTimeoutValid : undefined} aria-describedby={policy && !sessionTimeoutValid ? `${controlId}-policy-error` : undefined} /></div>
@@ -228,7 +228,7 @@
         </div>
         {#if policy && !policyNumbersValid}<div id={`${controlId}-policy-error`}><FeedbackNotice tone="warning" message={isZh ? '会话超时和审计保留天数必须为正整数。' : 'Session timeout and audit retention must be positive integers.'} /></div>{/if}
         <SettingsFieldRow label={i18n.t('account.auditLogging')} controlId={`${controlId}-audit`} description={isZh ? '由后端持久化组织级审计策略。' : 'Persist the organization audit policy through the backend provider.'} control={auditControl} separated />
-        <Button size="sm" disabled={!identityProvider || !policy || !policyNumbersValid || saving} onclick={saveSettings}>{saving ? (isZh ? '保存中…' : 'Saving...') : i18n.t('common.save')}</Button>
+        <Button size="sm" disabled={!identityProvider || !policy || !policyNumbersValid || saving} onclick={saveSettings}>{saving ? (isZh ? '保存中…' : 'Saving…') : i18n.t('common.save')}</Button>
       </SettingsGroup>
       <SettingsGroup title={i18n.t('account.singleSignOn')} description={i18n.t('account.ssoDescription')} bodyClass="space-y-4">
         <SettingsFieldRow label={i18n.t('account.enableSso')} controlId={`${controlId}-sso`} description={isZh ? '启用后由已配置身份源执行组织登录策略。' : 'Require the configured identity provider for organization members.'} control={ssoControl} />
@@ -236,7 +236,7 @@
           <Label for={`${controlId}-metadata-url`}>{i18n.t('account.ssoProvider')}</Label>
           <Input id={`${controlId}-metadata-url`} type="url" bind:value={metadataUrl} placeholder="https://idp.example.com/.well-known/openid-configuration" disabled={!identityProvider || testing} />
         </div>
-        <Button variant="outline" size="sm" disabled={!identityProvider || testing} onclick={() => testConnection()}>{testing ? (isZh ? '测试中...' : 'Testing...') : i18n.t('common.test')}</Button>
+        <Button variant="outline" size="sm" disabled={!identityProvider || testing} onclick={() => testConnection()}>{testing ? (isZh ? '测试中…' : 'Testing…') : i18n.t('common.test')}</Button>
       </SettingsGroup>
     </div>
     <section class="space-y-3">

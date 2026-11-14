@@ -106,7 +106,7 @@
   {#if status === 'pending'}
     <div class="svadmin-ai-confirmation__actions">
       {#if oncancel}<button class="svadmin-ai-confirmation__button svadmin-ai-confirmation__button--ghost" type="button" disabled={!actionable} onclick={() => run(oncancel)}><X size={15} aria-hidden="true" />{cancelLabel}</button>{/if}
-      {#if onconfirm}<button class="svadmin-ai-confirmation__button" type="button" disabled={!actionable} aria-busy={busy} onclick={() => run(onconfirm)}><Check size={15} aria-hidden="true" />{busy ? 'Working...' : confirmLabel}</button>{/if}
+      {#if onconfirm}<button class="svadmin-ai-confirmation__button" type="button" disabled={!actionable} aria-busy={busy} onclick={() => run(onconfirm)}><Check size={15} aria-hidden="true" />{busy ? 'Working…' : confirmLabel}</button>{/if}
     </div>
   {/if}
   {/if}

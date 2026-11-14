@@ -213,7 +213,7 @@
       <PasswordInput id={`${controlId}-security-new-password`} label={i18n.t('profile.newPassword')} bind:value={newPassword} autocomplete="new-password" showStrength disabled={!authProvider?.updatePassword || changingPassword} />
       <PasswordInput id={`${controlId}-security-confirm-password`} label={i18n.t('auth.confirmPassword')} bind:value={confirmPassword} autocomplete="new-password" disabled={!authProvider?.updatePassword || changingPassword} />
       {#if passwordChangedRecently}<p class="text-xs text-muted-foreground">{i18n.t('profile.passwordChangedRecently')}</p>{/if}
-      <Button type="submit" disabled={!authProvider?.updatePassword || changingPassword}>{changingPassword ? (isZh ? '更新中...' : 'Updating...') : i18n.t('profile.updatePassword')}</Button>
+      <Button type="submit" disabled={!authProvider?.updatePassword || changingPassword}>{changingPassword ? (isZh ? '更新中…' : 'Updating…') : i18n.t('profile.updatePassword')}</Button>
     </form>
   </SettingsGroup>
   <SettingsGroup title={i18n.t('security.activeSessions')} description={i18n.t('security.sessionsDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { useList } from '@svadmin/core';
+  import { formatAdminCurrency, useList } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell, Input, InputGroup, MetricBlock, Select } from '@svadmin/ui';
@@ -110,7 +110,7 @@
   const hasActiveFilters = $derived(Boolean(search.trim() || (isPropertyView && (market || assetType || status || maximumPrice !== undefined || hasPropertyViewFilter))));
   const savedViewError = $derived(isPropertyView && view === 'saved' && savedStorageError);
   const contentCount = $derived(savedViewError ? undefined : visibleCount);
-  const money = (value: number) => new Intl.NumberFormat(isZh ? 'zh-CN' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  const money = (value: number) => formatAdminCurrency(value, { locale: isZh ? 'zh-CN' : 'en-US', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
   function toggleSaved(id: number): void {
     if (savedStorageError) return;
     const next = saved.includes(id) ? saved.filter(value => value !== id) : [...saved, id];

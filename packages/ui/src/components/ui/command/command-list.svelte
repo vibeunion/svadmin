@@ -5,6 +5,7 @@
 	let {
 		ref = $bindable(null),
 		class: className,
+		"aria-label": ariaLabel = "Suggestions…",
 		...restProps
 	}: CommandPrimitive.ListProps = $props();
 </script>
@@ -14,5 +15,6 @@
 	data-slot="command-list"
 	data-cmdk-list=""
 	class={cn("svadmin-command-list", className)}
+	aria-label={ariaLabel}
 	{...restProps}
 />

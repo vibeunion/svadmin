@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAdminCopy, formatAdminEllipsis, formatAdminNumber, formatAdminTime, spaceCjkLatin } from './copy-format';
+import { formatAdminCopy, formatAdminCurrency, formatAdminDate, formatAdminEllipsis, formatAdminNumber, formatAdminPercent, formatAdminTime, spaceCjkLatin } from './copy-format';
 
 describe('admin copy format', () => {
   it('formats clock time on a 24-hour cycle', () => {
@@ -41,6 +41,24 @@ describe('admin copy format', () => {
     expect(spaceCjkLatin('3D打印')).toBe('3D打印');
     expect(spaceCjkLatin('HTML5发布')).toBe('HTML5发布');
     expect(spaceCjkLatin('共 12 项')).toBe('共 12 项');
+  });
+
+  it('formats currency without a space after the symbol and keeps locale decimals', () => {
+    expect(formatAdminCurrency(1234, { locale: 'en-US', currency: 'USD', maximumFractionDigits: 0 })).toBe('$1,234');
+    expect(formatAdminCurrency(1234.5, { locale: 'de-DE', currency: 'EUR', maximumFractionDigits: 2, minimumFractionDigits: 2 })).toMatch(/1\.234,50/);
+    expect(formatAdminCurrency(1234, 'zh-CN')).not.toMatch(/^[^\d\s]\s+\d/);
+  });
+
+  it('formats percents without a space before the sign', () => {
+    expect(formatAdminPercent(0.12, { locale: 'en-US', maximumFractionDigits: 0 })).toBe('12%');
+    expect(formatAdminPercent(12.5, { locale: 'zh-CN', scale: 'points', maximumFractionDigits: 1 })).toBe('12.5%');
+    expect(formatAdminPercent(0.125, 'fr-FR')).not.toMatch(/\s%/);
+  });
+
+  it('formats a calendar date without a clock time', () => {
+    const formatted = formatAdminDate(new Date(2026, 0, 2, 15, 4, 5), { locale: 'en-US', dateStyle: 'medium' });
+    expect(formatted).toContain('2026');
+    expect(formatted).not.toMatch(/15:04|3:04|PM|pm/);
   });
 
   it('uses the single-character ellipsis on shared copy', () => {

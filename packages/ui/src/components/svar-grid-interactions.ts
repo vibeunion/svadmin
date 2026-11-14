@@ -1,3 +1,4 @@
+import { formatAdminCurrency, formatAdminDate, formatAdminNumber, formatAdminPercent, formatAdminTime } from '@svadmin/core';
 import type { SvarColumn, SvarEngineColumn, SvarGridApi, SvarGridEngineProps, SvarSort, SvarTextFilter } from './svar-grid-contract.js';
 import { checkedSvarColumns, buildSvarColumns, svarColumnId, nextSvarSort, nextSvarFilter, SVAR_BLOCKED_ACTIONS } from './svar-grid-contract.js';
 import { svarRecordIndex, svarRecordKey, type SvarRecordId } from './svar-grid-operations.js';
@@ -45,16 +46,17 @@ export function formatSvarValue(value: unknown, column: SvarInteractiveColumn, l
   if (format === 'boolean') return value === true ? (locale.startsWith('zh') ? '是' : 'Yes') : value === false ? (locale.startsWith('zh') ? '否' : 'No') : '—';
   if (format === 'number' || format === 'currency' || format === 'percent') {
     if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
-    const options: Intl.NumberFormatOptions = format === 'currency'
-      ? { style: 'currency', currency: column.currency ?? 'USD' }
-      : format === 'percent' ? { style: 'percent', maximumFractionDigits: 2 } : {};
-    return new Intl.NumberFormat(locale, options).format(value);
+    if (format === 'currency') return formatAdminCurrency(value, { locale, currency: column.currency ?? 'USD' });
+    if (format === 'percent') return formatAdminPercent(value, { locale, maximumFractionDigits: 2 });
+    return formatAdminNumber(value, { locale });
   }
   if (format === 'date' || format === 'datetime') {
     if (typeof value !== 'string' && typeof value !== 'number') return '—';
     const date = new Date(value);
     if (!Number.isFinite(date.getTime())) return '—';
-    return new Intl.DateTimeFormat(locale, format === 'date' ? { dateStyle: 'medium', timeZone: 'UTC' } : { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(date);
+    return format === 'date'
+      ? formatAdminDate(date, { locale, dateStyle: 'medium', timeZone: 'UTC' })
+      : formatAdminTime(date, { locale, dateStyle: 'medium', seconds: false, timeZone: 'UTC' });
   }
   return typeof value === 'string' || typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value)) ? String(value) : '—';
 }

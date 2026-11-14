@@ -21,7 +21,7 @@
 {#if dialogModulePromise}
   {#await dialogModulePromise}
     <div class="flex h-12 items-center justify-center p-4" role="status" aria-live="polite">
-      <span class="text-xs text-muted-foreground">Loading assistant...</span>
+      <span class="text-xs text-muted-foreground">Loading assistant…</span>
     </div>
   {:then { ChatDialog }}
     <ChatDialog {...definedOptions({ "docked": docked })} {...definedOptions({ "scope": scope })} {...definedOptions({ "ownerScope": ownerScope })} />

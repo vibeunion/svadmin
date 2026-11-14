@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy, type Snippet } from 'svelte';
   import { Lock, Unlock, Eye, EyeOff, ShieldCheck, Clock } from '@lucide/svelte';
-  import { useTranslation } from '@svadmin/core';
+  import { formatAdminDate, useTranslation } from '@svadmin/core';
   import { cn } from '../utils.js';
   import MediaThumbnail from './content/MediaThumbnail.svelte';
 
@@ -54,12 +54,12 @@
     const seconds = String(now.getSeconds()).padStart(2, '0');
     currentTime = `${hours}:${minutes}:${seconds}`;
 
-    const options: Intl.DateTimeFormatOptions = {
+    currentDate = formatAdminDate(now, {
+      locale: i18n.locale === 'zh-CN' ? 'zh-CN' : 'en-US',
       month: 'long',
       day: 'numeric',
       weekday: 'long',
-    };
-    currentDate = now.toLocaleDateString(i18n.locale === 'zh-CN' ? 'zh-CN' : 'en-US', options);
+    });
   }
 
   // 自动空闲超时检测

@@ -137,7 +137,7 @@
             <input
               type="text"
               bind:value={searchQuery}
-              placeholder={chinese ? '筛选明细...' : 'Search items...'}
+              placeholder={chinese ? '筛选明细…' : 'Search items…'}
               class="h-7 w-40 rounded border border-input bg-background pl-7.5 pr-2 text-xs focus-visible:outline-none"
             />
           </div>

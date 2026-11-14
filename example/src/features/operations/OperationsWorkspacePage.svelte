@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatAdminCurrency } from '@svadmin/core';
   import { valueText as text, valueNumber as numeric, countBy, sumBy, absoluteSumBy, findLabel } from '../../rendering-values';
   import { demoRenderers } from '../../resource-rendering';
   import { demoRendering } from '../../resource-rendering';
@@ -153,7 +154,7 @@
   const warehouseName = (id: unknown) => findName(warehouses, id, isZh ? '未知仓库' : 'Unknown warehouse');
   const supplierName = (id: unknown) => findName(suppliers, id, isZh ? '未知供应商' : 'Unknown supplier');
   const percent = (value: number, total: number) => total > 0 ? Math.round((value / total) * 100) : 0;
-  const money = (value: number) => new Intl.NumberFormat(isZh ? 'zh-CN' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  const money = (value: number) => formatAdminCurrency(value, { locale: isZh ? 'zh-CN' : 'en-US', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const statusLabel = (value: unknown) => {
     const labels: Record<string, [string, string]> = {

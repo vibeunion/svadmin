@@ -34,7 +34,7 @@
       id={field.key}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
       style="min-height: 200px; font-family: monospace;"
-      placeholder="Enter markdown..."
+      placeholder="Enter markdown…"
       {...field.required ? { required: true } : {}}
     >{String(value ?? '')}</textarea>
     {#if hasError}

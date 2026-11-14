@@ -1,4 +1,4 @@
-import { formatAdminNumber } from '@svadmin/core';
+import { formatAdminDate, formatAdminNumber } from '@svadmin/core';
 import type { JsonObject, JsonValue } from './types.js';
 import type { SurfaceMessages } from './localization.js';
 
@@ -70,7 +70,7 @@ function formatTableDate(value: string | number, locale: string): string | null 
     : value);
   return Number.isNaN(date.getTime())
     ? null
-    : new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
+    : formatAdminDate(date, { locale, dateStyle: 'medium', timeZone: 'UTC' });
 }
 
 export function displayTableValue(value: JsonValue | undefined, options: TableValueFormatOptions): string {

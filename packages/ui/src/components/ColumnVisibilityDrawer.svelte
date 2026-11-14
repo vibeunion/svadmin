@@ -354,7 +354,7 @@
             <input
               type="text"
               bind:value={newPresetName}
-              placeholder={chinese ? '输入视图名称 (如: 财务视图)...' : 'Preset name...'}
+              placeholder={chinese ? '输入视图名称 (如: 财务视图)…' : 'Preset name…'}
               class="h-7 flex-1 rounded border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
             <Button size="sm" class="h-7 px-2.5 text-xs" onclick={saveCurrentAsPreset}>
@@ -407,7 +407,7 @@
         <input
           type="text"
           bind:value={filterQuery}
-          placeholder={chinese ? '快速检索列名或字段 Key...' : 'Search column name or key...'}
+          placeholder={chinese ? '快速检索列名或字段 Key…' : 'Search column name or key…'}
           class="h-8 w-full rounded-md border border-input bg-muted/30 pl-8 pr-2.5 text-xs placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
         {#if filterQuery}

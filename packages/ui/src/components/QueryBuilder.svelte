@@ -427,7 +427,7 @@
                     class="rounded border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary min-w-[160px] flex-1"
                     bind:value={item.value}
                     oninput={notifyChange}
-                    placeholder="输入匹配内容..."
+                    placeholder="输入匹配内容…"
                     disabled={readOnly}
                   />
                 {/if}

@@ -138,7 +138,7 @@
 
   {#if open}
     <div id={`${previewId}-frame`} class="svadmin-ai-web-preview__stage" data-device={device}>
-      {#if loading}<div class="svadmin-ai-web-preview__loading" role="status">Loading preview...</div>{/if}
+      {#if loading}<div class="svadmin-ai-web-preview__loading" role="status">Loading preview…</div>{/if}
       {#if safeUrl || srcdoc}
         {#key revision}
           <iframe title={title} src={safeUrl || undefined} {srcdoc} {sandbox} onload={handleLoad}></iframe>

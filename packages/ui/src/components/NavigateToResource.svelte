@@ -18,6 +18,6 @@
 <div class="flex h-screen w-screen items-center justify-center p-4 text-muted-foreground">
   <div class="text-center">
     <div class="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"></div>
-    <p>Navigating to default resource...</p>
+    <p>Navigating to default resource…</p>
   </div>
 </div>

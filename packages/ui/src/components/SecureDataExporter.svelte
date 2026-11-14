@@ -251,7 +251,7 @@
             id="export-reason-input"
             bind:value={exportReason}
             rows="3"
-            placeholder={chinese ? '请如实填写导出用途 (如: 2026Q4 财务清算审计)...' : 'State reason for export for compliance audit...'}
+            placeholder={chinese ? '请如实填写导出用途 (如: 2026Q4 财务清算审计)…' : 'State reason for export for compliance audit…'}
             class="w-full rounded-lg border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           ></textarea>
         </div>

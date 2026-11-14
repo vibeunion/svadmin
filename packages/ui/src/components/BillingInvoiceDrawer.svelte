@@ -1,5 +1,6 @@
 <script lang="ts">
   import { X, Receipt, Download, FileText, CheckCircle2, Clock, RotateCcw } from '@lucide/svelte';
+  import { formatAdminCurrency } from '@svadmin/core';
   import { cn } from '../utils.js';
 
   export interface BillingItem {
@@ -122,10 +123,10 @@
         <div class="rounded-lg border border-primary/20 bg-primary/5 p-4 flex items-baseline justify-between font-mono">
           <div>
             <span class="text-muted-foreground text-xs block">当期应付结算总额</span>
-            <span class="text-2xl font-bold text-primary">¥{invoice.totalAmount.toLocaleString()}</span>
+            <span class="text-2xl font-bold text-primary">{formatAdminCurrency(invoice.totalAmount, { locale: 'zh-CN', currency: 'CNY' })}</span>
           </div>
           {#if invoice.taxAmount !== undefined}
-            <span class="text-xs text-muted-foreground">含增值税额: ¥{invoice.taxAmount.toLocaleString()}</span>
+            <span class="text-xs text-muted-foreground">含增值税额: {formatAdminCurrency(invoice.taxAmount, { locale: 'zh-CN', currency: 'CNY' })}</span>
           {/if}
         </div>
 
@@ -151,7 +152,7 @@
                       {/if}
                     </td>
                     <td class="p-2.5 text-center text-muted-foreground">{item.category}</td>
-                    <td class="p-2.5 text-right font-bold text-foreground">¥{item.amount.toLocaleString()}</td>
+                    <td class="p-2.5 text-right font-bold text-foreground">{formatAdminCurrency(item.amount, { locale: 'zh-CN', currency: 'CNY' })}</td>
                   </tr>
                 {/each}
               </tbody>

@@ -294,7 +294,7 @@
               type="text"
               bind:value={child.value}
               oninput={notify}
-              placeholder={chinese ? '输入比较值...' : 'Value...'}
+              placeholder={chinese ? '输入比较值…' : 'Value…'}
               class="h-7 flex-1 rounded border border-input bg-background px-2 text-xs font-mono focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
 

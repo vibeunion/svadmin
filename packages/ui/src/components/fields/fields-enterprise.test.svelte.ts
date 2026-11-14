@@ -200,7 +200,7 @@ describe('CopyField enterprise capabilities', () => {
 
   it('renders masked text when masked=true', () => {
     const view = render(CopyField, { value: 'reference-secret-value-9999', masked: true });
-    expect(view.container.textContent).toContain('refe...9999');
+    expect(view.container.textContent).toContain('refe…9999');
   });
 
   it('reports success only after the clipboard write resolves', async () => {

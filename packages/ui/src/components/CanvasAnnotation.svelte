@@ -375,7 +375,7 @@
         <input
           type="text"
           bind:value={textInputPrompt}
-          placeholder="Annotation text..."
+          placeholder="Annotation text…"
           class="h-7 w-36 rounded border border-input bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           onkeydown={(e) => {
             if (e.key === 'Enter') submitText();

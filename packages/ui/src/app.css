@@ -1574,13 +1574,13 @@ main {
   top: 50%;
   left: 50%;
   z-index: 50;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: min(32rem, calc(100% - 2rem));
   max-height: 100dvh;
   gap: 1rem;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   background: var(--background);
@@ -1589,6 +1589,25 @@ main {
   box-shadow: var(--svadmin-shadow-overlay);
   transform: translate(-50%, -50%);
   transition: opacity var(--svadmin-motion-standard) var(--svadmin-motion-easing), transform var(--svadmin-motion-standard) var(--svadmin-motion-easing);
+}
+
+.svadmin-dialog-content > [data-slot="dialog-header"],
+.svadmin-dialog-content > [data-slot="dialog-footer"],
+.svadmin-dialog-form__body > [data-slot="dialog-header"],
+.svadmin-dialog-form__body > [data-slot="dialog-footer"] {
+  flex: 0 0 auto;
+}
+
+.svadmin-dialog-content > :not(form):not([data-slot="dialog-header"]):not([data-slot="dialog-footer"]):not(.svadmin-dialog-dismiss),
+.svadmin-dialog-form__body > :not([data-slot="dialog-header"]):not([data-slot="dialog-footer"]) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.svadmin-dialog-content[data-loading="true"] > :not(form):not([data-slot="dialog-header"]):not([data-slot="dialog-footer"]):not(.svadmin-dialog-dismiss) {
+  min-height: 4.5rem;
 }
 
 .svadmin-dialog-content[data-dialog-size="sm"] { max-width: min(400px, calc(100% - 2rem)); }
@@ -1601,11 +1620,15 @@ main {
   overflow: hidden;
 }
 
+.svadmin-dialog-content > .svadmin-dialog-form__body,
 .svadmin-dialog-form__body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1 1 auto;
   min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .svadmin-dialog-body {

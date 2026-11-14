@@ -39,7 +39,7 @@
     options = [],
     value = $bindable(undefined),
     multiple = false,
-    placeholder = 'Please select...',
+    placeholder = 'Please select…',
     disabled = false,
     height = 260,
     itemHeight = 32,
@@ -344,7 +344,7 @@
             <input
               type="text"
               bind:value={searchQuery}
-              placeholder="Search nodes..."
+              placeholder="Search nodes…"
               class="w-full rounded-sm border border-input bg-background pl-8 pr-2.5 py-1 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
           </div>

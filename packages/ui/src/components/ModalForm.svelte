@@ -154,7 +154,7 @@
     </Dialog.Trigger>
   {/if}
 
-  <Dialog.Content closeOnOverlayClick={false} size="md" class={cn('svadmin-dialog-form', widthClass, className)}>
+  <Dialog.Content closeOnOverlayClick={false} size="md" loading={busy} class={cn('svadmin-dialog-form', widthClass, className)}>
     <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="svadmin-dialog-form__body">
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>

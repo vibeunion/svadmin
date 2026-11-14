@@ -55,7 +55,7 @@ describe('TenantContextSwitcher component suite', () => {
       await fireEvent.click(trigger);
     }
 
-    const searchInput = getByPlaceholderText('搜索租户名称或编号...');
+    const searchInput = getByPlaceholderText('搜索租户名称或编号…');
     expect(searchInput).toBeTruthy();
     await fireEvent.input(searchInput, { target: { value: 'SupaCloud' } });
 

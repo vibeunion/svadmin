@@ -268,7 +268,7 @@
         {#if isThinking}
           <div class="flex items-center gap-2 text-xs text-muted-foreground p-2 rounded-lg bg-muted/20 w-fit">
             <Loader2 class="h-3.5 w-3.5 animate-spin text-primary" />
-            <span class="font-mono text-[11px]">正在解析业务意图并检索数据...</span>
+            <span class="font-mono text-[11px]">正在解析业务意图并检索数据…</span>
           </div>
         {/if}
       </div>

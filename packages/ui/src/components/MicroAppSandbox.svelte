@@ -149,7 +149,7 @@
       <!-- 加载过渡态骨架 -->
       <div class="p-6 flex flex-col items-center justify-center gap-3 text-muted-foreground">
         <Activity class="w-8 h-8 text-primary animate-spin" />
-        <div class="text-xs">正在向子应用注入登录令牌与安全样式表...</div>
+        <div class="text-xs">正在向子应用注入登录令牌与安全样式表…</div>
       </div>
     {:else if status === 'error'}
       <!-- 异常崩溃容灾降级面板 -->

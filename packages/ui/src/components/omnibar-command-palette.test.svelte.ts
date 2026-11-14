@@ -19,7 +19,7 @@ describe('OmnibarCommandPalette component suite', () => {
       open: true,
     });
 
-    const input = getByPlaceholderText('输入命令、查找页面或搜索实体资源... (⌘K)');
+    const input = getByPlaceholderText('输入命令、查找页面或搜索实体资源… (⌘K)');
     await fireEvent.input(input, { target: { value: '导出' } });
 
     expect(getByText('导出全量报表数据')).toBeTruthy();

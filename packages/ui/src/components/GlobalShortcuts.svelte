@@ -173,7 +173,7 @@
           <input
             type="text"
             bind:value={query}
-            placeholder="搜索快捷键..."
+            placeholder="搜索快捷键…"
             class="flex h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 py-1 text-sm shadow-2xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
           />
         </div>

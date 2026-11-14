@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FieldDefinition } from '@svadmin/core';
+  import { formatAdminDate, type FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   interface Props {
@@ -54,7 +54,7 @@
   function displayDate(v: unknown): string {
     if (!v) return '—';
     try {
-      return new Date(v as string).toLocaleDateString();
+      return formatAdminDate(v as string) || String(v);
     } catch {
       return String(v);
     }

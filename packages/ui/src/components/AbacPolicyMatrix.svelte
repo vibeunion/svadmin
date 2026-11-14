@@ -218,7 +218,7 @@
         <input
           type="text"
           bind:value={searchKeyword}
-          placeholder="按规则名称、资源类型检索..."
+          placeholder="按规则名称、资源类型检索…"
           class="w-64 pl-8 pr-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>

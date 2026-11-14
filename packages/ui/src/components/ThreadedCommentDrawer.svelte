@@ -225,7 +225,7 @@
       <div class="relative flex items-end gap-2">
         <textarea
           bind:value={newCommentText}
-          placeholder={chinese ? '发表业务批注或 @成员协同讨论...' : 'Leave a comment...'}
+          placeholder={chinese ? '发表业务批注或 @成员协同讨论…' : 'Leave a comment…'}
           rows="2"
           class="flex-1 rounded-lg border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         ></textarea>

@@ -56,7 +56,7 @@
         <input
           type="text"
           bind:value={searchQuery}
-          placeholder="Search items..."
+          placeholder="Search items…"
           class="h-8 w-full rounded-md border border-input bg-background pl-8 pr-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       </div>

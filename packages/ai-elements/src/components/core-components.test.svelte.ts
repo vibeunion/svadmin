@@ -141,7 +141,7 @@ describe('structured interaction components', () => {
 
     await fireEvent.click(confirm);
     await waitFor(() => expect((confirm as HTMLButtonElement).disabled).toBe(true));
-    expect(confirm.textContent).toContain('Working...');
+    expect(confirm.textContent).toContain('Working…');
 
     finish();
     await waitFor(() => expect((confirm as HTMLButtonElement).disabled).toBe(false));

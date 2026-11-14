@@ -35,7 +35,7 @@
     <form {action} method="POST" class="lite-approval-form">
       <div class="lite-approval-field">
         <label for="approval_comment" class="lite-label">Approval / Rejection Comment:</label>
-        <textarea id="approval_comment" name="comment" class="lite-textarea" style="height: 60px;" placeholder="Optional comment or rejection reason..."></textarea>
+        <textarea id="approval_comment" name="comment" class="lite-textarea" style="height: 60px;" placeholder="Optional comment or rejection reason…"></textarea>
       </div>
       <div class="lite-approval-actions">
         <button type="submit" name="_action" value="approve" class="lite-btn lite-btn-sm lite-btn-success">

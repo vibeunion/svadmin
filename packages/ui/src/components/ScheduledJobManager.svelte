@@ -82,7 +82,7 @@
   const statusLabels = $derived<Record<ScheduledJobStatus, string>>({
     active: chinese ? '计划运行中' : 'Active',
     paused: chinese ? '已暂停调度' : 'Paused',
-    running: chinese ? '执行中...' : 'Running...',
+    running: chinese ? '执行中…' : 'Running…',
     failed: chinese ? '上次异常' : 'Failed',
   });
 

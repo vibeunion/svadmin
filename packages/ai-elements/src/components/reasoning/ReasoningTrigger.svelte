@@ -20,7 +20,7 @@
 
   const message = $derived(getThinkingMessage?.(reasoning.isStreaming, reasoning.duration)
     ?? (reasoning.isStreaming || reasoning.duration === 0
-      ? 'Thinking...'
+      ? 'Thinking…'
       : reasoning.duration === undefined
         ? 'Thought for a few seconds'
         : `Thought for ${reasoning.duration} seconds`));

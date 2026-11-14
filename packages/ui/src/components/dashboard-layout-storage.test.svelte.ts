@@ -32,7 +32,7 @@ describe('DashboardLayoutStorage component suite', () => {
     const openSaveBtn = getByText('另存为方案');
     await fireEvent.click(openSaveBtn);
 
-    const nameInput = getByPlaceholderText('输入大屏方案名称 (如：双十一作战指挥大屏)...');
+    const nameInput = getByPlaceholderText('输入大屏方案名称 (如：双十一作战指挥大屏)…');
     await fireEvent.input(nameInput, { target: { value: '我的自定义监控看板' } });
 
     const confirmBtn = getByText('保存方案');

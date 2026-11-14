@@ -60,7 +60,7 @@ describe('Lite Fields SSR rendering', () => {
       masked: true,
       mode: 'show',
     });
-    expect(showView.container.textContent).toContain('secr...5678');
+    expect(showView.container.textContent).toContain('secr…5678');
     showView.unmount();
 
     const editView = render(LiteCopyField, {

@@ -115,3 +115,101 @@ export function formatAdminEllipsis(text: string): string {
 export function formatAdminCopy(text: string): string {
   return spaceCjkLatin(formatAdminEllipsis(text));
 }
+
+export interface AdminCurrencyOptions extends AdminNumberOptions {
+  /** 默认 CNY。 */
+  currency?: string;
+  notation?: 'standard' | 'compact';
+}
+
+/**
+ * 货币符号后面不加空格。小数分隔仍由 locale 决定。
+ * 结尾货币符号（如 `€`）前面的空格保留，那是符号前的间距。
+ */
+export function formatAdminCurrency(
+  value: number,
+  localeOrOptions: string | AdminCurrencyOptions = 'zh-CN',
+): string {
+  if (!Number.isFinite(value)) return '';
+  const options: AdminCurrencyOptions = typeof localeOrOptions === 'string'
+    ? { locale: localeOrOptions }
+    : localeOrOptions;
+  const locale = options.locale === null ? undefined : (options.locale ?? 'zh-CN');
+  const currency = options.currency ?? 'CNY';
+  try {
+    const formatted = new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      useGrouping: true,
+      ...(options.minimumFractionDigits !== undefined ? { minimumFractionDigits: options.minimumFractionDigits } : {}),
+      ...(options.maximumFractionDigits !== undefined ? { maximumFractionDigits: options.maximumFractionDigits } : {}),
+      ...(options.notation === 'compact' ? { notation: 'compact', compactDisplay: 'short' } : {}),
+    }).format(value);
+    return formatted.replace(/^(\p{Sc})\s+/u, '$1');
+  } catch {
+    return '';
+  }
+}
+
+export interface AdminPercentOptions extends AdminNumberOptions {
+  /** `ratio` 把 0.12 格式化成 12%。`points` 把 12 格式化成 12%。 */
+  scale?: 'ratio' | 'points';
+}
+
+/** 百分号前面不加空格。 */
+export function formatAdminPercent(
+  value: number,
+  localeOrOptions: string | AdminPercentOptions = 'zh-CN',
+): string {
+  if (!Number.isFinite(value)) return '';
+  const options: AdminPercentOptions = typeof localeOrOptions === 'string'
+    ? { locale: localeOrOptions }
+    : localeOrOptions;
+  const locale = options.locale === null ? undefined : (options.locale ?? 'zh-CN');
+  const maximumFractionDigits = options.maximumFractionDigits ?? (options.scale === 'points' ? 20 : 0);
+  const minimumFractionDigits = options.minimumFractionDigits ?? 0;
+  if (options.scale === 'points') {
+    const amount = formatAdminNumber(value, {
+      locale: options.locale === null ? null : locale,
+      minimumFractionDigits,
+      maximumFractionDigits,
+    });
+    return `${amount}%`;
+  }
+  const formatted = new Intl.NumberFormat(locale, {
+    style: 'percent',
+    useGrouping: true,
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(value);
+  return formatted.replace(/\s+(?=%)/g, '');
+}
+
+export interface AdminDateOptions {
+  locale?: string;
+  timeZone?: string;
+  dateStyle?: Intl.DateTimeFormatOptions['dateStyle'];
+  weekday?: Intl.DateTimeFormatOptions['weekday'];
+  year?: Intl.DateTimeFormatOptions['year'];
+  month?: Intl.DateTimeFormatOptions['month'];
+  day?: Intl.DateTimeFormatOptions['day'];
+}
+
+/** 只输出日期，不带时间。和 `formatAdminTime` 的日期加时间分开。 */
+export function formatAdminDate(value: Date | number | string, options: AdminDateOptions = {}): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const fields: Intl.DateTimeFormatOptions = {};
+  if (options.dateStyle && !options.weekday && !options.year && !options.month && !options.day) {
+    fields.dateStyle = options.dateStyle;
+  } else if (options.weekday || options.year || options.month || options.day) {
+    if (options.weekday) fields.weekday = options.weekday;
+    if (options.year) fields.year = options.year;
+    if (options.month) fields.month = options.month;
+    if (options.day) fields.day = options.day;
+  } else {
+    fields.dateStyle = options.dateStyle ?? 'medium';
+  }
+  if (options.timeZone) fields.timeZone = options.timeZone;
+  return new Intl.DateTimeFormat(options.locale, fields).format(date);
+}

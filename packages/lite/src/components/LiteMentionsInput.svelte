@@ -20,7 +20,7 @@
   let {
     name = 'content',
     value = '',
-    placeholder = 'Type @ or # to mention...',
+    placeholder = 'Type @ or # to mention…',
     users = [],
     tags = [],
     rows = 3,
