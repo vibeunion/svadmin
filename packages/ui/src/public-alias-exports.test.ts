@@ -279,6 +279,10 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  IpAccessRuleEditor,
+  IpWhitelistDrawer,
+  IpAccessControlDrawer,
+
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
@@ -559,6 +563,10 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(IpAccessRuleEditor).toBeDefined();
+    expect(IpWhitelistDrawer).toBeDefined();
+    expect(IpAccessControlDrawer).toBe(IpWhitelistDrawer);
+
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);

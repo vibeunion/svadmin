@@ -3160,6 +3160,54 @@ AI 规则语义解释卡片：
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
 
+### `<IpAccessRuleEditor>` / `<IpWhitelistDrawer>`（`<IpAccessControlDrawer>`）
+
+企业级网络安全访问控制与 IP/CIDR 黑白名单配置器：
+- **全模式 IP 模式支持**：覆盖单点独立 IP（IPv4 / IPv6）、CIDR 网段掩码（`172.16.0.0/16`）与连续 IP 范围（`10.0.0.1 - 10.0.0.50`）。
+- **严格语法校验**：CIDR 前缀必须为十进制整数，范围必须同族且正序；支持 IPv6 与 IPv4-mapped 归一化。CIDR 主机位按所在网段解释，不代表提供任意两条规则的重叠审计。
+- **本地误锁预防**：每次编辑、删除、启停和模式切换均检查完整候选策略及未来生效/到期边界。DENY 始终优先，不依赖数组顺序或 `priority` 元数据；未知当前 IP 时阻止修改。
+- **规则生命周期**：支持可选 `startsAt` 生效时间、动态倒计时和已生效/已过期/待生效状态；有效期支持永久、2 小时、24 小时、7 天，从生效时间与当前时间的较晚者起算。编辑默认保留原到期时间，只有明确选择才变更。
+- **白名单/黑名单双模切换**：灵活切换严格白名单模式（仅允许放行列表访问）或恶意黑名单拦截模式。
+
+```svelte
+<script lang="ts">
+  import { IpWhitelistDrawer, type IpAccessRule } from '@svadmin/ui';
+
+  let open = $state(false);
+  let rules = $state<IpAccessRule[]>([
+    {
+      id: 'rule-1',
+      type: 'SINGLE',
+      value: '192.168.1.100',
+      action: 'ALLOW',
+      description: '办公内网网关',
+      enabled: true,
+      expiresAt: null,
+    },
+    {
+      id: 'rule-2',
+      type: 'CIDR',
+      value: '10.0.0.0/16',
+      action: 'ALLOW',
+      description: '专线 VPN 网段',
+      enabled: true,
+      expiresAt: null,
+    },
+  ]);
+</script>
+
+<button onclick={() => (open = true)}>打开 IP 规则配置抽屉</button>
+<IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+```
+
+上述地址仅用于文档示例。实际应通过已认证后端提供 `currentClientIp`，或传入 `resolveClientIp: () => Promise<string>`，在编辑器挂载时自动解析。解析器须经宿主 DataProvider/服务边界调用，不应使用第三方 IP 查询或在视图内直接发起网络请求。已传入的地址优先；检测失败会展示错误，不会伪造回退 IP。
+
+`onChange(rules)` 与抽屉 `onModeChange(mode)` 支持 Promise。可绑定 `rules` / `mode`，或通过已认证、租户隔离的服务持久化回调提供的独立快照。相关回调成功后才更新界面，等待期间阻止重复提交及模式切换。`onAddMyIp(ip)` 仅为保存后的通知，不是服务端执行凭据。编辑器可绑定 `busy` 观察等待状态。
+
+“Trust My IP” 会新增或续期为永久 SINGLE ALLOW，不会自动删除或覆盖冲突 DENY，冲突必须显式解决。过期编辑草稿会被拒绝，规则或模式异步保存期间也会保护宿主传入的新快照。本地安全预览不等同于防火墙、服务端授权、持久化、审计日志，也不能保证 IP 变化后的访问。后端必须重新校验整套策略、通过可信代理配置识别真实请求 IP、采用一致的地址归一化及 DENY 优先语义、使用服务端时间，并在策略写入事务中拒绝误锁；同时使用策略版本号等并发控制拒绝过期写入。不能信任前端提供的 IP 或 `priority` 绕过校验。生产 ACL 和代理链仍需独立集成验收。
+
+浏览器验证示例：`bun run vite --config scripts/fixtures/ip-access-rules/vite.config.ts`（端口 4198）。
+
 
 ### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
 

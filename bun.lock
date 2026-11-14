@@ -876,6 +876,7 @@
         "cn": "^0.5.2",
         "devframe": "1.3.3",
         "esm-env": "^1.2.2",
+        "ip-address": "10.7.6",
         "svelte-sonner": "^1.2.3",
         "tailwind-variants": "^4.0.2",
         "typebox": "^1.4.6",
