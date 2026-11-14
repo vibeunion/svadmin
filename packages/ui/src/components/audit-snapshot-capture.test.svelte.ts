@@ -15,12 +15,12 @@ describe('AuditSnapshotCapture', () => {
       },
     });
 
-    expect(screen.getByText('AUDIT-TEST-001')).toBeInTheDocument();
-    expect(screen.getByText('李四 (Li Si)')).toBeInTheDocument();
-    expect(screen.getByText('EMP-90001')).toBeInTheDocument();
-    expect(screen.getByText('192.168.10.50')).toBeInTheDocument();
-    expect(screen.getByText('金融云专区')).toBeInTheDocument();
-    expect(screen.getByText('存证验真通过')).toBeInTheDocument();
+    expect(screen.getByText('AUDIT-TEST-001')).toBeTruthy();
+    expect(screen.getByText('李四 (Li Si)')).toBeTruthy();
+    expect(screen.getByText('EMP-90001')).toBeTruthy();
+    expect(screen.getByText('192.168.10.50')).toBeTruthy();
+    expect(screen.getByText('金融云专区')).toBeTruthy();
+    expect(screen.getByText('存证验真通过')).toBeTruthy();
   });
 
   it('renders field diff table accurately', () => {
@@ -33,10 +33,10 @@ describe('AuditSnapshotCapture', () => {
       },
     });
 
-    expect(screen.getByText('status')).toBeInTheDocument();
-    expect(screen.getByText('账户状态')).toBeInTheDocument();
-    expect(screen.getByText('active')).toBeInTheDocument();
-    expect(screen.getByText('suspended')).toBeInTheDocument();
+    expect(screen.getByText('status')).toBeTruthy();
+    expect(screen.getByText('账户状态')).toBeTruthy();
+    expect(screen.getByText('active')).toBeTruthy();
+    expect(screen.getByText('suspended')).toBeTruthy();
   });
 
   it('invokes onexport when export buttons are clicked', async () => {
@@ -58,12 +58,7 @@ describe('AuditSnapshotCapture', () => {
   });
 
   it('copies hash value on copy button click', async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, {
-      clipboard: {
-        writeText,
-      },
-    });
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 
     render(AuditSnapshotCapture, {
       props: {
@@ -75,5 +70,6 @@ describe('AuditSnapshotCapture', () => {
     await fireEvent.click(copyBtn);
 
     expect(writeText).toHaveBeenCalledWith('test-hash-string-999');
+    writeText.mockRestore();
   });
 });

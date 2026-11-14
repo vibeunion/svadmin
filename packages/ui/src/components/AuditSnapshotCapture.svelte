@@ -5,15 +5,13 @@
     Copy,
     Check,
     Download,
-    Eye,
     Hash,
     Clock,
     User,
     Building2,
     Globe,
     AlertCircle,
-    FileCode,
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
 
   export interface AuditSnapshotDiffItem {
     field: string;
@@ -298,7 +296,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-border">
-            {#each changes as item}
+            {#each changes as item (item.field)}
               <tr class="hover:bg-muted/30 transition-colors">
                 <td class="py-2 px-4 font-mono font-medium text-foreground">
                   <div>{item.field}</div>

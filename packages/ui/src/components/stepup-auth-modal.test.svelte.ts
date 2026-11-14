@@ -13,10 +13,10 @@ describe('StepUpAuthModal', () => {
       },
     });
 
-    expect(screen.getByText('高敏特权二次认证')).toBeInTheDocument();
-    expect(screen.getByText('删除主集群数据节点')).toBeInTheDocument();
-    expect(screen.getByText('严重高危')).toBeInTheDocument();
-    expect(screen.getByText('动态口令 TOTP')).toBeInTheDocument();
+    expect(screen.getByText('高敏特权二次认证')).toBeTruthy();
+    expect(screen.getByText('删除主集群数据节点')).toBeTruthy();
+    expect(screen.getByText('严重高危')).toBeTruthy();
+    expect(screen.getByText('动态口令 TOTP')).toBeTruthy();
   });
 
   it('switches verification method tabs', async () => {
@@ -31,13 +31,13 @@ describe('StepUpAuthModal', () => {
     const smsTab = screen.getByText('短信验证码');
     await fireEvent.click(smsTab);
 
-    expect(screen.getByText(/139\*\*\*\*1234/)).toBeInTheDocument();
-    expect(screen.getByText('获取验证码')).toBeInTheDocument();
+    expect(screen.getByText(/139\*\*\*\*1234/)).toBeTruthy();
+    expect(screen.getByText('获取验证码')).toBeTruthy();
 
     const supervisorTab = screen.getByText('主管授权码');
     await fireEvent.click(supervisorTab);
 
-    expect(screen.getByPlaceholderText('SUPV-AUTH-XXXXXX')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('SUPV-AUTH-XXXXXX')).toBeTruthy();
   });
 
   it('invokes onverify with entered code and handles successful verification', async () => {
@@ -56,7 +56,7 @@ describe('StepUpAuthModal', () => {
     await fireEvent.input(input, { target: { value: 'SUPV-889922' } });
 
     const submitBtn = screen.getByRole('button', { name: /验证并执行/ });
-    expect(submitBtn).not.toBeDisabled();
+    expect((submitBtn as HTMLButtonElement).disabled).toBe(false);
     await fireEvent.click(submitBtn);
 
     expect(onverify).toHaveBeenCalledWith({
@@ -88,7 +88,7 @@ describe('StepUpAuthModal', () => {
     await fireEvent.click(submitBtn);
 
     expect(onlockout).toHaveBeenCalled();
-    expect(screen.getByText('特权鉴权通道已锁定')).toBeInTheDocument();
+    expect(screen.getByText('特权鉴权通道已锁定')).toBeTruthy();
   });
 
   it('handles cancel callback when close button is clicked', async () => {

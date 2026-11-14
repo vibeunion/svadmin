@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import {
     ShieldAlert,
     Smartphone,
@@ -11,7 +11,7 @@
     X,
     CheckCircle2,
     RefreshCw,
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
 
   export type StepUpAuthMethod = 'totp' | 'sms' | 'hardware' | 'supervisor';
   export type StepUpRiskLevel = 'low' | 'medium' | 'high' | 'critical';
@@ -29,7 +29,7 @@
     maxAttempts?: number;
     cooldownSeconds?: number;
     lockoutDurationSeconds?: number;
-    onverify?: (payload: { method: StepUpAuthMethod; code: string; supervisorToken?: string }) => Promise<boolean> | boolean | void;
+    onverify?: (payload: { method: StepUpAuthMethod; code: string; supervisorToken?: string }) => Promise<boolean> | boolean;
     oncancel?: () => void;
     onlockout?: () => void;
   }
@@ -52,7 +52,7 @@
     onlockout,
   }: Props = $props();
 
-  let activeMethod = $state<StepUpAuthMethod>(defaultMethod);
+  let activeMethod = $state<StepUpAuthMethod>(untrack(() => defaultMethod));
   let digits = $state<string[]>(['', '', '', '', '', '']);
   let supervisorToken = $state('');
   let attemptsCount = $state(0);
@@ -167,7 +167,7 @@
         const result = await onverify({
           method: activeMethod,
           code,
-          supervisorToken: activeMethod === 'supervisor' ? supervisorToken : undefined,
+          ...(activeMethod === 'supervisor' ? { supervisorToken } : {}),
         });
         if (result === false) {
           handleFailure();
@@ -377,7 +377,7 @@
         {:else}
           <!-- 6-digit PIN Box Grid -->
           <div class="flex items-center justify-center gap-2 sm:gap-3" onpaste={handlePaste}>
-            {#each digits as digit, i}
+            {#each digits as digit, i (i)}
               <input
                 id="stepup-digit-{i}"
                 type="text"
