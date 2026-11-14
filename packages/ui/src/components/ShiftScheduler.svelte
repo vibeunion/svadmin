@@ -3,13 +3,10 @@
     Calendar as CalendarIcon,
     ChevronLeft,
     ChevronRight,
-    Users,
-    Clock,
     AlertTriangle,
     CheckCircle2,
     RotateCcw,
     Sparkles,
-    Briefcase,
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
@@ -385,7 +382,7 @@
       <thead>
         <tr class="border-b border-border/60 bg-muted/40 font-medium text-muted-foreground">
           <th class="w-48 px-4 py-2.5">员工与部门</th>
-          {#each weekDays as wd}
+          {#each weekDays as wd (wd.dateStr)}
             <th class={cn('px-2 py-2.5 text-center', wd.isWeekend ? 'bg-muted/60 text-foreground' : '')}>
               <div>{wd.dayLabel}</div>
               <div class="font-mono text-[11px] opacity-75">{wd.dateNum}日</div>
@@ -421,7 +418,7 @@
             </td>
 
             <!-- 7 天排班单元格 -->
-            {#each weekDays as wd}
+            {#each weekDays as wd (wd.dateStr)}
               {@const shift = getShift(staff.id, wd.dateStr)}
               <td class={cn('p-1 text-center', wd.isWeekend ? 'bg-muted/20' : '')}>
                 <button
