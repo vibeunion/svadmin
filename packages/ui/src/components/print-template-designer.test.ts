@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { numberToChineseCurrency, type PrintColumn, type PrintTemplateConfig } from './print-utils.js';
 
 describe('PrintTemplateDesigner and Currency Capitalization Logic', () => {

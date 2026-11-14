@@ -45,18 +45,18 @@ export function numberToChineseCurrency(num: number): string {
   let s = '';
   const fractionPart = Math.floor(num * 100) % 100;
   for (let i = 0; i < fraction.length; i++) {
-    s += (digit[Math.floor(fractionPart / (i === 0 ? 10 : 1)) % 10] + fraction[i]).replace(/零./, '');
+    s += `${digit[Math.floor(fractionPart / (i === 0 ? 10 : 1)) % 10] ?? ''}${fraction[i] ?? ''}`.replace(/零./, '');
   }
   s = s || '整';
 
   let integerPart = Math.floor(num);
-  for (let i = 0; i < unit[0].length && integerPart > 0; i++) {
+  for (let i = 0; i < (unit[0]?.length ?? 0) && integerPart > 0; i++) {
     let p = '';
-    for (let j = 0; j < unit[1].length && integerPart > 0; j++) {
-      p = digit[integerPart % 10] + unit[1][j] + p;
+    for (let j = 0; j < (unit[1]?.length ?? 0) && integerPart > 0; j++) {
+      p = `${digit[integerPart % 10] ?? ''}${unit[1]?.[j] ?? ''}${p}`;
       integerPart = Math.floor(integerPart / 10);
     }
-    s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+    s = `${p.replace(/(零.)*零$/, '').replace(/^$/, '零')}${unit[0]?.[i] ?? ''}${s}`;
   }
   return s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '零元整');
 }

@@ -1,9 +1,7 @@
 <script lang="ts">
-  import type { PaperSize, PrintColumn, PrintTemplateConfig } from './print-utils.js';
+  import { untrack } from 'svelte';
+  import type { PaperSize, PrintTemplateConfig } from './print-utils.js';
   import { numberToChineseCurrency } from './print-utils.js';
-
-  export type { PaperSize, PrintColumn, PrintTemplateConfig };
-  export { numberToChineseCurrency };
 
   export interface PrintTemplateDesignerProps {
     config?: Partial<PrintTemplateConfig>;
@@ -22,7 +20,7 @@
   }: PrintTemplateDesignerProps = $props();
 
   // Reactive state
-  let config = $state<PrintTemplateConfig>({
+  let config = $state<PrintTemplateConfig>(untrack(() => ({
     id: initialConfig.id || 'template-receipt-standard',
     name: initialConfig.name || '标准销售出库发货单',
     title: initialConfig.title || '商品发货单 / 出库凭证',
@@ -56,21 +54,25 @@
     signers: initialConfig.signers || ['制单人: 张三', '仓管员: 李四', '复核人: 王五', '提货人(签字): _______'],
     copies: initialConfig.copies || ['第一联: 存根联 (白)', '第二联: 客户联 (红)', '第三联: 财务联 (黄)'],
     footerNotes: initialConfig.footerNotes || '特别提示: 货物送达后请现场当面验收并在提货联签字确认，如有异议请在24小时内联系客服。',
-  });
+  })));
 
   // Active view tabs
   let activeTab = $state<'DESIGN' | 'PREVIEW'>('PREVIEW');
   let activeCopyIndex = $state<number>(0);
 
-  // Sample items
-  const mockItems = [
+  // Sample items: caller-provided rows take precedence over the built-in demo rows.
+  const mockItems: Array<Record<string, number | string>> = (() => {
+    const rows = Object.values(untrack(() => sampleData))
+      .filter((row): row is Record<string, number | string> => typeof row === 'object' && row !== null);
+    return rows.length > 0 ? rows : [
     { index: 1, sku: 'PROD-A01', name: '高保真低功耗边缘网关核心模块', spec: 'Pro-16G', quantity: 10, unit_price: 1280.00, total_amount: 12800.00 },
     { index: 2, sku: 'PROD-B02', name: '工业级千兆以太网交换机 (8口 PoE)', spec: 'Gigabit-8P', quantity: 4, unit_price: 650.00, total_amount: 2600.00 },
-    { index: 3, sku: 'PROD-C03', name: '金属外壳防浪涌电源适配器', spec: '24V-5A', quantity: 14, unit_price: 120.00, total_amount: 1680.00 },
-  ];
+      { index: 3, sku: 'PROD-C03', name: '金属外壳防浪涌电源适配器', spec: '24V-5A', quantity: 14, unit_price: 120.00, total_amount: 1680.00 },
+    ];
+  })();
 
-  const totalSum = $derived(mockItems.reduce((acc, curr) => acc + curr.total_amount, 0));
-  const totalQty = $derived(mockItems.reduce((acc, curr) => acc + curr.quantity, 0));
+  const totalSum = $derived(mockItems.reduce((acc, curr) => acc + Number(curr['total_amount'] ?? 0), 0));
+  const totalQty = $derived(mockItems.reduce((acc, curr) => acc + Number(curr['quantity'] ?? 0), 0));
   const amountInWords = $derived(numberToChineseCurrency(totalSum));
 
   function getPaperSizeStyles(size: PaperSize) {
@@ -98,6 +100,10 @@
 
   function handleSave() {
     onSave?.($state.snapshot(config));
+  }
+
+  function handlePreview() {
+    onPreview?.($state.snapshot(config));
   }
 
   function addColumn() {
@@ -160,6 +166,14 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
         </svg>
         调起系统打印
+      </button>
+
+      <button
+        type="button"
+        onclick={handlePreview}
+        class="inline-flex items-center justify-center text-xs font-semibold px-3 py-2 rounded-lg border border-border bg-card text-card-foreground hover:bg-muted transition-colors shadow-sm"
+      >
+        预览模板
       </button>
 
       <button
@@ -264,7 +278,7 @@
       {#if config.copies.length > 1}
         <div class="flex items-center gap-2 mb-4">
           <span class="text-xs text-muted-foreground font-medium">预览联次:</span>
-          {#each config.copies as copyName, index}
+          {#each config.copies as copyName, index (copyName)}
             <button
               type="button"
               onclick={() => (activeCopyIndex = index)}
@@ -278,66 +292,66 @@
 
       <!-- High-Fidelity Printable Paper Canvas Container -->
       <div
-        class="bg-white text-neutral-900 border border-neutral-300 shadow-xl relative transition-all duration-200 select-none {getPaperSizeStyles(config.paperSize)}"
+        class="bg-card text-card-foreground border border-border shadow-xl relative transition-all duration-200 select-none {getPaperSizeStyles(config.paperSize)}"
       >
         <!-- Optional Watermark Overlay -->
         {#if config.showWatermark && config.watermarkText}
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 overflow-hidden">
-            <span class="text-5xl font-black rotate-[-30deg] tracking-widest text-neutral-900 select-none">
+            <span class="text-5xl font-black rotate-[-30deg] tracking-widest text-card-foreground select-none">
               {config.watermarkText}
             </span>
           </div>
         {/if}
 
         <!-- Top Header: Company Name & Copy Tag -->
-        <div class="flex items-center justify-between pb-2 border-b border-neutral-800">
+        <div class="flex items-center justify-between pb-2 border-b border-foreground">
           <div class="flex flex-col">
             <span class="text-base font-extrabold tracking-wide uppercase">{config.companyName}</span>
-            <span class="text-[10px] text-neutral-600 font-mono">{config.subTitle}</span>
+            <span class="text-[10px] text-muted-foreground font-mono">{config.subTitle}</span>
           </div>
           <div class="flex flex-col items-end">
-            <span class="text-xs font-bold border border-neutral-800 px-2 py-0.5 rounded">
+            <span class="text-xs font-bold border border-foreground px-2 py-0.5 rounded">
               {config.copies[activeCopyIndex] || '标准打印联'}
             </span>
-            <span class="text-[9px] text-neutral-500 mt-1">印刷编号: SV-PRT-0988</span>
+            <span class="text-[9px] text-muted-foreground mt-1">印刷编号: SV-PRT-0988</span>
           </div>
         </div>
 
         <!-- Big Center Title & Barcode Row -->
         <div class="flex items-center justify-between my-3">
-          <h1 class="text-xl font-bold tracking-widest text-neutral-900">{config.title}</h1>
+          <h1 class="text-xl font-bold tracking-widest text-card-foreground">{config.title}</h1>
 
           {#if config.showBarcode}
             <div class="flex flex-col items-center">
               <!-- Visual Barcode representation -->
               <div class="flex items-end gap-[1.5px] h-7 px-1">
-                {#each [2,3,1,4,2,1,3,2,4,1,2,3,1,4,2,3,1,2,4,1,3,2,1,4] as h}
-                  <div class="bg-black w-[1.5px]" style="height: {h * 6}px"></div>
+                {#each [2,3,1,4,2,1,3,2,4,1,2,3,1,4,2,3,1,2,4,1,3,2,1,4] as h, i (i)}
+                  <div class="bg-foreground w-[1.5px]" style="height: {h * 6}px"></div>
                 {/each}
               </div>
-              <span class="font-mono text-[9px] tracking-wider text-neutral-700">CK-20261115-0089</span>
+              <span class="font-mono text-[9px] tracking-wider text-card-foreground">CK-20261115-0089</span>
             </div>
           {/if}
         </div>
 
         <!-- Meta Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1.5 text-xs py-2 border-y border-neutral-300">
-          {#each config.metaFields as mf}
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1.5 text-xs py-2 border-y border-border">
+          {#each config.metaFields as mf (mf.label)}
             <div class="flex items-center">
-              <span class="text-neutral-600 w-16 shrink-0">{mf.label}:</span>
-              <span class="font-semibold text-neutral-900 font-mono truncate">{mf.value || '-'}</span>
+              <span class="text-muted-foreground w-16 shrink-0">{mf.label}:</span>
+              <span class="font-semibold text-card-foreground font-mono truncate">{mf.value || '-'}</span>
             </div>
           {/each}
         </div>
 
         <!-- Detail Table -->
         <div class="my-3 overflow-x-auto">
-          <table class="w-full text-xs border-collapse border border-neutral-400">
+          <table class="w-full text-xs border-collapse border border-border">
             <thead>
-              <tr class="bg-neutral-100 border-b border-neutral-400 text-neutral-800">
-                {#each config.columns.filter(c => c.visible) as col}
+              <tr class="bg-muted border-b border-border text-card-foreground">
+                {#each config.columns.filter(c => c.visible) as col (col.id)}
                   <th
-                    class="py-1 px-2 border-r border-neutral-400 font-bold"
+                    class="py-1 px-2 border-r border-border font-bold"
                     style="text-align: {col.align || 'left'}; width: {col.width || 'auto'};"
                   >
                     {col.label}
@@ -346,11 +360,11 @@
               </tr>
             </thead>
             <tbody>
-              {#each mockItems as item}
-                <tr class="border-b border-neutral-300 hover:bg-neutral-50">
-                  {#each config.columns.filter(c => c.visible) as col}
+              {#each mockItems as item (String(item['sku'] ?? item['index'] ?? ''))}
+                <tr class="border-b border-border hover:bg-muted/50">
+                  {#each config.columns.filter(c => c.visible) as col (col.id)}
                     <td
-                      class="py-1 px-2 border-r border-neutral-300 font-mono text-[11px]"
+                      class="py-1 px-2 border-r border-border font-mono text-[11px]"
                       style="text-align: {col.align || 'left'};"
                     >
                       {#if col.field === 'total_amount' || col.field === 'unit_price'}
@@ -365,12 +379,12 @@
             </tbody>
             <!-- Summary Row -->
             <tfoot>
-              <tr class="border-t-2 border-neutral-500 bg-neutral-50 font-bold text-xs">
-                <td class="py-1 px-2 border-r border-neutral-300" colspan="2">合计 (TOTAL):</td>
-                <td class="py-1 px-2 border-r border-neutral-300 text-right font-mono" colspan="2">
+              <tr class="border-t-2 border-foreground bg-muted/50 font-bold text-xs">
+                <td class="py-1 px-2 border-r border-border" colspan="2">合计 (TOTAL):</td>
+                <td class="py-1 px-2 border-r border-border text-right font-mono" colspan="2">
                   总件数: {totalQty} 件
                 </td>
-                <td class="py-1 px-2 border-r border-neutral-300 text-right font-mono" colspan="3">
+                <td class="py-1 px-2 border-r border-border text-right font-mono" colspan="3">
                   合计金额: {config.currencySymbol}{totalSum.toFixed(2)}
                 </td>
               </tr>
@@ -380,12 +394,12 @@
 
         <!-- Amount In Words (Chinese Currency Capitalization) -->
         {#if config.showAmountInWords}
-          <div class="flex items-center justify-between p-2 my-2 border border-neutral-400 bg-neutral-50 text-xs">
+          <div class="flex items-center justify-between p-2 my-2 border border-border bg-muted/50 text-xs">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-neutral-800">金额大写:</span>
-              <span class="font-bold font-serif text-neutral-900 tracking-wider">{amountInWords}</span>
+              <span class="font-bold text-card-foreground">金额大写:</span>
+              <span class="font-bold font-serif text-card-foreground tracking-wider">{amountInWords}</span>
             </div>
-            <div class="flex items-center gap-1 font-mono text-neutral-700">
+            <div class="flex items-center gap-1 font-mono text-card-foreground">
               <span>小写合计:</span>
               <span class="font-bold">{config.currencySymbol}{totalSum.toFixed(2)}</span>
             </div>
@@ -393,9 +407,9 @@
         {/if}
 
         <!-- Signer Signature Fields -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 mt-4 border-t border-neutral-300 text-xs">
-          {#each config.signers as signer}
-            <div class="flex items-center text-neutral-800">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 mt-4 border-t border-border text-xs">
+          {#each config.signers as signer (signer)}
+            <div class="flex items-center text-card-foreground">
               <span>{signer}</span>
             </div>
           {/each}
@@ -403,7 +417,7 @@
 
         <!-- Footer Notes -->
         {#if config.footerNotes}
-          <div class="mt-4 pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 leading-relaxed">
+          <div class="mt-4 pt-2 border-t border-border text-[10px] text-muted-foreground leading-relaxed">
             {config.footerNotes}
           </div>
         {/if}
