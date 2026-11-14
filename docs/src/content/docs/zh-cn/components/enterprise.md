@@ -3061,3 +3061,43 @@ AI 规则语义解释卡片：
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<IpAccessRuleEditor>` / `<IpWhitelistDrawer>`（`<IpAccessControlDrawer>`）
+
+企业级网络安全访问控制与 IP/CIDR 黑白名单配置器：
+- **全模式 IP 模式支持**：覆盖单点独立 IP（IPv4 / IPv6）、CIDR 网段掩码（`172.16.0.0/16`）与连续 IP 范围（`10.0.0.1 - 10.0.0.50`）。
+- **实时合法性与冲突校验**：内置严格 IP 格式校验与网段重叠/包含合法性检测。
+- **管理员自防封禁保护**：提供一键“信任当前操作员 IP”快捷操作，防止管理员误设白名单将自己锁在系统外。
+- **临时放行过期策略**：支持设置临时放行有效期（永久放行、2 小时、24 小时、7 天），便于临时运维巡检或排障。
+- **白名单/黑名单双模切换**：灵活切换严格白名单模式（仅允许放行列表访问）或恶意黑名单拦截模式。
+
+```svelte
+<script lang="ts">
+  import { IpWhitelistDrawer, type IpAccessRule } from '@svadmin/ui';
+
+  let open = $state(false);
+  let rules: IpAccessRule[] = [
+    {
+      id: 'rule-1',
+      type: 'SINGLE',
+      value: '192.168.1.100',
+      action: 'ALLOW',
+      description: '办公内网网关',
+      enabled: true,
+      expiresAt: null,
+    },
+    {
+      id: 'rule-2',
+      type: 'CIDR',
+      value: '10.0.0.0/16',
+      action: 'ALLOW',
+      description: '专线 VPN 网段',
+      enabled: true,
+      expiresAt: null,
+    },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>打开 IP 规则配置抽屉</button>
+<IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+```

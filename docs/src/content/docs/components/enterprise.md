@@ -3170,3 +3170,43 @@ Micro-frontend parent-child SPA route synchronization coordinator:
 
 <MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
 ```
+
+### `<IpAccessRuleEditor>` / `<IpWhitelistDrawer>` (`<IpAccessControlDrawer>`)
+
+Enterprise network security IP access rule editor and whitelist/blacklist drawer:
+- **Multiple IP Pattern Types**: Supports single IPv4/IPv6 addresses, CIDR subnet masks (`172.16.0.0/16`), and IP ranges (`10.0.0.1 - 10.0.0.50`).
+- **Real-Time Syntax & Conflict Validation**: Validates IP boundaries and detects overlapping subnet rules.
+- **Self-Protection Operator Action**: Provides one-click "Trust My IP" operation to prevent administrators from locking themselves out.
+- **Rule Expirations**: Configurable expiration periods (Permanent, 2 Hours, 24 Hours, 7 Days) for emergency or maintenance windows.
+- **Dual Enforcement Modes**: Switch seamlessly between Whitelist (Allowlist) and Blacklist (Blocklist).
+
+```svelte
+<script lang="ts">
+  import { IpWhitelistDrawer, type IpAccessRule } from '@svadmin/ui';
+
+  let open = $state(false);
+  let rules: IpAccessRule[] = [
+    {
+      id: 'rule-1',
+      type: 'SINGLE',
+      value: '192.168.1.100',
+      action: 'ALLOW',
+      description: 'Office Gateway',
+      enabled: true,
+      expiresAt: null,
+    },
+    {
+      id: 'rule-2',
+      type: 'CIDR',
+      value: '10.0.0.0/16',
+      action: 'ALLOW',
+      description: 'Corporate VPN',
+      enabled: true,
+      expiresAt: null,
+    },
+  ];
+</script>
+
+<button onclick={() => (open = true)}>Configure IP Rules</button>
+<IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+```

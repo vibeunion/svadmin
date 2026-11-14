@@ -980,3 +980,18 @@ export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type Micro
 export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
+
+// Enterprise network security IP access rule editor & whitelist drawer suite
+export {
+  default as IpAccessRuleEditor,
+  validateIpRuleValue,
+  type IpAccessRuleEditorProps,
+  type IpAccessRule,
+  type IpRuleType,
+  type IpRuleAction,
+} from './components/IpAccessRuleEditor.svelte';
+export {
+  default as IpWhitelistDrawer,
+  default as IpAccessControlDrawer,
+  type IpWhitelistDrawerProps,
+} from './components/IpWhitelistDrawer.svelte';

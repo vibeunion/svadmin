@@ -267,6 +267,9 @@ import {
   TooltipButton,
   FullscreenButton,
   FullScreenButton,
+  IpAccessRuleEditor,
+  IpWhitelistDrawer,
+  IpAccessControlDrawer,
   message,
   notification,
   toast,
@@ -532,6 +535,9 @@ describe('public compatibility aliases', () => {
     expect(FullscreenButton).toBeDefined();
     expect(FullScreenButton).toBe(FullscreenButton);
     expect(Segmented).toBe(SegmentedControl);
+    expect(IpAccessRuleEditor).toBeDefined();
+    expect(IpWhitelistDrawer).toBeDefined();
+    expect(IpAccessControlDrawer).toBe(IpWhitelistDrawer);
   });
 
   it('keeps service aliases bound to canonical services', () => {
