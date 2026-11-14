@@ -1,16 +1,10 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import {
-    ShieldCheck,
-    ShieldAlert,
-    ShieldX,
     Lock,
     Globe,
-    Calendar,
     RefreshCw,
     Key,
-    ExternalLink,
-    AlertTriangle,
     CheckCircle2
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
@@ -99,8 +93,8 @@
       return {
         level: 'critical',
         label: `即将到期 (${daysRemaining}天)`,
-        border: 'border-rose-500/40',
-        badgeClass: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400',
+        border: 'border-destructive/40',
+        badgeClass: 'bg-destructive/15 text-destructive border-destructive/30 dark:text-destructive',
         desc: '证书剩余有效天数不足 7 天，属于极高危状态，建议立即执行 ACME 自动或人工续期。'
       };
     }
@@ -108,16 +102,16 @@
       return {
         level: 'expiring_soon',
         label: `到期预警 (${daysRemaining}天)`,
-        border: 'border-amber-500/30',
-        badgeClass: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400',
+        border: 'border-warning/30',
+        badgeClass: 'bg-warning/15 text-warning border-warning/30 dark:text-warning',
         desc: '证书处于 30 天常规预警期，建议核查 DNS 验证记录与自动续期任务状态。'
       };
     }
     return {
       level: 'valid',
       label: `证书正常 (${daysRemaining}天)`,
-      border: 'border-emerald-500/30',
-      badgeClass: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 dark:text-emerald-400',
+      border: 'border-success/30',
+      badgeClass: 'bg-success/15 text-success border-success/30 dark:text-success',
       desc: 'SSL/TLS 证书生命周期处于安全区间，CA 权威信任链与 OCSP 状态核验完备。'
     };
   }
@@ -151,10 +145,10 @@
             class={cn(
               'stroke-current transition-all duration-500',
               certificate.daysRemaining <= 7
-                ? 'text-rose-500'
+                ? 'text-destructive'
                 : certificate.daysRemaining <= 30
-                  ? 'text-amber-500'
-                  : 'text-emerald-500'
+                  ? 'text-warning'
+                  : 'text-success'
             )}
             stroke-dasharray="{lifePercentage}, 100"
             stroke-width="3.5"
@@ -237,7 +231,7 @@
           加密算法与 TLS 协议特性
         </span>
         {#if certificate.chainComplete}
-          <span class="flex items-center gap-1 rounded bg-emerald-500/10 text-emerald-600 px-1.5 py-0.2 text-[10px] font-medium border border-emerald-500/20">
+          <span class="flex items-center gap-1 rounded bg-success/10 text-success px-1.5 py-0.2 text-[10px] font-medium border border-success/20">
             <CheckCircle2 class="h-3 w-3" />
             证书链完整
           </span>
@@ -278,7 +272,7 @@
     <div class="flex flex-col gap-2.5 p-5 bg-muted/10">
       <div class="flex items-center justify-between border-b border-border pb-2">
         <span class="flex items-center gap-1.5 font-semibold text-foreground">
-          <Globe class="h-4 w-4 text-emerald-500" />
+          <Globe class="h-4 w-4 text-success" />
           备用名称覆盖 (SAN Domains)
         </span>
         <span class="text-muted-foreground text-[11px]">

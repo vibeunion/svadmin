@@ -1,19 +1,11 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { Snippet } from 'svelte';
   import {
-    Activity,
     Network,
     Server,
-    ShieldAlert,
-    ShieldCheck,
     ArrowRight,
-    Zap,
-    RefreshCw,
-    ToggleLeft,
-    ToggleRight,
-    Sliders,
-    Layers,
-    Cpu
+    RefreshCw
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
@@ -72,7 +64,7 @@
     class: className = ''
   }: TrafficTopologyInspectorProps = $props();
 
-  let selectedNodeId = $state<string | null>(nodes.length > 0 ? nodes[0].id : null);
+  let selectedNodeId = $state<string | null>(untrack(() => nodes[0]?.id ?? null));
   let isRefreshing = $state(false);
 
   async function handleRefresh() {
@@ -101,11 +93,11 @@
   function getNodeStatusBadge(status: TopologyNodeStatus) {
     switch (status) {
       case 'healthy':
-        return { label: '运行平稳', class: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 dark:text-emerald-400' };
+        return { label: '运行平稳', class: 'bg-success/15 text-success border-success/30 dark:text-success' };
       case 'warning':
-        return { label: '延迟偏高', class: 'bg-amber-500/15 text-amber-600 border-amber-500/30 dark:text-amber-400' };
+        return { label: '延迟偏高', class: 'bg-warning/15 text-warning border-warning/30 dark:text-warning' };
       case 'critical':
-        return { label: '异常告警', class: 'bg-rose-500/15 text-rose-600 border-rose-500/30 dark:text-rose-400' };
+        return { label: '异常告警', class: 'bg-destructive/15 text-destructive border-destructive/30 dark:text-destructive' };
       default:
         return { label: '已熔断旁路', class: 'bg-muted text-muted-foreground border-border' };
     }
@@ -156,11 +148,11 @@
       </div>
 
       <div class="flex items-center gap-1.5">
-        <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+        <span class="flex h-2 w-2 rounded-full bg-success"></span>
         <span>正常 {clusterMetrics.healthyCount}</span>
-        <span class="flex h-2 w-2 rounded-full bg-amber-500 ml-1"></span>
+        <span class="flex h-2 w-2 rounded-full bg-warning ml-1"></span>
         <span>预警 {clusterMetrics.warningCount}</span>
-        <span class="flex h-2 w-2 rounded-full bg-rose-500 ml-1"></span>
+        <span class="flex h-2 w-2 rounded-full bg-destructive ml-1"></span>
         <span>故障 {clusterMetrics.criticalCount}</span>
       </div>
 
@@ -233,13 +225,13 @@
               </div>
               <div>
                 <span>p99 延迟</span>
-                <span class={cn('block font-mono font-medium', node.latencyMsP99 > 200 ? 'text-rose-600' : 'text-foreground')}>
+                <span class={cn('block font-mono font-medium', node.latencyMsP99 > 200 ? 'text-destructive' : 'text-foreground')}>
                   {node.latencyMsP99} ms
                 </span>
               </div>
               <div>
                 <span>错误率</span>
-                <span class={cn('block font-mono font-medium', node.errorRatePercent > 1 ? 'text-rose-600' : 'text-foreground')}>
+                <span class={cn('block font-mono font-medium', node.errorRatePercent > 1 ? 'text-destructive' : 'text-foreground')}>
                   {node.errorRatePercent}%
                 </span>
               </div>
@@ -332,8 +324,8 @@
                 class={cn(
                   'rounded-lg px-3 py-1.5 font-medium transition-colors',
                   selectedNode.status === 'bypassed'
-                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    : 'bg-rose-500 text-white hover:bg-rose-600'
+                    ? 'bg-success text-background hover:bg-success'
+                    : 'bg-destructive text-background hover:bg-destructive'
                 )}
                 onclick={() => selectedNode && handleBypassToggle(selectedNode)}
               >
