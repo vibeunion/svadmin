@@ -430,6 +430,11 @@
       "component": "meilisearch",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/typesense": {
+      "release-type": "node",
+      "component": "typesense",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/casbin": {
       "release-type": "node",
       "component": "casbin",

@@ -181,8 +181,8 @@ export function createQdrantDataProvider(options: QdrantOptions): DataProvider {
       const qdrantFilter = buildQdrantFilter(filters);
       const queryVector = meta?.['vector'] as number[] | undefined;
 
-      let records: TData[] = [];
-      let total = 0;
+      let records: TData[];
+      let total: number;
 
       // 1. Vector similarity search mode
       if (Array.isArray(queryVector) && queryVector.length > 0) {

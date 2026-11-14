@@ -262,12 +262,13 @@ describe('@svadmin/qdrant DataProvider', () => {
       fetch: mockFetch,
     });
 
-    const res = await provider.custom!({
+    expect(provider.custom).toBeDefined();
+    const res = await provider.custom?.({
       url: '/collections',
       method: 'get',
     });
 
-    expect(res.data).toBeDefined();
-    expect(provider.getApiUrl!()).toBe('http://localhost:6333');
+    expect(res?.data).toBeDefined();
+    expect(provider.getApiUrl?.()).toBe('http://localhost:6333');
   });
 });

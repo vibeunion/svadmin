@@ -95,6 +95,7 @@
 | `@svadmin/simple-rest`  | REST API (zero deps, JWT/Cookie auth)        |
 | `@svadmin/jsonapi`      | JSON:API 1.0 specification provider          |
 | `@svadmin/meilisearch`  | Meilisearch instant search & faceted engine  |
+| `@svadmin/typesense`    | Typesense in-memory typo-tolerant search     |
 | `@svadmin/postgrest`    | PostgREST & PostgreSQL REST API provider     |
 | `@svadmin/supabase`     | Supabase (data + auth + live)                |
 | `@svadmin/drizzle`      | Drizzle ORM (SQLite, PostgreSQL, MySQL, D1)  |
