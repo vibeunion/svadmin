@@ -3047,21 +3047,6 @@ AI 规则语义解释卡片：
 <MicroAppStateBusIndicator />
 ```
 
-### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
-
-微前端父子单页应用路由双向无感同步协调器：
-- 解决微前端经典架构痛点：子应用内部切页后刷新丢失、404 以及浏览器前进后退断裂。
-- **双向无感映射**：将子应用单页路由编码映射为宿主查询参数（如 `?subAppRoute=/reports/details`），并在宿主 popstate 时反向通知子应用。
-- **路由栈历史回放**：直观展示快捷路由栈与一键复制带深层路径的完整分享链接。
-
-```svelte
-<script lang="ts">
-  import { MicroAppRouteSync } from '@svadmin/ui';
-</script>
-
-<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
-```
-
 ### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
 
 功能开关配置编辑器与渐进发布模拟器。组件在当前注册表中评估配置，通过 `onChange` 通知编辑结果；持久化由宿主应用对接自己的服务完成。
@@ -3092,3 +3077,18 @@ AI 规则语义解释卡片：
 `useFeatureFlag` 随注册表写入和响应式上下文变化更新。读写均隔离配置快照。`registerFeatureFlags`、`setFeatureFlag`、`getFeatureFlag`、`clearFeatureFlags` 的最后一个参数可传入注册表；默认注册表仅供浏览器使用，SSR 必须显式传入请求实例。没有传入注册表的 Studio 拥有独立状态，不会写入浏览器默认注册表。
 
 替换 `flags` 属性会同步编辑器快照，并从关联注册表移除过期条目。`onChange(flag)` 提供用于持久化的独立快照，修改它不会影响编辑器或最初的输入对象。设置 0% 比例并配置白名单，可实现仅向试用用户开放。
+
+### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
+
+微前端父子单页应用路由双向无感同步协调器：
+- 解决微前端经典架构痛点：子应用内部切页后刷新丢失、404 以及浏览器前进后退断裂。
+- **双向无感映射**：将子应用单页路由编码映射为宿主查询参数（如 `?subAppRoute=/reports/details`），并在宿主 popstate 时反向通知子应用。
+- **路由栈历史回放**：直观展示快捷路由栈与一键复制带深层路径的完整分享链接。
+
+```svelte
+<script lang="ts">
+  import { MicroAppRouteSync } from '@svadmin/ui';
+</script>
+
+<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
+```

@@ -3156,21 +3156,6 @@ Cross-app reactive state bus and event message stream:
 <MicroAppStateBusIndicator />
 ```
 
-### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
-
-Micro-frontend parent-child SPA route synchronization coordinator:
-- Eliminates 404 page refresh failures and broken browser back/forward history in embedded micro-apps.
-- **Bi-Directional Mapping**: Maps sub-app internal routes to host query parameters and synchronizes on popstate events.
-- **Route Breadcrumb Stack**: Provides history back navigation and deep-link copying.
-
-```svelte
-<script lang="ts">
-  import { MicroAppRouteSync } from '@svadmin/ui';
-</script>
-
-<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
-```
-
 ### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
 
 Feature flag configuration editor and gradual rollout simulator. It evaluates the current registry and reports edits through `onChange`; the host application persists those changes through its own service integration.
@@ -3201,3 +3186,18 @@ Create one registry in each application root (and each SSR request) and pass tha
 `useFeatureFlag` reacts to registry writes and reactive context values. Registry reads/writes use detached snapshots. `registerFeatureFlags`, `setFeatureFlag`, `getFeatureFlag`, and `clearFeatureFlags` accept an optional registry as their final argument. Their default registry is browser-only; SSR callers must provide a request-local instance. A studio without an explicit registry owns an isolated registry and does not publish to the browser default.
 
 Replacing the `flags` prop replaces the editor snapshot and removes stale entries from its connected registry. `onChange(flag)` receives a detached snapshot for persistence; updating it does not mutate the editor or the caller's original input. A 0% rollout with allow rules is useful for early-access whitelists.
+
+### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
+
+Micro-frontend parent-child SPA route synchronization coordinator:
+- Eliminates 404 page refresh failures and broken browser back/forward history in embedded micro-apps.
+- **Bi-Directional Mapping**: Maps sub-app internal routes to host query parameters and synchronizes on popstate events.
+- **Route Breadcrumb Stack**: Provides history back navigation and deep-link copying.
+
+```svelte
+<script lang="ts">
+  import { MicroAppRouteSync } from '@svadmin/ui';
+</script>
+
+<MicroAppRouteSync initialRoute="/reports/quarterly-gmv/details" />
+```

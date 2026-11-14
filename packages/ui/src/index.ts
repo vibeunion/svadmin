@@ -959,6 +959,23 @@ export { default as SystemCapacityForecastCard, default as ResourceCapacityPredi
 // Enterprise workspace & multi-tenant context switcher suite
 export { default as TenantContextSwitcher, default as WorkspaceContextSwitcher, type TenantContextSwitcherProps, type TenantItem, type TenantRole } from './components/TenantContextSwitcher.svelte';
 
+// Enterprise feature flag & gray release control suite
+export { default as FeatureFlagStudio, default as GrayReleaseManager, type FeatureFlagStudioProps } from './components/FeatureFlagStudio.svelte';
+export {
+  useFeatureFlag,
+  createFeatureFlagRegistry,
+  evaluateFeatureFlag,
+  registerFeatureFlags,
+  setFeatureFlag,
+  getFeatureFlag,
+  clearFeatureFlags,
+  hashStringToPercentage,
+  type FeatureFlag,
+  type FeatureFlagRule,
+  type FeatureFlagContext,
+  type FeatureFlagRegistry,
+} from './components/useFeatureFlag.svelte.js';
+
 // Enterprise global omnibar command palette & resource search suite
 export { default as OmnibarCommandPalette, default as GlobalCommandOmnibar, type OmnibarCommandPaletteProps, type CommandPaletteItem } from './components/OmnibarCommandPalette.svelte';
 
@@ -980,20 +997,3 @@ export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type Micro
 export { useMicroAppState, type UseMicroAppStateOptions, type MicroAppStateMessage } from './components/useMicroAppState.svelte.js';
 export { default as MicroAppStateBusIndicator, default as CrossAppStateBus, type MicroAppStateBusIndicatorProps } from './components/MicroAppStateBusIndicator.svelte';
 export { default as MicroAppRouteSync, default as SubAppUrlSynchronizer, type MicroAppRouteSyncProps } from './components/MicroAppRouteSync.svelte';
-
-// Enterprise feature flag & gray release control suite
-export { default as FeatureFlagStudio, default as GrayReleaseManager, type FeatureFlagStudioProps } from './components/FeatureFlagStudio.svelte';
-export {
-  useFeatureFlag,
-  createFeatureFlagRegistry,
-  evaluateFeatureFlag,
-  registerFeatureFlags,
-  setFeatureFlag,
-  getFeatureFlag,
-  clearFeatureFlags,
-  hashStringToPercentage,
-  type FeatureFlag,
-  type FeatureFlagRule,
-  type FeatureFlagContext,
-  type FeatureFlagRegistry,
-} from './components/useFeatureFlag.svelte.js';
