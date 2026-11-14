@@ -58,12 +58,9 @@
   }: SsoConnectionStudioProps = $props();
 
   // Internal reactive items
-  let connList = $state<SsoConnection[]>([]);
-
-  $effect(() => {
-    connList = connections.length > 0
-      ? connections.map(c => ({ ...c, domains: [...c.domains], claimMappings: c.claimMappings ? [...c.claimMappings] : [] }))
-      : [
+  let connList = $state<SsoConnection[]>(untrack(() => connections.length > 0
+    ? connections.map(c => ({ ...c, domains: [...c.domains], claimMappings: c.claimMappings ? [...c.claimMappings] : [] }))
+    : [
           {
             id: 'conn-okta-saml',
             name: 'Corporate Okta SSO',
@@ -120,8 +117,7 @@
             lastTestedAt: '2026-11-10 09:00',
             testStatus: 'untested',
           },
-        ];
-  });
+        ]));
 
   // Filters & Search
   let searchQuery = $state('');
@@ -345,13 +341,13 @@
       case 'saml':
         return 'bg-primary/10 text-primary border-primary/20';
       case 'oidc':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+        return 'bg-info/10 text-info dark:text-info border-info/20';
       case 'feishu':
-        return 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20';
+        return 'bg-info/10 text-info dark:text-info border-info/20';
       case 'dingtalk':
-        return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
+        return 'bg-warning/10 text-warning dark:text-warning border-warning/20';
       case 'wecom':
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+        return 'bg-success/10 text-success dark:text-success border-success/20';
       default:
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -404,7 +400,7 @@
 
   <!-- Copied Toast Alert -->
   {#if copiedNotification}
-    <div class="px-3 py-2 text-xs rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-between transition-all">
+    <div class="px-3 py-2 text-xs rounded-md bg-success/15 text-success dark:text-success border border-success/30 flex items-center justify-between transition-all">
       <span>已成功复制 {copiedNotification} 至剪贴板！</span>
     </div>
   {/if}
@@ -455,7 +451,7 @@
     </div>
     <div class="p-3 rounded-lg bg-card border border-border flex flex-col gap-1">
       <span class="text-xs text-muted-foreground">活跃运行中</span>
-      <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400">{activeCount}</span>
+      <span class="text-xl font-bold text-success dark:text-success">{activeCount}</span>
     </div>
     <div class="p-3 rounded-lg bg-card border border-border flex flex-col gap-1">
       <span class="text-xs text-muted-foreground">覆盖企业邮箱域名</span>
@@ -530,13 +526,13 @@
                 {conn.protocol.toUpperCase()}
               </span>
               {#if conn.isDefault}
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-warning/10 text-warning dark:text-warning border border-warning/20">
                   默认身份源
                 </span>
               {/if}
               <div class="flex items-center gap-1.5 ml-1">
                 <span
-                  class="w-2 h-2 rounded-full {conn.status === 'active' ? 'bg-emerald-500' : 'bg-muted-foreground/50'}"
+                  class="w-2 h-2 rounded-full {conn.status === 'active' ? 'bg-success' : 'bg-muted-foreground/50'}"
                 ></span>
                 <span class="text-xs text-muted-foreground capitalize">{conn.status}</span>
               </div>
@@ -548,7 +544,7 @@
               {#if conn.domains.length === 0}
                 <span class="text-[11px] italic">无专属域名</span>
               {:else}
-                {#each conn.domains as domain}
+                {#each conn.domains as domain (domain)}
                   <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-muted text-foreground border border-border">
                     @{domain}
                   </span>
@@ -559,7 +555,7 @@
             <!-- Test status and feedback -->
             <div class="flex items-center gap-2 text-xs">
               {#if conn.testStatus === 'success'}
-                <span class="inline-flex items-center text-emerald-600 dark:text-emerald-400 text-[11px]">
+                <span class="inline-flex items-center text-success dark:text-success text-[11px]">
                   <svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
@@ -677,7 +673,7 @@
                 { id: 'feishu', label: '飞书自建应用' },
                 { id: 'dingtalk', label: '钉钉企业应用' },
                 { id: 'wecom', label: '企业微信' },
-              ] as item}
+              ] as item (item.id)}
                 <button
                   type="button"
                   onclick={() => (editProtocol = item.id as SsoProtocol)}
@@ -826,7 +822,7 @@
               </button>
             </div>
             <div class="flex flex-col gap-1.5">
-              {#each editClaimMappings as mapping, idx}
+              {#each editClaimMappings as mapping, idx (idx)}
                 <div class="flex items-center gap-2">
                   <input
                     type="text"

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import type { SsoConnection } from './SsoConnectionStudio.svelte';
 
 describe('SsoConnectionStudio Business & Filtering Logic', () => {
