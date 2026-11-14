@@ -465,7 +465,7 @@
         </div>
         <Dialog.Description class="mt-4">
           Are you sure you want to activate the emergency kill switch for <strong class="text-foreground">{killSwitchTarget.name}</strong> (<code class="text-destructive">{killSwitchTarget.key}</code>)?
-          This disables evaluation in the connected registry. Persist the change through onChange to apply it to your service.
+          This disables this feature in the current preview. Save the configuration in your application to apply it.
         </Dialog.Description>
         <div class="mt-6 flex justify-end gap-3">
           <button
