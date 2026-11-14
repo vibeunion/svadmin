@@ -3187,6 +3187,52 @@ AI 规则语义解释卡片：
 
 <ShiftScheduler {staffList} {shiftTypes} />
 
+### `<FieldMappingBuilder>` / `<ColumnMappingBuilder>`
+
+企业级跨系统字段可视化连线与映射构建器：
+- **跨系统字段映射**：支持将导入文件（CSV/Excel/JSON）或外部三方接口字段对齐映射至系统业务模型。
+- **智能模糊匹配**：内置智能匹配启发算法，自动关联下划线、驼峰及中英文标签相似字段。
+- **数据清洗转换**：支持直接映射、去空格、全大写、全小写、数值转换及默认回退值填充。
+- **实时样本推演**：支持接入样本数据，实时预览前置清洗转换后的实际目标值。
+
+```svelte
+<script lang="ts">
+  import { FieldMappingBuilder } from '@svadmin/ui';
+
+  const sourceFields = [
+    { name: 'user_name', label: '用户姓名', sample: '张三' },
+    { name: 'contact_email', label: '联系邮箱', sample: 'zhang@example.com' },
+  ];
+
+  const targetFields = [
+    { name: 'username', label: '账户姓名', required: true },
+    { name: 'email', label: '电子邮箱', required: true },
+  ];
+</script>
+
+<FieldMappingBuilder {sourceFields} {targetFields} />
+```
+
+### `<DataImportPipeline>` / `<BatchImportPipeline>`
+
+企业批量数据智能导入与行内就地纠错流水线：
+- **全流程四阶管道**：涵盖数据录入解析、字段映射转换、质检就地纠错、批量并发导入四阶段。
+- **行内就地纠错**：高亮错误单元格并提示校验失败原因，支持双击就地编辑与即时重新校验。
+- **质检分类筛选**：支持“全部”、“仅看异常”、“仅看合规”视图快速切换，一键剔除不可修复脏数据。
+- **入库进度推演**：实时呈现导入进度条、成功/失败明细统计与重试触发。
+
+```svelte
+<script lang="ts">
+  import { DataImportPipeline } from '@svadmin/ui';
+
+  const targetFields = [
+    { name: 'name', label: '姓名', required: true },
+    { name: 'email', label: '邮箱', required: true },
+  ];
+</script>
+
+<DataImportPipeline {targetFields} />
+
 ### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
 
 紧凑铃铛弹层保持现有 `items`、`onread`、`onreadall` API 兼容。通过 `showDrawerButton` 和 `onopendrawer` 打开完整通知抽屉。
