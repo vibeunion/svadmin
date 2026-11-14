@@ -127,6 +127,8 @@ import {
   CrossAppStateBus,
   MicroAppRouteSync,
   SubAppUrlSynchronizer,
+  ShiftScheduler,
+  WorkShiftCalendar,
   useMicroAppState,
   DataImportDropzone,
   BatchImportDropzone,
@@ -481,6 +483,8 @@ describe('public compatibility aliases', () => {
     expect(CrossAppStateBus).toBe(MicroAppStateBusIndicator);
     expect(MicroAppRouteSync).toBeDefined();
     expect(SubAppUrlSynchronizer).toBe(MicroAppRouteSync);
+    expect(ShiftScheduler).toBeDefined();
+    expect(WorkShiftCalendar).toBe(ShiftScheduler);
     expect(useMicroAppState).toBeDefined();
     expect(DataImportDropzone).toBeDefined();
     expect(BatchImportDropzone).toBe(DataImportDropzone);
