@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.129.0](https://github.com/vibeunion/svadmin/compare/ui-v0.128.0...ui-v0.129.0) (2026-11-14)
+
+
+### 🚀 Features
+
+* **ui:** close leftover Arco visual contracts ([#791](https://github.com/vibeunion/svadmin/issues/791)) ([b13fb82](https://github.com/vibeunion/svadmin/commit/b13fb8231dac97948f7ac6420d04ca2726ad0b3c))
+
 ## [0.128.0](https://github.com/vibeunion/svadmin/compare/ui-v0.127.0...ui-v0.128.0) (2026-11-14)
 
 
