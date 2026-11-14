@@ -272,12 +272,13 @@
 
   <!-- Lightbox Modal -->
   {#if activeIndex !== null && currentItem()}
-    {@const item = currentItem()!}
-    <div
-      class="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-md"
-      role="dialog"
-      aria-modal="true"
-    >
+    {@const item = currentItem()}
+    {#if item}
+      <div
+        class="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-md"
+        role="dialog"
+        aria-modal="true"
+      >
       <!-- Watermark Protection Layer -->
       {#if watermarkText}
         <div class="pointer-events-none absolute inset-0 select-none overflow-hidden opacity-10">
@@ -553,5 +554,6 @@
         {/if}
       </div>
     </div>
+    {/if}
   {/if}
 </div>

@@ -32,13 +32,9 @@
   }: ResizableSplitterProps = $props();
 
   let containerEl = $state<HTMLDivElement | null>(null);
-  let sizes = $state<[number, number]>([50, 50]);
+  let sizes = $state<[number, number]>([initialSizes[0], initialSizes[1]]);
   let isDragging = $state<boolean>(false);
   let collapsedPane = $state<'first' | 'second' | null>(null);
-
-  $effect(() => {
-    sizes = [initialSizes[0], initialSizes[1]];
-  });
 
   onMount(() => {
     if (storageKey && typeof localStorage !== 'undefined') {
@@ -234,7 +230,9 @@
       <button
         type="button"
         class="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-foreground shadow-xs hover:bg-muted"
-        onclick={() => toggleCollapse(collapsedPane!)}
+        onclick={() => {
+          if (collapsedPane) toggleCollapse(collapsedPane);
+        }}
       >
         <span>恢复面板</span>
         <span class="text-[10px] text-muted-foreground">({collapsedPane === 'first' ? '左/上' : '右/下'})</span>

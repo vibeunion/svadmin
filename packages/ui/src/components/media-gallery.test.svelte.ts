@@ -43,7 +43,9 @@ describe('MediaGallery Component', () => {
 
     const firstThumb = container.querySelector('.aspect-video');
     expect(firstThumb).toBeTruthy();
-    await fireEvent.click(firstThumb!);
+    if (firstThumb) {
+      await fireEvent.click(firstThumb);
+    }
 
     expect(onItemClick).toHaveBeenCalledWith(mockItems[0], 0);
 
@@ -53,7 +55,9 @@ describe('MediaGallery Component', () => {
 
     const closeBtn = dialog?.querySelector('button[title*="关闭"]');
     expect(closeBtn).toBeTruthy();
-    await fireEvent.click(closeBtn!);
+    if (closeBtn) {
+      await fireEvent.click(closeBtn);
+    }
 
     expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
@@ -66,19 +70,25 @@ describe('MediaGallery Component', () => {
     });
 
     const firstThumb = container.querySelector('.aspect-video');
-    await fireEvent.click(firstThumb!);
+    if (firstThumb) {
+      await fireEvent.click(firstThumb);
+    }
 
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog?.textContent).toContain('1 / 5');
 
     const nextBtn = dialog?.querySelector('button[title*="下一张"]');
     expect(nextBtn).toBeTruthy();
-    await fireEvent.click(nextBtn!);
+    if (nextBtn) {
+      await fireEvent.click(nextBtn);
+    }
     expect(dialog?.textContent).toContain('2 / 5');
 
     const prevBtn = dialog?.querySelector('button[title*="上一张"]');
     expect(prevBtn).toBeTruthy();
-    await fireEvent.click(prevBtn!);
+    if (prevBtn) {
+      await fireEvent.click(prevBtn);
+    }
     expect(dialog?.textContent).toContain('1 / 5');
   });
 
@@ -91,14 +101,18 @@ describe('MediaGallery Component', () => {
     });
 
     const firstThumb = container.querySelector('.aspect-video');
-    await fireEvent.click(firstThumb!);
+    if (firstThumb) {
+      await fireEvent.click(firstThumb);
+    }
 
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog?.querySelector('aside')).toBeNull();
 
     const infoBtn = dialog?.querySelector('button[title="详情信息"]');
     expect(infoBtn).toBeTruthy();
-    await fireEvent.click(infoBtn!);
+    if (infoBtn) {
+      await fireEvent.click(infoBtn);
+    }
 
     const drawer = dialog?.querySelector('aside');
     expect(drawer).toBeTruthy();
@@ -116,7 +130,9 @@ describe('MediaGallery Component', () => {
     });
 
     const firstThumb = container.querySelector('.aspect-video');
-    await fireEvent.click(firstThumb!);
+    if (firstThumb) {
+      await fireEvent.click(firstThumb);
+    }
 
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog?.textContent).toContain('CONFIDENTIAL-CORP-SEC');

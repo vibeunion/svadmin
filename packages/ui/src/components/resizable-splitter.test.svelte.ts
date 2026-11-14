@@ -45,7 +45,9 @@ describe('ResizableSplitter Component', () => {
     const gutter = container.querySelector('[role="separator"]');
     expect(gutter).toBeTruthy();
 
-    await fireEvent.dblClick(gutter!);
+    if (gutter) {
+      await fireEvent.dblClick(gutter);
+    }
     expect(onResize).toHaveBeenCalledWith([50, 50]);
   });
 
@@ -80,13 +82,17 @@ describe('ResizableSplitter Component', () => {
     const collapseFirstBtn = container.querySelector('button[title="折叠左/上方"]');
     expect(collapseFirstBtn).toBeTruthy();
 
-    await fireEvent.click(collapseFirstBtn!);
+    if (collapseFirstBtn) {
+      await fireEvent.click(collapseFirstBtn);
+    }
     expect(onCollapse).toHaveBeenCalledWith('first');
 
     const restoreBtn = container.querySelector('button');
     expect(restoreBtn?.textContent).toContain('恢复面板');
 
-    await fireEvent.click(restoreBtn!);
+    if (restoreBtn) {
+      await fireEvent.click(restoreBtn);
+    }
     expect(onCollapse).toHaveBeenCalledWith(null);
   });
 });

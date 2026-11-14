@@ -86,10 +86,12 @@
     const map = new Map<string, HotkeyItem[]>();
     for (const item of filteredHotkeys()) {
       const cat = item.category || '通用快捷键';
-      if (!map.has(cat)) {
-        map.set(cat, []);
+      const list = map.get(cat);
+      if (list) {
+        list.push(item);
+      } else {
+        map.set(cat, [item]);
       }
-      map.get(cat)!.push(item);
     }
     return Array.from(map.entries());
   });

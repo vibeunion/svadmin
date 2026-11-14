@@ -46,7 +46,9 @@ describe('HotkeysHelpModal Component', () => {
     );
     expect(formCategoryBtn).toBeTruthy();
 
-    await fireEvent.click(formCategoryBtn!);
+    if (formCategoryBtn) {
+      await fireEvent.click(formCategoryBtn);
+    }
     expect(container.textContent).toContain('保存表单 / 提交');
     expect(container.textContent).not.toContain('打开全局命令栏');
   });
@@ -75,7 +77,9 @@ describe('HotkeysHelpModal Component', () => {
 
     const closeBtn = container.querySelector('button[title*="关闭"]');
     expect(closeBtn).toBeTruthy();
-    await fireEvent.click(closeBtn!);
+    if (closeBtn) {
+      await fireEvent.click(closeBtn);
+    }
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
