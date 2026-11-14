@@ -122,7 +122,7 @@
     cursor: pointer;
   }
   .svadmin-app-footer__link:hover { color: var(--foreground, currentColor); text-decoration: underline; text-underline-offset: 0.2em; }
-  .svadmin-app-footer__link:focus-visible { outline: 2px solid var(--ring, currentColor); outline-offset: 2px; }
+  .svadmin-app-footer__link:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring, currentColor); outline-offset: var(--svadmin-focus-offset); }
 
   .svadmin-app-footer__bar {
     display: flex;

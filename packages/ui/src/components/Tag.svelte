@@ -82,8 +82,9 @@
 </span>
 
 <style>
-  .svadmin-tag { gap: 0.25rem; max-width: 100%; }
-  .svadmin-tag.is-disabled { opacity: 0.55; }
+  .svadmin-tag { gap: 0.25rem; max-width: 100%; min-height: 24px; padding-inline: 8px; border-radius: 2px; font-weight: 500; }
+  .svadmin-tag[data-size='compact'] { min-height: 20px; }
+  .svadmin-tag.is-disabled { opacity: 1; color: var(--svadmin-text-4); }
   .svadmin-tag__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .svadmin-tag__control,
   .svadmin-tag__close {
@@ -107,8 +108,8 @@
   }
   .svadmin-tag__control:focus-visible,
   .svadmin-tag__close:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: var(--svadmin-focus-width) solid color-mix(in oklch, var(--ring) 48%, transparent);
+    outline-offset: var(--svadmin-focus-offset);
     border-radius: var(--radius-sm);
   }
   .svadmin-tag__control:disabled,

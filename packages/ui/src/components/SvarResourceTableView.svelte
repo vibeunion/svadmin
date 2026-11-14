@@ -357,10 +357,10 @@
   .svar-resource-table { min-width: 0; color: var(--foreground, CanvasText); }
   header, footer, .toolbar, .confirmation { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.75rem 0; }
   header, footer { justify-content: space-between; }
-  h2 { font-size: 1.125rem; margin: 0; }
+  h2 { font-size: var(--svadmin-text-title, 1.25rem); margin: 0; font-weight: 500; }
   button, input, select { max-width: 100%; font: inherit; color: inherit; background: var(--card, Canvas); border: 1px solid var(--border, GrayText); border-radius: var(--radius, 6px); padding: 0.375rem 0.75rem; }
-  button { cursor: pointer; } button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--ring, Highlight); outline-offset: 2px; }
-  button:disabled, input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
+  button { cursor: pointer; } button:focus-visible, input:focus-visible, select:focus-visible { outline: var(--svadmin-focus-width, 2px) solid var(--ring, Highlight); outline-offset: var(--svadmin-focus-offset, 2px); }
+  button:disabled, input:disabled, select:disabled { opacity: 1; color: var(--svadmin-text-4, GrayText); cursor: not-allowed; }
   .confirmation { border-block: 1px solid var(--border, GrayText); } .confirmation p { width: 100%; margin: 0; }
   details label { display: block; } [role='alert'] { color: var(--destructive, CanvasText); }
 </style>

@@ -304,6 +304,14 @@
     cursor: pointer;
   }
 
+  .svadmin-radio-group__option input[type='radio'] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    flex: 0 0 auto;
+    accent-color: var(--primary);
+  }
+
   .svadmin-radio-group__option--disabled {
     cursor: not-allowed;
     color: var(--svadmin-text-4);

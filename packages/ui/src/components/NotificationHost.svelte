@@ -50,5 +50,5 @@
   .svadmin-notification-host__action { margin-block-start: var(--svadmin-space-2); padding: 0; border: 0; background: transparent; color: var(--primary); font-size: var(--svadmin-text-label); font-weight: 600; cursor: pointer; }
   .svadmin-notification-host__close { align-self: start; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted-foreground); cursor: pointer; }
   .svadmin-notification-host__close:hover { background: var(--muted); color: var(--foreground); }
-  .svadmin-notification-host__close:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .svadmin-notification-host__close:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
 </style>

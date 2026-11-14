@@ -179,5 +179,5 @@
 <style>
   .record-detail-group { border-bottom: 1px solid var(--border); }
   .record-detail-group summary { cursor: pointer; padding: 12px 0; font-weight: 500; }
-  .record-detail-group summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .record-detail-group summary:focus-visible { outline: var(--svadmin-focus-width) solid var(--ring); outline-offset: var(--svadmin-focus-offset); }
 </style>
