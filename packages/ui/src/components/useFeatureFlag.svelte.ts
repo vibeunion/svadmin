@@ -134,13 +134,6 @@ export function useFeatureFlag(
   contextGetter?: () => FeatureFlagContext,
   defaultFallback = false
 ) {
-  let isEnabled = $state<boolean>(() => {
-    const flag = flagRegistry.get(key);
-    if (!flag) return defaultFallback;
-    const ctx = contextGetter ? contextGetter() : {};
-    return evaluateFeatureFlag(flag, ctx);
-  });
-
   return {
     get enabled() {
       const flag = flagRegistry.get(key);

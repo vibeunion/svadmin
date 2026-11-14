@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { FeatureFlag, FeatureFlagContext } from './useFeatureFlag.svelte.js';
   import {
     evaluateFeatureFlag,
@@ -23,7 +24,8 @@
   }: FeatureFlagStudioProps = $props();
 
   // Internal reactive state
-  let flagList = $state<FeatureFlag[]>(flags.map((f) => ({ ...f })));
+  // Seeded from the initial prop; the studio owns edits afterwards.
+  let flagList = $state<FeatureFlag[]>(untrack(() => flags.map((f) => ({ ...f }))));
   let searchQuery = $state<string>('');
   let statusFilter = $state<'ALL' | 'ENABLED' | 'DISABLED' | 'KILL_SWITCH'>('ALL');
   let selectedTag = $state<string>('ALL');
@@ -55,7 +57,7 @@
   });
 
   // Extract all unique tags
-  const allTags = $derived<string[]>(() => {
+  const allTags = $derived.by((): string[] => {
     const set = new Set<string>();
     for (const flag of flagList) {
       if (flag.tags) {
@@ -66,7 +68,7 @@
   });
 
   // Filtered flag list
-  const filteredFlags = $derived<FeatureFlag[]>(() => {
+  const filteredFlags = $derived.by((): FeatureFlag[] => {
     return flagList.filter((flag) => {
       // Status filter
       if (statusFilter === 'ENABLED' && (!flag.enabled || flag.killSwitch)) return false;
@@ -92,15 +94,15 @@
   });
 
   // Simulation result calculation
-  const simResult = $derived<{ enabled: boolean; reason: string }>(() => {
+  const simResult = $derived.by((): { enabled: boolean; reason: string } => {
     if (!simFlagKey) return { enabled: false, reason: 'No flag selected' };
     const flag = flagList.find((f) => f.key === simFlagKey);
     if (!flag) return { enabled: false, reason: 'Flag not found' };
 
     const ctx: FeatureFlagContext = {
-      userId: simUserId.trim() || undefined,
-      tenantId: simTenantId.trim() || undefined,
-      role: simRole.trim() || undefined,
+      ...(simUserId.trim() ? { userId: simUserId.trim() } : {}),
+      ...(simTenantId.trim() ? { tenantId: simTenantId.trim() } : {}),
+      ...(simRole.trim() ? { role: simRole.trim() } : {}),
     };
 
     if (flag.killSwitch) {
@@ -184,17 +186,18 @@
       description: editDescription.trim(),
       enabled: true,
       percentage: editPercentage,
-      tags: tags.length > 0 ? tags : undefined,
-      rules:
-        whitelist.length > 0
-          ? [
+      ...(tags.length > 0 ? { tags } : {}),
+      ...(whitelist.length > 0
+        ? {
+            rules: [
               {
                 field: 'userId',
-                operator: 'in',
+                operator: 'in' as const,
                 values: whitelist,
               },
-            ]
-          : undefined,
+            ],
+          }
+        : {}),
       updatedAt: new Date().toISOString(),
     };
 
@@ -254,20 +257,20 @@
       </div>
       <select
         bind:value={statusFilter}
-        class="rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        data-size="compact" class="svadmin-select--inline svadmin-select"
       >
         <option value="ALL">All Status</option>
         <option value="ENABLED">Enabled</option>
         <option value="DISABLED">Disabled</option>
         <option value="KILL_SWITCH">Kill Switch Active</option>
       </select>
-      {#if allTags().length > 0}
+      {#if allTags.length > 0}
         <select
           bind:value={selectedTag}
-          class="rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          data-size="compact" class="svadmin-select--inline svadmin-select"
         >
           <option value="ALL">All Tags</option>
-          {#each allTags() as tag}
+          {#each allTags as tag (tag)}
             <option value={tag}>{tag}</option>
           {/each}
         </select>
@@ -277,12 +280,12 @@
 
   <!-- Flag Cards Grid -->
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-    {#if filteredFlags().length === 0}
+    {#if filteredFlags.length === 0}
       <div class="col-span-full rounded-lg border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
         No feature flags matched the current filter.
       </div>
     {:else}
-      {#each filteredFlags() as flag (flag.key)}
+      {#each filteredFlags as flag (flag.key)}
         <div
           class="relative flex flex-col justify-between rounded-lg border border-border bg-card p-4 shadow-sm transition-all hover:border-border/80 {flag.killSwitch ? 'border-destructive/60 bg-destructive/5' : ''}"
         >
@@ -317,6 +320,7 @@
                   type="button"
                   role="switch"
                   aria-checked={flag.enabled}
+                  aria-label={`${flag.name} (${flag.key})`}
                   disabled={flag.killSwitch}
                   class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {flag.enabled && !flag.killSwitch ? 'bg-primary' : 'bg-muted'}"
                   onclick={() => toggleFlagEnabled(flag)}
@@ -349,7 +353,7 @@
             <!-- Tags & Rules Badge -->
             {#if flag.tags && flag.tags.length > 0}
               <div class="mt-3 flex flex-wrap gap-1.5">
-                {#each flag.tags as tag}
+                {#each flag.tags as tag (tag)}
                   <span class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     #{tag}
                   </span>
@@ -393,10 +397,10 @@
           <select
             id="ffs-target-flag"
             bind:value={simFlagKey}
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-select"
           >
             <option value="">Select a flag...</option>
-            {#each flagList as flag}
+            {#each flagList as flag (flag.key)}
               <option value={flag.key}>{flag.name} ({flag.key})</option>
             {/each}
           </select>
@@ -408,7 +412,7 @@
             type="text"
             bind:value={simUserId}
             placeholder="e.g. user_99"
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-select"
           />
         </div>
         <div>
@@ -418,7 +422,7 @@
             type="text"
             bind:value={simTenantId}
             placeholder="e.g. tenant_pro"
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-select"
           />
         </div>
         <div>
@@ -428,7 +432,7 @@
             type="text"
             bind:value={simRole}
             placeholder="e.g. admin"
-            class="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            data-size="compact" class="mt-1 svadmin-select"
           />
         </div>
       </div>
@@ -436,7 +440,7 @@
       <div class="mt-4 flex items-center justify-between rounded-md border border-border bg-background p-3">
         <div class="flex items-center gap-3">
           <span class="text-xs font-medium text-muted-foreground">Simulation Result:</span>
-          {#if simResult().enabled}
+          {#if simResult.enabled}
             <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
               ENABLED (TRUE)
             </span>
@@ -446,7 +450,7 @@
             </span>
           {/if}
         </div>
-        <span class="text-xs text-muted-foreground">{simResult().reason}</span>
+        <span class="text-xs text-muted-foreground">{simResult.reason}</span>
       </div>
     </div>
   {/if}

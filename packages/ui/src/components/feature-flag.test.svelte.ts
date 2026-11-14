@@ -133,7 +133,9 @@ describe('FeatureFlagStudio Component', () => {
     const killSwitchButtons = screen.getAllByText('Trigger Kill Switch');
     expect(killSwitchButtons.length).toBeGreaterThan(0);
 
-    await fireEvent.click(killSwitchButtons[0]!);
+    const firstKillSwitch = killSwitchButtons[0];
+    expect(firstKillSwitch).toBeDefined();
+    await fireEvent.click(firstKillSwitch as HTMLElement);
 
     const modal = container.querySelector('[data-svadmin-component="FeatureFlagStudioKillSwitchDialog"]');
     expect(modal).not.toBeNull();
