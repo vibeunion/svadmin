@@ -3374,3 +3374,83 @@ The drawer supports All, Unread, Tasks, Notices and Security filters, immutable 
 />
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
+
+### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+
+Enterprise legal contract clause comparison and compliance decision suite:
+- **Sentence-level Clause Comparison**: Seamlessly switch between side-by-side (Split) and unified diff views, clearly highlighting additions, deletions, and modifications.
+- **Clause Navigation Outline**: Displays clause index, risk level (high/medium/low), and decision statuses (pending/accepted/rejected).
+- **Inline Legal Annotations**: Review legal counsel comment threads and submit in-place compliance advice.
+- **Acceptance & Rejection Governance**: Supports per-clause decision making and batch one-click accept/reject actions.
+
+```svelte
+<script lang="ts">
+  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
+
+  let clauses: ContractClause[] = [
+    {
+      id: 'c1',
+      clauseNumber: '3.1',
+      title: 'Payment Terms and Billing Cycle',
+      changeType: 'modified',
+      riskLevel: 'high',
+      originalContent: 'Buyer shall pay within 30 days of receiving the invoice.',
+      proposedContent: 'Buyer shall pay 70% within 60 days following acceptance inspection.',
+      decision: 'pending',
+    },
+  ];
+</script>
+
+<ContractClauseDiffViewer
+  {clauses}
+  originalVersionLabel="Standard v1.0"
+  proposedVersionLabel="Counterparty Revision v2.0"
+  onDecisionChange={(id, dec) => console.log('Decision change:', id, dec)}
+/>
+```
+
+### `<ElectronicSealInspector>` / `<StampAuthenticityCard>`
+
+Enterprise electronic seal anti-tampering verification and CA certificate inspection suite:
+- **Authentic Vector Stamp Simulation**: Pure SVG vector official seal rendering, complete with circular enterprise name text paths, star emblems, and anti-counterfeiting codes.
+- **Verification Status & Warnings**: Real-time authenticity feedback (Valid, Expired, Revoked, Tampered).
+- **CA Digital Certificate Chain**: In-depth inspection of certificate issuer (e.g. CFCA), subject, algorithm (SM2/RSA), serial number, and SHA-256 fingerprint.
+- **Trusted Timestamp (TSA)**: Integrated National Time Service Center timestamp verification, stamping datetime, and token hash validation.
+- **Audit Verification Trail**: Multi-step audit log covering certificate chain validity, document digest integrity, and timestamp trustworthiness with exportable compliance credentials.
+
+```svelte
+<script lang="ts">
+  import { ElectronicSealInspector, type ElectronicSealInfo } from '@svadmin/ui';
+
+  const seal: ElectronicSealInfo = {
+    id: 'seal-001',
+    sealName: 'Beijing Acme Technology Co., Ltd. Contract Seal',
+    sealType: 'contract',
+    enterpriseName: 'Beijing Acme Technology Co., Ltd.',
+    creditCode: '91110108MA01ABCD12',
+    status: 'valid',
+    documentHashMatch: true,
+    certificate: {
+      issuer: 'China Financial Certification Authority (CFCA)',
+      subject: 'CN=Beijing Acme Technology Co., Ltd.',
+      serialNumber: '7B3A99201F82E601C2',
+      algorithm: 'SM2-with-SM3',
+      validFrom: '2024-01-01',
+      validTo: '2027-01-01',
+      fingerprintSha256: '9A:B3:7C:12:...',
+    },
+    timestamp: {
+      tsaName: 'National Time Service Center TSA',
+      stampedAt: '2026-11-14 15:32:08 CST',
+      timestampTokenId: 'TSA-TOKEN-SHA256-VALID',
+      verified: true,
+    },
+  };
+</script>
+
+<ElectronicSealInspector
+  {seal}
+  onExportReport={(s) => console.log('Export verification report:', s.sealName)}
+  onRevalidate={(id) => console.log('Revalidate seal:', id)}
+/>
+```
