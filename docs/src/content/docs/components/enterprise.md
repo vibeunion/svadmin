@@ -3423,23 +3423,67 @@ The drawer supports All, Unread, Tasks, Notices and Security filters, immutable 
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
 
+## StepUpAuthModal
 
+High-privilege step-up authentication modal designed for critical security operations (such as production cluster mutations, credential rotations, or privilege escalations). Supports multi-factor challenges (TOTP, SMS, supervisor token), brute-force lockout protection, and security context display. Public alias: `PrivilegeElevationModal`.
+
+```svelte
+<script lang="ts">
+  import { StepUpAuthModal } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function handleVerify(payload: { method: string; code: string }) {
+    return payload.code === '123456';
+  }
+</script>
+
+<button onclick={() => { open = true; }}>Execute High-Risk Operation</button>
+
+<StepUpAuthModal
+  bind:open
+  title="Step-Up Privilege Elevation"
+  operationName="Full Export of Production Database"
+  riskLevel="critical"
+  clientIp="10.12.88.42"
+  methods={['totp', 'sms', 'supervisor']}
+  onverify={handleVerify}
+  onlockout={() => console.warn('Privilege channel locked')}
+/>
+```
+
+## AuditSnapshotCapture
+
+Immutable compliance evidence snapshot card designed for regulatory audit trails and forensics. Features SHA-256 digital fingerprint validation, tamper-evident anti-leak watermark overlay, structured before/after diff table, and one-click PNG / SVG snapshot export. Public alias: `ComplianceEvidenceCard`.
+
+```svelte
+<script lang="ts">
+  import { AuditSnapshotCapture } from '@svadmin/ui';
+
+  const diffItems = [
+    { field: 'role', label: 'Authorized Role', before: 'operator', after: 'super_admin' },
+    { field: 'mfaEnforced', label: 'Enforce MFA', before: false, after: true },
+  ];
+</script>
+
+<AuditSnapshotCapture
+  recordId="AUDIT-20261114-8899"
+  operatorName="Li Si"
+  operatorId="EMP-90021"
+  clientIp="10.12.88.42"
+  actionType="privilege_grant"
+  actionLabel="Privilege Elevation Approved"
+  changes={diffItems}
+  onexport={(format) => console.log('Export format:', format)}
 ### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
-
 Enterprise service desk ticket lifecycle and support collaboration card:
 - **SLA Breach Countdown**: Real-time resolution and first-response SLA timer with urgency alerts and breach warning badges.
 - **Ticket Lifecycle Capsule**: Distinct indicators across unassigned, in progress, pending customer, resolved, and closed states.
 - **Collaborator Stacks**: Structured display for reporter, current technician, and collaborator avatar chips.
 - **Quick Desk Actions**: One-click urge notification, reassign technician, and resolve ticket actions.
-
-```svelte
-<script lang="ts">
   import { ServiceDeskTicketCard } from '@svadmin/ui';
-
   const reporter = { id: 'u1', name: 'Alex' };
   const assignee = { id: 'u2', name: 'David' };
-</script>
-
 <ServiceDeskTicketCard
   ticketId="TCK-20261114-001"
   title="Production connection pool reached critical threshold"
@@ -3448,20 +3492,12 @@ Enterprise service desk ticket lifecycle and support collaboration card:
   {reporter}
   {assignee}
   categoryTags={['Database', 'Infrastructure']}
-/>
-```
-
 ### `<CannedResponsePicker>` / `<QuickReplyDrawer>`
-
 Helpdesk and customer support quick reply template drawer:
 - **Category Filter & Fuzzy Search**: Fast template retrieval with category pills and instant query keyword matching.
 - **Dynamic Variable Extraction**: Automatically parse and populate `{{customer_name}}`, `{{ticket_id}}`, and contextual variables.
 - **Instant Injection**: Render and inject formatted text into ticket comments or conversation inputs with a single click.
-
-```svelte
-<script lang="ts">
   import { CannedResponsePicker } from '@svadmin/ui';
-
   const templates = [
     {
       id: '1',
@@ -3470,9 +3506,6 @@ Helpdesk and customer support quick reply template drawer:
       shortcut: '/hello',
       content: 'Hello {{customer_name}}, your ticket {{ticket_id}} is being reviewed by our engineering team.',
     },
-  ];
-</script>
-
 <CannedResponsePicker
   {templates}
   contextVariables={{ customer_name: 'Alex', ticket_id: 'TCK-8848' }}

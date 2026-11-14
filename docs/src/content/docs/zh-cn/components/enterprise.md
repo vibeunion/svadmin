@@ -3315,23 +3315,68 @@ AI 规则语义解释卡片：
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
 
+## StepUpAuthModal 高敏特权二次认证弹窗
 
+面向严重高危操作（如生产库清空、全量秘钥轮换、高权限提权），提供阶梯式多因子认证、防暴力破解锁定机制与审批授权联动。公共别名为 `PrivilegeElevationModal`。
+
+```svelte
+<script lang="ts">
+  import { StepUpAuthModal } from '@svadmin/ui';
+
+  let open = $state(false);
+
+  async function handleVerify(payload: { method: string; code: string }) {
+    // 调用后端特权鉴权接口校验动态口令或短信
+    return payload.code === '123456';
+  }
+</script>
+
+<button onclick={() => { open = true; }}>执行高敏敏感操作</button>
+
+<StepUpAuthModal
+  bind:open
+  title="高敏特权二次认证"
+  operationName="核心生产数据库全量导出"
+  riskLevel="critical"
+  clientIp="10.12.88.42"
+  methods={['totp', 'sms', 'supervisor']}
+  onverify={handleVerify}
+  onlockout={() => console.warn('特权通道已被锁定')}
+/>
+```
+
+## AuditSnapshotCapture 不可篡改操作存证快照
+
+专为等保三级、金融审计与合规追溯设计，支持生成包含 SHA-256 数字指纹、操作人防篡改动态水印、字段级变更 Diff 对比以及一键导出 PNG / SVG 存证凭证。公共别名为 `ComplianceEvidenceCard`。
+
+```svelte
+<script lang="ts">
+  import { AuditSnapshotCapture } from '@svadmin/ui';
+
+  const diffItems = [
+    { field: 'role', label: '授权角色', before: 'operator', after: 'super_admin' },
+    { field: 'mfaEnforced', label: '强制 MFA', before: false, after: true },
+  ];
+</script>
+
+<AuditSnapshotCapture
+  recordId="AUDIT-20261114-8899"
+  operatorName="李四 (Li Si)"
+  operatorId="EMP-90021"
+  clientIp="10.12.88.42"
+  actionType="privilege_grant"
+  actionLabel="特权角色审批通过"
+  changes={diffItems}
+  onexport={(format) => console.log('导出快照格式:', format)}
 ### `<ServiceDeskTicketCard>` / `<SupportTicketCard>`
-
 企业级服务台工单与客户支持流转卡片：
 - **SLA 履约倒计时**：首响 SLA 与结单 SLA 动态推演，临近超时黄色预警，超时违约呼吸灯闪烁。
 - **流转生命周期**：涵盖待受理、技术处理中、等待客户反馈、问题已解决与工单已结案全链路。
 - **人员协同群组**：清晰展现提单人、责任处理人以及协同工程师头像堆叠。
 - **快捷协同操作**：内置一键催单通知、工单快速转派与完结归档快捷动作组。
-
-```svelte
-<script lang="ts">
   import { ServiceDeskTicketCard } from '@svadmin/ui';
-
   const reporter = { id: 'u1', name: '李经理' };
   const assignee = { id: 'u2', name: '王工' };
-</script>
-
 <ServiceDeskTicketCard
   ticketId="TCK-20261114-001"
   title="生产环境连接池达到告警阈值"
@@ -3340,20 +3385,12 @@ AI 规则语义解释卡片：
   {reporter}
   {assignee}
   categoryTags={['数据库', '稳定性']}
-/>
-```
-
 ### `<CannedResponsePicker>` / `<QuickReplyDrawer>`
-
 客服与工单高效预设话术与快捷回复抽屉：
 - **话术分类与模糊检索**：支持常见接待、故障解释、财务开票、安全核验等多维度分类及关键词即时高亮匹配。
 - **动态占位符提取注入**：自动解析模版中的 `{{customer_name}}`、`{{ticket_id}}` 等占位符，支持参数字典自动渲染或手动调整。
 - **一键回填流转**：点击模版一键将推演正文回填至工单沟通流或客服对话框中。
-
-```svelte
-<script lang="ts">
   import { CannedResponsePicker } from '@svadmin/ui';
-
   const templates = [
     {
       id: '1',
@@ -3362,9 +3399,6 @@ AI 规则语义解释卡片：
       shortcut: '/hello',
       content: '尊敬的 {{customer_name}} 客户您好，您的工单 {{ticket_id}} 已受理，工程师正火速排查中。',
     },
-  ];
-</script>
-
 <CannedResponsePicker
   {templates}
   contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
