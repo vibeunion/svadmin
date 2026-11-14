@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@sveltejs/kit": "^3.0.0",
-    "@svadmin/core": ">=0.83.0",
+    "@svadmin/core": ">=0.32.2 <0.84.0",
     "svelte": "^5.57.1"
   },
   "license": "MIT",

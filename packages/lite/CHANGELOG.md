@@ -7,7 +7,7 @@
 
 * The following workspace dependencies were updated
   * peerDependencies
-    * @svadmin/core bumped from >=0.34.2 <0.83.0 to >=0.83.0
+    * @svadmin/core bumped from >=0.34.2 <0.83.0 to >=0.34.2 <0.84.0
 
 ## [0.32.0](https://github.com/vibeunion/svadmin/compare/lite-v0.31.1...lite-v0.32.0) (2026-11-14)
 
