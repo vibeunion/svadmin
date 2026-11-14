@@ -3315,6 +3315,61 @@ AI 规则语义解释卡片：
 <NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
 
+## GatewayRouteEditor 微服务 API 网关路由编排
+
+面向企业微服务 API 网关架构，提供 URI 路径模式匹配、HTTP 方法约束、Header 动态过滤、上游后端集群分发、URL 重写以及金丝雀（Canary）灰度流量权重滑动分配。公共别名为 `ApiRouteRuleCard`。
+
+```svelte
+<script lang="ts">
+  import { GatewayRouteEditor, type GatewayRouteConfig } from '@svadmin/ui';
+
+  let routeConfig = $state<GatewayRouteConfig>({
+    id: 'route-order-01',
+    name: '订单核心交易微服务分流规则',
+    enabled: true,
+    pathPattern: '/api/v1/orders/**',
+    matchType: 'prefix',
+    methods: ['GET', 'POST', 'PUT'],
+    headers: [{ id: 'h1', name: 'X-Tenant-ID', value: 'tenant-*', op: 'prefix' }],
+    upstreamUrl: 'http://order-cluster.internal:8080',
+    stripPrefix: true,
+    canaryEnabled: true,
+    canaryUpstreamUrl: 'http://order-canary.internal:8080',
+    canaryWeight: 20,
+  });
+</script>
+
+<GatewayRouteEditor
+  route={routeConfig}
+  onsave={(cfg) => { routeConfig = cfg; }}
+  ontest={(path) => path.startsWith('/api/v1/orders')}
+/>
+```
+
+## RateLimitPolicyPanel API 限流熔断与自愈治理看板
+
+专为企业服务高可用性治理设计，集成基于令牌桶算法（Token Bucket）的精细化 QPS 限流控制、熔断器三态健康流转机（Closed 正常闭合 / Open 阻断降级 / Half-Open 半开探针试探）以及自动化故障降级兜底策略。公共别名为 `CircuitBreakerCard`。
+
+```svelte
+<script lang="ts">
+  import { RateLimitPolicyPanel } from '@svadmin/ui';
+</script>
+
+<RateLimitPolicyPanel
+  config={{
+    qps: 600,
+    burst: 1200,
+    dimension: 'client_ip',
+    circuitBreakerState: 'closed',
+    failureRateThreshold: 50,
+    slowCallDurationMs: 1500,
+    fallbackStrategy: 'mock_json',
+  }}
+  onsave={(cfg) => console.log('同步限流熔断策略:', cfg)}
+  onresetCircuitBreaker={() => console.log('手动复位熔断状态')}
+/>
+```
+
 ## StepUpAuthModal 高敏特权二次认证弹窗
 
 面向严重高危操作（如生产库清空、全量秘钥轮换、高权限提权），提供阶梯式多因子认证、防暴力破解锁定机制与审批授权联动。公共别名为 `PrivilegeElevationModal`。
@@ -3425,6 +3480,88 @@ AI 规则语义解释卡片：
   contextVariables={{ customer_name: '张总', ticket_id: 'TCK-8848' }}
 />
 ```
+
+### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
+
+企业法务合同条款版本对比与决策套件：
+- **条款版本对比**：支持双侧对比（Split）与合并对比（Unified）自由切换，高亮新增、删除、修订条款。
+- **条款目录索引**：左侧展示条款大纲、风险等级（高/中/低）与决策状态（待决/已采纳/已驳回）。
+- **行内合规批注**：支持查看法务批注流，并直接就地追加法务审查意见。
+- **采纳与驳回控制**：支持单条款独立采纳/驳回，以及一键全局全量采纳/驳回。
+
+```svelte
+<script lang="ts">
+  import { ContractClauseDiffViewer, type ContractClause } from '@svadmin/ui';
+
+  let clauses = $state<ContractClause[]>([
+    {
+      id: 'c1',
+      clauseNumber: '3.1',
+      title: '付款期限与结算周期',
+      changeType: 'modified',
+      riskLevel: 'high',
+      originalContent: '买方应在收到发票后 30 个工作日内支付全部款项。',
+      proposedContent: '买方应在收到发票并完成现场验收后 60 个工作日内支付首期款 70%。',
+      decision: 'pending',
+    },
+  ]);
+</script>
+
+<ContractClauseDiffViewer
+  {clauses}
+  originalVersionLabel="标准版 v1.0"
+  proposedVersionLabel="对手方修订版 v2.0"
+  onDecisionChange={(id, decision) => { clauses = clauses.map((clause) => clause.id === id ? { ...clause, decision } : clause); }}
+/>
+```
+
+### `<ElectronicSealInspector>` / `<StampAuthenticityCard>`
+
+企业级电子印章防伪验真与 CA 数字证书认证套件：
+- **逼真矢量印章预览**：纯 SVG 矢量防伪印章，支持企业名称环形路径、星徽与防伪编码展示。
+- **验真状态与防伪预警**：实时展示验真结果（真实有效、已过期、已被吊销、文档被篡改）。
+- **CA 数字证书链**：详细展示证书颁发机构（如 CFCA）、证书使用者、算法（SM2/RSA）、序列号与 SHA-256 证书指纹。
+- **可信时间戳 (TSA)**：展示调用方提供的时间戳校验结果、盖章时间与令牌哈希。
+- **审计验真链路**：逐步呈现证书有效性、文档完整性与防伪核验日志，支持一键导出验真凭据。
+
+```svelte
+<script lang="ts">
+  import { ElectronicSealInspector, type ElectronicSealInfo } from '@svadmin/ui';
+
+  const seal: ElectronicSealInfo = {
+    id: 'seal-001',
+    sealName: '北京某某科技有限公司 合同专用章',
+    sealType: 'contract',
+    enterpriseName: '北京某某科技有限公司',
+    creditCode: '91110108MA01ABCD12',
+    status: 'valid',
+    documentHashMatch: true,
+    certificate: {
+      issuer: '中国金融认证中心 (CFCA)',
+      subject: 'CN=北京某某科技有限公司',
+      serialNumber: '7B3A99201F82E601C2',
+      algorithm: 'SM2-with-SM3',
+      validFrom: '2024-01-01',
+      validTo: '2027-01-01',
+      fingerprintSha256: '9A:B3:7C:12:...',
+    },
+    timestamp: {
+      tsaName: '国家授时中心可信时间戳服务',
+      stampedAt: '2026-11-14 15:32:08 CST',
+      timestampTokenId: 'TSA-TOKEN-SHA256-VALID',
+      verified: true,
+    },
+  };
+</script>
+
+<ElectronicSealInspector
+  {seal}
+  onExportReport={(s) => console.log('导出验真报告:', s.sealName)}
+  onRevalidate={(id) => console.log('重新验真:', id)}
+/>
+```
+
+组件展示调用方提供的验真数据；通过 `onRevalidate` 接入实际验真服务并更新数据。
 
 ### `<I18nStudio>` (`<TranslationManager>`)
 
