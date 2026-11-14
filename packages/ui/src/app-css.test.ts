@@ -151,6 +151,26 @@ describe('native component CSS', () => {
     }
   });
 
+  it('keeps the default controls aligned with the Arco interaction reference', () => {
+    const css = readAppCss();
+    const defaultRefinement = css.slice(
+      css.indexOf('/* --- Default visual refinement'),
+      css.indexOf('/* --- Runtime shell preferences'),
+    );
+
+    expect(defaultRefinement).toContain('--svadmin-shadow-control: 0 1px 3px rgb(0 0 0 / 0.08);');
+    expect(defaultRefinement).toContain('--svadmin-shadow-control: 0 1px 3px rgb(0 0 0 / 0.24);');
+    expect(defaultRefinement).toContain('font-weight: 400;');
+    expect(defaultRefinement).toContain('transition: transform 100ms cubic-bezier(0, 0, 1, 1)');
+    expect(defaultRefinement).toContain('transform: none;');
+    expect(defaultRefinement).not.toContain('translateY(-0.125rem)');
+    expect(defaultRefinement).not.toContain('scale(0.98)');
+    expect(defaultRefinement).toContain('border-color: transparent;\n  background: var(--muted);\n  box-shadow: none;');
+    expect(defaultRefinement).toContain('[data-svadmin-table-head] [data-slot="table-head"] {\n  background: var(--muted);\n  font-weight: 500;');
+    expect(defaultRefinement).toContain('[data-slot="tabs-list"][data-variant="line"]');
+    expect(defaultRefinement).toContain('min-height: 2.25rem;');
+  });
+
   it('documents svadmin as the visual authority and Metronic as capability reference only', () => {
     const designContract = readFileSync(join(currentDir, '../../../DESIGN.md'), 'utf8');
 

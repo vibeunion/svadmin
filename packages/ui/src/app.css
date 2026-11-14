@@ -4327,8 +4327,10 @@ details[data-svadmin-filter][open] > :not(summary),
 }
 
 /* --- Default visual refinement --------------------------------
- * Default product canvas. Neutrals and radius come from the product ramp.
- * The optional Stripe preset below keeps its own canvas and technical grid.
+ * Default product canvas. Neutrals and radius come from the product ramp;
+ * compact control geometry and calm state transitions follow the Arco
+ * reference used by the component-parity review. The optional Stripe preset
+ * below keeps its own canvas and technical grid.
  */
 .layout-clean-flat[data-theme="default"] {
   --background: #F7F8FA;
@@ -4355,9 +4357,9 @@ details[data-svadmin-filter][open] > :not(summary),
   --sidebar-accent: #E8F3FF;
   --sidebar-accent-foreground: #0E42D2;
   --sidebar-border: #E5E6EB;
-  --svadmin-shadow-control: 0 1px 2px rgb(0 0 0 / 0.06);
-  --svadmin-shadow-surface: 0 2px 5px rgb(0 0 0 / 0.08);
-  --svadmin-shadow-surface-hover: 0 4px 10px rgb(0 0 0 / 0.1);
+  --svadmin-shadow-control: 0 1px 3px rgb(0 0 0 / 0.08);
+  --svadmin-shadow-surface: 0 1px 3px rgb(0 0 0 / 0.04);
+  --svadmin-shadow-surface-hover: 0 2px 6px rgb(0 0 0 / 0.08);
   --svadmin-control-shadow: var(--svadmin-shadow-control);
   --svadmin-surface-shadow: var(--svadmin-shadow-surface);
   --svadmin-surface-hover-shadow: var(--svadmin-shadow-surface-hover);
@@ -4387,9 +4389,9 @@ details[data-svadmin-filter][open] > :not(summary),
   --sidebar-accent: #1B2B4A;
   --sidebar-accent-foreground: #94BFFF;
   --sidebar-border: #484849;
-  --svadmin-shadow-control: 0 1px 2px rgb(0 0 0 / 0.28);
-  --svadmin-shadow-surface: 0 2px 8px rgb(0 0 0 / 0.32);
-  --svadmin-shadow-surface-hover: 0 4px 12px rgb(0 0 0 / 0.4);
+  --svadmin-shadow-control: 0 1px 3px rgb(0 0 0 / 0.24);
+  --svadmin-shadow-surface: 0 1px 3px rgb(0 0 0 / 0.22);
+  --svadmin-shadow-surface-hover: 0 2px 6px rgb(0 0 0 / 0.28);
   --svadmin-control-shadow: var(--svadmin-shadow-control);
   --svadmin-surface-shadow: var(--svadmin-shadow-surface);
   --svadmin-surface-hover-shadow: var(--svadmin-shadow-surface-hover);
@@ -4600,8 +4602,8 @@ details[data-svadmin-filter][open] > :not(summary),
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button) {
   border-radius: var(--radius);
   box-shadow: var(--svadmin-control-shadow);
-  font-weight: 600;
-  transition: transform var(--svadmin-motion-standard) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-standard) var(--svadmin-motion-easing), background-color var(--svadmin-motion-standard) var(--svadmin-motion-easing), border-color var(--svadmin-motion-standard) var(--svadmin-motion-easing);
+  font-weight: 400;
+  transition: transform 100ms cubic-bezier(0, 0, 1, 1), box-shadow 100ms cubic-bezier(0, 0, 1, 1), background-color 100ms cubic-bezier(0, 0, 1, 1), border-color 100ms cubic-bezier(0, 0, 1, 1);
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="ghost"], [data-variant="link"], .svadmin-button--ghost, .svadmin-button--link) {
@@ -4616,11 +4618,11 @@ details[data-svadmin-filter][open] > :not(summary),
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
-  transform: translateY(0) scale(0.98);
+  transform: none;
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], [data-variant="outline"], .svadmin-button--default, .svadmin-button--outline):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
-  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.18);
+  box-shadow: var(--svadmin-control-shadow);
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):focus-visible,
@@ -4717,7 +4719,7 @@ details[data-svadmin-filter][open] > :not(summary),
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], [data-variant="outline"], .svadmin-button--default, .svadmin-button--outline):not(:disabled, [aria-disabled="true"], [data-disabled]):hover:not(:active) {
-    transform: translateY(-0.125rem);
+    transform: none;
   }
 }
 
@@ -4726,6 +4728,139 @@ details[data-svadmin-filter][open] > :not(summary),
   .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
     transform: none;
   }
+}
+
+/* --- Arco component parity pass --------------------------------
+ * Keep the existing shadcn primitives and public hooks, then align the
+ * highest-frequency states with Arco's compact filled controls, neutral table
+ * surfaces, 36px menu rows, and line-tab indicator.
+ */
+.layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):hover {
+  background: color-mix(in oklch, var(--primary) 80%, var(--primary-foreground));
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
+  background: color-mix(in oklch, var(--primary) 80%, var(--background));
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="outline"], .svadmin-button--outline):hover {
+  border-color: color-mix(in oklch, var(--primary) 80%, var(--primary-foreground));
+  background: transparent;
+  color: color-mix(in oklch, var(--primary) 80%, var(--primary-foreground));
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="outline"], .svadmin-button--outline):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
+  border-color: color-mix(in oklch, var(--primary) 80%, var(--background));
+  background: transparent;
+  color: color-mix(in oklch, var(--primary) 80%, var(--background));
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"]) {
+  border-color: transparent;
+  background: var(--muted);
+  box-shadow: none;
+  transition: color 100ms cubic-bezier(0, 0, 1, 1), border-color 100ms cubic-bezier(0, 0, 1, 1), background-color 100ms cubic-bezier(0, 0, 1, 1), box-shadow 100ms cubic-bezier(0, 0, 1, 1);
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"]):not(:disabled):hover {
+  border-color: transparent;
+  background: color-mix(in oklch, var(--muted) 78%, var(--border));
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"]):focus-visible {
+  border-color: var(--ring);
+  background: var(--card);
+  box-shadow: none;
+}
+
+.layout-clean-flat[data-theme="default"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"])[aria-invalid="true"] {
+  border-color: transparent;
+  background: color-mix(in oklch, var(--destructive) 10%, var(--card));
+  box-shadow: none;
+}
+
+.layout-clean-flat[data-theme="default"] [data-svadmin-table-head] [data-slot="table-head"] {
+  background: var(--muted);
+  font-weight: 500;
+}
+
+.layout-clean-flat[data-theme="default"] [data-svadmin-table-row] [data-slot="table-cell"] {
+  background: var(--card);
+}
+
+.layout-clean-flat[data-theme="default"] [data-svadmin-table-row]:hover [data-slot="table-cell"] {
+  background: color-mix(in oklch, var(--muted) 78%, var(--card));
+}
+
+.layout-clean-flat[data-theme="default"] [data-svadmin-table-row][data-state="selected"] [data-slot="table-cell"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.layout-clean-flat[data-theme="default"] [data-slot="card"] {
+  box-shadow: none;
+}
+
+.layout-clean-flat[data-theme="default"] [data-slot="card"][data-interactive="true"]:hover {
+  box-shadow: var(--svadmin-surface-hover-shadow);
+}
+
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-content,
+.layout-clean-flat[data-theme="default"] .svadmin-popover-content {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--svadmin-shadow-overlay);
+}
+
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-item,
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-checkbox-item {
+  min-height: 2.25rem;
+  border-radius: var(--radius-sm);
+  padding: 0 0.75rem;
+  transition: all 100ms cubic-bezier(0, 0, 1, 1);
+}
+
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-item:hover,
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-item:focus,
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-checkbox-item:hover,
+.layout-clean-flat[data-theme="default"] .svadmin-dropdown-checkbox-item:focus {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.layout-clean-flat[data-theme="default"] [data-slot="tabs-list"][data-variant="line"] {
+  width: 100%;
+  height: var(--svadmin-control-h);
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.layout-clean-flat[data-theme="default"] [data-slot="tabs-list"][data-variant="line"] [data-slot="tabs-trigger"] {
+  position: relative;
+  height: 100%;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  padding: 0 0.75rem;
+  font-weight: 400;
+}
+
+.layout-clean-flat[data-theme="default"] [data-slot="tabs-list"][data-variant="line"] [data-slot="tabs-trigger"][data-state="active"] {
+  background: transparent;
+  color: var(--primary);
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.layout-clean-flat[data-theme="default"] [data-slot="tabs-list"][data-variant="line"] [data-slot="tabs-trigger"][data-state="active"]::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--primary);
+  content: "";
 }
 
 /* --- Runtime shell preferences --- */

@@ -50,7 +50,7 @@ describe('Theme state ownership', () => {
         }
       });
     });
-    expect(hoverTransforms).toBe(1);
+    expect(hoverTransforms).toBe(0);
     root.walkRules((rule) => {
       if (!rule.selector.includes('[data-slot="button"]') || !rule.selector.includes(':active')) return;
       rule.walkDecls('transform', (decl) => {

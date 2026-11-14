@@ -147,6 +147,15 @@ not become a mixed visual theme:
 When references conflict, svadmin accessibility and state contracts win first,
 then the default ramp and page patterns. Stripe is no longer the default visual.
 The result is one product language rather than a collage of template styles.
+The default `clean-flat` refinement uses Mihua Blocks' component-parity method
+as a reference for compact Arco-like control geometry and state transitions,
+while svadmin keeps ownership of the semantic tokens, component API, and
+accessibility behavior.
+The current parity baseline is explicit: controls use 100ms state transitions;
+inputs and selects use a neutral filled surface until focus; tables use a
+neutral 40px header and white rows; menus use 36px options; `line` tabs use a
+primary bottom indicator. These rules apply only to the default Admin UI
+refinement and are checked from the published CSS contract.
 
 ## Component contract
 

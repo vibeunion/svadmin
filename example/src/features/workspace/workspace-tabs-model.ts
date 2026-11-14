@@ -46,6 +46,35 @@ export const EDITOR_DRAFT_FIELDS: Record<EditableResource, readonly string[]> = 
   crm_accounts: ['accountName'],
 };
 
+export interface WorkspaceIdentityInput {
+  readonly id?: unknown;
+  readonly email?: unknown;
+}
+
+/** 用户作用域保持旧格式，避免无租户的现有 example 快照因升级而失效。 */
+export function workspaceUserScope(identity: WorkspaceIdentityInput | null | undefined): string | undefined {
+  const id = typeof identity?.id === 'string' ? identity.id : '';
+  const email = typeof identity?.email === 'string' ? identity.email : '';
+  if (!id && !email) return undefined;
+  return `identity:${JSON.stringify([id, email])}`;
+}
+
+/** 租户值带类型编码，避免数字 1 与字符串 "1" 共用状态。 */
+export function workspaceTenantScope(tenant: string | number | undefined): string | undefined {
+  return tenant === undefined ? undefined : `${typeof tenant}:${String(tenant)}`;
+}
+
+/** 标签、查询和草稿的跨窗口作用域必须同时包含用户与租户。 */
+export function workspaceSessionScope(
+  identity: WorkspaceIdentityInput | null | undefined,
+  tenant: string | number | undefined,
+): string | undefined {
+  const userScope = workspaceUserScope(identity);
+  if (!userScope) return undefined;
+  const tenantScope = workspaceTenantScope(tenant);
+  return tenantScope === undefined ? userScope : `${userScope}:tenant:${tenantScope}`;
+}
+
 export interface StoredWorkspaceTabs {
   tabIds: string[];
   activeTabId: string | undefined;

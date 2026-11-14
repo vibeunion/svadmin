@@ -41,7 +41,10 @@
     stableDraftJson,
     validWorkspaceTabIds,
     withoutTab,
+    workspaceSessionScope,
     workspaceSyncChannelName,
+    workspaceTenantScope,
+    workspaceUserScope,
     writeStoredWorkspaceTabs,
     type EditableResource,
     type WorkspaceResource,
@@ -85,15 +88,10 @@
     initialTabIds.push(initialRequestedTabId);
   }
   const identity = useGetIdentity();
-  const sessionScope = $derived.by(() => {
-    const data = identity.data;
-    if (!data) return undefined;
-    const id = typeof data.id === 'string' ? data.id : '';
-    const email = typeof data.email === 'string' ? data.email : '';
-    if (!id && !email) return undefined;
-    // 精确 tuple 编码避免 trim 合并或分隔符碰撞，不用字段内容猜身份。
-    return `identity:${JSON.stringify([id, email])}`;
-  });
+  const tenantIdentity = $derived(adminContext.tenantCacheKey?.__svadminTenant);
+  const userScope = $derived.by(() => workspaceUserScope(identity.data));
+  const tenantScope = $derived(workspaceTenantScope(tenantIdentity));
+  const sessionScope = $derived.by(() => workspaceSessionScope(identity.data, tenantIdentity));
 
   let tabs = $state<WorkspaceTab[]>(
     initialTabIds.flatMap((id) => {
@@ -191,14 +189,16 @@
 
   function currentAdapter(): WorkspaceTabStateAdapter | undefined {
     const scope = sessionScope;
-    if (!scope) return undefined;
+    const user = userScope;
+    if (!scope || !user) return undefined;
     if (!adapter || adapterScope !== scope) {
       adapter?.dispose();
       adapter = createWorkspaceTabStateAdapter({
-        tenantId: scope,
+        // 无租户的旧 example 继续使用 identity 作为兼容键；有租户时使用真实租户键。
+        tenantId: tenantScope ?? scope,
         storage: createSessionTabStateStorage() ?? null,
         keyPrefix: TAB_STATE_KEY_PREFIX,
-        userId: scope,
+        userId: user,
         draftFields: adapterDraftFields(),
       });
       adapterScope = scope;
