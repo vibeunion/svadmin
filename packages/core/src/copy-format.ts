@@ -169,8 +169,9 @@ export function formatAdminPercent(
   const maximumFractionDigits = options.maximumFractionDigits ?? (options.scale === 'points' ? 20 : 0);
   const minimumFractionDigits = options.minimumFractionDigits ?? 0;
   if (options.scale === 'points') {
+    const numberLocale: string | null = options.locale === null ? null : locale ?? 'zh-CN';
     const amount = formatAdminNumber(value, {
-      locale: options.locale === null ? null : locale,
+      locale: numberLocale,
       minimumFractionDigits,
       maximumFractionDigits,
     });

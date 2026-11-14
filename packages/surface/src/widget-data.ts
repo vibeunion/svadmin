@@ -1,4 +1,4 @@
-import { formatAdminDate, formatAdminNumber } from '@svadmin/core';
+import { formatAdminDate, formatAdminNumber } from '@svadmin/core/copy-format';
 import type { JsonObject, JsonValue } from './types.js';
 import type { SurfaceMessages } from './localization.js';
 

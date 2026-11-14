@@ -1,4 +1,4 @@
-import { formatAdminCurrency, formatAdminDate, formatAdminNumber, formatAdminPercent, formatAdminTime } from '@svadmin/core';
+import { formatAdminCurrency, formatAdminDate, formatAdminNumber, formatAdminPercent, formatAdminTime } from '@svadmin/core/copy-format';
 import type { SvarColumn, SvarEngineColumn, SvarGridApi, SvarGridEngineProps, SvarSort, SvarTextFilter } from './svar-grid-contract.js';
 import { checkedSvarColumns, buildSvarColumns, svarColumnId, nextSvarSort, nextSvarFilter, SVAR_BLOCKED_ACTIONS } from './svar-grid-contract.js';
 import { svarRecordIndex, svarRecordKey, type SvarRecordId } from './svar-grid-operations.js';
