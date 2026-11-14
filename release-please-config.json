@@ -449,6 +449,11 @@
       "release-type": "node",
       "component": "sse",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/qdrant": {
+      "release-type": "node",
+      "component": "qdrant",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "plugins": [

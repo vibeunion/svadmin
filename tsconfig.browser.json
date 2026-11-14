@@ -50,6 +50,7 @@
     "packages/strapi/src/**/*.test.ts",
     "packages/supabase/src/**/*.test.ts",
     "packages/sse/src/**/*.test.ts",
+    "packages/qdrant/src/**/*.test.ts",
     "example/src/**/*.test.ts"
   ]
 }

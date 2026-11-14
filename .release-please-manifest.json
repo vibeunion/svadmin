@@ -52,5 +52,6 @@
   "packages/casbin": "0.2.5",
   "packages/cerbos": "0.2.5",
   "packages/postgrest": "0.2.5",
-  "packages/sse": "0.3.0"
+  "packages/sse": "0.3.0",
+  "packages/qdrant": "0.1.0"
 }

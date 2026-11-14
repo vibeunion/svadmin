@@ -126,6 +126,7 @@
 | `@svadmin/openfga`      | OpenFGA relationship-based fine-grained access control (ReBAC) |
 | `@svadmin/casbin`       | Casbin policy-based authorization and multi-tenant RBAC |
 | `@svadmin/cerbos`       | Cerbos policy decision point access control adapter |
+| `@svadmin/qdrant`       | Qdrant vector database similarity search & payload store |
 
 The dedicated `@svadmin/parse` wrapper has been retired. Host applications can
 initialize a Parse provider and pass it to `createRefineAdapter`; see the
