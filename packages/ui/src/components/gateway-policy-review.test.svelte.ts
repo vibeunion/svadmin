@@ -60,14 +60,14 @@ describe('网关与限流审查回归', () => {
     expect(getByRole('button', { name: '保存限流策略' })).toBeTruthy();
   });
 
-  for (const [name, component, buttonName] of [
-    ['路由', GatewayRouteEditor, '保存路由配置'],
-    ['策略', RateLimitPolicyPanel, '保存限流策略'],
+  for (const [name, mount, buttonName] of [
+    ['路由', (onsave: () => Promise<void>) => render(GatewayRouteEditor, { onsave }), '保存路由配置'],
+    ['策略', (onsave: () => Promise<void>) => render(RateLimitPolicyPanel, { onsave }), '保存限流策略'],
   ] as const) {
     it(`${name}保存等待实际完成，失败可见且可以重试`, async () => {
       let rejectSave: ((error: Error) => void) | undefined;
       const onsave = vi.fn(() => new Promise<void>((_resolve, reject) => { rejectSave = reject; }));
-      const { getByRole } = render(component, { onsave });
+      const { getByRole } = mount(onsave);
       const button = getByRole('button', { name: buttonName }) as HTMLButtonElement;
       await fireEvent.click(button);
       expect(button.disabled).toBe(true);
