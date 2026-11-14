@@ -959,6 +959,23 @@ export { default as SystemCapacityForecastCard, default as ResourceCapacityPredi
 // Enterprise workspace & multi-tenant context switcher suite
 export { default as TenantContextSwitcher, default as WorkspaceContextSwitcher, type TenantContextSwitcherProps, type TenantItem, type TenantRole } from './components/TenantContextSwitcher.svelte';
 
+// Enterprise feature flag & gray release control suite
+export { default as FeatureFlagStudio, default as GrayReleaseManager, type FeatureFlagStudioProps } from './components/FeatureFlagStudio.svelte';
+export {
+  useFeatureFlag,
+  createFeatureFlagRegistry,
+  evaluateFeatureFlag,
+  registerFeatureFlags,
+  setFeatureFlag,
+  getFeatureFlag,
+  clearFeatureFlags,
+  hashStringToPercentage,
+  type FeatureFlag,
+  type FeatureFlagRule,
+  type FeatureFlagContext,
+  type FeatureFlagRegistry,
+} from './components/useFeatureFlag.svelte.js';
+
 // Enterprise global omnibar command palette & resource search suite
 export { default as OmnibarCommandPalette, default as GlobalCommandOmnibar, type OmnibarCommandPaletteProps, type CommandPaletteItem } from './components/OmnibarCommandPalette.svelte';
 
@@ -974,6 +991,11 @@ export { default as ChartAnnotationOverlay, default as MetricEventAnnotation, ty
 export { default as AbacPolicyMatrix, default as AttributeBasedAccessControlMatrix, type AbacPolicyMatrixProps, type AbacPolicyRule, type AbacCondition } from './components/AbacPolicyMatrix.svelte';
 export { default as PermissionSimulator, default as RolePermissionSandbox, type PermissionSimulatorProps, type SimulationTargetUser, type SimulatedMenuNode, type SimulatedAction } from './components/PermissionSimulator.svelte';
 export { default as WorkflowNodeInspector, default as ApprovalNodeDrawer, type WorkflowNodeInspectorProps, type WorkflowNodeData } from './components/WorkflowNodeInspector.svelte';
+
+// Enterprise multimodal media gallery, hotkeys guide & resizable splitter suite
+export { default as MediaGallery, default as MultiModalMediaGallery, type MediaGalleryProps, type MediaGalleryItem } from './components/MediaGallery.svelte';
+export { default as HotkeysHelpModal, default as HotkeysGuideModal, type HotkeysHelpModalProps, type HotkeysHelpEntry } from './components/HotkeysHelpModal.svelte';
+export { default as ResizableSplitter, default as DynamicSplitter, type ResizableSplitterProps } from './components/ResizableSplitter.svelte';
 
 // Enterprise micro-app isolated sandbox runtime, state bus & route sync suite
 export { default as MicroAppSandbox, default as SubAppRuntimeSandbox, type MicroAppSandboxProps } from './components/MicroAppSandbox.svelte';
@@ -995,3 +1017,13 @@ export {
   default as IpAccessControlDrawer,
   type IpWhitelistDrawerProps,
 } from './components/IpWhitelistDrawer.svelte';
+
+// Enterprise global notification drawer suite
+export {
+  default as NotificationDrawer,
+  default as GlobalNoticeDrawer,
+  type NotificationDrawerProps,
+  type NotificationItem as NotificationDrawerItem,
+  type NotificationAction,
+  type NotificationCategory,
+} from './components/NotificationDrawer.svelte';

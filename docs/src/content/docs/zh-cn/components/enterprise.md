@@ -3017,6 +3017,73 @@ AI 规则语义解释卡片：
 <WorkflowNodeInspector bind:open />
 ```
 
+### `<MediaGallery>` / `<MultiModalMediaGallery>`
+
+企业多模态媒体画廊与全屏沉浸灯箱套件：
+- 适用于商品库素材、审批票据证照、视频巡检回放及合同附件的多形态统一展示。
+- **全屏沉浸式灯箱体验**：支持滚轮无级缩放（0.2x~5.0x）、双击复位、拖拽平移、90° 步进旋转与左右快捷键盘切图。
+- **+N 折叠与安全防护**：超过最大展示数自动折叠为 `+N` 胶囊，全屏浏览内置元数据抽屉（分辨率/大小/上传者）与防截图动态水印。
+
+```svelte
+<script lang="ts">
+  import { MediaGallery } from '@svadmin/ui';
+
+  const items = [
+    { id: 1, src: '/blueprint.png', title: '系统拓扑设计', size: '3.2 MB', dimensions: '2560x1440' },
+    { id: 2, src: '/demo.mp4', title: '操作演示视频', type: 'video' },
+  ];
+</script>
+
+<MediaGallery {items} watermarkText="CONFIDENTIAL" />
+```
+
+### `<HotkeysHelpModal>` / `<HotkeysGuideModal>`
+
+企业全系统键盘快捷键指引面板：
+- 专为桌面级高频操作业务打造，按全局 `?` 键或 `Shift + /` 即可即时唤醒。
+- **平台智能感知自适应**：自动识别 macOS 与 Windows/Linux 平台，动态呈现 `⌘ / ⌥ / ⇧` 或 `Ctrl / Alt / Shift` 实体键帽。
+- **业务分组与即时模糊检索**：按全局导航、表格操作、表单编辑等分组呈现，支持按功能名称或键位即时过滤。
+
+```svelte
+<script lang="ts">
+  import { HotkeysHelpModal } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<HotkeysHelpModal bind:open enableGlobalTrigger={true} />
+```
+
+### `<ResizableSplitter>` / `<DynamicSplitter>`
+
+企业级多面板拖拽分栏与折叠套件：
+- 适用于工作台主次分栏、代码与预览双屏、日志实时监控与详情抽屉等复杂布局。
+- **双向平滑拖拽**：支持水平（横向）与垂直（纵向）双向拖拽，内置最小与最大尺寸边界保护。
+- **一键极速折叠与本地记忆**：分割条内置微型折叠指示按钮与双击居中平分，可选基于 `storageKey` 记忆用户自定义排版比例。
+
+```svelte
+<script lang="ts">
+  import { ResizableSplitter } from '@svadmin/ui';
+</script>
+
+<div class="h-96 w-full border border-border rounded-xl overflow-hidden">
+  <ResizableSplitter direction="horizontal" initialSizes={[30, 70]} storageKey="dashboard_layout">
+    {#snippet firstPane()}
+      <div class="p-4 text-sm font-medium">左侧目录导航树</div>
+    {/snippet}
+    {#snippet secondPane()}
+      <div class="p-4 text-sm font-medium">右侧主工作区详情</div>
+    {/snippet}
+  </ResizableSplitter>
+</div>
+```
+
+<!-- PR #793 交互约定 -->
+
+媒体预览和快捷键指引复用共享 Dialog 的焦点与 Esc 关闭行为。播放控件保留自身方向键操作；活动资源从列表移除时关闭预览。`enableDownload={false}` 隐藏所有内置下载入口。默认下载支持 HTTP、HTTPS 和 blob URL，宿主可通过 `onDownload` 自定义下载。
+
+分栏同时约束两侧尺寸，总和始终为 100%。折叠恢复保留原比例；双击在允许范围内居中，Home/End 调整至最小/最大比例。无效持久化数据回退到初始比例，卸载时移除拖拽监听。
+
 ### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
 
 企业级微前端子应用隔离运行时沙箱套件：
@@ -3046,6 +3113,37 @@ AI 规则语义解释卡片：
 
 <MicroAppStateBusIndicator />
 ```
+
+### `<FeatureFlagStudio>` / `<GrayReleaseManager>`
+
+功能开关配置编辑器与渐进发布模拟器。组件在当前注册表中评估配置，通过 `onChange` 通知编辑结果；持久化由宿主应用对接自己的服务完成。
+
+- 全局关闭与紧急熔断优先于其他规则。
+- 命中 `notIn` 排除名单时始终关闭，不受 `in` / `equals` 白名单顺序影响。
+- 白名单可提前向指定用户、租户或角色开放。未命中者遵循发布比例；未设置比例时，有白名单的开关仅向白名单开放。
+- 按开关和用户／租户稳定分桶；渐进发布缺少稳定实体身份时返回关闭。
+- 熔断弹窗支持键盘焦点、Escape 取消与显式确认。
+
+在每个应用根组件中创建独立注册表，SSR 每个请求各自创建，并向编辑器和消费方传入同一个实例：
+
+```svelte
+<script lang="ts">
+  import { FeatureFlagStudio, createFeatureFlagRegistry, useFeatureFlag, type FeatureFlag } from '@svadmin/ui';
+
+  const flags: FeatureFlag[] = [
+    { key: 'billing_v2', name: 'Billing Engine V2', enabled: true, percentage: 25, tags: ['billing', 'beta'] },
+  ];
+  const registry = createFeatureFlagRegistry(flags);
+  const billingFeature = useFeatureFlag('billing_v2', () => ({ userId: 'user_123' }), false, registry);
+</script>
+
+<FeatureFlagStudio {flags} {registry} showSimulator={true} />
+<p>当前用户：{billingFeature.enabled ? '已开放' : '未开放'}</p>
+```
+
+`useFeatureFlag` 随注册表写入和响应式上下文变化更新。读写均隔离配置快照。`registerFeatureFlags`、`setFeatureFlag`、`getFeatureFlag`、`clearFeatureFlags` 的最后一个参数可传入注册表；默认注册表仅供浏览器使用，SSR 必须显式传入请求实例。没有传入注册表的 Studio 拥有独立状态，不会写入浏览器默认注册表。
+
+替换 `flags` 属性会同步编辑器快照，并从关联注册表移除过期条目。`onChange(flag)` 提供用于持久化的独立快照，修改它不会影响编辑器或最初的输入对象。设置 0% 比例并配置白名单，可实现仅向试用用户开放。
 
 ### `<MicroAppRouteSync>` / `<SubAppUrlSynchronizer>`
 
@@ -3100,4 +3198,37 @@ AI 规则语义解释卡片：
 
 <button onclick={() => (open = true)}>打开 IP 规则配置抽屉</button>
 <IpWhitelistDrawer bind:open bind:rules currentClientIp="203.0.113.195" />
+
+### `<NotificationCenter>` / `<NotificationDrawer>` (`<GlobalNoticeDrawer>`)
+
+紧凑铃铛弹层保持现有 `items`、`onread`、`onreadall` API 兼容。通过 `showDrawerButton` 和 `onopendrawer` 打开完整通知抽屉。
+
+抽屉支持全部、未读、任务、公告和安全筛选，不原地修改调用方数据；提供全局全部已读、清理已读，以及 Escape 关闭、焦点约束和焦点恢复。异步操作等待成功后更新状态，阻止重复提交并展示失败。单个操作的 `onClick` 优先于抽屉级 `onAction`，避免重复执行。
+
+`dndEnabled` 是可绑定的免打扰偏好；宿主可通过 `onToggleDnd` 接入自己的提醒投递策略。抽屉不会丢弃消息；免打扰仅弱化普通徽标，安全消息及其徽标始终可见。
+
+```svelte
+<script lang="ts">
+  import { NotificationCenter, NotificationDrawer, type NotificationDrawerItem } from '@svadmin/ui';
+
+  let drawerOpen = $state(false);
+  let notifications = $state<NotificationDrawerItem[]>([
+    {
+      id: 'task-1', title: 'Expense reimbursement pending', category: 'TASKS',
+      read: false, createdAt: '5m ago',
+      actions: [{ id: 'approve', label: 'Approve', variant: 'primary' }],
+    },
+    {
+      id: 'security-1', title: 'New device login alert', category: 'SECURITY_ALERTS',
+      read: false, createdAt: '1h ago',
+    },
+  ]);
+</script>
+
+<NotificationCenter
+  items={notifications.map(item => ({ ...item, time: item.createdAt }))}
+  showDrawerButton
+  onopendrawer={() => { drawerOpen = true; }}
+/>
+<NotificationDrawer bind:open={drawerOpen} bind:items={notifications} />
 ```
