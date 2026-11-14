@@ -1212,7 +1212,7 @@ Standardized business process result and HTTP/operation exception display page:
 
 ### `<WatermarkContainer>`
 
-Anti-tamper enterprise dynamic watermark protection suite:
+Anti-tamper enterprise a watermark overlay suite:
 - Designed for confidential financial reports, HR compensation records, and sensitive dashboards.
 - Supports multi-line employee IDs, tenant identifiers, client IP, and dynamic timestamps.
 - **Anti-tamper guard**: Embedded `MutationObserver` detects DOM tree removals and inline styling overrides (`display: none`, `opacity: 0`, `visibility: hidden`), restoring watermark integrity within milliseconds to safeguard against screenshot leakage.
@@ -3125,6 +3125,72 @@ Workflow node property drawer and resolution configuration inspector:
 
 <WorkflowNodeInspector bind:open />
 ```
+
+### `<MediaGallery>` / `<MultiModalMediaGallery>`
+
+Enterprise multimodal media gallery & immersive fullscreen lightbox:
+- Unified viewer for product imagery, verification attachments, inspection clips, and PDF contracts.
+- **Full-featured Lightbox**: Supports stepless wheel zoom (0.2x~5.0x), double-click reset, pan drag, 90° rotation, and arrow key navigation.
+- **+N Folding & Metadata**: Collapses overflow items into a `+N` badge, includes a collapsible metadata drawer (resolution, size, uploader), and displays a watermark overlay.
+
+```svelte
+<script lang="ts">
+  import { MediaGallery } from '@svadmin/ui';
+
+  const items = [
+    { id: 1, src: '/blueprint.png', title: 'Architecture Blueprint', size: '3.2 MB', dimensions: '2560x1440' },
+    { id: 2, src: '/demo.mp4', title: 'System Walkthrough', type: 'video' },
+  ];
+</script>
+
+<MediaGallery {items} watermarkText="CONFIDENTIAL" />
+```
+
+### `<HotkeysHelpModal>` / `<HotkeysGuideModal>`
+
+Enterprise system-wide keyboard shortcuts modal:
+- High-efficiency shortcut cheat sheet for desktop power users, invoked globally with `?` or `Shift + /`.
+- **Platform Key Symbology**: Automatically adapts keycaps between macOS (`⌘`, `⌥`, `⇧`) and Windows/Linux (`Ctrl`, `Alt`, `Shift`).
+- **Category Tabs & Keyword Search**: Organizes shortcuts by navigation, tables, and forms, with instant keyword filtering.
+
+```svelte
+<script lang="ts">
+  import { HotkeysHelpModal } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<HotkeysHelpModal bind:open enableGlobalTrigger={true} />
+```
+
+### `<ResizableSplitter>` / `<DynamicSplitter>`
+
+Enterprise multi-pane drag-to-resize splitter suite:
+- Ideal for workspace split layouts, code/preview panels, live log monitors, and inspector drawers.
+- **Smooth Bi-directional Resizing**: Supports horizontal and vertical orientations with configurable min/max size boundaries.
+- **One-click Collapse & Persistence**: Built-in collapse toggle triggers, double-click center equalization, and optional `storageKey` persistence.
+
+```svelte
+<script lang="ts">
+  import { ResizableSplitter } from '@svadmin/ui';
+</script>
+
+<div class="h-96 w-full border border-border rounded-xl overflow-hidden">
+  <ResizableSplitter direction="horizontal" initialSizes={[30, 70]} storageKey="dashboard_layout">
+    {#snippet firstPane()}
+      <div class="p-4 text-sm font-medium">Left Navigation Tree</div>
+    {/snippet}
+    {#snippet secondPane()}
+      <div class="p-4 text-sm font-medium">Right Workspace View</div>
+    {/snippet}
+  </ResizableSplitter>
+</div>
+
+<!-- PR #793 interaction contract -->
+
+Media previews and shortcut help reuse the shared Dialog focus/Escape behavior. Media controls retain their own arrow keys; removing the active item closes its preview. `enableDownload={false}` hides every built-in download action. Default downloads support HTTP, HTTPS, and blob URLs; `onDownload` can supply host behavior.
+
+Splitters enforce both pane limits together and preserve a total of 100%. Collapse/restore retains the last allocation. Double-click recenters within the limits; Home/End selects the minimum/maximum allocation. Invalid saved ratios fall back to the initial allocation, and active pointer listeners are removed on unmount.
 
 ### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
 

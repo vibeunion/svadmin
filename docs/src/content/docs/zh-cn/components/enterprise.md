@@ -3017,6 +3017,73 @@ AI 规则语义解释卡片：
 <WorkflowNodeInspector bind:open />
 ```
 
+### `<MediaGallery>` / `<MultiModalMediaGallery>`
+
+企业多模态媒体画廊与全屏沉浸灯箱套件：
+- 适用于商品库素材、审批票据证照、视频巡检回放及合同附件的多形态统一展示。
+- **全屏沉浸式灯箱体验**：支持滚轮无级缩放（0.2x~5.0x）、双击复位、拖拽平移、90° 步进旋转与左右快捷键盘切图。
+- **+N 折叠与安全防护**：超过最大展示数自动折叠为 `+N` 胶囊，全屏浏览内置元数据抽屉（分辨率/大小/上传者）与防截图动态水印。
+
+```svelte
+<script lang="ts">
+  import { MediaGallery } from '@svadmin/ui';
+
+  const items = [
+    { id: 1, src: '/blueprint.png', title: '系统拓扑设计', size: '3.2 MB', dimensions: '2560x1440' },
+    { id: 2, src: '/demo.mp4', title: '操作演示视频', type: 'video' },
+  ];
+</script>
+
+<MediaGallery {items} watermarkText="CONFIDENTIAL" />
+```
+
+### `<HotkeysHelpModal>` / `<HotkeysGuideModal>`
+
+企业全系统键盘快捷键指引面板：
+- 专为桌面级高频操作业务打造，按全局 `?` 键或 `Shift + /` 即可即时唤醒。
+- **平台智能感知自适应**：自动识别 macOS 与 Windows/Linux 平台，动态呈现 `⌘ / ⌥ / ⇧` 或 `Ctrl / Alt / Shift` 实体键帽。
+- **业务分组与即时模糊检索**：按全局导航、表格操作、表单编辑等分组呈现，支持按功能名称或键位即时过滤。
+
+```svelte
+<script lang="ts">
+  import { HotkeysHelpModal } from '@svadmin/ui';
+
+  let open = $state(false);
+</script>
+
+<HotkeysHelpModal bind:open enableGlobalTrigger={true} />
+```
+
+### `<ResizableSplitter>` / `<DynamicSplitter>`
+
+企业级多面板拖拽分栏与折叠套件：
+- 适用于工作台主次分栏、代码与预览双屏、日志实时监控与详情抽屉等复杂布局。
+- **双向平滑拖拽**：支持水平（横向）与垂直（纵向）双向拖拽，内置最小与最大尺寸边界保护。
+- **一键极速折叠与本地记忆**：分割条内置微型折叠指示按钮与双击居中平分，可选基于 `storageKey` 记忆用户自定义排版比例。
+
+```svelte
+<script lang="ts">
+  import { ResizableSplitter } from '@svadmin/ui';
+</script>
+
+<div class="h-96 w-full border border-border rounded-xl overflow-hidden">
+  <ResizableSplitter direction="horizontal" initialSizes={[30, 70]} storageKey="dashboard_layout">
+    {#snippet firstPane()}
+      <div class="p-4 text-sm font-medium">左侧目录导航树</div>
+    {/snippet}
+    {#snippet secondPane()}
+      <div class="p-4 text-sm font-medium">右侧主工作区详情</div>
+    {/snippet}
+  </ResizableSplitter>
+</div>
+```
+
+<!-- PR #793 交互约定 -->
+
+媒体预览和快捷键指引复用共享 Dialog 的焦点与 Esc 关闭行为。播放控件保留自身方向键操作；活动资源从列表移除时关闭预览。`enableDownload={false}` 隐藏所有内置下载入口。默认下载支持 HTTP、HTTPS 和 blob URL，宿主可通过 `onDownload` 自定义下载。
+
+分栏同时约束两侧尺寸，总和始终为 100%。折叠恢复保留原比例；双击在允许范围内居中，Home/End 调整至最小/最大比例。无效持久化数据回退到初始比例，卸载时移除拖拽监听。
+
 ### `<MicroAppSandbox>` / `<SubAppRuntimeSandbox>`
 
 企业级微前端子应用隔离运行时沙箱套件：
