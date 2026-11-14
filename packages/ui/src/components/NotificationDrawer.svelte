@@ -1,4 +1,4 @@
-<script lang="ts">
+<script module lang="ts">
   import type { Snippet } from 'svelte';
 
   export type NotificationCategory = 'TASKS' | 'ANNOUNCEMENTS' | 'SECURITY_ALERTS';
@@ -36,6 +36,9 @@
     onAction?: (actionId: string, item: NotificationItem) => void;
     customItem?: Snippet<[{ item: NotificationItem; index: number }]>;
   }
+</script>
+
+<script lang="ts">
 
   let {
     open = $bindable(false),
@@ -54,14 +57,21 @@
   let activeTab = $state<'ALL' | NotificationCategory>('ALL');
 
   // Filtered list based on active tab
-  const filteredItems = $derived<NotificationItem[]>(() => {
+  const filteredItems = $derived.by((): NotificationItem[] => {
     if (activeTab === 'ALL') return items;
     return items.filter((item) => item.category === activeTab);
   });
 
   // Unread count per category
-  const unreadCounts = $derived<Record<string, number>>(() => {
-    const counts: Record<string, number> = {
+  interface UnreadCounts {
+    ALL: number;
+    TASKS: number;
+    ANNOUNCEMENTS: number;
+    SECURITY_ALERTS: number;
+  }
+
+  const unreadCounts = $derived.by((): UnreadCounts => {
+    const counts: UnreadCounts = {
       ALL: 0,
       TASKS: 0,
       ANNOUNCEMENTS: 0,
@@ -69,8 +79,8 @@
     };
     for (const item of items) {
       if (!item.read) {
-        counts.ALL = (counts.ALL ?? 0) + 1;
-        counts[item.category] = (counts[item.category] ?? 0) + 1;
+        counts.ALL += 1;
+        counts[item.category] += 1;
       }
     }
     return counts;
@@ -141,7 +151,7 @@
         <div>
           <h2 class="text-base font-semibold text-foreground">Notification Center</h2>
           <p class="text-xs text-muted-foreground">
-            {unreadCounts().ALL} unread notification{unreadCounts().ALL === 1 ? '' : 's'}
+            {unreadCounts.ALL} unread notification{unreadCounts.ALL === 1 ? '' : 's'}
           </p>
         </div>
       </div>
@@ -184,9 +194,9 @@
         onclick={() => (activeTab = 'ALL')}
       >
         All
-        {#if unreadCounts().ALL > 0}
+        {#if unreadCounts.ALL > 0}
           <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-            {unreadCounts().ALL > 99 ? '99+' : unreadCounts().ALL}
+            {unreadCounts.ALL > 99 ? '99+' : unreadCounts.ALL}
           </span>
         {/if}
       </button>
@@ -197,9 +207,9 @@
         onclick={() => (activeTab = 'TASKS')}
       >
         Tasks
-        {#if (unreadCounts().TASKS ?? 0) > 0}
+        {#if (unreadCounts.TASKS ?? 0) > 0}
           <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-            {unreadCounts().TASKS}
+            {unreadCounts.TASKS}
           </span>
         {/if}
       </button>
@@ -210,9 +220,9 @@
         onclick={() => (activeTab = 'ANNOUNCEMENTS')}
       >
         Notices
-        {#if (unreadCounts().ANNOUNCEMENTS ?? 0) > 0}
+        {#if (unreadCounts.ANNOUNCEMENTS ?? 0) > 0}
           <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-            {unreadCounts().ANNOUNCEMENTS}
+            {unreadCounts.ANNOUNCEMENTS}
           </span>
         {/if}
       </button>
@@ -223,9 +233,9 @@
         onclick={() => (activeTab = 'SECURITY_ALERTS')}
       >
         Security
-        {#if (unreadCounts().SECURITY_ALERTS ?? 0) > 0}
+        {#if (unreadCounts.SECURITY_ALERTS ?? 0) > 0}
           <span class="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
-            {unreadCounts().SECURITY_ALERTS}
+            {unreadCounts.SECURITY_ALERTS}
           </span>
         {/if}
       </button>
@@ -233,12 +243,12 @@
 
     <!-- Actions toolbar: Mark all read / Clear read -->
     <div class="flex items-center justify-between border-b border-border/60 bg-card px-4 py-2 text-xs text-muted-foreground">
-      <span>{filteredItems().length} item{filteredItems().length === 1 ? '' : 's'}</span>
+      <span>{filteredItems.length} item{filteredItems.length === 1 ? '' : 's'}</span>
       <div class="flex items-center gap-3">
         <button
           type="button"
           class="hover:text-primary transition-colors disabled:opacity-50"
-          disabled={unreadCounts().ALL === 0}
+          disabled={unreadCounts.ALL === 0}
           onclick={handleMarkAllAsRead}
         >
           Mark all as read
@@ -247,7 +257,7 @@
         <button
           type="button"
           class="hover:text-destructive transition-colors disabled:opacity-50"
-          disabled={filteredItems().every((i) => !i.read)}
+          disabled={filteredItems.every((i) => !i.read)}
           onclick={handleClearRead}
         >
           Clear read
@@ -257,7 +267,7 @@
 
     <!-- Notification List Content -->
     <div class="flex-1 overflow-y-auto divide-y divide-border/60 p-2">
-      {#if filteredItems().length === 0}
+      {#if filteredItems.length === 0}
         <div class="flex h-64 flex-col items-center justify-center p-6 text-center text-muted-foreground">
           <svg class="h-10 w-10 stroke-1 text-muted-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -265,7 +275,7 @@
           <p class="mt-2 text-xs">No notifications in this category</p>
         </div>
       {:else}
-        {#each filteredItems() as item, index (item.id)}
+        {#each filteredItems as item, index (item.id)}
           {#if customItem}
             {@render customItem({ item, index })}
           {:else}
@@ -316,7 +326,7 @@
               <!-- Quick action buttons -->
               {#if item.actions && item.actions.length > 0}
                 <div class="mt-2 flex flex-wrap items-center gap-2 pl-9">
-                  {#each item.actions as action}
+                  {#each item.actions as action (action.label ?? action.id ?? action.variant ?? 'action')}
                     <button
                       type="button"
                       class="rounded px-2 py-1 text-[11px] font-medium transition-colors {action.variant === 'primary' ? 'bg-primary text-primary-foreground hover:opacity-90' : action.variant === 'destructive' ? 'bg-destructive/10 text-destructive hover:bg-destructive/20' : 'border border-input bg-background text-foreground hover:bg-muted'}"
