@@ -51,5 +51,6 @@
   "packages/meilisearch": "0.3.4",
   "packages/casbin": "0.2.5",
   "packages/cerbos": "0.2.5",
-  "packages/postgrest": "0.2.5"
+  "packages/postgrest": "0.2.5",
+  "packages/sse": "0.2.0"
 }

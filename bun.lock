@@ -738,6 +738,13 @@
         "@svadmin/core",
       ],
     },
+    "packages/sse": {
+      "name": "@svadmin/sse",
+      "version": "0.2.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/sso": {
       "name": "@svadmin/sso",
       "version": "0.13.35",
@@ -1756,6 +1763,8 @@
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
     "@svadmin/simple-rest": ["@svadmin/simple-rest@workspace:packages/simple-rest"],
+
+    "@svadmin/sse": ["@svadmin/sse@workspace:packages/sse"],
 
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 
