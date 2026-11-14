@@ -287,7 +287,7 @@
     },
     "packages/create-svadmin": {
       "name": "@svadmin/create",
-      "version": "0.57.1",
+      "version": "0.57.2",
       "bin": {
         "create-svadmin": "./dist/index.js",
       },
@@ -738,6 +738,13 @@
         "@svadmin/core",
       ],
     },
+    "packages/sse": {
+      "name": "@svadmin/sse",
+      "version": "0.3.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/sso": {
       "name": "@svadmin/sso",
       "version": "0.13.35",
@@ -818,7 +825,7 @@
     },
     "packages/surface": {
       "name": "@svadmin/surface",
-      "version": "0.22.0",
+      "version": "0.22.1",
       "dependencies": {
         "typebox": "^1.4.6",
       },
@@ -833,7 +840,7 @@
       },
       "peerDependencies": {
         "@svadmin/core": ">=0.82.0 <0.84.0",
-        "@svadmin/ui": ">=0.127.0 <0.129.0",
+        "@svadmin/ui": ">=0.127.0 <0.130.0",
         "svelte": "^5.56.10",
       },
     },
@@ -853,7 +860,7 @@
     },
     "packages/ui": {
       "name": "@svadmin/ui",
-      "version": "0.128.0",
+      "version": "0.129.0",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.71.0",
@@ -1756,6 +1763,8 @@
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
     "@svadmin/simple-rest": ["@svadmin/simple-rest@workspace:packages/simple-rest"],
+
+    "@svadmin/sse": ["@svadmin/sse@workspace:packages/sse"],
 
     "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 

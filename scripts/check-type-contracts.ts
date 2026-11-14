@@ -55,6 +55,7 @@ for (const project of [
   'packages/cerbos/tsconfig.json',
   'packages/meilisearch/tsconfig.json',
   'packages/postgrest/tsconfig.json',
+  'packages/sse/tsconfig.json',
   'packages/storage/tsconfig.json',
   'packages/s3/tsconfig.json',
   'scripts/fixtures/pocketbase-types/tsconfig.json',
