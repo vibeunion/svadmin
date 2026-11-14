@@ -858,6 +858,13 @@
         "svelte",
       ],
     },
+    "packages/typesense": {
+      "name": "@svadmin/typesense",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+    },
     "packages/ui": {
       "name": "@svadmin/ui",
       "version": "0.130.0",
@@ -1779,6 +1786,8 @@
     "@svadmin/surface": ["@svadmin/surface@workspace:packages/surface"],
 
     "@svadmin/sveltekit": ["@svadmin/sveltekit@workspace:packages/sveltekit"],
+
+    "@svadmin/typesense": ["@svadmin/typesense@workspace:packages/typesense"],
 
     "@svadmin/ui": ["@svadmin/ui@workspace:packages/ui"],
 
