@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  EmployeeOffboardingAuditor,
+  HandoverChecklistDrawer,
+  AccessRevocationMatrix,
+  PrivilegeDeprovisionCard,
   DataRetentionPolicyEditor,
   DataArchiveStudio,
   SensitiveWordAuditor,
@@ -630,6 +634,11 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+
+    expect(EmployeeOffboardingAuditor).toBeDefined();
+    expect(HandoverChecklistDrawer).toBe(EmployeeOffboardingAuditor);
+    expect(AccessRevocationMatrix).toBeDefined();
+    expect(PrivilegeDeprovisionCard).toBe(AccessRevocationMatrix);
     expect(DataRetentionPolicyEditor).toBeDefined();
     expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
     expect(TrafficTopologyInspector).toBeDefined();

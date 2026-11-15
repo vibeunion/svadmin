@@ -1094,6 +1094,24 @@ export {
 export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
 export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
 
+// Enterprise employee offboarding auditor & privilege access revocation suite
+export {
+  default as EmployeeOffboardingAuditor,
+  default as HandoverChecklistDrawer,
+  type OffboardingEmployee,
+  type OffboardingItem,
+  type OffboardingCategory,
+  type OffboardingItemStatus,
+  type SignoffStatus,
+} from './components/EmployeeOffboardingAuditor.svelte';
+export {
+  default as AccessRevocationMatrix,
+  default as PrivilegeDeprovisionCard,
+  type TargetSystemAccess,
+  type SystemType,
+  type PrivilegeLevel,
+  type RevocationStatus,
+} from './components/AccessRevocationMatrix.svelte';
 // Enterprise data lifecycle retention policy editor & archive studio suite
 export {
   default as DataRetentionPolicyEditor,
