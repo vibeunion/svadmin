@@ -3912,3 +3912,37 @@ Enterprise SSL/TLS digital certificate lifecycle monitor and expiration radar:
   onRecheckChain={(id) => console.log('Recheck chain:', id)}
 />
 ```
+
+### `<DataRetentionPolicyEditor>` / `<DataArchiveStudio>`
+
+Enterprise Data Lifecycle & Compliance Retention Policy Center:
+- **Resource Lifecycle Definition**: Specify retention duration in days (e.g. 180 days for audit logs, 7 days for temporary exports).
+- **Flexible Expiry Enforcements**: Automated migration to cold storage (S3 Glacier / OSS), permanent unrecoverable hard deletion, or data anonymisation before archiving.
+- **Conflict & Overlap Detection**: Built-in detection algorithms alerting operators to overlapping concurrent policies on the same dataset.
+- **Storage Metrics & Audit Proofs**: Aggregate active policy counts, estimated affected records, and projected monthly freed cloud storage capacity.
+
+```svelte
+<script lang="ts">
+  import { DataRetentionPolicyEditor } from '@svadmin/ui';
+
+  const policies = [
+    {
+      id: 'p-1',
+      name: 'System Audit Logs Cold Storage',
+      resource: 'audit_logs',
+      retentionDays: 180,
+      action: 'archive_cold_storage',
+      status: 'active',
+      targetStorage: 's3://corp-glacier/audit/',
+      estimatedRows: 500000,
+      estimatedStorageMb: 1200,
+    },
+  ];
+</script>
+
+<DataRetentionPolicyEditor
+  {policies}
+  onSave={(p) => console.log('Saved retention policies:', p)}
+  onRunManualArchive={(p) => console.log('Triggered manual test run:', p)}
+/>
+```

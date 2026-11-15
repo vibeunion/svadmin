@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DataRetentionPolicyEditor,
+  DataArchiveStudio,
   SensitiveWordAuditor,
   ComplianceWordFilter,
   ContentModerationCenter,
@@ -628,6 +630,8 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(DataRetentionPolicyEditor).toBeDefined();
+    expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
     expect(TrafficTopologyInspector).toBeDefined();
     expect(ClusterTrafficVisualizer).toBe(TrafficTopologyInspector);
     expect(SslCertificateMonitorCard).toBeDefined();
