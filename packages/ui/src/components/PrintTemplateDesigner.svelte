@@ -273,7 +273,7 @@
     {/if}
 
     <!-- Right: High-Fidelity Paper Preview -->
-    <div class="flex-1 flex flex-col items-center justify-start p-6 rounded-xl border border-border bg-muted/20 overflow-x-auto min-h-[500px]">
+    <div class="flex-1 flex flex-col items-center justify-start p-6 rounded-xl border border-border bg-muted/20 overflow-x-auto">
       <!-- Copy multi-tabs switcher -->
       {#if config.copies.length > 1}
         <div class="flex items-center gap-2 mb-4">
