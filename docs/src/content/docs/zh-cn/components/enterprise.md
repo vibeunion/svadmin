@@ -3597,6 +3597,40 @@ AI 规则语义解释卡片：
   onSave={(updated) => console.log('保存翻译词典:', updated)}
 />
 ```
+### `<SsoConnectionStudio>` / `<IdentityProviderManager>`
+
+企业多源单点登录 (SSO) 与身份提供商 (IdP) 自服务配置中心：
+- **多协议与办公套件生态支持**：原生覆盖 SAML 2.0、OpenID Connect (OIDC)、OAuth 2.0 以及飞书企业自建应用、钉钉应用、企业微信应用自建连接。
+- **邮箱域名匹配与智能路由**：绑定企业专属邮箱后缀（如 `@megacorp.com`），登录时自动识别并重定向至租户专属 IdP。
+- **用户属性声明映射 (Claims Mapping)**：可视化配置远程身份字段与本地用户字段（如 `sub` 映射至 `sso_uid`、`email`、`roles` 等）转换规则。
+- **连通性测试与握手诊断**：内置仿真探针校验，检测 SP/IdP 元数据连接性、TLS 证书有效期及端点可达性。
+
+```svelte
+<script lang="ts">
+  import { SsoConnectionStudio } from '@svadmin/ui';
+
+  const connections = [
+    {
+      id: 'conn-okta',
+      name: '集团总部 Okta SSO',
+      protocol: 'saml',
+      status: 'active',
+      domains: ['megacorp.com'],
+      isDefault: true,
+      entityId: 'http://www.okta.com/exk1234567890abcdef',
+      ssoUrl: 'https://megacorp.okta.com/app/svadmin/sso/saml',
+    },
+  ];
+</script>
+
+<SsoConnectionStudio
+  {connections}
+  spEntityId="https://auth.svadmin.internal/saml/metadata"
+  spAcsUrl="https://auth.svadmin.internal/saml/acs"
+  onSave={(conn) => console.log('保存 SSO 连接:', conn)}
+/>
+```
+
 ## 企业员工离职交接与特权访问回收套件
 
 ### `<EmployeeOffboardingAuditor>` / `<HandoverChecklistDrawer>`
