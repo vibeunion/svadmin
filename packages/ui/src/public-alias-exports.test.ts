@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PrintTemplateDesigner,
+  DocumentPrintStudio,
+  PrintPreviewModal,
+  DocumentPrintPreview,
   SsoConnectionStudio,
   IdentityProviderManager,
   GatewayRouteEditor,
@@ -620,6 +624,10 @@ describe('public compatibility aliases', () => {
     expect(MediaInspectionCard).toBe(AudioVisualInspector);
     expect(MediaAuthenticityAuditCard).toBeDefined();
     expect(ExifMetadataAuditor).toBe(MediaAuthenticityAuditCard);
+    expect(PrintTemplateDesigner).toBeDefined();
+    expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
+    expect(PrintPreviewModal).toBeDefined();
+    expect(DocumentPrintPreview).toBe(PrintPreviewModal);
     expect(SsoConnectionStudio).toBeDefined();
     expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });

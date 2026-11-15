@@ -1114,6 +1114,23 @@ export {
   type BlindWatermarkPayload,
   type MediaTamperRiskLevel,
 } from './components/MediaAuthenticityAuditCard.svelte';
+// Enterprise bill printing template designer & high-fidelity preview suite
+export {
+  default as PrintTemplateDesigner,
+  default as DocumentPrintStudio,
+  type PrintTemplateDesignerProps,
+} from './components/PrintTemplateDesigner.svelte';
+export {
+  default as PrintPreviewModal,
+  default as DocumentPrintPreview,
+  type PrintPreviewModalProps,
+} from './components/PrintPreviewModal.svelte';
+export {
+  numberToChineseCurrency,
+  type PaperSize,
+  type PrintColumn,
+  type PrintTemplateConfig,
+} from './components/print-utils.js';
 // Enterprise SSO Connection Studio & Identity Provider Manager suite
 export {
   default as SsoConnectionStudio,
