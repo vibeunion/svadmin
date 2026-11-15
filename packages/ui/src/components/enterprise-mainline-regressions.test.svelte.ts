@@ -74,6 +74,16 @@ describe('financial printing regressions', () => {
     expect(view.container.querySelector('tfoot')).toBeNull();
     expect(view.container.textContent).toContain('合计金额: ¥0.00');
   });
+  it.each(['RECEIPT_80MM', 'SHIPPING_100X180'] as const)('uses fluid columns on %s paper', paperSize => {
+    const view = render(PrintDocument, {
+      config: { ...config, paperSize, columns: [
+        { id: 'name', field: 'name', label: '商品', visible: true, width: '400px' },
+        { id: 'amount', field: 'total_amount', label: '金额', visible: true, width: '200px' },
+      ] },
+      copies: ['test'],
+    });
+    expect(Array.from(view.container.querySelectorAll('th'), column => column.style.width)).toEqual(['auto', 'auto']);
+  });
   it('encodes caller numbers into real barcode and QR output', async () => {
     const view = render(PrintDocument, { config, data: { order_no: 'CALLER-123' }, copies: ['test'] });
     const qr = () => view.container.querySelector('.svadmin-qr-code__svg path')?.getAttribute('d');
@@ -189,15 +199,15 @@ describe('media callback contracts', () => {
     const props = { media: { title: 'caller', mediaType: 'audio' as const, durationSeconds: 60 },
       onPlayChange, onMuteChange, onPlaybackRateChange, onResultChange };
     const view = render(AudioVisualInspector, props);
-    await fireEvent.click(view.getByRole('button', { name: '播放', exact: true }));
-    await fireEvent.click(view.getByRole('button', { name: '静音', exact: true }));
-    await fireEvent.click(view.getByRole('button', { name: '1.5x', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: '播放' }));
+    await fireEvent.click(view.getByRole('button', { name: '静音' }));
+    await fireEvent.click(view.getByRole('button', { name: '1.5x' }));
     expect(onPlayChange).toHaveBeenCalledWith(true);
     expect(onMuteChange).toHaveBeenCalledWith(true);
     expect(onPlaybackRateChange).toHaveBeenCalledWith(1.5);
-    expect(view.queryByRole('button', { name: '暂停', exact: true })).toBeNull();
+    expect(view.queryByRole('button', { name: '暂停' })).toBeNull();
     await view.rerender({ ...props, isPlaying: true, isMuted: true, playbackRate: 1.5 });
-    expect(view.getByRole('button', { name: '暂停', exact: true })).toBeTruthy();
+    expect(view.getByRole('button', { name: '暂停' })).toBeTruthy();
     expect(onResultChange).toHaveBeenCalledWith('passed', 100);
   });
 });

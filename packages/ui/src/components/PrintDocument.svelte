@@ -17,6 +17,8 @@
   const total = $derived(totalCents / 100);
   const quantity = $derived(items.reduce((sum, row) => sum + Number(row['quantity'] ?? row['qty'] ?? 0), 0));
   const paper = $derived(PRINT_PAPER_DIMENSIONS[config.paperSize]);
+  // 窄纸不能沿用 A4 的固定列宽，否则会把金额列挤出可打印区域。
+  const fluidColumns = $derived(paper.width <= 100);
   const orderNumber = $derived(String(data['order_no'] ?? config.metaFields.find(field => field.field === 'order_no')?.value ?? ''));
 </script>
 
@@ -46,7 +48,7 @@
     {#if columns.length}
       <table>
         <thead><tr>{#each columns as column (column.id)}
-          <th style:text-align={column.align ?? 'left'} style:width={column.width ?? 'auto'}>{column.label}</th>
+          <th style:text-align={column.align ?? 'left'} style:width={fluidColumns ? 'auto' : column.width ?? 'auto'}>{column.label}</th>
         {/each}</tr></thead>
         <tbody>{#each items as row, index (index)}
           <tr>{#each columns as column (column.id)}
@@ -73,21 +75,21 @@
 {/each}
 
 <style>
-  .print-page { box-sizing: border-box; padding: 8mm; position: relative; background: white; color: black; font: 12px/1.5 sans-serif; overflow-wrap: anywhere; }
+  .print-page { box-sizing: border-box; padding: 8mm; position: relative; background: white; color: black; font: 9pt/1.5 sans-serif; overflow-wrap: anywhere; }
   header, .document-title, .summary, footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
   header { border-bottom: 1px solid black; padding-bottom: 8px; }
   header p, h1 { margin: 0; }
-  h1 { font-size: 20px; }
+  h1 { font-size: 15pt; }
   .document-title { margin: 12px 0; }
   .codes { display: flex; flex-wrap: wrap; align-items: center; max-width: 100%; }
   .codes :global([data-svadmin-component="Barcode"]) { color: black; background: white; --foreground: black; --muted-foreground: black; max-width: 100%; }
-  dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-block: 1px solid #bbb; padding: 8px 0; }
+  dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-block: 1px solid color-mix(in srgb, currentColor 30%, transparent); padding: 8px 0; }
   dl div { display: flex; flex-wrap: wrap; gap: 6px; } dd { margin: 0; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  th, td { border: 1px solid #bbb; padding: 4px; overflow-wrap: anywhere; }
+  th, td { border: 1px solid color-mix(in srgb, currentColor 30%, transparent); padding: 4px; overflow-wrap: anywhere; }
   tr { break-inside: avoid; }
-  .summary { padding: 8px 0; border-bottom: 1px solid #bbb; }
-  footer { margin-top: 16px; } .notes { font-size: 10px; }
-  .watermark { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.05; font-size: 48px; pointer-events: none; }
+  .summary { padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
+  footer { margin-top: 16px; } .notes { font-size: 7.5pt; }
+  .watermark { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.05; font-size: 36pt; pointer-events: none; }
   @media print { .print-page:not(:last-child) { break-after: page; } }
 </style>
