@@ -1112,6 +1112,20 @@ export {
   type PrivilegeLevel,
   type RevocationStatus,
 } from './components/AccessRevocationMatrix.svelte';
+// Enterprise data lifecycle retention policy editor & archive studio suite
+export {
+  default as DataRetentionPolicyEditor,
+  default as DataArchiveStudio,
+  type DataRetentionPolicyEditorProps,
+} from './components/DataRetentionPolicyEditor.svelte';
+export {
+  calculateRetentionMetrics,
+  detectPolicyConflicts,
+  type RetentionAction,
+  type RetentionStatus,
+  type RetentionPolicy,
+  type RetentionSummaryMetrics,
+} from './components/retention-utils.js';
 // Enterprise cluster traffic topology & SSL certificate monitor suite
 export {
   default as TrafficTopologyInspector,

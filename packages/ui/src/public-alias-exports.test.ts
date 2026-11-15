@@ -4,6 +4,8 @@ import {
   HandoverChecklistDrawer,
   AccessRevocationMatrix,
   PrivilegeDeprovisionCard,
+  DataRetentionPolicyEditor,
+  DataArchiveStudio,
   SensitiveWordAuditor,
   ComplianceWordFilter,
   ContentModerationCenter,
@@ -637,6 +639,8 @@ describe('public compatibility aliases', () => {
     expect(HandoverChecklistDrawer).toBe(EmployeeOffboardingAuditor);
     expect(AccessRevocationMatrix).toBeDefined();
     expect(PrivilegeDeprovisionCard).toBe(AccessRevocationMatrix);
+    expect(DataRetentionPolicyEditor).toBeDefined();
+    expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
     expect(TrafficTopologyInspector).toBeDefined();
     expect(ClusterTrafficVisualizer).toBe(TrafficTopologyInspector);
     expect(SslCertificateMonitorCard).toBeDefined();
