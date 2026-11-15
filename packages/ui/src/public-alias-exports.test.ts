@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   DataRetentionPolicyEditor,
   DataArchiveStudio,
+  PrintTemplateDesigner,
+  DocumentPrintStudio,
+  PrintPreviewModal,
+  DocumentPrintPreview,
   SsoConnectionStudio,
   IdentityProviderManager,
   GatewayRouteEditor,
@@ -616,6 +620,10 @@ describe('public compatibility aliases', () => {
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
     expect(DataRetentionPolicyEditor).toBeDefined();
     expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
+    expect(PrintTemplateDesigner).toBeDefined();
+    expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
+    expect(PrintPreviewModal).toBeDefined();
+    expect(DocumentPrintPreview).toBe(PrintPreviewModal);
     expect(SsoConnectionStudio).toBeDefined();
     expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });

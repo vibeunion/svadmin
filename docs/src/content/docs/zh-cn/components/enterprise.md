@@ -3630,6 +3630,38 @@ AI 规则语义解释卡片：
   onSave={(conn) => console.log('保存 SSO 连接:', conn)}
 />
 ```
+### `<PrintTemplateDesigner>` / `<DocumentPrintStudio>` 与 `<PrintPreviewModal>`
+
+企业单据套打与模板打印设计器套件：
+- **全规格纸张支持**：覆盖 A4 纵向/横向、针式三联打孔单 (241×140mm)、仓储物流面单 (100×180mm)、热敏小票 (80mm) 标准尺寸。
+- **财务大写自动生成**：内置人民币大写转换引擎（`numberToChineseCurrency`），智能解析角、分、整，生成规范财务凭证大写金额。
+- **条码二维码一体化**：内置单据流水号条形码（Code 128）与验真二维码，支持防伪底纹水印。
+- **高保真预览与打印保护**：通过 `<PrintPreviewModal>` 调起原生系统打印，针对 `@media print` 做了智能分页防截断（`page-break-inside: avoid`）优化。
+
+```svelte
+<script lang="ts">
+  import { PrintTemplateDesigner, PrintPreviewModal } from '@svadmin/ui';
+
+  let openPreview = $state(false);
+  const sampleConfig = {
+    title: '商品出库发货单',
+    companyName: '极速物流技术有限公司',
+    paperSize: 'A4',
+  };
+</script>
+
+<PrintTemplateDesigner
+  config={sampleConfig}
+  onSave={(cfg) => console.log('保存单据模板:', cfg)}
+  onPreview={() => (openPreview = true)}
+/>
+
+<PrintPreviewModal
+  bind:open={openPreview}
+  config={sampleConfig}
+  items={[{ name: '工业交换机', quantity: 2, total_amount: 1300 }]}
+/>
+```
 
 ### `<DataRetentionPolicyEditor>` / `<DataArchiveStudio>`
 
