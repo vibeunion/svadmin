@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { isUnexpectedPackedTestArtifact, packedConsumerDependencies, packedRuntimeOverrides, publishedWorkspaceManifest, stagePublishedPack } from './check-package-packs';
+import { isUnexpectedPackedTestArtifact, packedConsumerDependencies, packedRuntimeOverrides, publishedWorkspaceManifest, stagePublishedPack, surfaceMinimumRuntimeOverrides } from './check-package-packs';
 
 test('only the shipped customer acceptance test is exempt from the packed test exclusion', () => {
   const shipped = 'blueprints/customer-workspace/tests/workspace.spec.ts';
@@ -150,6 +150,15 @@ test('minimum-supported fixture keeps published versions without traversing newe
     '@svadmin/core': '0.53.0',
     svelte: '5.56.10',
   });
+});
+
+test('minimum Surface runtime snapshot pins only the compatible published UI dependency edge', () => {
+  expect(surfaceMinimumRuntimeOverrides).toEqual({
+    '@svadmin/ui>@svadmin/devtools': '0.6.12',
+  });
+  expect(surfaceMinimumRuntimeOverrides).not.toHaveProperty('@svadmin/core');
+  expect(surfaceMinimumRuntimeOverrides).not.toHaveProperty('@svadmin/ui');
+  expect(Object.values(surfaceMinimumRuntimeOverrides).some((version) => version.startsWith('file:'))).toBe(false);
 });
 
 test('optional runtime dependencies remain local without enabling unused optional peers', () => {
