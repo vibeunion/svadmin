@@ -1108,6 +1108,23 @@ export {
   type RetentionPolicy,
   type RetentionSummaryMetrics,
 } from './components/retention-utils.js';
+// Enterprise cluster traffic topology & SSL certificate monitor suite
+export {
+  default as TrafficTopologyInspector,
+  default as ClusterTrafficVisualizer,
+  type TrafficTopologyInspectorProps,
+  type TopologyNode,
+  type TopologyEdge,
+  type TopologyNodeStatus,
+  type TopologyNodeType,
+} from './components/TrafficTopologyInspector.svelte';
+export {
+  default as SslCertificateMonitorCard,
+  default as TlsCertExpiryRadar,
+  type SslCertificateMonitorCardProps,
+  type SslCertificateData,
+  type CertSecurityLevel,
+} from './components/SslCertificateMonitorCard.svelte';
 // Enterprise sensitive word auditor & content moderation suite
 export {
   default as SensitiveWordAuditor,

@@ -318,6 +318,10 @@ import {
   SupportTicketCard,
   CannedResponsePicker,
   QuickReplyDrawer,
+  TrafficTopologyInspector,
+  ClusterTrafficVisualizer,
+  SslCertificateMonitorCard,
+  TlsCertExpiryRadar,
   AudioVisualInspector,
   MediaInspectionCard,
   MediaAuthenticityAuditCard,
@@ -628,6 +632,10 @@ describe('public compatibility aliases', () => {
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
     expect(DataRetentionPolicyEditor).toBeDefined();
     expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
+    expect(TrafficTopologyInspector).toBeDefined();
+    expect(ClusterTrafficVisualizer).toBe(TrafficTopologyInspector);
+    expect(SslCertificateMonitorCard).toBeDefined();
+    expect(TlsCertExpiryRadar).toBe(SslCertificateMonitorCard);
     expect(SensitiveWordAuditor).toBeDefined();
     expect(ComplianceWordFilter).toBe(SensitiveWordAuditor);
     expect(ContentModerationCenter).toBeDefined();
