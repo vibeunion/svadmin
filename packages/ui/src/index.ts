@@ -1112,6 +1112,26 @@ export {
   type PrivilegeLevel,
   type RevocationStatus,
 } from './components/AccessRevocationMatrix.svelte';
+// Enterprise audiovisual inspection & media authenticity audit suite
+export {
+  default as AudioVisualInspector,
+  default as MediaInspectionCard,
+  type AudioVisualInspectorProps,
+  type AudioVisualMediaMeta,
+  type ViolationMarker,
+  type InspectionViolationLevel,
+  type InspectionOverallResult,
+} from './components/AudioVisualInspector.svelte';
+export {
+  default as MediaAuthenticityAuditCard,
+  default as ExifMetadataAuditor,
+  type MediaAuthenticityAuditCardProps,
+  type MediaAuthenticityData,
+  type MediaExifMeta,
+  type MediaGpsLocation,
+  type BlindWatermarkPayload,
+  type MediaTamperRiskLevel,
+} from './components/MediaAuthenticityAuditCard.svelte';
 // Enterprise bill printing template designer & high-fidelity preview suite
 export {
   default as PrintTemplateDesigner,
