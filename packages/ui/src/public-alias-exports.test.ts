@@ -4,6 +4,10 @@ import {
   HandoverChecklistDrawer,
   AccessRevocationMatrix,
   PrivilegeDeprovisionCard,
+  SensitiveWordAuditor,
+  ComplianceWordFilter,
+  ContentModerationCenter,
+  ContentReviewWorkbench,
   PrintTemplateDesigner,
   DocumentPrintStudio,
   PrintPreviewModal,
@@ -629,6 +633,10 @@ describe('public compatibility aliases', () => {
     expect(HandoverChecklistDrawer).toBe(EmployeeOffboardingAuditor);
     expect(AccessRevocationMatrix).toBeDefined();
     expect(PrivilegeDeprovisionCard).toBe(AccessRevocationMatrix);
+    expect(SensitiveWordAuditor).toBeDefined();
+    expect(ComplianceWordFilter).toBe(SensitiveWordAuditor);
+    expect(ContentModerationCenter).toBeDefined();
+    expect(ContentReviewWorkbench).toBe(ContentModerationCenter);
     expect(AudioVisualInspector).toBeDefined();
     expect(MediaInspectionCard).toBe(AudioVisualInspector);
     expect(MediaAuthenticityAuditCard).toBeDefined();
