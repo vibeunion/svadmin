@@ -316,6 +316,10 @@ import {
   SupportTicketCard,
   CannedResponsePicker,
   QuickReplyDrawer,
+  AudioVisualInspector,
+  MediaInspectionCard,
+  MediaAuthenticityAuditCard,
+  ExifMetadataAuditor,
   message,
   notification,
   toast,
@@ -624,6 +628,10 @@ describe('public compatibility aliases', () => {
     expect(ComplianceWordFilter).toBe(SensitiveWordAuditor);
     expect(ContentModerationCenter).toBeDefined();
     expect(ContentReviewWorkbench).toBe(ContentModerationCenter);
+    expect(AudioVisualInspector).toBeDefined();
+    expect(MediaInspectionCard).toBe(AudioVisualInspector);
+    expect(MediaAuthenticityAuditCard).toBeDefined();
+    expect(ExifMetadataAuditor).toBe(MediaAuthenticityAuditCard);
     expect(PrintTemplateDesigner).toBeDefined();
     expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
     expect(PrintPreviewModal).toBeDefined();
