@@ -3836,3 +3836,113 @@ Enterprise media authenticity forensics, EXIF metadata audit, and blind watermar
   onRecheck={(id) => console.log('Recheck media:', id)}
 />
 ```
+
+### `<SensitiveWordAuditor>` / `<ComplianceWordFilter>` & `<ContentModerationCenter>`
+
+Enterprise Sensitive Word Auditor & Content Risk Moderation Suite:
+- **Comprehensive Lexicon Management**: Manage categorised sensitive vocabularies (spam, violence, politics, pornography, custom) with severity tiers (critical, high, medium, low).
+- **Enforcement Strategy Configuration**: Direct blocking, automatic asterisk masking (`***`), or dispatching to manual auditor review.
+- **Interactive Live Scan Sandbox**: Instant real-time text analysis identifying matched violation substrings, offset indices, and sanitised text output.
+- **`<ContentModerationCenter>` Workflow Workbench**: Operational review queue supporting batch approval, rejection, and masked publication.
+
+```svelte
+<script lang="ts">
+  import { SensitiveWordAuditor, ContentModerationCenter } from '@svadmin/ui';
+
+  const words = [
+    { id: '1', word: 'guaranteed-returns', category: 'spam', action: 'block', severity: 'critical', enabled: true },
+  ];
+</script>
+
+<SensitiveWordAuditor {words} onSaveWords={(w) => console.log('Saved words:', w)} />
+<ContentModerationCenter />
+```
+
+### `<TrafficTopologyInspector>` / `<ClusterTrafficVisualizer>`
+
+Multi-cloud and microservice real-time traffic topology and circuit-breaking inspector:
+- **Service Dependency Flow Mapping**: Visualizes caller/callee links from Ingress Gateways to core services with traffic distribution percentages.
+- **Cluster Health Telemetry**: Aggregates throughput QPS, p99 latency counters, and 5xx error rate cards.
+- **Dynamic Bypass & Circuit Breaking**: One-click circuit breaking to isolate unstable nodes from the active routing pool.
+
+```svelte
+<script lang="ts">
+  import { TrafficTopologyInspector, type TopologyNode } from '@svadmin/ui';
+
+  const nodes: TopologyNode[] = [
+    { id: 'gw-1', label: 'API Ingress Gateway', type: 'gateway', status: 'healthy', qps: 12500, latencyMsP99: 12, errorRatePercent: 0.01 },
+    { id: 'srv-order', label: 'Order Center Service', type: 'service', status: 'healthy', qps: 8400, latencyMsP99: 45, errorRatePercent: 0.05 },
+  ];
+</script>
+
+<TrafficTopologyInspector
+  {nodes}
+  onToggleBypass={(id, bypassed) => console.log('Toggle bypass:', id, bypassed)}
+/>
+```
+
+### `<SslCertificateMonitorCard>` / `<TlsCertExpiryRadar>`
+
+Enterprise SSL/TLS digital certificate lifecycle monitor and expiration radar:
+- **Expiry Countdown Radar Ring**: Real-time remaining validity days with dynamic state shifts (Safe >30d, Warning <=30d, Critical <=7d, Expired <=0d).
+- **SAN Domain Coverage List**: Displays primary hostnames alongside Subject Alternative Names (wildcards and subdomains).
+- **Cryptographic & Protocol Auditing**: Inspects cipher algorithms (RSA/ECC/SM2), OCSP Stapling, and supported TLS versions.
+- **Automated Operations Integration**: One-click ACME protocol auto-renewal trigger and immediate certificate chain verification.
+
+```svelte
+<script lang="ts">
+  import { SslCertificateMonitorCard, type SslCertificateData } from '@svadmin/ui';
+
+  const cert: SslCertificateData = {
+    id: 'cert-1',
+    domain: 'api.svadmin.io',
+    issuer: 'DigiCert Global Root CA',
+    validFrom: '2026-01-01',
+    validTo: '2026-12-31',
+    daysRemaining: 18,
+    algorithm: 'ECDSA P-256',
+    autoRenewEnabled: true,
+    chainComplete: true,
+  };
+</script>
+
+<SslCertificateMonitorCard
+  certificate={cert}
+  onTriggerAutoRenew={(id) => console.log('Trigger auto-renew:', id)}
+  onRecheckChain={(id) => console.log('Recheck chain:', id)}
+/>
+```
+
+### `<DataRetentionPolicyEditor>` / `<DataArchiveStudio>`
+
+Enterprise Data Lifecycle & Compliance Retention Policy Center:
+- **Resource Lifecycle Definition**: Specify retention duration in days (e.g. 180 days for audit logs, 7 days for temporary exports).
+- **Flexible Expiry Enforcements**: Automated migration to cold storage (S3 Glacier / OSS), permanent unrecoverable hard deletion, or data anonymisation before archiving.
+- **Conflict & Overlap Detection**: Built-in detection algorithms alerting operators to overlapping concurrent policies on the same dataset.
+- **Storage Metrics & Audit Proofs**: Aggregate active policy counts, estimated affected records, and projected monthly freed cloud storage capacity.
+
+```svelte
+<script lang="ts">
+  import { DataRetentionPolicyEditor } from '@svadmin/ui';
+
+  const policies = [
+    {
+      id: 'p-1',
+      name: 'System Audit Logs Cold Storage',
+      resource: 'audit_logs',
+      retentionDays: 180,
+      action: 'archive_cold_storage',
+      status: 'active',
+      targetStorage: 's3://corp-glacier/audit/',
+      estimatedRows: 500000,
+      estimatedStorageMb: 1200,
+    },
+  ];
+</script>
+
+<DataRetentionPolicyEditor
+  {policies}
+  onSave={(p) => console.log('Saved retention policies:', p)}
+  onRunManualArchive={(p) => console.log('Triggered manual test run:', p)}
+/>
+```

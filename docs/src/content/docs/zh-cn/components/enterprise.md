@@ -3729,3 +3729,113 @@ AI 规则语义解释卡片：
   onRecheck={(id) => console.log('重新核验:', id)}
 />
 ```
+
+### `<SensitiveWordAuditor>` / `<ComplianceWordFilter>` 与 `<ContentModerationCenter>`
+
+企业敏感词合规审查与内容风控工作台套件：
+- **多维度敏感词库管理**：分类支持广告引流、欺诈、涉政、暴恐、涉黄及业务自定义违禁词，支持严重级别（严重、高危、中等、低）。
+- **处置策略配置**：支持违规直接拦截、星号自动脱敏替换（如 `***`）与人工复审流转。
+- **实时在线检测沙箱**：输入富文本实时呈现命中违规词位置、风险分值与脱敏预览文本。
+- **`<ContentModerationCenter>` 审核工作台**：待审核工单流转卡片，支持一键放行通过、驳回打回或强制脱敏后发布。
+
+```svelte
+<script lang="ts">
+  import { SensitiveWordAuditor, ContentModerationCenter } from '@svadmin/ui';
+
+  const words = [
+    { id: '1', word: '保本高收益', category: 'spam', action: 'block', severity: 'critical', enabled: true },
+  ];
+</script>
+
+<SensitiveWordAuditor {words} onSaveWords={(w) => console.log('保存词库:', w)} />
+<ContentModerationCenter />
+```
+
+### `<TrafficTopologyInspector>` / `<ClusterTrafficVisualizer>`
+
+多云与分布式微服务实时流量拓扑与链路监控工作台：
+- **微服务调用链路流向**：可视化展现 Ingress 网关至核心业务微服务与存储中间件的实时调用关系边与分流权重。
+- **全集群健康度遥测**：汇聚全集群吞吐 QPS、p99 端到端耗时与 5xx 错误率指标卡片。
+- **动态故障旁路切流**：支持将高延迟、故障抖动或遭遇雪崩的节点一键从路由池熔断旁路，防止系统全链路雪崩。
+
+```svelte
+<script lang="ts">
+  import { TrafficTopologyInspector, type TopologyNode } from '@svadmin/ui';
+
+  const nodes: TopologyNode[] = [
+    { id: 'gw-1', label: 'API Ingress Gateway', type: 'gateway', status: 'healthy', qps: 12500, latencyMsP99: 12, errorRatePercent: 0.01 },
+    { id: 'srv-order', label: 'Order Center Service', type: 'service', status: 'healthy', qps: 8400, latencyMsP99: 45, errorRatePercent: 0.05 },
+  ];
+</script>
+
+<TrafficTopologyInspector
+  {nodes}
+  onToggleBypass={(id, bypassed) => console.log('旁路状态切换:', id, bypassed)}
+/>
+```
+
+### `<SslCertificateMonitorCard>` / `<TlsCertExpiryRadar>`
+
+企业级 SSL/TLS 数字证书全生命周期监控与到期预警雷达：
+- **到期倒计时雷达环**：直观展示证书剩余有效天数，按安全（>30天）、预警（<=30天）、高危（<=7天）与已过期（<=0天）动态切换状态。
+- **SAN 备用域名覆盖清单**：解析展示主域名及所有通配符备用名称（Subject Alternative Names）。
+- **密码学规格与协议特性**：审查加密算法（RSA/ECC/SM2）、OCSP Stapling 状态以及支持的 TLS 协议版本。
+- **自动化运维续期联动**：支持一键触发 ACME 协议自动续期任务与证书链完整性即时复核。
+
+```svelte
+<script lang="ts">
+  import { SslCertificateMonitorCard, type SslCertificateData } from '@svadmin/ui';
+
+  const cert: SslCertificateData = {
+    id: 'cert-1',
+    domain: 'api.svadmin.io',
+    issuer: 'DigiCert Global Root CA',
+    validFrom: '2026-01-01',
+    validTo: '2026-12-31',
+    daysRemaining: 18,
+    algorithm: 'ECDSA P-256',
+    autoRenewEnabled: true,
+    chainComplete: true,
+  };
+</script>
+
+<SslCertificateMonitorCard
+  certificate={cert}
+  onTriggerAutoRenew={(id) => console.log('触发证书自动续期:', id)}
+  onRecheckChain={(id) => console.log('复核证书链:', id)}
+/>
+```
+
+### `<DataRetentionPolicyEditor>` / `<DataArchiveStudio>`
+
+企业数据生命周期与合规归档策略中心：
+- **资源级留存期限定义**：支持针对各业务数据表（如操作审计日志、订单历史、临时导出报表）设置保留天数。
+- **多元化到期处置**：支持转入低成本冷存储（S3 Glacier / OSS）、定期物理安全擦除、数据脱敏归档以及软删除标记。
+- **策略冲突预警**：内置冲突诊断分析算法，实时检测同一数据源上并行的重叠策略并给出互斥建议。
+- **存储收益与合规大盘**：汇总展示预估月度释放存储体积（GB/TB）、预估受影响数据行数与归档执行计划。
+
+```svelte
+<script lang="ts">
+  import { DataRetentionPolicyEditor } from '@svadmin/ui';
+
+  const policies = [
+    {
+      id: 'p-1',
+      name: '审计日志定期下沉冷存',
+      resource: 'audit_logs',
+      retentionDays: 180,
+      action: 'archive_cold_storage',
+      status: 'active',
+      targetStorage: 's3://corp-glacier/audit/',
+      estimatedRows: 500000,
+      estimatedStorageMb: 1200,
+    },
+  ];
+</script>
+
+<DataRetentionPolicyEditor
+  {policies}
+  onSave={(p) => console.log('保存生命周期策略:', p)}
+  onRunManualArchive={(p) => console.log('触发测试执行:', p)}
+/>
+```

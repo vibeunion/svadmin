@@ -1094,6 +1094,58 @@ export {
 export { default as ServiceDeskTicketCard, default as SupportTicketCard, type ServiceDeskTicketCardProps, type TicketPriority, type TicketStatus, type TicketActor, type SlaInfo } from './components/ServiceDeskTicketCard.svelte';
 export { default as CannedResponsePicker, default as QuickReplyDrawer, type CannedResponsePickerProps, type CannedTemplate } from './components/CannedResponsePicker.svelte';
 
+// Enterprise data lifecycle retention policy editor & archive studio suite
+export {
+  default as DataRetentionPolicyEditor,
+  default as DataArchiveStudio,
+  type DataRetentionPolicyEditorProps,
+} from './components/DataRetentionPolicyEditor.svelte';
+export {
+  calculateRetentionMetrics,
+  detectPolicyConflicts,
+  type RetentionAction,
+  type RetentionStatus,
+  type RetentionPolicy,
+  type RetentionSummaryMetrics,
+} from './components/retention-utils.js';
+// Enterprise cluster traffic topology & SSL certificate monitor suite
+export {
+  default as TrafficTopologyInspector,
+  default as ClusterTrafficVisualizer,
+  type TrafficTopologyInspectorProps,
+  type TopologyNode,
+  type TopologyEdge,
+  type TopologyNodeStatus,
+  type TopologyNodeType,
+} from './components/TrafficTopologyInspector.svelte';
+export {
+  default as SslCertificateMonitorCard,
+  default as TlsCertExpiryRadar,
+  type SslCertificateMonitorCardProps,
+  type SslCertificateData,
+  type CertSecurityLevel,
+} from './components/SslCertificateMonitorCard.svelte';
+// Enterprise sensitive word auditor & content moderation suite
+export {
+  default as SensitiveWordAuditor,
+  default as ComplianceWordFilter,
+  type SensitiveWordAuditorProps,
+} from './components/SensitiveWordAuditor.svelte';
+export {
+  default as ContentModerationCenter,
+  default as ContentReviewWorkbench,
+  type ContentModerationCenterProps,
+} from './components/ContentModerationCenter.svelte';
+export {
+  scanContent,
+  type ModerationCategory,
+  type ModerationAction,
+  type ModerationSeverity,
+  type SensitiveWordItem,
+  type ModerationMatch,
+  type ModerationScanResult,
+  type ModerationTicket,
+} from './components/moderation-utils.js';
 // Enterprise audiovisual inspection & media authenticity audit suite
 export {
   default as AudioVisualInspector,
