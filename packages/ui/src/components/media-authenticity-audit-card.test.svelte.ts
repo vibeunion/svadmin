@@ -52,7 +52,7 @@ describe('MediaAuthenticityAuditCard Component', () => {
     expect(root).toBeTruthy();
 
     expect(container.textContent).toContain('20261114_现场查勘照片_车损核定.jpg');
-    expect(container.textContent).toContain('原始可信 · 未见篡改');
+    expect(container.textContent).toContain('宿主风险等级：安全');
     expect(container.textContent).toContain('Apple iPhone 15 Pro Max');
     expect(container.textContent).toContain('北京市东城区东长安街 1 号');
     expect(container.textContent).toContain('TENANT-INSURANCE-009');
