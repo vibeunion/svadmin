@@ -131,9 +131,11 @@ describe('EmployeeOffboardingAuditor', () => {
     const onSignoff = vi.fn();
     const onExportAuditReport = vi.fn();
 
+    // 交接全部完成后才允许签署
+    const completedItems = mockItems.map(item => ({ ...item, status: 'completed' as const }));
     render(EmployeeOffboardingAuditor, {
       employee: mockEmployee,
-      items: mockItems,
+      items: completedItems,
       signoffStatus: {
         hrApproved: false,
         managerApproved: true,
