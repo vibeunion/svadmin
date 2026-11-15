@@ -11,12 +11,12 @@ describe('retention save safety', () => {
   it('does not invent active policies for an empty input', () => {
     const view = render(DataRetentionPolicyEditor, { policies: [] });
     expect(view.container.textContent).toContain('没有找到匹配');
-    expect(view.queryByRole('button', { name: '编辑', exact: true })).toBeNull();
+    expect(view.queryByRole('button', { name: '编辑' })).toBeNull();
   });
   it.each(['paused', 'draft'] as const)('preserves %s status and actual estimates', async status => {
     const onSave = vi.fn();
     const view = render(DataRetentionPolicyEditor, { policies: [{ ...base, status }], onSave });
-    await fireEvent.click(view.getByRole('button', { name: '编辑', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: '编辑' }));
     await fireEvent.input(view.getByLabelText('条件过滤器 (可选 SQL/DSL 表达式)'), { target: { value: '' } });
     await fireEvent.click(view.getByRole('button', { name: '保存规则' }));
     expect(onSave).toHaveBeenCalledOnce();
@@ -30,7 +30,7 @@ describe('retention save safety', () => {
   it.each(['', '-1', '0', '1.5'])('rejects invalid retention days %s at the save boundary', async days => {
     const onSave = vi.fn();
     const view = render(DataRetentionPolicyEditor, { policies: [base], onSave });
-    await fireEvent.click(view.getByRole('button', { name: '编辑', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: '编辑' }));
     await fireEvent.input(view.getByLabelText('保留期限 (天数)'), { target: { value: days } });
     await fireEvent.click(view.getByRole('button', { name: '保存规则' }));
     expect(onSave).not.toHaveBeenCalled();
@@ -39,7 +39,7 @@ describe('retention save safety', () => {
   it('requires a resource and a target for archival actions', async () => {
     const onSave = vi.fn();
     const view = render(DataRetentionPolicyEditor, { policies: [base], onSave });
-    await fireEvent.click(view.getByRole('button', { name: '编辑', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: '编辑' }));
     await fireEvent.input(view.getByLabelText('目标数据资源 (Resource)'), { target: { value: '' } });
     await fireEvent.click(view.getByRole('button', { name: '保存规则' }));
     expect(view.getByRole('alert').textContent).toContain('资源不能为空');
