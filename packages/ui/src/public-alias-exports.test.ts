@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SensitiveWordAuditor,
+  ComplianceWordFilter,
+  ContentModerationCenter,
+  ContentReviewWorkbench,
   PrintTemplateDesigner,
   DocumentPrintStudio,
   PrintPreviewModal,
@@ -620,6 +624,10 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(SensitiveWordAuditor).toBeDefined();
+    expect(ComplianceWordFilter).toBe(SensitiveWordAuditor);
+    expect(ContentModerationCenter).toBeDefined();
+    expect(ContentReviewWorkbench).toBe(ContentModerationCenter);
     expect(AudioVisualInspector).toBeDefined();
     expect(MediaInspectionCard).toBe(AudioVisualInspector);
     expect(MediaAuthenticityAuditCard).toBeDefined();
