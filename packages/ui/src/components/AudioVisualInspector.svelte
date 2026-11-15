@@ -47,6 +47,12 @@
     maxScore?: number;
     /** 当前播放进度秒数（受控） */
     currentTime?: number;
+    isPlaying?: boolean;
+    isMuted?: boolean;
+    playbackRate?: number;
+    onPlayChange?: (playing: boolean) => void;
+    onMuteChange?: (muted: boolean) => void;
+    onPlaybackRateChange?: (rate: number) => void;
     /** 是否只读模式（不可修改评分与批注） */
     readonly?: boolean;
     /** 综合判定结果变更回调 */
@@ -66,6 +72,12 @@
     violations = [],
     maxScore = 100,
     currentTime = $bindable(0),
+    isPlaying = false,
+    isMuted = false,
+    playbackRate = 1,
+    onPlayChange,
+    onMuteChange,
+    onPlaybackRateChange,
     readonly = false,
     onResultChange,
     onSeek,
@@ -74,9 +86,6 @@
     class: className = ''
   }: AudioVisualInspectorProps = $props();
 
-  let isPlaying = $state(false);
-  let isMuted = $state(false);
-  let playbackRate = $state(1.0);
   let selectedMarkerId = $state<string | null>(null);
   let newMarkerTitle = $state('');
   let newMarkerLevel = $state<InspectionViolationLevel>('minor');
@@ -124,7 +133,7 @@
   }
 
   function handleTogglePlay() {
-    isPlaying = !isPlaying;
+    onPlayChange?.(!isPlaying);
   }
 
   function handleAddMarker() {
@@ -280,6 +289,7 @@
           type="button"
           class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
           onclick={handleTogglePlay}
+          disabled={!onPlayChange}
           aria-label={isPlaying ? '暂停' : '播放'}
         >
           {#if isPlaying}
@@ -315,7 +325,9 @@
                 'rounded px-1.5 py-0.5 transition-colors',
                 playbackRate === rate ? 'bg-primary text-primary-foreground font-semibold shadow-xs' : 'text-muted-foreground hover:text-foreground'
               )}
-              onclick={() => (playbackRate = rate)}
+              disabled={!onPlaybackRateChange}
+              onclick={() => onPlaybackRateChange?.(rate)}
+              aria-pressed={playbackRate === rate}
             >
               {rate}x
             </button>
@@ -325,7 +337,8 @@
         <button
           type="button"
           class="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:bg-muted"
-          onclick={() => (isMuted = !isMuted)}
+          disabled={!onMuteChange}
+          onclick={() => onMuteChange?.(!isMuted)}
           aria-label={isMuted ? '取消静音' : '静音'}
         >
           {#if isMuted}

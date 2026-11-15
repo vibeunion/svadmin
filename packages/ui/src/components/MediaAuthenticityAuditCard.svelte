@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import {
     Camera,
     MapPin,
@@ -68,7 +69,7 @@
     /** 多媒体防伪与 EXIF 审计数据 */
     data: MediaAuthenticityData;
     /** 重新触发防伪复核回调 */
-    onRecheck?: (mediaId: string) => void;
+    onRecheck?: (mediaId: string) => void | Promise<void>;
     /** 导出防伪存证凭据回调 */
     onExportEvidence?: (data: MediaAuthenticityData) => void;
     /** 自定义操作栏插槽 */
@@ -85,16 +86,34 @@
   }: MediaAuthenticityAuditCardProps = $props();
 
   let isChecking = $state(false);
+  let recheckError = $state('');
+  let generation = 0;
+  let destroyed = false;
+  let observed = untrack(() => ({ id: data.id, onRecheck }));
+
+  $effect.pre(() => {
+    if (data.id === observed.id && onRecheck === observed.onRecheck) return;
+    observed = { id: data.id, onRecheck };
+    generation += 1;
+    isChecking = false;
+    recheckError = '';
+  });
+  onDestroy(() => { destroyed = true; generation += 1; });
 
   async function handleRecheck() {
-    if (isChecking) return;
+    if (isChecking || !onRecheck || destroyed) return;
+    const current = ++generation;
+    const owner = { id: data.id, onRecheck };
+    const isCurrent = () => !destroyed && current === generation
+      && data.id === owner.id && onRecheck === owner.onRecheck;
     isChecking = true;
+    recheckError = '';
     try {
-      onRecheck?.(data.id);
+      await onRecheck(data.id);
+    } catch {
+      if (isCurrent()) recheckError = '重新核验失败，请重试';
     } finally {
-      setTimeout(() => {
-        isChecking = false;
-      }, 500);
+      if (isCurrent()) isChecking = false;
     }
   }
 
@@ -102,35 +121,35 @@
     switch (level) {
       case 'safe':
         return {
-          label: '原始可信 · 未见篡改',
+          label: '宿主风险等级：安全',
           tone: 'success',
           border: 'border-success/30',
           badgeClass: 'bg-success/15 text-success border-success/30 dark:text-success',
-          desc: 'EXIF 链路完整，拍摄时间与数字化时间一致，未检出图像处理软件二次重编码痕迹。'
+          desc: '具体核验依据以宿主提供的审计记录为准。'
         };
       case 'low':
         return {
-          label: '低风险 · 元数据轻度修剪',
+          label: '宿主风险等级：低风险',
           tone: 'warning',
           border: 'border-warning/30',
           badgeClass: 'bg-warning/15 text-warning border-warning/30 dark:text-warning',
-          desc: '存在常规重命名或无损压缩痕迹，核心拍摄参数与设备特征仍保持一致。'
+          desc: '具体核验依据以宿主提供的审计记录为准。'
         };
       case 'suspicious':
         return {
-          label: '疑似篡改 · 存在二次编辑',
+          label: '宿主风险等级：可疑',
           tone: 'danger',
           border: 'border-destructive/30',
           badgeClass: 'bg-destructive/15 text-destructive border-destructive/30 dark:text-destructive',
-          desc: '检测到图像处理软件签名或时间戳跳变，建议法务与合规团队人工核验原件。'
+          desc: '请结合宿主审计记录人工核验原件。'
         };
       default:
         return {
-          label: '高危篡改 · 证实伪造',
+          label: '宿主风险等级：高风险',
           tone: 'danger',
           border: 'border-destructive/40',
           badgeClass: 'bg-destructive/15 text-destructive border-destructive/30',
-          desc: '关键元数据全部遭擦除或重写，图片像素存在重采样拼接，已触发反作弊告警。'
+          desc: '请结合宿主审计记录人工核验原件。'
         };
     }
   }
@@ -204,7 +223,7 @@
       <button
         type="button"
         class="flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-        disabled={isChecking}
+        disabled={isChecking || !onRecheck}
         onclick={handleRecheck}
       >
         <RefreshCw class={cn('h-3.5 w-3.5', isChecking && 'animate-spin text-primary')} />
@@ -227,6 +246,7 @@
       {/if}
     </div>
   </header>
+  {#if recheckError}<p role="alert" class="p-4 text-xs text-destructive">{recheckError}</p>{/if}
 
   <!-- 中间：EXIF 拍摄器材参数 + GPS 空间地理信息 -->
   <div class="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0 text-xs">
@@ -258,13 +278,13 @@
         <div>
           <span>光学规格：</span>
           <span class="font-mono text-foreground block pt-0.5">
-            {data.exif.focalLength || '24mm'} {data.exif.fNumber || 'f/1.8'}
+            {data.exif.focalLength || '未提供'} {data.exif.fNumber || '未提供'}
           </span>
         </div>
         <div>
           <span>曝光与感光度：</span>
           <span class="font-mono text-foreground block pt-0.5">
-            {data.exif.exposureTime || '1/60s'} {data.exif.iso || 'ISO 100'}
+            {data.exif.exposureTime || '未提供'} {data.exif.iso || '未提供'}
           </span>
         </div>
       </div>

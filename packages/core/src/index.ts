@@ -318,7 +318,7 @@ export type { UseExportOptions } from './export-hooks.svelte';
 export { useImport } from './import-hooks.svelte';
 export type { ImportArtifact, ImportArtifactProvider, ImportTaskResult, ImportPreviewFailure, ImportPreviewResult } from './import-contract';
 export { snapshotImportArtifact, snapshotImportTaskResult, invalidImportPreviewFailure } from './import-contract';
-export { IMPORT_LIMITS } from './import-contract';
+export { IMPORT_LIMITS, parseImportRows } from './import-contract';
 export type { UseImportOptions, ImportProgress, ImportResult } from './import-hooks.svelte';
 export type { ExportFormat } from './data-transfer.svelte';
 export {
