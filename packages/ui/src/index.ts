@@ -1108,6 +1108,27 @@ export {
   type RetentionPolicy,
   type RetentionSummaryMetrics,
 } from './components/retention-utils.js';
+// Enterprise sensitive word auditor & content moderation suite
+export {
+  default as SensitiveWordAuditor,
+  default as ComplianceWordFilter,
+  type SensitiveWordAuditorProps,
+} from './components/SensitiveWordAuditor.svelte';
+export {
+  default as ContentModerationCenter,
+  default as ContentReviewWorkbench,
+  type ContentModerationCenterProps,
+} from './components/ContentModerationCenter.svelte';
+export {
+  scanContent,
+  type ModerationCategory,
+  type ModerationAction,
+  type ModerationSeverity,
+  type SensitiveWordItem,
+  type ModerationMatch,
+  type ModerationScanResult,
+  type ModerationTicket,
+} from './components/moderation-utils.js';
 // Enterprise audiovisual inspection & media authenticity audit suite
 export {
   default as AudioVisualInspector,
