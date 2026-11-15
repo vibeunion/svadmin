@@ -3857,3 +3857,58 @@ Enterprise Sensitive Word Auditor & Content Risk Moderation Suite:
 <SensitiveWordAuditor {words} onSaveWords={(w) => console.log('Saved words:', w)} />
 <ContentModerationCenter />
 ```
+
+### `<TrafficTopologyInspector>` / `<ClusterTrafficVisualizer>`
+
+Multi-cloud and microservice real-time traffic topology and circuit-breaking inspector:
+- **Service Dependency Flow Mapping**: Visualizes caller/callee links from Ingress Gateways to core services with traffic distribution percentages.
+- **Cluster Health Telemetry**: Aggregates throughput QPS, p99 latency counters, and 5xx error rate cards.
+- **Dynamic Bypass & Circuit Breaking**: One-click circuit breaking to isolate unstable nodes from the active routing pool.
+
+```svelte
+<script lang="ts">
+  import { TrafficTopologyInspector, type TopologyNode } from '@svadmin/ui';
+
+  const nodes: TopologyNode[] = [
+    { id: 'gw-1', label: 'API Ingress Gateway', type: 'gateway', status: 'healthy', qps: 12500, latencyMsP99: 12, errorRatePercent: 0.01 },
+    { id: 'srv-order', label: 'Order Center Service', type: 'service', status: 'healthy', qps: 8400, latencyMsP99: 45, errorRatePercent: 0.05 },
+  ];
+</script>
+
+<TrafficTopologyInspector
+  {nodes}
+  onToggleBypass={(id, bypassed) => console.log('Toggle bypass:', id, bypassed)}
+/>
+```
+
+### `<SslCertificateMonitorCard>` / `<TlsCertExpiryRadar>`
+
+Enterprise SSL/TLS digital certificate lifecycle monitor and expiration radar:
+- **Expiry Countdown Radar Ring**: Real-time remaining validity days with dynamic state shifts (Safe >30d, Warning <=30d, Critical <=7d, Expired <=0d).
+- **SAN Domain Coverage List**: Displays primary hostnames alongside Subject Alternative Names (wildcards and subdomains).
+- **Cryptographic & Protocol Auditing**: Inspects cipher algorithms (RSA/ECC/SM2), OCSP Stapling, and supported TLS versions.
+- **Automated Operations Integration**: One-click ACME protocol auto-renewal trigger and immediate certificate chain verification.
+
+```svelte
+<script lang="ts">
+  import { SslCertificateMonitorCard, type SslCertificateData } from '@svadmin/ui';
+
+  const cert: SslCertificateData = {
+    id: 'cert-1',
+    domain: 'api.svadmin.io',
+    issuer: 'DigiCert Global Root CA',
+    validFrom: '2026-01-01',
+    validTo: '2026-12-31',
+    daysRemaining: 18,
+    algorithm: 'ECDSA P-256',
+    autoRenewEnabled: true,
+    chainComplete: true,
+  };
+</script>
+
+<SslCertificateMonitorCard
+  certificate={cert}
+  onTriggerAutoRenew={(id) => console.log('Trigger auto-renew:', id)}
+  onRecheckChain={(id) => console.log('Recheck chain:', id)}
+/>
+```
