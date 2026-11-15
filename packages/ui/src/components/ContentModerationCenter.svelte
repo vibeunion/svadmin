@@ -1,6 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import type { ModerationTicket } from './moderation-utils.js';
+  import { maskModerationMatches } from './moderation-utils.js';
 
   export interface ContentModerationCenterProps {
     tickets?: ModerationTicket[];
@@ -18,47 +19,8 @@
     onMaskPublish,
   }: ContentModerationCenterProps = $props();
 
-  let ticketList = $state<ModerationTicket[]>(untrack(() => initialTickets.length > 0
-      ? initialTickets.map(t => ({ ...t, matches: [...t.matches] }))
-      : [
-          {
-            id: 'mod-101',
-            title: '社区热门发帖审核: 快速理财收益说明',
-            sourceModule: '用户社区 / 动态发布',
-            author: 'user_alex88',
-            submittedAt: '2026-11-15 06:15',
-            rawContent: '今天发现一个绝密渠道，保证保本高收益，大家一起冲！',
-            status: 'pending',
-            riskScore: 92,
-            matches: [
-              { word: '保本高收益', category: 'spam', action: 'block', severity: 'critical', index: 12, length: 5 },
-            ],
-          },
-          {
-            id: 'mod-102',
-            title: '商品营销文案审核: 换季大促礼包',
-            sourceModule: '商品中心 / 详情编辑',
-            author: 'merchant_vendor',
-            submittedAt: '2026-11-15 05:40',
-            rawContent: '下单立即返利，享高额返现，名额有限先到先得。',
-            status: 'pending',
-            riskScore: 68,
-            matches: [
-              { word: '高额返现', category: 'spam', action: 'mask', severity: 'medium', index: 8, length: 4, replacement: '***' },
-            ],
-          },
-          {
-            id: 'mod-103',
-            title: '客服沟通工单记录抽查',
-            sourceModule: '服务台 / 工单回执',
-            author: 'agent_sarah',
-            submittedAt: '2026-11-14 22:10',
-            rawContent: '客户咨询退款政策，已提供正规退换货指引。',
-            status: 'approved',
-            riskScore: 0,
-            matches: [],
-          },
-        ]));
+  let ticketList = $state<ModerationTicket[]>(untrack(() =>
+    initialTickets.map(ticket => ({ ...ticket, matches: ticket.matches.map(match => ({ ...match })) }))));
 
   let filterStatus = $state<'ALL' | 'pending' | 'approved' | 'rejected'>('pending');
 
@@ -77,8 +39,12 @@
   }
 
   function handleMaskPublish(ticket: ModerationTicket) {
+    if (!onMaskPublish) return;
+    const snapshot = $state.snapshot(ticket);
+    const publication = { ...snapshot, status: 'masked' as const,
+      rawContent: maskModerationMatches(snapshot.rawContent, snapshot.matches) };
+    onMaskPublish(publication);
     ticket.status = 'masked';
-    onMaskPublish?.(ticket);
   }
 </script>
 
@@ -175,6 +141,7 @@
               <button
                 type="button"
                 onclick={() => handleMaskPublish(ticket)}
+                disabled={!onMaskPublish}
                 class="px-3 py-1.5 rounded-lg border border-border bg-card text-foreground hover:bg-muted font-medium transition-colors"
               >
                 脱敏后发布

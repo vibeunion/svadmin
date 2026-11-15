@@ -43,6 +43,32 @@ export interface ModerationTicket {
   matches: ModerationMatch[];
 }
 
+export function maskModerationMatches(text: string, matches: ModerationMatch[]): string {
+  const regions: Array<{ start: number; end: number; replacement: string }> = [];
+  for (const match of [...matches].sort((a, b) => a.index - b.index)) {
+    if (!Number.isInteger(match.index) || !Number.isInteger(match.length)
+      || match.index < 0 || match.length < 1 || match.index + match.length > text.length) {
+      throw new RangeError('敏感词匹配位置无效');
+    }
+    const end = match.index + match.length;
+    const previous = regions.at(-1);
+    // 重叠命中覆盖原文区间的并集；相邻命中独立替换，不处理替换产物。
+    if (previous && match.index < previous.end) {
+      previous.end = Math.max(previous.end, end);
+      previous.replacement = '*'.repeat(previous.end - previous.start);
+    } else {
+      regions.push({ start: match.index, end, replacement: match.replacement ?? '*'.repeat(match.length) });
+    }
+  }
+  let cursor = 0;
+  let masked = '';
+  for (const region of regions) {
+    masked += text.slice(cursor, region.start) + region.replacement;
+    cursor = region.end;
+  }
+  return masked + text.slice(cursor);
+}
+
 /**
  * 扫描文本并根据敏感词库进行分词匹配与脱敏处理
  */
@@ -63,37 +89,29 @@ export function scanContent(
 
   const activeWords = dictionary.filter(w => w.enabled);
   const matches: ModerationMatch[] = [];
-  let maskedText = text;
 
   for (const item of activeWords) {
     if (!item.word.trim()) continue;
-    let pos = 0;
-    const lowerWord = item.word.toLowerCase();
-    const lowerText = text.toLowerCase();
-
-    while ((pos = lowerText.indexOf(lowerWord, pos)) !== -1) {
+    const pattern = new RegExp(item.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    let occurrence: RegExpExecArray | null;
+    while ((occurrence = pattern.exec(text)) !== null) {
       matches.push({
         word: item.word,
         category: item.category,
         action: item.action,
         severity: item.severity,
-        index: pos,
-        length: item.word.length,
+        index: occurrence.index,
+        length: occurrence[0].length,
         ...(item.replacement ? { replacement: item.replacement } : {}),
       });
-      pos += item.word.length;
+      pattern.lastIndex = occurrence.index + 1;
     }
   }
 
   // Sort matches by offset index
   matches.sort((a, b) => a.index - b.index);
 
-  // Apply masking to generate clean preview text
-  for (const match of matches) {
-    const originalSlice = text.substring(match.index, match.index + match.length);
-    const replacement = match.replacement || '*'.repeat(match.length);
-    maskedText = maskedText.replaceAll(originalSlice, replacement);
-  }
+  const maskedText = maskModerationMatches(text, matches);
 
   const blockRequired = matches.some(m => m.action === 'block' || m.severity === 'critical');
   const reviewRequired = matches.some(m => m.action === 'review' || m.severity === 'high');

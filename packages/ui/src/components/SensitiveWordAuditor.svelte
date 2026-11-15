@@ -21,15 +21,7 @@
   }: SensitiveWordAuditorProps = $props();
 
   // Internal reactive word dictionary
-  let wordList = $state<SensitiveWordItem[]>(untrack(() => initialWords.length > 0
-      ? initialWords.map(w => ({ ...w }))
-      : [
-          { id: 'sw-1', word: '高额返现', category: 'spam', action: 'mask', severity: 'medium', replacement: '***', enabled: true },
-          { id: 'sw-2', word: '保本高收益', category: 'spam', action: 'block', severity: 'critical', enabled: true },
-          { id: 'sw-3', word: '枪支弹药', category: 'violence', action: 'block', severity: 'critical', enabled: true },
-          { id: 'sw-4', word: '博彩下注', category: 'custom', action: 'block', severity: 'high', enabled: true },
-          { id: 'sw-5', word: '内幕暴利', category: 'spam', action: 'review', severity: 'high', enabled: true },
-        ]));
+  let wordList = $state<SensitiveWordItem[]>(untrack(() => initialWords.map(word => ({ ...word }))));
 
   // Filters & search
   let searchQuery = $state('');
