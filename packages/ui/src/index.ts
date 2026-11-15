@@ -1108,3 +1108,13 @@ export {
   type RetentionPolicy,
   type RetentionSummaryMetrics,
 } from './components/retention-utils.js';
+// Enterprise SSO Connection Studio & Identity Provider Manager suite
+export {
+  default as SsoConnectionStudio,
+  default as IdentityProviderManager,
+  type SsoConnectionStudioProps,
+  type SsoConnection,
+  type SsoProtocol,
+  type SsoStatus,
+  type SsoClaimMapping,
+} from './components/SsoConnectionStudio.svelte';

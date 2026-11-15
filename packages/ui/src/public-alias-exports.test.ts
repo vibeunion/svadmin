@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   DataRetentionPolicyEditor,
   DataArchiveStudio,
+  SsoConnectionStudio,
+  IdentityProviderManager,
   GatewayRouteEditor,
   ApiRouteRuleCard,
   RateLimitPolicyPanel,
@@ -614,6 +616,8 @@ describe('public compatibility aliases', () => {
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
     expect(DataRetentionPolicyEditor).toBeDefined();
     expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
+    expect(SsoConnectionStudio).toBeDefined();
+    expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });
 
   it('keeps service aliases bound to canonical services', () => {
