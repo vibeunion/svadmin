@@ -1032,6 +1032,52 @@ export {
   type NotificationCategory,
 } from './components/NotificationDrawer.svelte';
 
+// Enterprise i18n translation management & hot reloading studio suite
+export {
+  default as I18nStudio,
+  default as TranslationManager,
+  type I18nStudioProps,
+} from './components/I18nStudio.svelte';
+// Enterprise contract clause diff viewer & legal compliance suite
+export {
+  default as ContractClauseDiffViewer,
+  default as LegalClauseComparator,
+  type ContractClauseDiffViewerProps,
+  type ContractClause,
+  type ClauseChangeType,
+  type ClauseRiskLevel,
+  type ClauseDecisionStatus,
+  type ClauseAnnotation,
+} from './components/ContractClauseDiffViewer.svelte';
+
+// Enterprise electronic seal authenticity inspector & CA verification suite
+export {
+  default as ElectronicSealInspector,
+  default as StampAuthenticityCard,
+  type ElectronicSealInspectorProps,
+  type ElectronicSealInfo,
+  type SealValidationStatus,
+  type SealType as ElectronicSealValidationType,
+  type SealCertificateInfo,
+  type SealTimestampInfo,
+  type SealVerificationLog,
+} from './components/ElectronicSealInspector.svelte';
+// Enterprise microservice API gateway route & rate limit circuit breaker governance suite
+export {
+  default as GatewayRouteEditor,
+  default as ApiRouteRuleCard,
+  type HttpMethod as GatewayHttpMethod,
+  type HeaderMatchRule,
+  type GatewayRouteConfig,
+} from './components/GatewayRouteEditor.svelte';
+export {
+  default as RateLimitPolicyPanel,
+  default as CircuitBreakerCard,
+  type CircuitBreakerState,
+  type RateLimitDimension,
+  type FallbackStrategy,
+  type RateLimitPolicyConfig,
+} from './components/RateLimitPolicyPanel.svelte';
 // Enterprise step-up authentication & audit snapshot compliance suite
 export {
   default as StepUpAuthModal,
