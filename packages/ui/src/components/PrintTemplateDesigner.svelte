@@ -1,7 +1,9 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import type { PaperSize, PrintTemplateConfig } from './print-utils.js';
-  import { numberToChineseCurrency } from './print-utils.js';
+  import type { PrintTemplateConfig } from './print-utils.js';
+  import { printSampleItems } from './print-utils.js';
+  import { printDocument } from './print-document.js';
+  import PrintDocument from './PrintDocument.svelte';
 
   export interface PrintTemplateDesignerProps {
     config?: Partial<PrintTemplateConfig>;
@@ -60,42 +62,18 @@
   let activeTab = $state<'DESIGN' | 'PREVIEW'>('PREVIEW');
   let activeCopyIndex = $state<number>(0);
 
-  // Sample items: caller-provided rows take precedence over the built-in demo rows.
-  const mockItems: Array<Record<string, number | string>> = (() => {
-    const rows = Object.values(untrack(() => sampleData))
-      .filter((row): row is Record<string, number | string> => typeof row === 'object' && row !== null);
-    return rows.length > 0 ? rows : [
-    { index: 1, sku: 'PROD-A01', name: '高保真低功耗边缘网关核心模块', spec: 'Pro-16G', quantity: 10, unit_price: 1280.00, total_amount: 12800.00 },
-    { index: 2, sku: 'PROD-B02', name: '工业级千兆以太网交换机 (8口 PoE)', spec: 'Gigabit-8P', quantity: 4, unit_price: 650.00, total_amount: 2600.00 },
-      { index: 3, sku: 'PROD-C03', name: '金属外壳防浪涌电源适配器', spec: '24V-5A', quantity: 14, unit_price: 120.00, total_amount: 1680.00 },
-    ];
-  })();
+  const sampleItems = $derived(printSampleItems(sampleData));
+  let pages = $state<HTMLDivElement>();
+  let printing = $state(false);
+  let printError = $state('');
 
-  const totalSum = $derived(mockItems.reduce((acc, curr) => acc + Number(curr['total_amount'] ?? 0), 0));
-  const totalQty = $derived(mockItems.reduce((acc, curr) => acc + Number(curr['quantity'] ?? 0), 0));
-  const amountInWords = $derived(numberToChineseCurrency(totalSum));
-
-  function getPaperSizeStyles(size: PaperSize) {
-    switch (size) {
-      case 'A4':
-        return 'w-[210mm] min-h-[297mm] p-[15mm]';
-      case 'A4_LANDSCAPE':
-        return 'w-[297mm] min-h-[210mm] p-[15mm]';
-      case 'RECEIPT_80MM':
-        return 'w-[80mm] min-h-[160mm] p-[5mm] text-[11px]';
-      case 'SHIPPING_100X180':
-        return 'w-[100mm] min-h-[180mm] p-[8mm] text-xs';
-      case 'TRIPLICATE_241X140':
-        return 'w-[241mm] min-h-[140mm] p-[10mm]';
-      default:
-        return 'w-[210mm] min-h-[297mm] p-[15mm]';
-    }
-  }
-
-  function handlePrint() {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+  async function handlePrint() {
+    if (printing || !pages) return;
+    printing = true;
+    printError = '';
+    try { await printDocument(pages, config.paperSize); }
+    catch { printError = '打印失败，请检查浏览器打印权限后重试'; }
+    finally { printing = false; }
   }
 
   function handleSave() {
@@ -160,6 +138,7 @@
       <button
         type="button"
         onclick={handlePrint}
+        disabled={printing}
         class="inline-flex items-center justify-center text-xs font-semibold px-3 py-2 rounded-lg border border-border bg-card text-card-foreground hover:bg-muted transition-colors shadow-sm"
       >
         <svg class="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -290,137 +269,11 @@
         </div>
       {/if}
 
-      <!-- High-Fidelity Printable Paper Canvas Container -->
-      <div
-        class="bg-card text-card-foreground border border-border shadow-xl relative transition-all duration-200 select-none {getPaperSizeStyles(config.paperSize)}"
-      >
-        <!-- Optional Watermark Overlay -->
-        {#if config.showWatermark && config.watermarkText}
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 overflow-hidden">
-            <span class="text-5xl font-black rotate-[-30deg] tracking-widest text-card-foreground select-none">
-              {config.watermarkText}
-            </span>
-          </div>
-        {/if}
-
-        <!-- Top Header: Company Name & Copy Tag -->
-        <div class="flex items-center justify-between pb-2 border-b border-foreground">
-          <div class="flex flex-col">
-            <span class="text-base font-extrabold tracking-wide uppercase">{config.companyName}</span>
-            <span class="text-[10px] text-muted-foreground font-mono">{config.subTitle}</span>
-          </div>
-          <div class="flex flex-col items-end">
-            <span class="text-xs font-bold border border-foreground px-2 py-0.5 rounded">
-              {config.copies[activeCopyIndex] || '标准打印联'}
-            </span>
-            <span class="text-[9px] text-muted-foreground mt-1">印刷编号: SV-PRT-0988</span>
-          </div>
-        </div>
-
-        <!-- Big Center Title & Barcode Row -->
-        <div class="flex items-center justify-between my-3">
-          <h1 class="text-xl font-bold tracking-widest text-card-foreground">{config.title}</h1>
-
-          {#if config.showBarcode}
-            <div class="flex flex-col items-center">
-              <!-- Visual Barcode representation -->
-              <div class="flex items-end gap-[1.5px] h-7 px-1">
-                {#each [2,3,1,4,2,1,3,2,4,1,2,3,1,4,2,3,1,2,4,1,3,2,1,4] as h, i (i)}
-                  <div class="bg-foreground w-[1.5px]" style="height: {h * 6}px"></div>
-                {/each}
-              </div>
-              <span class="font-mono text-[9px] tracking-wider text-card-foreground">CK-20261115-0089</span>
-            </div>
-          {/if}
-        </div>
-
-        <!-- Meta Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1.5 text-xs py-2 border-y border-border">
-          {#each config.metaFields as mf (mf.label)}
-            <div class="flex items-center">
-              <span class="text-muted-foreground w-16 shrink-0">{mf.label}:</span>
-              <span class="font-semibold text-card-foreground font-mono truncate">{mf.value || '-'}</span>
-            </div>
-          {/each}
-        </div>
-
-        <!-- Detail Table -->
-        <div class="my-3 overflow-x-auto">
-          <table class="w-full text-xs border-collapse border border-border">
-            <thead>
-              <tr class="bg-muted border-b border-border text-card-foreground">
-                {#each config.columns.filter(c => c.visible) as col (col.id)}
-                  <th
-                    class="py-1 px-2 border-r border-border font-bold"
-                    style="text-align: {col.align || 'left'}; width: {col.width || 'auto'};"
-                  >
-                    {col.label}
-                  </th>
-                {/each}
-              </tr>
-            </thead>
-            <tbody>
-              {#each mockItems as item (String(item['sku'] ?? item['index'] ?? ''))}
-                <tr class="border-b border-border hover:bg-muted/50">
-                  {#each config.columns.filter(c => c.visible) as col (col.id)}
-                    <td
-                      class="py-1 px-2 border-r border-border font-mono text-[11px]"
-                      style="text-align: {col.align || 'left'};"
-                    >
-                      {#if col.field === 'total_amount' || col.field === 'unit_price'}
-                        {config.currencySymbol}{Number((item as Record<string, unknown>)[col.field] || 0).toFixed(2)}
-                      {:else}
-                        {(item as Record<string, unknown>)[col.field] ?? ''}
-                      {/if}
-                    </td>
-                  {/each}
-                </tr>
-              {/each}
-            </tbody>
-            <!-- Summary Row -->
-            <tfoot>
-              <tr class="border-t-2 border-foreground bg-muted/50 font-bold text-xs">
-                <td class="py-1 px-2 border-r border-border" colspan="2">合计 (TOTAL):</td>
-                <td class="py-1 px-2 border-r border-border text-right font-mono" colspan="2">
-                  总件数: {totalQty} 件
-                </td>
-                <td class="py-1 px-2 border-r border-border text-right font-mono" colspan="3">
-                  合计金额: {config.currencySymbol}{totalSum.toFixed(2)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <!-- Amount In Words (Chinese Currency Capitalization) -->
-        {#if config.showAmountInWords}
-          <div class="flex items-center justify-between p-2 my-2 border border-border bg-muted/50 text-xs">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-card-foreground">金额大写:</span>
-              <span class="font-bold font-serif text-card-foreground tracking-wider">{amountInWords}</span>
-            </div>
-            <div class="flex items-center gap-1 font-mono text-card-foreground">
-              <span>小写合计:</span>
-              <span class="font-bold">{config.currencySymbol}{totalSum.toFixed(2)}</span>
-            </div>
-          </div>
-        {/if}
-
-        <!-- Signer Signature Fields -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 mt-4 border-t border-border text-xs">
-          {#each config.signers as signer (signer)}
-            <div class="flex items-center text-card-foreground">
-              <span>{signer}</span>
-            </div>
-          {/each}
-        </div>
-
-        <!-- Footer Notes -->
-        {#if config.footerNotes}
-          <div class="mt-4 pt-2 border-t border-border text-[10px] text-muted-foreground leading-relaxed">
-            {config.footerNotes}
-          </div>
-        {/if}
+      {#if printError}<p role="alert">{printError}</p>{/if}
+      <PrintDocument {config} data={sampleData} items={sampleItems}
+        copies={[config.copies[activeCopyIndex] ?? '打印联']} />
+      <div bind:this={pages} class="print-pages" hidden>
+        <PrintDocument {config} data={sampleData} items={sampleItems} />
       </div>
     </div>
   </div>

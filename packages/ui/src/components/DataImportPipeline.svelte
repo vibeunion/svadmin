@@ -12,6 +12,7 @@
     Loader2,
   } from '@lucide/svelte';
   import { cn } from '../utils.js';
+  import { parseImportRows } from '@svadmin/core';
   import FieldMappingBuilder, {
     type SourceField,
     type TargetField,
@@ -62,6 +63,7 @@
   let rawRows = $state<Record<string, unknown>[]>([]);
   let pasteContent = $state('');
   let isParsing = $state(false);
+  let pipelineError = $state('');
 
   // 映射规则
   let mappingRules = $state<FieldMappingRule[]>([]);
@@ -93,28 +95,22 @@
     }));
   });
 
-  // 简易 CSV 文本解析
   function parseCsvText(text: string) {
-    const lines = text.trim().split('\n').map((l) => l.trim()).filter(Boolean);
-    if (lines.length < 2) return;
-    const headerLine = lines[0];
-    if (!headerLine) return;
-    const headers = headerLine.split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
-    const rows: Record<string, unknown>[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (!line) continue;
-      const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
-      const obj: Record<string, unknown> = {};
-      headers.forEach((h, idx) => {
-        obj[h] = values[idx] ?? '';
-      });
-      rows.push(obj);
+    pipelineError = '';
+    isParsing = true;
+    try {
+      const rows = parseImportRows(text, 'pasted.csv', 'csv');
+      if (rows.length === 0) {
+        pipelineError = 'CSV 至少需要一条数据记录';
+        return;
+      }
+      rawRows = rows;
+      currentStep = 2;
+    } catch {
+      pipelineError = 'CSV 解析失败，请检查引号、列名、列数与导入大小';
+    } finally {
+      isParsing = false;
     }
-
-    rawRows = rows;
-    currentStep = 2;
   }
 
   // 根据当前映射规则计算转换后的规范数据行
@@ -242,6 +238,9 @@
 
   // 批量导入处理
   async function handleExecuteImport() {
+    if (isImporting || !onimport || rowErrorMap.size > 0) return;
+    pipelineError = '';
+    importResult = null;
     isImporting = true;
     importProgress = 10;
     currentStep = 4;
@@ -249,19 +248,13 @@
     // 过滤出完全合规的数据行
     const validRows = mappedRows.filter((_, idx) => !rowErrorMap.has(idx));
 
-    // 模拟或真实执行导入回调
     try {
       importProgress = 40;
-      if (onimport) {
-        const res = await onimport(validRows);
-        importResult = res;
-      } else {
-        importResult = {
-          successCount: validRows.length,
-          failCount: rawRows.length - validRows.length,
-        };
-      }
+      importResult = await onimport(validRows);
       importProgress = 100;
+    } catch {
+      pipelineError = '导入失败，请核实服务端结果后重试';
+      currentStep = 3;
     } finally {
       isImporting = false;
     }
@@ -272,6 +265,7 @@
     pasteContent = '';
     mappingRules = [];
     importResult = null;
+    pipelineError = '';
     currentStep = 1;
   }
 </script>
@@ -282,6 +276,7 @@
   )}
   data-svadmin-component="DataImportPipeline"
 >
+  {#if pipelineError}<p role="alert" class="p-4 text-sm text-destructive">{pipelineError}</p>{/if}
   <!-- 顶部主标题与步骤条 -->
   <div class="border-b border-border/60 p-5">
     <div class="flex flex-wrap items-center justify-between gap-4">
@@ -531,7 +526,7 @@
 
         <button
           type="button"
-          disabled={rowErrorMap.size > 0}
+          disabled={rowErrorMap.size > 0 || !onimport || isImporting}
           class="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50"
           onclick={handleExecuteImport}
         >
