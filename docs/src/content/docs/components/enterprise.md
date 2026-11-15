@@ -3588,25 +3588,6 @@ Helpdesk and customer support quick reply template drawer:
 />
 ```
 
-### `<SensitiveWordAuditor>` / `<ComplianceWordFilter>` & `<ContentModerationCenter>`
-
-Enterprise Sensitive Word Auditor & Content Risk Moderation Suite:
-- **Comprehensive Lexicon Management**: Manage categorised sensitive vocabularies (spam, violence, politics, pornography, custom) with severity tiers (critical, high, medium, low).
-- **Enforcement Strategy Configuration**: Direct blocking, automatic asterisk masking (`***`), or dispatching to manual auditor review.
-- **Interactive Live Scan Sandbox**: Instant real-time text analysis identifying matched violation substrings, offset indices, and sanitised text output.
-- **`<ContentModerationCenter>` Workflow Workbench**: Operational review queue supporting batch approval, rejection, and masked publication.
-
-```svelte
-<script lang="ts">
-  import { SensitiveWordAuditor, ContentModerationCenter } from '@svadmin/ui';
-
-  const words = [
-    { id: '1', word: 'guaranteed-returns', category: 'spam', action: 'block', severity: 'critical', enabled: true },
-  ];
-</script>
-
-<SensitiveWordAuditor {words} onSaveWords={(w) => console.log('Saved words:', w)} />
-<ContentModerationCenter />
 ### `<ContractClauseDiffViewer>` / `<LegalClauseComparator>`
 
 Enterprise legal contract clause comparison and compliance decision suite:
@@ -3722,4 +3703,24 @@ Features:
   targetLocale="en-US"
   onSave={(updated) => console.log('Saved translations:', updated)}
 />
+```
+### `<SensitiveWordAuditor>` / `<ComplianceWordFilter>` & `<ContentModerationCenter>`
+
+Enterprise Sensitive Word Auditor & Content Risk Moderation Suite:
+- **Comprehensive Lexicon Management**: Manage categorised sensitive vocabularies (spam, violence, politics, pornography, custom) with severity tiers (critical, high, medium, low).
+- **Enforcement Strategy Configuration**: Direct blocking, automatic asterisk masking (`***`), or dispatching to manual auditor review.
+- **Interactive Live Scan Sandbox**: Instant real-time text analysis identifying matched violation substrings, offset indices, and sanitised text output.
+- **`<ContentModerationCenter>` Workflow Workbench**: Operational review queue supporting batch approval, rejection, and masked publication.
+
+```svelte
+<script lang="ts">
+  import { SensitiveWordAuditor, ContentModerationCenter } from '@svadmin/ui';
+
+  const words = [
+    { id: '1', word: 'guaranteed-returns', category: 'spam', action: 'block', severity: 'critical', enabled: true },
+  ];
+</script>
+
+<SensitiveWordAuditor {words} onSaveWords={(w) => console.log('Saved words:', w)} />
+<ContentModerationCenter />
 ```
