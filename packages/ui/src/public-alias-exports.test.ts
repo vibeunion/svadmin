@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+  GatewayRouteEditor,
+  ApiRouteRuleCard,
+  RateLimitPolicyPanel,
+  CircuitBreakerCard,
   StepUpAuthModal,
   PrivilegeElevationModal,
   AuditSnapshotCapture,
   ComplianceEvidenceCard,
   MediaGallery,
   MultiModalMediaGallery,
+  I18nStudio,
+  TranslationManager,
   HotkeysHelpModal,
   HotkeysGuideModal,
   ResizableSplitter,
@@ -292,6 +298,10 @@ import {
   NotificationCenter,
   NotificationDrawer,
   GlobalNoticeDrawer,
+  ContractClauseDiffViewer,
+  LegalClauseComparator,
+  ElectronicSealInspector,
+  StampAuthenticityCard,
   ServiceDeskTicketCard,
   SupportTicketCard,
   CannedResponsePicker,
@@ -586,6 +596,16 @@ describe('public compatibility aliases', () => {
     expect(NotificationCenter).toBeDefined();
     expect(NotificationDrawer).toBeDefined();
     expect(GlobalNoticeDrawer).toBe(NotificationDrawer);
+    expect(I18nStudio).toBeDefined();
+    expect(TranslationManager).toBe(I18nStudio);
+    expect(ContractClauseDiffViewer).toBeDefined();
+    expect(LegalClauseComparator).toBe(ContractClauseDiffViewer);
+    expect(ElectronicSealInspector).toBeDefined();
+    expect(StampAuthenticityCard).toBe(ElectronicSealInspector);
+    expect(GatewayRouteEditor).toBeDefined();
+    expect(ApiRouteRuleCard).toBe(GatewayRouteEditor);
+    expect(RateLimitPolicyPanel).toBeDefined();
+    expect(CircuitBreakerCard).toBe(RateLimitPolicyPanel);
     expect(StepUpAuthModal).toBeDefined();
     expect(PrivilegeElevationModal).toBe(StepUpAuthModal);
     expect(AuditSnapshotCapture).toBeDefined();
