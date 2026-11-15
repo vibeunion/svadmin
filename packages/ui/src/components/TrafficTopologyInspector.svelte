@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import type { Snippet } from 'svelte';
   import {
     Network,
@@ -46,7 +46,7 @@
     /** 选中节点回调 */
     onSelectNode?: (nodeId: string) => void;
     /** 刷新拓扑数据回调 */
-    onRefresh?: () => void;
+    onRefresh?: () => void | Promise<void>;
     /** 自定义操作插槽 */
     actions?: Snippet | undefined;
     class?: string | undefined;
@@ -66,16 +66,32 @@
 
   let selectedNodeId = $state<string | null>(untrack(() => nodes[0]?.id ?? null));
   let isRefreshing = $state(false);
+  let refreshError = $state('');
+  let generation = 0;
+  let destroyed = false;
+  let observedRefresh = untrack(() => onRefresh);
+  $effect.pre(() => {
+    if (observedRefresh === onRefresh) return;
+    observedRefresh = onRefresh;
+    generation += 1;
+    isRefreshing = false;
+    refreshError = '';
+  });
+  onDestroy(() => { destroyed = true; generation += 1; });
 
   async function handleRefresh() {
-    if (isRefreshing) return;
+    if (isRefreshing || !onRefresh || destroyed) return;
+    const current = ++generation;
+    const callback = onRefresh;
+    const isCurrent = () => !destroyed && current === generation && callback === onRefresh;
     isRefreshing = true;
+    refreshError = '';
     try {
-      onRefresh?.();
+      await onRefresh();
+    } catch {
+      if (isCurrent()) refreshError = '拓扑刷新失败，请重试';
     } finally {
-      setTimeout(() => {
-        isRefreshing = false;
-      }, 500);
+      if (isCurrent()) isRefreshing = false;
     }
   }
 
@@ -159,7 +175,7 @@
       <button
         type="button"
         class="flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-        disabled={isRefreshing}
+        disabled={isRefreshing || !onRefresh}
         onclick={handleRefresh}
       >
         <RefreshCw class={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin text-primary')} />
@@ -171,6 +187,7 @@
       {/if}
     </div>
   </header>
+  {#if refreshError}<p role="alert" class="p-4 text-xs text-destructive">{refreshError}</p>{/if}
 
   <!-- 拓扑工作区：主拓扑矩阵 + 节点详情抽屉 -->
   <div class="grid grid-cols-1 divide-y divide-border lg:grid-cols-12 lg:divide-x lg:divide-y-0 text-xs">

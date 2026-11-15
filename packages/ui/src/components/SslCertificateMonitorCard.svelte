@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import {
     Lock,
     Globe,
@@ -30,9 +31,9 @@
     /** SSL/TLS 证书监控数据 */
     certificate: SslCertificateData;
     /** 自动续期触发回调 */
-    onTriggerAutoRenew?: (certId: string) => void;
+    onTriggerAutoRenew?: (certId: string) => void | Promise<void>;
     /** 重新扫描证书链状态回调 */
-    onRecheckChain?: (certId: string) => void;
+    onRecheckChain?: (certId: string) => void | Promise<void>;
     /** 自定义操作栏插槽 */
     actions?: Snippet | undefined;
     class?: string | undefined;
@@ -46,30 +47,41 @@
     class: className = ''
   }: SslCertificateMonitorCardProps = $props();
 
-  let isRenewing = $state(false);
-  let isChecking = $state(false);
-
-  async function handleAutoRenew() {
-    if (isRenewing) return;
-    isRenewing = true;
-    try {
-      onTriggerAutoRenew?.(certificate.id);
-    } finally {
-      setTimeout(() => {
-        isRenewing = false;
-      }, 500);
+  let pending = $state({ renew: false, check: false });
+  let errors = $state({ renew: '', check: '' });
+  const generations = { renew: 0, check: 0 };
+  let destroyed = false;
+  let observed = untrack(() => ({ id: certificate.id, onTriggerAutoRenew, onRecheckChain }));
+  $effect.pre(() => {
+    if (certificate.id !== observed.id || onTriggerAutoRenew !== observed.onTriggerAutoRenew) {
+      generations.renew += 1;
+      pending.renew = false;
+      errors.renew = '';
     }
-  }
+    if (certificate.id !== observed.id || onRecheckChain !== observed.onRecheckChain) {
+      generations.check += 1;
+      pending.check = false;
+      errors.check = '';
+    }
+    observed = { id: certificate.id, onTriggerAutoRenew, onRecheckChain };
+  });
+  onDestroy(() => { destroyed = true; generations.renew += 1; generations.check += 1; });
 
-  async function handleRecheck() {
-    if (isChecking) return;
-    isChecking = true;
+  async function runCertificateAction(action: 'renew' | 'check') {
+    const callback = action === 'renew' ? onTriggerAutoRenew : onRecheckChain;
+    if (pending[action] || !callback || destroyed) return;
+    const scope = generations[action];
+    const certId = certificate.id;
+    const isCurrent = () => !destroyed && generations[action] === scope && certificate.id === certId
+      && callback === (action === 'renew' ? onTriggerAutoRenew : onRecheckChain);
+    pending[action] = true;
+    errors[action] = '';
     try {
-      onRecheckChain?.(certificate.id);
+      await callback(certificate.id);
+    } catch {
+      if (isCurrent()) errors[action] = action === 'renew' ? '证书续期失败，请重试' : '证书链检查失败，请重试';
     } finally {
-      setTimeout(() => {
-        isChecking = false;
-      }, 500);
+      if (isCurrent()) pending[action] = false;
     }
   }
 
@@ -112,7 +124,7 @@
       label: `证书正常 (${daysRemaining}天)`,
       border: 'border-success/30',
       badgeClass: 'bg-success/15 text-success border-success/30 dark:text-success',
-      desc: 'SSL/TLS 证书生命周期处于安全区间，CA 权威信任链与 OCSP 状态核验完备。'
+      desc: '证书剩余有效期超过 30 天；信任链及吊销状态须以实际核验结果为准。'
     };
   }
 
@@ -196,10 +208,10 @@
       <button
         type="button"
         class="flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-        disabled={isChecking}
-        onclick={handleRecheck}
+        disabled={pending.check || !onRecheckChain}
+        onclick={() => runCertificateAction('check')}
       >
-        <RefreshCw class={cn('h-3.5 w-3.5', isChecking && 'animate-spin text-primary')} />
+        <RefreshCw class={cn('h-3.5 w-3.5', pending.check && 'animate-spin text-primary')} />
         校验证书链
       </button>
 
@@ -207,10 +219,10 @@
         <button
           type="button"
           class="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 disabled:opacity-50"
-          disabled={isRenewing}
-          onclick={handleAutoRenew}
+          disabled={pending.renew}
+          onclick={() => runCertificateAction('renew')}
         >
-          <RefreshCw class={cn('h-3.5 w-3.5', isRenewing && 'animate-spin')} />
+          <RefreshCw class={cn('h-3.5 w-3.5', pending.renew && 'animate-spin')} />
           立即续期
         </button>
       {/if}
@@ -220,6 +232,8 @@
       {/if}
     </div>
   </header>
+  {#if errors.renew}<p role="alert" class="p-4 text-xs text-destructive">{errors.renew}</p>{/if}
+  {#if errors.check}<p role="alert" class="p-4 text-xs text-destructive">{errors.check}</p>{/if}
 
   <!-- 中间：证书参数属性表 -->
   <div class="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0 text-xs">
@@ -235,6 +249,8 @@
             <CheckCircle2 class="h-3 w-3" />
             证书链完整
           </span>
+        {:else}
+          <span>{certificate.chainComplete === false ? '证书链不完整' : '证书链状态未知'}</span>
         {/if}
       </div>
 
@@ -242,13 +258,13 @@
         <div>
           <span>加密公钥算法：</span>
           <strong class="text-foreground font-mono block pt-0.5">
-            {certificate.algorithm || 'RSA 2048-bit'}
+            {certificate.algorithm || '未提供'}
           </strong>
         </div>
         <div>
           <span>OCSP Stapling：</span>
           <span class="text-foreground block pt-0.5">
-            {certificate.ocspStaplingEnabled ? '已启用 (高安全)' : '未启用'}
+            {certificate.ocspStaplingEnabled === undefined ? '未知' : certificate.ocspStaplingEnabled ? '已启用' : '未启用'}
           </span>
         </div>
         <div>
@@ -260,8 +276,9 @@
         <div>
           <span>支持 TLS 协议：</span>
           <div class="flex gap-1 pt-0.5 font-mono">
-            {#each certificate.tlsVersions || ['TLS 1.2', 'TLS 1.3'] as tls (tls)}
+            {#each certificate.tlsVersions ?? [] as tls (tls)}
               <span class="rounded bg-muted px-1.5 py-0.2 text-[10px] text-foreground">{tls}</span>
+            {:else}<span>{certificate.tlsVersions ? '未报告支持版本' : '未提供'}</span>
             {/each}
           </div>
         </div>
