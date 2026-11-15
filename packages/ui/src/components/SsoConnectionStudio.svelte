@@ -1,5 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { defaultSsoConnections } from './sso-connection-presets.js';
+  import SsoSpMetadataPanel from './SsoSpMetadataPanel.svelte';
 
   export type SsoProtocol = 'saml' | 'oidc' | 'oauth2' | 'feishu' | 'dingtalk' | 'wecom';
   export type SsoStatus = 'active' | 'inactive' | 'testing';
@@ -60,64 +62,7 @@
   // Internal reactive items
   let connList = $state<SsoConnection[]>(untrack(() => connections.length > 0
     ? connections.map(c => ({ ...c, domains: [...c.domains], claimMappings: c.claimMappings ? [...c.claimMappings] : [] }))
-    : [
-          {
-            id: 'conn-okta-saml',
-            name: 'Corporate Okta SSO',
-            protocol: 'saml',
-            status: 'active',
-            domains: ['corp.example.com', 'partner.example.com'],
-            isDefault: true,
-            entityId: 'http://www.okta.com/exk1234567890abcdef',
-            ssoUrl: 'https://corp.okta.com/app/svadmin/exk1234567890abcdef/sso/saml',
-            certificate: 'MIIDpDCCAoygAwIBAgIGAV...[X.509 Certificate]...EXAMPLEDATA',
-            claimMappings: [
-              { remoteClaim: 'email', localField: 'email' },
-              { remoteClaim: 'firstName', localField: 'first_name' },
-              { remoteClaim: 'lastName', localField: 'last_name' },
-              { remoteClaim: 'department', localField: 'department' },
-            ],
-            lastTestedAt: '2026-11-14 18:30',
-            testStatus: 'success',
-            testMessage: 'Handshake 200 OK. Signature verified.',
-          },
-          {
-            id: 'conn-azure-oidc',
-            name: 'Microsoft Entra ID (Azure AD)',
-            protocol: 'oidc',
-            status: 'active',
-            domains: ['cloud.example.org'],
-            isDefault: false,
-            clientId: '9f8b4a2c-1d3e-4f5a-8b9c-0d1e2f3a4b5c',
-            clientSecret: 'ms_sec_••••••••••••••••',
-            discoveryUrl: 'https://login.microsoftonline.com/tenant-id/v2.0/.well-known/openid-configuration',
-            scopes: ['openid', 'profile', 'email'],
-            claimMappings: [
-              { remoteClaim: 'preferred_username', localField: 'email' },
-              { remoteClaim: 'name', localField: 'display_name' },
-            ],
-            lastTestedAt: '2026-11-14 17:15',
-            testStatus: 'success',
-            testMessage: 'Discovery endpoint parsed. OIDC JWKS valid.',
-          },
-          {
-            id: 'conn-feishu-suite',
-            name: '飞书自建应用企业登录',
-            protocol: 'feishu',
-            status: 'inactive',
-            domains: ['feishu.internal'],
-            isDefault: false,
-            appId: 'cli_a1b2c3d4e5f6g7h8',
-            appSecret: 'secret_••••••••••••',
-            claimMappings: [
-              { remoteClaim: 'open_id', localField: 'sso_uid' },
-              { remoteClaim: 'name', localField: 'display_name' },
-              { remoteClaim: 'mobile', localField: 'phone' },
-            ],
-            lastTestedAt: '2026-11-10 09:00',
-            testStatus: 'untested',
-          },
-        ]));
+    : structuredClone(defaultSsoConnections)))
 
   // Filters & Search
   let searchQuery = $state('');
@@ -407,40 +352,7 @@
 
   <!-- SP Metadata Panel -->
   {#if showSpMetadata}
-    <div class="p-4 rounded-lg bg-muted/40 border border-border flex flex-col gap-3">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-foreground uppercase tracking-wider">系统服务提供商 (SP) 对接参数</span>
-        <span class="text-[11px] text-muted-foreground">请将此配置填入您的 Okta / Azure AD / Keycloak 中</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-        <div class="flex flex-col gap-1 p-2.5 rounded bg-card border border-border">
-          <span class="text-muted-foreground font-medium">SP Entity ID (Audience URI):</span>
-          <div class="flex items-center justify-between font-mono text-[11px] text-foreground break-all">
-            <span>{spEntityId}</span>
-            <button
-              type="button"
-              onclick={() => copyText(spEntityId, 'SP Entity ID')}
-              class="ml-2 px-1.5 py-0.5 text-[10px] font-sans rounded bg-muted hover:bg-muted/80 text-muted-foreground"
-            >
-              复制
-            </button>
-          </div>
-        </div>
-        <div class="flex flex-col gap-1 p-2.5 rounded bg-card border border-border">
-          <span class="text-muted-foreground font-medium">ACS URL (Single Sign-On Callback):</span>
-          <div class="flex items-center justify-between font-mono text-[11px] text-foreground break-all">
-            <span>{spAcsUrl}</span>
-            <button
-              type="button"
-              onclick={() => copyText(spAcsUrl, 'ACS URL')}
-              class="ml-2 px-1.5 py-0.5 text-[10px] font-sans rounded bg-muted hover:bg-muted/80 text-muted-foreground"
-            >
-              复制
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <SsoSpMetadataPanel {spEntityId} {spAcsUrl} onCopy={copyText} />
   {/if}
 
   <!-- Metrics Strip -->
