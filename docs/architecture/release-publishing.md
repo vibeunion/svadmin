@@ -86,6 +86,12 @@ publication job cannot hide an intentionally unpublished target.
 
 ## Operating rules
 
+- The Surface minimum consumer keeps the declared core/UI/Svelte versions and
+  pins the UI-to-devtools runtime edge to published `0.6.12`. Newer devtools
+  releases require a newer core; this historical fixture must not drift to them.
+  Strict peer checking remains enabled, and the workspace-packed consumer still
+  tests current tarballs without this pin. This proves the fixed historical
+  combination, not an unlocked fresh installation of the old UI release.
 - Never re-publish or move a tag whose npm version already exists; the loop
   skips published versions and fails on anything else.
 - `force_publish` only bypasses the test/e2e gates for a tag that already

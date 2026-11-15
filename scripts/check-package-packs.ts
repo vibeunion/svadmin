@@ -1466,6 +1466,12 @@ interface SurfaceCompatibility {
   };
 }
 
+// UI 0.127.0 的 ^0.6.12 会选到要求 core ^0.83.0 的新版 devtools。
+// 最低组合固定兼容的已发布运行时，不覆盖其 peer 声明或使用当前源码 tarball。
+export const surfaceMinimumRuntimeOverrides: Readonly<Record<string, string>> = {
+  '@svadmin/ui>@svadmin/devtools': '0.6.12',
+};
+
 async function verifySurfaceCompatibility(
   packDirectory: string,
   results: Map<string, PackResult>,
@@ -1502,12 +1508,14 @@ async function verifySurfaceCompatibility(
       core: `file:${join(packDirectory, corePack.filename)}`,
       ui: `file:${join(packDirectory, uiPack.filename)}`,
       svelte: workspaceSvelte,
+      runtimeOverrides: {},
     },
     {
       name: 'minimum-supported',
       core: compatibility.minimumSupported['@svadmin/core'],
       ui: compatibility.minimumSupported['@svadmin/ui'],
       svelte: compatibility.minimumSupported.svelte,
+      runtimeOverrides: surfaceMinimumRuntimeOverrides,
     },
   ] as const;
 
@@ -1552,7 +1560,7 @@ async function verifySurfaceCompatibility(
         `export default { plugins: [svelte()], build: { lib: { entry: 'entry.ts', formats: ['es'] } } };\n`,
     );
 
-    await configurePackedPnpmConsumer(consumerDirectory, manifests);
+    await configurePackedPnpmConsumer(consumerDirectory, manifests, combination.runtimeOverrides);
     run('npx', [
       '--yes',
       `pnpm@${pnpmVersion}`,
