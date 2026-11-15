@@ -24,61 +24,7 @@
   }: DataRetentionPolicyEditorProps = $props();
 
   // Internal reactive policies
-  let policyList = $state<RetentionPolicy[]>(untrack(() => initialPolicies.length > 0
-      ? initialPolicies.map(p => ({ ...p }))
-      : [
-          {
-            id: 'ret-1',
-            name: '用户操作审计日志留存归档',
-            resource: 'audit_logs',
-            retentionDays: 180,
-            action: 'archive_cold_storage',
-            status: 'active',
-            targetStorage: 's3://corp-compliance-vault/audit_logs/',
-            filterCondition: "event_level != 'CRITICAL_SECURITY'",
-            estimatedRows: 1450000,
-            estimatedStorageMb: 3600,
-            lastExecutedAt: '2026-11-15 02:00',
-            scheduleCron: '0 2 * * *',
-          },
-          {
-            id: 'ret-2',
-            name: '临时数据导出报表定期物理销毁',
-            resource: 'temp_exports',
-            retentionDays: 7,
-            action: 'hard_delete',
-            status: 'active',
-            estimatedRows: 4200,
-            estimatedStorageMb: 8500,
-            lastExecutedAt: '2026-11-15 03:00',
-            scheduleCron: '0 3 * * *',
-          },
-          {
-            id: 'ret-3',
-            name: '已注销企业租户数据脱敏归档',
-            resource: 'tenant_records',
-            retentionDays: 365,
-            action: 'mask_and_archive',
-            status: 'active',
-            targetStorage: 's3://corp-glacier-cold/tenant_archive/',
-            filterCondition: "tenant_status = 'deleted'",
-            estimatedRows: 86000,
-            estimatedStorageMb: 1200,
-            lastExecutedAt: '2026-11-01 04:00',
-            scheduleCron: '0 4 1 * *',
-          },
-          {
-            id: 'ret-4',
-            name: '已读站内系统通知定时软清理',
-            resource: 'notifications',
-            retentionDays: 90,
-            action: 'soft_delete',
-            status: 'paused',
-            filterCondition: 'is_read = true',
-            estimatedRows: 220000,
-            estimatedStorageMb: 450,
-          },
-        ]));
+  let policyList = $state<RetentionPolicy[]>(untrack(() => initialPolicies.map(policy => ({ ...policy }))));
 
   const metrics = $derived(calculateRetentionMetrics(policyList));
   const conflicts = $derived(detectPolicyConflicts(policyList));
@@ -88,10 +34,11 @@
   let editId = $state('');
   let editName = $state('');
   let editResource = $state('audit_logs');
-  let editDays = $state(180);
+  let editDays = $state<number | undefined>(180);
   let editAction = $state<RetentionAction>('archive_cold_storage');
   let editTargetStorage = $state('');
   let editCondition = $state('');
+  let validationError = $state('');
 
   // Search & Filter
   let searchQuery = $state('');
@@ -113,11 +60,12 @@
   function openCreateModal() {
     editId = `ret-${Date.now()}`;
     editName = '';
-    editResource = 'audit_logs';
+    editResource = '';
     editDays = 180;
     editAction = 'archive_cold_storage';
-    editTargetStorage = 's3://corp-compliance-vault/';
+    editTargetStorage = '';
     editCondition = '';
+    validationError = '';
     isEditing = true;
   }
 
@@ -129,27 +77,45 @@
     editAction = p.action;
     editTargetStorage = p.targetStorage || '';
     editCondition = p.filterCondition || '';
+    validationError = '';
     isEditing = true;
   }
 
   function savePolicy() {
-    if (!editName.trim()) return;
+    validationError = '';
+    if (!editName.trim() || !editResource.trim()) {
+      validationError = '规则名称和目标数据资源不能为空';
+      return;
+    }
+    if (typeof editDays !== 'number' || !Number.isSafeInteger(editDays) || editDays < 1) {
+      validationError = '保留期限必须为正整数天数';
+      return;
+    }
+    const requiresStorage = editAction === 'archive_cold_storage' || editAction === 'mask_and_archive';
+    if (requiresStorage && !editTargetStorage.trim()) {
+      validationError = '归档动作必须填写目标存储路径';
+      return;
+    }
     const existingIndex = policyList.findIndex(p => p.id === editId);
+    const previous = policyList[existingIndex];
     const item: RetentionPolicy = {
+      ...previous,
       id: editId,
       name: editName.trim(),
       resource: editResource.trim(),
       retentionDays: editDays,
       action: editAction,
-      status: 'active',
-      ...(editTargetStorage.trim() ? { targetStorage: editTargetStorage.trim() } : {}),
-      ...(editCondition.trim() ? { filterCondition: editCondition.trim() } : {}),
-      estimatedRows: 10000,
-      estimatedStorageMb: 500,
+      status: previous?.status ?? 'draft',
+      estimatedRows: previous?.estimatedRows ?? 0,
+      estimatedStorageMb: previous?.estimatedStorageMb ?? 0,
     };
+    delete item.targetStorage;
+    delete item.filterCondition;
+    if (requiresStorage) item.targetStorage = editTargetStorage.trim();
+    if (editCondition.trim()) item.filterCondition = editCondition.trim();
 
     if (existingIndex >= 0) {
-      policyList[existingIndex] = { ...policyList[existingIndex], ...item };
+      policyList[existingIndex] = item;
     } else {
       policyList = [...policyList, item];
     }
@@ -358,7 +324,7 @@
                   onclick={() => toggleStatus(item)}
                   class="text-[11px] px-2 py-0.5 rounded font-medium transition-colors {item.status === 'active' ? 'bg-success/15 text-success dark:text-success' : 'bg-muted text-muted-foreground'}"
                 >
-                  {item.status === 'active' ? '已生效' : '已暂停'}
+                  {item.status === 'active' ? '已生效' : item.status === 'draft' ? '草稿' : '已暂停'}
                 </button>
               </td>
               <td class="p-3 text-right">
@@ -478,6 +444,7 @@
           </div>
         </div>
 
+        {#if validationError}<p role="alert" class="text-destructive">{validationError}</p>{/if}
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-border">
           <button type="button" onclick={() => (isEditing = false)} class="px-3 py-1.5 rounded border border-border bg-card">取消</button>
           <button type="button" onclick={savePolicy} class="px-3 py-1.5 rounded bg-primary text-primary-foreground font-semibold">保存规则</button>
