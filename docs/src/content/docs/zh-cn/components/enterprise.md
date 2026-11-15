@@ -3662,3 +3662,70 @@ AI 规则语义解释卡片：
   items={[{ name: '工业交换机', quantity: 2, total_amount: 1300 }]}
 />
 ```
+
+### `<AudioVisualInspector>` / `<MediaInspectionCard>`
+
+企业级音视频质检与媒体合规审查工作台：
+- **波形图时间轴可视化**：纯 SVG 交互式波形谱图，支持任意时间点拖拽寻道（Seek）、多倍速播放（1.0x~2.0x）与静音切换。
+- **违规时间点精准打标**：直观展示轻微瑕疵、业务违规、合规红线图钉，点击时间戳瞬间跳转对应音视频段落。
+- **质检得分动态推演**：根据违规扣分项自动推导 0-100 综合分值与质检合格/整改/不合格状态胶囊。
+- **就地快速扣分打标**：支持质检员在当前播放时刻一键输入违规事项并保存质检记录。
+
+```svelte
+<script lang="ts">
+  import { AudioVisualInspector, type AudioVisualMediaMeta, type ViolationMarker } from '@svadmin/ui';
+
+  const media: AudioVisualMediaMeta = {
+    title: '客服呼叫中心录音_10086.wav',
+    mediaType: 'audio',
+    durationSeconds: 180,
+    operatorName: '李客服',
+  };
+
+  const violations: ViolationMarker[] = [
+    { id: 'v1', timestampSeconds: 45, title: '未主动报工号', level: 'minor', deduction: 5 },
+  ];
+</script>
+
+<AudioVisualInspector
+  {media}
+  {violations}
+  onSeek={(seconds) => console.log('跳转至:', seconds)}
+  onAddViolation={(time, title, level) => console.log('新增违规:', time, title, level)}
+/>
+```
+
+### `<MediaAuthenticityAuditCard>` / `<ExifMetadataAuditor>`
+
+企业级多媒体防伪、EXIF 元数据溯源与盲水印检测卡片：
+- **原始 EXIF 拍摄参数解析**：提取相机品牌型号（如 iPhone / Sony）、光圈、快门、ISO、焦距与原始拍摄时间。
+- **GPS 空间地理坐标**：提取精准经纬度、海拔高度与反查街区地址。
+- **篡改检测与风险指数**：分析二次重编码签名、修改时间戳漂移、生成 0~100% 篡改嫌疑指数与四态风险告警。
+- **隐形数字盲水印提取**：检测多媒体内部嵌合的租户标识、员工工号与存证哈希，支持导出防伪存证报告。
+
+```svelte
+<script lang="ts">
+  import { MediaAuthenticityAuditCard, type MediaAuthenticityData } from '@svadmin/ui';
+
+  const data: MediaAuthenticityData = {
+    id: 'media-001',
+    fileName: '现场查勘照片.jpg',
+    fileSizeMb: 3.8,
+    mimeType: 'image/jpeg',
+    riskLevel: 'safe',
+    tamperConfidencePercent: 5,
+    exif: {
+      make: 'Apple',
+      model: 'iPhone 15 Pro Max',
+      capturedAt: '2026-11-14 14:22:05',
+    },
+    auditFindings: ['EXIF 拍摄链路完整', '未见图像处理软件重保存痕迹'],
+  };
+</script>
+
+<MediaAuthenticityAuditCard
+  {data}
+  onExportEvidence={(d) => console.log('导出防伪报告:', d.fileName)}
+  onRecheck={(id) => console.log('重新核验:', id)}
+/>
+```
