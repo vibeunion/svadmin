@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SsoConnectionStudio,
+  IdentityProviderManager,
   GatewayRouteEditor,
   ApiRouteRuleCard,
   RateLimitPolicyPanel,
@@ -610,6 +612,8 @@ describe('public compatibility aliases', () => {
     expect(SupportTicketCard).toBe(ServiceDeskTicketCard);
     expect(CannedResponsePicker).toBeDefined();
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
+    expect(SsoConnectionStudio).toBeDefined();
+    expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });
 
   it('keeps service aliases bound to canonical services', () => {
