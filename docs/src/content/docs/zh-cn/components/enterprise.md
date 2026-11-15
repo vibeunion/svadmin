@@ -3751,6 +3751,61 @@ AI 规则语义解释卡片：
 <ContentModerationCenter />
 ```
 
+### `<TrafficTopologyInspector>` / `<ClusterTrafficVisualizer>`
+
+多云与分布式微服务实时流量拓扑与链路监控工作台：
+- **微服务调用链路流向**：可视化展现 Ingress 网关至核心业务微服务与存储中间件的实时调用关系边与分流权重。
+- **全集群健康度遥测**：汇聚全集群吞吐 QPS、p99 端到端耗时与 5xx 错误率指标卡片。
+- **动态故障旁路切流**：支持将高延迟、故障抖动或遭遇雪崩的节点一键从路由池熔断旁路，防止系统全链路雪崩。
+
+```svelte
+<script lang="ts">
+  import { TrafficTopologyInspector, type TopologyNode } from '@svadmin/ui';
+
+  const nodes: TopologyNode[] = [
+    { id: 'gw-1', label: 'API Ingress Gateway', type: 'gateway', status: 'healthy', qps: 12500, latencyMsP99: 12, errorRatePercent: 0.01 },
+    { id: 'srv-order', label: 'Order Center Service', type: 'service', status: 'healthy', qps: 8400, latencyMsP99: 45, errorRatePercent: 0.05 },
+  ];
+</script>
+
+<TrafficTopologyInspector
+  {nodes}
+  onToggleBypass={(id, bypassed) => console.log('旁路状态切换:', id, bypassed)}
+/>
+```
+
+### `<SslCertificateMonitorCard>` / `<TlsCertExpiryRadar>`
+
+企业级 SSL/TLS 数字证书全生命周期监控与到期预警雷达：
+- **到期倒计时雷达环**：直观展示证书剩余有效天数，按安全（>30天）、预警（<=30天）、高危（<=7天）与已过期（<=0天）动态切换状态。
+- **SAN 备用域名覆盖清单**：解析展示主域名及所有通配符备用名称（Subject Alternative Names）。
+- **密码学规格与协议特性**：审查加密算法（RSA/ECC/SM2）、OCSP Stapling 状态以及支持的 TLS 协议版本。
+- **自动化运维续期联动**：支持一键触发 ACME 协议自动续期任务与证书链完整性即时复核。
+
+```svelte
+<script lang="ts">
+  import { SslCertificateMonitorCard, type SslCertificateData } from '@svadmin/ui';
+
+  const cert: SslCertificateData = {
+    id: 'cert-1',
+    domain: 'api.svadmin.io',
+    issuer: 'DigiCert Global Root CA',
+    validFrom: '2026-01-01',
+    validTo: '2026-12-31',
+    daysRemaining: 18,
+    algorithm: 'ECDSA P-256',
+    autoRenewEnabled: true,
+    chainComplete: true,
+  };
+</script>
+
+<SslCertificateMonitorCard
+  certificate={cert}
+  onTriggerAutoRenew={(id) => console.log('触发证书自动续期:', id)}
+  onRecheckChain={(id) => console.log('复核证书链:', id)}
+/>
+```
+
 ## 企业员工离职交接与特权访问回收套件
 
 ### `<EmployeeOffboardingAuditor>` / `<HandoverChecklistDrawer>`
