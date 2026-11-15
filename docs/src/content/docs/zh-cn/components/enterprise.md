@@ -3730,6 +3730,27 @@ AI 规则语义解释卡片：
 />
 ```
 
+### `<SensitiveWordAuditor>` / `<ComplianceWordFilter>` 与 `<ContentModerationCenter>`
+
+企业敏感词合规审查与内容风控工作台套件：
+- **多维度敏感词库管理**：分类支持广告引流、欺诈、涉政、暴恐、涉黄及业务自定义违禁词，支持严重级别（严重、高危、中等、低）。
+- **处置策略配置**：支持违规直接拦截、星号自动脱敏替换（如 `***`）与人工复审流转。
+- **实时在线检测沙箱**：输入富文本实时呈现命中违规词位置、风险分值与脱敏预览文本。
+- **`<ContentModerationCenter>` 审核工作台**：待审核工单流转卡片，支持一键放行通过、驳回打回或强制脱敏后发布。
+
+```svelte
+<script lang="ts">
+  import { SensitiveWordAuditor, ContentModerationCenter } from '@svadmin/ui';
+
+  const words = [
+    { id: '1', word: '保本高收益', category: 'spam', action: 'block', severity: 'critical', enabled: true },
+  ];
+</script>
+
+<SensitiveWordAuditor {words} onSaveWords={(w) => console.log('保存词库:', w)} />
+<ContentModerationCenter />
+```
+
 ### `<TrafficTopologyInspector>` / `<ClusterTrafficVisualizer>`
 
 多云与分布式微服务实时流量拓扑与链路监控工作台：
