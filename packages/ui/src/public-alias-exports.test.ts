@@ -4,6 +4,8 @@ import {
   DocumentPrintStudio,
   PrintPreviewModal,
   DocumentPrintPreview,
+  SsoConnectionStudio,
+  IdentityProviderManager,
   GatewayRouteEditor,
   ApiRouteRuleCard,
   RateLimitPolicyPanel,
@@ -618,6 +620,8 @@ describe('public compatibility aliases', () => {
     expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
     expect(PrintPreviewModal).toBeDefined();
     expect(DocumentPrintPreview).toBe(PrintPreviewModal);
+    expect(SsoConnectionStudio).toBeDefined();
+    expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });
 
   it('keeps service aliases bound to canonical services', () => {

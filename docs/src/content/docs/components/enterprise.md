@@ -3704,6 +3704,39 @@ Features:
   onSave={(updated) => console.log('Saved translations:', updated)}
 />
 ```
+### `<SsoConnectionStudio>` / `<IdentityProviderManager>`
+
+Enterprise Multi-protocol Single Sign-On (SSO) Connection Studio:
+- **Multi-protocol & Office Ecosystem Support**: First-party support for SAML 2.0, OpenID Connect (OIDC), OAuth 2.0, Feishu, DingTalk, and WeChat Work enterprise self-built apps.
+- **Domain Matching & Smart Routing**: Match user email domains (e.g. `@acme.com`) and automatically route login requests to the customer's dedicated IdP.
+- **Attribute Claims Mapping**: Visually map external IdP claims (`sub`, `email`, `department`, `roles`) into local user account fields.
+- **Connectivity & Handshake Sandbox**: Live simulated probe to test SP-IdP metadata connectivity, certificate validity, and endpoint reachability.
+
+```svelte
+<script lang="ts">
+  import { SsoConnectionStudio } from '@svadmin/ui';
+
+  const connections = [
+    {
+      id: 'conn-okta',
+      name: 'Okta Enterprise SSO',
+      protocol: 'saml',
+      status: 'active',
+      domains: ['acme.com'],
+      isDefault: true,
+      entityId: 'http://www.okta.com/exk1234567890abcdef',
+      ssoUrl: 'https://acme.okta.com/app/svadmin/sso/saml',
+    },
+  ];
+</script>
+
+<SsoConnectionStudio
+  {connections}
+  spEntityId="https://auth.svadmin.internal/saml/metadata"
+  spAcsUrl="https://auth.svadmin.internal/saml/acs"
+  onSave={(conn) => console.log('Saved SSO connection:', conn)}
+/>
+```
 ### `<PrintTemplateDesigner>` / `<DocumentPrintStudio>` & `<PrintPreviewModal>`
 
 Enterprise Bill Print Template Designer & High-Fidelity Printable Suite:
