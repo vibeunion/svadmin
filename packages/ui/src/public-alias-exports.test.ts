@@ -4,6 +4,10 @@ import {
   HandoverChecklistDrawer,
   AccessRevocationMatrix,
   PrivilegeDeprovisionCard,
+  PrintTemplateDesigner,
+  DocumentPrintStudio,
+  PrintPreviewModal,
+  DocumentPrintPreview,
   SsoConnectionStudio,
   IdentityProviderManager,
   GatewayRouteEditor,
@@ -621,6 +625,10 @@ describe('public compatibility aliases', () => {
     expect(HandoverChecklistDrawer).toBe(EmployeeOffboardingAuditor);
     expect(AccessRevocationMatrix).toBeDefined();
     expect(PrivilegeDeprovisionCard).toBe(AccessRevocationMatrix);
+    expect(PrintTemplateDesigner).toBeDefined();
+    expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
+    expect(PrintPreviewModal).toBeDefined();
+    expect(DocumentPrintPreview).toBe(PrintPreviewModal);
     expect(SsoConnectionStudio).toBeDefined();
     expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });
