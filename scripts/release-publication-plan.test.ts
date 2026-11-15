@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { planReleasePublication } from './plan-release-publication';
+import { verifyReleaseManifest } from './verify-release-manifest';
 
 interface FixturePackage {
   path: string;
@@ -22,7 +23,10 @@ function createRepositoryFixture(
       join(root, 'release-please-config.json'),
       JSON.stringify({
         packages: Object.fromEntries(
-          releaseConfigPackages.map((packagePath) => [packagePath, { 'release-type': 'node' }]),
+          releaseConfigPackages.map((packagePath) => [
+            packagePath,
+            { 'release-type': 'node', component: packagePath.slice('packages/'.length) },
+          ]),
         ),
       }),
     );
@@ -202,6 +206,63 @@ describe('release publication planning', () => {
           isPackageVersionPublished: (name, version) => published.has(`${name}@${version}`),
         }),
       ).toEqual([supabase.path, missingPackage.path]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('requires explicit approval before a discovered missing version can be published', () => {
+    const root = createRepositoryFixture(
+      [refineAdapter, supabase],
+      [refineAdapter.path, supabase.path],
+    );
+    const releaseSha = 'a'.repeat(40);
+    const releaseManifest = JSON.stringify([{ path: supabase.path, tag: 'supabase-v0.11.8' }]);
+    try {
+      const releasePaths = planReleasePublication({
+        repositoryRoot: root,
+        releaseManifest,
+        includeMissingVersions: true,
+        isPackageVersionPublished: () => false,
+      });
+      expect(releasePaths).toEqual([refineAdapter.path, supabase.path]);
+      expect(() => verifyReleaseManifest({
+        repositoryRoot: root,
+        releaseSha,
+        releaseManifest,
+        releasePaths,
+        resolveTagSha: () => releaseSha,
+      })).toThrow('Publication plan includes packages/refine-adapter outside the approved release manifest');
+      expect(verifyReleaseManifest({
+        repositoryRoot: root,
+        releaseSha,
+        releaseManifest: JSON.stringify([
+          { path: supabase.path, tag: 'supabase-v0.11.8' },
+          { path: refineAdapter.path, tag: 'refine-adapter-v0.10.0' },
+        ]),
+        releasePaths,
+        resolveTagSha: () => releaseSha,
+      })).toHaveLength(2);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('recovers an explicit target without unrelated historical missing versions', () => {
+    const root = createRepositoryFixture(
+      [refineAdapter, supabase],
+      [refineAdapter.path, supabase.path],
+    );
+    try {
+      expect(planReleasePublication({
+        repositoryRoot: root,
+        releaseManifest: JSON.stringify([
+          { path: refineAdapter.path, tag: 'refine-adapter-v0.10.0' },
+        ]),
+        isPackageVersionPublished: () => {
+          throw new Error('unrelated historical versions must not be queried');
+        },
+      })).toEqual([refineAdapter.path]);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
