@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.83.1](https://github.com/vibeunion/svadmin/compare/core-v0.83.0...core-v0.83.1) (2026-11-15)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** repair CSV, financial printing, and media audit contracts ([713b50d](https://github.com/vibeunion/svadmin/commit/713b50da9ce0ae7bc3870021c04f6f875d2008d8))
+* **ui:** repair import printing and media audit contracts ([ca02195](https://github.com/vibeunion/svadmin/commit/ca02195d64dfe53440dc934330ce6b2de18c8aaf))
+
 ## [0.83.0](https://github.com/vibeunion/svadmin/compare/core-v0.82.0...core-v0.83.0) (2026-11-14)
 
 

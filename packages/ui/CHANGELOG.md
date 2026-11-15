@@ -1,5 +1,73 @@
 # Changelog
 
+## [0.131.0](https://github.com/vibeunion/svadmin/compare/ui-v0.130.0...ui-v0.131.0) (2026-11-15)
+
+
+### 🚀 Features
+
+* **ui:** add Arco IP access rule editor and whitelist drawer ([#798](https://github.com/vibeunion/svadmin/issues/798)) ([d06642d](https://github.com/vibeunion/svadmin/commit/d06642d816562136613bb8e0038262c4ab8d821e))
+* **ui:** add AudioVisualInspector and MediaAuthenticityAuditCard suite ([#812](https://github.com/vibeunion/svadmin/issues/812)) ([71c8c5f](https://github.com/vibeunion/svadmin/commit/71c8c5fdd039f1cdbf0bae9f95194fe09b344ad4))
+* **ui:** add ContractClauseDiffViewer and ElectronicSealInspector suite ([bee7a42](https://github.com/vibeunion/svadmin/commit/bee7a4245650cf55df20aa5f79d147cdb84bebc9))
+* **ui:** add ContractClauseDiffViewer and ElectronicSealInspector suite ([e43b2f5](https://github.com/vibeunion/svadmin/commit/e43b2f50a92e0ecf2cf5b673cb471110435a5d54))
+* **ui:** add ContractClauseDiffViewer and ElectronicSealInspector suite ([#808](https://github.com/vibeunion/svadmin/issues/808)) ([bee7a42](https://github.com/vibeunion/svadmin/commit/bee7a4245650cf55df20aa5f79d147cdb84bebc9))
+* **ui:** add DataRetentionPolicyEditor and DataArchiveStudio enterprise suite ([#815](https://github.com/vibeunion/svadmin/issues/815)) ([981bd17](https://github.com/vibeunion/svadmin/commit/981bd17e04f39b711d1646bcd611663e91509e26))
+* **ui:** add EmployeeOffboardingAuditor and AccessRevocationMatrix suite ([#816](https://github.com/vibeunion/svadmin/issues/816)) ([0dfbc5e](https://github.com/vibeunion/svadmin/commit/0dfbc5ee4b6c3d7b63236dcb985812e95663cdbe))
+* **ui:** add FieldMappingBuilder and DataImportPipeline suite ([#797](https://github.com/vibeunion/svadmin/issues/797)) ([aa74b14](https://github.com/vibeunion/svadmin/commit/aa74b1473f787c8e4ed1daf30f5dd5fcb4038c3b))
+* **ui:** add GatewayRouteEditor and RateLimitPolicyPanel suite ([3176dde](https://github.com/vibeunion/svadmin/commit/3176dde3b1a5e763093229d107a866a0e09d3c4c))
+* **ui:** add GatewayRouteEditor and RateLimitPolicyPanel suite ([bab6b47](https://github.com/vibeunion/svadmin/commit/bab6b47993930248f9f731f4cfcf8a7f44622765))
+* **ui:** add GatewayRouteEditor and RateLimitPolicyPanel suite ([#806](https://github.com/vibeunion/svadmin/issues/806)) ([3176dde](https://github.com/vibeunion/svadmin/commit/3176dde3b1a5e763093229d107a866a0e09d3c4c))
+* **ui:** add I18nStudio and TranslationManager enterprise multilingual suite ([b032fc6](https://github.com/vibeunion/svadmin/commit/b032fc686a99355dcff5f6e20a2b82e54b680717))
+* **ui:** add I18nStudio and TranslationManager enterprise multilingual suite ([95ea207](https://github.com/vibeunion/svadmin/commit/95ea2072c2c9e7e36862c177849be0de085165ef))
+* **ui:** add I18nStudio and TranslationManager enterprise multilingual suite ([#805](https://github.com/vibeunion/svadmin/issues/805)) ([b032fc6](https://github.com/vibeunion/svadmin/commit/b032fc686a99355dcff5f6e20a2b82e54b680717))
+* **ui:** add PrintTemplateDesigner and PrintPreviewModal enterprise suite ([#811](https://github.com/vibeunion/svadmin/issues/811)) ([1df03f5](https://github.com/vibeunion/svadmin/commit/1df03f522e44ac37751ed4ddd5a2fcc8194288ff))
+* **ui:** add SensitiveWordAuditor and ContentModerationCenter enterprise suite ([#813](https://github.com/vibeunion/svadmin/issues/813)) ([c7e93cb](https://github.com/vibeunion/svadmin/commit/c7e93cb00b7044f7aa8676021658e9612ac50fcb))
+* **ui:** add ServiceDeskTicketCard and CannedResponsePicker suite ([#802](https://github.com/vibeunion/svadmin/issues/802)) ([51d2fa2](https://github.com/vibeunion/svadmin/commit/51d2fa2ab35cb3ad2e86c4f8e0264fcb58b8e63b))
+* **ui:** add ShiftScheduler enterprise rotation calendar suite ([#799](https://github.com/vibeunion/svadmin/issues/799)) ([74a21d6](https://github.com/vibeunion/svadmin/commit/74a21d6830d2d8cf8ce05240efad92075d3e9939))
+* **ui:** add SsoConnectionStudio and IdentityProviderManager suite ([#810](https://github.com/vibeunion/svadmin/issues/810)) ([f4c9480](https://github.com/vibeunion/svadmin/commit/f4c94805f6ded14b2142e3738f5e8b6243ee3f11))
+* **ui:** add StepUpAuthModal and AuditSnapshotCapture suite ([#803](https://github.com/vibeunion/svadmin/issues/803)) ([2455637](https://github.com/vibeunion/svadmin/commit/24556378a19fc1e9885f8b9eb5a56f1367121f08))
+* **ui:** add TrafficTopologyInspector and SslCertificateMonitorCard suite ([#814](https://github.com/vibeunion/svadmin/issues/814)) ([47d8d33](https://github.com/vibeunion/svadmin/commit/47d8d33f6ef502c5129b55e9854636aa58ba7922))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** align contract diff and seal inspector with token and type contracts ([da8d4fe](https://github.com/vibeunion/svadmin/commit/da8d4fe3a1be93b7a60c12f89179daf924a50aa9))
+* **ui:** align the i18n studio with derived and select contracts ([1ab934a](https://github.com/vibeunion/svadmin/commit/1ab934a94cc1fe49b7be9403b51d30d11d8b15d6))
+* **ui:** constrain narrow print columns and satisfy regression contracts ([627ba9f](https://github.com/vibeunion/svadmin/commit/627ba9f8f88f6df708877c0590db0bc6be7cadd3))
+* **ui:** correct contract selection and seal verification lifecycle ([2a5c9e9](https://github.com/vibeunion/svadmin/commit/2a5c9e92186f1c2f5bd017d5443cea6f63e54d6c))
+* **ui:** drop the unused seal inspector icon import ([7dffc80](https://github.com/vibeunion/svadmin/commit/7dffc806cd6e3286ff0caa60c23bd965968ae16a))
+* **ui:** isolate gateway drafts and await configuration saves ([bbfc47d](https://github.com/vibeunion/svadmin/commit/bbfc47d4d0e0d09df5633e7fb36c5b203c5944de))
+* **ui:** preserve translation drafts and isolate save results ([ccdcec7](https://github.com/vibeunion/svadmin/commit/ccdcec7c10e922792389e378745b5097a64c6758))
+* **ui:** repair CSV, financial printing, and media audit contracts ([713b50d](https://github.com/vibeunion/svadmin/commit/713b50da9ce0ae7bc3870021c04f6f875d2008d8))
+* **ui:** repair gateway route and rate limit panel contracts ([fe902ed](https://github.com/vibeunion/svadmin/commit/fe902eddea7dfc5f69d254950ad56170d309f60c))
+* **ui:** repair import printing and media audit contracts ([ca02195](https://github.com/vibeunion/svadmin/commit/ca02195d64dfe53440dc934330ce6b2de18c8aaf))
+* **ui:** use writable locale derivations and precise test types ([43b1a82](https://github.com/vibeunion/svadmin/commit/43b1a82c77cf19964df1b64ac88fc75a9d38273e))
+
+
+### 🔧 Miscellaneous Chores
+
+* **example:** sync the branch with main ([f48d31d](https://github.com/vibeunion/svadmin/commit/f48d31dbc14308eacd7200d4e8c91e8263b41d6d))
+* **ui:** reconcile gateway and contract component exports ([7a03f09](https://github.com/vibeunion/svadmin/commit/7a03f0960029ad3cf9edd8dd4dbe337391aaba19))
+* **ui:** reconcile translation studio with reviewed enterprise suites ([fa90d4b](https://github.com/vibeunion/svadmin/commit/fa90d4bda061fdbf02f9fa92951daaa7d9c034bf))
+* **ui:** sync gateway regression type fix ([378669e](https://github.com/vibeunion/svadmin/commit/378669e8df883446977f58348ae84d0f90b25df2))
+* **ui:** sync reviewed regression type fix ([f3d5d4d](https://github.com/vibeunion/svadmin/commit/f3d5d4d67fe7d66e06be82d7ebaea4b2988b671d))
+* **ui:** sync the branch with main ([800ea73](https://github.com/vibeunion/svadmin/commit/800ea734b8dcc968192811ac81698d7397e18c9c))
+* **ui:** sync the branch with main ([70e2f8c](https://github.com/vibeunion/svadmin/commit/70e2f8ce35fea637aab65a077d64497282f10bce))
+* **ui:** sync the branch with main ([b3bd1dc](https://github.com/vibeunion/svadmin/commit/b3bd1dc594816ca62efa2aba85d015afd99558e2))
+* **ui:** sync the branch with main ([b4a6f0f](https://github.com/vibeunion/svadmin/commit/b4a6f0fb9bcfe212adf6f7b2e96571dfbca7ff2e))
+* **ui:** sync the branch with main ([b4e28c4](https://github.com/vibeunion/svadmin/commit/b4e28c471f7f652af635134f87eb5dd2c81f1446))
+* **ui:** sync the branch with main ([6644883](https://github.com/vibeunion/svadmin/commit/6644883624eaf7062738e7348c3909555a2392b5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.14
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.1
+
 ## [0.130.0](https://github.com/vibeunion/svadmin/compare/ui-v0.129.0...ui-v0.130.0) (2026-11-14)
 
 

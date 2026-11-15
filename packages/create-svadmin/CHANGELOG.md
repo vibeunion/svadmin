@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.57.4](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.57.3...create-svadmin-v0.57.4) (2026-11-15)
+
+
+### 📝 Documentation
+
+* **create:** default AI business schemas to TypeBox ([#817](https://github.com/vibeunion/svadmin/issues/817)) ([bcd47c1](https://github.com/vibeunion/svadmin/commit/bcd47c1e0097a61043f39feebd3c23a973e865d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.83.1
+
 ## [0.57.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.57.2...create-svadmin-v0.57.3) (2026-11-14)
 
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.14.33](https://github.com/vibeunion/svadmin/compare/drizzle-v0.14.32...drizzle-v0.14.33) (2026-11-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.15
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.1
+
 ## [0.14.32](https://github.com/vibeunion/svadmin/compare/drizzle-v0.14.31...drizzle-v0.14.32) (2026-11-14)
 
 

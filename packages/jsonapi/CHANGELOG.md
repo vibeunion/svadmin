@@ -1,5 +1,14 @@
 # @svadmin/jsonapi
 
+## [0.2.6](https://github.com/vibeunion/svadmin/compare/jsonapi-v0.2.5...jsonapi-v0.2.6) (2026-11-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.1
+
 ## [0.2.5](https://github.com/vibeunion/svadmin/compare/jsonapi-v0.2.4...jsonapi-v0.2.5) (2026-11-14)
 
 
