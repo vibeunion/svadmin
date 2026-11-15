@@ -3770,6 +3770,73 @@ Enterprise Bill Print Template Designer & High-Fidelity Printable Suite:
 />
 ```
 
+### `<AudioVisualInspector>` / `<MediaInspectionCard>`
+
+Enterprise audiovisual quality inspection and compliance review workbench:
+- **Waveform Timeline Visualization**: Pure SVG interactive waveform visualization supporting seek scrubbing, variable playback rates (1.0x~2.0x), and mute toggle.
+- **Precision Violation Markers**: Visual pin markers for minor flaws, major infractions, and compliance red lines with direct playback jump capability.
+- **Dynamic Score Deduction Engine**: Automatically evaluates a 0-100 overall score with Passed, Rework, or Failed status badges.
+- **In-place Quality Marking**: Enables auditors to annotate infractions and penalty deductions directly at the current playback position.
+
+```svelte
+<script lang="ts">
+  import { AudioVisualInspector, type AudioVisualMediaMeta, type ViolationMarker } from '@svadmin/ui';
+
+  const media: AudioVisualMediaMeta = {
+    title: 'Support_Call_Recording_10086.wav',
+    mediaType: 'audio',
+    durationSeconds: 180,
+    operatorName: 'Support Agent Lee',
+  };
+
+  const violations: ViolationMarker[] = [
+    { id: 'v1', timestampSeconds: 45, title: 'Missing employee identifier', level: 'minor', deduction: 5 },
+  ];
+</script>
+
+<AudioVisualInspector
+  {media}
+  {violations}
+  onSeek={(seconds) => console.log('Seek to:', seconds)}
+  onAddViolation={(time, title, level) => console.log('Add violation:', time, title, level)}
+/>
+```
+
+### `<MediaAuthenticityAuditCard>` / `<ExifMetadataAuditor>`
+
+Enterprise media authenticity forensics, EXIF metadata audit, and blind watermark detector card:
+- **Camera EXIF Parameter Inspection**: Extracts camera make/model (e.g. Apple / Sony), aperture, shutter speed, ISO, focal length, and original capture timestamps.
+- **Geospatial GPS Coordinates**: Decodes latitude, longitude, altitude, and reverse geocoded street addresses.
+- **Tampering Confidence & Risk Index**: Flags secondary re-encoding signatures, detects timestamp drift, and calculates a 0~100% tampering suspicion index with 4-level risk badges.
+- **Invisible Blind Watermark Detection**: Recovers embedded tenant identifiers, operator IDs, and integrity digests with exportable forensics credentials.
+
+```svelte
+<script lang="ts">
+  import { MediaAuthenticityAuditCard, type MediaAuthenticityData } from '@svadmin/ui';
+
+  const data: MediaAuthenticityData = {
+    id: 'media-001',
+    fileName: 'Onsite_Inspection_Photo.jpg',
+    fileSizeMb: 3.8,
+    mimeType: 'image/jpeg',
+    riskLevel: 'safe',
+    tamperConfidencePercent: 5,
+    exif: {
+      make: 'Apple',
+      model: 'iPhone 15 Pro Max',
+      capturedAt: '2026-11-14 14:22:05',
+    },
+    auditFindings: ['EXIF hardware digest verified', 'No secondary editing software signatures detected'],
+  };
+</script>
+
+<MediaAuthenticityAuditCard
+  {data}
+  onExportEvidence={(d) => console.log('Export report:', d.fileName)}
+  onRecheck={(id) => console.log('Recheck media:', id)}
+/>
+```
+
 ### `<DataRetentionPolicyEditor>` / `<DataArchiveStudio>`
 
 Enterprise Data Lifecycle & Compliance Retention Policy Center:

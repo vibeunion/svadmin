@@ -314,6 +314,10 @@ import {
   SupportTicketCard,
   CannedResponsePicker,
   QuickReplyDrawer,
+  AudioVisualInspector,
+  MediaInspectionCard,
+  MediaAuthenticityAuditCard,
+  ExifMetadataAuditor,
   message,
   notification,
   toast,
@@ -620,6 +624,10 @@ describe('public compatibility aliases', () => {
     expect(QuickReplyDrawer).toBe(CannedResponsePicker);
     expect(DataRetentionPolicyEditor).toBeDefined();
     expect(DataArchiveStudio).toBe(DataRetentionPolicyEditor);
+    expect(AudioVisualInspector).toBeDefined();
+    expect(MediaInspectionCard).toBe(AudioVisualInspector);
+    expect(MediaAuthenticityAuditCard).toBeDefined();
+    expect(ExifMetadataAuditor).toBe(MediaAuthenticityAuditCard);
     expect(PrintTemplateDesigner).toBeDefined();
     expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
     expect(PrintPreviewModal).toBeDefined();
