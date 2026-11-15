@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { isReleasePackagePath } from './verify-release-manifest';
+import { isReleasePackagePath, verifyReleaseManifest } from './verify-release-manifest';
 import { npmPackageVersionStatus } from './npm-package-version';
 
 interface PackageManifest {
@@ -28,7 +28,7 @@ interface PlanReleasePublicationOptions {
   isPackageVersionPublished?: (name: string, version: string) => boolean;
   /**
    * 把「npm 上还没有的版本」并入发布计划。release-please 打完 tag 之后若发布任务失败，
-   * 下一次发布可以自动补齐历史缺口，而不是永久缺失一个版本。
+   * CLI 仍要求所有路径属于已批准的同 SHA 清单；历史缺口须按原 tag 单独恢复。
    */
   includeMissingVersions?: boolean;
 }
@@ -327,6 +327,12 @@ if (import.meta.main) {
       repositoryRoot: resolve(import.meta.dir, '..'),
       releaseManifest: process.env.RELEASE_MANIFEST ?? '[]',
       includeMissingVersions,
+    });
+    verifyReleaseManifest({
+      repositoryRoot: resolve(import.meta.dir, '..'),
+      releaseSha: process.env.RELEASE_SHA ?? '',
+      releaseManifest: process.env.RELEASE_MANIFEST ?? '[]',
+      releasePaths,
     });
     for (const releasePath of releasePaths) {
       console.info(releasePath);

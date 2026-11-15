@@ -249,12 +249,6 @@ jobs:
         with:
           bun-version: "1.4.4"
 
-      - name: Verify release tags
-        env:
-          RELEASE_SHA: ${{ inputs.release_sha }}
-          RELEASE_MANIFEST: ${{ inputs.release_manifest }}
-        run: bun scripts/verify-release-manifest.ts
-
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.release_sha }}
@@ -269,7 +263,14 @@ jobs:
           git restore --source="$VERIFIER_SHA" --worktree -- \
             scripts/verify-workspace-lockfile.ts \
             scripts/plan-release-publication.ts \
+            scripts/verify-release-manifest.ts \
             scripts/npm-package-version.ts
+
+      - name: Verify release tags
+        env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
+          RELEASE_MANIFEST: ${{ inputs.release_manifest }}
+        run: bun scripts/verify-release-manifest.ts
 
       - uses: actions/setup-node@v7
         with:
@@ -291,7 +292,7 @@ jobs:
           # package.json 一致，因此这里做一致性校验，而不是拒绝依赖解析的归一化。
           bun scripts/verify-workspace-lockfile.ts
           # 允许 bun.lock 的归一化，以及上一步从工作流提交恢复的校验脚本。
-          allowed='^(bun\.lock|scripts/(verify-workspace-lockfile|plan-release-publication|npm-package-version)\.ts)$'
+          allowed='^(bun\.lock|scripts/(verify-workspace-lockfile|plan-release-publication|verify-release-manifest|npm-package-version)\.ts)$'
           changed_outside_lockfile=$(git status --porcelain | awk '{print $NF}' | grep -Ev "$allowed" || true)
           if [ -n "$changed_outside_lockfile" ]; then
             echo "$changed_outside_lockfile"
@@ -305,14 +306,15 @@ jobs:
       - name: Verify dependency closure and plan publication
         id: release_plan
         env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
           RELEASE_MANIFEST: ${{ inputs.release_manifest }}
+          RELEASE_INCLUDE_MISSING: "false"
         run: |
           set -euo pipefail
           {
             echo 'paths<<SVADMIN_RELEASE_PATHS'
-            # --include-missing 会把「已经打了 tag 但 npm 上没有」的版本并入计划，
-            # 这样一次失败的发布不会留下永久缺口。
-            bun scripts/plan-release-publication.ts --include-missing
+            # 只发布明确批准的目标，历史缺口按各自原 tag 单独恢复。
+            bun scripts/plan-release-publication.ts
             echo 'SVADMIN_RELEASE_PATHS'
           } >> "$GITHUB_OUTPUT"
 
@@ -367,9 +369,6 @@ jobs:
       - name: Publish released packages
         env:
           RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}
-          # OIDC 只能发布已存在且信任本工作流的包。新包名用 repository token
-          # 兜底一次；已存在的包仍然只走 OIDC trusted publishing。
-          NPM_BOOTSTRAP_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -u
           if [ -z "$RELEASE_DIRS" ]; then
@@ -378,7 +377,6 @@ jobs:
           fi
 
           failed=0
-          unpublished=0
           while IFS= read -r pkg_dir; do
             [ -z "$pkg_dir" ] && continue
             PKG_JSON="$pkg_dir/package.json"
@@ -397,22 +395,10 @@ jobs:
                 PUBLISH_LOG="$RUNNER_TEMP/npm-publish-$(echo "$pkg_dir" | tr '/' '-').log"
                 if (cd "$pkg_dir" && npm publish --provenance --access public) > "$PUBLISH_LOG" 2>&1; then
                   cat "$PUBLISH_LOG"
-                elif grep -q 'E404' "$PUBLISH_LOG" && [ -n "${NPM_BOOTSTRAP_TOKEN:-}" ]; then
-                  cat "$PUBLISH_LOG"
-                  echo "::warning::OIDC trusted publishing could not create $NAME; retrying once with the repository bootstrap token. Configure vibeunion/svadmin as its trusted publisher to return to OIDC-only publishing."
-                  BOOTSTRAP_LOG="$RUNNER_TEMP/npm-bootstrap-$(echo "$pkg_dir" | tr '/' '-').log"
-                  if (cd "$pkg_dir" && env NODE_AUTH_TOKEN="$NPM_BOOTSTRAP_TOKEN" npm publish --provenance --access public --ignore-scripts) > "$BOOTSTRAP_LOG" 2>&1; then
-                    cat "$BOOTSTRAP_LOG"
-                    echo "✅ Bootstrapped $NAME@$LOCAL_VER with the repository token; add its trusted publisher before trusting OIDC-only releases."
-                  else
-                    cat "$BOOTSTRAP_LOG"
-                    echo "::warning::Bootstrap publish could not create $NAME; leaving it unpublished. Publish it once as a scope owner and add vibeunion/svadmin as its trusted publisher before relying on OIDC."
-                    unpublished=$((unpublished + 1))
-                  fi
                 else
                   cat "$PUBLISH_LOG"
                   if grep -q 'E404' "$PUBLISH_LOG"; then
-                    echo "::error::npm rejected $NAME with E404: either the package does not exist on npm yet, or this repository is not its trusted publisher. Set the NPM_TOKEN repository secret to bootstrap it, or publish it once as a scope owner (npm publish --access public) and add vibeunion/svadmin as a trusted publisher, then re-run the release."
+                    echo "::error::npm rejected $NAME with E404: either the package does not exist on npm yet, or this repository is not its trusted publisher. Manually publish a placeholder once as a scope owner (npm publish --access public), configure vibeunion/svadmin ci.yml as its trusted publisher with direct publishing allowed, then re-run the release. CI never falls back to a long-lived token."
                   fi
                   echo "❌ Publish FAILED for $NAME"
                   failed=1
@@ -429,10 +415,6 @@ jobs:
               failed=1
             fi
           done <<< "$RELEASE_DIRS"
-
-          if [ "$unpublished" -ne 0 ]; then
-            echo "::warning::$unpublished package(s) still need a manual npm bootstrap before they can use OIDC trusted publishing"
-          fi
 
           if [ "$failed" -ne 0 ]; then
             echo "::error::One or more release packages failed to publish; see the complete package list above"

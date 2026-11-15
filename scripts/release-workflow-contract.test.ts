@@ -376,7 +376,7 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(workflow).not.toContain('git restore --source="$VERIFIER_SHA" --worktree -- packages');
   });
 
-  test('publishes from an explicit ci.yml workflow dispatch with OIDC first', () => {
+  test('publishes from an explicit ci.yml workflow dispatch with OIDC only', () => {
     const ciWorkflow = readWorkflow('ci.yml');
 
     expect(ciWorkflow).toContain('workflow_dispatch:');
@@ -394,8 +394,9 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).toContain('group: npm-publish-${{ inputs.release_sha }}');
     expect(ciWorkflow).toContain('id-token: write');
     expect(ciWorkflow).not.toContain('bootstrap_publish');
-    expect(ciWorkflow.match(/secrets\.NPM_TOKEN/g) ?? []).toHaveLength(1);
-    expect(ciWorkflow).toContain('NPM_BOOTSTRAP_TOKEN: ${{ secrets.NPM_TOKEN }}');
+    expect(ciWorkflow).not.toContain('secrets.NPM_TOKEN');
+    expect(ciWorkflow).not.toContain('NPM_BOOTSTRAP_TOKEN');
+    expect(ciWorkflow).not.toContain('NODE_AUTH_TOKEN=');
     expect(ciWorkflow).toContain('npm publish --provenance --access public');
     expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts');
     expect(ciWorkflow).toContain('id: release_plan');
@@ -437,32 +438,26 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishJob).not.toContain('git diff --exit-code -- bun.lock');
     // 恢复的校验脚本本身会出现在 git status 里，必须排除，否则回填会自己挡住自己。
     expect(publishJob).toContain(
-      "allowed='^(bun\\.lock|scripts/(verify-workspace-lockfile|plan-release-publication|npm-package-version)\\.ts)$'",
+      "allowed='^(bun\\.lock|scripts/(verify-workspace-lockfile|plan-release-publication|verify-release-manifest|npm-package-version)\\.ts)$'",
     );
     expect(publishJob).not.toContain("grep -v ' bun\\.lock$'");
   });
 
-  test('repairs previously unpublished versions during the next release', () => {
-    const ciWorkflow = readWorkflow('ci.yml');
+  test('binds the complete publication plan to the approved immutable release manifest', () => {
+    const workflow = Bun.YAML.parse(readWorkflow('ci.yml')) as {
+      jobs: { publish: { steps: Array<{ id?: string; env?: Record<string, string>; run?: string }> } };
+    };
+    const planStep = workflow.jobs.publish.steps.find((step) => step.id === 'release_plan');
+    expect(planStep?.env?.RELEASE_SHA).toBe('${{ inputs.release_sha }}');
+    expect(planStep?.env?.RELEASE_MANIFEST).toBe('${{ inputs.release_manifest }}');
+    expect(planStep?.env?.RELEASE_INCLUDE_MISSING).toBe('false');
+    expect(planStep?.run).toContain('bun scripts/plan-release-publication.ts');
+    expect(planStep?.run).not.toContain('--include-missing');
 
-    expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts --include-missing');
-  });
-
-  test('retries only E404 package creation with the bootstrap token', () => {
-    const ciWorkflow = readWorkflow('ci.yml');
-    const publishStep = ciWorkflow.slice(ciWorkflow.indexOf('      - name: Publish released packages'));
-
-    expect(publishStep).toContain(
-      'elif grep -q \'E404\' "$PUBLISH_LOG" && [ -n "${NPM_BOOTSTRAP_TOKEN:-}" ]; then',
-    );
-    expect(publishStep).toContain(
-      'env NODE_AUTH_TOKEN="$NPM_BOOTSTRAP_TOKEN" npm publish --provenance --access public --ignore-scripts',
-    );
-    expect(publishStep).toContain('unpublished=$((unpublished + 1))');
-    expect(publishStep).toContain('leaving it unpublished');
-    expect(publishStep).toContain('still need a manual npm bootstrap');
-    expect(publishStep.indexOf('npm publish --provenance --access public)')).toBeLessThan(
-      publishStep.indexOf('NODE_AUTH_TOKEN='),
+    const planner = readFileSync(resolve(repositoryRoot, 'scripts/plan-release-publication.ts'), 'utf8');
+    expect(planner).toContain('verifyReleaseManifest({');
+    expect(planner.indexOf('verifyReleaseManifest({')).toBeLessThan(
+      planner.indexOf('console.info(releasePath)'),
     );
   });
 
@@ -474,7 +469,9 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishStep).toContain('either the package does not exist on npm yet');
     expect(publishStep).toContain('is not its trusted publisher');
     expect(publishStep).toContain('npm publish --access public');
-    expect(publishStep).toContain('Set the NPM_TOKEN repository secret to bootstrap it');
+    expect(publishStep).toContain('Manually publish a placeholder once as a scope owner');
+    expect(publishStep).toContain('CI never falls back to a long-lived token');
+    expect(publishStep).not.toContain('unpublished=');
   });
 
   test('restores publication verifiers from the workflow revision before publishing', () => {
@@ -485,9 +482,19 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(publishJob).toContain('git fetch --no-tags origin "$VERIFIER_SHA"');
     expect(publishJob).toContain('scripts/verify-workspace-lockfile.ts');
     expect(publishJob).toContain('scripts/plan-release-publication.ts');
+    expect(publishJob).toContain('scripts/verify-release-manifest.ts \\');
     expect(publishJob).toContain('scripts/npm-package-version.ts');
     expect(publishJob.indexOf('Use workflow revision publication verifiers')).toBeLessThan(
       publishJob.indexOf('bun scripts/verify-workspace-lockfile.ts'),
+    );
+    expect(publishJob.indexOf('ref: ${{ inputs.release_sha }}')).toBeLessThan(
+      publishJob.indexOf('Use workflow revision publication verifiers'),
+    );
+    expect(publishJob.indexOf('Use workflow revision publication verifiers')).toBeLessThan(
+      publishJob.indexOf('name: Verify release tags'),
+    );
+    expect(publishJob.indexOf('name: Verify release tags')).toBeLessThan(
+      publishJob.indexOf('name: Install dependencies'),
     );
   });
 
@@ -574,6 +581,57 @@ describe('release manifest verification', () => {
           resolveTagSha: () => releaseSha,
         }),
       ).toThrow('Release tag ui-v0.38.2 does not match packages/lite; expected lite-v0.3.9');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('rejects discovered missing paths outside the approved release manifest', () => {
+    const root = createRepositoryFixture();
+    try {
+      expect(() =>
+        verifyReleaseManifest({
+          repositoryRoot: root,
+          releaseSha,
+          releaseManifest: JSON.stringify([{ path: 'packages/lite', tag: 'lite-v0.3.9' }]),
+          releasePaths: ['packages/lite', 'packages/ui'],
+          resolveTagSha: () => releaseSha,
+        }),
+      ).toThrow('Publication plan includes packages/ui outside the approved release manifest');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('accepts a publication plan covered by the approved tag manifest', () => {
+    const root = createRepositoryFixture();
+    try {
+      expect(
+        verifyReleaseManifest({
+          repositoryRoot: root,
+          releaseSha,
+          releaseManifest: JSON.stringify([{ path: 'packages/lite', tag: 'lite-v0.3.9' }]),
+          releasePaths: ['packages/lite'],
+          resolveTagSha: () => releaseSha,
+        }),
+      ).toEqual([{ path: 'packages/lite', tag: 'lite-v0.3.9' }]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('rejects a covered package whose tag belongs to a different release SHA', () => {
+    const root = createRepositoryFixture();
+    try {
+      expect(() =>
+        verifyReleaseManifest({
+          repositoryRoot: root,
+          releaseSha,
+          releaseManifest: JSON.stringify([{ path: 'packages/lite', tag: 'lite-v0.3.9' }]),
+          releasePaths: ['packages/lite'],
+          resolveTagSha: () => '1'.repeat(40),
+        }),
+      ).toThrow(`expected ${releaseSha}`);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

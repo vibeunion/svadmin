@@ -31,7 +31,8 @@ while the tag and GitHub release stayed in place.
 The publish job now runs `bun scripts/verify-workspace-lockfile.ts` after
 `bun install` instead: the published tarballs are built from `package.json`, so
 the only requirement is that the *final* lockfile is consistent. Any change
-outside `bun.lock` still fails the job. `release.yml` runs the same verifier on
+outside `bun.lock` and the explicitly restored workflow verifiers still fails
+the job. `release.yml` runs the same verifier on
 the release pull request, so the synchronization is also checked before merge.
 
 ## A version that never reached npm
@@ -42,43 +43,46 @@ by release N+1. Versions stayed missing permanently (this is how
 `@svadmin/core@0.76.0` and `@svadmin/ui@0.114.0` were tagged but absent from
 npm).
 
-`bun scripts/plan-release-publication.ts --include-missing` now unions the
-release manifest with every workspace package whose current version is missing
-from npm, ordered by the workspace dependency graph. The next release repairs
-older gaps automatically. To audit or repair by hand:
+Production plans only the explicit release manifest, ordered by the workspace
+dependency graph. Unrelated historical missing versions cannot block a valid
+recovery. Before emitting any paths, the CLI verifies that the complete plan is
+covered by the explicit manifest and that every tag points to `RELEASE_SHA`.
+Discovery does not authorize publishing historical versions from newer source.
+
+Recover a missing version by dispatching `ci.yml` with its original immutable
+tag SHA and an explicit manifest covering the plan. For example, from the
+matching release checkout, validate the plan before dispatch:
 
 ```sh
-RELEASE_MANIFEST='[]' bun scripts/plan-release-publication.ts --include-missing
+RELEASE_SHA="$(git rev-parse 'refs/tags/core-v0.76.0^{commit}')" \
+RELEASE_MANIFEST='[{"path":"packages/core","tag":"core-v0.76.0"}]' \
+RELEASE_INCLUDE_MISSING=false bun scripts/plan-release-publication.ts
 ```
+
+The optional `--include-missing` CLI mode discovers missing workspace versions
+but still requires full manifest/tag coverage. If it discovers additional
+unapproved versions, it fails rather than silently publishing them. Include
+them only when their tags point to the same SHA; otherwise recover them in
+separate dispatches at their original SHAs. A missing workspace dependency
+always blocks its dependent until that exact version is published or approved
+in the same batch.
 
 ## A package that has never been published
 
 OIDC trusted publishing is configured per package on npmjs.com. A package that
 does not exist yet, or whose trusted publisher does not point at
-`vibeunion/svadmin` with the release workflow, fails with `E404` while every
-other package publishes fine. `@svadmin/charts`, `@svadmin/dock`,
-`@svadmin/ai-elements`, `@svadmin/clerk`, `@svadmin/drizzle`,
-`@svadmin/editor`, `@svadmin/elasticsearch`, `@svadmin/pusher`,
-`@svadmin/storage`, and the ecosystem providers `@svadmin/clickhouse`,
-`@svadmin/kinde`, and `@svadmin/openfga` were in that state when this fallback
-was added.
+`vibeunion/svadmin` with `ci.yml`, can fail with `E404`. This response alone
+does not distinguish an absent package from missing trust.
 
-The publish job first attempts OIDC trusted publishing. If npm returns `E404`
-and the repository `NPM_TOKEN` secret is configured, it retries that one package
-once with the bootstrap token and `--ignore-scripts`, then continues the release.
-Existing packages still publish with OIDC provenance.
+CI uses OIDC only and never retries with a long-lived repository token. A scope
+owner must manually publish an isolated placeholder for a new package name,
+preserving the repository's formal version, then configure its trusted publisher
+for GitHub Actions, `vibeunion/svadmin`, workflow `ci.yml`, with direct publishing
+allowed. An existing package needs the trust configuration, not another bootstrap.
 
-Add `vibeunion/svadmin` as the trusted publisher for newly bootstrapped packages
-when possible. Until that is configured, later releases keep using the bootstrap
-fallback for those package names and the workflow emits a warning so the missing
-trust configuration stays visible.
-
-If the bootstrap token also cannot create the package (for example, it has no
-write permission for the `@svadmin` scope), the workflow records a warning,
-leaves that package unpublished, and finishes the remaining packages instead of
-failing the whole release. A scope owner must publish the package once and add
-`vibeunion/svadmin` as its trusted publisher. Without `NPM_TOKEN`, `E404` still
-fails the job and prints the manual remediation steps.
+Every failed registry lookup or publication makes the job fail. The loop still
+attempts the remaining packages and reports the aggregate failure, so a green
+publication job cannot hide an intentionally unpublished target.
 
 ## Operating rules
 

@@ -11,6 +11,7 @@ interface VerifyReleaseManifestOptions {
   repositoryRoot: string;
   releaseSha: string;
   releaseManifest: string;
+  releasePaths?: string[];
   resolveTagSha?: (tag: string) => string;
 }
 
@@ -40,6 +41,7 @@ export function verifyReleaseManifest({
   repositoryRoot,
   releaseSha,
   releaseManifest,
+  releasePaths,
   resolveTagSha = (tag) => defaultTagResolver(repositoryRoot, tag),
 }: VerifyReleaseManifestOptions): ReleaseManifestEntry[] {
   if (!/^[0-9a-f]{40,64}$/.test(releaseSha)) {
@@ -116,6 +118,13 @@ export function verifyReleaseManifest({
     releases.push({ path: packagePath, tag });
   }
 
+  for (const releasePath of releasePaths ?? []) {
+    if (!seenPaths.has(releasePath)) {
+      throw new Error(
+        `Publication plan includes ${releasePath} outside the approved release manifest; recover missing versions with an explicit manifest at their tagged release SHA`,
+      );
+    }
+  }
   return releases;
 }
 
