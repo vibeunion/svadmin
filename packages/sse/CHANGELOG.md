@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1](https://github.com/vibeunion/svadmin/compare/sse-v0.3.0...sse-v0.3.1) (2026-11-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.1
+
 ## [0.3.0](https://github.com/vibeunion/svadmin/compare/sse-v0.2.0...sse-v0.3.0) (2026-11-14)
 
 

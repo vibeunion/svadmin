@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.36](https://github.com/vibeunion/svadmin/compare/strapi-v0.12.35...strapi-v0.12.36) (2026-11-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.15
+  * peerDependencies
+    * @svadmin/core bumped to 0.83.1
+
 ## [0.12.35](https://github.com/vibeunion/svadmin/compare/strapi-v0.12.34...strapi-v0.12.35) (2026-11-14)
 
 
