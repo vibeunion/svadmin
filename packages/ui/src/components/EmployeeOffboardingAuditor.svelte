@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   export interface OffboardingEmployee {
     id: string;
     name: string;
@@ -58,6 +59,17 @@
   let selectedCategory = $state<'all' | OffboardingCategory>('all');
   let blockingModalItemId = $state<string | null>(null);
   let blockingReasonInput = $state('');
+  let blockingEmployeeId = $state<string | null>(null);
+  let observedEmployeeId = untrack(() => employee.id);
+  $effect.pre(() => {
+    if (employee.id === observedEmployeeId) return;
+    observedEmployeeId = employee.id;
+    blockingModalItemId = null;
+    blockingEmployeeId = null;
+    blockingReasonInput = '';
+    selectedCategory = 'all';
+  });
+  const handoverComplete = $derived(items.every(item => item.status === 'completed'));
 
   const filteredItems = $derived(
     selectedCategory === 'all'
@@ -113,6 +125,7 @@
   function handleMarkStatus(item: OffboardingItem, newStatus: OffboardingItemStatus) {
     if (newStatus === 'blocked') {
       blockingModalItemId = item.id;
+      blockingEmployeeId = employee.id;
       blockingReasonInput = '';
     } else {
       onItemStatusChange?.(item, newStatus);
@@ -120,18 +133,27 @@
   }
 
   function confirmBlockItem() {
-    if (!blockingModalItemId) return;
+    if (!blockingModalItemId || blockingEmployeeId !== employee.id || !blockingReasonInput.trim()) return;
     const targetItem = items.find((i) => i.id === blockingModalItemId);
     if (targetItem) {
-      onItemStatusChange?.(targetItem, 'blocked', blockingReasonInput.trim() || '交接材料缺失或审计异常');
+      onItemStatusChange?.(targetItem, 'blocked', blockingReasonInput.trim());
     }
     blockingModalItemId = null;
+    blockingEmployeeId = null;
     blockingReasonInput = '';
   }
 
   function cancelBlockModal() {
     blockingModalItemId = null;
+    blockingEmployeeId = null;
     blockingReasonInput = '';
+  }
+
+  function signOff(role: 'hr' | 'manager' | 'it' | 'finance') {
+    const approved = { hr: signoffStatus.hrApproved, manager: signoffStatus.managerApproved,
+      it: signoffStatus.itApproved, finance: signoffStatus.financeApproved };
+    if (!canSignoff || !handoverComplete || approved[role] || !onSignoff) return;
+    onSignoff(role);
   }
 </script>
 
@@ -330,6 +352,7 @@
             type="button"
             class="rounded-md bg-destructive px-3 py-1.5 text-xs font-medium text-destructive-foreground hover:bg-destructive/90"
             onclick={confirmBlockItem}
+            disabled={!blockingReasonInput.trim()}
           >
             确认阻断
           </button>
@@ -369,8 +392,8 @@
             <button
               type="button"
               class="mt-3 w-full rounded border border-border/80 bg-muted/40 py-1 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-40"
-              disabled={dept.approved || !canSignoff}
-              onclick={() => onSignoff?.(dept.key as 'hr' | 'manager' | 'it' | 'finance')}
+              disabled={dept.approved || !canSignoff || !handoverComplete || !onSignoff}
+              onclick={() => signOff(dept.key as 'hr' | 'manager' | 'it' | 'finance')}
             >
               {dept.approved ? '已确认' : '点击盖章签署'}
             </button>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   export type SystemType = 'cloud' | 'code' | 'vpn' | 'im' | 'database' | 'finance';
   export type PrivilegeLevel = 'superadmin' | 'admin' | 'write' | 'read';
   export type RevocationStatus = 'active' | 'revoking' | 'revoked' | 'failed';
@@ -39,6 +40,26 @@
 
   let selectedSystemIds = $state<string[]>([]);
   let showBatchConfirm = $state(false);
+  let confirmationEmployeeId = $state<string | null>(null);
+  let confirmationIds = $state<string[]>([]);
+  let observedEmployeeId = untrack(() => employeeId);
+  const eligibleIds = $derived(systems.filter(system => system.status === 'active' || system.status === 'failed')
+    .map(system => system.id));
+  $effect.pre(() => {
+    if (employeeId !== observedEmployeeId) {
+      observedEmployeeId = employeeId;
+      selectedSystemIds = [];
+      showBatchConfirm = false;
+      confirmationEmployeeId = null;
+      confirmationIds = [];
+      return;
+    }
+    const stillEligible = selectedSystemIds.filter(id => eligibleIds.includes(id));
+    if (stillEligible.length !== selectedSystemIds.length) {
+      selectedSystemIds = stillEligible;
+      showBatchConfirm = false;
+    }
+  });
 
   const totalCount = $derived(systems.length);
   const revokedCount = $derived(systems.filter((s) => s.status === 'revoked').length);
@@ -126,6 +147,8 @@
   }
 
   function toggleSelect(id: string) {
+    if (batchRevoking || !eligibleIds.includes(id)) return;
+    showBatchConfirm = false;
     if (selectedSystemIds.includes(id)) {
       selectedSystemIds = selectedSystemIds.filter((item) => item !== id);
     } else {
@@ -134,23 +157,37 @@
   }
 
   function toggleSelectAll() {
-    const unrevokedIds = systems.filter((s) => s.status !== 'revoked').map((s) => s.id);
-    if (selectedSystemIds.length === unrevokedIds.length) {
+    if (batchRevoking) return;
+    showBatchConfirm = false;
+    if (selectedSystemIds.length === eligibleIds.length) {
       selectedSystemIds = [];
     } else {
-      selectedSystemIds = unrevokedIds;
+      selectedSystemIds = [...eligibleIds];
     }
   }
 
   function handleBatchRevokeTrigger() {
-    if (selectedSystemIds.length === 0) return;
+    if (selectedSystemIds.length === 0 || batchRevoking || !onRevokeBatch) return;
+    confirmationEmployeeId = employeeId;
+    confirmationIds = [...selectedSystemIds];
     showBatchConfirm = true;
   }
 
   function confirmBatchRevoke() {
-    onRevokeBatch?.(selectedSystemIds);
+    if (!showBatchConfirm || batchRevoking || !onRevokeBatch || confirmationEmployeeId !== employeeId
+      || confirmationIds.length === 0 || !confirmationIds.every(id => eligibleIds.includes(id))) return;
+    const approvedIds = [...confirmationIds];
     showBatchConfirm = false;
     selectedSystemIds = [];
+    confirmationIds = [];
+    onRevokeBatch(approvedIds);
+  }
+
+  function requestSingle(systemId: string) {
+    if (batchRevoking) return;
+    const system = systems.find(candidate => candidate.id === systemId);
+    if (system?.status === 'failed') onRetryFailed?.(systemId);
+    else if (system?.status === 'active') onRevokeSingle?.(systemId);
   }
 </script>
 
@@ -204,9 +241,10 @@
         type="button"
         class="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         onclick={toggleSelectAll}
+        disabled={batchRevoking}
       >
         <span class="flex h-3.5 w-3.5 items-center justify-center rounded border border-border bg-background">
-          {#if selectedSystemIds.length > 0 && selectedSystemIds.length === systems.filter((s) => s.status !== 'revoked').length}
+          {#if selectedSystemIds.length > 0 && selectedSystemIds.length === eligibleIds.length}
             ✓
           {/if}
         </span>
@@ -239,7 +277,7 @@
       <button
         type="button"
         class="inline-flex items-center gap-1.5 rounded-md bg-destructive px-3.5 py-1.5 text-xs font-semibold text-destructive-foreground shadow-xs transition-colors hover:bg-destructive/90 disabled:opacity-50"
-        disabled={selectedSystemIds.length === 0 || batchRevoking}
+        disabled={selectedSystemIds.length === 0 || batchRevoking || !onRevokeBatch}
         onclick={handleBatchRevokeTrigger}
       >
         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -279,7 +317,7 @@
                 <input
                   type="checkbox"
                   class="h-4 w-4 rounded border-border"
-                  disabled={system.status === 'revoked'}
+                  disabled={!eligibleIds.includes(system.id) || batchRevoking}
                   checked={selectedSystemIds.includes(system.id)}
                   onchange={() => toggleSelect(system.id)}
                 />
@@ -322,7 +360,8 @@
                   <button
                     type="button"
                     class="rounded border border-destructive/40 bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20"
-                    onclick={() => onRetryFailed?.(system.id)}
+                    disabled={batchRevoking || !onRetryFailed}
+                    onclick={() => requestSingle(system.id)}
                   >
                     重试回收
                   </button>
@@ -330,7 +369,8 @@
                   <button
                     type="button"
                     class="rounded border border-border/80 bg-background px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    onclick={() => onRevokeSingle?.(system.id)}
+                    disabled={batchRevoking || !onRevokeSingle}
+                    onclick={() => requestSingle(system.id)}
                   >
                     注销回收
                   </button>
@@ -360,7 +400,7 @@
           <h3 class="text-base font-semibold">确认批量注销回收特权账号？</h3>
         </div>
         <p class="mt-2 text-xs text-muted-foreground">
-          即将针对选中的 <strong>{selectedSystemIds.length}</strong> 个系统执行注销操作。系统将自动断开 Session、轮转 API Key 并下发特权阻断指令，此操作将记录至不可篡改的安全审计日志中。
+          即将请求注销选中的 <strong>{confirmationIds.length}</strong> 个系统。实际会话清退、密钥轮转与审计留痕以宿主系统的执行结果为准。
         </p>
         <div class="mt-4 flex justify-end gap-2">
           <button
@@ -374,6 +414,7 @@
             type="button"
             class="rounded-md bg-destructive px-3.5 py-1.5 text-xs font-medium text-destructive-foreground hover:bg-destructive/90"
             onclick={confirmBatchRevoke}
+            disabled={batchRevoking || !onRevokeBatch}
           >
             确认执行注销
           </button>
