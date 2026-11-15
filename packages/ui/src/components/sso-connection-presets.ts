@@ -1,0 +1,61 @@
+import type { SsoConnection } from './SsoConnectionStudio.svelte';
+
+// 默认 SSO 连接示例，集中存放保持组件精简。
+export const defaultSsoConnections: SsoConnection[] = [
+      {
+        id: 'conn-okta-saml',
+        name: 'Corporate Okta SSO',
+        protocol: 'saml',
+        status: 'active',
+        domains: ['corp.example.com', 'partner.example.com'],
+        isDefault: true,
+        entityId: 'http://www.okta.com/exk1234567890abcdef',
+        ssoUrl: 'https://corp.okta.com/app/svadmin/exk1234567890abcdef/sso/saml',
+        certificate: 'MIIDpDCCAoygAwIBAgIGAV...[X.509 Certificate]...EXAMPLEDATA',
+        claimMappings: [
+          { remoteClaim: 'email', localField: 'email' },
+          { remoteClaim: 'firstName', localField: 'first_name' },
+          { remoteClaim: 'lastName', localField: 'last_name' },
+          { remoteClaim: 'department', localField: 'department' },
+        ],
+        lastTestedAt: '2026-11-14 18:30',
+        testStatus: 'success',
+        testMessage: 'Handshake 200 OK. Signature verified.',
+      },
+      {
+        id: 'conn-azure-oidc',
+        name: 'Microsoft Entra ID (Azure AD)',
+        protocol: 'oidc',
+        status: 'active',
+        domains: ['cloud.example.org'],
+        isDefault: false,
+        clientId: '9f8b4a2c-1d3e-4f5a-8b9c-0d1e2f3a4b5c',
+        clientSecret: 'ms_sec_••••••••••••••••',
+        discoveryUrl: 'https://login.microsoftonline.com/tenant-id/v2.0/.well-known/openid-configuration',
+        scopes: ['openid', 'profile', 'email'],
+        claimMappings: [
+          { remoteClaim: 'preferred_username', localField: 'email' },
+          { remoteClaim: 'name', localField: 'display_name' },
+        ],
+        lastTestedAt: '2026-11-14 17:15',
+        testStatus: 'success',
+        testMessage: 'Discovery endpoint parsed. OIDC JWKS valid.',
+      },
+      {
+        id: 'conn-feishu-suite',
+        name: '飞书自建应用企业登录',
+        protocol: 'feishu',
+        status: 'inactive',
+        domains: ['feishu.internal'],
+        isDefault: false,
+        appId: 'cli_a1b2c3d4e5f6g7h8',
+        appSecret: 'secret_••••••••••••',
+        claimMappings: [
+          { remoteClaim: 'open_id', localField: 'sso_uid' },
+          { remoteClaim: 'name', localField: 'display_name' },
+          { remoteClaim: 'mobile', localField: 'phone' },
+        ],
+        lastTestedAt: '2026-11-10 09:00',
+        testStatus: 'untested',
+      },
+];
