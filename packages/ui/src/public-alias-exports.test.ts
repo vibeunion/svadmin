@@ -4,6 +4,10 @@ import {
   ComplianceWordFilter,
   ContentModerationCenter,
   ContentReviewWorkbench,
+  PrintTemplateDesigner,
+  DocumentPrintStudio,
+  PrintPreviewModal,
+  DocumentPrintPreview,
   SsoConnectionStudio,
   IdentityProviderManager,
   GatewayRouteEditor,
@@ -620,6 +624,10 @@ describe('public compatibility aliases', () => {
     expect(ComplianceWordFilter).toBe(SensitiveWordAuditor);
     expect(ContentModerationCenter).toBeDefined();
     expect(ContentReviewWorkbench).toBe(ContentModerationCenter);
+    expect(PrintTemplateDesigner).toBeDefined();
+    expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
+    expect(PrintPreviewModal).toBeDefined();
+    expect(DocumentPrintPreview).toBe(PrintPreviewModal);
     expect(SsoConnectionStudio).toBeDefined();
     expect(IdentityProviderManager).toBe(SsoConnectionStudio);
   });

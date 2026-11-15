@@ -3737,6 +3737,38 @@ Enterprise Multi-protocol Single Sign-On (SSO) Connection Studio:
   onSave={(conn) => console.log('Saved SSO connection:', conn)}
 />
 ```
+### `<PrintTemplateDesigner>` / `<DocumentPrintStudio>` & `<PrintPreviewModal>`
+
+Enterprise Bill Print Template Designer & High-Fidelity Printable Suite:
+- **Multiple Paper Formats**: Supports standard paper formats including A4 Portrait/Landscape, Triplicate needle-print bills (241x140mm), Warehouse shipping labels (100x180mm), and Thermal receipt paper (80mm).
+- **Automated Financial Capitalization**: Built-in Chinese currency capitalization (`numberToChineseCurrency`) generating formal RMB financial text.
+- **Barcode & QR Integration**: Out-of-the-box barcode (Code 128) and QR code anti-counterfeiting verification headers.
+- **High-Fidelity Preview & Print Shield**: Provides `<PrintPreviewModal>` with `@media print` layout isolation and table row page-break protection (`page-break-inside: avoid`).
+
+```svelte
+<script lang="ts">
+  import { PrintTemplateDesigner, PrintPreviewModal } from '@svadmin/ui';
+
+  let openPreview = $state(false);
+  const sampleConfig = {
+    title: 'Warehouse Dispatch Bill',
+    companyName: 'Acme Logistics Corp',
+    paperSize: 'A4',
+  };
+</script>
+
+<PrintTemplateDesigner
+  config={sampleConfig}
+  onSave={(cfg) => console.log('Saved template:', cfg)}
+  onPreview={() => (openPreview = true)}
+/>
+
+<PrintPreviewModal
+  bind:open={openPreview}
+  config={sampleConfig}
+  items={[{ name: 'Server Rack', quantity: 2, total_amount: 5000 }]}
+/>
+```
 
 ### `<SensitiveWordAuditor>` / `<ComplianceWordFilter>` & `<ContentModerationCenter>`
 
