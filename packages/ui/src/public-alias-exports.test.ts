@@ -316,6 +316,10 @@ import {
   ClusterTrafficVisualizer,
   SslCertificateMonitorCard,
   TlsCertExpiryRadar,
+  AudioVisualInspector,
+  MediaInspectionCard,
+  MediaAuthenticityAuditCard,
+  ExifMetadataAuditor,
   message,
   notification,
   toast,
@@ -624,6 +628,10 @@ describe('public compatibility aliases', () => {
     expect(ClusterTrafficVisualizer).toBe(TrafficTopologyInspector);
     expect(SslCertificateMonitorCard).toBeDefined();
     expect(TlsCertExpiryRadar).toBe(SslCertificateMonitorCard);
+    expect(AudioVisualInspector).toBeDefined();
+    expect(MediaInspectionCard).toBe(AudioVisualInspector);
+    expect(MediaAuthenticityAuditCard).toBeDefined();
+    expect(ExifMetadataAuditor).toBe(MediaAuthenticityAuditCard);
     expect(PrintTemplateDesigner).toBeDefined();
     expect(DocumentPrintStudio).toBe(PrintTemplateDesigner);
     expect(PrintPreviewModal).toBeDefined();

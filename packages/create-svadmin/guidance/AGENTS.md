@@ -4,6 +4,21 @@ Read `DESIGN.md` before creating, revising, or reviewing any UI. It is the
 authority for visual language, page hierarchy, feedback ownership, and
 acceptance checks in this project.
 
+## 默认 Schema 与校验
+
+- AI 新生成的业务代码默认使用 TypeBox 1.x：从 `typebox` 导入 `Type` 和
+  `Static`，从 `typebox/value` 导入 `Value`。不要使用旧的 `@sinclair/typebox`
+  包名，也不要把 Zod 的 `parse` / `safeParse` API 用在 TypeBox Schema 上。
+- 除非用户明确要求，否则不要为新业务代码安装或引入 `zod`、`zod/*`、
+  Zod resolver，也不要另建一套 Zod Schema。第三方 SDK 的间接 Zod 依赖
+  不代表业务项目选择了 Zod。
+- 复用已有 TypeBox 资源契约，通过 `Static<typeof Schema>` 推导业务类型，
+  使用资源契约的校验入口；独立边界校验使用 `Value.Check` / `Value.Errors`。
+  新资源先使用 `create-svadmin add resource`、`generate` / `infer` 或
+  `svadmin_generateResource` 生成，再按真实接口收紧契约。
+- 已有业务代码使用 Zod 时，先遵循用户要求确认迁移范围；不要为了新增功能
+  擅自迁移无关模块，或把依赖的 Zod 包 alias / override 为 TypeBox。
+
 ## Product-first generation
 
 Read `PRODUCT.md` before converting a schema, API, or feature list into pages. Build the product brief, workflows, resources, actions, surfaces, and menu in that order. Resources are data contracts; they are not automatic pages or menu entries.
@@ -138,6 +153,8 @@ business code inside `src/features/<module>/` and expose it through the module's
 
 ## Reject generated UI when
 
+- new business code introduces Zod without an explicit user request, or duplicates
+  an existing TypeBox contract with a second validation schema;
 - success appears simultaneously in a Toast, heading, description, Alert, badge,
   or result summary;
 - the page contains decorative explanation panels or nested cards;
