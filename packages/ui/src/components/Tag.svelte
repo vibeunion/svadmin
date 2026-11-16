@@ -1,18 +1,23 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
-  import X from '@lucide/svelte/icons/x';
-  import { cn } from '../utils.js';
-  import { badgeVariants, type BadgeVariant } from './ui/badge/index.js';
-  import { useComponentConfig } from './ConfigProvider.svelte';
+  import type { Snippet } from "svelte";
+  import X from "@lucide/svelte/icons/x";
+  import { cn } from "../utils.js";
+  import { badgeVariants, type BadgeVariant } from "./ui/badge/index.js";
+  import { useComponentConfig } from "./ConfigProvider.svelte";
+
+  export type TagColor = "blue" | "green" | "orange" | "red" | "purple" | "cyan" | "gray" | string;
 
   interface Props {
     variant?: BadgeVariant;
-    size?: 'default' | 'compact';
+    color?: TagColor;
+    size?: "default" | "compact";
+    bordered?: boolean;
     closable?: boolean;
     checkable?: boolean;
     checked?: boolean;
     disabled?: boolean;
     closeLabel?: string;
+    icon?: Snippet;
     class?: string;
     children?: Snippet;
     onclose?: (event: MouseEvent) => void;
@@ -20,13 +25,16 @@
   }
 
   let {
-    variant = 'secondary',
+    variant = "secondary",
+    color,
     size: sizeProp,
+    bordered = true,
     closable = false,
     checkable = false,
     checked = false,
     disabled = false,
-    closeLabel = 'Remove tag',
+    closeLabel = "Remove tag",
+    icon,
     class: className,
     children,
     onclose,
@@ -34,8 +42,24 @@
   }: Props = $props();
 
   const config = useComponentConfig();
-  const size = $derived(sizeProp ?? (config.density === 'compact' || config.componentSize === 'sm' ? 'compact' : 'default'));
-  const resolvedVariant = $derived(checkable && checked && variant === 'secondary' ? 'default' : variant);
+  const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
+  const resolvedVariant = $derived(checkable && checked && variant === "secondary" ? "default" : variant);
+
+  const presetColorClasses: Record<string, string> = {
+    blue: "bg-primary/10 text-primary border-primary/20",
+    green: "bg-success/10 text-success border-success/20",
+    orange: "bg-warning/10 text-warning border-warning/20",
+    red: "bg-destructive/10 text-destructive border-destructive/20",
+    purple: "bg-accent text-accent-foreground border-border",
+    cyan: "bg-info/10 text-info border-info/20",
+    gray: "bg-muted text-muted-foreground border-border",
+  };
+
+  const isPresetColor = $derived(Boolean(color && presetColorClasses[color]));
+  const customColorStyle = $derived.by(() => {
+    if (!color || isPresetColor) return undefined;
+    return `background-color: color-mix(in srgb, ${color} 10%, transparent); color: ${color}; border-color: color-mix(in srgb, ${color} 25%, transparent);`;
+  });
 
   function handleCheck(): void {
     if (disabled) return;
@@ -49,12 +73,26 @@
 </script>
 
 <span
-  class={cn(badgeVariants({ variant: resolvedVariant }), 'svadmin-tag', className)}
+  class={cn(
+    !color && badgeVariants({ variant: resolvedVariant }),
+    color && isPresetColor && presetColorClasses[color],
+    color && !isPresetColor && "border",
+    !bordered && "border-transparent",
+    "svadmin-tag inline-flex items-center",
+    className
+  )}
+  style={customColorStyle}
   class:is-disabled={disabled}
   data-slot="tag"
   data-size={size}
+  data-color={color}
   data-checked={checkable ? String(checked) : undefined}
 >
+  {#if icon}
+    <span class="svadmin-tag__icon shrink-0 mr-1 flex items-center" aria-hidden="true">
+      {@render icon()}
+    </span>
+  {/if}
   {#if checkable}
     <button
       type="button"
@@ -83,7 +121,7 @@
 
 <style>
   .svadmin-tag { gap: 0.25rem; max-width: 100%; min-height: 24px; padding-inline: 8px; border-radius: 2px; font-weight: 500; }
-  .svadmin-tag[data-size='compact'] { min-height: 20px; }
+  .svadmin-tag[data-size="compact"] { min-height: 20px; }
   .svadmin-tag.is-disabled { opacity: 1; color: var(--svadmin-text-4); }
   .svadmin-tag__label { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .svadmin-tag__control,
