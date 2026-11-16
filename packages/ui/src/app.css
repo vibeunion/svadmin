@@ -1676,6 +1676,14 @@ main {
   .svadmin-textarea[data-input-state="loading"] { animation: none; }
 }
 
+.svadmin-card--hoverable {
+  transition: transform var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+  cursor: pointer;
+}
+.svadmin-card--hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--svadmin-shadow-surface-hover);
+}
 .svadmin-card {
   display: flex;
   flex-direction: column;
