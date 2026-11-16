@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.0](https://github.com/vibeunion/svadmin/compare/core-v0.83.1...core-v0.84.0) (2026-11-16)
+
+
+### 🚀 Features
+
+* **core:** add query-scoped cursor list controller ([#824](https://github.com/vibeunion/svadmin/issues/824)) ([c5efa9d](https://github.com/vibeunion/svadmin/commit/c5efa9dd93ba29cdf3664d8fa56f22269a6b721b))
+
 ## [0.83.1](https://github.com/vibeunion/svadmin/compare/core-v0.83.0...core-v0.83.1) (2026-11-15)
 
 

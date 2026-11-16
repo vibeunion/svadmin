@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.131.1](https://github.com/vibeunion/svadmin/compare/ui-v0.131.0...ui-v0.131.1) (2026-11-16)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** localize filter builder operators and constrained choices ([#822](https://github.com/vibeunion/svadmin/issues/822)) ([8472da1](https://github.com/vibeunion/svadmin/commit/8472da11397e684f1961e06826315893f045dbcf))
+* **ui:** prevent implicit alert grid columns ([#823](https://github.com/vibeunion/svadmin/issues/823)) ([fa4c3e3](https://github.com/vibeunion/svadmin/commit/fa4c3e391aa7a57a42a76391f7d933f05a6d1f29))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.15
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.0
+
 ## [0.131.0](https://github.com/vibeunion/svadmin/compare/ui-v0.130.0...ui-v0.131.0) (2026-11-15)
 
 
