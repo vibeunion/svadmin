@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.1](https://github.com/vibeunion/svadmin/compare/core-v0.84.0...core-v0.84.1) (2026-11-16)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ui:** drop upstream brand names from comments and test descriptions ([b675083](https://github.com/vibeunion/svadmin/commit/b675083e840ecd2516d469b31ec5314c5f9c7a52))
+
 ## [0.84.0](https://github.com/vibeunion/svadmin/compare/core-v0.83.1...core-v0.84.0) (2026-11-16)
 
 
