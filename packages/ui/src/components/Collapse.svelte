@@ -21,6 +21,8 @@
     bordered?: boolean;
     /** 展开图标位置，对齐参考实现的 expand-icon-position。 */
     expandIconPosition?: 'left' | 'right';
+    /** 尺寸规范 */
+    size?: 'mini' | 'small' | 'default' | 'large';
     /** 关闭后是否销毁内容；默认保留以便做高度过渡。 */
     destroyOnHide?: boolean;
     /** 首次展开前不渲染内容，对齐参考实现的 lazyload。 */
@@ -40,6 +42,7 @@
     accordion = false,
     bordered = true,
     expandIconPosition = 'right',
+    size = 'default',
     destroyOnHide = false,
     lazyload = false,
     showExpandIcon = true,
@@ -78,6 +81,7 @@
   class={cn('svadmin-collapse', !bordered && 'svadmin-collapse--borderless', className)}
   data-bordered={bordered}
   data-expand-icon-position={expandIconPosition}
+  data-size={size}
 >
   {#each items as item (item.id)}
     {@const open = openIds.includes(item.id)}
@@ -174,6 +178,30 @@
   .svadmin-collapse__content[data-state='open'] .svadmin-collapse__content-inner {
     padding-block: var(--svadmin-space-3) var(--svadmin-space-4);
   }
+
+  /* Size variations */
+  .svadmin-collapse[data-size='mini'] .svadmin-collapse__trigger {
+    padding: 4px 8px;
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
+  .svadmin-collapse[data-size='mini'] .svadmin-collapse__content-inner {
+    padding-inline: var(--svadmin-space-2, 0.5rem);
+  }
+  .svadmin-collapse[data-size='small'] .svadmin-collapse__trigger {
+    padding: 6px 10px;
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
+  .svadmin-collapse[data-size='small'] .svadmin-collapse__content-inner {
+    padding-inline: var(--svadmin-space-3, 0.75rem);
+  }
+  .svadmin-collapse[data-size='large'] .svadmin-collapse__trigger {
+    padding: 12px 16px;
+    font-size: var(--svadmin-text-section, 1rem);
+  }
+  .svadmin-collapse[data-size='large'] .svadmin-collapse__content-inner {
+    padding-inline: var(--svadmin-space-5, 1.25rem);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .svadmin-collapse__icon,
     .svadmin-collapse__content { transition: none; }
