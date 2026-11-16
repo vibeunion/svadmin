@@ -143,3 +143,16 @@ export const productComponentSizeMigration = Object.freeze({
     ]),
   }),
 });
+
+// The collapsible summary lives in a root rule, outside the components layer.
+export const collapsibleSummarySelector = `details.svadmin-collapsible > summary,
+details.svadmin-collapsible-filter > summary,
+details[data-svadmin-filter] > summary,
+[data-svadmin-collapsible] > summary`;
+
+export const collapsibleSummaryMigration = Object.freeze({
+  'min-height': Object.freeze(['2rem', '40px']),
+  padding: Object.freeze(['0.25rem 0', '8px 0']),
+  'font-size': Object.freeze(['0.8125rem', '0.875rem']),
+  'line-height': Object.freeze(['1.25rem', '24px']),
+});

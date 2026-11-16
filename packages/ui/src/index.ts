@@ -190,7 +190,7 @@ export { default as Image } from './components/Image.svelte';
 export { default as ImageCropper } from './components/ImageCropper.svelte';
 export { default as ActivityFeed } from './components/ActivityFeed.svelte';
 export type { ActivityItem } from './components/ActivityFeed.svelte';
-export { default as PresenceAvatarGroup, default as PresenceAvatars } from './components/PresenceAvatarGroup.svelte';
+export { default as PresenceAvatarGroup, default as PresenceAvatars, default as AvatarGroup } from './components/PresenceAvatarGroup.svelte';
 export type { PresenceAvatarGroupProps, PresenceUser } from './components/PresenceAvatarGroup.svelte';
 export { default as PrintableBill } from './components/PrintableBill.svelte';
 export type { BillItem } from './components/PrintableBill.svelte';

@@ -3,12 +3,12 @@
 ## Contract
 
 - Source / parent: PR #798, initial head `8e2b72c7`.
-- Reason: user requested an Arco-style enterprise suite PR; continue the existing PR and correct its review findings.
-- Goal: strict IP/CIDR/range parsing, temporary-rule preservation, current-IP detection adapter, local lockout prevention, and accessible Arco editor/drawer.
+- Reason: user requested an enterprise suite PR; continue the existing PR and correct its review findings.
+- Goal: strict IP/CIDR/range parsing, temporary-rule preservation, current-IP detection adapter, local lockout prevention, and accessible editor/drawer.
 - Non-goals: production ACL enforcement, deployment, merging, other roadmap suites, unrelated example changes.
 - Risk / orchestration: high / bounded panel, one writer and two independent read-only reviewers.
 - Writer scope: IP suite source, tests, dependency declaration, bilingual enterprise section, dedicated browser fixture and this evidence directory. A backward-compatible `Sheet.closeOnOverlayClick` flag is required to preserve form drafts; its default remains unchanged.
-- Acceptance: focused parsing and behavior tests, Arco/style contracts, deterministic build, governance, desktop/mobile screenshots, nested keyboard flow and independent final review.
+- Acceptance: focused parsing and behavior tests, style contracts, deterministic build, governance, desktop/mobile screenshots, nested keyboard flow and independent final review.
 - Runtime note: `agmesh` and `stack-profile-selector` were unavailable. No installation or project-rule deployment was performed. The requested default subagent model is unavailable in the current host catalog; reviewers inherit the host model.
 
 ## Boundaries

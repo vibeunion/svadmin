@@ -151,6 +151,7 @@ import {
   MetricEventAnnotation,
   TableToolbar,
   SearchTableToolbar,
+  AvatarGroup,
   AbacPolicyMatrix,
   AttributeBasedAccessControlMatrix,
   PermissionSimulator,
@@ -544,6 +545,7 @@ describe('public compatibility aliases', () => {
     expect(MetricEventAnnotation).toBe(ChartAnnotationOverlay);
     expect(TableToolbar).toBeDefined();
     expect(SearchTableToolbar).toBe(TableToolbar);
+    expect(AvatarGroup).toBe(PresenceAvatarGroup);
     expect(AbacPolicyMatrix).toBeDefined();
     expect(AttributeBasedAccessControlMatrix).toBe(AbacPolicyMatrix);
     expect(PermissionSimulator).toBeDefined();

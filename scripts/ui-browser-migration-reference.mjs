@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import postcss from 'postcss';
 import {
+  collapsibleSummaryMigration,
+  collapsibleSummarySelector,
   productComponentSizeMigration,
   productDarkTokenMigration,
   productLightTokenMigration,
@@ -171,9 +173,26 @@ export function createMigrationReference(baselineCss) {
   replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
   migrateComponentDeclarations(root, tableSizeMigration);
   migrateComponentDeclarations(root, productComponentSizeMigration);
+  migrateRootDeclarations(root, collapsibleSummarySelector, collapsibleSummaryMigration);
   appendVisualContract(root);
   appendHostNormalization(root);
   return root.toString();
+}
+
+function migrateRootDeclarations(root, selector, declarations) {
+  const rules = [];
+  root.walkRules(selector, (rule) => {
+    if (rule.parent?.type === 'root') rules.push(rule);
+  });
+  assert.equal(rules.length, 1, 'collapsible summary: expected one root rule');
+  const rule = rules[0];
+  for (const [property, [before, after]] of Object.entries(declarations)) {
+    const matches = rule.nodes.filter((node) => node.type === 'decl' && node.prop === property);
+    assert.equal(matches.length, 1, `collapsible summary ${property}: historical declaration drift`);
+    assert.equal(matches[0].value, before, `collapsible summary ${property}: historical value drift`);
+    assert.equal(Boolean(matches[0].important), false, `collapsible summary ${property}: unexpected priority`);
+    matches[0].value = after;
+  }
 }
 
 function appendHostNormalization(root) {

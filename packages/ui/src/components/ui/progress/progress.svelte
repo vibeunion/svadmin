@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Check, X } from "@lucide/svelte";
   import { cn } from "../../../utils.js";
 
   type ProgressStatus = 'normal' | 'success' | 'warning' | 'danger';
@@ -59,7 +60,7 @@
         style:stroke-dashoffset={indeterminate ? circumference * 0.7 : dashOffset}
       />
     </svg>
-    {#if showInfo}<span class="svadmin-progress__info">{indeterminate ? '…' : info}</span>{/if}
+    {#if showInfo}<span class="svadmin-progress__info flex items-center justify-center">{#if indeterminate}…{:else if status === "success"}<Check class="size-4 text-success" aria-hidden="true" />{:else if status === "danger"}<X class="size-4 text-destructive" aria-hidden="true" />{:else}{info}{/if}</span>{/if}
   </div>
 {:else}
   <div
@@ -76,7 +77,7 @@
       <div class="svadmin-progress__line-track">
         <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
       </div>
-      <span class="svadmin-progress__info">{indeterminate ? '…' : info}</span>
+      <span class="svadmin-progress__info flex items-center justify-end">{#if indeterminate}…{:else if status === "success"}<Check class="size-3.5 text-success" aria-hidden="true" />{:else if status === "danger"}<X class="size-3.5 text-destructive" aria-hidden="true" />{:else}{info}{/if}</span>
     {:else}
       <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
     {/if}
