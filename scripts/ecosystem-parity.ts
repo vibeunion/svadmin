@@ -1,5 +1,5 @@
 /**
- * Ecosystem parity matrix for the reference Arco ecosystem.
+ * Ecosystem parity matrix for the reference admin-ecosystem capabilities.
  *
  * `docs/components/parity.md` already audits components and Pro pages. This
  * module owns the third layer — build plugins, theming, icons, CLI materials,
@@ -43,7 +43,7 @@ export const ECOSYSTEM_MATRIX_END = '<!-- ecosystem-matrix:end -->';
 export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   {
     id: 'theme-tokens',
-    counterpart: '@arco-design/color, arco-theme editor',
+    counterpart: 'tone-scale generator, theme editor',
     capability: 'Derive a tonal palette from one brand color, emit light/dark tokens, exchange them as data',
     surface: '`generateColorScale`, `deriveColorPreset`, `exportColorThemes`, `importColorThemes`',
     status: 'adopted',
@@ -56,7 +56,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'material-cli',
-    counterpart: 'arco-cli, `arco add`, material market',
+    counterpart: 'scaffold CLI, material market',
     capability: 'List, install, upgrade, and remove page materials without clobbering local edits',
     surface: '`svadmin add block <name> [--dry-run|--json|--upgrade|--remove]`',
     status: 'adopted',
@@ -69,7 +69,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'icon-registry',
-    counterpart: '@arco-design/web-react/icon',
+    counterpart: 'framework icon registry',
     capability: 'Resolve an icon by name, including sprite sheets and remote SVG templates',
     surface: '`registerIcons`, `registerIconSource`, `Icon`',
     status: 'adopted',
@@ -82,7 +82,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'schema-reactions',
-    counterpart: '@formily/arco',
+    counterpart: 'schema-form adapter',
     capability: 'Schema-driven conditional visibility and derived field values',
     surface: '`visibleWhen` combinators, `equalsField`, `computed`, `applySchemaFormComputed`',
     status: 'partial',
@@ -96,7 +96,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'intent-preload',
-    counterpart: '@arco-plugins/vite-react lazy load',
+    counterpart: 'bundler lazy-load plugin',
     capability: 'Preload a module when the user hovers, focuses, or scrolls it into view',
     surface: '`intentPreload` action and `preloadModule`',
     status: 'adopted',
@@ -120,7 +120,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'build-plugins',
-    counterpart: '@arco-plugins/vite-react, @arco-plugins/webpack-react, unplugin-react, babel-plugin-import',
+    counterpart: 'bundler import-rewrite and Less plugins',
     capability: 'On-demand component/style imports, Less variable replacement, lazy loading, icon substitution',
     surface: 'Not ported',
     status: 'non_goal',
@@ -128,7 +128,7 @@ export const ECOSYSTEM_ITEMS: readonly EcosystemItem[] = [
   },
   {
     id: 'mobile-components',
-    counterpart: '@arco-design/mobile-react',
+    counterpart: 'mobile component kit',
     capability: 'Mobile-first component set with touch gestures',
     surface: '`@svadmin/lite` SSR + responsive table/form layouts',
     status: 'non_goal',

@@ -48,7 +48,7 @@
 
 ### 🚀 Features
 
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 
 
 ### Dependencies
@@ -268,7 +268,7 @@
 
 ### 🚀 Features
 
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 
 
 ### Dependencies

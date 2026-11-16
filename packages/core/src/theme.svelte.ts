@@ -623,7 +623,7 @@ export function unregisterThemeOwner(token: ThemeOwnerToken|undefined): void {
 
 /**
  * Derive a full tonal palette from one brand color and register it.
- * Mirrors the Arco `@arco-design/color` capability without a Less variable layer.
+ * Mirrors the reference tone-scale capability without a Less variable layer.
  */
 export function registerColorTheme(input: { name: string; label?: string; color: string }): ColorPreset {
   const derived=deriveColorPreset(input);

@@ -1,8 +1,8 @@
 /**
  * Color scale generation and theme-token exchange.
  *
- * Capability parity with the Arco ecosystem's `@arco-design/color` + theme
- * editor: derive a tonal scale from one brand color, build light/dark CSS
+ * Capability parity with the reference ecosystem's tone-scale generator and
+ * theme editor: derive a tonal scale from one brand color, build light/dark CSS
  * variable bundles, and exchange presets as portable JSON.
  *
  * Boundaries (intentional):
@@ -220,10 +220,10 @@ function contrastAdjusted(
 const SCALE_LIGHTNESS_STEP = (0.975 - 0.26) / 9;
 
 /**
- * Official Arco hover (5) / pressed (7) / disabled fill (3) for the written
+ * Reference hover (5) / pressed (7) / disabled fill (3) for the written
  * product bases. `#165DFF` is the CSS default and must not be regenerated.
- * Dark values are the compiled `body[arco-theme=dark]` channels from
- * `@arco-design/web-react` 2.66.1, not the light scale reversed by hand.
+ * Dark values are the compiled dark-theme channels of the reference component
+ * library 2.66.1, not the light scale reversed by hand.
  */
 const OFFICIAL_INTERACTION_RAMPS: Record<string, { hover: string; pressed: string; disabled: string }> = {
   '#165DFF': { hover: '#4080FF', pressed: '#0E42D2', disabled: '#94BFFF' },
@@ -263,7 +263,7 @@ function parseOklchColor(color: string): { l: number; c: number; h: number } | u
 
 /**
  * Hover / pressed / disabled fills for one brand color.
- * Known Arco bases return the official hex. Every other color shifts lightness
+ * Known reference bases return the pinned hex. Every other color shifts lightness
  * by the existing OKLCH scale step so imported themes stay on the same ramp.
  */
 export function interactionRamps(color: string): InteractionRamps {

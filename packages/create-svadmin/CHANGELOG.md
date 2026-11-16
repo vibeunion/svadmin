@@ -6,14 +6,14 @@
 ### 🚀 Features
 
 * **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
-* **ecosystem:** align arco ecosystem capabilities ([b8a8af1](https://github.com/vibeunion/svadmin/commit/b8a8af1a5c24a22aac6676e57da75221edfe9b93))
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([b8a8af1](https://github.com/vibeunion/svadmin/commit/b8a8af1a5c24a22aac6676e57da75221edfe9b93))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 * **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
 * **ecosystem:** govern materials, theme contrast, and schema layout ([2690dc8](https://github.com/vibeunion/svadmin/commit/2690dc8abc4a33a2bd780d1191ad1235624eed3f))
 * **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
 * **platform:** expand materials and adaptive AI surfaces ([9fea775](https://github.com/vibeunion/svadmin/commit/9fea775b31f09e2d6d62b795f3a4a732fefc5f5c))
 * **ui:** align admin UI and workspace scope ([9714dfb](https://github.com/vibeunion/svadmin/commit/9714dfba3d4bab9f6c340780d63bf6e5ce63ee94))
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 
 
 ### 🐛 Bug Fixes
@@ -138,7 +138,7 @@
 ### 🚀 Features
 
 * **ui:** align admin UI and workspace scope ([9714dfb](https://github.com/vibeunion/svadmin/commit/9714dfba3d4bab9f6c340780d63bf6e5ce63ee94))
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 
 
 ### Dependencies
@@ -162,8 +162,8 @@
 ### 🚀 Features
 
 * **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
-* **ecosystem:** align arco ecosystem capabilities ([b8a8af1](https://github.com/vibeunion/svadmin/commit/b8a8af1a5c24a22aac6676e57da75221edfe9b93))
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([b8a8af1](https://github.com/vibeunion/svadmin/commit/b8a8af1a5c24a22aac6676e57da75221edfe9b93))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 * **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
 * **ecosystem:** govern materials, theme contrast, and schema layout ([2690dc8](https://github.com/vibeunion/svadmin/commit/2690dc8abc4a33a2bd780d1191ad1235624eed3f))
 * **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
@@ -327,8 +327,8 @@
 * **create-svadmin:** ship vibe workspace catalog and read-only MCP ([10325c9](https://github.com/vibeunion/svadmin/commit/10325c9c5903e28dccca33c71c0f4a4d30ac227d))
 * **create:** support the full official provider catalog in add provider ([d7042e8](https://github.com/vibeunion/svadmin/commit/d7042e879f5c58045b5767642fe7af64978b9c48))
 * **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
-* **ecosystem:** align arco ecosystem capabilities ([b8a8af1](https://github.com/vibeunion/svadmin/commit/b8a8af1a5c24a22aac6676e57da75221edfe9b93))
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([b8a8af1](https://github.com/vibeunion/svadmin/commit/b8a8af1a5c24a22aac6676e57da75221edfe9b93))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 * **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
 * **ecosystem:** govern materials, theme contrast, and schema layout ([2690dc8](https://github.com/vibeunion/svadmin/commit/2690dc8abc4a33a2bd780d1191ad1235624eed3f))
 * generate product workspace from product plans ([501ae2a](https://github.com/vibeunion/svadmin/commit/501ae2a2acd1ac7bb610e1c358797f38bc43faa4))
@@ -471,7 +471,7 @@
 
 ### 🚀 Features
 
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 
 
 ### Dependencies

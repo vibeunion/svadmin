@@ -51,9 +51,9 @@
 * **ui:** add marks and tick labels support to Slider and RangeSlider ([#840](https://github.com/vibeunion/svadmin/issues/840)) ([2108091](https://github.com/vibeunion/svadmin/commit/21080912b2cd44f5336d6df42ac820caf9b98c20))
 * **ui:** add showWordLimit, maxLength counter, and allowClear to Textarea ([#839](https://github.com/vibeunion/svadmin/issues/839)) ([257f189](https://github.com/vibeunion/svadmin/commit/257f18980cde0fa219be422ab4196f372704d2b6))
 * **ui:** add TableToolbar suite, enhance Switch text/spinner and StepsForm halo ([#832](https://github.com/vibeunion/svadmin/issues/832)) ([52a53f6](https://github.com/vibeunion/svadmin/commit/52a53f6c0aee1e1f400008b26abcd83d24ac645b))
-* **ui:** enhance Alert semantic icon/banner and Link external icon with Arco patterns ([#834](https://github.com/vibeunion/svadmin/issues/834)) ([0ce435d](https://github.com/vibeunion/svadmin/commit/0ce435df7c467e4f5e13ff215ceac09bd6704581))
+* **ui:** enhance Alert semantic icon/banner and Link external icon with shared reference patterns ([#834](https://github.com/vibeunion/svadmin/issues/834)) ([0ce435d](https://github.com/vibeunion/svadmin/commit/0ce435df7c467e4f5e13ff215ceac09bd6704581))
 * **ui:** enhance BackTop icon/target, TagsInput clear/collapse, and AvatarGroup alias ([#833](https://github.com/vibeunion/svadmin/issues/833)) ([8db866f](https://github.com/vibeunion/svadmin/commit/8db866f95260a31e1373688064771ab2d62c6cd3))
-* **ui:** enhance Card hoverable/loading and Progress semantic icons with Arco patterns ([#835](https://github.com/vibeunion/svadmin/issues/835)) ([3780367](https://github.com/vibeunion/svadmin/commit/378036790218060e297e58b15afd664f5ba732ba))
+* **ui:** enhance Card hoverable/loading and Progress semantic icons with shared reference patterns ([#835](https://github.com/vibeunion/svadmin/issues/835)) ([3780367](https://github.com/vibeunion/svadmin/commit/378036790218060e297e58b15afd664f5ba732ba))
 * **ui:** enhance EmptyState vertical layout, Carousel hover arrows, and Statistic extra ([#836](https://github.com/vibeunion/svadmin/issues/836)) ([4309844](https://github.com/vibeunion/svadmin/commit/4309844c13362d95f0359e64b22da39b440b1684))
 * **ui:** normalize shared desktop control states ([9a78cca](https://github.com/vibeunion/svadmin/commit/9a78cca44ed8da8dbd387829b2f7aeee33b3aebb))
 
@@ -105,7 +105,7 @@
 
 ### 🚀 Features
 
-* **ui:** add Arco IP access rule editor and whitelist drawer ([#798](https://github.com/vibeunion/svadmin/issues/798)) ([d06642d](https://github.com/vibeunion/svadmin/commit/d06642d816562136613bb8e0038262c4ab8d821e))
+* **ui:** add the IP access rule editor and whitelist drawer ([#798](https://github.com/vibeunion/svadmin/issues/798)) ([d06642d](https://github.com/vibeunion/svadmin/commit/d06642d816562136613bb8e0038262c4ab8d821e))
 * **ui:** add AudioVisualInspector and MediaAuthenticityAuditCard suite ([#812](https://github.com/vibeunion/svadmin/issues/812)) ([71c8c5f](https://github.com/vibeunion/svadmin/commit/71c8c5fdd039f1cdbf0bae9f95194fe09b344ad4))
 * **ui:** add ContractClauseDiffViewer and ElectronicSealInspector suite ([bee7a42](https://github.com/vibeunion/svadmin/commit/bee7a4245650cf55df20aa5f79d147cdb84bebc9))
 * **ui:** add ContractClauseDiffViewer and ElectronicSealInspector suite ([e43b2f5](https://github.com/vibeunion/svadmin/commit/e43b2f50a92e0ecf2cf5b673cb471110435a5d54))
@@ -182,14 +182,14 @@
 
 ### 🚀 Features
 
-* **ui:** close leftover Arco visual contracts ([#791](https://github.com/vibeunion/svadmin/issues/791)) ([b13fb82](https://github.com/vibeunion/svadmin/commit/b13fb8231dac97948f7ac6420d04ca2726ad0b3c))
+* **ui:** close leftover shared visual contracts ([#791](https://github.com/vibeunion/svadmin/issues/791)) ([b13fb82](https://github.com/vibeunion/svadmin/commit/b13fb8231dac97948f7ac6420d04ca2726ad0b3c))
 
 ## [0.128.0](https://github.com/vibeunion/svadmin/compare/ui-v0.127.0...ui-v0.128.0) (2026-11-14)
 
 
 ### 🚀 Features
 
-* **ui:** finish remaining Arco control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
+* **ui:** finish remaining shared control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
 
 
 ### 🐛 Bug Fixes
@@ -213,7 +213,7 @@
 ### 🚀 Features
 
 * **ui:** align admin UI and workspace scope ([9714dfb](https://github.com/vibeunion/svadmin/commit/9714dfba3d4bab9f6c340780d63bf6e5ce63ee94))
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 
 
 ### Dependencies
@@ -250,7 +250,7 @@
 ### 🚀 Features
 
 * **ui:** add InputGroup affixes, animate Steps progress, and add table fullscreen toggle ([#772](https://github.com/vibeunion/svadmin/issues/772)) ([3f8a87c](https://github.com/vibeunion/svadmin/commit/3f8a87c7205bd1fd932faa4933c650edbf161114))
-* **ui:** enhance Rate hover, Spin overlay, Timeline dot, and Result icon with Arco patterns ([#770](https://github.com/vibeunion/svadmin/issues/770)) ([9df281b](https://github.com/vibeunion/svadmin/commit/9df281b0301c992a18c454a1a791b20ff699ffc6))
+* **ui:** enhance Rate hover, Spin overlay, Timeline dot, and Result icon with shared reference patterns ([#770](https://github.com/vibeunion/svadmin/issues/770)) ([9df281b](https://github.com/vibeunion/svadmin/commit/9df281b0301c992a18c454a1a791b20ff699ffc6))
 * **ui:** micro-app sandbox, route sync and cross-app state bus suite ([#775](https://github.com/vibeunion/svadmin/issues/775)) ([362274f](https://github.com/vibeunion/svadmin/commit/362274f51dccbdbc235bbcdb03fa8249e02639d0))
 
 
@@ -269,8 +269,8 @@
 * **ui:** add AntiLeakWatermark, DataLineage, LiveLogs, SealStamp, and Capacity suite ([#758](https://github.com/vibeunion/svadmin/issues/758)) ([0851948](https://github.com/vibeunion/svadmin/commit/08519487ef6e7ad1794573291ebfba2d6183c015))
 * **ui:** add DashboardGridLayout, DashboardLayoutStorage, and ChartAnnotationOverlay suite ([#763](https://github.com/vibeunion/svadmin/issues/763)) ([53d59b4](https://github.com/vibeunion/svadmin/commit/53d59b43b0bef447532b890798253b2a5654fc3f))
 * **ui:** add TenantContextSwitcher, OmnibarCommandPalette, and AuditTrailInspector suite ([#760](https://github.com/vibeunion/svadmin/issues/760)) ([0d49341](https://github.com/vibeunion/svadmin/commit/0d493410edd7e5c3c08eec85893b8f60f4c7fa04))
-* **ui:** align pagination select controls and popconfirm with Arco patterns ([d1bb4ac](https://github.com/vibeunion/svadmin/commit/d1bb4ac05feffe90318f23923f0381e7ec9a465f))
-* **ui:** align pagination select controls and popconfirm with Arco patterns ([#765](https://github.com/vibeunion/svadmin/issues/765)) ([39cf819](https://github.com/vibeunion/svadmin/commit/39cf819ad2ad210de0bb5906fe83e0fa8bad6231))
+* **ui:** align pagination select controls and popconfirm with shared reference patterns ([d1bb4ac](https://github.com/vibeunion/svadmin/commit/d1bb4ac05feffe90318f23923f0381e7ec9a465f))
+* **ui:** align pagination select controls and popconfirm with shared reference patterns ([#765](https://github.com/vibeunion/svadmin/issues/765)) ([39cf819](https://github.com/vibeunion/svadmin/commit/39cf819ad2ad210de0bb5906fe83e0fa8bad6231))
 
 
 ### 🐛 Bug Fixes
@@ -563,7 +563,7 @@
 
 ### 🚀 Features
 
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 
 
 ### Dependencies

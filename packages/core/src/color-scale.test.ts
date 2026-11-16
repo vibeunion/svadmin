@@ -64,7 +64,7 @@ describe('derived presets', () => {
     expect(() => deriveColorPreset({ name: '  ', color: '#165DFF' })).toThrow(TypeError);
   });
 
-  it('keeps the written Arco default ramps and derives the rest from the OKLCH step', () => {
+  it('keeps the written reference default ramps and derives the rest from the OKLCH step', () => {
     expect(interactionRamps('#165DFF')).toEqual({
       hover: '#4080FF',
       pressed: '#0E42D2',

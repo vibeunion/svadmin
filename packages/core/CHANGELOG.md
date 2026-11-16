@@ -27,14 +27,14 @@
 
 ### 🚀 Features
 
-* **ui:** finish remaining Arco control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
+* **ui:** finish remaining shared control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
 
 ## [0.82.0](https://github.com/vibeunion/svadmin/compare/core-v0.81.1...core-v0.82.0) (2026-11-14)
 
 
 ### 🚀 Features
 
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 
 ## [0.81.1](https://github.com/vibeunion/svadmin/compare/core-v0.81.0...core-v0.81.1) (2026-11-13)
 
@@ -135,7 +135,7 @@
 
 ### 🚀 Features
 
-* **ecosystem:** align Arco ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
+* **ecosystem:** align reference ecosystem capabilities ([f828443](https://github.com/vibeunion/svadmin/commit/f8284434bf57a0e1c20b9a9a3d01d43532928526))
 
 ## [0.72.0](https://github.com/vibeunion/svadmin/compare/core-v0.71.0...core-v0.72.0) (2026-11-02)
 

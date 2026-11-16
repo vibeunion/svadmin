@@ -89,7 +89,7 @@
 
 ### 🚀 Features
 
-* **ui:** finish remaining Arco control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
+* **ui:** finish remaining shared control contracts ([#787](https://github.com/vibeunion/svadmin/issues/787)) ([66399cf](https://github.com/vibeunion/svadmin/commit/66399cf3fae19ea767a3c9046e5946118291e0b5))
 
 
 ### Dependencies
@@ -104,7 +104,7 @@
 
 ### 🚀 Features
 
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 
 
 ### Dependencies

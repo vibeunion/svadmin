@@ -148,7 +148,7 @@ When references conflict, svadmin accessibility and state contracts win first,
 then the default ramp and page patterns. Stripe is no longer the default visual.
 The result is one product language rather than a collage of template styles.
 The default `clean-flat` refinement uses Mihua Blocks' component-parity method
-as a reference for compact Arco-like control geometry and state transitions,
+as a reference for compact control geometry and state transitions,
 while svadmin keeps ownership of the semantic tokens, component API, and
 accessibility behavior.
 The current parity baseline is explicit: controls use 100ms state transitions;
