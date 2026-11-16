@@ -2532,6 +2532,9 @@ button.svadmin-slider__mark:disabled { cursor: not-allowed; color: var(--svadmin
   background: var(--muted);
   animation: svadmin-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+.svadmin-skeleton[data-animation="false"] {
+  animation: none;
+}
 
 @keyframes svadmin-pulse {
   50% {
