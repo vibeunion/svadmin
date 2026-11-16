@@ -467,6 +467,9 @@ h1, h2, h3, h4, h5, h6, [data-slot="card-title"] {
     width: 4rem;
     height: 4rem;
   }
+  .svadmin-avatar:is([data-shape="square"], .svadmin-avatar-shape--square) {
+    border-radius: var(--radius-md);
+  }
   [data-slot="avatar"] {
     width: 100%;
     height: 100%;

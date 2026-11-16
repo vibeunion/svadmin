@@ -383,7 +383,7 @@ export { default as ItemList, default as List } from './components/ItemList.svel
 export type { ListItem } from './components/ItemList.svelte';
 export { default as Tree } from './components/Tree.svelte';
 export type { TreeNode, TreeCheckInfo, TreeDragInfo } from './components/Tree.svelte';
-export { Avatar } from './components/ui/avatar/index.js';
+export { Avatar, type AvatarShape } from './components/ui/avatar/index.js';
 export { Skeleton } from './components/ui/skeleton/index.js';
 export * as Sheet from './components/ui/sheet/index.js';
 export * as Drawer from './components/ui/sheet/index.js';

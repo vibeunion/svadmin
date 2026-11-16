@@ -1,7 +1,7 @@
 <script lang="ts" module>
-	import { avatarVariants as resolveAvatarVariants, type AvatarSize as AvatarSizeValue } from "./avatar-variants.js";
+	import { avatarVariants as resolveAvatarVariants, type AvatarSize as AvatarSizeValue, type AvatarShape as AvatarShapeValue } from "./avatar-variants.js";
 
-	export { avatarVariants, type AvatarSize } from "./avatar-variants.js";
+	export { avatarVariants, type AvatarSize, type AvatarShape } from "./avatar-variants.js";
 </script>
 
 <script lang="ts">
@@ -10,6 +10,7 @@
 
 	type Props = WithElementRef<HTMLImgAttributes, HTMLImageElement> & {
 		size?: AvatarSizeValue;
+		shape?: AvatarShapeValue;
 		fallback?: string;
 	};
 
@@ -18,6 +19,7 @@
 		src,
 		alt = "",
 		size = "default",
+		shape = "circle",
 		fallback,
 		class: className,
 		...restProps
@@ -27,7 +29,7 @@
 </script>
 
 {#if src && !imgError}
-	<span data-size={size} class={cn(resolveAvatarVariants({ size }), className)}>
+	<span data-size={size} data-shape={shape} class={cn(resolveAvatarVariants({ size, shape }), className)}>
 		<img
 			bind:this={ref}
 			data-slot="avatar"
@@ -42,8 +44,9 @@
 	<span
 		data-slot="avatar-fallback"
 		data-size={size}
+		data-shape={shape}
 		class={cn(
-			resolveAvatarVariants({ size }),
+			resolveAvatarVariants({ size, shape }),
 			"svadmin-avatar-fallback",
 			className
 		)}
