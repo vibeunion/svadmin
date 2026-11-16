@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.134.0](https://github.com/vibeunion/svadmin/compare/ui-v0.133.0...ui-v0.134.0) (2026-11-16)
+
+
+### 🚀 Features
+
+* **ui:** add Tag color presets, icon slot, and Notification error alias ([#842](https://github.com/vibeunion/svadmin/issues/842)) ([47716c0](https://github.com/vibeunion/svadmin/commit/47716c0309af25d3159b31053679848c5348b7f2))
+* **ui:** align affix, mark, radio, and tag control metrics ([#843](https://github.com/vibeunion/svadmin/issues/843)) ([b3880b5](https://github.com/vibeunion/svadmin/commit/b3880b5edf74cfa942772fd42e0dafca5ba292b8))
+
+
+### 🔧 Miscellaneous Chores
+
+* **ui:** drop upstream brand names from comments and test descriptions ([b675083](https://github.com/vibeunion/svadmin/commit/b675083e840ecd2516d469b31ec5314c5f9c7a52))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.16
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.4
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.1
+
 ## [0.133.0](https://github.com/vibeunion/svadmin/compare/ui-v0.132.0...ui-v0.133.0) (2026-11-16)
 
 
