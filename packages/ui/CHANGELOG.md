@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.135.0](https://github.com/vibeunion/svadmin/compare/ui-v0.134.0...ui-v0.135.0) (2026-11-16)
+
+
+### 🚀 Features
+
+* **ui:** add dot type and small size options to Steps ([#847](https://github.com/vibeunion/svadmin/issues/847)) ([3c83e5a](https://github.com/vibeunion/svadmin/commit/3c83e5a3808dbfd46adcce97ec4bfaf326c48b50))
+* **ui:** add items prop and separator option to Breadcrumbs ([#849](https://github.com/vibeunion/svadmin/issues/849)) ([6f1d10d](https://github.com/vibeunion/svadmin/commit/6f1d10df915128ebd58f806cb6c61698079fc99f))
+* **ui:** add offset aliases to Affix/Anchor and separator to OtpInput ([#844](https://github.com/vibeunion/svadmin/issues/844)) ([23a184b](https://github.com/vibeunion/svadmin/commit/23a184bdeea441f02c1b5a0d57851a96c782db75))
+* **ui:** add reverse and alternate mode options to Timeline ([#848](https://github.com/vibeunion/svadmin/issues/848)) ([91fc666](https://github.com/vibeunion/svadmin/commit/91fc6668fff9b1c03c089a0fd030a83f9b1e3365))
+* **ui:** add square shape option to Avatar ([#850](https://github.com/vibeunion/svadmin/issues/850)) ([2c2591f](https://github.com/vibeunion/svadmin/commit/2c2591f2dda2f1178a7e5b662ebf9821b7afa732))
+* **ui:** add title, extra slot, and size options to DescriptionList ([#846](https://github.com/vibeunion/svadmin/issues/846)) ([172e8b4](https://github.com/vibeunion/svadmin/commit/172e8b47086bb7a8e80cb5f5548fae0ceffa8b97))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep Breadcrumbs crumb types exact-optional safe ([8fb4b3f](https://github.com/vibeunion/svadmin/commit/8fb4b3f2bede7fc98310d122e3a977aedbc6e379))
+
 ## [0.134.0](https://github.com/vibeunion/svadmin/compare/ui-v0.133.0...ui-v0.134.0) (2026-11-16)
 
 
