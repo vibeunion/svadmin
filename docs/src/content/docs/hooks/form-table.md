@@ -242,7 +242,8 @@ const {
   const list = createCursorListController({
     provider: taskProvider,
     query: { status: 'open', pageSize: 50 },
-    queryKey: 'tenant-a:tasks:open:50',
+    queryKey: 'open:50',
+    scopeKey: 'tenant-a:tasks',
   });
   onMount(() => { void list.refresh(); });
   onDestroy(() => list.dispose());
@@ -256,6 +257,10 @@ const {
   onNext={() => { void list.next(); }} />
 ```
 
-Call `setQuery(query, queryKey)` when filters, sorting, page size, resource/provider or authorization scope change. Include all of these inputs in a stable key and pass immutable query values. A new key clears the old scope immediately, aborts its read and starts page one; stale responses cannot commit even when the provider ignores cancellation. The same key is a no-op.
+Use immutable query values and a stable `queryKey` containing effective filters, sorting and page size. `setQuery(query, queryKey)` requests page one when that key changes, then commits query, records, page and cursor cache together only after success. A failed query retains the applied snapshot; `state.query/queryKey` always describe the displayed records. Equivalent keys are a no-op. Explicit Apply/Clear actions use `resetQuery(query, queryKey)`, which re-reads page one even when the key is unchanged.
 
-`refresh()` re-reads the current page with `bypassCache: true`; `refresh({ resetToFirstPage: true })` explicitly starts over. A failed navigation or refresh retains the current successful page; `retry()` repeats the failed target. Pending navigation/refresh calls are deduplicated. `cancel()` aborts the active read, and `dispose()` also stops notifications. Error formatting, retry policy and focus/scroll restoration remain host concerns.
+The required separate `scopeKey` identifies the resource, provider and authorization scope. Pass a changed scope with `setQuery(query, queryKey, newScopeKey)`: this immediately clears old-scope data and reads page one, including when that read fails. Superseded responses cannot commit even when the provider ignores cancellation.
+
+`refresh()` re-reads the current page with `bypassCache: true`; `refresh({ resetToFirstPage: true })` explicitly starts over. A failed navigation or refresh retains the current successful page; `retry()` repeats the failed query and target cursor. Pending navigation/refresh calls are deduplicated. `cancel()`, `dispose()` and query supersession settle the action promise without waiting for the provider; disposal also stops notifications. Actions return true only when a page commits, allowing hosts to apply optional focus/scroll behavior without the controller accessing the DOM.
+
+Provider errors remain available to the host. A non-advancing cursor produces `CursorListError` with the stable `CURSOR_NOT_ADVANCING` code for host i18n; its English message is diagnostic only. Error formatting and automatic retry policy remain host concerns.

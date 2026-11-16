@@ -17,6 +17,13 @@
     ],
     "queryReset": true,
     "failureRetained": true,
+    "queryFailureRetained": true,
+    "queryRetryApplied": true,
+    "sameKeyReset": true,
+    "clearReset": true,
+    "ignoredCancellationSettled": true,
+    "scopeCleared": true,
+    "pageErrors": 0,
     "pageOverflow": false
   },
   {
@@ -37,6 +44,13 @@
     ],
     "queryReset": true,
     "failureRetained": true,
+    "queryFailureRetained": true,
+    "queryRetryApplied": true,
+    "sameKeyReset": true,
+    "clearReset": true,
+    "ignoredCancellationSettled": true,
+    "scopeCleared": true,
+    "pageErrors": 0,
     "pageOverflow": false
   }
 ]
