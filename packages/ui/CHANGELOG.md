@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.131.2](https://github.com/vibeunion/svadmin/compare/ui-v0.131.1...ui-v0.131.2) (2026-11-16)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** retain page-size controls after results fit on one page ([#826](https://github.com/vibeunion/svadmin/issues/826)) ([ffe7ef5](https://github.com/vibeunion/svadmin/commit/ffe7ef5ae0822ce515ffefa1f93a46a6ba98a27e))
+
 ## [0.131.1](https://github.com/vibeunion/svadmin/compare/ui-v0.131.0...ui-v0.131.1) (2026-11-16)
 
 
