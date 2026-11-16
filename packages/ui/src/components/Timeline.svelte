@@ -14,19 +14,36 @@
 
   interface Props {
     items: TimelineEntry[];
-    mode?: 'vertical' | 'horizontal';
+    mode?: 'vertical' | 'horizontal' | 'alternate';
+    reverse?: boolean;
     label?: string;
     class?: string;
     dot?: Snippet<[TimelineEntry]>;
     children?: Snippet<[TimelineEntry]>;
   }
 
-  let { items, mode = 'vertical', label = 'Timeline', class: className = '', dot, children }: Props = $props();
+  let {
+    items,
+    mode = 'vertical',
+    reverse = false,
+    label = 'Timeline',
+    class: className = '',
+    dot,
+    children,
+  }: Props = $props();
+
+  const displayItems = $derived(reverse ? [...items].reverse() : items);
 </script>
 
 <ol class={cn('svadmin-timeline', className)} data-mode={mode} aria-label={label}>
-  {#each items as item (item.id)}
-    <li class="svadmin-timeline__item" data-tone={item.tone ?? 'neutral'} data-active={item.active ? 'true' : undefined}>
+  {#each displayItems as item, index (item.id)}
+    {@const side = mode === 'alternate' ? (index % 2 === 0 ? 'left' : 'right') : undefined}
+    <li
+      class="svadmin-timeline__item"
+      data-tone={item.tone ?? 'neutral'}
+      data-active={item.active ? 'true' : undefined}
+      data-side={side}
+    >
       {#if item.dot}
         <span class="svadmin-timeline__custom-dot" aria-hidden="true">{@render item.dot()}</span>
       {:else if dot}
@@ -64,7 +81,7 @@
     color: var(--foreground);
     font-size: var(--svadmin-text-body);
   }
-  .svadmin-timeline__item:not(:last-child)::before {
+  .svadmin-timeline:not([data-mode='alternate']) .svadmin-timeline__item:not(:last-child)::before {
     position: absolute;
     inset-block: 1rem calc(-1 * var(--svadmin-space-4));
     inset-inline-start: 0.3125rem;
@@ -98,5 +115,46 @@
     inset: 0.3125rem calc(-1 * var(--svadmin-space-4)) auto auto;
     width: auto;
     height: 1px;
+  }
+
+  /* Alternate mode */
+  .svadmin-timeline[data-mode='alternate'] {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+  .svadmin-timeline[data-mode='alternate']::before {
+    position: absolute;
+    inset-block: 0.5rem 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    background: var(--border);
+    content: '';
+  }
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item {
+    display: flex;
+    box-sizing: border-box;
+    width: 50%;
+    min-height: 70px;
+  }
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item[data-side='left'] {
+    margin-right: auto;
+    flex-direction: row-reverse;
+    text-align: right;
+    padding-right: var(--svadmin-space-4);
+  }
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item[data-side='left'] .svadmin-timeline__marker,
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item[data-side='left'] .svadmin-timeline__custom-dot {
+    transform: translateX(calc(var(--svadmin-space-4) + 0.34375rem));
+  }
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item[data-side='right'] {
+    margin-left: 50%;
+    text-align: left;
+    padding-left: var(--svadmin-space-4);
+  }
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item[data-side='right'] .svadmin-timeline__marker,
+  .svadmin-timeline[data-mode='alternate'] .svadmin-timeline__item[data-side='right'] .svadmin-timeline__custom-dot {
+    transform: translateX(calc(-1 * (var(--svadmin-space-4) + 0.34375rem)));
   }
 </style>
