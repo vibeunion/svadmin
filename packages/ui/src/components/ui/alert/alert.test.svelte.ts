@@ -26,3 +26,17 @@ describe('Alert', () => {
     expect(screen.getByText('Heads up')).toBeTruthy();
   });
 });
+
+  it("renders showIcon and title per Arco alert specification", () => {
+    render(Alert, {
+      variant: "warning",
+      showIcon: true,
+      title: "系统维护提醒",
+      children: message("今晚 23:00 将进行系统升级。"),
+    });
+
+    expect(screen.getByText("系统维护提醒")).toBeTruthy();
+    expect(screen.getByText("今晚 23:00 将进行系统升级。")).toBeTruthy();
+    const icon = document.querySelector(".svadmin-alert__icon");
+    expect(icon).not.toBeNull();
+  });
