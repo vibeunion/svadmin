@@ -61,19 +61,14 @@
         >
           <dt
             class={cn(
-              'bg-muted/30 font-medium text-muted-foreground shrink-0 border-b sm:border-b-0 sm:border-r border-border/30',
-              'px-4 py-2.5 text-xs sm:text-sm',
+              'svadmin-description-list__label shrink-0 border-b sm:border-b-0 sm:border-r border-border/30 bg-muted/30',
+              'px-4 py-2.5',
               isHorizontal ? 'sm:w-1/3' : '',
             )}
           >
             {item.label}
           </dt>
-          <dd
-            class={cn(
-              'break-words font-medium text-foreground bg-card flex-1 min-w-0',
-              'px-4 py-2.5 text-xs sm:text-sm',
-            )}
-          >
+          <dd class="svadmin-description-list__value bg-card px-4 py-2.5">
             {#if item.href}
               <a class="text-primary underline-offset-4 hover:underline" href={item.href}>{String(item.value ?? '—')}</a>
             {:else}
@@ -104,21 +99,10 @@
           spanClass(Math.min(item.span ?? 1, columns)),
         )}
       >
-        <dt
-          class={cn(
-            'font-medium text-muted-foreground',
-            'text-xs',
-            isHorizontal ? 'shrink-0 min-w-20' : '',
-          )}
-        >
+        <dt class="svadmin-description-list__label">
           {item.label}
         </dt>
-        <dd
-          class={cn(
-            'break-words font-medium text-foreground min-w-0 flex-1',
-            isHorizontal ? 'text-xs sm:text-sm' : 'mt-1 text-sm',
-          )}
-        >
+        <dd class="svadmin-description-list__value">
           {#if item.href}
             <a class="text-primary underline-offset-4 hover:underline" href={item.href}>{String(item.value ?? '—')}</a>
           {:else}
@@ -132,3 +116,23 @@
     {/each}
   </dl>
 {/if}
+
+<style>
+  .svadmin-description-list__label {
+    color: var(--svadmin-text-3);
+    font-size: var(--svadmin-text-body);
+    font-weight: 500;
+    line-height: 1.5715;
+  }
+  .svadmin-description-list__value {
+    min-width: 0;
+    flex: 1;
+    color: var(--foreground);
+    font-size: var(--svadmin-text-body);
+    font-weight: 400;
+    line-height: 1.5715;
+    overflow-wrap: anywhere;
+  }
+  div.flex > .svadmin-description-list__label { flex: none; min-width: 5rem; }
+  div:not(.flex) > .svadmin-description-list__value { margin-top: 4px; }
+</style>

@@ -62,9 +62,9 @@
 </div>
 
 <style>
-  .svadmin-statistic { display: grid; min-width: 0; gap: var(--svadmin-space-1); }
-  .svadmin-statistic__title { margin: 0; color: var(--muted-foreground); font-size: var(--svadmin-text-label); }
-  .svadmin-statistic__value { display: flex; align-items: baseline; gap: var(--svadmin-space-1); margin: 0; color: var(--foreground); font-size: var(--svadmin-text-heading); font-weight: 650; line-height: var(--svadmin-leading-tight); }
+  .svadmin-statistic { display: grid; min-width: 0; gap: 0; line-height: 1.5715; color: var(--muted-foreground); }
+  .svadmin-statistic__title { margin: 0 0 8px; color: var(--muted-foreground); font-size: var(--svadmin-text-body); }
+  .svadmin-statistic__value { display: flex; align-items: baseline; gap: var(--svadmin-space-1); margin: 0; color: var(--foreground); font-size: 1.625rem; font-weight: 500; line-height: 1.5715; }
   .svadmin-statistic__affix { color: var(--muted-foreground); font-size: var(--svadmin-text-label); font-weight: 500; }
   .svadmin-statistic__trend { display: flex; align-items: center; gap: var(--svadmin-space-1); margin: 0; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-statistic__trend[data-trend='up'] { color: var(--success, var(--primary)); }

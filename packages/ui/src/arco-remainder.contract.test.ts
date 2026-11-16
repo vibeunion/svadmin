@@ -119,5 +119,11 @@ describe('Arco remainder style contract', () => {
     expect(rule('.svadmin-result__title')).toContain('font-size: 14px');
     expect(rule('.svadmin-result__title')).toContain('font-weight: 500');
     expect(css).toContain('color: var(--svadmin-text-3);');
+    expect(css).toContain('--svadmin-leading-body: 1.5715;');
+    expect(css).toContain('--svadmin-shadow-popup: 0 4px 10px rgb(0 0 0 / 0.1);');
+    expect(css).toContain('padding: 9px 16px;');
+    expect(css).toContain('padding: 1px 4px;');
+    expect(css).toContain('min-height: 46px;');
+    expect(css).toContain('gap: 8px;');
   });
 });

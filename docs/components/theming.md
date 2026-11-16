@@ -223,8 +223,8 @@ instead of re-writing component CSS.
 | `--svadmin-text-caption`…`--svadmin-text-title` | `12 / 13 / 14 / 16 / 20px` | Existing type scale / 既有字号 |
 | `--svadmin-text-title-3` | `1.5rem` (24px) | Large title / 大标题 |
 | `--svadmin-text-display-1…3` | `36 / 48 / 56px` | Display sizes / 运营标题 |
-| `--svadmin-leading-tight` / `snug` / `body` | `1.25 / 1.35 / 1.4` | Line heights. Body copy uses `1.4` / 行高，正文 1.4 |
-| `--svadmin-paragraph-gap` | `1.3125rem` (21px) | Gap inside `.svadmin-copy > p + p` only / 仅多段正文 |
+| `--svadmin-leading-tight` / `snug` / `body` | `1.25 / 1.35 / 1.5715` | Line heights. Body copy uses the official `1.5715` / 行高，正文 1.5715 |
+| `--svadmin-paragraph-gap` | `1.375rem` (22px) | Gap inside `.svadmin-copy > p + p` only. 14px × 1.5715 / 仅多段正文 |
 | `--svadmin-measure` | `65ch` | Reading measure / 阅读宽度 |
 | `--svadmin-shell-topbar-h` | `3.5rem` (56px) | Intentional SVAdmin topbar / 顶栏，有意保持 |
 | `--svadmin-shell-sidebar-w` | `15rem` (240px) | Intentional SVAdmin rail / 展开导航，有意保持 |
@@ -314,7 +314,7 @@ These sizes are the intentional SVAdmin default. They are not retuned to Arco Pr
 - Light text-3 / text-4 are `#86909C` / `#C9CDD4`. Dark text-3 / text-4 are white at 50% / 30%. Fill 1–4 and bg-4 / bg-5 are aliases beside the existing neutrals. `--foreground`, `--muted-foreground`, `--muted`, and `--primary` are not renamed. Extra aliases only: `--color-text-1/2`, `--color-border-1` through `--color-border-4`, `--color-bg-1/2/3`, and `--color-*-light-1` through `4`.
 - Named motion tokens are `--svadmin-duration-1` through `--svadmin-duration-5` (`0.1s`–`0.5s`), `--svadmin-duration-loading` (`1s`), and the official curves `--svadmin-easing-linear`, `--svadmin-easing-standard`, `--svadmin-easing-overshoot`, `--svadmin-easing-decelerate`, and `--svadmin-easing-accelerate`. Existing `--svadmin-motion-fast` (150ms), `--svadmin-motion-standard` (200ms), `--svadmin-motion-slow` (900ms), and `ease-out` stay in place.
 - Breadcrumb separators default to `/`. Pass `separator="arrow"` for the previous chevron. Dark navigation stays opt-in via `data-svadmin-navigation-theme="dark"`.
-- Body copy is `0.875rem` with `line-height: var(--svadmin-leading-body)` (`1.4`). Paragraph spacing `21px` applies only inside `.svadmin-copy > p + p`.
+- Body copy is `0.875rem` with `line-height: var(--svadmin-leading-body)` (`1.5715`, official `.arco-typography`). Paragraph spacing `22px` applies only inside `.svadmin-copy > p + p`.
 - `.layout-clean-flat[data-theme="default"]` uses a system stack: Helvetica Neue, system UI, PingFang SC, Microsoft YaHei. Nunito and Byte Number are not loaded. Other presets, including Stripe, keep their own stack.
 - Shadow names `--shadow-special`, `--shadow-1`, `--shadow1-center`, `--shadow-2`, and `--shadow-3` alias the existing shadow tokens. The clean-flat shadow numbers are unchanged.
 - `formatAdminTime`, `formatAdminNumber`, `spaceCjkLatin`, `formatAdminEllipsis`, and `formatAdminCopy` live in `packages/core/src/copy-format.ts` and are re-exported from `@svadmin/ui`. Clock displays use 24-hour time. Numbers with more than four integer digits always use a thousands separator. Four-digit numbers keep the active locale's separator (`9,999`, `1.234,5`); Arco allows omitting it, and SVAdmin does not strip it. CJK–Latin spacing skips non-quantity tokens such as 「7号线」 and 「3D打印」. Shared catalog copy uses 「…」, states a reason on new error strings, and does not use 「您」 or a default 「请勿」.
