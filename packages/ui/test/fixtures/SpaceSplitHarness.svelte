@@ -3,8 +3,6 @@
 </script>
 
 <Space>
-  {#snippet children()}
-    <span>Item 1</span>
-    <span>Item 2</span>
-  {/snippet}
+  <span>Item 1</span>
+  <span>Item 2</span>
 </Space>
