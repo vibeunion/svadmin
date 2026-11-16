@@ -5,13 +5,18 @@
 
   interface Props {
     top?: number;
+    offsetTop?: number;
     bottom?: number;
+    offsetBottom?: number;
     target?: string;
     children: Snippet;
     class?: string;
+    onchange?: (stuck: boolean) => void;
   }
 
-  let { top = 16, bottom, target = 'window', children, class: className = '' }: Props = $props();
+  let { top = 16, offsetTop, bottom, offsetBottom, target = 'window', children, class: className = '', onchange }: Props = $props();
+  const effectiveTop = $derived(offsetTop ?? top);
+  const effectiveBottom = $derived(offsetBottom ?? bottom);
   let stuck = $state(false);
   let sentinel: HTMLDivElement | undefined;
   let observer: IntersectionObserver | undefined;
@@ -19,8 +24,14 @@
   onMount(() => {
     if (!sentinel) return;
     observer = new IntersectionObserver(([entry]) => {
-      if (entry) stuck = !entry.isIntersecting;
-    }, { root: target === 'window' ? null : document.querySelector(target), rootMargin: `-${top}px 0px 0px 0px`, threshold: [0] });
+      if (entry) {
+        const nextStuck = !entry.isIntersecting;
+        if (stuck !== nextStuck) {
+          stuck = nextStuck;
+          onchange?.(nextStuck);
+        }
+      }
+    }, { root: target === 'window' ? null : document.querySelector(target), rootMargin: `-${effectiveTop}px 0px 0px 0px`, threshold: [0] });
     observer.observe(sentinel);
     return () => observer?.disconnect();
   });
@@ -30,8 +41,8 @@
 <div
   class={cn('svadmin-affix', className)}
   class:is-stuck={stuck}
-  style:top={`${top}px`}
-  style:bottom={bottom === undefined ? undefined : `${bottom}px`}
+  style:top={`${effectiveTop}px`}
+  style:bottom={effectiveBottom === undefined ? undefined : `${effectiveBottom}px`}
 >
   {@render children()}
 </div>
