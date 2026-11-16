@@ -9,16 +9,29 @@
   import * as Breadcrumb from './ui/breadcrumb/index.js';
   import * as DropdownMenu from './ui/dropdown-menu/index.js';
 
+  export interface BreadcrumbItem {
+    label: string;
+    href?: string;
+  }
+
   const i18n = useTranslation();
 
   const adminContext = captureAdminContext();
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
   let {
+    items: explicitItems,
     menu,
+    separator = 'slash',
     maxItems = 0,
     class: className = 'svadmin-breadcrumbs--spaced',
-  }: { menu?: MenuItem[] | undefined; maxItems?: number; class?: string } = $props();
+  }: {
+    items?: BreadcrumbItem[] | undefined;
+    menu?: MenuItem[] | undefined;
+    separator?: 'slash' | 'arrow';
+    maxItems?: number;
+    class?: string;
+  } = $props();
 
   interface Crumb { label: string; href?: string; hidden?: boolean; children?: Crumb[]; }
 
@@ -45,6 +58,13 @@
   }
 
   const crumbs = $derived.by(() => {
+    if (explicitItems && explicitItems.length > 0) {
+      return explicitItems.map((item) => ({
+        label: item.label,
+        href: item.href,
+      }));
+    }
+
     const result: Crumb[] = [{ label: i18n.t('common.home') ?? 'Home', href: adminContext.formatLink('/') }];
     const currentPathname = normalizePath(getPath());
     if (currentPathname === '/') return result;
@@ -113,12 +133,12 @@
   });
 </script>
 
-{#if crumbs.length > 1}
+{#if explicitItems ? crumbs.length > 0 : crumbs.length > 1}
   <Breadcrumb.Root class={cn('svadmin-breadcrumbs', className)}>
     <Breadcrumb.List>
       {#each displayCrumbs as crumb, i (`${crumb.label}-${i}`)}
         {#if i > 0}
-          <Breadcrumb.Separator />
+          <Breadcrumb.Separator {separator} />
         {/if}
         <Breadcrumb.Item>
           <span class="svadmin-breadcrumbs__item svadmin-page-enter" style="animation-duration: 0.2s;">

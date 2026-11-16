@@ -68,7 +68,7 @@ export { default as Toast } from './components/Toast.svelte';
 export { default as NotificationHost } from './components/NotificationHost.svelte';
 export { notification, notification as Notification, getNotifications, closeNotification, closeNotificationByKey, clearNotifications, createNotificationController, provideNotificationController, useNotificationController } from './notifications.svelte.js';
 export type { NotificationOptions, NotificationRecord, NotificationTone, NotificationController } from './notifications.svelte.js';
-export { default as Breadcrumbs } from './components/Breadcrumbs.svelte';
+export { default as Breadcrumbs, type BreadcrumbItem } from './components/Breadcrumbs.svelte';
 export { default as FieldRenderer } from './components/FieldRenderer.svelte';
 export { default as EmptyState } from './components/EmptyState.svelte';
 export { default as StatsCard } from './components/StatsCard.svelte';
