@@ -1010,7 +1010,24 @@ h6,
   font-size: 0.875rem;
 }
 
+:is([data-slot="alert"], .svadmin-alert).svadmin-alert:has(> svg) {
+  grid-template-columns: 1rem minmax(0, 1fr);
+  column-gap: 0.75rem;
+}
+
+:is([data-slot="alert"], .svadmin-alert).svadmin-alert > :is(.svadmin-alert-title, .svadmin-alert-description) {
+  grid-column: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+:is([data-slot="alert"], .svadmin-alert).svadmin-alert:has(> svg) > :is(.svadmin-alert-title, .svadmin-alert-description) {
+  grid-column: 2;
+}
+
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert > svg {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   width: 1rem;
   height: 1rem;
   color: currentColor;

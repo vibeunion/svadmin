@@ -1,0 +1,338 @@
+[
+  {
+    "phase": "before",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "collapsed": [
+      {
+        "width": 546,
+        "titleOffset": 183.171875,
+        "descriptionOffset": 183.171875,
+        "iconRight": 33,
+        "columns": "166.172px 345.828px",
+        "overflow": false,
+        "descriptionWidth": 345.828125
+      },
+      {
+        "width": 546,
+        "titleOffset": 221.59375,
+        "descriptionOffset": 221.59375,
+        "iconRight": null,
+        "columns": "204.594px 307.406px",
+        "overflow": false,
+        "descriptionWidth": 307.40625
+      },
+      {
+        "width": 546,
+        "titleOffset": 315.65625,
+        "descriptionOffset": 315.65625,
+        "iconRight": 33,
+        "columns": "298.656px 213.344px",
+        "overflow": false,
+        "descriptionWidth": 213.34375
+      },
+      {
+        "width": 546,
+        "titleOffset": 218.765625,
+        "descriptionOffset": 218.765625,
+        "iconRight": 33,
+        "columns": "201.766px 310.234px",
+        "overflow": false,
+        "descriptionWidth": 310.234375
+      }
+    ],
+    "expanded": [
+      {
+        "width": 546,
+        "titleOffset": 183.171875,
+        "descriptionOffset": 183.171875,
+        "iconRight": 33,
+        "columns": "166.172px 345.828px",
+        "overflow": false,
+        "descriptionWidth": 345.828125
+      },
+      {
+        "width": 546,
+        "titleOffset": 221.59375,
+        "descriptionOffset": 221.59375,
+        "iconRight": null,
+        "columns": "204.594px 307.406px",
+        "overflow": false,
+        "descriptionWidth": 307.40625
+      },
+      {
+        "width": 546,
+        "titleOffset": 33,
+        "descriptionOffset": 33,
+        "iconRight": 33,
+        "columns": "16px 496px",
+        "overflow": false,
+        "descriptionWidth": 496
+      },
+      {
+        "width": 546,
+        "titleOffset": 218.765625,
+        "descriptionOffset": 218.765625,
+        "iconRight": 33,
+        "columns": "201.766px 310.234px",
+        "overflow": false,
+        "descriptionWidth": 310.234375
+      }
+    ],
+    "pageOverflow": false
+  },
+  {
+    "phase": "after",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "collapsed": [
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 17,
+        "descriptionOffset": 17,
+        "iconRight": null,
+        "columns": "512px",
+        "overflow": false,
+        "descriptionWidth": 512
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      }
+    ],
+    "expanded": [
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 17,
+        "descriptionOffset": 17,
+        "iconRight": null,
+        "columns": "512px",
+        "overflow": false,
+        "descriptionWidth": 512
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      }
+    ],
+    "pageOverflow": false
+  },
+  {
+    "phase": "before",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "collapsed": [
+      {
+        "width": 546,
+        "titleOffset": 183.171875,
+        "descriptionOffset": 183.171875,
+        "iconRight": 33,
+        "columns": "166.172px 345.828px",
+        "overflow": false,
+        "descriptionWidth": 345.828125
+      },
+      {
+        "width": 546,
+        "titleOffset": 221.59375,
+        "descriptionOffset": 221.59375,
+        "iconRight": null,
+        "columns": "204.594px 307.406px",
+        "overflow": false,
+        "descriptionWidth": 307.40625
+      },
+      {
+        "width": 546,
+        "titleOffset": 315.65625,
+        "descriptionOffset": 315.65625,
+        "iconRight": 33,
+        "columns": "298.656px 213.344px",
+        "overflow": false,
+        "descriptionWidth": 213.34375
+      },
+      {
+        "width": 546,
+        "titleOffset": 218.765625,
+        "descriptionOffset": 218.765625,
+        "iconRight": 33,
+        "columns": "201.766px 310.234px",
+        "overflow": false,
+        "descriptionWidth": 310.234375
+      }
+    ],
+    "expanded": [
+      {
+        "width": 546,
+        "titleOffset": 183.171875,
+        "descriptionOffset": 183.171875,
+        "iconRight": 33,
+        "columns": "166.172px 345.828px",
+        "overflow": false,
+        "descriptionWidth": 345.828125
+      },
+      {
+        "width": 546,
+        "titleOffset": 221.59375,
+        "descriptionOffset": 221.59375,
+        "iconRight": null,
+        "columns": "204.594px 307.406px",
+        "overflow": false,
+        "descriptionWidth": 307.40625
+      },
+      {
+        "width": 546,
+        "titleOffset": 33,
+        "descriptionOffset": 33,
+        "iconRight": 33,
+        "columns": "16px 496px",
+        "overflow": false,
+        "descriptionWidth": 496
+      },
+      {
+        "width": 546,
+        "titleOffset": 218.765625,
+        "descriptionOffset": 218.765625,
+        "iconRight": 33,
+        "columns": "201.766px 310.234px",
+        "overflow": false,
+        "descriptionWidth": 310.234375
+      }
+    ],
+    "pageOverflow": false
+  },
+  {
+    "phase": "after",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "collapsed": [
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 17,
+        "descriptionOffset": 17,
+        "iconRight": null,
+        "columns": "512px",
+        "overflow": false,
+        "descriptionWidth": 512
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      }
+    ],
+    "expanded": [
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 17,
+        "descriptionOffset": 17,
+        "iconRight": null,
+        "columns": "512px",
+        "overflow": false,
+        "descriptionWidth": 512
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      },
+      {
+        "width": 546,
+        "titleOffset": 45,
+        "descriptionOffset": 45,
+        "iconRight": 33,
+        "columns": "16px 484px",
+        "overflow": false,
+        "descriptionWidth": 484
+      }
+    ],
+    "pageOverflow": false
+  }
+]
