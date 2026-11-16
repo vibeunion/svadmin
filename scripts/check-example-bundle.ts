@@ -22,8 +22,10 @@ const maximumInitialBytes = 1_420_000;
 // ships its merge tables instead of the separate tailwind-merge peer and measured
 // 407081 gzip bytes. Copy formatting for numbers, dates and ellipsis measured
 // 408538 gzip bytes on 2026-11-14. Notification drawer and enterprise suite
-// in PR #795 measured 422803 gzip bytes; keep a narrow headroom for runner variation.
-const maximumInitialGzipBytes = 425_000;
+// in PR #795 measured 422803 gzip bytes. The shared control-state
+// normalization and the Card/Link/Progress refinements measured 425630 gzip
+// bytes; keep a narrow headroom for runner variation.
+const maximumInitialGzipBytes = 428_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
