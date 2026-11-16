@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
+	import { getTabsContext } from "./tabs-context.svelte.js";
 
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		variant?: "default" | "line" | "card";
@@ -10,13 +11,24 @@
 
 	let {
 		ref = $bindable(null),
-		variant = "default",
-		orientation = "horizontal",
+		variant: variantProp,
+		orientation: orientationProp,
 		scrollable = false,
 		class: className,
 		children,
 		...restProps
 	}: Props = $props();
+
+	let tabs = $derived.by(() => {
+		try {
+			return getTabsContext();
+		} catch {
+			return null;
+		}
+	});
+
+	const variant = $derived(variantProp ?? tabs?.variant ?? "default");
+	const orientation = $derived(orientationProp ?? tabs?.orientation ?? "horizontal");
 </script>
 
 <div
