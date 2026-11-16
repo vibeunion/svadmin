@@ -68,6 +68,6 @@
   .empty-state__image { width: 100%; height: 100%; object-fit: contain; }
   .empty-state__body { min-width: 0; flex: 1; overflow-wrap: anywhere; }
   h3 { margin: 0; font-size: var(--svadmin-text-body); line-height: 1.5715; font-weight: 500; letter-spacing: 0; }
-  p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--svadmin-text-5, #A9AEB8); }
+  p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--svadmin-text-5, var(--color-text-5, currentColor)); }
   .empty-state__action { margin-top: 12px; }
 </style>

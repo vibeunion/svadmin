@@ -11,7 +11,7 @@ function rule(selector: string): string {
   return css.slice(start, css.indexOf('}', start));
 }
 
-describe('Arco remainder style contract', () => {
+describe('Remaining visual style contract', () => {
   it('drops whole-control opacity on the disabled controls that still had it', () => {
     for (const selector of [
       '.svadmin-textarea:disabled',

@@ -78,6 +78,6 @@
   .empty-state__icon { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 32px; border-radius: 6px; background: var(--muted); color: var(--muted-foreground); }
   .empty-state__body { min-width: 0; flex: 1; overflow-wrap: anywhere; }
   .empty-state h3 { margin: 0; font-size: var(--svadmin-text-body); line-height: 1.5715; font-weight: 500; letter-spacing: 0; }
-  .empty-state p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--svadmin-text-5, #A9AEB8); }
+  .empty-state p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--svadmin-text-5, var(--color-text-5, currentColor)); }
   .empty-state__action { margin-top: 12px; }
 </style>

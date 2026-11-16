@@ -147,7 +147,7 @@
   --shadow-surface: var(--svadmin-shadow-surface);
   --shadow-surface-hover: var(--svadmin-shadow-surface-hover);
   --shadow-overlay: var(--svadmin-shadow-overlay);
-  /* 官方阴影名只做别名，数值仍是现有 clean-flat / 产品阴影，不按 Arco px 重调。 */
+  /* 官方阴影名只做别名，数值仍是现有 clean-flat / 产品阴影，不按参考实现 px 重调。 */
   --shadow-special: var(--svadmin-shadow-control);
   --shadow-1: var(--svadmin-shadow-surface);
   --shadow1-center: var(--svadmin-shadow-surface);
@@ -261,7 +261,7 @@
     --svadmin-paragraph-gap: 1.375rem; /* 22px，14px × 1.5715 */
     --svadmin-leading-tight: 1.25;
     --svadmin-leading-snug: 1.35;
-    /* 官方正文行高。来源：.arco-typography { line-height: 1.5715 } */
+    /* 官方正文行高：1.5715。 */
     --svadmin-leading-body: 1.5715;
     --svadmin-focus-width: 2px;
     --svadmin-switch-width: 2.5rem; /* 40px，官方 default */
@@ -335,7 +335,7 @@
     --color-bg-1: var(--card);
     --color-bg-2: var(--popover);
     --color-bg-3: var(--background);
-    /* 官方浅色阶 1/2/4。light-3 继续指向已写明的 color-3。来源：@arco-design/web-react 2.66.18 body 色板。 */
+    /* 官方浅色阶 1/2/4。light-3 继续指向已写明的 color-3。 */
     --primary-1: #E8F3FF;
     --primary-2: #BEDAFF;
     --primary-4: #6AA1FF;
@@ -672,7 +672,7 @@
     --chart-1: oklch(0.541 0.281 293.009);
   }
 
-  /* 非 default 预设只改 --primary。主色浅阶继续跟着品牌走，不沿用 Arco 的 #E8F3FF。 */
+  /* 非 default 预设只改 --primary。主色浅阶继续跟着品牌走。 */
   :is(
     [data-theme="neutral"],
     [data-theme="indigo"],
@@ -799,7 +799,7 @@ h6,
   border-radius: var(--radius-sm);
   background-clip: padding-box;
   font-size: 0.875rem;
-  /* 官方 .arco-btn：字重 400，行高 1.5715。 */
+  /* 官方按钮：字重 400，行高 1.5715。 */
   font-weight: 400;
   line-height: 1.5715;
   white-space: nowrap;
@@ -2500,7 +2500,7 @@ main {
   transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
-/* Inline variant keeps the Arco chevron and states without forcing full width. */
+/* Inline variant keeps the chevron and states without forcing full width. */
 .svadmin-select--inline {
   width: auto;
 }
@@ -4957,7 +4957,7 @@ details[data-svadmin-filter][open] > :not(summary),
 
 /* --- Default visual refinement --------------------------------
  * Default product canvas. Neutrals and radius come from the product ramp;
- * compact control geometry and calm state transitions follow the Arco
+ * compact control geometry and calm state transitions follow the
  * reference used by the component-parity review. The optional Stripe preset
  * below keeps its own canvas and technical grid.
  */
@@ -5361,9 +5361,9 @@ html.layout-clean-flat[data-theme="default"] body {
   }
 }
 
-/* --- Arco component parity pass --------------------------------
+/* --- Component parity pass -------------------------------------
  * Keep the existing shadcn primitives and public hooks, then align the
- * highest-frequency states with Arco's compact filled controls, neutral table
+ * highest-frequency states with compact filled controls, neutral table
  * surfaces, 36px dropdown rows, and line-tab indicator.
  */
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):hover {
