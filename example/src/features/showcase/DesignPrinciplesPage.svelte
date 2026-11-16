@@ -575,7 +575,7 @@ import { definedOptions } from '@svadmin/core/options';
         <div class="flex flex-wrap items-start gap-6">
           <Calendar card value={demoCalendar} onchange={(value) => { demoCalendar = value; }} />
           <Image
-            src={"data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160"><rect width="240" height="160" fill="#E8F3FF"/><rect x="24" y="36" width="192" height="88" rx="2" fill="#165DFF"/></svg>')}
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160'%3E%3Crect width='240' height='160' fill='%23E8F3FF'/%3E%3Crect x='24' y='36' width='192' height='88' rx='2' fill='%23165DFF'/%3E%3C/svg%3E"
             alt={isZh ? '示例图片' : 'Sample picture'}
             title={isZh ? '封面' : 'Cover'}
             description={isZh ? '图片说明在画面下方。' : 'The caption sits below the picture.'}

@@ -308,11 +308,14 @@
     grid-template-columns: repeat(7, minmax(0, 1fr));
   }
   .svadmin-date-picker__weekdays span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 32px;
     color: var(--muted-foreground);
     font-size: var(--svadmin-text-body);
     font-weight: 500;
-    line-height: 32px;
+    line-height: 1;
     text-align: center;
   }
   .svadmin-date-picker__cell {
@@ -332,7 +335,7 @@
   .svadmin-date-picker__cell:hover:not(:disabled):not(.svadmin-date-picker__day) { background: var(--svadmin-fill-3, var(--border)); }
   .svadmin-date-picker__cell.is-outside:not(.svadmin-date-picker__day) { color: var(--svadmin-text-4); opacity: 1; }
   .svadmin-date-picker__cell.is-today:not(.svadmin-date-picker__day) { box-shadow: inset 0 0 0 1px var(--primary); }
-  .svadmin-date-picker__cell.is-selected:not(.svadmin-date-picker__day) { background: var(--primary); color: var(--color-white, #fff); }
+  .svadmin-date-picker__cell.is-selected:not(.svadmin-date-picker__day) { background: var(--primary); color: var(--primary-foreground); }
   .svadmin-date-picker__cell:disabled { opacity: 1; color: var(--svadmin-text-4); cursor: not-allowed; }
   .svadmin-date-picker__day {
     position: relative;
@@ -347,14 +350,14 @@
     min-width: 24px;
     height: 24px;
     border-radius: 24px;
-    line-height: 24px;
+    line-height: 1;
   }
   .svadmin-date-picker__day:hover:not(:disabled):not(.is-selected) > span {
     background: var(--svadmin-fill-3, var(--border));
     color: var(--foreground);
   }
   .svadmin-date-picker__day.is-outside > span { color: var(--svadmin-text-4); }
-  .svadmin-date-picker__day.is-selected > span { background: var(--primary); color: var(--color-white, #fff); }
+  .svadmin-date-picker__day.is-selected > span { background: var(--primary); color: var(--primary-foreground); }
   .svadmin-date-picker__day.is-today::after {
     content: '';
     position: absolute;

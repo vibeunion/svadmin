@@ -125,7 +125,7 @@
     align-items: center;
     justify-content: center;
     background: var(--svadmin-mask, var(--color-mask-bg));
-    color: var(--color-white, #fff);
+    color: var(--color-white);
     opacity: 0;
     transition: opacity var(--svadmin-duration-1, 0.1s) var(--svadmin-easing-linear, linear);
     pointer-events: none;

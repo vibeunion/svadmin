@@ -192,7 +192,7 @@
     color: var(--foreground);
     font-size: var(--svadmin-text-body);
     font-weight: 500;
-    line-height: 24px;
+    line-height: 1;
     text-align: center;
   }
   .svadmin-calendar__nav { display: flex; gap: 2px; }
@@ -217,11 +217,14 @@
   .svadmin-calendar__body { display: grid; padding: 14px 16px; }
   .svadmin-calendar__weekdays, .svadmin-calendar__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
   .svadmin-calendar__weekdays span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 32px;
     color: var(--muted-foreground);
     font-size: var(--svadmin-text-body);
     font-weight: 400;
-    line-height: 32px;
+    line-height: 1;
     text-align: center;
   }
   .svadmin-calendar__day {
@@ -245,7 +248,7 @@
     min-width: 24px;
     height: 24px;
     border-radius: 999px;
-    line-height: 24px;
+    line-height: 1;
   }
   .svadmin-calendar__day:hover:not(:disabled):not(.is-selected) .svadmin-calendar__date {
     background: var(--primary-light-1, var(--accent));
@@ -266,7 +269,7 @@
   }
   .svadmin-calendar__day.is-selected .svadmin-calendar__date {
     background: var(--primary);
-    color: var(--color-white, #fff);
+    color: var(--primary-foreground);
   }
   .svadmin-calendar__day:disabled {
     cursor: not-allowed;
