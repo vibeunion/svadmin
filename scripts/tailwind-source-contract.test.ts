@@ -103,7 +103,9 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(css).toContain('--svadmin-grid-size: 40px;');
     expect(css).not.toContain('background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);');
     expect(css).toContain('--svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02);');
-    expect(css).toContain('inset 0 1px 0 rgb(255 255 255 / 0.2)');
+    // 主按钮不再叠加品牌色投影与内高光；悬停/按下改为色板档位。
+    expect(css).not.toContain('inset 0 1px 0 rgb(255 255 255 / 0.2)');
+    expect(css).not.toContain('0 2px 5px color-mix(in oklch, var(--primary) 40%, transparent)');
     expect(css).toContain('transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);');
     expect(css).not.toContain('.layout-default[data-theme="stripe"]');
   });
