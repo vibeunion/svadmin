@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.132.0](https://github.com/vibeunion/svadmin/compare/ui-v0.131.2...ui-v0.132.0) (2026-11-16)
+
+
+### 🚀 Features
+
+* **ui:** align remaining visual and interaction contracts ([27489d2](https://github.com/vibeunion/svadmin/commit/27489d28ac312c0baf20d88e3f49c8547f8ba012))
+
 ## [0.131.2](https://github.com/vibeunion/svadmin/compare/ui-v0.131.1...ui-v0.131.2) (2026-11-16)
 
 
