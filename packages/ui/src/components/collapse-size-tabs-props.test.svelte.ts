@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/svelte";
 import { createRawSnippet } from "svelte";
 import Collapse from "./Collapse.svelte";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs/index.js";
+import { Tabs } from "./ui/tabs/index.js";
 
 describe("Collapse size and Tabs type/orientation enhancements", () => {
   it("renders Collapse with size attributes", () => {
@@ -19,10 +19,6 @@ describe("Collapse size and Tabs type/orientation enhancements", () => {
   });
 
   it("propagates type and orientation from Tabs root to TabsList", () => {
-    const listSnippet = createRawSnippet(() => ({
-      render: () => '<div data-slot="tabs-list" role="tablist"></div>',
-    }));
-
     const { container } = render(Tabs, {
       props: {
         type: "card",
