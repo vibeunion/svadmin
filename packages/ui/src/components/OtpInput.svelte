@@ -11,6 +11,7 @@
     error?: boolean;
     autoFocus?: boolean;
     size?: 'sm' | 'md' | 'lg';
+    separator?: string;
     class?: string;
     'aria-label'?: string;
     onchange?: (value: string) => void;
@@ -26,6 +27,7 @@
     error = false,
     autoFocus = false,
     size = 'md',
+    separator,
     class: className = '',
     'aria-label': groupAriaLabel = 'OTP verification code input',
     onchange,
@@ -181,6 +183,9 @@
   aria-label={groupAriaLabel}
 >
   {#each digits as digit, index (index)}
+    {#if separator && index > 0 && index % 3 === 0}
+      <span class="svadmin-otp-separator text-muted-foreground font-mono select-none" aria-hidden="true">{separator}</span>
+    {/if}
     <input
       use:registerInput={index}
       type={mask ? 'password' : 'text'}

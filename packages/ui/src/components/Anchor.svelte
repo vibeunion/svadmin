@@ -11,11 +11,14 @@
   interface Props {
     items: AnchorItem[];
     offset?: number;
+    targetOffset?: number;
     label?: string;
     class?: string;
+    onselect?: (id: string) => void;
   }
 
-  let { items, offset = 96, label = 'On this page', class: className = '' }: Props = $props();
+  let { items, offset = 96, targetOffset, label = 'On this page', class: className = '', onselect }: Props = $props();
+  const effectiveOffset = $derived(targetOffset ?? offset);
   let active = $state(untrack(() => items[0]?.id ?? ''));
   let observer: IntersectionObserver | undefined;
 
@@ -25,7 +28,7 @@
     observer = new IntersectionObserver((entries) => {
       const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
       if (visible[0]?.target.id) active = visible[0].target.id;
-    }, { rootMargin: `-${offset}px 0px -65% 0px`, threshold: [0, 1] });
+    }, { rootMargin: `-${effectiveOffset}px 0px -65% 0px`, threshold: [0, 1] });
     for (const element of elements) observer.observe(element);
     return () => observer?.disconnect();
   });
@@ -33,9 +36,10 @@
   function jump(id: string): void {
     const target = document.getElementById(id);
     if (!target) return;
-    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    const top = target.getBoundingClientRect().top + window.scrollY - effectiveOffset;
     window.scrollTo({ top, behavior: 'smooth' });
     active = id;
+    onselect?.(id);
   }
 </script>
 
