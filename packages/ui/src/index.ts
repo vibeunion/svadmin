@@ -634,7 +634,7 @@ export { default as Calendar } from './components/Calendar.svelte';
 export type { CalendarEvent } from './components/Calendar.svelte';
 export { default as Carousel } from './components/Carousel.svelte';
 export { default as ImagePreview } from './components/ImagePreview.svelte';
-export { default as QRCode } from './components/QRCode.svelte';
+export { default as QRCode, type QRCodeStatus } from './components/QRCode.svelte';
 export type { PreviewImage } from './components/ImagePreview.svelte';
 export { default as Anchor } from './components/Anchor.svelte';
 export type { AnchorItem } from './components/Anchor.svelte';
