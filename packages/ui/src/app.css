@@ -2174,9 +2174,19 @@ main {
 
 .svadmin-back-top {
   position: fixed; inset-inline-end: 1.5rem; bottom: 1.5rem; z-index: 30;
-  height: var(--svadmin-control-h); padding: 0 0.75rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--svadmin-control-h); height: var(--svadmin-control-h); padding: 0 0.5rem;
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   background: var(--card); color: var(--foreground);
+  box-shadow: var(--svadmin-shadow-surface);
+  cursor: pointer;
+  transition: all var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+}
+.svadmin-back-top:hover {
+  background: var(--muted);
+  border-color: var(--ring);
+  color: var(--primary);
+  transform: translateY(-2px);
 }
 .svadmin-item-list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
 /* Official default list row: 13px 20px. The header title is 16px / 500. */
