@@ -117,10 +117,10 @@
       <ColumnSettings
         bind:columns
         presets={columnPresets}
-        {storageKey}
         triggerVariant="ghost"
         triggerSize="icon"
         class="h-8 w-8"
+        {...storageKey !== undefined ? { storageKey } : {}}
         {...oncolumnschange ? { onchange: oncolumnschange } : {}}
       />
     {/if}

@@ -1,9 +1,15 @@
 {
   "reviewedCount": 135,
   "unresolved": [],
-  "referenceHookCount": 107,
+  "referenceHookCount": 108,
   "preservedCount": 107,
-  "coveragePercentage": 100,
-  "missing": [],
-  "timestamp": "2026-11-13T00:50:15.035Z"
+  "coveragePercentage": 99.1,
+  "missing": [
+    {
+      "name": "BackTop",
+      "category": "layout",
+      "liteComponent": "LiteBackTop.svelte"
+    }
+  ],
+  "timestamp": "2026-11-16T08:09:15.206Z"
 }

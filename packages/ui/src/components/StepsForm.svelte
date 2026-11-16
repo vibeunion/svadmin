@@ -17,7 +17,6 @@
   import ConfirmDialog from './ConfirmDialog.svelte';
   import { Skeleton } from './ui/skeleton/index.js';
   import { withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
-  import { cn } from '../utils.js';
 
   const i18n = useTranslation();
 
