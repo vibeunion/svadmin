@@ -38,4 +38,4 @@ Execution decision: native, one owner, external=0; bounded CSS fix verified with
 - `bun run check:vibe-governance`: passed; `git diff --check`: passed.
 - Real browser 1440x900 and 1920x1080: icon/no-icon, loading/empty guidance, error recovery and collapsed/expanded long diagnostics; page errors and horizontal overflow 0. Title offset from Alert border changed 183.172→45px with icon and 221.594→17px without icon at 1440. These are CSS-slot fixtures using actual generated public CSS, not production application acceptance.
 - Images: [1440x900](1440x900.png), [1920x1080](1920x1080.png); before images and full geometry are beside them.
-- Reproduce: build UI, serve the repository root on localhost:5286, then run `playwright-cli run-code` with `verify.js`. `fixture.html` consumes the public native CSS and standard Alert slots.
+- Reproduce: build UI, serve the repository root on localhost:5286, then import the default verifier from `verify.js` and pass its `toString()` result to `playwright-cli run-code`. `fixture.html` consumes the public native CSS and standard Alert slots.
