@@ -1,7 +1,7 @@
 /**
  * Intent preload: start a dynamic import on hover, focus, or viewport entry.
  *
- * This is the part of Arco's component lazy-load plugin worth keeping. It does
+ * This is the part of the component lazy-load plugin worth keeping. It does
  * not rewrite imports. SSR never calls the loader; the host renders its fallback
  * until the client preloads.
  */

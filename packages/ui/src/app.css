@@ -2636,7 +2636,7 @@ main {
 
 .svadmin-select[data-size="small"],
 .svadmin-select[data-size="compact"] {
-  /* Official .arco-select-size-small.arco-select-single .arco-select-view is 28px / 14px. */
+  /* Official compact select view: 28px height with 14px type. */
   height: var(--svadmin-control-h-sm);
   padding: 0.25rem 1.75rem 0.25rem 0.5rem;
   font-size: var(--svadmin-text-body);
@@ -3582,7 +3582,7 @@ main {
   height: var(--svadmin-space-4);
 }
 
-/* Official .arco-pagination-item: 32px, borderless, 14px type. Active is primary-light-1. */
+/* Official pagination item: 32px, borderless, 14px type. Active is primary-light-1. */
 :is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item {
   box-sizing: border-box;
   display: inline-flex;

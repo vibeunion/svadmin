@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/svelte";
 import Card from "./card.svelte";
 
-describe("Card Arco Enhancements", () => {
+describe("Card states", () => {
   it("renders hoverable card with hover class and attribute", () => {
     const { container } = render(Card, {
       props: {

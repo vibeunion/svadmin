@@ -1336,7 +1336,7 @@ main {
     outline: none;
     transition: border-color 120ms ease, box-shadow 120ms ease;
   }
-  /* Inline variant keeps the Arco chevron and states without forcing full width. */
+  /* Inline variant keeps the chevron and states without forcing full width. */
   .svadmin-select--inline {
     width: auto;
   }

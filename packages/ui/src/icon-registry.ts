@@ -1,7 +1,7 @@
 /**
  * Icon registry — resolve icons by name instead of a hardcoded local map.
  *
- * Arco resolves icons from a name (`<IconUser />` / `icon="user"`). svadmin keeps
+ * Upstream libraries resolve icons from a name (`<IconUser />` / `icon="user"`). svadmin keeps
  * `@lucide/svelte` as the default set, but name resolution must be extensible:
  * third-party plugins contribute icons without patching `Sidebar`, and a missing
  * name must fail predictably instead of rendering nothing.

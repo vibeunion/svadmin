@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/svelte";
 import Progress from "./progress.svelte";
 
-describe("Progress Arco Enhancements", () => {
+describe("Progress states", () => {
   it("renders status success with check icon in info slot", () => {
     const { container } = render(Progress, {
       props: {

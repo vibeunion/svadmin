@@ -24,7 +24,7 @@
 		showCloseButton?: boolean;
 		/** 信息展示可点遮罩关闭。录入表单应传 false。 */
 		closeOnOverlayClick?: boolean;
-		/** Arco 建议宽度：400 / 520 / 720。不传则保持现有默认宽度。 */
+		/** 建议宽度：400 / 520 / 720。不传则保持现有默认宽度。 */
 		size?: 'sm' | 'md' | 'lg';
 		/** 加载中时正文区保持最小高度，避免标题和按钮跳动。 */
 		loading?: boolean;

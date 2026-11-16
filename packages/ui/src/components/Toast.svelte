@@ -21,7 +21,7 @@
   const isActiveHost = $derived(host?.isActive() ?? false);
   const theme = $derived(getResolvedTheme() === 'dark' ? 'dark' : 'light');
   // 默认仍是 top-right，抽屉打开时改到 bottom-left，避开底部居中的撤销条。
-  // 显式 placement 才用 Arco 的顶部 / 底部居中。
+  // 显式 placement 才用顶部 / 底部居中。
   const toastPosition = $derived<'top-right' | 'bottom-left' | 'top-center' | 'bottom-center'>(
     placement === 'top' ? 'top-center' : placement === 'bottom' ? 'bottom-center' : sheetOpen ? 'bottom-left' : 'top-right',
   );

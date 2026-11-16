@@ -27,7 +27,7 @@ describe('Alert', () => {
   });
 });
 
-  it("renders showIcon and title per Arco alert specification", () => {
+  it("renders showIcon and title per the alert specification", () => {
     render(Alert, {
       variant: "warning",
       showIcon: true,

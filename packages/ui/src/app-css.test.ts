@@ -151,7 +151,7 @@ describe('native component CSS', () => {
     }
   });
 
-  it('keeps the default controls aligned with the Arco interaction reference', () => {
+  it('keeps the default controls aligned with the shared interaction reference', () => {
     const css = readAppCss();
     const defaultRefinement = css.slice(
       css.indexOf('/* --- Default visual refinement'),
