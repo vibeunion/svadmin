@@ -97,5 +97,27 @@ describe('Arco remainder style contract', () => {
     expect(css).toContain('--color-primary-light-3: var(--primary-light-3);');
     expect(css).toContain('--foreground: #1D2129;');
     expect(css).toContain('--primary: #165DFF;');
+    expect(css).toContain('--primary-light-1: var(--primary-1);');
+    expect(css).toContain('--primary-1: #E8F3FF;');
+    expect(css).toContain('--color-border-1: var(--svadmin-fill-2);');
+  });
+
+  it('matches the remaining official control, overlay, and type metrics', () => {
+    expect(css).toContain('padding: 0 15px;');
+    expect(css).toContain('padding: 0 11px;');
+    expect(css).toContain('padding: 0 19px;');
+    expect(css).toContain('font-weight: 400;');
+    expect(css).toContain('background: var(--primary-5, var(--primary));');
+    expect(css).not.toContain('color-mix(in oklch, var(--primary) 80%');
+    expect(css).toContain('background: var(--primary-light-1);');
+    expect(css).toContain('padding: 8px 15px;');
+    expect(css).toContain('padding: 24px 20px;');
+    expect(css).toContain('min-height: 48px;');
+    expect(css).toContain('min-height: var(--svadmin-shell-topbar-h);');
+    expect(css).toContain('padding: 12px 16px;');
+    expect(css).toContain('min-height: 36px;');
+    expect(rule('.svadmin-result__title')).toContain('font-size: 14px');
+    expect(rule('.svadmin-result__title')).toContain('font-weight: 500');
+    expect(css).toContain('color: var(--svadmin-text-3);');
   });
 });
