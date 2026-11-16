@@ -44,27 +44,29 @@
 </script>
 
 {#snippet content()}
-  {#if src && !failed}
-    <img
-      class="svadmin-image__img"
-      {src}
-      {alt}
-      loading="lazy"
-      decoding="async"
-      style={`object-fit:${fit}`}
-      onerror={() => { failed = true; }}
-    />
-    {#if preview}
-      <span class="svadmin-image__overlay" aria-hidden="true" data-slot="image-overlay">
-        <ZoomIn size={20} />
+  <span class="svadmin-image__frame">
+    {#if src && !failed}
+      <img
+        class="svadmin-image__img"
+        {src}
+        {alt}
+        loading="lazy"
+        decoding="async"
+        style={`object-fit:${fit}`}
+        onerror={() => { failed = true; }}
+      />
+      {#if preview}
+        <span class="svadmin-image__overlay" aria-hidden="true" data-slot="image-overlay">
+          <ZoomIn size={16} />
+        </span>
+      {/if}
+    {:else}
+      <span class="svadmin-image__fallback" role="img" aria-label={fallback}>
+        <ImageOff size={20} aria-hidden="true" />
+        {#if fallback}<span>{fallback}</span>{/if}
       </span>
     {/if}
-  {:else}
-    <span class="svadmin-image__fallback" role="img" aria-label={fallback}>
-      <ImageOff size={20} aria-hidden="true" />
-      {#if fallback}<span>{fallback}</span>{/if}
-    </span>
-  {/if}
+  </span>
   {#if title || description || children}
     <div class="svadmin-image__caption">
       {#if title}<strong class="svadmin-image__title">{title}</strong>{/if}
@@ -93,19 +95,28 @@
 
 <style>
   .svadmin-image {
+    display: grid;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    color: var(--foreground);
+  }
+  .svadmin-image__button { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; text-align: inherit; }
+  .svadmin-image__button:focus-visible {
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
+  }
+  .svadmin-image.is-rounded .svadmin-image__frame { border-radius: var(--radius); }
+  .svadmin-image.is-preview { cursor: zoom-in; }
+  .svadmin-image__frame {
     position: relative;
     display: grid;
     place-items: center;
     min-width: 0;
-    max-width: 100%;
-    margin: 0;
     overflow: hidden;
-    background: var(--muted);
-    color: var(--muted-foreground);
+    background: var(--svadmin-fill-1, var(--muted));
+    color: var(--svadmin-text-4, var(--muted-foreground));
   }
-  .svadmin-image__button { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; text-align: inherit; }
-  .svadmin-image.is-rounded { border-radius: var(--radius-lg); }
-  .svadmin-image.is-preview { cursor: zoom-in; }
   .svadmin-image__img { display: block; width: 100%; height: 100%; max-width: 100%; }
   .svadmin-image__overlay {
     position: absolute;
@@ -113,10 +124,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: color-mix(in srgb, var(--card, black) 40%, transparent);
-    color: var(--primary-foreground, white);
+    background: var(--svadmin-mask, var(--color-mask-bg));
+    color: var(--color-white, #fff);
     opacity: 0;
-    transition: opacity 150ms ease;
+    transition: opacity var(--svadmin-duration-1, 0.1s) var(--svadmin-easing-linear, linear);
     pointer-events: none;
   }
   .svadmin-image__button:hover .svadmin-image__overlay,
@@ -127,22 +138,25 @@
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--svadmin-space-1, 0.25rem);
-    padding: var(--svadmin-space-4, 1rem);
-    color: var(--muted-foreground);
-    font-size: var(--svadmin-text-caption, 0.75rem);
+    gap: var(--svadmin-space-1);
+    padding: 8px 16px;
+    color: var(--svadmin-text-4, var(--muted-foreground));
+    font-size: var(--svadmin-text-caption);
+    line-height: 1.6667;
     text-align: center;
   }
-  .svadmin-image__caption { width: 100%; padding: 0.5rem 0.75rem; font-size: var(--svadmin-text-caption, 0.75rem); }
+  .svadmin-image__caption { width: 100%; margin-top: 4px; }
   .svadmin-image__title {
     display: block;
     color: var(--foreground);
-    font-size: var(--svadmin-text-body, 0.875rem);
+    font-size: var(--svadmin-text-section);
     font-weight: 500;
+    line-height: 1.5715;
   }
   .svadmin-image__description {
-    margin: 0.125rem 0 0;
-    color: var(--muted-foreground);
-    font-size: var(--svadmin-text-caption, 0.75rem);
+    margin: 0;
+    color: var(--svadmin-text-3, var(--muted-foreground));
+    font-size: var(--svadmin-text-body);
+    line-height: 1.5715;
   }
 </style>

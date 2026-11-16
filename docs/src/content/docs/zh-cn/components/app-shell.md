@@ -111,7 +111,7 @@ description: 为自带路由和数据层的宿主提供的路由无关应用外�
 | `--svadmin-space-1…6` | `4px … 32px` | 间距刻度 |
 | `--svadmin-section-gap` | `--svadmin-space-5` | 页面区块间距 |
 | `--svadmin-text-caption/label/body/section/title` | `12/13/14/16/20px` | 字号 |
-| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.4` | 行高，正文为 1.4 |
+| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.5715` | 行高，正文为 1.5715 |
 | `--svadmin-measure` | `65ch` | 描述文本阅读宽度 |
 | `--svadmin-shell-sidebar-w` | `15rem` | 展开导航宽度 |
 | `--svadmin-shell-sidebar-w-collapsed` | `3.5rem` | 收起导航宽度 |

@@ -116,7 +116,7 @@ host that needs larger or tighter controls overrides the size tokens once:
 | `--svadmin-space-1…6` | `4px … 32px` | Spacing scale |
 | `--svadmin-section-gap` | `--svadmin-space-5` | Gap between page sections |
 | `--svadmin-text-caption/label/body/section/title` | `12/13/14/16/20px` | Type sizes |
-| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.4` | Line heights. Body is 1.4 |
+| `--svadmin-leading-tight/snug/body` | `1.25 / 1.35 / 1.5715` | Line heights. Body is 1.5715 |
 | `--svadmin-measure` | `65ch` | Reading measure for descriptions |
 | `--svadmin-shell-sidebar-w` | `15rem` | Expanded rail width |
 | `--svadmin-shell-sidebar-w-collapsed` | `3.5rem` | Collapsed rail width |

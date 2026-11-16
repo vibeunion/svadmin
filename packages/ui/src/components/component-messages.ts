@@ -16,6 +16,11 @@ export const componentMessageCatalog = {
   'datePicker.previousYear': { en: 'Previous year', zh: '上一年' },
   'datePicker.nextYear': { en: 'Next year', zh: '下一年' },
   'datePicker.calendarDates': { en: 'Calendar dates', zh: '日历日期' },
+  'qrCode.expired': { en: 'QR code expired', zh: '二维码已失效' },
+  'qrCode.refresh': { en: 'Refresh', zh: '点击刷新' },
+  'qrCode.refreshLabel': { en: 'Refresh QR code', zh: '刷新二维码' },
+  'qrCode.scanned': { en: 'Scanned', zh: '已扫描' },
+  'qrCode.empty': { en: 'No QR content.', zh: '没有二维码内容。' },
 } as const;
 
 export type ComponentMessageKey = keyof typeof componentMessageCatalog;

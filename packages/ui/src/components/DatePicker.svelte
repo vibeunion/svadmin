@@ -201,7 +201,7 @@
           {...props}
           disabled={disabled}
           aria-label={nativeProps.ariaLabel}
-          class="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-left text-sm focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          class="svadmin-date-picker__trigger"
         >
           <span class={value ? 'text-foreground' : 'text-muted-foreground'}>{formatValue(value) || resolvedPlaceholder}</span>
           <ChevronRight class="h-4 w-4 rotate-90 opacity-50" />
@@ -217,21 +217,21 @@
         </div>
 
         {#if viewMode === 'day'}
-          <div class="grid grid-cols-7 gap-0.5 text-center text-[0.6875rem] text-muted-foreground">
-            {#each weekdays as weekday, index (index)}<span class="py-1">{weekday}</span>{/each}
+          <div class="svadmin-date-picker__weekdays">
+            {#each weekdays as weekday, index (index)}<span>{weekday}</span>{/each}
           </div>
-          <div class="grid grid-cols-7 gap-0.5">
+          <div class="svadmin-date-picker__days">
             {#each days as day (day.iso)}
               <button
                 type="button"
                 disabled={day.disabled}
                 aria-pressed={day.selected}
-                class="svadmin-date-picker__cell"
+                class="svadmin-date-picker__cell svadmin-date-picker__day"
                 class:is-outside={day.outside}
                 class:is-today={day.today}
                 class:is-selected={day.selected}
                 onclick={() => chooseDay(day.iso, day.disabled)}
-              >{day.day}</button>
+              ><span>{day.day}</span></button>
             {/each}
           </div>
         {:else if viewMode === 'month'}
@@ -274,23 +274,103 @@
 {/if}
 
 <style>
+  .svadmin-date-picker__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: var(--svadmin-control-h);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-small, 2px);
+    background: var(--card);
+    padding: 0 12px;
+    color: var(--foreground);
+    font-size: var(--svadmin-text-body);
+    line-height: 1.5715;
+    text-align: start;
+    cursor: pointer;
+  }
+  .svadmin-date-picker__trigger:focus-visible {
+    border-color: var(--ring);
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
+  }
+  .svadmin-date-picker__trigger:disabled {
+    cursor: not-allowed;
+    opacity: 1;
+    border-color: transparent;
+    background: var(--svadmin-fill-2, var(--muted));
+    color: var(--svadmin-text-4);
+  }
+  .svadmin-date-picker__weekdays,
+  .svadmin-date-picker__days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .svadmin-date-picker__weekdays span {
+    height: 32px;
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-body);
+    font-weight: 500;
+    line-height: 32px;
+    text-align: center;
+  }
   .svadmin-date-picker__cell {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 2rem;
     border: 0;
-    border-radius: var(--radius-sm);
+    border-radius: var(--border-radius-small, 2px);
     background: transparent;
     color: var(--foreground);
     font: inherit;
-    font-size: var(--svadmin-text-label);
+    font-size: var(--svadmin-text-body);
+    font-weight: 500;
     cursor: pointer;
   }
-  .svadmin-date-picker__cell:hover:not(:disabled) { background: var(--accent); }
-  .svadmin-date-picker__cell.is-outside { color: var(--muted-foreground); opacity: 0.55; }
-  .svadmin-date-picker__cell.is-today { box-shadow: inset 0 0 0 1px var(--primary); }
-  .svadmin-date-picker__cell.is-selected { background: var(--primary); color: var(--primary-foreground); }
-  .svadmin-date-picker__cell:disabled { opacity: 0.35; cursor: not-allowed; }
+  .svadmin-date-picker__cell:hover:not(:disabled):not(.svadmin-date-picker__day) { background: var(--svadmin-fill-3, var(--border)); }
+  .svadmin-date-picker__cell.is-outside:not(.svadmin-date-picker__day) { color: var(--svadmin-text-4); opacity: 1; }
+  .svadmin-date-picker__cell.is-today:not(.svadmin-date-picker__day) { box-shadow: inset 0 0 0 1px var(--primary); }
+  .svadmin-date-picker__cell.is-selected:not(.svadmin-date-picker__day) { background: var(--primary); color: var(--color-white, #fff); }
+  .svadmin-date-picker__cell:disabled { opacity: 1; color: var(--svadmin-text-4); cursor: not-allowed; }
+  .svadmin-date-picker__day {
+    position: relative;
+    min-height: 32px;
+    padding: 2px 0 6px;
+    border-radius: 0;
+    background: transparent;
+  }
+  .svadmin-date-picker__day > span {
+    display: inline-grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 24px;
+    line-height: 24px;
+  }
+  .svadmin-date-picker__day:hover:not(:disabled):not(.is-selected) > span {
+    background: var(--svadmin-fill-3, var(--border));
+    color: var(--foreground);
+  }
+  .svadmin-date-picker__day.is-outside > span { color: var(--svadmin-text-4); }
+  .svadmin-date-picker__day.is-selected > span { background: var(--primary); color: var(--color-white, #fff); }
+  .svadmin-date-picker__day.is-today::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 999px;
+    background: var(--primary);
+  }
+  .svadmin-date-picker__day:disabled { background: var(--svadmin-fill-1, var(--background)); }
+  .svadmin-date-picker__day:disabled > span { background: transparent; color: var(--svadmin-text-4); }
+  .svadmin-date-picker__day:focus-visible {
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
+  }
   :global(.svadmin-date-picker-panel) { z-index: 80; }
 </style>

@@ -27,7 +27,8 @@ describe("QRCode status overlay enhancements", () => {
     const mask = container.querySelector('[data-slot="qr-code-mask"]');
     expect(mask).not.toBeNull();
     expect(mask?.getAttribute("data-status")).toBe("expired");
-    expect(container.textContent).toContain("二维码已失效");
+    expect(container.textContent).toContain("QR code expired");
+    expect(container.textContent).toContain("Refresh");
 
     const refreshBtn = getByRole("button", { name: "Refresh QR code" });
     await fireEvent.click(refreshBtn);
@@ -45,5 +46,16 @@ describe("QRCode status overlay enhancements", () => {
     expect(mask).not.toBeNull();
     expect(mask?.getAttribute("data-status")).toBe("scanned");
     expect(container.textContent).toContain("扫码成功");
+  });
+
+  it("uses the resolved locale when status text is omitted", () => {
+    const { container } = render(QRCode, {
+      value: "https://example.com/login",
+      status: "expired",
+      locale: "zh-CN",
+    });
+
+    expect(container.textContent).toContain("二维码已失效");
+    expect(container.textContent).toContain("点击刷新");
   });
 });
