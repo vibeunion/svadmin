@@ -226,3 +226,41 @@ const {
   setFilters,    // (filters) => void
 } = useTable();
 ```
+
+## Cursor-backed lists without totals
+
+`createCursorListController` composes the existing cursor provider/cache into a Svelte-compatible readable store. Pages replace records; visited pages are cached. It does not require a total count or a DOM.
+
+```svelte
+<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+  import { createCursorListController } from '@svadmin/core';
+  import { CursorListFooter } from '@svadmin/ui';
+
+  // The host provides a typed CursorProvider; options include signal/bypassCache.
+  import { taskProvider } from './task-provider';
+  const list = createCursorListController({
+    provider: taskProvider,
+    query: { status: 'open', pageSize: 50 },
+    queryKey: 'open:50',
+    scopeKey: 'tenant-a:tasks',
+  });
+  onMount(() => { void list.refresh(); });
+  onDestroy(() => list.dispose());
+</script>
+
+{#each $list.items as task (task.id)}<p>{task.title}</p>{/each}
+{#if $list.error}<p role="alert">Read failed. Current page retained.</p>{/if}
+<CursorListFooter label="Tasks" page={$list.page} loadedCount={$list.items.length}
+  hasPrevious={$list.hasPrevious} hasNext={$list.hasNext} loading={$list.loading}
+  onPrevious={() => { void list.previous(); }}
+  onNext={() => { void list.next(); }} />
+```
+
+Use immutable query values and a stable `queryKey` containing effective filters, sorting and page size. `setQuery(query, queryKey)` requests page one when that key changes, then commits query, records, page and cursor cache together only after success. A failed query retains the applied snapshot; `state.query/queryKey` always describe the displayed records. Equivalent keys are a no-op. Explicit Apply/Clear actions use `resetQuery(query, queryKey)`, which re-reads page one even when the key is unchanged.
+
+The required separate `scopeKey` identifies the resource, provider and authorization scope. Pass a changed scope with `setQuery(query, queryKey, newScopeKey)`: this immediately clears old-scope data and reads page one, including when that read fails. Superseded responses cannot commit even when the provider ignores cancellation.
+
+`refresh()` re-reads the current page with `bypassCache: true`; `refresh({ resetToFirstPage: true })` explicitly starts over. A failed navigation or refresh retains the current successful page; `retry()` repeats the failed query and target cursor. Pending navigation/refresh calls are deduplicated. `cancel()`, `dispose()` and query supersession settle the action promise without waiting for the provider; disposal also stops notifications. Actions return true only when a page commits, allowing hosts to apply optional focus/scroll behavior without the controller accessing the DOM.
+
+Provider errors remain available to the host. A non-advancing cursor produces `CursorListError` with the stable `CURSOR_NOT_ADVANCING` code for host i18n; its English message is diagnostic only. Error formatting and automatic retry policy remain host concerns.

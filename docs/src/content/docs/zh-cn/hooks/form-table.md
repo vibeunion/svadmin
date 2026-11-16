@@ -177,3 +177,32 @@ throw new HttpError('验证失败', 422, {
 - `syncWithLocation` 把打开状态写入当前路由查询参数，刷新和前进/后退可恢复；`param` 可改参数名
 
 路由驱动的编辑页继续使用 `<AutoForm mode="edit" id={...}>`，记录身份已经在路由中。
+
+## 无总数的游标列表
+
+`createCursorListController` 将现有游标 provider/缓存组合为兼容 Svelte store 的控制器，无需总记录数或 DOM。换页替换当前记录，已访问页通过缓存返回，可直接绑定 `CursorListFooter` 的 `page/loadedCount/hasPrevious/hasNext/loading`，将 `onPrevious/onNext` 连接到控制器同名操作。
+
+```ts
+import { createCursorListController } from '@svadmin/core';
+
+const list = createCursorListController({
+  provider: taskProvider, // 已有强类型 CursorProvider，接收 signal/bypassCache
+  query: { status: 'open', pageSize: 50 },
+  queryKey: 'open:50',
+  scopeKey: 'tenant-a:tasks',
+});
+await list.refresh();
+await list.next();
+await list.previous();
+await list.setQuery({ status: 'closed', pageSize: 50 }, 'closed:50');
+// 显式查询/清除即使条件未变，也重新读取第一页。
+await list.resetQuery({ status: 'closed', pageSize: 50 }, 'closed:50');
+```
+
+在 Svelte 中可用 `$list` 读取快照，在 `onMount` 首次读取，在 `onDestroy` 调用 `list.dispose()`。query 必须不可变；稳定的 queryKey 包含有效筛选、排序和每页条数，不能依赖对象引用。`setQuery` 在 key 变化时请求第一页，仅在成功后一起提交查询、记录、页号和新游标链；失败保留上次成功结果，`state.query/queryKey` 始终与当前记录一致。相同 key 不重新读取，显式查询/清除入口使用 `resetQuery`，即使 key 相同也重新读取第一页。
+
+构造时必须提供独立的 `scopeKey` 标识资源、provider 及授权范围；范围变化时调用 `setQuery(query, queryKey, newScopeKey)`。与普通筛选不同，scopeKey 变化会立即清除旧范围数据，从第一页重新读取，失败也不恢复旧范围。即使 provider 忽略取消，旧响应也不能写回。
+
+`refresh()` 默认刷新当前页并传入 `bypassCache: true`；`refresh({ resetToFirstPage: true })` 明确返回第一页。翻页/刷新失败保留原成功页，`retry()` 重试原目标查询和游标；处理中去重，`cancel()` 取消读取，`dispose()` 同时停止订阅通知。取消、销毁或查询替代都会及时结束对应动作 Promise，不依赖 provider 是否响应取消。动作仅在成功提交页面时返回 true，宿主可据此决定焦点/滚动；控制器本身不访问 DOM。
+
+provider 错误原样交给宿主；游标未推进的协议错误使用 `CursorListError.code === 'CURSOR_NOT_ADVANCING'`，供宿主通过自己的 i18n 翻译，英文 message 只用于诊断。自动重试策略由宿主决定。
