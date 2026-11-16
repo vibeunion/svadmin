@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/vibeunion/svadmin/compare/lite-v0.32.3...lite-v0.33.0) (2026-11-16)
+
+
+### 🚀 Features
+
+* **ui:** normalize shared desktop control states ([9a78cca](https://github.com/vibeunion/svadmin/commit/9a78cca44ed8da8dbd387829b2f7aeee33b3aebb))
+
 ## [0.32.3](https://github.com/vibeunion/svadmin/compare/lite-v0.32.2...lite-v0.32.3) (2026-11-16)
 
 
