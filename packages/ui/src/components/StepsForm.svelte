@@ -7,6 +7,7 @@
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
+  import { cn } from '../utils.js';
   import { Button } from './ui/button/index.js';
   import * as Card from './ui/card/index.js';
   import { Badge } from './ui/badge/index.js';
@@ -16,7 +17,6 @@
   import ConfirmDialog from './ConfirmDialog.svelte';
   import { Skeleton } from './ui/skeleton/index.js';
   import { withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
-  import { cn } from '../utils.js';
 
   const i18n = useTranslation();
 

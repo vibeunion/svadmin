@@ -9,5 +9,10 @@ describe("Space Split Enhancements", () => {
     expect(space).not.toBeNull();
     expect(container.textContent).toContain("Item 1");
     expect(container.textContent).toContain("Item 2");
+    const separators = space?.querySelectorAll(":scope > .svadmin-space__split") ?? [];
+    expect(separators).toHaveLength(1);
+    expect(separators[0]?.textContent).toBe("|");
+    expect(space?.firstElementChild?.textContent).toBe("Item 1");
+    expect(space?.lastElementChild?.textContent).toBe("Item 2");
   });
 });

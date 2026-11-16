@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/svelte";
-import Link from "./Link.svelte";
 import LinkHarness from "../../test/fixtures/LinkHarness.svelte";
 
 describe("Link external icon", () => {

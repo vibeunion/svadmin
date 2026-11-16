@@ -33,6 +33,27 @@
     children,
   }: Props = $props();
 
+  let root = $state<HTMLDivElement | null>(null);
+  let splitSource = $state<HTMLSpanElement | null>(null);
+
+  // A snippet is one block, so clone the rendered separator between child elements.
+  $effect(() => {
+    const host = root;
+    const source = split ? splitSource : null;
+    if (!host) return;
+    for (const node of [...host.querySelectorAll(':scope > .svadmin-space__split')]) node.remove();
+    if (!source) return;
+    const items = [...host.children].filter((child) => !child.classList.contains('svadmin-space__split'));
+    for (let index = items.length - 1; index > 0; index -= 1) {
+      const clone = source.cloneNode(true);
+      if (!(clone instanceof HTMLElement)) continue;
+      clone.hidden = false;
+      clone.classList.remove('svadmin-space__split-source');
+      clone.classList.add('svadmin-space__split');
+      items[index]?.before(clone);
+    }
+  });
+
   const spaceStep: Record<Exclude<SpaceSize, number>, string> = {
     xs: '1',
     mini: '1',
@@ -49,6 +70,7 @@
 </script>
 
 <div
+  bind:this={root}
   class={cn('svadmin-space', className)}
   data-direction={direction}
   data-size={typeof size === 'number' ? undefined : size}
@@ -60,6 +82,9 @@
 >
   {@render children?.()}
 </div>
+{#if split}
+  <span class="svadmin-space__split-source" hidden bind:this={splitSource}>{@render split()}</span>
+{/if}
 
 <style>
   .svadmin-space {

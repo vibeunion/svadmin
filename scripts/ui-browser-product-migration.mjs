@@ -93,7 +93,7 @@ const buttonIcon = ':is([data-slot="button"], .svadmin-button):is([data-size="ic
 
 export const productComponentSizeMigration = Object.freeze({
   ':is([data-slot="button"], .svadmin-button), :is([data-svadmin-button], .svadmin-button)': Object.freeze({
-    'border-radius': Object.freeze(['var(--radius-md)', 'var(--radius-sm)']),
+    'border-radius': Object.freeze(['var(--radius-md)', 'var(--border-radius-small, 2px)']),
     'font-weight': Object.freeze(['500', '400']),
     'line-height': Object.freeze(['1', '1.5715']),
   }),
@@ -142,4 +142,17 @@ export const productComponentSizeMigration = Object.freeze({
       'border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing), background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing)',
     ]),
   }),
+});
+
+// The collapsible summary lives in a root rule, outside the components layer.
+export const collapsibleSummarySelector = `details.svadmin-collapsible > summary,
+details.svadmin-collapsible-filter > summary,
+details[data-svadmin-filter] > summary,
+[data-svadmin-collapsible] > summary`;
+
+export const collapsibleSummaryMigration = Object.freeze({
+  'min-height': Object.freeze(['2rem', '40px']),
+  padding: Object.freeze(['0.25rem 0', '8px 0']),
+  'font-size': Object.freeze(['0.8125rem', '0.875rem']),
+  'line-height': Object.freeze(['1.25rem', '24px']),
 });

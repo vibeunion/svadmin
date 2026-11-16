@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import { RefreshCw, Columns3 } from "@lucide/svelte";
+  import { definedOptions } from "@svadmin/core/options";
   import { Button } from "./ui/button/index.js";
   import ColumnSettings, { type ColumnItem, type ColumnPreset } from "./ColumnSettings.svelte";
   import FullscreenButton from "./FullscreenButton.svelte";
@@ -117,11 +118,10 @@
       <ColumnSettings
         bind:columns
         presets={columnPresets}
-        {storageKey}
         triggerVariant="ghost"
         triggerSize="icon"
         class="h-8 w-8"
-        onchange={oncolumnschange}
+        {...definedOptions({ storageKey, onchange: oncolumnschange })}
       />
     {/if}
 

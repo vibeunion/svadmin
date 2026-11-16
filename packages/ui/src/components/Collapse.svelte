@@ -140,6 +140,8 @@
     gap: var(--svadmin-space-2);
     width: 100%;
     padding: 8px 13px;
+    font-size: var(--svadmin-text-body);
+    line-height: var(--svadmin-control-h-mini);
     border: 0;
     background: var(--card);
     color: var(--foreground);
@@ -161,7 +163,8 @@
     grid-template-rows: 0fr;
     border-block-start: 1px solid transparent;
     color: var(--muted-foreground);
-    font-size: var(--svadmin-text-label);
+    font-size: var(--svadmin-text-body);
+    line-height: var(--svadmin-leading-body);
     transition:
       grid-template-rows var(--svadmin-motion-standard) var(--svadmin-motion-easing),
       border-color var(--svadmin-motion-standard) var(--svadmin-motion-easing);

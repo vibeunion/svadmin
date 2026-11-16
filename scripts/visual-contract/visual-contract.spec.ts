@@ -45,7 +45,7 @@ for (const scheme of ['light', 'dark'] as const) {
       return { size: style.fontSize, leading: style.lineHeight, family: style.fontFamily };
     });
     expect(body.size).toBe('14px');
-    expect(body.leading).toBe('19.6px');
+    expect(body.leading).toBe('22.001px');
     expect(body.family.toLowerCase()).toContain('helvetica neue');
     expect(body.family.toLowerCase()).not.toContain('nunito');
 
@@ -63,11 +63,19 @@ for (const scheme of ['light', 'dark'] as const) {
     expect((await paint(page, '#warning-disabled', 'color')).replace(/\s+/g, '')).toBe('rgb(29,33,41)');
 
     const gap = await page.locator('#second-paragraph').evaluate((element) => getComputedStyle(element).marginTop);
-    expect(gap).toBe('21px');
+    expect(gap).toBe('22px');
 
     const helpGap = await page.locator('#field-help').evaluate((element) => getComputedStyle(element).marginTop);
     expect(helpGap).toBe('4px');
     expect(await paint(page, '#input-disabled', 'opacity')).toBe('1');
+    const disabledLink = (await paint(page, '#link-disabled', 'color')).replace(/\s+/g, '');
+    expect(disabledLink).toBe(scheme === 'light' ? 'rgb(148,191,255)' : 'rgba(60,126,255,0.5)');
+    expect(await paint(page, '#switch-off', 'width')).toBe('40px');
+    expect(await paint(page, '#switch-off', 'height')).toBe('24px');
+    expect(await paint(page, '#switch-on .svadmin-switch-thumb', 'width')).toBe('16px');
+    const invalidFill = (await paint(page, '#input-error', 'background-color')).replace(/\s+/g, '');
+    expect(invalidFill).toBe(scheme === 'light' ? 'rgb(255,236,232)' : 'rgba(247,105,101,0.2)');
+    expect(await paint(page, '#input-error', 'box-shadow')).toBe('none');
     expect(await page.locator('#alert-static').getAttribute('data-feedback')).toBe('static');
     expect(await page.locator('#table-loading').getAttribute('aria-busy')).toBe('true');
     expect(await page.locator('#table-empty').getAttribute('data-svadmin-data-state')).toBe('empty');

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import postcss from 'postcss';
 import {
+  collapsibleSummaryMigration,
+  collapsibleSummarySelector,
   productComponentSizeMigration,
   productDarkTokenMigration,
   productLightTokenMigration,
@@ -66,9 +68,22 @@ export const bodyStyleMigration = Object.freeze({
 
 export const visualContractDisabledSelector = ':is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled]), :is([data-svadmin-button], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled])';
 
+export const hostNormalizationSelector = '[data-slot="input"][aria-invalid="true"]';
+
+export const hostNormalizationDeclarations = Object.freeze({
+  'border-color': 'transparent',
+  'background-color': 'var(--danger-light-1, #FFECE8)',
+  'box-shadow': 'none',
+});
+
 export const visualContractAdditions = Object.freeze({
   light: Object.freeze({ '--primary-3': '#94BFFF', '--svadmin-fill-2': '#F2F3F5' }),
-  dark: Object.freeze({ '--primary-3': '#0E32A6', '--svadmin-fill-2': 'rgb(255 255 255 / 8%)' }),
+  dark: Object.freeze({
+    '--primary-3': '#0E32A6',
+    '--svadmin-fill-2': 'rgb(255 255 255 / 8%)',
+    // 历史样式表没有 danger-light-1；暗色无效态填充需要在参考里显式补上。
+    '--danger-light-1': 'rgb(247 105 101 / 20%)',
+  }),
   disabled: Object.freeze({
     'pointer-events': 'none',
     opacity: '1',
@@ -158,8 +173,32 @@ export function createMigrationReference(baselineCss) {
   replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
   migrateComponentDeclarations(root, tableSizeMigration);
   migrateComponentDeclarations(root, productComponentSizeMigration);
+  migrateRootDeclarations(root, collapsibleSummarySelector, collapsibleSummaryMigration);
   appendVisualContract(root);
+  appendHostNormalization(root);
   return root.toString();
+}
+
+function migrateRootDeclarations(root, selector, declarations) {
+  const rules = [];
+  root.walkRules(selector, (rule) => {
+    if (rule.parent?.type === 'root') rules.push(rule);
+  });
+  assert.equal(rules.length, 1, 'collapsible summary: expected one root rule');
+  const rule = rules[0];
+  for (const [property, [before, after]] of Object.entries(declarations)) {
+    const matches = rule.nodes.filter((node) => node.type === 'decl' && node.prop === property);
+    assert.equal(matches.length, 1, `collapsible summary ${property}: historical declaration drift`);
+    assert.equal(matches[0].value, before, `collapsible summary ${property}: historical value drift`);
+    assert.equal(Boolean(matches[0].important), false, `collapsible summary ${property}: unexpected priority`);
+    matches[0].value = after;
+  }
+}
+
+function appendHostNormalization(root) {
+  const rule = postcss.rule({ selector: hostNormalizationSelector });
+  for (const [prop, value] of Object.entries(hostNormalizationDeclarations)) rule.append({ prop, value });
+  root.append(rule);
 }
 
 function appendToken(root, selector, prop, value) {
