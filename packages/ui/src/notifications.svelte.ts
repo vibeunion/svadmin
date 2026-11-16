@@ -31,6 +31,7 @@ export interface NotificationController {
   success(title: string, description?: string, options?: Omit<NotificationOptions, 'title' | 'description' | 'tone'>): number;
   warning(title: string, description?: string, options?: Omit<NotificationOptions, 'title' | 'description' | 'tone'>): number;
   danger(title: string, description?: string, options?: Omit<NotificationOptions, 'title' | 'description' | 'tone'>): number;
+  error(title: string, description?: string, options?: Omit<NotificationOptions, 'title' | 'description' | 'tone'>): number;
 }
 
 type ToneOptions = Omit<NotificationOptions, 'title' | 'description' | 'tone'>;
@@ -88,6 +89,7 @@ export function createNotificationController(): NotificationController {
     success: withTone('success'),
     warning: withTone('warning'),
     danger: withTone('danger'),
+    error: withTone('danger'),
   };
 }
 
@@ -173,4 +175,5 @@ export const notification: NotificationController = {
   success: (title, description, options) => activeController().success(title, description, options),
   warning: (title, description, options) => activeController().warning(title, description, options),
   danger: (title, description, options) => activeController().danger(title, description, options),
+  error: (title, description, options) => activeController().error(title, description, options),
 };
