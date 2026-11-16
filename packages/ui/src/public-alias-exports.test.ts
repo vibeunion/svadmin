@@ -149,6 +149,8 @@ import {
   DashboardPresetManager,
   ChartAnnotationOverlay,
   MetricEventAnnotation,
+  TableToolbar,
+  SearchTableToolbar,
   AbacPolicyMatrix,
   AttributeBasedAccessControlMatrix,
   PermissionSimulator,
@@ -540,6 +542,8 @@ describe('public compatibility aliases', () => {
     expect(DashboardPresetManager).toBe(DashboardLayoutStorage);
     expect(ChartAnnotationOverlay).toBeDefined();
     expect(MetricEventAnnotation).toBe(ChartAnnotationOverlay);
+    expect(TableToolbar).toBeDefined();
+    expect(SearchTableToolbar).toBe(TableToolbar);
     expect(AbacPolicyMatrix).toBeDefined();
     expect(AttributeBasedAccessControlMatrix).toBe(AbacPolicyMatrix);
     expect(PermissionSimulator).toBeDefined();
