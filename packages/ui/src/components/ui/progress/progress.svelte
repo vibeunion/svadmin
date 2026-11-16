@@ -10,7 +10,7 @@
     indeterminate = false,
     status = 'normal',
     size = 96,
-    strokeWidth = 8,
+    strokeWidth = 4,
     showInfo = false,
     format,
     class: className,
@@ -87,22 +87,22 @@
   .svadmin-progress {
     position: relative;
     width: 100%;
-    height: 0.5rem;
+    height: 4px;
     overflow: hidden;
     border-radius: 999px;
-    background: var(--muted);
+    background: var(--svadmin-fill-3, var(--border));
   }
   .svadmin-progress-value {
     width: 100%;
     height: 100%;
     border-radius: inherit;
     background: var(--primary);
-    transition: transform 160ms ease;
+    transition: transform 0.6s var(--svadmin-easing-standard, cubic-bezier(0.34, 0.69, 0.1, 1));
   }
   .svadmin-progress--with-info {
     display: flex;
     align-items: center;
-    gap: var(--svadmin-space-2);
+    gap: 16px;
     height: auto;
     overflow: visible;
     background: transparent;
@@ -110,10 +110,10 @@
   .svadmin-progress__line-track {
     flex: 1;
     min-width: 0;
-    height: 0.5rem;
+    height: 4px;
     overflow: hidden;
     border-radius: inherit;
-    background: var(--muted);
+    background: var(--svadmin-fill-3, var(--border));
   }
   .svadmin-progress[data-status='success'] .svadmin-progress-value { background: var(--success); }
   .svadmin-progress[data-status='warning'] .svadmin-progress-value { background: var(--warning); }
@@ -143,11 +143,11 @@
     fill: none;
     stroke-width: var(--svadmin-progress-stroke);
   }
-  .svadmin-progress__track { stroke: var(--muted); }
+  .svadmin-progress__track { stroke: var(--svadmin-fill-3, var(--border)); }
   .svadmin-progress__indicator {
     stroke: var(--primary);
     stroke-linecap: round;
-    transition: stroke-dashoffset 160ms ease;
+    transition: stroke-dashoffset 0.6s var(--svadmin-easing-standard, cubic-bezier(0.34, 0.69, 0.1, 1));
   }
   .svadmin-progress--circle[data-status='success'] .svadmin-progress__indicator { stroke: var(--success); }
   .svadmin-progress--circle[data-status='warning'] .svadmin-progress__indicator { stroke: var(--warning); }
@@ -155,9 +155,11 @@
   .svadmin-progress--circle[data-indeterminate='true'] svg { animation: svadmin-progress-spin 1.1s linear infinite; }
   .svadmin-progress__info {
     position: relative;
-    color: var(--foreground);
+    min-width: 32px;
+    color: var(--muted-foreground);
     font-size: var(--svadmin-text-caption);
     font-variant-numeric: tabular-nums;
+    text-align: end;
   }
   .svadmin-progress--circle .svadmin-progress__info { position: absolute; }
   @keyframes svadmin-progress-indeterminate {

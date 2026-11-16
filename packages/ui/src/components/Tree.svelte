@@ -353,18 +353,19 @@
     display: grid;
     gap: 1px;
     color: var(--foreground);
-    font-size: var(--svadmin-text-label);
+    font-size: var(--svadmin-text-body);
+    line-height: 1.5715;
   }
   .svadmin-tree__row {
     position: relative;
-    border-radius: var(--radius-sm);
+    border-radius: 2px;
     cursor: pointer;
     outline: none;
   }
-  .svadmin-tree__row:hover { background: var(--accent); }
-  .svadmin-tree__row.is-selected { background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); }
+  .svadmin-tree__row:hover { background: var(--svadmin-fill-2, var(--muted)); }
+  .svadmin-tree__row.is-selected { background: var(--svadmin-fill-2, var(--muted)); color: var(--primary); }
   .svadmin-tree__row:focus-visible { box-shadow: inset 0 0 0 var(--svadmin-focus-width) var(--ring); }
-  .svadmin-tree__row.is-disabled { cursor: not-allowed; opacity: 0.5; }
+  .svadmin-tree__row.is-disabled { cursor: not-allowed; opacity: 1; color: var(--svadmin-text-4); }
   .svadmin-tree__row.is-dragging { opacity: 0.45; }
   .svadmin-tree__row[data-drop-position='inside'] { background: color-mix(in srgb, var(--primary) 14%, transparent); }
   .svadmin-tree__row[data-drop-position='before']::before,

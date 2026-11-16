@@ -11,7 +11,7 @@ function rule(selector: string): string {
   return css.slice(start, css.indexOf('}', start));
 }
 
-describe('Arco remainder style contract', () => {
+describe('Remaining visual style contract', () => {
   it('drops whole-control opacity on the disabled controls that still had it', () => {
     for (const selector of [
       '.svadmin-textarea:disabled',
@@ -97,5 +97,58 @@ describe('Arco remainder style contract', () => {
     expect(css).toContain('--color-primary-light-3: var(--primary-light-3);');
     expect(css).toContain('--foreground: #1D2129;');
     expect(css).toContain('--primary: #165DFF;');
+    expect(css).toContain('--primary-light-1: var(--primary-1);');
+    expect(css).toContain('--primary-1: #E8F3FF;');
+    expect(css).toContain('--color-border-1: var(--svadmin-fill-2);');
+  });
+
+  it('matches the remaining official control, overlay, and type metrics', () => {
+    expect(css).toContain('padding: 0 15px;');
+    expect(css).toContain('padding: 0 11px;');
+    expect(css).toContain('padding: 0 19px;');
+    expect(css).toContain('font-weight: 400;');
+    expect(css).toContain('background: var(--primary-5, var(--primary));');
+    expect(css).not.toContain('color-mix(in oklch, var(--primary) 80%');
+    expect(css).toContain('background: var(--primary-light-1);');
+    expect(css).toContain('padding: 8px 15px;');
+    expect(css).toContain('padding: 24px 20px;');
+    expect(css).toContain('min-height: 48px;');
+    expect(css).toContain('min-height: var(--svadmin-shell-topbar-h);');
+    expect(css).toContain('padding: 12px 16px;');
+    expect(css).toContain('min-height: 36px;');
+    expect(rule('.svadmin-result__title')).toContain('font-size: 14px');
+    expect(rule('.svadmin-result__title')).toContain('font-weight: 500');
+    expect(rule('.svadmin-input::placeholder')).toContain('color: var(--muted-foreground);');
+    expect(css).toContain('--svadmin-leading-body: 1.5715;');
+    expect(css).toContain('--svadmin-shadow-popup: 0 4px 10px rgb(0 0 0 / 0.1);');
+    expect(css).toContain('padding: 9px 16px;');
+    expect(css).toContain('padding: 1px 4px;');
+    expect(css).toContain('min-height: 46px;');
+    expect(css).toContain('gap: 8px;');
+  });
+
+  it('matches the remaining official select, pagination, list, and progress metrics', () => {
+    const smallSelect = rule('.svadmin-select[data-size="small"]');
+    expect(smallSelect).toContain('height: var(--svadmin-control-h-sm)');
+    expect(smallSelect).toContain('font-size: var(--svadmin-text-body)');
+    expect(smallSelect).not.toContain('0.8125rem');
+    expect(rule('.svadmin-select[data-size="mini"]')).toContain('height: var(--svadmin-control-h-mini)');
+    expect(rule('.svadmin-select[data-size="large"]')).toContain('height: var(--svadmin-control-h-lg)');
+    expect(css).toContain('--svadmin-switch-width: 2.5rem;');
+    expect(css).toContain('--svadmin-switch-height: 1.5rem;');
+    expect(css).toContain('--svadmin-switch-width-sm: 1.75rem;');
+    expect(css).toContain('--svadmin-switch-height-sm: 1rem;');
+    const page = rule('[data-slot="pagination-link"].svadmin-pagination-item[data-active="true"]');
+    expect(page).toContain('background: var(--primary-light-1)');
+    expect(page).toContain('color: var(--primary)');
+    expect(rule(':is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item')).toContain('border: 0 solid transparent');
+    expect(rule(':is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item')).toContain('height: 32px');
+    expect(rule('.svadmin-breadcrumb-page')).toContain('font-weight: 500');
+    expect(css).not.toContain('.svadmin-breadcrumb-list {\n    gap: 0.625rem;');
+    expect(rule('.svadmin-item-list__item')).toContain('padding: 13px 20px');
+    expect(rule('.svadmin-item-list__title')).toContain('var(--svadmin-text-section)');
+    expect(rule('.svadmin-progress')).toContain('height: 4px');
+    expect(rule('.svadmin-result__icon')).toContain('margin-bottom: 16px');
+    expect(css).toContain('--svadmin-mask: rgb(29 33 41 / 60%);');
   });
 });

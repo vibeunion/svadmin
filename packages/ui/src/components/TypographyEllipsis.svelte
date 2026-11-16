@@ -95,7 +95,7 @@
 </div>
 
 <style>
-  .svadmin-typography-ellipsis { color: var(--foreground); font-size: var(--svadmin-text-label); line-height: 1.5715; }
+  .svadmin-typography-ellipsis { color: var(--foreground); font-size: var(--svadmin-text-body); line-height: 1.5715; }
   .svadmin-typography-ellipsis__content { overflow-wrap: anywhere; }
   .svadmin-typography-ellipsis__content.is-clamped {
     display: -webkit-box;

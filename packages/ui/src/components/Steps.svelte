@@ -115,9 +115,11 @@
   .svadmin-steps__item[data-status='process'] .svadmin-steps__indicator { background: var(--primary); color: var(--primary-foreground); }
   .svadmin-steps__item[data-status='error'] .svadmin-steps__indicator { background: var(--destructive); color: var(--destructive-foreground); }
   .svadmin-steps__text { display: grid; min-width: 0; gap: 0.15rem; }
-  .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 500; }
-  .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 500; }
-  .svadmin-steps__description { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
+  /* Official step title is 16px. Only the active step is weight 500. */
+  .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 400; line-height: 1.75; }
+  .svadmin-steps__item[data-status='process'] .svadmin-steps__title { font-weight: 500; }
+  .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 400; }
+  .svadmin-steps__description { margin-top: 2px; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-steps__connector {
     position: relative;
     flex: 1;

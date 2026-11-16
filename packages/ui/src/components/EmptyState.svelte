@@ -67,7 +67,7 @@
   .empty-state__icon { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 32px; border-radius: 6px; background: var(--muted); color: var(--muted-foreground); overflow: hidden; }
   .empty-state__image { width: 100%; height: 100%; object-fit: contain; }
   .empty-state__body { min-width: 0; flex: 1; overflow-wrap: anywhere; }
-  h3 { margin: 0; font-size: var(--svadmin-text-label); line-height: var(--svadmin-leading-body); font-weight: 600; letter-spacing: 0; }
-  p { margin: var(--svadmin-space-1) 0 0; font-size: var(--svadmin-text-label); line-height: var(--svadmin-leading-body); color: var(--muted-foreground); }
+  h3 { margin: 0; font-size: var(--svadmin-text-body); line-height: 1.5715; font-weight: 500; letter-spacing: 0; }
+  p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--muted-foreground); }
   .empty-state__action { margin-top: 12px; }
 </style>

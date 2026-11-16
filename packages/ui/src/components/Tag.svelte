@@ -85,7 +85,7 @@
   .svadmin-tag { gap: 0.25rem; max-width: 100%; min-height: 24px; padding-inline: 8px; border-radius: 2px; font-weight: 500; }
   .svadmin-tag[data-size='compact'] { min-height: 20px; }
   .svadmin-tag.is-disabled { opacity: 1; color: var(--svadmin-text-4); }
-  .svadmin-tag__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .svadmin-tag__label { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .svadmin-tag__control,
   .svadmin-tag__close {
     display: inline-flex;

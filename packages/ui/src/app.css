@@ -147,7 +147,7 @@
   --shadow-surface: var(--svadmin-shadow-surface);
   --shadow-surface-hover: var(--svadmin-shadow-surface-hover);
   --shadow-overlay: var(--svadmin-shadow-overlay);
-  /* 官方阴影名只做别名，数值仍是现有 clean-flat / 产品阴影，不按 Arco px 重调。 */
+  /* Official shadow names are aliases. The numbers stay the current clean-flat product shadows. */
   --shadow-special: var(--svadmin-shadow-control);
   --shadow-1: var(--svadmin-shadow-surface);
   --shadow1-center: var(--svadmin-shadow-surface);
@@ -203,6 +203,7 @@
     --accent-foreground: #0E42D2;
     --destructive: #F53F3F;
     --destructive-foreground: #FFFFFF;
+    --color-white: #FFFFFF;
     --border: #E5E6EB;
     --input: #E5E6EB;
     --ring: #165DFF;
@@ -257,10 +258,11 @@
     --svadmin-text-display-1: 2.25rem; /* 36px */
     --svadmin-text-display-2: 3rem; /* 48px */
     --svadmin-text-display-3: 3.5rem; /* 56px */
-    --svadmin-paragraph-gap: 1.3125rem; /* 21px，14px × 1.5 */
+    --svadmin-paragraph-gap: 1.375rem; /* 22px，14px × 1.5715 */
     --svadmin-leading-tight: 1.25;
     --svadmin-leading-snug: 1.35;
-    --svadmin-leading-body: 1.4;
+    /* Official body line-height: 1.5715. */
+    --svadmin-leading-body: 1.5715;
     --svadmin-focus-width: 2px;
     --svadmin-switch-width: 2.5rem; /* 40px，官方 default */
     --svadmin-switch-height: 1.5rem; /* 24px */
@@ -276,6 +278,8 @@
     --svadmin-chrome-basis: 16rem;
     --svadmin-shell-aside-w: 22rem;
     --svadmin-shadow-overlay: 0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1);
+    /* Official dropdown, popover, and Message shadow: 0 4px 10px rgba(0,0,0,.1). Dialogs keep the overlay shadow above. */
+    --svadmin-shadow-popup: 0 4px 10px rgb(0 0 0 / 0.1);
     /* 亮色官方色阶。6 号色就是现有 --primary / --success / --warning / --destructive / --info，不改名。 */
     --primary-5: #4080FF;
     --primary-7: #0E42D2;
@@ -323,29 +327,45 @@
     --color-bg-5: var(--svadmin-bg-5);
     --color-text-1: var(--foreground);
     --color-text-2: var(--muted-foreground);
-    --color-border-1: var(--svadmin-fill-3);
+    /* Official border-1 is neutral-2 (#F2F3F5). Border-2 is #E5E6EB. */
+    --color-border-1: var(--svadmin-fill-2);
     --color-border-2: var(--border);
     --color-border-3: var(--svadmin-fill-4);
     --color-border-4: var(--svadmin-text-3);
     --color-bg-1: var(--card);
     --color-bg-2: var(--popover);
     --color-bg-3: var(--background);
-    --primary-light-1: color-mix(in srgb, var(--primary) 12%, var(--card));
-    --primary-light-2: color-mix(in srgb, var(--primary) 20%, var(--card));
+    /* Official light steps 1/2/4. light-3 still points at the written color-3. */
+    --primary-1: #E8F3FF;
+    --primary-2: #BEDAFF;
+    --primary-4: #6AA1FF;
+    --primary-light-1: var(--primary-1);
+    --primary-light-2: var(--primary-2);
     --primary-light-3: var(--primary-3);
-    --primary-light-4: color-mix(in srgb, var(--primary) 35%, var(--card));
-    --success-light-1: color-mix(in srgb, var(--success) 12%, var(--card));
-    --success-light-2: color-mix(in srgb, var(--success) 20%, var(--card));
+    --primary-light-4: var(--primary-4);
+    --success-1: #E8FFEA;
+    --success-2: #AFF0B5;
+    --success-4: #4CD263;
+    --success-light-1: var(--success-1);
+    --success-light-2: var(--success-2);
     --success-light-3: var(--success-3);
-    --success-light-4: color-mix(in srgb, var(--success) 35%, var(--card));
-    --warning-light-1: color-mix(in srgb, var(--warning) 12%, var(--card));
-    --warning-light-2: color-mix(in srgb, var(--warning) 20%, var(--card));
+    --success-light-4: var(--success-4);
+    --warning-1: #FFF7E8;
+    --warning-2: #FFE4BA;
+    --warning-4: #FFB65D;
+    --warning-light-1: var(--warning-1);
+    --warning-light-2: var(--warning-2);
     --warning-light-3: var(--warning-3);
-    --warning-light-4: color-mix(in srgb, var(--warning) 35%, var(--card));
-    --danger-light-1: color-mix(in srgb, var(--destructive) 12%, var(--card));
-    --danger-light-2: color-mix(in srgb, var(--destructive) 20%, var(--card));
+    --warning-light-4: var(--warning-4);
+    --danger-1: #FFECE8;
+    --danger-2: #FDCDC5;
+    --danger-4: #F98981;
+    --danger-light-1: var(--danger-1);
+    --danger-light-2: var(--danger-2);
     --danger-light-3: var(--danger-3);
-    --danger-light-4: color-mix(in srgb, var(--destructive) 35%, var(--card));
+    --danger-light-4: var(--danger-4);
+    /* gray-5. Empty descriptions use this, not text-2. */
+    --svadmin-text-5: #A9AEB8;
     --color-primary-light-1: var(--primary-light-1);
     --color-primary-light-2: var(--primary-light-2);
     --color-primary-light-3: var(--primary-light-3);
@@ -434,6 +454,24 @@
     --svadmin-fill-4: rgb(255 255 255 / 16%);
     --svadmin-bg-4: #313132;
     --svadmin-bg-5: #373739;
+    /* Official dark light steps are color-6 at 20/35/50/65%, not the light palette. The primary-3 disabled fill stays. */
+    --primary-light-1: rgb(60 126 255 / 20%);
+    --primary-light-2: rgb(60 126 255 / 35%);
+    --primary-light-3: rgb(60 126 255 / 50%);
+    --primary-light-4: rgb(60 126 255 / 65%);
+    --success-light-1: rgb(39 195 70 / 20%);
+    --success-light-2: rgb(39 195 70 / 35%);
+    --success-light-3: rgb(39 195 70 / 50%);
+    --success-light-4: rgb(39 195 70 / 65%);
+    --warning-light-1: rgb(255 154 46 / 20%);
+    --warning-light-2: rgb(255 154 46 / 35%);
+    --warning-light-3: rgb(255 154 46 / 50%);
+    --warning-light-4: rgb(255 154 46 / 65%);
+    --danger-light-1: rgb(247 105 101 / 20%);
+    --danger-light-2: rgb(247 105 101 / 35%);
+    --danger-light-3: rgb(247 105 101 / 50%);
+    --danger-light-4: rgb(247 105 101 / 65%);
+    --svadmin-text-5: rgb(255 255 255 / 40%);
   }
 
   /* ── Color Theme Overrides ──────────────────────────────
@@ -634,6 +672,22 @@
     --chart-1: oklch(0.541 0.281 293.009);
   }
 
+  /* Non-default presets only change --primary. Primary light steps keep tracking the brand. */
+  :is(
+    [data-theme="neutral"],
+    [data-theme="indigo"],
+    [data-theme="stripe"],
+    [data-theme="blue"],
+    [data-theme="green"],
+    [data-theme="rose"],
+    [data-theme="orange"],
+    [data-theme="violet"]
+  ) {
+    --primary-light-1: color-mix(in srgb, var(--primary) 12%, var(--card));
+    --primary-light-2: color-mix(in srgb, var(--primary) 20%, var(--card));
+    --primary-light-4: color-mix(in srgb, var(--primary) 35%, var(--card));
+  }
+
 }
 
 @layer components {
@@ -745,8 +799,9 @@ h6,
   border-radius: var(--radius-sm);
   background-clip: padding-box;
   font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1;
+  /* Official button: weight 400, line-height 1.5715. */
+  font-weight: 400;
+  line-height: 1.5715;
   white-space: nowrap;
   user-select: none;
   outline: none;
@@ -802,11 +857,22 @@ h6,
 :is([data-slot="button"], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary),
 :is([data-svadmin-button], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary) {
   background: var(--secondary);
-  color: var(--secondary-foreground);
+  /* Official secondary text is text-2, not text-1. */
+  color: var(--muted-foreground);
 }
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary):hover,
-:is([data-svadmin-button], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary):hover,
+:is([data-svadmin-button], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary):hover {
+  background: var(--svadmin-fill-3, var(--border));
+  color: var(--muted-foreground);
+}
+
+:is([data-slot="button"], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary):active,
+:is([data-svadmin-button], .svadmin-button):is([data-variant="secondary"], .svadmin-button--secondary):active {
+  background: var(--svadmin-fill-4, var(--border));
+  color: var(--muted-foreground);
+}
+
 :is([data-slot="button"], .svadmin-button):is([data-variant="ghost"], .svadmin-button--ghost):hover,
 :is([data-svadmin-button], .svadmin-button):is([data-variant="ghost"], .svadmin-button--ghost):hover {
   background: var(--muted);
@@ -902,16 +968,18 @@ h6,
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="dashed"], .svadmin-button--dashed),
 :is([data-svadmin-button], .svadmin-button):is([data-variant="dashed"], .svadmin-button--dashed) {
+  /* Official dashed: fill-2 background, text-2, neutral-3 dashed border. */
   border-color: var(--border);
   border-style: dashed;
-  background: transparent;
-  color: var(--foreground);
+  background: var(--svadmin-fill-2, var(--muted));
+  color: var(--muted-foreground);
 }
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="dashed"], .svadmin-button--dashed):hover,
 :is([data-svadmin-button], .svadmin-button):is([data-variant="dashed"], .svadmin-button--dashed):hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: var(--svadmin-fill-4, var(--border));
+  background: var(--svadmin-fill-3, var(--muted));
+  color: var(--muted-foreground);
 }
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="text"], .svadmin-button--text),
@@ -923,8 +991,15 @@ h6,
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="text"], .svadmin-button--text):hover,
 :is([data-svadmin-button], .svadmin-button):is([data-variant="text"], .svadmin-button--text):hover {
+  /* Official text button: hover fill-2, press fill-3, label stays primary-6. */
   background: var(--svadmin-fill-2, var(--muted));
-  color: var(--link-5, var(--primary-5, var(--primary)));
+  color: var(--primary);
+}
+
+:is([data-slot="button"], .svadmin-button):is([data-variant="text"], .svadmin-button--text):active,
+:is([data-svadmin-button], .svadmin-button):is([data-variant="text"], .svadmin-button--text):active {
+  background: var(--svadmin-fill-3, var(--border));
+  color: var(--primary);
 }
 
 /* 禁用用文字色和禁用填充，不用整颗按钮的 opacity，避免边框和底色一起发灰。 */
@@ -978,36 +1053,39 @@ h6,
   color: var(--svadmin-text-4);
 }
 
+/* Official button padding: mini 11px, small and default 15px, large 19px. Heights stay 24/28/32/36. */
 :is([data-slot="button"], .svadmin-button):is([data-size="default"], .svadmin-button-size--default),
-:is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default) { min-height: var(--svadmin-control-h); padding: 0 0.75rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default) { min-height: var(--svadmin-control-h); padding: 0 15px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs),
-:is([data-svadmin-button], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs) { min-height: var(--svadmin-control-h-mini); padding: 0 0.5rem; font-size: 0.75rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs) { min-height: var(--svadmin-control-h-mini); padding: 0 11px; font-size: 12px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm),
-:is([data-svadmin-button], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm) { min-height: var(--svadmin-control-h-sm); padding: 0 0.75rem; font-size: 0.8rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm) { min-height: var(--svadmin-control-h-sm); padding: 0 15px; font-size: 14px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg),
-:is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg) { min-height: var(--svadmin-control-h-lg); padding: 0 1rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg) { min-height: var(--svadmin-control-h-lg); padding: 0 19px; font-size: 14px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon),
 :is([data-svadmin-button], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon) { width: var(--svadmin-control-h); height: var(--svadmin-control-h); }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon-xs"], .svadmin-button-size--icon-xs),
 :is([data-svadmin-button], .svadmin-button):is([data-size="icon-xs"], .svadmin-button-size--icon-xs) { width: var(--svadmin-control-h-mini); height: var(--svadmin-control-h-mini); }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon-sm"], .svadmin-button-size--icon-sm),
-:is([data-svadmin-button], .svadmin-button):is([data-size="icon-sm"], .svadmin-button-size--icon-sm) { width: 2rem; height: 2rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="icon-sm"], .svadmin-button-size--icon-sm) { width: 28px; height: 28px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon-lg"], .svadmin-button-size--icon-lg),
-:is([data-svadmin-button], .svadmin-button):is([data-size="icon-lg"], .svadmin-button-size--icon-lg) { width: 2.5rem; height: 2.5rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="icon-lg"], .svadmin-button-size--icon-lg) { width: 36px; height: 36px; }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert {
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
   row-gap: 0.125rem;
-  align-items: start;
+  align-items: center;
   width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 0.75rem 1rem;
-  background: var(--card);
+  /* Official alert: 2px radius, 8px 15px padding, transparent border, info fill is primary-light-1. */
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 8px 15px;
+  background: var(--primary-light-1);
   color: var(--foreground);
-  font-size: 0.875rem;
+  font-size: 14px;
+  line-height: 1.5715;
 }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert:has(> svg) {
@@ -1035,23 +1113,25 @@ h6,
 }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert:is([data-variant="destructive"], .svadmin-alert--destructive) {
-  color: var(--destructive);
+  border-color: transparent;
+  background: var(--danger-light-1);
+  color: var(--foreground);
 }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert:is([data-variant="destructive"], .svadmin-alert--destructive) [data-slot="alert-description"] {
-  color: color-mix(in oklch, var(--destructive) 90%, transparent);
+  color: var(--muted-foreground);
 }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert:is([data-variant="warning"], .svadmin-alert--warning) {
-  border-color: color-mix(in oklch, var(--warning) 50%, var(--border));
-  background: color-mix(in oklch, var(--warning) 10%, transparent);
-  color: var(--warning-foreground);
+  border-color: transparent;
+  background: var(--warning-light-1);
+  color: var(--foreground);
 }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert:is([data-variant="success"], .svadmin-alert--success) {
-  border-color: color-mix(in oklch, var(--success) 50%, var(--border));
-  background: color-mix(in oklch, var(--success) 10%, transparent);
-  color: var(--success);
+  border-color: transparent;
+  background: var(--success-light-1);
+  color: var(--foreground);
 }
 
 .svadmin-avatar {
@@ -1076,8 +1156,9 @@ h6,
 }
 
 [data-slot="avatar-fallback"] {
-  background: var(--muted);
-  color: var(--muted-foreground);
+  /* 保留 fill-4，并使用前景色保证明暗主题中的文字可读性。 */
+  background: var(--svadmin-fill-4, var(--muted));
+  color: var(--foreground);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -1233,6 +1314,12 @@ h6,
 }
 
 [data-sonner-toaster] [data-sonner-toast] {
+  /* Official Message: padding 10px 16px, radius 2px, 14px type. Placement stays the host default. */
+  padding: 10px 16px;
+  border-radius: 2px;
+  font-size: 14px;
+  line-height: 1;
+  box-shadow: var(--svadmin-shadow-popup, var(--svadmin-shadow-overlay));
   transition-duration: var(--svadmin-motion-fast);
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1253,7 +1340,7 @@ h6,
 }
 
 [data-slot="tooltip-content"] {
-  /* 官方气泡：14px、左右 12px、上下 8px，单行正好 38px。mini 上下 4px，单行 30px。 */
+  /* Official tooltip: 14px type, 12px horizontal padding, 8px vertical padding. One line is 38px. Mini uses 4px vertical padding and a 30px line. */
   animation: svadmin-tooltip-enter 120ms ease-out;
   box-sizing: border-box;
   min-height: 38px;
@@ -1483,24 +1570,26 @@ main {
 }
 
 .svadmin-input:not([data-input-type="file"]) {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0 12px;
+  font-size: 14px;
 }
 
 .svadmin-input[data-size="mini"]:not([data-input-type="file"]) {
   height: var(--svadmin-control-h-mini);
-  padding: 0 0.5rem;
-  font-size: 0.75rem;
+  padding: 0 8px;
+  font-size: 12px;
 }
 
 .svadmin-input[data-size="compact"]:not([data-input-type="file"]) {
   height: var(--svadmin-control-h-sm);
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8125rem;
+  padding: 0 12px;
+  font-size: 14px;
 }
 
 .svadmin-input[data-size="lg"]:not([data-input-type="file"]) {
   height: var(--svadmin-control-h-lg);
+  padding: 0 16px;
+  font-size: 14px;
 }
 
 .svadmin-input[data-input-type="file"] {
@@ -1553,7 +1642,9 @@ main {
   background: var(--muted);
 }
 
-.svadmin-input::placeholder {
+.svadmin-input::placeholder,
+.svadmin-textarea::placeholder {
+  /* 占位文字使用可读的次要文字色，保留明暗主题对比度。 */
   color: var(--muted-foreground);
 }
 
@@ -1567,9 +1658,12 @@ main {
 }
 
 .svadmin-field-help,
-[data-svadmin-field-description],
-[data-svadmin-field-error] {
+[data-svadmin-field-description] {
+  /* 12px 辅助文字保持可读对比度，距控件 4px。 */
   margin-top: 4px;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.667;
 }
 
 @keyframes svadmin-input-loading {
@@ -1587,7 +1681,8 @@ main {
   flex-direction: column;
   gap: 1rem;
   overflow: hidden;
-  border-radius: 0.5rem;
+  /* Official cards default to a 0 radius. This uses the product medium 4px radius instead of square corners. */
+  border-radius: var(--radius);
   padding: 1rem 0;
   background: var(--card);
   color: var(--card-foreground);
@@ -1617,8 +1712,10 @@ main {
 
 .svadmin-table-cell {
   height: var(--svadmin-row-h);
-  padding: var(--svadmin-space-2);
-  font-size: var(--svadmin-text-label);
+  /* Official cell: 9px 16px, 14px, line-height 1.5715. */
+  padding: 9px 16px;
+  font-size: var(--svadmin-text-body);
+  line-height: 1.5715;
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -1647,7 +1744,8 @@ main {
 }
 
 .svadmin-table-row:hover .svadmin-table-cell {
-  background: var(--muted);
+  /* Official row hover is fill-1 (#F7F8FA). */
+  background: var(--svadmin-fill-1, var(--background));
 }
 
 .svadmin-table-row:hover .svadmin-table-cell[data-sticky],
@@ -1665,11 +1763,12 @@ main {
   width: 100%;
   max-width: min(32rem, calc(100% - 2rem));
   max-height: 100dvh;
-  gap: 1rem;
+  gap: 0;
   overflow: hidden;
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  background: var(--background);
+  /* Official dialog radius is medium 4px. The surface is popup white, not the gray canvas. */
+  border-radius: var(--radius);
+  padding: 0;
+  background: var(--card);
   color: var(--foreground);
   outline: none;
   box-shadow: var(--svadmin-shadow-overlay);
@@ -1690,6 +1789,8 @@ main {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  /* Official modal body padding is 24px 20px. */
+  padding: 24px 20px;
 }
 
 .svadmin-dialog-content[data-loading="true"] > :not(form):not([data-slot="dialog-header"]):not([data-slot="dialog-footer"]):not(.svadmin-dialog-dismiss) {
@@ -1754,11 +1855,11 @@ main {
   display: grid;
   width: 100%;
   max-width: 32rem;
-  gap: 1rem;
+  gap: 0;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  background: var(--background);
+  border-radius: var(--radius);
+  padding: 0;
+  background: var(--card);
   color: var(--foreground);
   box-shadow: var(--svadmin-shadow-overlay);
   transform: translate(-50%, -50%);
@@ -1779,9 +1880,9 @@ main {
   width: 75%;
   max-width: 24rem;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: var(--background);
+  gap: 0;
+  padding: 0;
+  background: var(--card);
   color: var(--foreground);
   box-shadow: var(--svadmin-shadow-overlay);
 }
@@ -1798,9 +1899,11 @@ main {
 
 .svadmin-sheet-content {
   display: flex;
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
+  padding: 16px;
 }
 
 /* Narrow screens use the full viewport for detail work and keep touch scrolling
@@ -1852,8 +1955,8 @@ main {
 
 .svadmin-sheet-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 14px;
+  right: 16px;
   border: 0;
   border-radius: 0.25rem;
   padding: 0.25rem;
@@ -1921,18 +2024,26 @@ main {
 }
 
 [data-svadmin-field-error] {
-  margin: 0;
+  /* Official form message: 12px, danger-6, line-height 20px. */
+  margin: 4px 0 0;
   color: var(--destructive);
   font-size: 0.75rem;
-  line-height: 1.4;
+  line-height: 1.667;
+  min-height: 20px;
 }
 
 .svadmin-link {
+  /* Official link: 14px, line-height 1.5715, padding 1px 4px, no underline by default. */
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 2px;
   color: var(--link-6, var(--primary));
+  font-size: var(--svadmin-text-body);
+  line-height: 1.5715;
   text-decoration: none;
 }
-.svadmin-link:hover { color: var(--link-5, var(--primary-5, var(--primary))); text-decoration: underline; }
-.svadmin-link:active { color: var(--link-7, var(--primary-7, var(--primary))); }
+.svadmin-link:hover { color: var(--link-6, var(--primary)); background: var(--svadmin-fill-2, var(--muted)); text-decoration: none; }
+.svadmin-link:active { color: var(--link-6, var(--primary)); background: var(--svadmin-fill-3, var(--border)); }
 .svadmin-link[aria-disabled="true"] { color: var(--svadmin-text-4); pointer-events: none; text-decoration: none; }
 .svadmin-link[data-status="success"] { color: var(--success); }
 .svadmin-link[data-status="success"]:hover { color: var(--success-5, var(--success)); }
@@ -1956,19 +2067,20 @@ main {
 
 .svadmin-spin { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); }
 .svadmin-spin__icon {
-  width: 1rem; height: 1rem; border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  /* Official spin icon is 20px. The tip is 14px / 500 / primary, 6px below the icon. */
+  width: 1.25rem; height: 1.25rem; border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
   border-top-color: var(--primary); border-radius: 50%;
   animation: svadmin-spin 0.8s linear infinite;
 }
-.svadmin-spin__tip { color: var(--muted-foreground); font-size: 0.875rem; }
+.svadmin-spin__tip { margin-top: 6px; color: var(--primary); font-size: var(--svadmin-text-body); font-weight: 500; }
 @keyframes svadmin-spin { to { transform: rotate(360deg); } }
 .svadmin-sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 
-.svadmin-result { display: grid; justify-items: center; gap: 0.5rem; padding: 2rem 1rem; text-align: center; }
-.svadmin-result__icon { display: flex; align-items: center; justify-content: center; margin-bottom: 0.25rem; color: var(--primary); }
+.svadmin-result { display: grid; justify-items: center; gap: 0; padding: 32px 32px 24px; text-align: center; }
+.svadmin-result__icon { display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--primary); }
 .svadmin-result[data-status="success"] .svadmin-result__icon { color: var(--success); }
 .svadmin-result[data-status="warning"] .svadmin-result__icon { color: var(--warning); }
 .svadmin-result[data-status="error"] .svadmin-result__icon,
@@ -1982,9 +2094,9 @@ main {
 .svadmin-result[data-status="403"] .svadmin-result__status,
 .svadmin-result[data-status="404"] .svadmin-result__status,
 .svadmin-result[data-status="500"] .svadmin-result__status { color: var(--destructive); }
-.svadmin-result__title { margin: 0; color: var(--foreground); font-size: 1.25rem; font-weight: 600; }
-.svadmin-result__subtitle { margin: 0; max-width: 36rem; color: var(--muted-foreground); font-size: 0.875rem; }
-.svadmin-result__extra { display: flex; gap: 0.5rem; }
+.svadmin-result__title { margin: 0; color: var(--foreground); font-size: 14px; font-weight: 500; line-height: 1.5715; }
+.svadmin-result__subtitle { margin: 0; max-width: 36rem; color: var(--muted-foreground); font-size: 14px; line-height: 1.5715; }
+.svadmin-result__extra { display: flex; gap: 12px; margin-top: 20px; }
 
 .svadmin-popconfirm { display: grid; gap: 0.75rem; width: max-content; max-width: 20rem; }
 .svadmin-popconfirm__title { margin: 0; color: var(--foreground); font-size: 0.875rem; }
@@ -1998,9 +2110,10 @@ main {
   background: var(--card); color: var(--foreground);
 }
 .svadmin-item-list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
-.svadmin-item-list__item { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+/* Official default list row: 13px 20px. The header title is 16px / 500. */
+.svadmin-item-list__item { padding: 13px 20px; border-bottom: 1px solid var(--border); }
 .svadmin-item-list__item:last-child { border-bottom: 0; }
-.svadmin-item-list__title { margin: 0; color: var(--foreground); font-size: 0.875rem; font-weight: 500; }
+.svadmin-item-list__title { margin: 0; color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 500; }
 .svadmin-item-list__description { margin: 0.25rem 0 0; color: var(--muted-foreground); font-size: 0.75rem; }
 
 .svadmin-tree-root, .svadmin-tree { margin: 0; padding: 0; list-style: none; }
@@ -2078,10 +2191,11 @@ main {
 .svadmin-progress {
   position: relative;
   width: 100%;
-  height: 0.5rem;
+  /* Official line stroke defaults to 4px. The track is fill-3. */
+  height: 4px;
   overflow: hidden;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  background: var(--svadmin-fill-3, var(--border));
 }
 
 .svadmin-progress-value {
@@ -2089,7 +2203,7 @@ main {
   height: 100%;
   flex: 1;
   background: var(--primary);
-  transition: transform var(--svadmin-motion-standard) var(--svadmin-motion-easing);
+  transition: transform 0.6s var(--svadmin-easing-standard);
 }
 
 .svadmin-separator {
@@ -2111,9 +2225,11 @@ main {
   display: grid;
   grid-auto-rows: min-content;
   grid-template-columns: 1fr;
-  align-items: start;
+  align-items: center;
   gap: 0.25rem;
-  padding: 0 1rem;
+  /* Official default card header is 46px tall with 16px horizontal padding. */
+  min-height: 46px;
+  padding: 0 16px;
 }
 
 .svadmin-card-header:has([data-slot="card-action"]) {
@@ -2153,9 +2269,10 @@ main {
 
 .svadmin-card-title {
   color: var(--card-foreground);
-  font-size: inherit;
-  font-weight: 600;
-  line-height: 1;
+  /* Official card title is 16px / 500. */
+  font-size: var(--svadmin-text-section);
+  font-weight: 500;
+  line-height: 1.5;
   letter-spacing: 0;
 }
 
@@ -2191,16 +2308,20 @@ main {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0;
   color: var(--muted-foreground);
-  font-size: 0.875rem;
+  /* Official breadcrumb is 14px with a 24px item line-height. */
+  font-size: var(--svadmin-text-body);
+  line-height: 24px;
   overflow-wrap: break-word;
 }
 
 .svadmin-breadcrumb-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0;
+  padding: 0 4px;
+  line-height: 24px;
 }
 
 .svadmin-breadcrumb-link {
@@ -2208,17 +2329,24 @@ main {
 }
 
 .svadmin-breadcrumb-link:hover {
-  color: var(--foreground);
+  /* Official breadcrumb link hover: fill-2 background, link color, no underline. */
+  border-radius: 2px;
+  background: var(--svadmin-fill-2, var(--muted));
+  color: var(--link-6, var(--primary));
 }
 
 .svadmin-breadcrumb-page {
+  /* Official last crumb is text-1 at weight 500. */
   color: var(--foreground);
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .svadmin-breadcrumb-separator {
   display: inline-flex;
   align-items: center;
+  margin: 0 4px;
+  color: var(--svadmin-text-4);
+  line-height: 24px;
 }
 
 .svadmin-breadcrumb-ellipsis {
@@ -2237,14 +2365,20 @@ main {
 .svadmin-alert-dialog-header {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 4px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
   text-align: center;
 }
 
 .svadmin-alert-dialog-footer {
   display: flex;
   flex-direction: column-reverse;
-  gap: 0.5rem;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
 }
 
 .svadmin-alert-dialog-title,
@@ -2274,32 +2408,48 @@ main {
 .svadmin-dialog-header {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 4px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.svadmin-dialog-dismiss {
+  position: absolute;
+  top: 10px;
+  right: 12px;
 }
 
 .svadmin-dialog-footer {
   display: flex;
   flex-direction: column-reverse;
-  gap: 0.5rem;
-  margin: 0 -1.5rem -1.5rem;
+  gap: 12px;
+  margin: 0;
   border-top: 1px solid var(--border);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  padding: 1rem;
-  background: color-mix(in srgb, var(--muted) 50%, transparent);
+  border-radius: 0;
+  padding: 16px 20px;
+  background: transparent;
 }
 
 .svadmin-sheet-header {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
-  padding-bottom: 1rem;
+  gap: 4px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .svadmin-sheet-footer {
   display: flex;
   flex-direction: column-reverse;
-  gap: 0.5rem;
+  gap: 12px;
   margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .svadmin-sheet-title {
@@ -2355,7 +2505,7 @@ main {
   transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
-/* Inline variant keeps the Arco chevron and states without forcing full width. */
+/* Inline variant keeps the chevron and states without forcing full width. */
 .svadmin-select--inline {
   width: auto;
 }
@@ -2385,9 +2535,10 @@ main {
 
 .svadmin-select[data-size="small"],
 .svadmin-select[data-size="compact"] {
+  /* Official .arco-select-size-small.arco-select-single .arco-select-view is 28px / 14px. */
   height: var(--svadmin-control-h-sm);
   padding: 0.25rem 1.75rem 0.25rem 0.5rem;
-  font-size: 0.8125rem;
+  font-size: var(--svadmin-text-body);
   background-position: right 0.375rem center;
   background-size: 0.875rem 0.875rem;
 }
@@ -2546,14 +2697,14 @@ main {
   position: absolute;
   z-index: 50;
   min-width: 8rem;
-  margin-top: 0.25rem;
+  margin-top: 4px;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 0.25rem;
+  border: 1px solid var(--svadmin-fill-3, var(--border));
+  border-radius: var(--radius);
+  padding: 4px 0;
   background: var(--popover);
   color: var(--popover-foreground);
-  box-shadow: var(--svadmin-shadow-overlay);
+  box-shadow: var(--svadmin-shadow-popup, var(--svadmin-shadow-overlay));
   animation: svadmin-menu-enter 120ms ease-out;
 }
 
@@ -2578,8 +2729,9 @@ main {
   align-items: center;
   gap: 0.5rem;
   border: 0;
-  border-radius: 0.375rem;
-  padding: 0.375rem 0.5rem;
+  border-radius: 0;
+  min-height: 36px;
+  padding: 0 12px;
   background: transparent;
   color: var(--foreground);
   font: inherit;
@@ -2919,8 +3071,7 @@ main {
   border-radius: 0.375rem;
   background: var(--popover);
   color: var(--popover-foreground);
-  box-shadow: var(--svadmin-shadow-overlay);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--svadmin-shadow-popup, var(--svadmin-shadow-overlay));
   transition: width var(--svadmin-motion-standard) var(--svadmin-motion-easing), height var(--svadmin-motion-standard) var(--svadmin-motion-easing);
 }
 
@@ -2928,12 +3079,12 @@ main {
   z-index: 50;
   width: 18rem;
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  padding: 1rem;
+  border-radius: var(--radius);
+  padding: 12px 16px;
   background: var(--popover);
   color: var(--popover-foreground);
   outline: none;
-  box-shadow: var(--svadmin-shadow-overlay);
+  box-shadow: var(--svadmin-shadow-popup, var(--svadmin-shadow-overlay));
   animation: svadmin-dialog-enter 120ms ease-out;
 }
 
@@ -3176,12 +3327,13 @@ main {
 
 .svadmin-alert-description {
   grid-column: 2;
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
+  color: var(--foreground);
+  font-size: 14px;
+  line-height: 1.5715;
 }
 
 .svadmin-alert-description p {
-  line-height: 1.625;
+  line-height: 1.5715;
 }
 
 .svadmin-alert-title {
@@ -3189,7 +3341,10 @@ main {
   min-height: 1rem;
   overflow: hidden;
   color: var(--foreground);
+  /* Official alert title is title-1: 16px / 500. */
+  font-size: var(--svadmin-text-section);
   font-weight: 500;
+  line-height: 1.5;
   letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3232,12 +3387,14 @@ main {
 
 .svadmin-table-head {
   height: var(--svadmin-table-head-h);
-  padding: var(--svadmin-space-2);
-  background: var(--background);
-  color: var(--muted-foreground);
+  /* Official table head: 9px 16px, 14px, weight 500, neutral-2 background, text-1. */
+  padding: 9px 16px;
+  background: var(--svadmin-fill-2, var(--muted));
+  color: var(--foreground);
   text-align: left;
   vertical-align: middle;
-  font-size: var(--svadmin-text-caption);
+  font-size: var(--svadmin-text-body);
+  line-height: 1.5715;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -3276,7 +3433,8 @@ main {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.25rem;
+  /* Official pagination item gap is 8px. */
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -3297,6 +3455,50 @@ main {
 .svadmin-pagination-icon {
   width: var(--svadmin-space-4);
   height: var(--svadmin-space-4);
+}
+
+/* Official .arco-pagination-item: 32px, borderless, 14px type. Active is primary-light-1. */
+:is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0 solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted-foreground);
+  font-size: var(--svadmin-text-body);
+  font-weight: 400;
+  line-height: 32px;
+}
+:is([data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item {
+  font-size: 12px;
+}
+:is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--svadmin-fill-1, var(--muted));
+  color: var(--muted-foreground);
+}
+:is([data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item:hover:not(:disabled) {
+  color: var(--primary);
+}
+[data-slot="pagination-link"].svadmin-pagination-item[data-active="true"] {
+  background: var(--primary-light-1);
+  color: var(--primary);
+}
+:is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item:disabled {
+  background: transparent;
+  color: var(--svadmin-text-4);
+  cursor: not-allowed;
+}
+:is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item:focus-visible {
+  outline: var(--svadmin-focus-width) solid color-mix(in oklch, var(--ring) 48%, transparent);
+  outline-offset: var(--svadmin-focus-offset);
 }
 
 @keyframes svadmin-menu-enter {
@@ -3335,10 +3537,6 @@ main {
   .svadmin-sheet-footer {
     flex-direction: row;
     justify-content: flex-end;
-  }
-
-  .svadmin-breadcrumb-list {
-    gap: 0.625rem;
   }
 
   .svadmin-dialog-content {
@@ -3737,14 +3935,15 @@ details[data-svadmin-filter][open] > :not(summary),
 }
 
 .layout-clean-flat [data-svadmin-field-label] {
-  color: var(--svadmin-text);
-  font-weight: 600;
+  color: var(--svadmin-text, var(--foreground));
+  font-size: var(--svadmin-text-body);
+  font-weight: 400;
 }
 
 .layout-clean-flat [data-svadmin-form-settings] [data-slot="input"],
 .layout-clean-flat [data-svadmin-form-settings] textarea,
 .layout-clean-flat [data-svadmin-form-settings] [data-slot="select-trigger"] {
-  min-height: 2.625rem;
+  min-height: var(--svadmin-control-h);
   background: var(--svadmin-surface);
 }
 
@@ -4804,7 +5003,7 @@ details[data-svadmin-filter][open] > :not(summary),
 
 /* --- Default visual refinement --------------------------------
  * Default product canvas. Neutrals and radius come from the product ramp;
- * compact control geometry and calm state transitions follow the Arco
+ * compact control geometry and calm state transitions follow the
  * reference used by the component-parity review. The optional Stripe preset
  * below keeps its own canvas and technical grid.
  */
@@ -4964,29 +5163,31 @@ html.layout-clean-flat[data-theme="default"] body {
 }
 
 .layout-clean-flat[data-theme="default"] .sidebar-menu-item {
-  min-height: 2.25rem;
-  margin-block: 0.125rem;
-  border-radius: var(--radius);
+  /* Official vertical menu: 40px tall, 14px type, weight 400, 4px item gap. */
+  min-height: 2.5rem;
+  margin-block: 2px;
+  padding-inline: 12px;
+  border-radius: 2px;
   color: var(--sidebar-foreground);
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: var(--svadmin-text-body);
+  font-weight: 400;
   transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat[data-theme="default"] .sidebar-menu-item:hover {
-  background: var(--sidebar-accent);
-  color: var(--sidebar-accent-foreground);
+  background: var(--svadmin-fill-2, var(--muted));
+  color: var(--muted-foreground);
 }
 
 .layout-clean-flat[data-theme="default"] .sidebar-menu-item-active {
-  background: color-mix(in oklch, var(--primary) 9%, var(--sidebar));
+  background: var(--svadmin-fill-2, var(--muted));
   color: var(--primary);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .layout-clean-flat[data-theme="default"] .sidebar-menu-item-active::before {
-  width: 4px;
-  content: "";
+  width: 0;
+  content: none;
 }
 
 .layout-clean-flat[data-theme="default"] .sidebar-menu-item-active svg {
@@ -5002,7 +5203,7 @@ html.layout-clean-flat[data-theme="default"] body {
 }
 
 .layout-clean-flat[data-theme="default"] [data-svadmin-topbar] {
-  min-height: 4rem;
+  min-height: var(--svadmin-shell-topbar-h);
   border-bottom: 1px solid var(--border);
   background: color-mix(in oklch, var(--card) 96%, transparent);
   box-shadow: none;
@@ -5092,13 +5293,6 @@ html.layout-clean-flat[data-theme="default"] body {
   box-shadow: none;
 }
 
-.layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button)[data-variant="default"],
-.layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button).svadmin-button--default {
-  box-shadow:
-    0 2px 5px color-mix(in oklch, var(--primary) 40%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 0.2);
-}
-
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
   transform: none;
 }
@@ -5133,8 +5327,9 @@ html.layout-clean-flat[data-theme="default"] body {
 .layout-clean-flat[data-theme="default"] [data-svadmin-table-head] [data-slot="table-head"] {
   height: var(--svadmin-table-head-h);
   background: var(--background);
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
+  /* Official table-head text is text-1, not text-2. */
+  color: var(--foreground);
+  font-size: var(--svadmin-text-body);
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -5212,29 +5407,30 @@ html.layout-clean-flat[data-theme="default"] body {
   }
 }
 
-/* --- Arco component parity pass --------------------------------
+/* --- Component parity pass -------------------------------------
  * Keep the existing shadcn primitives and public hooks, then align the
- * highest-frequency states with Arco's compact filled controls, neutral table
- * surfaces, 36px menu rows, and line-tab indicator.
+ * highest-frequency states with compact filled controls, neutral table
+ * surfaces, 36px dropdown rows, and line-tab indicator.
  */
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):hover {
-  background: color-mix(in oklch, var(--primary) 80%, var(--primary-foreground));
+  /* Official primary hover is color-5, not an 80% mix. */
+  background: var(--primary-5, var(--primary));
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
-  background: color-mix(in oklch, var(--primary) 80%, var(--background));
+  background: var(--primary-7, var(--primary));
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="outline"], .svadmin-button--outline):hover {
-  border-color: color-mix(in oklch, var(--primary) 80%, var(--primary-foreground));
+  border-color: var(--primary-5, var(--primary));
   background: transparent;
-  color: color-mix(in oklch, var(--primary) 80%, var(--primary-foreground));
+  color: var(--primary-5, var(--primary));
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button):is([data-variant="outline"], .svadmin-button--outline):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
-  border-color: color-mix(in oklch, var(--primary) 80%, var(--background));
+  border-color: var(--primary-7, var(--primary));
   background: transparent;
-  color: color-mix(in oklch, var(--primary) 80%, var(--background));
+  color: var(--primary-7, var(--primary));
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"]) {
@@ -5257,7 +5453,7 @@ html.layout-clean-flat[data-theme="default"] body {
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"])[aria-invalid="true"] {
   border-color: transparent;
-  background: color-mix(in oklch, var(--destructive) 10%, var(--card));
+  background: var(--danger-light-1);
   box-shadow: none;
 }
 
@@ -5296,8 +5492,8 @@ html.layout-clean-flat[data-theme="default"] body {
 .layout-clean-flat[data-theme="default"] .svadmin-dropdown-item,
 .layout-clean-flat[data-theme="default"] .svadmin-dropdown-checkbox-item {
   min-height: 2.25rem;
-  border-radius: var(--radius-sm);
-  padding: 0 0.75rem;
+  border-radius: 0;
+  padding: 0 12px;
   transition: all 100ms cubic-bezier(0, 0, 1, 1);
 }
 
@@ -5456,15 +5652,22 @@ html.layout-clean-flat[data-theme="default"] body {
 .svadmin-tabs-list[data-variant="line"] .svadmin-tabs-trigger {
   border-radius: 0;
   border-bottom: 2px solid transparent;
-  padding: 0.5rem 0.875rem;
+  padding: 4px 0;
+  margin-inline: 8px;
   background: transparent;
   box-shadow: none;
+  color: var(--muted-foreground);
+  font-size: var(--svadmin-text-body);
+  font-weight: 400;
+  line-height: 1.5715;
 }
 
 .svadmin-tabs-list[data-variant="line"] .svadmin-tabs-trigger[data-state="active"] {
   border-bottom-color: var(--primary);
   background: transparent;
   box-shadow: none;
+  color: var(--primary);
+  font-weight: 500;
 }
 
 .svadmin-tabs-list[data-variant="card"] {

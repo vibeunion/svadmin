@@ -187,8 +187,8 @@ describe('size token contract', () => {
     }
     expect(heights.get('.svadmin-table-head')).toBe('var(--svadmin-table-head-h)');
     expect(heights.get('.svadmin-table-cell')).toBe('var(--svadmin-row-h)');
-    expect(sizes.get('.svadmin-table-head')).toBe('var(--svadmin-text-caption)');
-    expect(sizes.get('.svadmin-table-cell')).toBe('var(--svadmin-text-label)');
+    expect(sizes.get('.svadmin-table-head')).toBe('var(--svadmin-text-body)');
+    expect(sizes.get('.svadmin-table-cell')).toBe('var(--svadmin-text-body)');
     expect(sizes.get('.svadmin-page-header__title')).toBe('var(--svadmin-text-title)');
     expect(sizes.get('.svadmin-page-header__description')).toBe('var(--svadmin-text-body)');
 

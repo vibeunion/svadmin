@@ -477,10 +477,12 @@
 
 <style>
   .svadmin-file-upload-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .svadmin-file-upload-dropzone { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 88px; border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; }
-  .svadmin-file-upload-dropzone[aria-disabled="true"] { cursor: not-allowed; opacity: 0.6; }
-  .svadmin-file-upload-list { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
-  .svadmin-file-upload-list li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  /* Official drag trigger: 2px radius, dashed neutral border, fill-1, 50px vertical padding. */
+  .svadmin-file-upload-dropzone { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 50px 0; border: 1px dashed var(--border); border-radius: 2px; background: var(--svadmin-fill-1, var(--muted)); color: var(--foreground); cursor: pointer; }
+  .svadmin-file-upload-dropzone:hover:not([aria-disabled="true"]) { border-color: var(--svadmin-text-3, var(--border)); background: var(--svadmin-fill-3, var(--muted)); }
+  .svadmin-file-upload-dropzone[aria-disabled="true"] { cursor: not-allowed; opacity: 1; border-color: var(--svadmin-text-4); background: var(--svadmin-fill-1, var(--muted)); color: var(--svadmin-text-4); }
+  .svadmin-file-upload-list { display: grid; gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
+  .svadmin-file-upload-list li { display: flex; align-items: center; gap: 8px; min-width: 0; box-sizing: border-box; padding: 8px 10px 8px 12px; border-radius: 2px; background: var(--svadmin-fill-1, var(--muted)); font-size: var(--svadmin-text-body); }
   .svadmin-file-upload-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .svadmin-file-upload-status { color: var(--muted-foreground); font-size: 0.875rem; }
 </style>

@@ -30,14 +30,21 @@ test('reference changes only explicitly approved token, body and table declarati
   assert.deepEqual(tableSizeMigration, {
     '.svadmin-table-head': {
       height: ['2.25rem', '2.5rem'],
-      background: [null, 'var(--background)'],
-      color: ['var(--foreground)', 'var(--muted-foreground)'],
-      'font-size': [null, '0.75rem'],
+      background: [null, 'var(--svadmin-fill-2, var(--muted))'],
+      color: ['var(--foreground)', 'var(--foreground)'],
+      'font-size': [null, '14px'],
+      padding: ['0.5rem', '9px 16px'],
+      'line-height': [null, '1.5715'],
     },
-    '.svadmin-table-cell': { height: [null, '2.5rem'], 'font-size': [null, '0.8125rem'] },
+    '.svadmin-table-cell': {
+      height: [null, '2.5rem'], 'font-size': [null, '14px'],
+      padding: ['0.5rem', '9px 16px'], 'line-height': [null, '1.5715'],
+    },
   });
   const reference = postcss.parse(createMigrationReference(baseline));
-  reference.walkDecls('--primary-3', (declaration) => declaration.remove());
+  for (const property of Object.keys(visualContractAdditions.light)) {
+    reference.walkDecls(property, (declaration) => declaration.remove());
+  }
   reference.walkRules(visualContractDisabledSelector, (rule) => rule.remove());
   assert.equal(visualContractAdditions.light['--primary-3'], '#94BFFF');
   assert.equal(visualContractAdditions.dark['--primary-3'], '#0E32A6');
@@ -75,7 +82,8 @@ test('reference changes only explicitly approved token, body and table declarati
         const matches = rule.nodes.filter(node => node.type === 'decl' && node.prop === property);
         assert.equal(matches.length, 1);
         assert.equal(matches[0].value, after);
-        matches[0].value = before;
+        if (before === null) matches[0].remove();
+        else matches[0].value = before;
       }
     });
   }
