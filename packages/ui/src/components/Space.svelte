@@ -16,6 +16,7 @@
     justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
     wrap?: boolean;
     inline?: boolean;
+    split?: Snippet;
     class?: string;
     children?: Snippet;
   }
@@ -27,6 +28,7 @@
     justify = 'start',
     wrap = false,
     inline = false,
+    split,
     class: className = '',
     children,
   }: Props = $props();
