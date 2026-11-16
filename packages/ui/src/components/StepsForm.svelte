@@ -282,11 +282,12 @@
           onclick={changeStep(i)}
         >
           <span
-            class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors"
+            class={cn("flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-all duration-200", i === form.steps.currentStep && "ring-4 ring-primary/20")}
             class:bg-primary={i <= form.steps.currentStep}
             class:text-primary-foreground={i <= form.steps.currentStep}
             class:bg-muted={i > form.steps.currentStep}
             class:text-muted-foreground={i > form.steps.currentStep}
+
           >
             {#if i < form.steps.currentStep}
               <Check class="h-3.5 w-3.5" />
@@ -297,7 +298,7 @@
           <span class="hidden sm:inline">{step.title}</span>
         </Button>
         {#if i < steps.length - 1}
-          <div class="flex-1 mx-2 h-px bg-border" class:bg-primary={i < form.steps.currentStep}></div>
+          <div class="flex-1 mx-2 h-px bg-border transition-colors duration-300" class:bg-primary={i < form.steps.currentStep}></div>
         {/if}
       {/each}
     </div>
