@@ -57,12 +57,12 @@
     }
   }
 
-  const crumbs = $derived.by(() => {
+  const crumbs = $derived.by<Crumb[]>(() => {
     if (explicitItems && explicitItems.length > 0) {
-      return explicitItems.map((item) => ({
-        label: item.label,
-        href: item.href,
-      }));
+      // exactOptionalPropertyTypes: 不把 undefined 塞进可选 href。
+      return explicitItems.map((item) => (item.href === undefined
+        ? { label: item.label }
+        : { label: item.label, href: item.href }));
     }
 
     const result: Crumb[] = [{ label: i18n.t('common.home') ?? 'Home', href: adminContext.formatLink('/') }];
