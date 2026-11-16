@@ -148,7 +148,7 @@
     border-radius: var(--border-radius-small, 2px);
     background: var(--card);
     color: var(--foreground);
-    font-size: 14px;
+    font-size: var(--svadmin-text-body);
   }
 
   .svadmin-tags-input:focus-within {
@@ -172,9 +172,10 @@
     border-radius: var(--border-radius-small, 2px);
     background: var(--svadmin-fill-2, var(--muted));
     color: var(--foreground);
-    font-size: 12px;
+    font-size: var(--svadmin-text-caption);
     font-weight: 500;
-    line-height: 22px;
+    /* 12px 字号下的官方 22px 行高，避免组件样式里写裸像素字号。 */
+    line-height: calc(22 / 12);
   }
 
   .svadmin-tags-input__tag span {
@@ -208,7 +209,7 @@
     border: 0;
     background: transparent;
     color: var(--color-text-2, var(--muted-foreground));
-    font-size: 12px;
+    font-size: var(--svadmin-text-caption);
     line-height: 1;
     cursor: pointer;
     padding: 0;

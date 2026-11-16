@@ -32,9 +32,9 @@ describe('Host control metrics for newly landed APIs', () => {
     expect(field).not.toContain('6px');
     const tag = block(source, '.svadmin-tags-input__tag {');
     expect(tag).toContain('height: 24px');
-    expect(tag).toContain('font-size: 12px');
-    expect(tag).toContain('line-height: 22px');
-    expect(block(source, '.svadmin-tags-input__clear {')).toContain('font-size: 12px');
+    expect(tag).toContain('font-size: var(--svadmin-text-caption)');
+    expect(tag).toContain('line-height: calc(22 / 12)');
+    expect(block(source, '.svadmin-tags-input__clear {')).toContain('font-size: var(--svadmin-text-caption)');
   });
 
   it('uses the official statistic extra size and empty description body size', () => {
