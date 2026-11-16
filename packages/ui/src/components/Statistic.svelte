@@ -9,6 +9,8 @@
     precision?: number;
     prefix?: string | Snippet;
     suffix?: string | Snippet;
+    extra?: string | Snippet;
+    groupSeparator?: boolean;
     trend?: 'up' | 'down' | 'neutral';
     trendLabel?: string;
     loading?: boolean;
@@ -22,6 +24,8 @@
     precision = 0,
     prefix,
     suffix,
+    extra,
+    groupSeparator = false,
     trend,
     trendLabel,
     loading = false,
@@ -31,7 +35,7 @@
 
   const display = $derived(
     typeof value === 'number'
-      ? formatAdminNumber(value, { locale: null, minimumFractionDigits: precision, maximumFractionDigits: precision })
+      ? formatAdminNumber(value, { locale: groupSeparator ? 'en-US' : null, minimumFractionDigits: precision, maximumFractionDigits: precision })
       : value,
   );
 </script>
@@ -57,6 +61,11 @@
       {#if trend === 'up'}↑{:else if trend === 'down'}↓{:else}→{/if}
       {#if trendLabel}<span>{trendLabel}</span>{/if}
     </p>
+  {/if}
+  {#if extra}
+    <div class="svadmin-statistic__extra text-xs text-muted-foreground mt-2">
+      {#if typeof extra === 'string'}{extra}{:else}{@render extra()}{/if}
+    </div>
   {/if}
   {@render children?.()}
 </div>

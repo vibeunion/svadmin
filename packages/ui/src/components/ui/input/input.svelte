@@ -3,6 +3,8 @@
 	generics="Type extends HTMLInputTypeAttribute | undefined = undefined"
 >
 	import type { HTMLInputAttributes, HTMLInputTypeAttribute } from "svelte/elements";
+	import type { Snippet } from "svelte";
+	import { CircleX } from "@lucide/svelte";
 	import { useTranslation } from "@svadmin/core/i18n";
 	import { definedOptions } from "@svadmin/core/options";
 	import { cn, type WithElementRef } from "../../../utils.js";
@@ -23,7 +25,14 @@
 	};
 
 	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value" | "size" | "onfocus" | "onblur" | "onselect">> &
-			{ size?: InputSize; nativeSize?: number; status?: InputStatus | undefined } &
+			{
+				size?: InputSize;
+				nativeSize?: number;
+				status?: InputStatus | undefined;
+				allowClear?: boolean;
+				prefix?: Snippet;
+				suffix?: Snippet;
+			} &
 			InputHandlers &
 			(Type extends "file"
 				? { type: "file"; files?: FileList | undefined; value?: never }
@@ -38,6 +47,9 @@
 		size: sizeProp,
 		nativeSize,
 		status,
+		allowClear = false,
+		prefix,
+		suffix,
 		class: className,
 		"data-slot": dataSlot = "input",
 		"aria-invalid": ariaInvalid,
@@ -107,7 +119,33 @@
 		textSelected = readSelected(event.currentTarget);
 		onselect?.(event);
 	}
+
+	function clearInput() {
+		if (disabled) return;
+		value = "" as InputValue;
+	}
+
+	const hasWrapper = $derived(!isFileInput && Boolean(allowClear || prefix || suffix));
 </script>
+
+{#snippet inputElement()}
+	<input
+		bind:this={ref}
+		data-slot={dataSlot}
+		data-size={size}
+		data-input-state={inputState}
+		aria-invalid={ariaInvalid}
+		aria-busy={inputState === "loading" ? "true" : undefined}
+		class={cn("svadmin-input", hasWrapper && "border-0 shadow-none bg-transparent focus-visible:ring-0 px-0 h-full", className)}
+		{type}
+		lang={isDateInput ? i18n.locale : undefined}
+		bind:value
+		{...attributes}
+		onfocus={handleFocus}
+		onblur={handleBlur}
+		onselect={handleSelect}
+	/>
+{/snippet}
 
 {#if isFileInput}
 	<div
@@ -136,21 +174,40 @@
 			<span class="svadmin-file-input__name">{selectedFileLabel}</span>
 		</span>
 	</div>
-{:else}
-	<input
-		bind:this={ref}
-		data-slot={dataSlot}
+{:else if hasWrapper}
+	<div
+		class={cn(
+			"svadmin-input-wrapper relative inline-flex items-center w-full rounded-sm border border-border bg-card px-2.5 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:border-ring",
+			size === "compact" || size === "mini" ? "h-7 text-xs" : "h-8 text-sm",
+			disabled && "opacity-50 cursor-not-allowed bg-muted",
+			className
+		)}
+		data-slot="input-wrapper"
 		data-size={size}
 		data-input-state={inputState}
-		aria-invalid={ariaInvalid}
-		aria-busy={inputState === "loading" ? "true" : undefined}
-		class={cn("svadmin-input", className)}
-		{type}
-		lang={isDateInput ? i18n.locale : undefined}
-		bind:value
-		{...attributes}
-		onfocus={handleFocus}
-		onblur={handleBlur}
-		onselect={handleSelect}
-	/>
+	>
+		{#if prefix}
+			<span class="svadmin-input-prefix mr-2 text-muted-foreground shrink-0 flex items-center" aria-hidden="true">
+				{@render prefix()}
+			</span>
+		{/if}
+		{@render inputElement()}
+		{#if allowClear && filled && !disabled}
+			<button
+				type="button"
+				class="svadmin-input-clear text-muted-foreground hover:text-foreground shrink-0 ml-1 p-0.5 rounded-full cursor-pointer outline-none"
+				aria-label="Clear input"
+				onclick={clearInput}
+			>
+				<CircleX size={14} aria-hidden="true" />
+			</button>
+		{/if}
+		{#if suffix}
+			<span class="svadmin-input-suffix ml-2 text-muted-foreground shrink-0 flex items-center" aria-hidden="true">
+				{@render suffix()}
+			</span>
+		{/if}
+	</div>
+{:else}
+	{@render inputElement()}
 {/if}
