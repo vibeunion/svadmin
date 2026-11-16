@@ -93,6 +93,8 @@
 
   const items = $derived(listPaginationItems(page, totalPages));
   const paginated = $derived(totalPages > 1);
+  // 条数选择独立于页码和汇总文字，扩大每页条数后仍能切回原来的值。
+  const showPageSizeControl = $derived(Boolean(onPageSizeChange && resolvedPageSize !== undefined));
 
   function jump(event: Event): void {
     const input = event.currentTarget as HTMLInputElement;
@@ -104,12 +106,14 @@
   }
 </script>
 
-{#if paginated}
-  <div {...restProps} class={`svadmin-list-pagination ${className}`.trim()} role="navigation" aria-label={listText(i18n, 'listPagination.navigation', { label })}>
-    {#if resolvedShowSummary}
+{#if paginated || showPageSizeControl}
+  <div {...restProps} class={`svadmin-list-pagination ${className}`.trim()} role={paginated ? 'navigation' : 'group'} aria-label={listText(i18n, 'listPagination.navigation', { label })}>
+    {#if resolvedShowSummary || showPageSizeControl}
       <div class="svadmin-list-pagination__info">
-        <span>{listText(i18n, 'listPagination.range', { start: rangeStart, end: rangeEnd, total })}</span>
-        {#if onPageSizeChange && resolvedPageSize !== undefined}
+        {#if resolvedShowSummary}<span>{paginated
+          ? listText(i18n, 'listPagination.range', { start: rangeStart, end: rangeEnd, total })
+          : listText(i18n, 'common.total', { total })}</span>{/if}
+        {#if showPageSizeControl}
           <span class="svadmin-list-pagination__size">{pageSizeLabel ?? listText(i18n, 'listPagination.pageSizeLabel')}
             <select
               aria-label={listText(i18n, 'listPagination.pageSizeAria', { label })}
@@ -122,7 +126,7 @@
         {/if}
       </div>
     {/if}
-    <div class="svadmin-list-pagination__controls">
+    {#if paginated}<div class="svadmin-list-pagination__controls">
       <button type="button" class="svadmin-list-pagination__control" disabled={page <= 1}
         title={listText(i18n, page <= 1 ? 'listPagination.firstPage' : 'listPagination.previous')}
         aria-label={listText(i18n, 'listPagination.previousAria', { label })} onclick={() => onPageChange(page - 1)}>{listText(i18n, 'listPagination.previous')}</button>
@@ -155,7 +159,7 @@
       <button type="button" class="svadmin-list-pagination__control" disabled={page >= totalPages}
         title={listText(i18n, page >= totalPages ? 'listPagination.lastPage' : 'listPagination.next')}
         aria-label={listText(i18n, 'listPagination.nextAria', { label })} onclick={() => onPageChange(page + 1)}>{listText(i18n, 'listPagination.next')}</button>
-    </div>
+    </div>{/if}
   </div>
 {:else if resolvedShowSummary}
   <p {...restProps} class={`svadmin-list-pagination__summary ${className}`.trim()}>{listText(i18n, 'common.total', { total })}</p>

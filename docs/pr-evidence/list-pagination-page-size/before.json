@@ -1,0 +1,40 @@
+{
+  "phase": "before",
+  "results": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "single": {
+        "rows": 23,
+        "selectors": 0,
+        "navigation": 0,
+        "pageButtons": 0,
+        "footerSelectors": 0,
+        "overflow": false,
+        "focusedSelect": false
+      },
+      "recoveryChecked": false
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "single": {
+        "rows": 23,
+        "selectors": 0,
+        "navigation": 0,
+        "pageButtons": 0,
+        "footerSelectors": 0,
+        "overflow": false,
+        "focusedSelect": false
+      },
+      "recoveryChecked": false
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "failed": []
+}
