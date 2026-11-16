@@ -21,6 +21,7 @@
     weekStartsOn?: 0 | 1;
     min?: string;
     max?: string;
+    card?: boolean;
     disabled?: boolean;
     class?: string;
     onchange?: (value: string) => void;
@@ -33,6 +34,7 @@
     weekStartsOn = 0,
     min,
     max,
+    card = false,
     disabled = false,
     class: className = '',
     onchange,
@@ -123,7 +125,11 @@
   }
 </script>
 
-<section class={cn('svadmin-calendar', className)} aria-label={title}>
+<section
+  class={cn('svadmin-calendar', card && 'svadmin-calendar--card', className)}
+  data-card={card}
+  aria-label={title}
+>
   <header class="svadmin-calendar__header">
     <strong>{title}</strong>
     <div class="svadmin-calendar__nav">
@@ -163,6 +169,22 @@
 
 <style>
   .svadmin-calendar { display: grid; gap: var(--svadmin-space-2); min-width: 0; }
+  .svadmin-calendar--card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--svadmin-space-3);
+    background: var(--card);
+    box-shadow: var(--svadmin-shadow-surface);
+  }
+  .svadmin-calendar--card .svadmin-calendar__header {
+    padding-bottom: var(--svadmin-space-1);
+    margin-bottom: var(--svadmin-space-1);
+    border-bottom: 1px solid var(--border);
+  }
+  .svadmin-calendar--card .svadmin-calendar__day {
+    min-height: 2rem;
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
   .svadmin-calendar__header { display: flex; align-items: center; justify-content: space-between; gap: var(--svadmin-space-3); }
   .svadmin-calendar__header strong { font-size: var(--svadmin-text-body); font-weight: 600; color: var(--foreground); }
   .svadmin-calendar__nav { display: flex; gap: var(--svadmin-space-1); }
