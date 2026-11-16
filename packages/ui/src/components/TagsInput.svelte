@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X } from '@lucide/svelte';
+  import { X, CircleX } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   interface Props {
@@ -8,6 +8,8 @@
     placeholder?: string | undefined;
     separator?: string | undefined;
     maxItems?: number | undefined;
+    maxTagCount?: number | undefined;
+    allowClear?: boolean | undefined;
     disabled?: boolean | undefined;
     required?: boolean | undefined;
     invalid?: boolean | undefined;
@@ -23,6 +25,8 @@
     placeholder = 'Add a tag',
     separator = ',',
     maxItems,
+    maxTagCount,
+    allowClear = false,
     disabled = false,
     required = false,
     invalid = false,
@@ -34,6 +38,8 @@
 
   let draft = $state('');
   let composing = $state(false);
+  const displayedTags = $derived(maxTagCount !== undefined && maxTagCount >= 0 ? value.slice(0, maxTagCount) : value);
+  const overflowCount = $derived(maxTagCount !== undefined && maxTagCount >= 0 ? Math.max(0, value.length - maxTagCount) : 0);
 
   function normalized(values: readonly string[]): string[] {
     return [...new Set(values.map(item => item.trim()).filter(Boolean))];
@@ -52,6 +58,11 @@
     const available = maxItems === undefined ? candidates : candidates.slice(0, Math.max(0, maxItems - value.length));
     update([...value, ...available]);
     draft = '';
+  }
+
+  function clearAll(): void {
+    if (disabled) return;
+    update([]);
   }
 
   function remove(index: number): void {
@@ -81,7 +92,7 @@
       <input type="hidden" {name} value={tag} {disabled} />
     {/each}
   {/if}
-  {#each value as tag, index (tag)}
+  {#each displayedTags as tag, index (tag)}
     <span class="svadmin-tags-input__tag">
       <span>{tag}</span>
       <button
@@ -94,6 +105,11 @@
       </button>
     </span>
   {/each}
+  {#if overflowCount > 0}
+    <span class="svadmin-tags-input__tag svadmin-tags-input__tag--overflow" title={value.slice(maxTagCount).join(", ")}>
+      <span>+{overflowCount}</span>
+    </span>
+  {/if}
   <input
     value={draft}
     {placeholder}
@@ -107,6 +123,16 @@
     oncompositionstart={() => { composing = true; }}
     oncompositionend={(event) => { composing = false; draft = (event.currentTarget as HTMLInputElement).value; }}
   />
+  {#if allowClear && value.length > 0 && !disabled}
+    <button
+      type="button"
+      class="svadmin-tags-input__clear"
+      aria-label="Clear all tags"
+      onclick={clearAll}
+    >
+      <CircleX size={14} aria-hidden="true" />
+    </button>
+  {/if}
 </div>
 
 <style>
@@ -165,6 +191,25 @@
     color: var(--accent-foreground);
   }
 
+  .svadmin-tags-input__clear {
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 999px;
+  }
+  .svadmin-tags-input__clear:hover {
+    color: var(--foreground);
+  }
+  .svadmin-tags-input__tag--overflow {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    padding: 2px 6px;
+    font-weight: 500;
+  }
   .svadmin-tags-input input {
     min-inline-size: 8rem;
     flex: 1 1 8rem;
