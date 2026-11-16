@@ -41,10 +41,10 @@
   .svadmin-notification-host[data-placement='top-left'] { inset-inline-start: 20px; inset-inline-end: auto; }
   .svadmin-notification-host[data-placement='bottom-right'] { inset-block-start: auto; inset-block-end: 20px; }
   .svadmin-notification-host[data-placement='bottom-left'] { inset-block-start: auto; inset-block-end: 20px; inset-inline-start: 20px; inset-inline-end: auto; }
-  .svadmin-notification-host__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; width: 340px; max-width: 100%; padding: 20px; border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--foreground); box-shadow: var(--svadmin-shadow-overlay, var(--shadow-overlay)); pointer-events: auto; }
-  .svadmin-notification-host__item[data-tone='success'] { border-color: var(--border); }
-  .svadmin-notification-host__item[data-tone='warning'] { border-color: var(--border); }
-  .svadmin-notification-host__item[data-tone='danger'] { border-color: var(--border); }
+  .svadmin-notification-host__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; width: 340px; max-width: 100%; padding: 20px; border: 1px solid var(--border); border-inline-start: 3px solid var(--info); border-radius: 4px; background: var(--card); color: var(--foreground); box-shadow: var(--svadmin-shadow-overlay, var(--shadow-overlay)); pointer-events: auto; }
+  .svadmin-notification-host__item[data-tone='success'] { border-inline-start-color: var(--success); }
+  .svadmin-notification-host__item[data-tone='warning'] { border-inline-start-color: var(--warning); }
+  .svadmin-notification-host__item[data-tone='danger'] { border-inline-start-color: var(--destructive); }
   .svadmin-notification-host__title { margin: 0 0 4px; font-size: var(--svadmin-text-section); font-weight: 500; }
   .svadmin-notification-host__description { margin: 0; color: var(--foreground); font-size: var(--svadmin-text-body); line-height: 1.5715; }
   .svadmin-notification-host__action { margin-block-start: var(--svadmin-space-2); padding: 0; border: 0; background: transparent; color: var(--primary); font-size: var(--svadmin-text-label); font-weight: 600; cursor: pointer; }

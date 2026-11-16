@@ -119,7 +119,7 @@
   .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 400; line-height: 1.75; }
   .svadmin-steps__item[data-status='process'] .svadmin-steps__title { font-weight: 500; }
   .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 400; }
-  .svadmin-steps__description { margin-top: 2px; color: var(--svadmin-text-3, var(--muted-foreground)); font-size: var(--svadmin-text-caption); }
+  .svadmin-steps__description { margin-top: 2px; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-steps__connector {
     position: relative;
     flex: 1;

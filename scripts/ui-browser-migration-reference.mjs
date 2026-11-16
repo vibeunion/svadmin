@@ -60,15 +60,15 @@ export const bodyStyleMigration = Object.freeze({
     "'Inter', ui-sans-serif, system-ui, sans-serif",
     'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   ],
-  // 正文行高跟 --svadmin-leading-body（1.4）。这里写成字面量，历史样式表没有这个变量。
-  'line-height': ['1.5', '1.4'],
+  // PR #828 的正文行高；独立写明目标，历史样式表没有这个变量。
+  'line-height': ['1.5', '1.5715'],
 });
 
 export const visualContractDisabledSelector = ':is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled]), :is([data-svadmin-button], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled])';
 
 export const visualContractAdditions = Object.freeze({
-  light: Object.freeze({ '--primary-3': '#94BFFF' }),
-  dark: Object.freeze({ '--primary-3': '#0E32A6' }),
+  light: Object.freeze({ '--primary-3': '#94BFFF', '--svadmin-fill-2': '#F2F3F5' }),
+  dark: Object.freeze({ '--primary-3': '#0E32A6', '--svadmin-fill-2': 'rgb(255 255 255 / 8%)' }),
   disabled: Object.freeze({
     'pointer-events': 'none',
     opacity: '1',
@@ -82,13 +82,17 @@ export const visualContractAdditions = Object.freeze({
 export const tableSizeMigration = Object.freeze({
   '.svadmin-table-head': Object.freeze({
     height: Object.freeze(['2.25rem', '2.5rem']),
-    background: Object.freeze([null, 'var(--background)']),
-    color: Object.freeze(['var(--foreground)', 'var(--muted-foreground)']),
-    'font-size': Object.freeze([null, '0.75rem']),
+    background: Object.freeze([null, 'var(--svadmin-fill-2, var(--muted))']),
+    color: Object.freeze(['var(--foreground)', 'var(--foreground)']),
+    'font-size': Object.freeze([null, '14px']),
+    padding: Object.freeze(['0.5rem', '9px 16px']),
+    'line-height': Object.freeze([null, '1.5715']),
   }),
   '.svadmin-table-cell': Object.freeze({
     height: Object.freeze([null, '2.5rem']),
-    'font-size': Object.freeze([null, '0.8125rem']),
+    'font-size': Object.freeze([null, '14px']),
+    padding: Object.freeze(['0.5rem', '9px 16px']),
+    'line-height': Object.freeze([null, '1.5715']),
   }),
 });
 

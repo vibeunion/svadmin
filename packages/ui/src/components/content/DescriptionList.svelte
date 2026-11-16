@@ -119,7 +119,7 @@
 
 <style>
   .svadmin-description-list__label {
-    color: var(--svadmin-text-3);
+    color: var(--muted-foreground);
     font-size: var(--svadmin-text-body);
     font-weight: 500;
     line-height: 1.5715;

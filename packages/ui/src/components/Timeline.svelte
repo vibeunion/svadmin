@@ -87,7 +87,7 @@
   .svadmin-timeline__item[data-active='true'] .svadmin-timeline__marker { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent); }
   .svadmin-timeline__custom-dot { display: inline-flex; align-items: center; justify-content: center; margin-block-start: 0.15rem; z-index: 1; color: var(--primary); }
   .svadmin-timeline__content { min-width: 0; }
-  .svadmin-timeline__time { color: var(--svadmin-text-3); font-size: var(--svadmin-text-caption); line-height: 1.667; }
+  .svadmin-timeline__time { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); line-height: 1.667; }
   .svadmin-timeline__title { margin: 0; color: var(--foreground); font-size: var(--svadmin-text-body); font-weight: 500; }
   .svadmin-timeline__description { margin: var(--svadmin-space-1) 0 0; color: var(--muted-foreground); font-size: var(--svadmin-text-body); line-height: 1.5715; }
   .svadmin-timeline[data-mode='horizontal'] {

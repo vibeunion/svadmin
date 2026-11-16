@@ -1156,9 +1156,9 @@ h6,
 }
 
 [data-slot="avatar-fallback"] {
-  /* Official avatar fallback is fill-4 with white text. */
+  /* 保留 fill-4，并使用前景色保证明暗主题中的文字可读性。 */
   background: var(--svadmin-fill-4, var(--muted));
-  color: var(--color-white);
+  color: var(--foreground);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -1644,8 +1644,8 @@ main {
 
 .svadmin-input::placeholder,
 .svadmin-textarea::placeholder {
-  /* Official placeholder is text-3 (#86909C), not text-2. */
-  color: var(--svadmin-text-3);
+  /* 占位文字使用可读的次要文字色，保留明暗主题对比度。 */
+  color: var(--muted-foreground);
 }
 
 .svadmin-field {
@@ -1659,9 +1659,9 @@ main {
 
 .svadmin-field-help,
 [data-svadmin-field-description] {
-  /* Official form extra: 12px, text-3, 4px below the control. */
+  /* 12px 辅助文字保持可读对比度，距控件 4px。 */
   margin-top: 4px;
-  color: var(--svadmin-text-3);
+  color: var(--muted-foreground);
   font-size: 0.75rem;
   line-height: 1.667;
 }
@@ -2173,7 +2173,7 @@ main {
 }
 
 .svadmin-textarea::placeholder {
-  color: var(--svadmin-text-3);
+  color: var(--muted-foreground);
 }
 
 .svadmin-skeleton {
@@ -3460,6 +3460,9 @@ main {
 /* Official .arco-pagination-item: 32px, borderless, 14px type. Active is primary-light-1. */
 :is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item {
   box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   min-width: 32px;
   height: 32px;

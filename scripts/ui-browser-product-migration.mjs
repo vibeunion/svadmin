@@ -85,7 +85,7 @@ export const productDarkTokenMigration = Object.freeze({
 });
 for (const values of Object.values(productDarkTokenMigration)) Object.freeze(values);
 
-// Component declarations that moved from literals to the #580 size rhythm.
+// 已审的 #580 和 #828 共享控件指标；品牌主题复用控件几何，仅覆盖颜色。
 const buttonDefault = ':is([data-slot="button"], .svadmin-button):is([data-size="default"], .svadmin-button-size--default), :is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default)';
 const buttonSm = ':is([data-slot="button"], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm), :is([data-svadmin-button], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm)';
 const buttonLg = ':is([data-slot="button"], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg), :is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg)';
@@ -94,13 +94,41 @@ const buttonIcon = ':is([data-slot="button"], .svadmin-button):is([data-size="ic
 export const productComponentSizeMigration = Object.freeze({
   ':is([data-slot="button"], .svadmin-button), :is([data-svadmin-button], .svadmin-button)': Object.freeze({
     'border-radius': Object.freeze(['var(--radius-md)', 'var(--radius-sm)']),
+    'font-weight': Object.freeze(['500', '400']),
+    'line-height': Object.freeze(['1', '1.5715']),
   }),
   '.svadmin-file-input__visual': Object.freeze({
     'border-radius': Object.freeze(['0.5rem', 'var(--radius-sm)']),
   }),
-  [buttonDefault]: Object.freeze({ 'min-height': Object.freeze(['2.25rem', '2rem']) }),
-  [buttonSm]: Object.freeze({ 'min-height': Object.freeze(['2rem', '1.75rem']) }),
-  [buttonLg]: Object.freeze({ 'min-height': Object.freeze(['2.5rem', '2.25rem']) }),
+  [buttonDefault]: Object.freeze({
+    'min-height': Object.freeze(['2.25rem', '2rem']),
+    padding: Object.freeze(['0 0.75rem', '0 15px']),
+  }),
+  [buttonSm]: Object.freeze({
+    'min-height': Object.freeze(['2rem', '1.75rem']),
+    padding: Object.freeze(['0 0.75rem', '0 15px']),
+    'font-size': Object.freeze(['0.8rem', '14px']),
+  }),
+  [buttonLg]: Object.freeze({
+    'min-height': Object.freeze(['2.5rem', '2.25rem']),
+    padding: Object.freeze(['0 1rem', '0 19px']),
+  }),
+  '.svadmin-input:not([data-input-type="file"])': Object.freeze({
+    padding: Object.freeze(['0.375rem 0.75rem', '0 12px']),
+    'font-size': Object.freeze(['0.875rem', '14px']),
+  }),
+  '.svadmin-card': Object.freeze({
+    'border-radius': Object.freeze(['0.5rem', 'var(--radius)']),
+  }),
+  '.svadmin-card-header': Object.freeze({
+    'align-items': Object.freeze(['start', 'center']),
+    'min-height': Object.freeze([null, '46px']),
+  }),
+  '.svadmin-card-title': Object.freeze({
+    'font-size': Object.freeze(['inherit', '16px']),
+    'font-weight': Object.freeze(['600', '500']),
+    'line-height': Object.freeze(['1', '1.5']),
+  }),
   [buttonIcon]: Object.freeze({
     width: Object.freeze(['2.25rem', '2rem']),
     height: Object.freeze(['2.25rem', '2rem']),
