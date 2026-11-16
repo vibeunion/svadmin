@@ -223,8 +223,8 @@ instead of re-writing component CSS.
 | `--svadmin-text-caption`…`--svadmin-text-title` | `12 / 13 / 14 / 16 / 20px` | Existing type scale / 既有字号 |
 | `--svadmin-text-title-3` | `1.5rem` (24px) | Large title / 大标题 |
 | `--svadmin-text-display-1…3` | `36 / 48 / 56px` | Display sizes / 运营标题 |
-| `--svadmin-leading-tight` / `snug` / `body` | `1.25 / 1.35 / 1.5715` | Line heights. Body copy uses the official `1.5715` / 行高，正文 1.5715 |
-| `--svadmin-paragraph-gap` | `1.375rem` (22px) | Gap inside `.svadmin-copy > p + p` only. 14px × 1.5715 / 仅多段正文 |
+| `--svadmin-leading-tight` / `snug` / `body` | `1.25 / 1.35 / 1.5715` | Line heights. Body copy uses the official `1.5715` |
+| `--svadmin-paragraph-gap` | `1.375rem` (22px) | Gap inside `.svadmin-copy > p + p` only. 14px × 1.5715 |
 | `--svadmin-measure` | `65ch` | Reading measure / 阅读宽度 |
 | `--svadmin-shell-topbar-h` | `3.5rem` (56px) | Intentional SVAdmin topbar / 顶栏，有意保持 |
 | `--svadmin-shell-sidebar-w` | `15rem` (240px) | Intentional SVAdmin rail / 展开导航，有意保持 |
@@ -292,9 +292,9 @@ Default product skin is palette `default` plus `layoutPreset: 'clean-flat'`.
 
 These sizes are the intentional SVAdmin default. They are not retuned to the reference product shell.
 
-这些尺寸是 SVAdmin 有意保留的默认值，不向参考产品的官方默认靠拢：
+These sizes stay on the SVAdmin defaults. They are not moved toward the reference product's published shell.
 
-| | SVAdmin | 参考产品（仅作参照） |
+| | SVAdmin | Reference product (comparison only) |
 | --- | --- | --- |
 | Sidebar | `15rem` / 240px | `menuWidth: 220` |
 | Top bar | `3.5rem` / 56px | navbar `paddingTop: 60px` |
@@ -327,7 +327,7 @@ These sizes are the intentional SVAdmin default. They are not retuned to the ref
 
 These follow the current component specs. They are behavior and defaults, not a pixel copy and not a third-party component API.
 
-下面按现行组件规范对齐用法和默认值，不复制像素，也不复制第三方组件的 props。
+The defaults below follow the current component spec. They match behavior, not pixels, and they do not copy a third-party component API.
 
 | Surface | When to use | SVAdmin default |
 | --- | --- | --- |
@@ -349,11 +349,11 @@ These follow the current component specs. They are behavior and defaults, not a 
 | Steps | Default circle is 28px. Title is 16px. Process is a filled primary circle. Finish is primary-light with primary text. | Indicator is 1.75rem. Title uses `--svadmin-text-section` at weight 500. Disabled steps use text-4, not opacity. |
 | Table | Header is 14px / 500 on fill-2. Show loading feedback while rows are loading, and an empty state when there are no rows. | Default-skin header uses `--svadmin-text-body`. `AutoTable` loading is a skeleton with `role="status"` and `aria-busy`. Empty and filtered-empty go through `DataState`. |
 
-Message 是轻量反馈，不打断操作。类型是 info / normal / success / warning / error。SVAdmin 宿主默认仍停在右上角，抽屉打开时改到左下角，避免盖住居中的撤销条。这是有意保留的默认，和外壳 240 / 56 / 24 一样。需要参考实现的顶部或底部居中时，给 `Toast` 传 `placement`。
+Message is lightweight feedback and does not interrupt the task. Types are info, normal, success, warning, and error. The host stays at the top right and moves to the bottom left while a drawer is open, so it does not cover the centered undo stack. That corner default is intentional, like the 240 / 56 / 24 shell. Pass `placement` on `Toast` for the centered top or bottom position.
 
-`risk="light"` 仍是不超过 320px 的气泡。`risk="irreversible"` 直接渲染对话框，不再弹出气泡。普通 Dialog 固定标题和行动按钮，只滚动正文，高度不超过一屏，没有横向滚动。信息展示类对话框仍可点遮罩关闭。录入用的 `ModalForm` 不因遮罩关闭。警告提示是页内静态信息，不代替字段错误，也不代替 Message。
+`risk="light"` stays a popover no wider than 320px. `risk="irreversible"` renders a dialog instead of a popover. A normal dialog keeps the title and actions fixed and scrolls only the body, with no horizontal scroll and a height of at most one viewport. Informational dialogs can still close when the mask is clicked. `ModalForm`, which collects input, does not. An alert is static in-page information. It does not replace a field error or a Message.
 
-对话框和抽屉标题是 16px、字重 500，不再使用 18px。Tooltip 默认内边距 8px 12px，mini 是 4px 12px，出现和消失延迟都是 0。焦点环继续只用 `--svadmin-focus-width` 和 `--svadmin-focus-offset`。复选框是 14px，单选布局高度 14px，菜单项 40px，分页当前页用 primary-light 底，步骤圆点 28px、进行中为实心主色。官方动效曲线补齐 linear、overshoot、accelerate 和 `duration-loading`，原有 150ms / 200ms / 900ms 不改。
+Dialog and drawer titles are 16px at weight 500. Tooltip padding is 8px 12px, and mini is 4px 12px. Open and close delays are both 0. Focus continues to use only `--svadmin-focus-width` and `--svadmin-focus-offset`. The checkbox is 14px, the radio layout height is 14px, menu items are 40px, the current pagination page uses a primary-light fill, and the step indicator is 28px with the process step filled in the primary color. The named motion curves include linear, overshoot, accelerate, and `duration-loading`. The existing 150ms / 200ms / 900ms durations stay.
 
 ### Checking the contract / 怎么核对
 
