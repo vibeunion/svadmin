@@ -1,12 +1,12 @@
 ## Summary
 
-This PR completes the enterprise security, rich badging, and keyboard shortcuts suite aligned with Arco Design, Arco Design Pro, and high-security enterprise admin patterns:
+This PR completes the enterprise security, rich badging, and keyboard shortcuts suite aligned with high-security enterprise admin patterns:
 
 ### 1. Enterprise Session Guard & Watermark (<LockScreen>, <Watermark>)
 - `<LockScreen>`: Fullscreen session protection dialog featuring real-time digital clock/date, user avatar and identity card, password-masked input with Enter key unlock, unlock failure shake animation, idle inactivity auto-lock detection (`idleTimeout`), and quick lock shortcut (`Alt+L`).
 - `<Header>` & `<Layout>` Integration: Integrated `showLock` trigger in top bar, and injected `<Watermark>` directly into `<Layout watermark={...}>` for zero-setup confidential tenant/employee anti-tamper watermark protection.
 
-### 2. Arco Design Rich Badging (<Badge>)
+### 2. Rich Badging (<Badge>)
 - **Wrapped Badges**: Wraps any children element (e.g. `<Avatar>`, `<Button>`, or icon) with absolute positioned top-right badges.
 - **Overflow Counts**: Configurable `overflowCount` (defaults to 99, rendering `99+` on overflow), and suppression of zero (`showZero: false`).
 - **Dot Badge**: Renders minimal standalone or anchor dot indicator (`dot: true`).
