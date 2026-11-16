@@ -141,7 +141,8 @@
     width: 100%;
     padding: 8px 13px;
     font-size: var(--svadmin-text-body);
-    line-height: 24px;
+    /* Official collapse header line-height is 24px. */
+    line-height: 1.5rem;
     border: 0;
     background: var(--card);
     color: var(--foreground);

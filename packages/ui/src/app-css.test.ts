@@ -191,7 +191,7 @@ describe('native component CSS', () => {
       expect(css).toContain('details.svadmin-collapsible-filter > summary');
       expect(css).toContain('details[data-svadmin-filter] > summary');
       expect(css).toContain('[data-svadmin-collapsible] > summary');
-      expect(css).toContain('padding: 0.25rem 0;');
+      expect(css).toContain('padding: 8px 0;');
       expect(css).toContain('list-style: none;');
       expect(css).toContain('::-webkit-details-marker');
       expect(css).toContain('summary::marker');
