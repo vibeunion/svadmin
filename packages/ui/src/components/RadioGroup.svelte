@@ -252,7 +252,7 @@
   aria-label={legend ? undefined : ariaLabel}
 >
   {#if legend}<legend>{legend}</legend>{/if}
-  <div class={cn('svadmin-radio-group__options', direction === 'horizontal' ? 'svadmin-radio-group__options--horizontal flex flex-wrap items-center gap-4' : 'grid gap-2')} data-direction={direction}>
+  <div class={cn('svadmin-radio-group__options', direction === 'horizontal' && 'svadmin-radio-group__options--horizontal')} data-direction={direction}>
     {#each options as option, index (option.value)}
       {@const inputId = `${instanceId}-radio-${index}`}
       <label class="svadmin-radio-group__option" class:svadmin-radio-group__option--disabled={disabled || option.disabled} for={inputId}>
@@ -296,6 +296,14 @@
   .svadmin-radio-group__options {
     display: grid;
     gap: 8px;
+  }
+
+  /* 官方横向单选的相邻间距是 20px。组件样式必须盖过纵向 grid，否则 flex 类不会生效。 */
+  .svadmin-radio-group__options--horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
   }
 
   .svadmin-radio-group__option {

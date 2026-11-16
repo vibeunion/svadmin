@@ -101,7 +101,7 @@
         disabled={disabled}
         onclick={() => remove(index)}
       >
-        <X size={14} aria-hidden="true" />
+        <X size={12} aria-hidden="true" />
       </button>
     </span>
   {/each}
@@ -130,7 +130,7 @@
       aria-label="Clear all tags"
       onclick={clearAll}
     >
-      <CircleX size={14} aria-hidden="true" />
+      <CircleX size={12} aria-hidden="true" />
     </button>
   {/if}
 </div>
@@ -141,11 +141,14 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 4px;
-    min-block-size: 36px;
-    padding: 4px 8px;
+    box-sizing: border-box;
+    min-block-size: var(--svadmin-control-h);
+    padding: 1px 4px;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--background);
+    border-radius: var(--border-radius-small, 2px);
+    background: var(--card);
+    color: var(--foreground);
+    font-size: var(--svadmin-text-body);
   }
 
   .svadmin-tags-input:focus-within {
@@ -161,12 +164,18 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    box-sizing: border-box;
     max-inline-size: 100%;
-    padding: 2px 4px 2px 8px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--muted);
+    height: 24px;
+    padding: 0 4px 0 8px;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-small, 2px);
+    background: var(--svadmin-fill-2, var(--muted));
     color: var(--foreground);
+    font-size: var(--svadmin-text-caption);
+    font-weight: 500;
+    /* 12px 字号下的官方 22px 行高，避免组件样式里写裸像素字号。 */
+    line-height: calc(22 / 12);
   }
 
   .svadmin-tags-input__tag span {
@@ -176,10 +185,13 @@
   .svadmin-tags-input__tag button {
     display: inline-grid;
     place-items: center;
-    min-block-size: 24px;
-    min-inline-size: 24px;
+    width: 16px;
+    height: 16px;
+    min-block-size: 16px;
+    min-inline-size: 16px;
+    padding: 0;
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--border-radius-small, 2px);
     background: transparent;
     color: var(--muted-foreground);
     cursor: pointer;
@@ -192,14 +204,19 @@
   }
 
   .svadmin-tags-input__clear {
-    display: inline-grid;
+    display: none;
     place-items: center;
     border: 0;
     background: transparent;
-    color: var(--muted-foreground);
+    color: var(--color-text-2, var(--muted-foreground));
+    font-size: var(--svadmin-text-caption);
+    line-height: 1;
     cursor: pointer;
-    padding: 2px;
-    border-radius: 999px;
+    padding: 0;
+  }
+  .svadmin-tags-input:hover .svadmin-tags-input__clear,
+  .svadmin-tags-input:focus-within .svadmin-tags-input__clear {
+    display: inline-grid;
   }
   .svadmin-tags-input__clear:hover {
     color: var(--foreground);
@@ -213,7 +230,7 @@
   .svadmin-tags-input input {
     min-inline-size: 8rem;
     flex: 1 1 8rem;
-    min-block-size: 28px;
+    min-block-size: 24px;
     border: 0;
     outline: 0;
     background: transparent;
