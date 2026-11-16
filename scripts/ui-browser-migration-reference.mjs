@@ -76,7 +76,12 @@ export const hostNormalizationDeclarations = Object.freeze({
 
 export const visualContractAdditions = Object.freeze({
   light: Object.freeze({ '--primary-3': '#94BFFF', '--svadmin-fill-2': '#F2F3F5' }),
-  dark: Object.freeze({ '--primary-3': '#0E32A6', '--svadmin-fill-2': 'rgb(255 255 255 / 8%)' }),
+  dark: Object.freeze({
+    '--primary-3': '#0E32A6',
+    '--svadmin-fill-2': 'rgb(255 255 255 / 8%)',
+    // 历史样式表没有 danger-light-1；暗色无效态填充需要在参考里显式补上。
+    '--danger-light-1': 'rgb(247 105 101 / 20%)',
+  }),
   disabled: Object.freeze({
     'pointer-events': 'none',
     opacity: '1',

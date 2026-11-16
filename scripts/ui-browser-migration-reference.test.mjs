@@ -43,7 +43,11 @@ test('reference changes only explicitly approved token, body and table declarati
     },
   });
   const reference = postcss.parse(createMigrationReference(baseline));
-  for (const property of Object.keys(visualContractAdditions.light)) {
+  const addedProperties = new Set([
+    ...Object.keys(visualContractAdditions.light),
+    ...Object.keys(visualContractAdditions.dark),
+  ]);
+  for (const property of addedProperties) {
     reference.walkDecls(property, (declaration) => declaration.remove());
   }
   reference.walkRules(visualContractDisabledSelector, (rule) => rule.remove());
