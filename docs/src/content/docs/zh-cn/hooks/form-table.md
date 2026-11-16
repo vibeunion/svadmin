@@ -177,3 +177,25 @@ throw new HttpError('验证失败', 422, {
 - `syncWithLocation` 把打开状态写入当前路由查询参数，刷新和前进/后退可恢复；`param` 可改参数名
 
 路由驱动的编辑页继续使用 `<AutoForm mode="edit" id={...}>`，记录身份已经在路由中。
+
+## 无总数的游标列表
+
+`createCursorListController` 将现有游标 provider/缓存组合为兼容 Svelte store 的控制器，无需总记录数或 DOM。换页替换当前记录，已访问页通过缓存返回，可直接绑定 `CursorListFooter` 的 `page/loadedCount/hasPrevious/hasNext/loading`，将 `onPrevious/onNext` 连接到控制器同名操作。
+
+```ts
+import { createCursorListController } from '@svadmin/core';
+
+const list = createCursorListController({
+  provider: taskProvider, // 已有强类型 CursorProvider，接收 signal/bypassCache
+  query: { status: 'open', pageSize: 50 },
+  queryKey: 'tenant-a:tasks:open:50',
+});
+await list.refresh();
+await list.next();
+await list.previous();
+await list.setQuery({ status: 'closed', pageSize: 50 }, 'tenant-a:tasks:closed:50');
+```
+
+在 Svelte 中可用 `$list` 读取快照，在 `onMount` 首次读取，在 `onDestroy` 调用 `list.dispose()`。query 必须不可变；稳定的 queryKey 须包含资源/provider、筛选、排序、每页条数及授权范围，不能只用新对象引用。新 key 会立即清空旧范围、取消旧请求并从第一页读取；即使 provider 不响应取消，迟到响应也不能写回。相同 key 不重新读取。
+
+`refresh()` 默认刷新当前页并传入 `bypassCache: true`；`refresh({ resetToFirstPage: true })` 明确返回第一页。翻页/刷新失败保留原成功页，`retry()` 重试原目标游标；处理中去重，`cancel()` 取消读取，`dispose()` 同时停止订阅通知。文案、自动重试及焦点/滚动策略由宿主按业务决定。

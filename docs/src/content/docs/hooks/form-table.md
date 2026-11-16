@@ -226,3 +226,36 @@ const {
   setFilters,    // (filters) => void
 } = useTable();
 ```
+
+## Cursor-backed lists without totals
+
+`createCursorListController` composes the existing cursor provider/cache into a Svelte-compatible readable store. Pages replace records; visited pages are cached. It does not require a total count or a DOM.
+
+```svelte
+<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+  import { createCursorListController } from '@svadmin/core';
+  import { CursorListFooter } from '@svadmin/ui';
+
+  // The host provides a typed CursorProvider; options include signal/bypassCache.
+  import { taskProvider } from './task-provider';
+  const list = createCursorListController({
+    provider: taskProvider,
+    query: { status: 'open', pageSize: 50 },
+    queryKey: 'tenant-a:tasks:open:50',
+  });
+  onMount(() => { void list.refresh(); });
+  onDestroy(() => list.dispose());
+</script>
+
+{#each $list.items as task (task.id)}<p>{task.title}</p>{/each}
+{#if $list.error}<p role="alert">Read failed. Current page retained.</p>{/if}
+<CursorListFooter label="Tasks" page={$list.page} loadedCount={$list.items.length}
+  hasPrevious={$list.hasPrevious} hasNext={$list.hasNext} loading={$list.loading}
+  onPrevious={() => { void list.previous(); }}
+  onNext={() => { void list.next(); }} />
+```
+
+Call `setQuery(query, queryKey)` when filters, sorting, page size, resource/provider or authorization scope change. Include all of these inputs in a stable key and pass immutable query values. A new key clears the old scope immediately, aborts its read and starts page one; stale responses cannot commit even when the provider ignores cancellation. The same key is a no-op.
+
+`refresh()` re-reads the current page with `bypassCache: true`; `refresh({ resetToFirstPage: true })` explicitly starts over. A failed navigation or refresh retains the current successful page; `retry()` repeats the failed target. Pending navigation/refresh calls are deduplicated. `cancel()` aborts the active read, and `dispose()` also stops notifications. Error formatting, retry policy and focus/scroll restoration remain host concerns.
