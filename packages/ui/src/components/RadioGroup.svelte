@@ -15,6 +15,7 @@
     name?: string | undefined;
     legend?: string;
     ariaLabel?: string;
+    direction?: 'horizontal' | 'vertical';
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
@@ -29,6 +30,7 @@
     name,
     legend,
     ariaLabel,
+    direction = 'vertical',
     disabled = false,
     required = false,
     invalid = false,
@@ -250,7 +252,7 @@
   aria-label={legend ? undefined : ariaLabel}
 >
   {#if legend}<legend>{legend}</legend>{/if}
-  <div class="svadmin-radio-group__options">
+  <div class={cn('svadmin-radio-group__options', direction === 'horizontal' ? 'svadmin-radio-group__options--horizontal flex flex-wrap items-center gap-4' : 'grid gap-2')} data-direction={direction}>
     {#each options as option, index (option.value)}
       {@const inputId = `${instanceId}-radio-${index}`}
       <label class="svadmin-radio-group__option" class:svadmin-radio-group__option--disabled={disabled || option.disabled} for={inputId}>
