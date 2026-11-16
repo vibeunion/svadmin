@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { ImageOff } from '@lucide/svelte';
+  import { ImageOff, ZoomIn } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   interface Props {
     src?: string | undefined;
     alt?: string;
+    title?: string;
+    description?: string;
     width?: string | number;
     height?: string | number;
     fit?: 'cover' | 'contain' | 'fill' | 'none';
@@ -20,6 +22,8 @@
   let {
     src,
     alt = '',
+    title,
+    description,
     width,
     height,
     fit = 'cover',
@@ -50,13 +54,24 @@
       style={`object-fit:${fit}`}
       onerror={() => { failed = true; }}
     />
+    {#if preview}
+      <span class="svadmin-image__overlay" aria-hidden="true" data-slot="image-overlay">
+        <ZoomIn size={20} />
+      </span>
+    {/if}
   {:else}
     <span class="svadmin-image__fallback" role="img" aria-label={fallback}>
       <ImageOff size={20} aria-hidden="true" />
       {#if fallback}<span>{fallback}</span>{/if}
     </span>
   {/if}
-  {#if children}<div class="svadmin-image__caption">{@render children()}</div>{/if}
+  {#if title || description || children}
+    <div class="svadmin-image__caption">
+      {#if title}<strong class="svadmin-image__title">{title}</strong>{/if}
+      {#if description}<p class="svadmin-image__description">{description}</p>{/if}
+      {#if children}{@render children()}{/if}
+    </div>
+  {/if}
 {/snippet}
 
 {#if preview || onclick}
@@ -92,6 +107,22 @@
   .svadmin-image.is-rounded { border-radius: var(--radius-lg); }
   .svadmin-image.is-preview { cursor: zoom-in; }
   .svadmin-image__img { display: block; width: 100%; height: 100%; max-width: 100%; }
+  .svadmin-image__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--card, black) 40%, transparent);
+    color: var(--primary-foreground, white);
+    opacity: 0;
+    transition: opacity 150ms ease;
+    pointer-events: none;
+  }
+  .svadmin-image__button:hover .svadmin-image__overlay,
+  .svadmin-image__button:focus-visible .svadmin-image__overlay {
+    opacity: 1;
+  }
   .svadmin-image__fallback {
     display: inline-flex;
     flex-direction: column;
@@ -103,4 +134,15 @@
     text-align: center;
   }
   .svadmin-image__caption { width: 100%; padding: 0.5rem 0.75rem; font-size: var(--svadmin-text-caption, 0.75rem); }
+  .svadmin-image__title {
+    display: block;
+    color: var(--foreground);
+    font-size: var(--svadmin-text-body, 0.875rem);
+    font-weight: 500;
+  }
+  .svadmin-image__description {
+    margin: 0.125rem 0 0;
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
 </style>
