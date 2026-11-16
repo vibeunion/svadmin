@@ -59,7 +59,8 @@
 						{#if typeof title === "string"}
 							{title}
 						{:else}
-							{@render title()}
+							<!-- string | Snippet 的联合在模板里无法自动收窄，这里显式断言。 -->
+							{@render (title as Snippet)()}
 						{/if}
 					</CardTitle>
 				{/if}
