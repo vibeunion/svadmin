@@ -4,7 +4,7 @@ import FilterBuilder from './FilterBuilder.svelte';
 import LiteFilterBuilder from '../../../lite/src/components/LiteFilterBuilder.svelte';
 import { createListLoader } from '../../../lite/src/server-adapter';
 import { compileFilterTree, readFilterTree, type FilterRuleNode } from './enterprise/filter-tree.js';
-import { isFilterCollectionValue, type FieldDefinition, type DataProvider, type CrudOperator, type Filter } from '@svadmin/core';
+import { CRUD_FIELD_OPERATORS, isFilterCollectionValue, type FieldDefinition, type DataProvider, type CrudOperator, type Filter } from '@svadmin/core';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,7 @@ import { dirname, resolve } from 'node:path';
 import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 
+import { filterOperatorText, filterText } from './filter-i18n.js';
 import { requireValue } from '../../../../scripts/test-assertions';
 const testFields: FieldDefinition[] = [
   { key: 'title', label: '标题', type: 'text', filterable: true },
@@ -693,10 +694,8 @@ describe('FilterBuilder component', () => {
     });
     await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
     const rule = within(view.getByTestId('filter-builder-rule'));
-    const operator = rule.getAllByRole('combobox')[1];
-    if (!(operator instanceof HTMLSelectElement)) throw new Error('Missing operator select');
-    expect([...operator.options].map((option) => option.value)).toEqual(['eq']);
-    expect(operator.value).toBe('eq');
+    expect(rule.queryByRole('combobox', { name: 'Operator' })).toBeNull();
+    expect(rule.getByRole('status', { name: 'Operator' }).textContent).toBe('Equals (=)');
   });
 
   it('does not invent an operator when the host allowlist matches nothing', async () => {
@@ -715,11 +714,8 @@ describe('FilterBuilder component', () => {
       allowGroups: false,
     });
     const root = within(view.getByTestId('filter-builder-root'));
-    const logic = root.getAllByRole('combobox')[0];
-    if (!(logic instanceof HTMLSelectElement)) throw new Error('Missing logic select');
-    expect([...logic.options].map((option) => option.value)).toEqual(['and']);
-    expect(logic.value).toBe('and');
-    expect(logic.disabled).toBe(true);
+    expect(root.queryByRole('combobox', { name: 'Group logic' })).toBeNull();
+    expect(root.getByRole('status', { name: 'Group logic' }).textContent).toBe('Match all conditions');
     expect(root.queryByTestId('filter-builder-add-group')).toBeNull();
   });
 
@@ -747,5 +743,91 @@ describe('FilterBuilder component', () => {
     });
     expect(view.getByTestId('filter-builder-errors')).toBeTruthy();
     expect(view.queryByTestId('filter-builder-root')).toBeNull();
+  });
+
+  it.each(['en', 'zh-CN'])('translates every protocol operator in %s including case and array variants', locale => {
+    const context = { locale, t: (key: string) => key };
+    for (const operator of CRUD_FIELD_OPERATORS) {
+      const label = filterOperatorText(context, operator);
+      expect(label).not.toBe(operator);
+      expect(label).not.toBe(`filter.${operator}`);
+      expect(label.length).toBeGreaterThan(1);
+      if (operator.endsWith('s') && ['eqs', 'nes', 'containss', 'ncontainss', 'startswiths', 'nstartswiths', 'endswiths', 'nendswiths'].includes(operator)) {
+        expect(label).toContain(locale === 'en' ? 'case-sensitive' : '区分大小写');
+      }
+    }
+    expect(filterOperatorText(context, 'ina')).not.toBe(filterOperatorText(context, 'in'));
+    expect(filterOperatorText(context, 'nina')).not.toBe(filterOperatorText(context, 'nin'));
+    expect(filterText(context, 'filter.and')).not.toBe('AND');
+    expect(filterText(context, 'filter.or')).not.toBe('OR');
+  });
+
+  it('uses host translations before built-in fallbacks', () => {
+    const t = vi.fn((key: string) => key === 'filter.eq' ? 'Custom equals' : key);
+    expect(filterOperatorText({ locale: 'fr', t }, 'eq')).toBe('Custom equals');
+    expect(filterText({ locale: 'fr', t }, 'filter.and')).toBe('Match all conditions');
+    expect(t).toHaveBeenCalledWith('filter.eq');
+  });
+
+  it('updates labels on locale change without changing rule values or protocol codes', async () => {
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, { fields: testFields,
+      filters: [{ field: 'title', operator: 'contains', value: 'ABC' }], onApply });
+    expect(view.getByRole('option', { name: /^Contains$/ }).getAttribute('value')).toBe('contains');
+    await view.wrapper['setLocale']('zh-CN');
+    expect(view.getByRole('option', { name: /^包含$/ }).getAttribute('value')).toBe('contains');
+    expect(view.getByRole('combobox', { name: '组合逻辑' }).textContent).toContain('满足全部条件');
+    const input = view.getByRole('textbox', { name: /^值$/ });
+    if (!(input instanceof HTMLInputElement)) throw new Error('Expected text input');
+    expect(input.value).toBe('ABC');
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledExactlyOnceWith([{ field: 'title', operator: 'contains', value: 'ABC' }]);
+  });
+
+  it('changes the fixed operator with the field and submits typed temporal comparisons', async () => {
+    const onApply = vi.fn();
+    const fields: FieldDefinition[] = [
+      { key: 'title', label: 'Title', type: 'text' },
+      { key: 'from', label: 'From', type: 'datetime' },
+      { key: 'to', label: 'To', type: 'datetime' },
+    ];
+    const view = render(FilterBuilder, { fields, allowedLogicalOperators: ['and'], allowGroups: false,
+      fieldOperators: { title: ['contains'], from: ['gte'], to: ['lt'] }, onApply });
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    expect(view.getByRole('status', { name: 'Operator' }).textContent).toBe('Contains');
+    await fireEvent.change(view.getByRole('combobox', { name: 'Field' }), { target: { value: 'from' } });
+    expect(view.getByRole('status', { name: 'Operator' }).textContent).toBe('Greater than or equal (≥)');
+    await fireEvent.input(view.getByLabelText('Value', { exact: true }), { target: { value: '2026-11-16T10:00' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenLastCalledWith([{ field: 'from', operator: 'gte', value: '2026-11-16T10:00' }]);
+    await fireEvent.change(view.getByRole('combobox', { name: 'Field' }), { target: { value: 'to' } });
+    expect(view.getByRole('status', { name: 'Operator' }).textContent).toBe('Less than (<)');
+    await fireEvent.input(view.getByLabelText('Value', { exact: true }), { target: { value: '2026-11-17T10:00' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenLastCalledWith([{ field: 'to', operator: 'lt', value: '2026-11-17T10:00' }]);
+  });
+
+  it('intersects field and global allowlists and rejects unsupported existing rules', async () => {
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, { fields: testFields, allowedOperators: ['eq', 'ne'],
+      fieldOperators: { title: ['contains', 'ne'] }, filters: [{ field: 'title', operator: 'eq', value: 'ABC' }], onApply });
+    const operator = view.getByRole('combobox', { name: 'Operator' });
+    expect(within(operator).getByRole('option', { name: 'Does not equal (≠)' }).getAttribute('value')).toBe('ne');
+    expect(within(operator).queryByRole('option', { name: 'Contains' })).toBeNull();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).not.toHaveBeenCalled();
+    expect(view.getByRole('alert').textContent).toContain('Operator is not supported for this field');
+    await fireEvent.change(operator, { target: { value: 'ne' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledExactlyOnceWith([{ field: 'title', operator: 'ne', value: 'ABC' }]);
+  });
+
+  it('treats inherited property names as unconfigured fields', async () => {
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'toString', label: 'Title', type: 'text' }], fieldOperators: {},
+    });
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    expect(view.getByRole('combobox', { name: 'Operator' })).toBeTruthy();
+    expect(view.getByRole('option', { name: /^Contains$/ }).getAttribute('value')).toBe('contains');
   });
 });
