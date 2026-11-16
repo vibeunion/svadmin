@@ -15,6 +15,7 @@
     triggerVariant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'destructive';
     triggerSize?: 'default' | 'sm' | 'lg' | 'icon';
     submitText?: string;
+    okText?: string;
     cancelText?: string;
     widthClass?: string;
     isSubmitting?: boolean;
@@ -34,6 +35,7 @@
     triggerVariant = 'default',
     triggerSize = 'sm',
     submitText = 'Confirm',
+    okText,
     cancelText = 'Cancel',
     widthClass = '',
     isSubmitting = false,
@@ -54,6 +56,7 @@
   let formElement: HTMLFormElement | undefined;
   let destroyed = false;
   const busy = $derived(loading || isSubmitting);
+  const effectiveSubmitText = $derived(okText ?? submitText);
 
   let lastOpen = open;
   let lastOnsubmit: Props['onsubmit'];
@@ -191,7 +194,7 @@
           {#if busy}
             <Loader2 class="h-4 w-4 animate-spin" />
           {/if}
-          {submitText}
+          {effectiveSubmitText}
         </Button>
       </Dialog.Footer>
     </form>

@@ -8,6 +8,7 @@
     /** Trailing addon rendered after the control (design-system `addAfter` slot). */
     addAfter?: string | Snippet | undefined;
     size?: 'default' | 'compact' | undefined;
+    compact?: boolean | undefined;
     invalid?: boolean | undefined;
     disabled?: boolean | undefined;
     class?: string | undefined;
@@ -18,7 +19,8 @@
   let {
     addBefore,
     addAfter,
-    size = 'default',
+    size: sizeProp = 'default',
+    compact = false,
     invalid = false,
     disabled = false,
     class: className = '',
@@ -26,13 +28,15 @@
     children,
   }: InputGroupProps = $props();
 
+  const size = $derived(compact ? 'compact' : sizeProp);
   const hasBefore = $derived(addBefore !== undefined);
   const hasAfter = $derived(addAfter !== undefined);
 </script>
 
 <div
-  class={cn('svadmin-input-group', className)}
+  class={cn('svadmin-input-group', compact && 'svadmin-input-group--compact', className)}
   data-size={size}
+  data-compact={compact ? 'true' : undefined}
   data-invalid={invalid ? 'true' : undefined}
   data-disabled={disabled ? 'true' : undefined}
   data-has-before={hasBefore ? 'true' : undefined}
