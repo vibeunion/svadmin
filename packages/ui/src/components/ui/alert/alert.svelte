@@ -4,6 +4,7 @@
 	import { alertVariants as resolveAlertVariants, type AlertVariant as AlertVariantValue } from "./alert-variants.js";
 
 	export { alertVariants, type AlertVariant } from "./alert-variants.js";
+	export type AlertType = "info" | "success" | "warning" | "error" | AlertVariantValue;
 </script>
 
 <script lang="ts">
@@ -13,6 +14,7 @@
 
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		variant?: AlertVariantValue;
+		type?: AlertType;
 		closable?: boolean;
 		closeLabel?: string;
 		title?: string;
@@ -26,7 +28,8 @@
 
 	let {
 		ref = $bindable(null),
-		variant = "default",
+		variant: variantProp,
+		type: typeProp,
 		closable = false,
 		closeLabel = "Dismiss alert",
 		title,
@@ -39,6 +42,14 @@
 		children,
 		...restProps
 	}: Props = $props();
+
+	const variant = $derived.by<AlertVariantValue>(() => {
+		if (variantProp) return variantProp;
+		if (typeProp === "error") return "destructive";
+		if (typeProp === "info") return "default";
+		if (typeProp === "success" || typeProp === "warning") return typeProp;
+		return (typeProp as AlertVariantValue) ?? "default";
+	});
 
 	const statusIcons = {
 		default: Info,
