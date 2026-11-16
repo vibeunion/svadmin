@@ -429,6 +429,26 @@ Lite 使用 `LiteErrorSummary`，传入相同语义的错误条目；条目可�
 `{ operator: 'and' | 'or', value: Filter[] }` 表示，字段条件仍使用
 `{ field, operator, value }`。
 
+SPA 筛选器的逻辑、全部 28 个字段操作符、提示及错误通过 i18n 翻译。
+宿主可覆盖 `filter.<操作符>`、`filter.and` / `filter.or` 和 `filterBuilder.*`；
+缺失词条回退到内置中英文。只有一个可选逻辑或操作符时直接显示说明文本。
+
+使用 `fieldOperators` 为不同字段设置能力，与 `allowedOperators` 取交集，
+没有列出的字段沿用全局配置。datetime/time 字段支持时间比较：
+
+```svelte
+<FilterBuilder
+  {fields}
+  {filters}
+  fieldOperators={{ title: ['contains'], status: ['eq'], from: ['gte'], to: ['lt'] }}
+  allowedLogicalOperators={['and']}
+  allowGroups={false}
+  {onApply}
+/>
+```
+
+上述配置只约束编辑器，宿主仍须确保服务端支持对应查询语义。
+
 ## 资源列表闭环迁移
 
 资源列表闭环由 `AutoTable`、`VirtualTable`、`FilterBuilder`、

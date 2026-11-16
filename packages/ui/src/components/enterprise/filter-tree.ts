@@ -32,7 +32,7 @@ export const isNullOperator = (operator: CrudOperator): boolean => operator === 
 
 export function filterOperators(field: Pick<FieldDefinition, 'type'> | undefined): CrudOperator[] {
   if (!field) return [];
-  if (field.type === 'number' || field.type === 'date') return [...comparison];
+  if (field.type === 'number' || field.type === 'date' || field.type === 'datetime' || field.type === 'time') return [...comparison];
   if (field.type === 'boolean' || field.type === 'select' || field.type === 'multiselect') return [...selection];
   return [...text];
 }

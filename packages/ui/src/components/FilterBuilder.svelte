@@ -9,6 +9,7 @@
   import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
   import { isNumericFilterField as isNumericField } from '@svadmin/core';
   import FilterCollectionInput from './FilterCollectionInput.svelte';
+  import { filterText, filterOperatorText } from './filter-i18n.js';
   import { readFilterTree, compileFilterTree, filterOperators, parseFilterInput, isCollectionOperator, isListOperator, isRangeOperator, isNullOperator,
     FILTER_EDITOR_LIMITS, type FilterGroupNode, type FilterNode, type FilterRuleNode, type FilterEditorIssue, type FilterIssueCode } from './enterprise/filter-tree.js';
 
@@ -25,6 +26,8 @@
     logicalOperator?: 'and' | 'or';
     /** 宿主服务端只支持部分操作符时，限制编辑器可选项；默认沿用字段全量操作符。 */
     allowedOperators?: readonly CrudOperator[];
+    /** 按字段进一步限制操作符，与全局白名单取交集；未列出的字段沿用全局限制。 */
+    fieldOperators?: Readonly<Record<string, readonly CrudOperator[]>>;
     /** 宿主只支持单一组合逻辑时（如扁平 AND 查询），限制逻辑选择；默认 AND/OR 都可用。 */
     allowedLogicalOperators?: readonly ('and' | 'or')[];
     /** 宿主不支持嵌套条件组时关闭新增入口；已保存的嵌套组仍会按白名单校验。 */
@@ -35,12 +38,11 @@
     onReset?: () => void;
     onInvalid?: (issues: FilterEditorIssue[]) => void;
   }
-  let { fields = [], filters = $bindable([]), logicalOperator = $bindable('and'), allowedOperators = undefined,
+  let { fields = [], filters = $bindable([]), logicalOperator = $bindable('and'), allowedOperators = undefined, fieldOperators = undefined,
     allowedLogicalOperators = ['and', 'or'], allowGroups = true, disabled = false,
     class: className, onApply, onReset, onInvalid }: Props = $props();
   const uid = $props.id();
   const i18n = useTranslation();
-  const chinese = $derived(i18n.locale.startsWith('zh'));
   const availableFields = $derived(fields.filter((field) => field.filterable !== false));
   const logicalOperators = $derived<readonly ('and' | 'or')[]>(
     allowedLogicalOperators.length > 0 ? allowedLogicalOperators : ['and'],
@@ -52,9 +54,10 @@
   const editorFields = $derived(fields.map(field => isNumericField(field) ? { ...field, type: 'number' as const } : field));
   function operatorsFor(field: FieldDefinition | undefined): CrudOperator[] {
     const operators = filterOperators(field);
-    if (!allowedOperators) return operators;
-    const allowed = new Set(allowedOperators);
-    return operators.filter((operator) => allowed.has(operator));
+    const perField = field && fieldOperators && Object.hasOwn(fieldOperators, field.key)
+      ? fieldOperators[field.key] : undefined;
+    return operators.filter(operator => (!allowedOperators || allowedOperators.includes(operator))
+      && (!perField || perField.includes(operator)));
   }
   function defaultOperator(field: FieldDefinition | undefined): CrudOperator | undefined {
     const operators = operatorsFor(field);
@@ -67,7 +70,19 @@
   let nextId = 0;
   let lastInputFilters: Filter[] | undefined;
   let preserved = $state.raw<ReadonlyMap<string, Filter>>(new Map());
-  const compilation = $derived(compileFilterTree({ ...root, operator: activeLogicalOperator }, editorFields, preserved));
+  const compilation = $derived.by(() => {
+    const compiled = compileFilterTree({ ...root, operator: activeLogicalOperator }, editorFields, preserved);
+    if (!compiled.ok) return compiled;
+    const issues: FilterEditorIssue[] = [];
+    function validate(node: FilterNode): void {
+      if (node.kind === 'group') node.children.forEach(validate);
+      else if (!node.readonly && !operatorsFor(editorFields.find(field => field.key === node.field)).includes(node.operator)) {
+        issues.push({ path: node.id, code: 'operator' });
+      }
+    }
+    validate(root);
+    return issues.length ? { ok: false as const, issues } : compiled;
+  });
   const issues = $derived(loadIssues.length ? loadIssues : attempted && !compilation.ok ? compilation.issues : []);
   function countNodes(node: FilterNode): number { return 1 + (node.kind === 'group' ? node.children.reduce((sum, child) => sum + countNodes(child), 0) : 0); }
   const nodeCount = $derived(countNodes(root));
@@ -139,17 +154,9 @@
   });
 
   function message(code: FilterIssueCode): string {
-    const labels: Record<FilterIssueCode, [string, string]> = {
-      'invalid-filter': ['条件结构不受支持，原条件未被修改', 'Unsupported filter structure; the original query is unchanged'],
-      limit: ['条件数量或深度超过限制', 'Filter count or depth exceeds the limit'],
-      'unknown-field': ['字段不可用于筛选', 'Field is unavailable for filtering'],
-      operator: ['操作符不适用于此字段', 'Operator is not supported for this field'],
-      logic: ['组合逻辑不受支持，原条件未被修改', 'Unsupported group logic; the original query is unchanged'],
-      value: ['请输入有效的类型化值', 'Enter a valid typed value'],
-      'empty-group': ['条件组不能为空', 'A filter group cannot be empty'],
-    };
-    return labels[code][chinese ? 0 : 1];
+    return filterText(i18n, `filterBuilder.error.${code}`);
   }
+
   function appendRule(group: FilterGroupNode): void {
     if (disabled || loadIssues.length || full) return;
     const field = availableFields[0];
@@ -225,10 +232,13 @@
 
 {#snippet groupEditor(group: FilterGroupNode, depth: number, top: boolean)}
   <fieldset class="filter-group" data-testid={top ? 'filter-builder-root' : 'filter-builder-group'} data-filter-group={group.id} disabled={disabled}>
-    <legend>{top ? (chinese ? '筛选条件' : 'Filters') : (chinese ? '条件组' : 'Filter group')}</legend>
+    <legend>{filterText(i18n, top ? 'filterBuilder.filters' : 'filterBuilder.group')}</legend>
     <div class="group-actions">
-      <label for={`${uid}-${group.id}-logic`}>{chinese ? '逻辑' : 'Logic'}</label>
-      <Select id={`${uid}-${group.id}-logic`} aria-label={chinese ? '组合逻辑' : 'Group logic'}
+      <label for={`${uid}-${group.id}-logic`}>{filterText(i18n, 'filterBuilder.logic')}</label>
+      {#if logicalOperators.length === 1}
+        <output id={`${uid}-${group.id}-logic`} aria-label={filterText(i18n, 'filterBuilder.groupLogic')} class="fixed-choice">{filterText(i18n, `filter.${activeLogicalOperator}`)}</output>
+      {:else}
+      <Select id={`${uid}-${group.id}-logic`} aria-label={filterText(i18n, 'filterBuilder.groupLogic')}
         value={top ? activeLogicalOperator : group.operator}
         disabled={disabled || logicalOperators.length <= 1}
         onchange={(event: Event) => {
@@ -238,22 +248,23 @@
           if (!logicalOperators.includes(next)) return;
           if (top) logicalOperator = next; else group.operator = next;
         }}>
-        {#each logicalOperators as operator (operator)}<option value={operator}>{operator.toUpperCase()}</option>{/each}
+        {#each logicalOperators as operator (operator)}<option value={operator}>{filterText(i18n, `filter.${operator}`)}</option>{/each}
       </Select>
+      {/if}
       <Button type="button" size="sm" variant="outline" disabled={full || depth >= FILTER_EDITOR_LIMITS.depth || !availableFields.length}
         data-testid={top ? 'filter-builder-add-rule' : 'filter-group-add-rule'} onclick={() => appendRule(group)}>
         <Plus size={14} aria-hidden="true" />{i18n.t('common.addRule')}
       </Button>
       {#if allowGroups}
         <Button type="button" size="sm" variant="ghost" disabled={full || depth >= FILTER_EDITOR_LIMITS.depth - 1}
-          data-testid="filter-builder-add-group" onclick={() => appendGroup(group)}>{chinese ? '添加条件组' : 'Add group'}</Button>
+          data-testid="filter-builder-add-group" onclick={() => appendGroup(group)}>{filterText(i18n, 'filterBuilder.addGroup')}</Button>
       {/if}
     </div>
     {#each group.children as node (node.id)}
       {#if node.kind === 'group'}
         <div class="nested-group">
           {@render groupEditor(node, depth + 1, false)}
-          <Button type="button" size="sm" variant="ghost" aria-label={chinese ? '删除条件组' : 'Remove group'} onclick={() => removeNode(group, node.id)}><Trash2 size={14} aria-hidden="true" /></Button>
+          <Button type="button" size="sm" variant="ghost" aria-label={filterText(i18n, 'filterBuilder.removeGroup')} onclick={() => removeNode(group, node.id)}><Trash2 size={14} aria-hidden="true" /></Button>
         </div>
       {:else}
         {@const field = availableFields.find((item) => item.key === node.field)}
@@ -263,30 +274,34 @@
         {@const describedby = issues.flatMap((issue, index) => issue.path === node.id ? [`${uid}-issue-${index}`] : []).join(' ') || undefined}
         <div class="filter-rule" data-testid="filter-builder-rule" data-filter-rule={node.id}>
           {#if node.readonly}
-            <output aria-label={i18n.t('filter.readonly')}>{node.field} {node.operator} {JSON.stringify(node.value)}</output>
+            <output aria-label={i18n.t('filter.readonly')}>{field?.label || node.field} {filterOperatorText(i18n, node.operator)} {JSON.stringify(node.value)}</output>
           {:else}
           <div>
-            <label for={`${uid}-${node.id}-field`}>{chinese ? '字段' : 'Field'}</label>
+            <label for={`${uid}-${node.id}-field`}>{filterText(i18n, 'filterBuilder.field')}</label>
             <Select id={`${uid}-${node.id}-field`} value={node.field} onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeField(node, event.currentTarget.value); }}>
               {#if !field}<option value={node.field} disabled>{node.field}</option>{/if}
               {#each availableFields as option (option.key)}<option value={option.key}>{option.label || option.key}</option>{/each}
             </Select>
           </div>
           <div>
-            <label for={`${uid}-${node.id}-operator`}>{chinese ? '操作符' : 'Operator'}</label>
+            <label for={`${uid}-${node.id}-operator`}>{filterText(i18n, 'filterBuilder.operator')}</label>
+            {#if allowed.length === 1 && allowed.includes(node.operator)}
+              <output id={`${uid}-${node.id}-operator`} aria-label={filterText(i18n, 'filterBuilder.operator')} class="fixed-choice">{filterOperatorText(i18n, node.operator)}</output>
+            {:else}
             <Select id={`${uid}-${node.id}-operator`} value={node.operator} onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeOperator(node, event.currentTarget.value as CrudOperator); }}>
-              {#if !allowed.includes(node.operator)}<option value={node.operator} disabled>{node.operator}</option>{/if}
-              {#each allowed as operator (operator)}<option value={operator}>{operator}</option>{/each}
+              {#if !allowed.includes(node.operator)}<option value={node.operator} disabled>{filterOperatorText(i18n, node.operator)}</option>{/if}
+              {#each allowed as operator (operator)}<option value={operator}>{filterOperatorText(i18n, operator)}</option>{/each}
             </Select>
+            {/if}
           </div>
           <div>
             {#if collection && field}
-              <span id={`${uid}-${node.id}-value-label`}>{chinese ? '值' : 'Value'}</span>
+              <span id={`${uid}-${node.id}-value-label`}>{filterText(i18n, 'filterBuilder.value')}</span>
             {:else}
-              <label for={`${uid}-${node.id}-value`}>{collection ? (chinese ? '值（JSON 数组）' : 'Value (JSON array)') : (chinese ? '值' : 'Value')}</label>
+              <label for={`${uid}-${node.id}-value`}>{filterText(i18n, collection ? 'filterBuilder.jsonValue' : 'filterBuilder.value')}</label>
             {/if}
             {#if isNullOperator(node.operator)}
-              <Input id={`${uid}-${node.id}-value`} value={chinese ? '无需填值' : 'No value required'} disabled />
+              <Input id={`${uid}-${node.id}-value`} value={filterText(i18n, 'filterBuilder.noValue')} disabled />
             {:else if collection && field}
               <FilterCollectionInput {field} value={node.value}
                 {invalid} {describedby} labelledby={`${uid}-${node.id}-value-label`}
@@ -303,13 +318,13 @@
                   const option = field.options?.[Number(raw)];
                   if (option && !option.disabled) node.value = option.value;
                 }}>
-                <option value="">{chinese ? '请选择' : 'Choose'}</option>
+                <option value="">{filterText(i18n, 'filterBuilder.choose')}</option>
                 {#each field.options as option, index (index)}<option value={String(index)} disabled={option.disabled}>{option.label}</option>{/each}
               </Select>
             {:else if !collection && field?.type === 'boolean'}
               <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid} aria-describedby={describedby} value={valueText(node.value)}
                 onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeValue(node, event.currentTarget.value); }}>
-                <option value="">{chinese ? '请选择' : 'Choose'}</option><option value="true">true</option><option value="false">false</option>
+                <option value="">{filterText(i18n, 'filterBuilder.choose')}</option><option value="true">{i18n.t('common.yes')}</option><option value="false">{i18n.t('common.no')}</option>
               </Select>
             {:else if !collection && isNumericField(field)}
               <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} aria-describedby={describedby} value={typeof node.value === 'number' ? node.value : undefined}
@@ -324,11 +339,11 @@
             {/if}
           </div>
           {/if}
-          <Button type="button" size="sm" variant="ghost" aria-label={chinese ? '删除条件' : 'Remove rule'} onclick={() => removeNode(group, node.id)}><Trash2 size={14} aria-hidden="true" /></Button>
+          <Button type="button" size="sm" variant="ghost" aria-label={filterText(i18n, 'filterBuilder.removeRule')} onclick={() => removeNode(group, node.id)}><Trash2 size={14} aria-hidden="true" /></Button>
         </div>
       {/if}
     {:else}
-      <p class="empty">{chinese ? '暂无筛选条件，请添加规则。' : 'No filters yet. Add a rule.'}</p>
+      <p class="empty">{filterText(i18n, 'filterBuilder.empty')}</p>
     {/each}
   </fieldset>
 {/snippet}
@@ -346,6 +361,7 @@
 </div>
 
 <style>
+  .fixed-choice { display: flex; align-items: center; min-height: 2.25rem; padding: .375rem .75rem; color: var(--muted-foreground); }
   .svadmin-filter-builder { color: var(--foreground); background: var(--card, var(--background)); border: 1px solid var(--border); border-radius: var(--radius, .5rem); padding: .75rem; font-size: .875rem; }
   .builder-header, .group-actions, .nested-group { display: flex; align-items: center; gap: .5rem; }
   .builder-header { justify-content: space-between; flex-wrap: wrap; padding-block-end: .75rem; }
