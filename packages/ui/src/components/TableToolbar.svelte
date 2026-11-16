@@ -121,7 +121,7 @@
         triggerVariant="ghost"
         triggerSize="icon"
         class="h-8 w-8"
-        onchange={oncolumnschange}
+        {...oncolumnschange ? { onchange: oncolumnschange } : {}}
       />
     {/if}
 
