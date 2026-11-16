@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/sse",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Native Server-Sent Events (SSE) LiveProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

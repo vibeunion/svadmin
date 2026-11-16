@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.11](https://github.com/vibeunion/svadmin/compare/clerk-v0.2.10...clerk-v0.2.11) (2026-11-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.0
+
 ## [0.2.10](https://github.com/vibeunion/svadmin/compare/clerk-v0.2.9...clerk-v0.2.10) (2026-11-15)
 
 
