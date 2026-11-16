@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/svelte";
 import TagsInput from "./TagsInput.svelte";
 
-describe("TagsInput Arco Enhancements", () => {
+describe("TagsInput collapse", () => {
   it("collapses tags when maxTagCount is exceeded", () => {
     const { container } = render(TagsInput, {
       props: {
