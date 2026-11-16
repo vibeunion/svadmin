@@ -157,6 +157,9 @@ describe('Remaining visual style contract', () => {
     expect(css).toContain('--color-link-light-3: var(--primary-light-3);');
     expect(css).toContain('--color-neutral-8: var(--muted-foreground);');
     expect(css).toContain('--border-radius-small: 2px;');
+    expect(css).toContain('border-radius: var(--border-radius-small, 2px);');
+    expect(rule('.svadmin-checkbox:hover:not(:disabled)')).toContain('var(--svadmin-fill-4, var(--border))');
+    expect(rule('.svadmin-sheet-content > :not(.svadmin-sheet-header):not(.svadmin-sheet-footer)')).toContain('padding: 12px 16px');
     expect(css).toContain('--color-tooltip-bg: #1D2129;');
     expect(css).toContain('--svadmin-shadow-notification: 0 4px 12px rgb(0 0 0 / 0.15);');
     expect(rule('.svadmin-link[aria-disabled="true"]')).toContain('var(--color-link-light-3, var(--primary-light-3))');

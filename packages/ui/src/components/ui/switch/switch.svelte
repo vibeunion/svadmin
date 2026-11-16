@@ -51,7 +51,7 @@
 	{...restProps}
 >
 	{#if checkedText || uncheckedText}
-		<span class={cn("svadmin-switch-text text-[10px] font-semibold select-none leading-none", checked ? "pl-2 pr-6 text-primary-foreground" : "pl-6 pr-2 text-muted-foreground")}>
+		<span class={cn("svadmin-switch-text text-xs font-medium select-none leading-none", checked ? "pl-2 pr-6 text-primary-foreground" : "pl-6 pr-2 text-muted-foreground")}>
 			{checked ? (checkedText ?? "") : (uncheckedText ?? "")}
 		</span>
 	{/if}

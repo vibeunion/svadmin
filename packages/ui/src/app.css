@@ -830,9 +830,9 @@ h6,
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
+  gap: 8px;
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-small, 2px);
   background-clip: padding-box;
   font-size: 0.875rem;
   /* Official button: weight 400, line-height 1.5715. */
@@ -1102,13 +1102,13 @@ h6,
 
 /* Official button padding: mini 11px, small and default 15px, large 19px. Heights stay 24/28/32/36. */
 :is([data-slot="button"], .svadmin-button):is([data-size="default"], .svadmin-button-size--default),
-:is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default) { min-height: var(--svadmin-control-h); padding: 0 15px; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default) { min-height: var(--svadmin-control-h); padding: 0 15px; gap: 8px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs),
-:is([data-svadmin-button], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs) { min-height: var(--svadmin-control-h-mini); padding: 0 11px; font-size: 12px; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs) { min-height: var(--svadmin-control-h-mini); padding: 0 11px; font-size: 12px; gap: 4px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm),
-:is([data-svadmin-button], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm) { min-height: var(--svadmin-control-h-sm); padding: 0 15px; font-size: 14px; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm) { min-height: var(--svadmin-control-h-sm); padding: 0 15px; font-size: 14px; gap: 6px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg),
-:is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg) { min-height: var(--svadmin-control-h-lg); padding: 0 19px; font-size: 14px; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg) { min-height: var(--svadmin-control-h-lg); padding: 0 19px; font-size: 14px; gap: 8px; }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon),
 :is([data-svadmin-button], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon) { width: var(--svadmin-control-h); height: var(--svadmin-control-h); }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon-xs"], .svadmin-button-size--icon-xs),
@@ -1966,8 +1966,11 @@ main {
   flex: 1 1 auto;
   min-height: 0;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 0;
+  padding: 0;
+}
+.svadmin-sheet-content > :not(.svadmin-sheet-header):not(.svadmin-sheet-footer) {
+  padding: 12px 16px;
 }
 
 /* Narrow screens use the full viewport for detail work and keep touch scrolling
@@ -2164,9 +2167,9 @@ main {
 .svadmin-result__subtitle { margin: 0; max-width: 36rem; color: var(--muted-foreground); font-size: 14px; line-height: 1.5715; }
 .svadmin-result__extra { display: flex; gap: 12px; margin-top: 20px; }
 
-.svadmin-popconfirm { display: grid; gap: 0.75rem; width: max-content; max-width: 20rem; }
-.svadmin-popconfirm__title { margin: 0; color: var(--foreground); font-size: 0.875rem; }
-.svadmin-popconfirm__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.svadmin-popconfirm { display: grid; gap: 16px; width: max-content; max-width: 20rem; padding: 16px; }
+.svadmin-popconfirm__title { margin: 0; color: var(--foreground); font-size: 0.875rem; line-height: 1.5715; }
+.svadmin-popconfirm__actions { display: flex; justify-content: flex-end; gap: 8px; }
 .svadmin-popconfirm__trigger { display: inline-flex; }
 
 .svadmin-back-top {
@@ -2183,13 +2186,13 @@ main {
 .svadmin-item-list__description { margin: 0.25rem 0 0; color: var(--muted-foreground); font-size: 0.75rem; }
 
 .svadmin-tree-root, .svadmin-tree { margin: 0; padding: 0; list-style: none; }
-.svadmin-tree .svadmin-tree { margin-inline-start: 1rem; }
+.svadmin-tree .svadmin-tree { margin-inline-start: 22px; }
 .svadmin-tree__toggle, .svadmin-tree__leaf {
   display: flex; align-items: center; min-height: var(--svadmin-control-h); width: 100%;
-  padding: 0 0.5rem; border: 0; border-radius: var(--radius-sm);
-  background: transparent; color: var(--foreground); font: inherit; font-size: 0.875rem; text-align: start;
+  padding: 5px 4px; border: 0; border-radius: var(--border-radius-small, 2px);
+  background: transparent; color: var(--foreground); font: inherit; font-size: var(--svadmin-text-body); text-align: start;
 }
-.svadmin-tree__toggle:hover { background: var(--muted); }
+.svadmin-tree__toggle:hover, .svadmin-tree__leaf:hover { background: var(--svadmin-fill-2, var(--muted)); color: var(--foreground); }
 
 .svadmin-textarea {
   width: 100%;
@@ -2910,6 +2913,9 @@ main {
   background: var(--primary);
 }
 
+.svadmin-checkbox:hover:not(:disabled) {
+  border-color: var(--svadmin-fill-4, var(--border));
+}
 .svadmin-checkbox:focus-visible {
   border-color: var(--ring);
   outline: var(--svadmin-focus-width) solid color-mix(in oklch, var(--ring) 48%, transparent);
@@ -3168,7 +3174,7 @@ main {
   margin-top: 0.375rem;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: var(--border-radius-medium, var(--radius));
   background: var(--popover);
   color: var(--popover-foreground);
   box-shadow: var(--svadmin-shadow-popup, var(--svadmin-shadow-overlay));
@@ -3191,6 +3197,11 @@ main {
 .svadmin-popover-content[data-state="closed"] {
   opacity: 0;
   transform: scale(0.95);
+}
+
+.svadmin-popover-content.svadmin-popconfirm {
+  padding: 16px;
+  gap: 16px;
 }
 
 .svadmin-avatar-image {
@@ -3675,14 +3686,14 @@ details[data-svadmin-filter] > summary,
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  min-height: 2rem;
+  min-height: 40px;
   margin: 0;
-  padding: 0.25rem 0;
+  padding: 8px 0;
   list-style: none;
   cursor: pointer;
-  font-size: 0.8125rem;
+  font-size: var(--svadmin-text-body);
   font-weight: 500;
-  line-height: 1.25rem;
+  line-height: 24px;
 }
 
 details.svadmin-collapsible > summary::-webkit-details-marker,
@@ -4336,8 +4347,8 @@ details[data-svadmin-filter][open] > :not(summary),
 .svadmin-evidence-card__body {
   margin-top: 0.75rem;
   color: var(--svadmin-text, var(--foreground));
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: var(--svadmin-text-body);
+  line-height: var(--svadmin-leading-body);
 }
 
 .svadmin-evidence-card__source {
@@ -4487,7 +4498,7 @@ details[data-svadmin-filter][open] > :not(summary),
   background: color-mix(in oklch, var(--activity-tone) 15%, transparent);
   color: var(--activity-text);
   padding: 0 0.25rem;
-  font-size: 0.625rem;
+  font-size: var(--svadmin-text-caption);
 }
 .svadmin-activity-feed :is([data-slot="badge"], .svadmin-badge)[data-status="success"] { --activity-tone: var(--success); --activity-text: var(--success); }
 .svadmin-activity-feed :is([data-slot="badge"], .svadmin-badge)[data-status="warning"] { --activity-tone: var(--warning); --activity-text: var(--warning-foreground); }
@@ -5379,7 +5390,7 @@ html.layout-clean-flat[data-theme="default"] body {
 }
 
 .layout-clean-flat[data-theme="default"] :is([data-slot="button"], .svadmin-button) {
-  border-radius: var(--radius);
+  border-radius: var(--border-radius-small, 2px);
   box-shadow: var(--svadmin-control-shadow);
   font-weight: 400;
   transition: transform 100ms cubic-bezier(0, 0, 1, 1), box-shadow 100ms cubic-bezier(0, 0, 1, 1), background-color 100ms cubic-bezier(0, 0, 1, 1), border-color 100ms cubic-bezier(0, 0, 1, 1);
@@ -5415,7 +5426,7 @@ html.layout-clean-flat[data-theme="default"] body {
 .layout-clean-flat[data-theme="default"] [data-slot="textarea"],
 .layout-clean-flat[data-theme="default"] [data-slot="select"],
 .layout-clean-flat[data-theme="default"] [data-slot="select-trigger"] {
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-small, 2px);
   background: var(--card);
   box-shadow: var(--svadmin-control-shadow);
 }

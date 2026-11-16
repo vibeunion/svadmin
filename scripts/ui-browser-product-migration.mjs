@@ -93,7 +93,7 @@ const buttonIcon = ':is([data-slot="button"], .svadmin-button):is([data-size="ic
 
 export const productComponentSizeMigration = Object.freeze({
   ':is([data-slot="button"], .svadmin-button), :is([data-svadmin-button], .svadmin-button)': Object.freeze({
-    'border-radius': Object.freeze(['var(--radius-md)', 'var(--radius-sm)']),
+    'border-radius': Object.freeze(['var(--radius-md)', 'var(--border-radius-small, 2px)']),
     'font-weight': Object.freeze(['500', '400']),
     'line-height': Object.freeze(['1', '1.5715']),
   }),

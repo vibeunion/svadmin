@@ -364,7 +364,8 @@ Shared control states read the same tokens in every brand preset. Extra names ar
 - `--color-neutral-1` through `--color-neutral-10`, `--border-radius-small` (2px) through `--border-radius-large` (8px), `--color-tooltip-bg`, `--color-spin-layer-bg`, and `--color-bg-popup` are available to host CSS.
 - `--svadmin-shadow-notification` is `0 4px 12px rgb(0 0 0 / 0.15)`. Dialogs keep `--svadmin-shadow-overlay`. Menus, popovers, and dropdowns keep `--svadmin-shadow-popup`.
 - Invalid inputs use the danger light fill and no extra halo. The focus ring stays a 2px outline with a 2px offset.
-- The switch track is fill-4, 40×24, with a 16px thumb. Small is 28×16 with a 12px thumb. The thumb does not use the dialog shadow.
+- The switch track is fill-4, 40×24, with a 16px thumb. Small is 28×16 with a 12px thumb. The thumb does not use the dialog shadow. Optional switch text is 12px and the loading spinner stays inside the thumb.
+- Default-skin buttons and fields use the 2px small radius. Cards stay at the 4px product radius. Default icon spacing is 8px, small is 6px, and mini is 4px.
 - Tooltip surfaces use `--color-tooltip-bg` and white text. Dropdown hover is fill-2 with text-1.
 - Outline buttons keep a neutral border at rest. Hover and press use color-5 and color-7 on the shared button rule. Stripe canvas colors stay on `[data-theme="stripe"]`.
 
