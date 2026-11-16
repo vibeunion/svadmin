@@ -10,6 +10,7 @@ import {
   visualContractDisabledSelector,
   stripeDarkTokenMigration,
   stripeLightTokenMigration,
+  controlSizeMigration,
   tableSizeMigration,
 } from './ui-browser-migration-reference.mjs';
 import {
@@ -30,14 +31,27 @@ test('reference changes only explicitly approved token, body and table declarati
   assert.deepEqual(tableSizeMigration, {
     '.svadmin-table-head': {
       height: ['2.25rem', '2.5rem'],
-      background: [null, 'var(--background)'],
-      color: ['var(--foreground)', 'var(--muted-foreground)'],
-      'font-size': [null, '0.75rem'],
+      padding: ['0.5rem', '9px 16px'],
+      background: [null, 'var(--svadmin-fill-2, var(--muted))'],
+      'font-size': [null, '0.875rem'],
+      'line-height': [null, '1.5715'],
     },
-    '.svadmin-table-cell': { height: [null, '2.5rem'], 'font-size': [null, '0.8125rem'] },
+    '.svadmin-table-cell': {
+      height: [null, '2.5rem'],
+      padding: ['0.5rem', '9px 16px'],
+      'font-size': [null, '0.875rem'],
+      'line-height': [null, '1.5715'],
+    },
   });
   const reference = postcss.parse(createMigrationReference(baseline));
-  reference.walkDecls('--primary-3', (declaration) => declaration.remove());
+  for (const [property, value] of Object.entries(visualContractAdditions.light)) {
+    assert.ok(value.length > 0);
+    reference.walkDecls(property, (declaration) => declaration.remove());
+  }
+  for (const [property, value] of Object.entries(visualContractAdditions.dark)) {
+    assert.ok(value.length > 0);
+    reference.walkDecls(property, (declaration) => declaration.remove());
+  }
   reference.walkRules(visualContractDisabledSelector, (rule) => rule.remove());
   assert.equal(visualContractAdditions.light['--primary-3'], '#94BFFF');
   assert.equal(visualContractAdditions.dark['--primary-3'], '#0E32A6');
@@ -79,7 +93,7 @@ test('reference changes only explicitly approved token, body and table declarati
       }
     });
   }
-  for (const [selector, values] of Object.entries(tableSizeMigration)) {
+  for (const migration of [controlSizeMigration, tableSizeMigration]) for (const [selector, values] of Object.entries(migration)) {
     reference.walkRules(selector, rule => {
       if (rule.parent?.name !== 'layer' || rule.parent.params !== 'components') return;
       for (const [property, [before, after]] of Object.entries(values)) {

@@ -60,15 +60,15 @@ export const bodyStyleMigration = Object.freeze({
     "'Inter', ui-sans-serif, system-ui, sans-serif",
     'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   ],
-  // 正文行高跟 --svadmin-leading-body（1.4）。这里写成字面量，历史样式表没有这个变量。
-  'line-height': ['1.5', '1.4'],
+  // 正文行高跟 --svadmin-leading-body（1.5715）。这里写成字面量，历史样式表没有这个变量。
+  'line-height': ['1.5', '1.5715'],
 });
 
 export const visualContractDisabledSelector = ':is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled]), :is([data-svadmin-button], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled])';
 
 export const visualContractAdditions = Object.freeze({
-  light: Object.freeze({ '--primary-3': '#94BFFF' }),
-  dark: Object.freeze({ '--primary-3': '#0E32A6' }),
+  light: Object.freeze({ '--primary-3': '#94BFFF', '--svadmin-fill-2': '#F2F3F5', '--svadmin-text-3': '#86909C' }),
+  dark: Object.freeze({ '--primary-3': '#0E32A6', '--svadmin-fill-2': 'rgb(255 255 255 / 8%)', '--svadmin-text-3': 'rgb(255 255 255 / 50%)' }),
   disabled: Object.freeze({
     'pointer-events': 'none',
     opacity: '1',
@@ -82,17 +82,53 @@ export const visualContractAdditions = Object.freeze({
 export const tableSizeMigration = Object.freeze({
   '.svadmin-table-head': Object.freeze({
     height: Object.freeze(['2.25rem', '2.5rem']),
-    background: Object.freeze([null, 'var(--background)']),
-    color: Object.freeze(['var(--foreground)', 'var(--muted-foreground)']),
-    'font-size': Object.freeze([null, '0.75rem']),
+    padding: Object.freeze(['0.5rem', '9px 16px']),
+    background: Object.freeze([null, 'var(--svadmin-fill-2, var(--muted))']),
+    'font-size': Object.freeze([null, '0.875rem']),
+    'line-height': Object.freeze([null, '1.5715']),
   }),
   '.svadmin-table-cell': Object.freeze({
     height: Object.freeze([null, '2.5rem']),
-    'font-size': Object.freeze([null, '0.8125rem']),
+    padding: Object.freeze(['0.5rem', '9px 16px']),
+    'font-size': Object.freeze([null, '0.875rem']),
+    'line-height': Object.freeze([null, '1.5715']),
   }),
 });
 
-for (const migration of [stripeLightTokenMigration, stripeDarkTokenMigration, bodyStyleMigration]) {
+// 组件级视觉契约迁移：控件内边距、正文字重与卡片标题字号。
+export const controlSizeMigration = Object.freeze({
+  ':is([data-slot="button"], .svadmin-button), :is([data-svadmin-button], .svadmin-button)': Object.freeze({
+    'font-weight': Object.freeze(['500', '400']),
+    'line-height': Object.freeze(['1', '1.5715']),
+  }),
+  ':is([data-slot="button"], .svadmin-button):is([data-size="default"], .svadmin-button-size--default), :is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default)': Object.freeze({
+    padding: Object.freeze(['0 0.75rem', '0 15px']),
+  }),
+  '.svadmin-input:not([data-input-type="file"])': Object.freeze({
+    padding: Object.freeze(['0.375rem 0.75rem', '0 12px']),
+  }),
+  '.svadmin-input::placeholder': Object.freeze({
+    color: Object.freeze(['var(--muted-foreground)', 'var(--svadmin-text-3)']),
+  }),
+  '.svadmin-textarea::placeholder': Object.freeze({
+    color: Object.freeze(['var(--muted-foreground)', 'var(--svadmin-text-3)']),
+  }),
+  '.svadmin-card': Object.freeze({
+    'border-radius': Object.freeze(['0.5rem', '4px']),
+  }),
+  '.svadmin-card-header': Object.freeze({
+    'align-items': Object.freeze(['start', 'center']),
+    'min-height': Object.freeze([null, '46px']),
+    padding: Object.freeze(['0 1rem', '0 16px']),
+  }),
+  '.svadmin-card-title': Object.freeze({
+    'font-size': Object.freeze(['inherit', '1rem']),
+    'font-weight': Object.freeze(['600', '500']),
+    'line-height': Object.freeze(['1', '1.5']),
+  }),
+});
+
+for (const migration of [stripeLightTokenMigration, stripeDarkTokenMigration, bodyStyleMigration, controlSizeMigration]) {
   for (const values of Object.values(migration)) Object.freeze(values);
 }
 
@@ -153,6 +189,7 @@ export function createMigrationReference(baselineCss) {
   replaceDeclarations(root, '.dark', productDarkTokenMigration, isBaseToken);
   replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
   migrateComponentDeclarations(root, tableSizeMigration);
+  migrateComponentDeclarations(root, controlSizeMigration);
   migrateComponentDeclarations(root, productComponentSizeMigration);
   appendVisualContract(root);
   return root.toString();
