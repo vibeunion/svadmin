@@ -126,4 +126,29 @@ describe('Remaining visual style contract', () => {
     expect(css).toContain('min-height: 46px;');
     expect(css).toContain('gap: 8px;');
   });
+
+  it('matches the remaining official select, pagination, list, and progress metrics', () => {
+    const smallSelect = rule('.svadmin-select[data-size="small"]');
+    expect(smallSelect).toContain('height: var(--svadmin-control-h-sm)');
+    expect(smallSelect).toContain('font-size: var(--svadmin-text-body)');
+    expect(smallSelect).not.toContain('0.8125rem');
+    expect(rule('.svadmin-select[data-size="mini"]')).toContain('height: var(--svadmin-control-h-mini)');
+    expect(rule('.svadmin-select[data-size="large"]')).toContain('height: var(--svadmin-control-h-lg)');
+    expect(css).toContain('--svadmin-switch-width: 2.5rem;');
+    expect(css).toContain('--svadmin-switch-height: 1.5rem;');
+    expect(css).toContain('--svadmin-switch-width-sm: 1.75rem;');
+    expect(css).toContain('--svadmin-switch-height-sm: 1rem;');
+    const page = rule('[data-slot="pagination-link"].svadmin-pagination-item[data-active="true"]');
+    expect(page).toContain('background: var(--primary-light-1)');
+    expect(page).toContain('color: var(--primary)');
+    expect(rule(':is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item')).toContain('border: 0 solid transparent');
+    expect(rule(':is([data-slot="pagination-link"], [data-slot="pagination-previous"], [data-slot="pagination-next"]).svadmin-pagination-item')).toContain('height: 32px');
+    expect(rule('.svadmin-breadcrumb-page')).toContain('font-weight: 500');
+    expect(css).not.toContain('.svadmin-breadcrumb-list {\n    gap: 0.625rem;');
+    expect(rule('.svadmin-item-list__item')).toContain('padding: 13px 20px');
+    expect(rule('.svadmin-item-list__title')).toContain('var(--svadmin-text-section)');
+    expect(rule('.svadmin-progress')).toContain('height: 4px');
+    expect(rule('.svadmin-result__icon')).toContain('margin-bottom: 16px');
+    expect(css).toContain('--svadmin-mask: rgb(29 33 41 / 60%);');
+  });
 });

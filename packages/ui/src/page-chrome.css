@@ -59,7 +59,8 @@
     color: var(--foreground);
     font-size: var(--svadmin-text-title);
     font-weight: 600;
-    line-height: var(--svadmin-leading-tight);
+    /* Official page-header head line-height is 28px on the 20px title (1.4). */
+    line-height: 1.4;
     overflow-wrap: anywhere;
   }
   .svadmin-page-header__description {

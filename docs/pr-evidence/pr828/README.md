@@ -1,6 +1,6 @@
 # PR 828 visual evidence
 
-Default-skin fixture for the visual contract pass.
+Default-skin rest fixture for the visual contract pass. Hover and press are not captured.
 
-- `1440x900.png`: buttons, alert light fills, dialog chrome, and selected sidebar item at 1440x900.
-- `1920x1080.png`: the same surfaces at 1920x1080.
+- `1440x900.png`: buttons, select sizes, borderless pagination with the current page on primary-light, breadcrumb, steps, progress, alerts, dialog chrome, list rows, and the selected sidebar item at 1440x900.
+- `1920x1080.png`: the same surfaces at 1920x1080, plus the upload drop area.
