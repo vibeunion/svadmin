@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/pusher",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "Pusher LiveProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

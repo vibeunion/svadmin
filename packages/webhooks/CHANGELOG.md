@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.7](https://github.com/vibeunion/svadmin/compare/webhooks-v0.2.6...webhooks-v0.2.7) (2026-11-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.1
+
 ## [0.2.6](https://github.com/vibeunion/svadmin/compare/webhooks-v0.2.5...webhooks-v0.2.6) (2026-11-16)
 
 
