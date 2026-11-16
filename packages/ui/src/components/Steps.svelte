@@ -16,6 +16,8 @@
     items: StepItem[];
     direction?: 'horizontal' | 'vertical';
     labelPlacement?: 'horizontal' | 'vertical';
+    type?: 'default' | 'dot';
+    size?: 'default' | 'small';
     status?: 'wait' | 'process' | 'finish' | 'error';
     clickable?: boolean;
     class?: string;
@@ -27,6 +29,8 @@
     items,
     direction = 'horizontal',
     labelPlacement = 'horizontal',
+    type = 'default',
+    size = 'default',
     status = 'process',
     clickable = false,
     class: className = '',
@@ -46,7 +50,14 @@
   }
 </script>
 
-<ol class={cn('svadmin-steps', className)} data-direction={direction} data-label-placement={labelPlacement} aria-label="Steps">
+<ol
+  class={cn('svadmin-steps', className)}
+  data-direction={direction}
+  data-label-placement={labelPlacement}
+  data-type={type}
+  data-size={size}
+  aria-label="Steps"
+>
   {#each items as item, index (item.id ?? `${item.title}-${index}`)}
     {@const stateValue = state(index)}
     <li class="svadmin-steps__item" data-status={stateValue} data-disabled={item.disabled || undefined}>
@@ -58,7 +69,17 @@
         aria-current={index === current ? 'step' : undefined}
       >
         <span class="svadmin-steps__indicator" aria-hidden="true">
-          {#if stateValue === 'finish'}<Check size={14} />{:else if stateValue === 'error'}<X size={14} />{:else if item.icon}{@render item.icon()}{:else}{index + 1}{/if}
+          {#if type === 'dot'}
+            <span class="svadmin-steps__dot"></span>
+          {:else if stateValue === 'finish'}
+            <Check size={size === 'small' ? 12 : 14} />
+          {:else if stateValue === 'error'}
+            <X size={size === 'small' ? 12 : 14} />
+          {:else if item.icon}
+            {@render item.icon()}
+          {:else}
+            {index + 1}
+          {/if}
         </span>
         <span class="svadmin-steps__text">
           <span class="svadmin-steps__title">{item.title}</span>
@@ -151,6 +172,58 @@
   }
   .svadmin-steps[data-label-placement='vertical'] .svadmin-steps__action { flex-direction: column; }
   .svadmin-steps__item[data-disabled='true'] { opacity: 1; color: var(--svadmin-text-4); }
+
+  /* Small size adjustments */
+  .svadmin-steps[data-size='small'] .svadmin-steps__indicator {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+  }
+  .svadmin-steps[data-size='small'] .svadmin-steps__title {
+    font-size: var(--svadmin-text-body);
+    line-height: 1.5rem;
+  }
+  .svadmin-steps[data-size='small'] .svadmin-steps__connector {
+    margin-block-start: 0.75rem;
+  }
+  .svadmin-steps[data-size='small'][data-direction='vertical'] .svadmin-steps__connector {
+    margin: 0 0 0 0.75rem;
+  }
+
+  /* Dot type adjustments */
+  .svadmin-steps[data-type='dot'] .svadmin-steps__indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-block-start: 0.375rem;
+    background: transparent;
+    border: 0;
+  }
+  .svadmin-steps[data-type='dot'] .svadmin-steps__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--svadmin-fill-3, var(--muted));
+    transition: all 200ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  .svadmin-steps[data-type='dot'] .svadmin-steps__item[data-status='process'] .svadmin-steps__dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    background: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+  .svadmin-steps[data-type='dot'] .svadmin-steps__item[data-status='finish'] .svadmin-steps__dot {
+    background: var(--primary);
+  }
+  .svadmin-steps[data-type='dot'] .svadmin-steps__item[data-status='error'] .svadmin-steps__dot {
+    background: var(--destructive);
+  }
+  .svadmin-steps[data-type='dot'] .svadmin-steps__connector {
+    margin-block-start: 0.75rem;
+  }
+  .svadmin-steps[data-type='dot'][data-direction='vertical'] .svadmin-steps__connector {
+    margin: 0 0 0 0.375rem;
+  }
+
   @media (max-width: 40rem) {
     .svadmin-steps[data-direction='horizontal'] { flex-direction: column; }
     .svadmin-steps[data-direction='horizontal'] .svadmin-steps__connector { width: 1px; height: 1rem; margin-inline-start: 0.875rem; }
