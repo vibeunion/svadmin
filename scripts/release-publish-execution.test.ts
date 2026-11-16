@@ -19,33 +19,47 @@ interface PublicationScenario {
   registryStatus?: string;
   publishError?: string;
   omitFirstManifest?: boolean;
+  scaffoldDependency?: boolean;
+  uiRegistryStatusAfterPublish?: string;
 }
 
 function runPublication(scenario: PublicationScenario) {
   const root = mkdtempSync(join(tmpdir(), 'svadmin-publish-execution-'));
   const bin = join(root, 'bin');
   mkdirSync(bin);
-  for (const name of ['first', 'second']) {
+  const packageDirectories = scenario.scaffoldDependency
+    ? ['ui', 'create-svadmin', 'independent']
+    : ['first', 'second'];
+  const firstDirectory = packageDirectories[0];
+  if (!firstDirectory) throw new Error('Missing first publication package');
+  for (const name of packageDirectories) {
     mkdirSync(join(root, 'packages', name), { recursive: true });
-    if (name === 'first' && scenario.omitFirstManifest) continue;
+    if (name === firstDirectory && scenario.omitFirstManifest) continue;
     writeFileSync(
       join(root, 'packages', name, 'package.json'),
-      JSON.stringify({ name: `@svadmin/${name}`, version: '1.0.0' }),
+      JSON.stringify({ name: name === 'create-svadmin' ? '@svadmin/create' : `@svadmin/${name}`, version: '1.0.0' }),
     );
   }
   writeFileSync(join(bin, 'bun'), `#!/bin/bash
-if [ "$2" = "@svadmin/first" ]; then
-  [ "$REGISTRY_STATUS" = "error" ] && exit 1
-  printf '%s\\n' "$REGISTRY_STATUS"
+if [ "$2" = "$PUBLICATION_FIRST_NAME" ]; then
+  publication_registry_status="$REGISTRY_STATUS"
+  if [ "$PUBLICATION_SCAFFOLD_DEPENDENCY" = "true" ] && [ -f "$PUBLICATION_UI_READY" ]; then
+    publication_registry_status="$PUBLICATION_UI_STATUS_AFTER"
+  fi
+  [ "$publication_registry_status" = "error" ] && exit 1
+  printf '%s\\n' "$publication_registry_status"
 else
   echo missing
 fi
 `, { mode: 0o755 });
   writeFileSync(join(bin, 'npm'), `#!/bin/bash
 printf '%s %s\\n' "\${PWD##*/}" "$*" >> "$ATTEMPTS"
-if [ "\${PWD##*/}" = "first" ] && [ -n "$PUBLISH_ERROR" ]; then
-  echo "$PUBLISH_ERROR"
-  exit 1
+if [ "\${PWD##*/}" = "$PUBLICATION_FIRST_DIR" ]; then
+  if [ -n "$PUBLISH_ERROR" ]; then
+    echo "$PUBLISH_ERROR"
+    exit 1
+  fi
+  touch "$PUBLICATION_UI_READY"
 fi
 `, { mode: 0o755 });
   try {
@@ -55,11 +69,16 @@ fi
       env: {
         ...process.env,
         PATH: `${bin}:${process.env.PATH}`,
-        RELEASE_DIRS: 'packages/first\npackages/second',
+        RELEASE_DIRS: packageDirectories.map((name) => `packages/${name}`).join('\n'),
         RUNNER_TEMP: root,
         ATTEMPTS: join(root, 'attempts'),
         REGISTRY_STATUS: scenario.registryStatus ?? 'missing',
         PUBLISH_ERROR: scenario.publishError ?? '',
+        PUBLICATION_FIRST_DIR: firstDirectory,
+        PUBLICATION_FIRST_NAME: `@svadmin/${firstDirectory}`,
+        PUBLICATION_SCAFFOLD_DEPENDENCY: String(scenario.scaffoldDependency ?? false),
+        PUBLICATION_UI_READY: join(root, 'ui-published'),
+        PUBLICATION_UI_STATUS_AFTER: scenario.uiRegistryStatusAfterPublish ?? 'published',
         // 即使存在旧配置，OIDC 失败也不能使用它进行第二次发布。
         NPM_BOOTSTRAP_TOKEN: 'test-only-unused-token',
       },
@@ -156,6 +175,38 @@ describe('release publication shell execution', () => {
     const existing = runPublication({ registryStatus: 'published' });
     expect(existing.status).toBe(0);
     expect(existing.attempts).toEqual(['second publish --provenance --access public']);
+  }, 30_000);
+
+  test('blocks scaffold publication until its UI dependency is registry-visible while retaining independent packages', () => {
+    for (const scenario of [
+      { publishError: 'E403' },
+      { uiRegistryStatusAfterPublish: 'missing' },
+      { uiRegistryStatusAfterPublish: 'error' },
+    ]) {
+      const execution = runPublication({ scaffoldDependency: true, ...scenario });
+      expect(execution.status).toBe(1);
+      expect(execution.attempts).toEqual([
+        'ui publish --provenance --access public',
+        'independent publish --provenance --access public',
+      ]);
+      expect(execution.output).toContain('required @svadmin/ui@1.0.0');
+    }
+  }, 30_000);
+
+  test('publishes scaffolds after UI becomes visible and accepts an already published UI on retry', () => {
+    const successful = runPublication({ scaffoldDependency: true });
+    expect(successful.status).toBe(0);
+    expect(successful.attempts).toEqual([
+      'ui publish --provenance --access public',
+      'create-svadmin publish --provenance --access public',
+      'independent publish --provenance --access public',
+    ]);
+    const existing = runPublication({ scaffoldDependency: true, registryStatus: 'published' });
+    expect(existing.status).toBe(0);
+    expect(existing.attempts).toEqual([
+      'create-svadmin publish --provenance --access public',
+      'independent publish --provenance --access public',
+    ]);
   }, 30_000);
 
   test('fails registry errors, unexpected statuses and missing manifests without losing later packages', () => {
