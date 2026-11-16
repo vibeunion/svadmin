@@ -18,6 +18,7 @@
     describedby?: string;
     ariaLabel?: string;
     showValue?: boolean;
+    marks?: Record<number, string>;
     class?: string;
     onchange?: (value: RangeSliderValue) => void;
   }
@@ -34,6 +35,7 @@
     describedby,
     ariaLabel,
     showValue = false,
+    marks,
     class: className = '',
     onchange,
   }: Props = $props();
@@ -57,36 +59,52 @@
   }
 </script>
 
-<div class={cn('svadmin-range-slider', className)} data-invalid={invalid ? 'true' : undefined}>
-  {#if minName}<input type="hidden" name={minName} value={lower} />{/if}
-  {#if maxName}<input type="hidden" name={maxName} value={upper} />{/if}
-  <div class="svadmin-range-slider__tracks">
-    <input
-      type="range"
-      value={lower}
-      {min}
-      max={upper}
-      {step}
-      disabled={disabled}
-      aria-label={ariaLabel ? `${ariaLabel} minimum` : 'Minimum'}
-      aria-invalid={invalid || undefined}
-      aria-describedby={describedby}
-      oninput={(event) => update('min', (event.currentTarget as HTMLInputElement).value)}
-    />
-    <input
-      type="range"
-      value={upper}
-      min={lower}
-      {max}
-      {step}
-      disabled={disabled}
-      aria-label={ariaLabel ? `${ariaLabel} maximum` : 'Maximum'}
-      aria-invalid={invalid || undefined}
-      aria-describedby={describedby}
-      oninput={(event) => update('max', (event.currentTarget as HTMLInputElement).value)}
-    />
+<div class={cn('svadmin-range-slider flex flex-col w-full gap-1', className)} data-invalid={invalid ? 'true' : undefined}>
+  <div class="flex items-center gap-2 w-full">
+    {#if minName}<input type="hidden" name={minName} value={lower} />{/if}
+    {#if maxName}<input type="hidden" name={maxName} value={upper} />{/if}
+    <div class="svadmin-range-slider__tracks">
+      <input
+        type="range"
+        value={lower}
+        {min}
+        max={upper}
+        {step}
+        disabled={disabled}
+        aria-label={ariaLabel ? `${ariaLabel} minimum` : 'Minimum'}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedby}
+        oninput={(event) => update('min', (event.currentTarget as HTMLInputElement).value)}
+      />
+      <input
+        type="range"
+        value={upper}
+        min={lower}
+        {max}
+        {step}
+        disabled={disabled}
+        aria-label={ariaLabel ? `${ariaLabel} maximum` : 'Maximum'}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedby}
+        oninput={(event) => update('max', (event.currentTarget as HTMLInputElement).value)}
+      />
+    </div>
+    {#if showValue}<output>{lower} - {upper}</output>{/if}
   </div>
-  {#if showValue}<output>{lower} - {upper}</output>{/if}
+  {#if marks && Object.keys(marks).length > 0}
+    <div class="relative w-full h-5 text-[11px] text-muted-foreground select-none" data-slot="slider-marks">
+      {#each Object.entries(marks) as [markVal, label] (markVal)}
+        {@const valNum = Number(markVal)}
+        {@const pct = boundsValid ? Math.min(100, Math.max(0, ((valNum - min) / (max - min)) * 100)) : 0}
+        <span
+          class="absolute -translate-x-1/2 hover:text-foreground transition-colors"
+          style={`left: ${pct}%;`}
+        >
+          {label}
+        </span>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
