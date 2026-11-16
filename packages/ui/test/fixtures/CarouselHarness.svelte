@@ -14,7 +14,7 @@
   } = $props();
 </script>
 
-<Carousel {count} {indicatorType} {arrowType} {onchange}>
+<Carousel {count} {indicatorType} {arrowType} {...onchange ? { onchange } : {}}>
   {#snippet children(idx)}
     <div>Slide {idx + 1}</div>
   {/snippet}
