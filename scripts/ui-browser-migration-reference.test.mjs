@@ -6,6 +6,7 @@ import {
   bodyStyleMigration,
   createMigrationReference,
   lightTokenMigration,
+  hostNormalizationSelector,
   visualContractAdditions,
   visualContractDisabledSelector,
   stripeDarkTokenMigration,
@@ -46,6 +47,7 @@ test('reference changes only explicitly approved token, body and table declarati
     reference.walkDecls(property, (declaration) => declaration.remove());
   }
   reference.walkRules(visualContractDisabledSelector, (rule) => rule.remove());
+  reference.walkRules(hostNormalizationSelector, (rule) => rule.remove());
   assert.equal(visualContractAdditions.light['--primary-3'], '#94BFFF');
   assert.equal(visualContractAdditions.dark['--primary-3'], '#0E32A6');
   const migrations = [

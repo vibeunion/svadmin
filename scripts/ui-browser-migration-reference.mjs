@@ -66,6 +66,14 @@ export const bodyStyleMigration = Object.freeze({
 
 export const visualContractDisabledSelector = ':is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled]), :is([data-svadmin-button], .svadmin-button):is([data-variant="default"], .svadmin-button--default):is(:disabled, [aria-disabled="true"], [data-disabled])';
 
+export const hostNormalizationSelector = '[data-slot="input"][aria-invalid="true"]';
+
+export const hostNormalizationDeclarations = Object.freeze({
+  'border-color': 'transparent',
+  'background-color': 'var(--danger-light-1, #FFECE8)',
+  'box-shadow': 'none',
+});
+
 export const visualContractAdditions = Object.freeze({
   light: Object.freeze({ '--primary-3': '#94BFFF', '--svadmin-fill-2': '#F2F3F5' }),
   dark: Object.freeze({ '--primary-3': '#0E32A6', '--svadmin-fill-2': 'rgb(255 255 255 / 8%)' }),
@@ -159,7 +167,14 @@ export function createMigrationReference(baselineCss) {
   migrateComponentDeclarations(root, tableSizeMigration);
   migrateComponentDeclarations(root, productComponentSizeMigration);
   appendVisualContract(root);
+  appendHostNormalization(root);
   return root.toString();
+}
+
+function appendHostNormalization(root) {
+  const rule = postcss.rule({ selector: hostNormalizationSelector });
+  for (const [prop, value] of Object.entries(hostNormalizationDeclarations)) rule.append({ prop, value });
+  root.append(rule);
 }
 
 function appendToken(root, selector, prop, value) {
