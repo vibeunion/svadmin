@@ -57,9 +57,6 @@
   style:flex-wrap={wrap ? 'wrap' : 'nowrap'}
 >
   {@render children?.()}
-  {#if split}
-    <span class="svadmin-space__split">{@render split()}</span>
-  {/if}
 </div>
 
 <style>
