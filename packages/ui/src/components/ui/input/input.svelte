@@ -24,7 +24,7 @@
 		onselect?: HTMLInputAttributes["onselect"];
 	};
 
-	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value" | "size" | "onfocus" | "onblur" | "onselect">> &
+	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value" | "size" | "onfocus" | "onblur" | "onselect" | "prefix" | "suffix">> &
 			{
 				size?: InputSize;
 				nativeSize?: number;

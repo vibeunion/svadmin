@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { definedOptions } from "@svadmin/core/options";
   import Carousel from "../../src/components/Carousel.svelte";
 
   let {
@@ -14,7 +15,7 @@
   } = $props();
 </script>
 
-<Carousel {count} {indicatorType} {arrowType} {onchange}>
+<Carousel {count} {indicatorType} {arrowType} {...definedOptions({ onchange })}>
   {#snippet children(idx)}
     <div>Slide {idx + 1}</div>
   {/snippet}
