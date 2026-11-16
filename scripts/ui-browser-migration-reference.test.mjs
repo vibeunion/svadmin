@@ -14,6 +14,8 @@ import {
   tableSizeMigration,
 } from './ui-browser-migration-reference.mjs';
 import {
+  collapsibleSummaryMigration,
+  collapsibleSummarySelector,
   productDarkTokenMigration,
   productLightTokenMigration,
   productComponentSizeMigration,
@@ -93,6 +95,15 @@ test('reference changes only explicitly approved token, body and table declarati
       }
     });
   }
+  reference.walkRules(collapsibleSummarySelector, (rule) => {
+    if (rule.parent?.type !== 'root') return;
+    for (const [property, [before, after]] of Object.entries(collapsibleSummaryMigration)) {
+      const matches = rule.nodes.filter((node) => node.type === 'decl' && node.prop === property);
+      assert.equal(matches.length, 1);
+      assert.equal(matches[0].value, after);
+      matches[0].value = before;
+    }
+  });
   for (const [selector, values] of Object.entries(tableSizeMigration)) {
     reference.walkRules(selector, rule => {
       if (rule.parent?.name !== 'layer' || rule.parent.params !== 'components') return;
