@@ -1211,3 +1211,6 @@ export {
   type SsoStatus,
   type SsoClaimMapping,
 } from './components/SsoConnectionStudio.svelte';
+
+// Enterprise table toolbar & action suite
+export { default as TableToolbar, default as SearchTableToolbar, type TableToolbarProps } from "./components/TableToolbar.svelte";
