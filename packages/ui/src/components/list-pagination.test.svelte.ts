@@ -88,9 +88,56 @@ describe('ListPagination', () => {
     await fireEvent.change(screen.getByRole('combobox', { name: '记录每页条数' }), { target: { value: '50' } });
     expect(onPageSizeChange).toHaveBeenCalledWith(50);
   });
+
+  it('keeps the size selector when a larger page size reduces the result to one page', async () => {
+    const onPageChange = vi.fn();
+    const onPageSizeChange = vi.fn();
+    const props = { page: 1, totalPages: 3, total: 23, rangeStart: 1, rangeEnd: 10,
+      pageSize: 10, label: 'Records', onPageChange, onPageSizeChange };
+    const view = renderWithI18n(ListPagination, props, 'en');
+    await fireEvent.change(view.getByRole('combobox', { name: 'Records rows per page' }), { target: { value: '50' } });
+    expect(onPageSizeChange).toHaveBeenLastCalledWith(50);
+    await view.rerender({ ...props, pageSize: 50, totalPages: 1, rangeEnd: 23 });
+    expect(view.queryByRole('navigation')).toBeNull();
+    expect(view.queryByRole('button')).toBeNull();
+    expect(view.getByText('Total: 23')).not.toBeNull();
+    expect(view.getByRole('combobox', { name: 'Records rows per page' })).toHaveProperty('value', '50');
+    await view.wrapper.setLocale('zh-CN');
+    await fireEvent.change(view.getByRole('combobox', { name: 'Records每页条数' }), { target: { value: '10' } });
+    expect(onPageSizeChange).toHaveBeenLastCalledWith(10);
+    await view.rerender(props);
+    expect(view.getByRole('navigation', { name: 'Records分页导航' })).not.toBeNull();
+    expect(onPageChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps configured size controls independent of hidden summaries and empty results', async () => {
+    const onPageSizeChange = vi.fn();
+    const props = { page: 1, totalPages: 3, total: 23, pageSize: 10,
+      label: 'Records', showSummary: false, onPageChange: vi.fn(), onPageSizeChange };
+    const view = renderWithI18n(ListPagination, props, 'en');
+    expect(view.getByRole('combobox', { name: 'Records rows per page' })).not.toBeNull();
+    expect(view.queryByText(/of 23 records/)).toBeNull();
+    await view.rerender({ ...props, totalPages: 1, total: 0 });
+    expect(view.queryByRole('navigation')).toBeNull();
+    expect(view.queryByText('Total: 0')).toBeNull();
+    await fireEvent.change(view.getByRole('combobox', { name: 'Records rows per page' }), { target: { value: '20' } });
+    expect(onPageSizeChange).toHaveBeenLastCalledWith(20);
+  });
 });
 
 describe('ListFooter', () => {
+  it('keeps a single-page size selector without duplicating its own record count', async () => {
+    const onPageSizeChange = vi.fn();
+    const view = renderWithI18n(ListFooter, {
+      label: 'Records', total: 23, loadedCount: 23, page: 1, totalPages: 1,
+      rangeStart: 1, rangeEnd: 23, pageSize: 50, onPageChange: vi.fn(), onPageSizeChange,
+    }, 'en');
+    expect(view.getAllByText('Total: 23')).toHaveLength(1);
+    expect(view.queryByRole('navigation')).toBeNull();
+    await fireEvent.change(view.getByRole('combobox', { name: 'Records rows per page' }), { target: { value: '10' } });
+    expect(onPageSizeChange).toHaveBeenCalledWith(10);
+  });
+
   it('shows truncation guidance once while keeping pagination in the footer', () => {
     renderWithI18n(ListFooter, {
       props: {

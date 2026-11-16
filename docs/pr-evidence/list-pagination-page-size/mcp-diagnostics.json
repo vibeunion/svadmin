@@ -1,0 +1,17 @@
+{
+  "coverage": "Verified standalone fixture browser observations through the local MCP handler; no full application collector attached.",
+  "browserEvidence": "after.json",
+  "tool": "svadmin_getDiagnostics",
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "page-size-fixture",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "[]"
+        }
+      ]
+    }
+  }
+}
