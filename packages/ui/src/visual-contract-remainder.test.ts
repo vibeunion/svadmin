@@ -151,4 +151,23 @@ describe('Remaining visual style contract', () => {
     expect(rule('.svadmin-result__icon')).toContain('margin-bottom: 16px');
     expect(css).toContain('--svadmin-mask: rgb(29 33 41 / 60%);');
   });
+
+  it('publishes host aliases and the remaining shared state colors', () => {
+    expect(css).toContain('--color-secondary-hover: var(--svadmin-fill-3);');
+    expect(css).toContain('--color-link-light-3: var(--primary-light-3);');
+    expect(css).toContain('--color-neutral-8: var(--muted-foreground);');
+    expect(css).toContain('--border-radius-small: 2px;');
+    expect(css).toContain('--color-tooltip-bg: #1D2129;');
+    expect(css).toContain('--svadmin-shadow-notification: 0 4px 12px rgb(0 0 0 / 0.15);');
+    expect(rule('.svadmin-link[aria-disabled="true"]')).toContain('var(--color-link-light-3, var(--primary-light-3))');
+    expect(rule('.svadmin-link[data-status="warning"][aria-disabled="true"]')).toContain('var(--warning-light-2, var(--warning-2))');
+    expect(rule('.svadmin-switch')).toContain('--svadmin-switch-dot: 16px');
+    expect(rule('.svadmin-switch-thumb')).toContain('box-shadow: none');
+    expect(rule('.svadmin-switch[aria-invalid="true"]')).toContain('outline: var(--svadmin-focus-width)');
+    expect(rule('.svadmin-dropdown-item:hover')).toContain('var(--svadmin-fill-2, var(--muted))');
+    expect(rule('[data-slot="tooltip-content"]')).toContain('var(--color-tooltip-bg, #1D2129)');
+    expect(css).toContain('background-color: var(--danger-light-1, #FFECE8);');
+    expect(css).not.toContain('font-size: 0.9375rem;');
+    expect(css).not.toContain('font-size: 0.6875rem;');
+  });
 });

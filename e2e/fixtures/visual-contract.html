@@ -27,7 +27,7 @@
       <div>
         <header class="top" data-svadmin-topbar>SVAdmin</header>
         <main>
-          <p class="svadmin-text" id="body-copy">正文 14 / 1.4。Body copy stays on the token.</p>
+          <p class="svadmin-text" id="body-copy">正文 14 / 1.5715。Body copy stays on the token.</p>
           <div class="svadmin-copy copy">
             <p>第一段说明。</p>
             <p id="second-paragraph">第二段与上一段之间使用段落间距。</p>
@@ -40,7 +40,17 @@
             <button class="svadmin-button" data-status="warning" id="warning">警告</button>
             <button class="svadmin-button" data-status="warning" id="warning-disabled" disabled>警告禁用</button>
           </div>
-          <a class="svadmin-link" id="link" href="#link">链接</a>
+          <div class="row">
+            <a class="svadmin-link" id="link" href="#link">链接</a>
+            <a class="svadmin-link" id="link-disabled" aria-disabled="true">禁用链接</a>
+            <button class="svadmin-button svadmin-button--outline" id="outline" type="button">线框</button>
+            <button class="svadmin-switch" id="switch-off" type="button" role="switch" aria-checked="false"><span class="svadmin-switch-thumb"></span></button>
+            <button class="svadmin-switch" id="switch-on" type="button" role="switch" aria-checked="true" data-state="checked"><span class="svadmin-switch-thumb"></span></button>
+          </div>
+          <div class="svadmin-dropdown-content" id="menu" style="position:relative;margin-top:0;width:16rem">
+            <button class="svadmin-dropdown-item" type="button">菜单项</button>
+            <button class="svadmin-dropdown-item" type="button" data-selected="true">已选</button>
+          </div>
           <div class="svadmin-dialog-overlay" id="mask" style="position:relative;inset:auto;height:72px"></div>
           <div class="svadmin-popconfirm" id="popconfirm" data-confirm-weight="light">
             <p>确认保存这条记录？</p>

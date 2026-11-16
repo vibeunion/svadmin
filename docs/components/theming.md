@@ -355,6 +355,19 @@ Message is lightweight feedback and does not interrupt the task. Types are info,
 
 Dialog and drawer titles are 16px at weight 500. Tooltip padding is 8px 12px, and mini is 4px 12px. Open and close delays are both 0. Focus continues to use only `--svadmin-focus-width` and `--svadmin-focus-offset`. The checkbox is 14px, the radio layout height is 14px, menu items are 40px, the current pagination page uses a primary-light fill, and the step indicator is 28px with the process step filled in the primary color. The named motion curves include linear, overshoot, accelerate, and `duration-loading`. The existing 150ms / 200ms / 900ms durations stay.
 
+### Host aliases / 宿主别名
+
+Shared control states read the same tokens in every brand preset. Extra names are aliases, so `--foreground`, `--muted-foreground`, `--primary`, and `--muted` stay as they are.
+
+- `--color-secondary-hover`, `--color-secondary-active`, and `--color-secondary-disabled` follow fill-3, fill-4, and fill-1.
+- `--color-link-light-1` through `--color-link-light-4` follow the primary light steps. A disabled link uses light-3. A disabled warning link uses warning light-2.
+- `--color-neutral-1` through `--color-neutral-10`, `--border-radius-small` (2px) through `--border-radius-large` (8px), `--color-tooltip-bg`, `--color-spin-layer-bg`, and `--color-bg-popup` are available to host CSS.
+- `--svadmin-shadow-notification` is `0 4px 12px rgb(0 0 0 / 0.15)`. Dialogs keep `--svadmin-shadow-overlay`. Menus, popovers, and dropdowns keep `--svadmin-shadow-popup`.
+- Invalid inputs use the danger light fill and no extra halo. The focus ring stays a 2px outline with a 2px offset.
+- The switch track is fill-4, 40×24, with a 16px thumb. Small is 28×16 with a 12px thumb. The thumb does not use the dialog shadow.
+- Tooltip surfaces use `--color-tooltip-bg` and white text. Dropdown hover is fill-2 with text-1.
+- Outline buttons keep a neutral border at rest. Hover and press use color-5 and color-7 on the shared button rule. Stripe canvas colors stay on `[data-theme="stripe"]`.
+
 ### Checking the contract / 怎么核对
 
 ```bash
