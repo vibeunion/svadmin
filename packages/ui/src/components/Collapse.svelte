@@ -141,7 +141,7 @@
     width: 100%;
     padding: 8px 13px;
     font-size: var(--svadmin-text-body);
-    line-height: 24px;
+    line-height: var(--svadmin-control-h-mini);
     border: 0;
     background: var(--card);
     color: var(--foreground);

@@ -1970,7 +1970,7 @@ main {
   padding: 0;
 }
 .svadmin-sheet-content > :not(.svadmin-sheet-header):not(.svadmin-sheet-footer) {
-  padding: 12px 16px;
+  padding: var(--svadmin-space-3) var(--svadmin-space-4);
 }
 
 /* Narrow screens use the full viewport for detail work and keep touch scrolling
@@ -2167,9 +2167,9 @@ main {
 .svadmin-result__subtitle { margin: 0; max-width: 36rem; color: var(--muted-foreground); font-size: 14px; line-height: 1.5715; }
 .svadmin-result__extra { display: flex; gap: 12px; margin-top: 20px; }
 
-.svadmin-popconfirm { display: grid; gap: 16px; width: max-content; max-width: 20rem; padding: 16px; }
+.svadmin-popconfirm { display: grid; gap: var(--svadmin-space-4); width: max-content; max-width: 20rem; padding: var(--svadmin-space-4); }
 .svadmin-popconfirm__title { margin: 0; color: var(--foreground); font-size: 0.875rem; line-height: 1.5715; }
-.svadmin-popconfirm__actions { display: flex; justify-content: flex-end; gap: 8px; }
+.svadmin-popconfirm__actions { display: flex; justify-content: flex-end; gap: var(--svadmin-space-2); }
 .svadmin-popconfirm__trigger { display: inline-flex; }
 
 .svadmin-back-top {
@@ -3200,8 +3200,8 @@ main {
 }
 
 .svadmin-popover-content.svadmin-popconfirm {
-  padding: 16px;
-  gap: 16px;
+  padding: var(--svadmin-space-4);
+  gap: var(--svadmin-space-4);
 }
 
 .svadmin-avatar-image {
@@ -3685,15 +3685,15 @@ details[data-svadmin-filter] > summary,
 [data-svadmin-collapsible] > summary {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  min-height: 40px;
+  gap: var(--svadmin-space-2);
+  min-height: var(--svadmin-row-h);
   margin: 0;
-  padding: 8px 0;
+  padding: var(--svadmin-space-2) 0;
   list-style: none;
   cursor: pointer;
   font-size: var(--svadmin-text-body);
   font-weight: 500;
-  line-height: 24px;
+  line-height: var(--svadmin-control-h-mini);
 }
 
 details.svadmin-collapsible > summary::-webkit-details-marker,
