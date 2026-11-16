@@ -391,6 +391,19 @@ jobs:
               fi
 
               if [ "$NPM_STATUS" = "missing" ]; then
+                # 脚手架清单与工作区 UI 版本同步；所需 UI 可见后才能发布生成器。
+                if [ "$NAME" = "@svadmin/create" ]; then
+                  if ! SCAFFOLD_UI_VERSION=$(node -p "require('./packages/ui/package.json').version"); then
+                    echo "::error::Skipping $NAME@$LOCAL_VER: cannot resolve the required UI version"
+                    failed=1
+                    continue
+                  fi
+                  if ! SCAFFOLD_UI_STATUS=$(bun scripts/npm-package-version.ts "@svadmin/ui" "$SCAFFOLD_UI_VERSION") || [ "$SCAFFOLD_UI_STATUS" != "published" ]; then
+                    echo "::error::Skipping $NAME@$LOCAL_VER: required @svadmin/ui@$SCAFFOLD_UI_VERSION is not published or registry lookup failed"
+                    failed=1
+                    continue
+                  fi
+                fi
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
                 PUBLISH_LOG="$RUNNER_TEMP/npm-publish-$(echo "$pkg_dir" | tr '/' '-').log"
                 if (cd "$pkg_dir" && npm publish --provenance --access public) > "$PUBLISH_LOG" 2>&1; then
