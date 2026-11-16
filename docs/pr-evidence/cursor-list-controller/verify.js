@@ -1,4 +1,4 @@
-async(page) => {
+export default async function verifyCursorController(page) {
   const results=[];
   for(const viewport of [{width:1440,height:900},{width:1920,height:1080}]) {
     await page.setViewportSize(viewport);
