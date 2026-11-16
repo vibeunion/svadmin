@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.133.0](https://github.com/vibeunion/svadmin/compare/ui-v0.132.0...ui-v0.133.0) (2026-11-16)
+
+
+### 🚀 Features
+
+* **ui:** add allowClear, prefix, and suffix support to Input ([#837](https://github.com/vibeunion/svadmin/issues/837)) ([4d73766](https://github.com/vibeunion/svadmin/commit/4d737662a81c96d1e2972685e4cefb1d0fe29d20))
+* **ui:** add horizontal direction to RadioGroup and split slot to Space ([#838](https://github.com/vibeunion/svadmin/issues/838)) ([5310c8c](https://github.com/vibeunion/svadmin/commit/5310c8c9a8ab76133e780d6fd9aee0fc811c7c85))
+* **ui:** add marks and tick labels support to Slider and RangeSlider ([#840](https://github.com/vibeunion/svadmin/issues/840)) ([2108091](https://github.com/vibeunion/svadmin/commit/21080912b2cd44f5336d6df42ac820caf9b98c20))
+* **ui:** add showWordLimit, maxLength counter, and allowClear to Textarea ([#839](https://github.com/vibeunion/svadmin/issues/839)) ([257f189](https://github.com/vibeunion/svadmin/commit/257f18980cde0fa219be422ab4196f372704d2b6))
+* **ui:** add TableToolbar suite, enhance Switch text/spinner and StepsForm halo ([#832](https://github.com/vibeunion/svadmin/issues/832)) ([52a53f6](https://github.com/vibeunion/svadmin/commit/52a53f6c0aee1e1f400008b26abcd83d24ac645b))
+* **ui:** enhance Alert semantic icon/banner and Link external icon with Arco patterns ([#834](https://github.com/vibeunion/svadmin/issues/834)) ([0ce435d](https://github.com/vibeunion/svadmin/commit/0ce435df7c467e4f5e13ff215ceac09bd6704581))
+* **ui:** enhance BackTop icon/target, TagsInput clear/collapse, and AvatarGroup alias ([#833](https://github.com/vibeunion/svadmin/issues/833)) ([8db866f](https://github.com/vibeunion/svadmin/commit/8db866f95260a31e1373688064771ab2d62c6cd3))
+* **ui:** enhance Card hoverable/loading and Progress semantic icons with Arco patterns ([#835](https://github.com/vibeunion/svadmin/issues/835)) ([3780367](https://github.com/vibeunion/svadmin/commit/378036790218060e297e58b15afd664f5ba732ba))
+* **ui:** enhance EmptyState vertical layout, Carousel hover arrows, and Statistic extra ([#836](https://github.com/vibeunion/svadmin/issues/836)) ([4309844](https://github.com/vibeunion/svadmin/commit/4309844c13362d95f0359e64b22da39b440b1684))
+* **ui:** normalize shared desktop control states ([9a78cca](https://github.com/vibeunion/svadmin/commit/9a78cca44ed8da8dbd387829b2f7aeee33b3aebb))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** import the class helper used by the StepsForm step indicator ([3130d34](https://github.com/vibeunion/svadmin/commit/3130d3497609ee571f28a5a8028dfbfbfb143bdf))
+
+
+### 🔧 Miscellaneous Chores
+
+* **ui:** rename component tests and evidence notes without upstream brand names ([79f7959](https://github.com/vibeunion/svadmin/commit/79f795919429eceba0a6a851b52cde6b9a3bcf84))
+
 ## [0.132.0](https://github.com/vibeunion/svadmin/compare/ui-v0.131.2...ui-v0.132.0) (2026-11-16)
 
 
