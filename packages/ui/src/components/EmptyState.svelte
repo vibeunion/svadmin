@@ -71,7 +71,7 @@
 <style>
   .empty-state { color: var(--foreground); }
   .empty-state--horizontal { display: flex; align-items: flex-start; gap: 12px; padding: 16px; text-align: left; }
-  .empty-state--horizontal .empty-state__icon { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 32px; border-radius: 6px; background: var(--muted); color: var(--muted-foreground); overflow: hidden; }
+  .empty-state--horizontal .empty-state__icon { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 32px; border-radius: var(--radius); background: var(--muted); color: var(--muted-foreground); overflow: hidden; }
   .empty-state--horizontal .empty-state__body { min-width: 0; flex: 1; overflow-wrap: anywhere; }
   .empty-state--horizontal h3 { margin: 0; font-size: var(--svadmin-text-body); line-height: 1.5715; font-weight: 500; letter-spacing: 0; }
   .empty-state--horizontal p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--muted-foreground); }
@@ -81,7 +81,7 @@
   .empty-state--vertical .empty-state__icon { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: var(--muted); color: var(--muted-foreground); overflow: hidden; margin-bottom: 12px; }
   .empty-state--vertical .empty-state__body { display: flex; flex-direction: column; align-items: center; max-width: 24rem; }
   .empty-state--vertical h3 { margin: 0; font-size: var(--svadmin-text-section); font-weight: 600; color: var(--foreground); }
-  .empty-state--vertical p { margin: 6px 0 0; font-size: var(--svadmin-text-label); color: var(--muted-foreground); line-height: 1.5; }
+  .empty-state--vertical p { margin: 4px 0 0; font-size: var(--svadmin-text-body); color: var(--muted-foreground); line-height: 1.5715; }
   .empty-state--vertical .empty-state__action { margin-top: 16px; }
 
   .empty-state__image { width: 100%; height: 100%; object-fit: contain; }

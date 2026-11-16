@@ -821,6 +821,28 @@ h6,
   outline-offset: var(--svadmin-focus-offset);
 }
 
+/* 前后缀输入和带计数的文本域把焦点画在外框上，避免内层再套一圈 outline。 */
+.svadmin-input-wrapper:focus-within,
+.svadmin-textarea-wrapper:focus-within {
+  border-color: var(--ring);
+  outline: var(--svadmin-focus-width) solid var(--ring);
+  outline: var(--svadmin-focus-width) solid color-mix(in oklch, var(--ring) 48%, transparent);
+  outline-offset: var(--svadmin-focus-offset);
+}
+
+.svadmin-input-wrapper:focus-within:has(.svadmin-input[aria-invalid="true"]),
+.svadmin-textarea-wrapper:focus-within:has(.svadmin-textarea[aria-invalid="true"]) {
+  border-color: var(--destructive);
+  background: var(--card);
+  outline-color: var(--destructive);
+}
+
+.svadmin-input-wrapper [data-slot="input"]:focus-visible,
+.svadmin-textarea-wrapper [data-slot="textarea"]:focus-visible {
+  outline: none;
+  border-color: transparent;
+}
+
 /* Keep primitive defaults below consumer utility overrides. */
 @layer components {
 /* Button primitives use stable state attributes so consumers do not need Tailwind. */
@@ -1711,6 +1733,233 @@ main {
   /* 占位文字使用可读的次要文字色，保留明暗主题对比度。 */
   color: var(--muted-foreground);
 }
+
+/* 前后缀 / 清除按钮与裸输入共用同一套尺寸、描边和禁用态。 */
+.svadmin-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: var(--svadmin-control-h);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 14px;
+  outline: none;
+  transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing), background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+}
+
+.svadmin-input-wrapper[data-size="mini"] {
+  height: var(--svadmin-control-h-mini);
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.svadmin-input-wrapper[data-size="compact"],
+.svadmin-input-wrapper[data-size="sm"] {
+  height: var(--svadmin-control-h-sm);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.svadmin-input-wrapper[data-size="lg"] {
+  height: var(--svadmin-control-h-lg);
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.svadmin-input-wrapper .svadmin-input:not([data-input-type="file"]) {
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.svadmin-input-prefix {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-end: 12px;
+  color: var(--color-text-2, var(--muted-foreground));
+  user-select: none;
+  white-space: nowrap;
+}
+
+.svadmin-input-suffix {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-start: 12px;
+  color: var(--color-text-2, var(--muted-foreground));
+  user-select: none;
+  white-space: nowrap;
+}
+
+.svadmin-input-clear,
+.svadmin-textarea-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-inline-start: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-2, var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  visibility: hidden;
+}
+
+.svadmin-input-wrapper:hover .svadmin-input-clear,
+.svadmin-input-wrapper:focus-within .svadmin-input-clear,
+.svadmin-textarea-wrapper:hover .svadmin-textarea-clear,
+.svadmin-textarea-wrapper:focus-within .svadmin-textarea-clear {
+  visibility: visible;
+}
+
+.svadmin-input-clear:hover,
+.svadmin-textarea-clear:hover {
+  color: var(--foreground);
+}
+
+.svadmin-input-wrapper:has(.svadmin-input:disabled),
+.svadmin-input-wrapper[data-input-state="disabled"] {
+  cursor: not-allowed;
+  opacity: 1;
+  color: var(--svadmin-text-4);
+  background: var(--muted);
+}
+
+.svadmin-input-wrapper:has(.svadmin-input[aria-invalid="true"]),
+.svadmin-input-wrapper[data-input-state="error"] {
+  border-color: transparent;
+  background: var(--danger-light-1, #FFECE8);
+  box-shadow: none;
+}
+
+.svadmin-input-wrapper:has(.svadmin-input[aria-invalid="true"]):hover,
+.svadmin-input-wrapper[data-input-state="error"]:hover {
+  border-color: transparent;
+  background: var(--danger-light-2, #FDCDC5);
+}
+
+.svadmin-input-wrapper .svadmin-input[aria-invalid="true"],
+.svadmin-input-wrapper .svadmin-input[data-input-state="error"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.svadmin-input-wrapper[data-input-state="success"] {
+  border-color: var(--success, var(--primary));
+}
+
+.svadmin-textarea-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--foreground);
+}
+
+.svadmin-textarea-wrapper .svadmin-textarea {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.svadmin-textarea-wrapper:has(.svadmin-textarea-clear) .svadmin-textarea {
+  padding-right: 20px;
+}
+
+.svadmin-textarea-wrapper:has(.svadmin-textarea-word-limit) .svadmin-textarea {
+  padding-bottom: 22px;
+}
+
+.svadmin-textarea-clear {
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  margin-inline-start: 0;
+}
+
+.svadmin-textarea-word-limit {
+  position: absolute;
+  inset-block-end: 6px;
+  inset-inline-end: 10px;
+  color: var(--muted-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.5715;
+  user-select: none;
+}
+
+.svadmin-textarea-word-limit[data-limit-state="error"] {
+  color: var(--destructive);
+}
+
+.svadmin-textarea-wrapper:has(.svadmin-textarea:disabled),
+.svadmin-textarea-wrapper[data-input-state="disabled"] {
+  cursor: not-allowed;
+  opacity: 1;
+  color: var(--svadmin-text-4);
+  background: var(--muted);
+}
+
+.svadmin-textarea-wrapper:has(.svadmin-textarea[aria-invalid="true"]),
+.svadmin-textarea-wrapper[data-input-state="error"] {
+  border-color: transparent;
+  background: var(--danger-light-1, #FFECE8);
+  box-shadow: none;
+}
+
+.svadmin-textarea-wrapper:has(.svadmin-textarea[aria-invalid="true"]):hover,
+.svadmin-textarea-wrapper[data-input-state="error"]:hover {
+  border-color: transparent;
+  background: var(--danger-light-2, #FDCDC5);
+}
+
+.svadmin-textarea-wrapper .svadmin-textarea[aria-invalid="true"],
+.svadmin-textarea-wrapper .svadmin-textarea[data-input-state="error"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.svadmin-textarea-wrapper[data-input-state="success"] {
+  border-color: var(--success, var(--primary));
+}
+
+/* 官方刻度文字 14px / line-height 1。颜色保持可读的次要文字色。 */
+[data-slot="slider-marks"] {
+  position: relative;
+  inline-size: 100%;
+  block-size: 14px;
+  user-select: none;
+}
+
+.svadmin-slider__mark {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  transform: translateX(-50%);
+}
+
+button.svadmin-slider__mark { cursor: pointer; }
+button.svadmin-slider__mark:hover:not(:disabled) { color: var(--foreground); }
+button.svadmin-slider__mark:disabled { cursor: not-allowed; color: var(--svadmin-text-4); }
 
 .svadmin-field {
   display: flex;

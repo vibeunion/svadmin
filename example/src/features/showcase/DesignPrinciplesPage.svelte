@@ -25,6 +25,7 @@ import { definedOptions } from '@svadmin/core/options';
     FilterToolbar,
     Input,
     Label,
+    Textarea,
     MediaThumbnail,
     MetricStrip,
     PageToolbar,
@@ -63,8 +64,12 @@ import { definedOptions } from '@svadmin/core/options';
   let showWarning = $state(true);
   let demoVisibility = $state<'personal' | 'team'>('team');
   let demoLabels = $state<string[]>(['review']);
+  let demoAccount = $state('workspace');
+  let demoNote = $state('Shared note');
   let demoCompletion = $state(0.72);
   let demoRange = $state({ min: 20, max: 80 });
+  const completionMarks = { 0: '0%', 0.5: '50%', 1: '100%' };
+  const rangeMarks = { 0: '0', 50: '50', 100: '100' };
   let demoColor = $state('');
   let demoDate = $state<string | null>('2026-09-20');
   let demoDateRange = $state<{ start: string | null; end: string | null }>({ start: '2026-09-01', end: '2026-09-20' });
@@ -458,7 +463,13 @@ import { definedOptions } from '@svadmin/core/options';
           description={isZh ? '这些控件来自 UI 包；状态只存在于示例页面。' : 'These controls come from the UI package; state belongs only to this example page.'}
         />
         <div class="grid gap-3 sm:grid-cols-2">
+          <Input allowClear placeholder={isZh ? '账号' : 'Account'} aria-label={isZh ? '账号' : 'Account'} bind:value={demoAccount}>
+            {#snippet prefix()}<span>@</span>{/snippet}
+            {#snippet suffix()}<span>.com</span>{/snippet}
+          </Input>
+          <Textarea showWordLimit maxLength={80} aria-label={isZh ? '备注' : 'Note'} bind:value={demoNote} />
           <RadioGroup
+            direction="horizontal"
             legend={isZh ? '可见范围' : 'Visibility'}
             ariaLabel={isZh ? '可见范围' : 'Visibility'}
             options={[
@@ -478,6 +489,7 @@ import { definedOptions } from '@svadmin/core/options';
             min={0}
             max={1}
             step={0.01}
+            marks={completionMarks}
             bind:value={demoCompletion}
             showValue
           />
@@ -485,6 +497,7 @@ import { definedOptions } from '@svadmin/core/options';
             ariaLabel={isZh ? '价格范围' : 'Price range'}
             min={0}
             max={100}
+            marks={rangeMarks}
             bind:value={demoRange}
             showValue
           />

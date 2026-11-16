@@ -20,6 +20,6 @@ describe("RadioGroup Direction Enhancements", () => {
     const optionsContainer = container.querySelector(".svadmin-radio-group__options");
     expect(optionsContainer).not.toBeNull();
     expect(optionsContainer?.getAttribute("data-direction")).toBe("horizontal");
-    expect(optionsContainer?.classList.contains("flex")).toBe(true);
+    expect(optionsContainer?.classList.contains("svadmin-radio-group__options--horizontal")).toBe(true);
   });
 });

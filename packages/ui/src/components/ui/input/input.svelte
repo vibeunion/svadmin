@@ -136,7 +136,7 @@
 		data-input-state={inputState}
 		aria-invalid={ariaInvalid}
 		aria-busy={inputState === "loading" ? "true" : undefined}
-		class={cn("svadmin-input", hasWrapper && "border-0 shadow-none bg-transparent focus-visible:ring-0 px-0 h-full", className)}
+		class={cn("svadmin-input", hasWrapper && "border-0 shadow-none bg-transparent px-0 h-full", className)}
 		{type}
 		lang={isDateInput ? i18n.locale : undefined}
 		bind:value
@@ -176,18 +176,13 @@
 	</div>
 {:else if hasWrapper}
 	<div
-		class={cn(
-			"svadmin-input-wrapper relative inline-flex items-center w-full rounded-sm border border-border bg-card px-2.5 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:border-ring",
-			size === "compact" || size === "mini" ? "h-7 text-xs" : "h-8 text-sm",
-			disabled && "opacity-50 cursor-not-allowed bg-muted",
-			className
-		)}
+		class={cn("svadmin-input-wrapper", className)}
 		data-slot="input-wrapper"
 		data-size={size}
 		data-input-state={inputState}
 	>
 		{#if prefix}
-			<span class="svadmin-input-prefix mr-2 text-muted-foreground shrink-0 flex items-center" aria-hidden="true">
+			<span class="svadmin-input-prefix" aria-hidden="true">
 				{@render prefix()}
 			</span>
 		{/if}
@@ -195,15 +190,15 @@
 		{#if allowClear && filled && !disabled}
 			<button
 				type="button"
-				class="svadmin-input-clear text-muted-foreground hover:text-foreground shrink-0 ml-1 p-0.5 rounded-full cursor-pointer outline-none"
+				class="svadmin-input-clear"
 				aria-label="Clear input"
 				onclick={clearInput}
 			>
-				<CircleX size={14} aria-hidden="true" />
+				<CircleX size={12} aria-hidden="true" />
 			</button>
 		{/if}
 		{#if suffix}
-			<span class="svadmin-input-suffix ml-2 text-muted-foreground shrink-0 flex items-center" aria-hidden="true">
+			<span class="svadmin-input-suffix" aria-hidden="true">
 				{@render suffix()}
 			</span>
 		{/if}

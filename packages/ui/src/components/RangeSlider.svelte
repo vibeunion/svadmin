@@ -59,8 +59,8 @@
   }
 </script>
 
-<div class={cn('svadmin-range-slider flex flex-col w-full gap-1', className)} data-invalid={invalid ? 'true' : undefined}>
-  <div class="flex items-center gap-2 w-full">
+<div class={cn('svadmin-range-slider', className)} data-invalid={invalid ? 'true' : undefined}>
+  <div class="svadmin-range-slider__control">
     {#if minName}<input type="hidden" name={minName} value={lower} />{/if}
     {#if maxName}<input type="hidden" name={maxName} value={upper} />{/if}
     <div class="svadmin-range-slider__tracks">
@@ -92,14 +92,11 @@
     {#if showValue}<output>{lower} - {upper}</output>{/if}
   </div>
   {#if marks && Object.keys(marks).length > 0}
-    <div class="relative w-full h-5 text-[11px] text-muted-foreground select-none" data-slot="slider-marks">
+    <div data-slot="slider-marks">
       {#each Object.entries(marks) as [markVal, label] (markVal)}
         {@const valNum = Number(markVal)}
         {@const pct = boundsValid ? Math.min(100, Math.max(0, ((valNum - min) / (max - min)) * 100)) : 0}
-        <span
-          class="absolute -translate-x-1/2 hover:text-foreground transition-colors"
-          style={`left: ${pct}%;`}
-        >
+        <span class="svadmin-slider__mark" style={`left: ${pct}%;`}>
           {label}
         </span>
       {/each}
@@ -109,6 +106,14 @@
 
 <style>
   .svadmin-range-slider {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    inline-size: 100%;
+  }
+
+  .svadmin-range-slider__control {
     display: flex;
     align-items: center;
     gap: 8px;

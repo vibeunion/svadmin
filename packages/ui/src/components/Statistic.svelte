@@ -63,7 +63,7 @@
     </p>
   {/if}
   {#if extra}
-    <div class="svadmin-statistic__extra text-xs text-muted-foreground mt-2">
+    <div class="svadmin-statistic__extra">
       {#if typeof extra === 'string'}{extra}{:else}{@render extra()}{/if}
     </div>
   {/if}
@@ -78,6 +78,7 @@
   .svadmin-statistic__trend { display: flex; align-items: center; gap: var(--svadmin-space-1); margin: 0; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-statistic__trend[data-trend='up'] { color: var(--success, var(--primary)); }
   .svadmin-statistic__trend[data-trend='down'] { color: var(--destructive); }
+  .svadmin-statistic__extra { margin-top: 8px; color: var(--muted-foreground); font-size: var(--svadmin-text-body); }
   .svadmin-statistic__skeleton { width: 4.5rem; height: 1.5rem; border-radius: var(--radius-sm); background: var(--muted); animation: svadmin-statistic-pulse 1.4s ease-in-out infinite; }
   .svadmin-statistic__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   @keyframes svadmin-statistic-pulse { 50% { opacity: 0.5; } }
