@@ -1,4 +1,4 @@
-import Alert, { type AlertVariant, alertVariants } from "./alert.svelte";
+import Alert, { type AlertVariant, type AlertType, alertVariants } from "./alert.svelte";
 import AlertTitle from "./alert-title.svelte";
 import AlertDescription from "./alert-description.svelte";
 
@@ -11,4 +11,5 @@ export {
 	AlertDescription as Description,
 	alertVariants,
 	type AlertVariant,
+	type AlertType,
 };

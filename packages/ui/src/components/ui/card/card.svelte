@@ -1,13 +1,20 @@
 <script lang="ts">
+	import type { Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import { Skeleton } from "../skeleton/index.js";
+	import CardHeader from "./card-header.svelte";
+	import CardTitle from "./card-title.svelte";
+	import CardAction from "./card-action.svelte";
+	import CardContent from "./card-content.svelte";
 
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		size?: "default" | "sm";
 		hoverable?: boolean;
 		bordered?: boolean;
 		loading?: boolean;
+		title?: string | Snippet;
+		extra?: Snippet;
 	};
 
 	let {
@@ -18,6 +25,8 @@
 		hoverable = false,
 		bordered = true,
 		loading = false,
+		title,
+		extra,
 		...restProps
 	}: Props = $props();
 </script>
@@ -43,6 +52,30 @@
 			<Skeleton class="h-16 w-full mt-2" />
 		</div>
 	{:else}
-		{@render children?.()}
+		{#if title || extra}
+			<CardHeader class="flex flex-row items-center justify-between pb-2">
+				{#if title}
+					<CardTitle>
+						{#if typeof title === "string"}
+							{title}
+						{:else}
+							{@render title()}
+						{/if}
+					</CardTitle>
+				{/if}
+				{#if extra}
+					<CardAction>
+						{@render extra()}
+					</CardAction>
+				{/if}
+			</CardHeader>
+		{/if}
+		{#if title || extra}
+			<CardContent>
+				{@render children?.()}
+			</CardContent>
+		{:else}
+			{@render children?.()}
+		{/if}
 	{/if}
 </div>
