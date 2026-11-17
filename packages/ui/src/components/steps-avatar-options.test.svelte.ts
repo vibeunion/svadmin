@@ -19,8 +19,8 @@ describe('Steps subTitle and size options', () => {
 
     const subtitles = container.querySelectorAll('.svadmin-steps__subtitle');
     expect(subtitles.length).toBe(2);
-    expect(subtitles[0]?.textContent?.trim()).toBe('Done');
-    expect(subtitles[1]?.textContent?.trim()).toBe('Pending');
+    expect(subtitles.item(0)?.textContent?.trim()).toBe('Done');
+    expect(subtitles.item(1)?.textContent?.trim()).toBe('Pending');
   });
 
   it('supports size="mini" and size="small"', () => {

@@ -15,8 +15,8 @@ describe('Anchor href and title item aliases', () => {
     });
     const buttons = container.querySelectorAll('.svadmin-anchor button');
     expect(buttons.length).toBe(2);
-    expect(buttons[0]?.textContent?.trim()).toBe('First Section');
-    expect(buttons[1]?.textContent?.trim()).toBe('Second Section');
+    expect(buttons.item(0)?.textContent?.trim()).toBe('First Section');
+    expect(buttons.item(1)?.textContent?.trim()).toBe('Second Section');
   });
 });
 
