@@ -11,12 +11,15 @@
   import { useTranslation } from '@svadmin/core/i18n';
 
   export interface TreeSelectOption {
-    value: string | number;
-    label: string;
+    value?: string | number;
+    key?: string | number;
+    label?: string;
+    title?: string;
     children?: TreeSelectOption[];
     hasChildren?: boolean;
     disabled?: boolean;
     expanded?: boolean;
+    [key: string]: unknown;
   }
 
   const i18n = useTranslation();
@@ -27,10 +30,13 @@
     describedby?: string | undefined;
     invalid?: boolean | undefined;
     options?: TreeSelectOption[] | undefined;
+    treeData?: TreeSelectOption[] | undefined;
+    data?: TreeSelectOption[] | undefined;
     value?: string | number | (string | number)[] | undefined;
     multiple?: boolean | undefined;
     placeholder?: string | undefined;
     searchable?: boolean | undefined;
+    showSearch?: boolean | undefined;
     onlyLeafSelectable?: boolean | undefined;
     disabled?: boolean | undefined;
     allowClear?: boolean | undefined;
@@ -49,10 +55,13 @@
     describedby,
     invalid = false,
     options = $bindable([]),
+    treeData,
+    data,
     value = $bindable(undefined),
     multiple = false,
     placeholder,
     searchable = true,
+    showSearch,
     onlyLeafSelectable = false,
     disabled = false,
     size = 'default',
@@ -64,6 +73,31 @@
     class: className,
     onchange,
   }: Props = $props();
+
+  const effectiveSearchable = $derived(showSearch ?? searchable);
+
+  function normalizeTreeNodes(nodes: TreeSelectOption[]): TreeSelectOption[] {
+    let changed = false;
+    const next = nodes.map((node) => {
+      const needsVal = node.value === undefined && node.key !== undefined;
+      const needsLab = node.label === undefined && node.title !== undefined;
+      const children = node.children ? normalizeTreeNodes(node.children) : undefined;
+      if (needsVal || needsLab || (children !== undefined && children !== node.children)) {
+        changed = true;
+        return {
+          ...node,
+          value: node.value ?? node.key ?? '',
+          label: node.label ?? node.title ?? String(node.value ?? node.key ?? ''),
+          children: children ?? node.children,
+        };
+      }
+      return node;
+    });
+    return changed ? next : nodes;
+  }
+
+  const rawInputOptions = $derived(treeData ?? data ?? options);
+  const effectiveOptions = $derived(normalizeTreeNodes(rawInputOptions));
 
   const instanceId = $props.id();
   const triggerId = $derived(id ?? `${instanceId}-trigger`);
@@ -94,7 +128,7 @@
   let treeScrollTop = $state(0);
   let treeRevision = $state(0);
   const loads = new Map<string | number, ChildLoad>();
-  let observedOptions = untrack(() => options);
+  let observedOptions = untrack(() => effectiveOptions);
   let observedLoader = untrack(() => loadChildren);
   interface SelectionAttempt {
     key: string | number;
@@ -117,7 +151,7 @@
         if (node.children) traverse(node.children);
       }
     }
-    traverse(options);
+    traverse(effectiveOptions);
     return map;
   });
 
@@ -131,7 +165,7 @@
         if (node.children) visit(node.children, unavailable);
       }
     }
-    visit(options, false);
+    visit(effectiveOptions, false);
     return keys;
   });
 
@@ -148,8 +182,8 @@
   $effect.pre(() => {
     // 外部替换根数组开启新数据版本；内部补充子节点保留当前版本。
     void disabledValues;
-    if (options !== observedOptions) {
-      observedOptions = options;
+    if (effectiveOptions !== observedOptions) {
+      observedOptions = effectiveOptions;
       treeEpoch += 1;
       treeRevision += 1;
       expandedOverrides.clear();
@@ -491,7 +525,7 @@
     await tick();
     const panel = panelElement;
     if (!mounted || !open || !panel || !panel.isConnected || panel.contains(document.activeElement)) return;
-    if (searchable && searchElement) {
+    if (effectiveSearchable && searchElement) {
       searchElement.focus();
       return;
     }
@@ -633,7 +667,7 @@
     return filtered;
   }
 
-  const visibleOptions = $derived(filterTree(options, searchQuery));
+  const visibleOptions = $derived(filterTree(effectiveOptions, searchQuery));
 
   interface VisibleNode {
     node: TreeSelectOption;
@@ -868,7 +902,7 @@
       {#snippet child({ props, wrapperProps })}
       <div {...wrapperProps}>
       <div {...props} id={panelId} bind:this={panelElement}>
-      {#if searchable}
+      {#if effectiveSearchable}
         <div class="relative mb-2">
           <Search class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
