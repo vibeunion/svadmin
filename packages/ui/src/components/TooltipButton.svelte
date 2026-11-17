@@ -70,5 +70,5 @@
       </Button>
     {/snippet}
   </Tooltip.Trigger>
-  <Tooltip.Content {side} {color}>{tooltip}</Tooltip.Content>
+  <Tooltip.Content {side} {...(color === undefined ? {} : { color })}>{tooltip}</Tooltip.Content>
 </Tooltip.Root>
