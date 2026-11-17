@@ -15,9 +15,12 @@
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		variant?: AlertVariantValue;
 		type?: AlertType;
+		visible?: boolean;
+		defaultVisible?: boolean;
 		closable?: boolean;
 		closeLabel?: string;
 		closeText?: string | Snippet;
+		closeElement?: Snippet;
 		title?: string | Snippet;
 		content?: string | Snippet;
 		showIcon?: boolean;
@@ -25,6 +28,7 @@
 		action?: Snippet;
 		icon?: Snippet;
 		onclose?: (event: MouseEvent) => void;
+		afterClose?: () => void;
 		children?: Snippet;
 	};
 
@@ -32,9 +36,12 @@
 		ref = $bindable(null),
 		variant: variantProp,
 		type: typeProp,
+		visible,
+		defaultVisible = true,
 		closable: closableProp,
 		closeLabel = "Dismiss alert",
 		closeText,
+		closeElement,
 		title,
 		content,
 		showIcon = false,
@@ -42,12 +49,15 @@
 		action,
 		icon,
 		onclose,
+		afterClose,
 		class: className,
 		children,
 		...restProps
 	}: Props = $props();
 
-	const closable = $derived(closableProp ?? Boolean(closeText));
+	let innerDismissed = $state(false);
+	const effectiveVisible = $derived(visible !== undefined ? visible : (!innerDismissed && (defaultVisible ?? true)));
+	const closable = $derived(closableProp ?? Boolean(closeText || closeElement));
 
 	const variant = $derived.by<AlertVariantValue>(() => {
 		if (variantProp) return variantProp;
@@ -65,8 +75,15 @@
 	} as const;
 
 	const IconComponent = $derived(statusIcons[variant] ?? Info);
+
+	function handleClose(event: MouseEvent) {
+		onclose?.(event);
+		innerDismissed = true;
+		afterClose?.();
+	}
 </script>
 
+{#if effectiveVisible}
 <div
 	bind:this={ref}
 	data-slot="alert"
@@ -111,11 +128,13 @@
 	{#if closable}
 		<button
 			type="button"
-			class={cn("svadmin-alert__close", closeText && "svadmin-alert__close--text w-auto h-auto px-1.5 py-0.5 text-xs font-medium")}
+			class={cn("svadmin-alert__close", (closeText || closeElement) && "svadmin-alert__close--text w-auto h-auto px-1.5 py-0.5 text-xs font-medium")}
 			aria-label={closeLabel}
-			onclick={(event) => onclose?.(event)}
+			onclick={handleClose}
 		>
-			{#if closeText}
+			{#if closeElement}
+				{@render closeElement()}
+			{:else if closeText}
 				{#if typeof closeText === "string"}{closeText}{:else}{@render (closeText as Snippet)()}{/if}
 			{:else}
 				<X size={14} aria-hidden="true" />
@@ -123,6 +142,7 @@
 		</button>
 	{/if}
 </div>
+{/if}
 
 <style>
 	[data-closable] {

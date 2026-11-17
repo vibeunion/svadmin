@@ -59,4 +59,22 @@ describe("Progress states", () => {
     const activeStepItems = container.querySelectorAll(".svadmin-progress-step-item--active");
     expect(activeStepItems.length).toBe(3);
   });
+
+  it("supports custom color, trackColor, and width options", () => {
+    const { container } = render(Progress, {
+      props: {
+        percent: 40,
+        color: "#ff5722",
+        trackColor: "#e0e0e0",
+        width: 320,
+      },
+    });
+
+    const progressEl = container.querySelector(".svadmin-progress");
+    expect(progressEl).not.toBeNull();
+    expect(progressEl?.getAttribute("style")).toContain("width: 320px");
+
+    const valueEl = container.querySelector(".svadmin-progress-value") as HTMLElement;
+    expect(valueEl.style.backgroundColor).toBeTruthy();
+  });
 });
