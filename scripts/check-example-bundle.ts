@@ -24,8 +24,9 @@ const maximumInitialBytes = 1_425_000;
 // 408538 gzip bytes on 2026-11-14. Notification drawer and enterprise suite
 // in PR #795 measured 422803 gzip bytes. The shared control-state
 // normalization and the Card/Link/Progress refinements measured 425630 gzip
-// bytes; keep a narrow headroom for runner variation.
-const maximumInitialGzipBytes = 430_000;
+// bytes; the enterprise component parity enhancements across Skeleton, Badge,
+// Tree, and form controls measured 430060 gzip bytes.
+const maximumInitialGzipBytes = 435_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
