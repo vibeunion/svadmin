@@ -79,7 +79,6 @@
     const instant = civilDateTimeToInstant(next, timeZone, disambiguation);
     return instant === undefined ? null : new Date(instant).toISOString();
   }
-  // svelte-ignore state_referenced_locally
   let draft = $state(untrack(() => toDraft(value ?? defaultValue ?? null)));
   let inputRef = $state<HTMLInputElement | null>(null);
   const instantMode = $derived(valueMode === 'instant');

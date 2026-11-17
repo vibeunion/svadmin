@@ -122,7 +122,7 @@
   $effect.pre(() => {
     if (!initialized) {
       initialized = true;
-      if (value.start === null && value.end === null && defaultValue !== undefined && defaultValue !== null) {
+      if (value?.start === null && value?.end === null && defaultValue !== undefined && defaultValue !== null) {
         value = { ...defaultValue };
       }
     }
