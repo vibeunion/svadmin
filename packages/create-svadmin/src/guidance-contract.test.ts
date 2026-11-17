@@ -15,7 +15,13 @@ describe('create-svadmin AI guidance contract', () => {
   });
 
   it('keeps the shipped DESIGN.md synchronized with the repository source', () => {
-    expect(readFileSync(guidanceDesignPath, 'utf8')).toBe(readFileSync(rootDesignPath, 'utf8'));
+    const design = readFileSync(guidanceDesignPath, 'utf8');
+    expect(design).toBe(readFileSync(rootDesignPath, 'utf8'));
+    expect(design).toContain('### Host desktop shell');
+    expect(design).toContain('240px (`15rem`, `--svadmin-shell-sidebar-w`)');
+    expect(design).toContain('56px (`3.5rem`, `--svadmin-shell-topbar-h`)');
+    expect(design).toContain('line-height 1.5715');
+    expect(design).not.toContain('menus use 36px options');
   });
 
   it('generates pages from the public default-first composition API', () => {

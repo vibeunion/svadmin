@@ -37,8 +37,11 @@ import { definedOptions } from '@svadmin/core/options';
     DashboardView,
     ErrorSummary,
     ColorPicker,
+    Calendar,
     DatePicker,
     DateRangePicker,
+    Image,
+    QRCode,
     DateTimePicker,
     RadioGroup,
     RangeSlider,
@@ -72,6 +75,7 @@ import { definedOptions } from '@svadmin/core/options';
   const rangeMarks = { 0: '0', 50: '50', 100: '100' };
   let demoColor = $state('');
   let demoDate = $state<string | null>('2026-09-20');
+  let demoCalendar = $state('2026-11-16');
   let demoDateRange = $state<{ start: string | null; end: string | null }>({ start: '2026-09-01', end: '2026-09-20' });
   let demoTime = $state<string | null>('09:30');
   let demoDateTime = $state<string | null>('2026-09-20T09:30');
@@ -560,6 +564,26 @@ import { definedOptions } from '@svadmin/core/options';
             id="design-principles-errors"
             onfocusfield={focusDemoField}
           />
+        </div>
+      </section>
+      <section class="space-y-3" aria-labelledby="panel-metrics-heading" data-panel-metrics>
+        <SectionHeader
+          id="panel-metrics-heading"
+          title={isZh ? '面板度量' : 'Panel metrics'}
+          description={isZh ? '日历卡片、图片说明和二维码状态使用同一套文字与遮罩令牌。' : 'The calendar card, image caption, and QR status use the shared type and mask tokens.'}
+        />
+        <div class="flex flex-wrap items-start gap-6">
+          <Calendar card value={demoCalendar} onchange={(value) => { demoCalendar = value; }} />
+          <Image
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160'%3E%3Crect width='240' height='160' fill='%23E8F3FF'/%3E%3Crect x='24' y='36' width='192' height='88' rx='2' fill='%23165DFF'/%3E%3C/svg%3E"
+            alt={isZh ? '示例图片' : 'Sample picture'}
+            title={isZh ? '封面' : 'Cover'}
+            description={isZh ? '图片说明在画面下方。' : 'The caption sits below the picture.'}
+            width={240}
+            height={160}
+            preview
+          />
+          <QRCode value="https://example.com/panel" status="expired" />
         </div>
       </section>
       <div class="rounded-lg border border-border bg-card p-4 shadow-sm">

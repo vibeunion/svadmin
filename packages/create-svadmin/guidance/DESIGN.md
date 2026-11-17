@@ -25,7 +25,7 @@ typography:
     fontFamily: "\"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Helvetica, Arial, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.4
+    lineHeight: 1.5715
     letterSpacing: "0px"
   label:
     fontFamily: "\"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Helvetica, Arial, sans-serif"
@@ -153,7 +153,7 @@ while svadmin keeps ownership of the semantic tokens, component API, and
 accessibility behavior.
 The current parity baseline is explicit: controls use 100ms state transitions;
 inputs and selects use a neutral filled surface until focus; tables use a
-neutral 40px header and white rows; menus use 36px options; `line` tabs use a
+neutral 40px header and white rows; menus use 40px options; `line` tabs use a
 primary bottom indicator. These rules apply only to the default Admin UI
 refinement and are checked from the published CSS contract.
 
@@ -486,9 +486,9 @@ These are the published shells. Compose them. Do not redraw them as generic card
 
 | Shell | Contract | Chrome |
 | --- | --- | --- |
-| `Layout` | `data-svadmin-layout`, `data-svadmin-main`, `data-svadmin-sidebar`, `data-svadmin-topbar` | Sidebar and topbar are flat hairline regions. The default canvas removes their shadows. Active sidebar items use a 9% primary wash and a 4px bar. |
-| `Sidebar` | `data-svadmin-sidebar`, `.sidebar-menu-item` | System sans at 13px / 500. Section labels are not uppercase. |
-| `AutoTable` | `data-svadmin-table-head`, `data-svadmin-table-row`, `data-svadmin-datatable` | The table is not wrapped in a card. Header labels are 12px / 600, sentence case, `letter-spacing: 0`. Numbers use `tabular-nums`. |
+| `Layout` | `data-svadmin-layout`, `data-svadmin-main`, `data-svadmin-sidebar`, `data-svadmin-topbar` | Sidebar and topbar are flat hairline regions. The default canvas removes their shadows. On the default skin, the selected item is fill-2 with primary text at weight 500 and no indicator bar. |
+| `Sidebar` | `data-svadmin-sidebar`, `.sidebar-menu-item` | Default skin: 14px, weight 400, 40px row. Section labels are not uppercase. |
+| `AutoTable` | `data-svadmin-table-head`, `data-svadmin-table-row`, `data-svadmin-datatable` | The table is not wrapped in a card. Default-skin header labels are 14px / 500 on the muted fill, sentence case, `letter-spacing: 0`. Numbers use `tabular-nums`. |
 | `PageToolbar` | `data-svadmin-table-toolbar` | A hairline row (`border-bottom`), transparent, no radius and no surface shadow. |
 | `AutoForm` | `data-svadmin-form-row`, `data-svadmin-form-actions`, `data-svadmin-field-label` | Rows are separated by a hairline. Under the default preset, save actions are a footer rule, not a floating card. |
 | `ConfigurationPage`, `SettingsGroup`, `SettingsFieldRow` | `data-svadmin-settings-group` | Unframed. The group header is a bottom border, title at 16px / 600, description in muted text. One page `h1`; nested groups use `h3`. |
@@ -501,6 +501,20 @@ These are the published shells. Compose them. Do not redraw them as generic card
 
 `FilterToolbar` (`data-svadmin-filter-toolbar`) owns search and advanced filters.
 Its advanced panel may use a muted fill. That panel is not a second page card.
+
+### Host desktop shell
+
+New projects from `packages/create-svadmin/template` start with `AdminApp`. Hosts that bring their own router use `AppShellPage`. Both read the shell tokens in `packages/ui/src/app.css`. Do not draw a second sidebar, top bar, or page gutter in host CSS.
+
+| Token | Value |
+| --- | --- |
+| Sidebar | 240px (`15rem`, `--svadmin-shell-sidebar-w`) |
+| Top bar | 56px (`3.5rem`, `--svadmin-shell-topbar-h`) |
+| Gutter | 24px (`--svadmin-shell-gutter`) |
+| Collapsed rail | 56px (`3.5rem`) |
+| Canvas | `#F7F8FA` |
+
+These are the SVAdmin shell. Do not copy a 220px menu or a 60px navbar. Body copy is 14px with line-height 1.5715. Page titles stay 20px. The template `src/App.svelte` keeps `AdminApp` and does not set a private theme or a private shell width.
 
 
 ## Micro-interactions & Motion
@@ -650,7 +664,7 @@ Quick light reference for the default clean-flat preset:
 
 - Canvas `#F7F8FA`, ink `#1D2129`, surface `#FFFFFF`, hairline `#E5E6EB`.
 - Action `#165DFF` on `#FFFFFF`. Dark action `#3C7EFF`.
-- Body 14px / 400 / 1.4. Page title 20px / 600 / 1.3. Labels 13px / 500.
+- Body 14px / 400 / 1.5715. Page title 20px / 600 / 1.3. Labels 13px / 500.
 - Radius 2px on small controls and 4px on fields and surfaces. Spacing 4 / 8 / 16 / 24 / 32.
 - Focus: 2px solid `--ring`, offset `--svadmin-focus-offset` (2px).
 

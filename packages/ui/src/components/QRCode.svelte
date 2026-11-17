@@ -1,7 +1,10 @@
 <script lang="ts">
   import QRCodeLib from 'qrcode';
   import { Loader2, RefreshCw, CheckCircle2 } from '@lucide/svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../utils.js';
+  import { hasComponentConfig, useComponentConfig } from './ConfigProvider.svelte';
+  import { componentText, resolveComponentLocale } from './component-messages.js';
 
   export type QRCodeStatus = 'normal' | 'loading' | 'expired' | 'scanned';
 
@@ -27,6 +30,8 @@
     statusText?: string;
     /** Callback when user clicks the refresh button in expired status */
     onrefresh?: () => void;
+    /** Overrides ConfigProvider and i18n for the status copy. */
+    locale?: string;
     ariaLabel?: string;
     class?: string;
   }
@@ -41,9 +46,26 @@
     status = 'normal',
     statusText,
     onrefresh,
+    locale,
     ariaLabel = 'QR code',
     class: className = '',
   }: Props = $props();
+
+  const config = useComponentConfig();
+  const i18n = useTranslation();
+  const provided = hasComponentConfig();
+  const activeLocale = $derived(resolveComponentLocale({
+    explicit: locale,
+    configLocale: provided ? config.locale : undefined,
+    i18nLocale: i18n.locale,
+  }));
+  const copy = $derived({
+    expired: componentText(i18n, activeLocale, 'qrCode.expired'),
+    refresh: componentText(i18n, activeLocale, 'qrCode.refresh'),
+    refreshLabel: componentText(i18n, activeLocale, 'qrCode.refreshLabel'),
+    scanned: componentText(i18n, activeLocale, 'qrCode.scanned'),
+    empty: componentText(i18n, activeLocale, 'qrCode.empty'),
+  });
 
   const matrix = $derived.by(() => {
     if (!value) return null;
@@ -89,24 +111,24 @@
           <Loader2 class="animate-spin text-primary size-7" />
           {#if statusText}<span class="svadmin-qr-code__status-text">{statusText}</span>{/if}
         {:else if status === 'expired'}
-          <p class="svadmin-qr-code__status-text">{statusText ?? '二维码已失效'}</p>
+          <p class="svadmin-qr-code__status-text">{statusText ?? copy.expired}</p>
           <button
             type="button"
             class="svadmin-qr-code__refresh-btn"
             onclick={onrefresh}
-            aria-label="Refresh QR code"
+            aria-label={copy.refreshLabel}
           >
-            <RefreshCw size={14} />
-            <span>点击刷新</span>
+            <RefreshCw size={12} />
+            <span>{copy.refresh}</span>
           </button>
         {:else if status === 'scanned'}
           <CheckCircle2 class="text-success size-7" />
-          <p class="svadmin-qr-code__status-text">{statusText ?? '已扫描'}</p>
+          <p class="svadmin-qr-code__status-text">{statusText ?? copy.scanned}</p>
         {/if}
       </div>
     {/if}
   {:else}
-    <p class="svadmin-qr-code__empty" role="status">No QR content.</p>
+    <p class="svadmin-qr-code__empty" role="status">{copy.empty}</p>
   {/if}
 </figure>
 
@@ -116,14 +138,20 @@
     display: inline-flex;
     margin: 0;
     border: 1px solid var(--border, currentColor);
-    border-radius: min(var(--radius, 0.5rem), 0.75rem);
-    padding: 0.5rem;
+    border-radius: var(--radius);
+    padding: var(--svadmin-space-2);
     background: var(--card, var(--background, transparent));
     color: var(--card-foreground, var(--foreground, currentColor));
   }
 
-  .svadmin-qr-code__svg { display: block; border-radius: calc(min(var(--radius, 0.5rem), 0.75rem) - 0.25rem); }
-  .svadmin-qr-code__empty { margin: 0; padding: 1rem; color: var(--muted-foreground, currentColor); font-size: 0.8125rem; }
+  .svadmin-qr-code__svg { display: block; border-radius: var(--border-radius-small, 2px); }
+  .svadmin-qr-code__empty {
+    margin: 0;
+    padding: var(--svadmin-space-4);
+    color: var(--muted-foreground, currentColor);
+    font-size: var(--svadmin-text-body);
+    line-height: 1.5715;
+  }
 
   .svadmin-qr-code__mask {
     position: absolute;
@@ -133,32 +161,33 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: color-mix(in srgb, var(--card, white) 90%, transparent);
-    backdrop-filter: blur(2px);
-    border-radius: calc(min(var(--radius, 0.5rem), 0.75rem) - 0.25rem);
+    background: color-mix(in srgb, var(--card, white) 92%, transparent);
+    border-radius: var(--border-radius-small, 2px);
     text-align: center;
-    padding: 0.5rem;
+    padding: var(--svadmin-space-2);
   }
   .svadmin-qr-code__status-text {
-    font-size: var(--svadmin-text-caption, 0.75rem);
-    color: var(--foreground);
     margin: 0;
+    color: var(--foreground);
+    font-size: var(--svadmin-text-caption);
+    line-height: 1.6667;
   }
   .svadmin-qr-code__refresh-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: var(--svadmin-text-caption, 0.75rem);
+    gap: var(--svadmin-space-1);
+    padding: 1px 4px;
+    border: 0;
+    border-radius: var(--border-radius-small, 2px);
+    background: transparent;
     color: var(--primary);
-    background: var(--accent, var(--muted));
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm, 0.25rem);
+    font-size: var(--svadmin-text-caption);
+    line-height: 1.6667;
     cursor: pointer;
-    transition: background 150ms ease;
   }
-  .svadmin-qr-code__refresh-btn:hover {
-    background: var(--accent);
-    color: var(--primary);
+  .svadmin-qr-code__refresh-btn:hover { background: var(--svadmin-fill-2, var(--muted)); }
+  .svadmin-qr-code__refresh-btn:focus-visible {
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
   }
 </style>
