@@ -9,6 +9,9 @@
 
   interface Props {
     open?: boolean;
+    visible?: boolean;
+    defaultOpen?: boolean;
+    defaultVisible?: boolean;
     title: string;
     description?: string;
     triggerText?: string;
@@ -22,16 +25,26 @@
     size?: 'sm' | 'md' | 'lg';
     maskClosable?: boolean;
     isSubmitting?: boolean;
+    confirmLoading?: boolean;
     disabled?: boolean;
+    destroyOnClose?: boolean;
+    footer?: Snippet | false;
     onsubmit?: (() => void | Promise<void>) | undefined;
+    onOk?: (() => void | Promise<void>) | undefined;
     oncancel?: (() => void) | undefined;
+    onCancel?: (() => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onVisibleChange?: ((visible: boolean) => void) | undefined;
     class?: string;
     triggerSnippet?: Snippet;
     children?: Snippet;
   }
 
   let {
-    open = $bindable(false),
+    defaultOpen,
+    defaultVisible,
+    open = $bindable(defaultVisible ?? defaultOpen ?? false),
+    visible = $bindable(undefined),
     title,
     description,
     triggerText = 'Open Form',
@@ -45,13 +58,31 @@
     size = 'md',
     maskClosable = false,
     isSubmitting = false,
+    confirmLoading = false,
     disabled = false,
+    destroyOnClose = false,
+    footer,
     onsubmit,
+    onOk,
     oncancel,
+    onCancel,
+    onOpenChange,
+    onVisibleChange,
     class: className = '',
     triggerSnippet,
     children,
   }: Props = $props();
+
+  $effect(() => {
+    if (visible !== undefined && visible !== open) {
+      open = visible;
+    }
+  });
+
+  const effectiveSubmit = $derived(onOk ?? onsubmit);
+  const effectiveCancel = $derived(onCancel ?? oncancel);
+  const effectiveSubmitText = $derived(okText ?? submitText);
+  const busy = $derived(loading || isSubmitting || confirmLoading);
 
   const widthStyle = $derived(
     typeof width === 'number'
@@ -68,10 +99,8 @@
   let activeRequest: { id: number; round: number; onsubmit?: Props['onsubmit'] } | undefined;
   let formElement: HTMLFormElement | undefined;
   let destroyed = false;
-  const busy = $derived(loading || isSubmitting);
-  const effectiveSubmitText = $derived(okText ?? submitText);
 
-  let lastOpen = open;
+  let lastOpen: boolean | undefined = undefined;
   let lastOnsubmit: Props['onsubmit'];
   let hasLastOnsubmit = false;
   function resetRequestState() {
@@ -88,7 +117,7 @@
   });
 
   $effect(() => {
-    const handler = onsubmit;
+    const handler = effectiveSubmit;
     if (!hasLastOnsubmit) {
       hasLastOnsubmit = true;
       lastOnsubmit = handler;
@@ -106,20 +135,50 @@
   });
 
   function isCurrentRequest(token: { id: number; round: number; onsubmit?: Props['onsubmit'] }) {
-    return !destroyed && activeRequest === token && token.round === round && token.onsubmit === onsubmit;
+    return !destroyed && activeRequest === token && token.round === round && token.onsubmit === effectiveSubmit;
+  }
+
+  function closeForm() {
+    loading = false;
+    if (visible !== undefined) {
+      visible = false;
+    }
+    open = false;
+    onOpenChange?.(false);
+    onVisibleChange?.(false);
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (next) {
+      if (visible !== undefined) visible = true;
+      open = true;
+      onOpenChange?.(true);
+      onVisibleChange?.(true);
+      return;
+    }
+    if (busy) {
+      if (visible !== undefined) visible = true;
+      open = true;
+      return;
+    }
+    if (visible !== undefined) visible = false;
+    open = false;
+    onOpenChange?.(false);
+    onVisibleChange?.(false);
   }
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     if (!open || destroyed || e.currentTarget !== formElement || disabled || busy) return;
-    const token = { id: ++nextRequestId, round, onsubmit };
+    const handler = effectiveSubmit;
+    const token = { id: ++nextRequestId, round, onsubmit: handler };
     activeRequest = token;
     loading = true;
     submitError = '';
     try {
-      await onsubmit?.();
+      await handler?.();
       if (!isCurrentRequest(token)) return;
-      open = false;
+      closeForm();
     } catch {
       if (!isCurrentRequest(token)) return;
       // 失败原因用固定文案，不把异常原文写进界面。
@@ -134,20 +193,8 @@
 
   function handleCancel() {
     if (busy) return;
-    oncancel?.();
-    open = false;
-  }
-
-  function handleOpenChange(next: boolean) {
-    if (next) {
-      open = true;
-      return;
-    }
-    if (busy) {
-      open = true;
-      return;
-    }
-    open = false;
+    effectiveCancel?.();
+    closeForm();
   }
 </script>
 
@@ -183,33 +230,41 @@
         {#if submitError}
           <FeedbackNotice tone="danger" message={submitError} />
         {/if}
-        {#if children}
-          {@render children()}
+        {#if !destroyOnClose || open}
+          {#if children}
+            {@render children()}
+          {/if}
         {/if}
       </div>
 
-      <Dialog.Footer class="gap-2 pt-2 border-t border-border/50">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={busy}
-          onclick={handleCancel}
-        >
-          {cancelText}
-        </Button>
-        <Button
-          type="submit"
-          size="sm"
-          disabled={busy || disabled}
-          class="gap-1.5 min-w-20"
-        >
-          {#if busy}
-            <Loader2 class="h-4 w-4 animate-spin" />
+      {#if footer !== false}
+        <Dialog.Footer class="gap-2 pt-2 border-t border-border/50">
+          {#if footer}
+            {@render footer()}
+          {:else}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onclick={handleCancel}
+            >
+              {cancelText}
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={busy || disabled}
+              class="gap-1.5 min-w-20"
+            >
+              {#if busy}
+                <Loader2 class="h-4 w-4 animate-spin" />
+              {/if}
+              {effectiveSubmitText}
+            </Button>
           {/if}
-          {effectiveSubmitText}
-        </Button>
-      </Dialog.Footer>
+        </Dialog.Footer>
+      {/if}
     </form>
   </Dialog.Content>
 </Dialog.Root>

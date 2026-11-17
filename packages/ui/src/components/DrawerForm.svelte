@@ -9,6 +9,9 @@
 
   interface Props {
     open?: boolean;
+    visible?: boolean;
+    defaultOpen?: boolean;
+    defaultVisible?: boolean;
     title: string;
     description?: string;
     triggerText?: string;
@@ -23,16 +26,26 @@
     width?: number | string;
     maskClosable?: boolean;
     isSubmitting?: boolean;
+    confirmLoading?: boolean;
     disabled?: boolean;
+    destroyOnClose?: boolean;
+    footer?: Snippet | false;
     onsubmit?: (() => void | Promise<void>) | undefined;
+    onOk?: (() => void | Promise<void>) | undefined;
     oncancel?: (() => void) | undefined;
+    onCancel?: (() => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onVisibleChange?: ((visible: boolean) => void) | undefined;
     class?: string;
     triggerSnippet?: Snippet;
     children?: Snippet;
   }
 
   let {
-    open = $bindable(false),
+    defaultOpen,
+    defaultVisible,
+    open = $bindable(defaultVisible ?? defaultOpen ?? false),
+    visible = $bindable(undefined),
     title,
     description,
     triggerText = 'Open Drawer',
@@ -47,15 +60,33 @@
     width,
     maskClosable = true,
     isSubmitting = false,
+    confirmLoading = false,
     disabled = false,
+    destroyOnClose = false,
+    footer,
     onsubmit,
+    onOk,
     oncancel,
+    onCancel,
+    onOpenChange,
+    onVisibleChange,
     class: className = '',
     triggerSnippet,
     children,
   }: Props = $props();
 
+  $effect(() => {
+    if (visible !== undefined && visible !== open) {
+      open = visible;
+    }
+  });
+
   const resolvedSide = $derived(placement ?? side);
+  const effectiveSubmit = $derived(onOk ?? onsubmit);
+  const effectiveCancel = $derived(onCancel ?? oncancel);
+  const effectiveSubmitText = $derived(okText ?? submitText);
+  const busy = $derived(loading || isSubmitting || confirmLoading);
+
   const widthStyle = $derived(
     typeof width === 'number'
       ? `width: ${width}px; max-width: 100vw;`
@@ -71,10 +102,8 @@
   let activeRequest: { id: number; round: number; onsubmit?: Props['onsubmit'] } | undefined;
   let formElement: HTMLFormElement | undefined;
   let destroyed = false;
-  const busy = $derived(loading || isSubmitting);
-  const effectiveSubmitText = $derived(okText ?? submitText);
 
-  let lastOpen = open;
+  let lastOpen: boolean | undefined = undefined;
   let lastOnsubmit: Props['onsubmit'];
   let hasLastOnsubmit = false;
   function resetRequestState() {
@@ -91,7 +120,7 @@
   });
 
   $effect(() => {
-    const handler = onsubmit;
+    const handler = effectiveSubmit;
     if (!hasLastOnsubmit) {
       hasLastOnsubmit = true;
       lastOnsubmit = handler;
@@ -109,20 +138,50 @@
   });
 
   function isCurrentRequest(token: { id: number; round: number; onsubmit?: Props['onsubmit'] }) {
-    return !destroyed && activeRequest === token && token.round === round && token.onsubmit === onsubmit;
+    return !destroyed && activeRequest === token && token.round === round && token.onsubmit === effectiveSubmit;
+  }
+
+  function closeForm() {
+    loading = false;
+    if (visible !== undefined) {
+      visible = false;
+    }
+    open = false;
+    onOpenChange?.(false);
+    onVisibleChange?.(false);
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (next) {
+      if (visible !== undefined) visible = true;
+      open = true;
+      onOpenChange?.(true);
+      onVisibleChange?.(true);
+      return;
+    }
+    if (busy) {
+      if (visible !== undefined) visible = true;
+      open = true;
+      return;
+    }
+    if (visible !== undefined) visible = false;
+    open = false;
+    onOpenChange?.(false);
+    onVisibleChange?.(false);
   }
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     if (!open || destroyed || e.currentTarget !== formElement || disabled || busy) return;
-    const token = { id: ++nextRequestId, round, onsubmit };
+    const handler = effectiveSubmit;
+    const token = { id: ++nextRequestId, round, onsubmit: handler };
     activeRequest = token;
     loading = true;
     submitError = '';
     try {
-      await onsubmit?.();
+      await handler?.();
       if (!isCurrentRequest(token)) return;
-      open = false;
+      closeForm();
     } catch {
       if (!isCurrentRequest(token)) return;
       submitError = i18n.t('common.submitRejected');
@@ -136,8 +195,8 @@
 
   function handleCancel() {
     if (busy) return;
-    oncancel?.();
-    open = false;
+    effectiveCancel?.();
+    closeForm();
   }
 
   function handleCloseRequest(close: () => void) {
@@ -150,13 +209,13 @@
   <button
     type="button"
     class="inline-flex cursor-pointer bg-transparent border-0 p-0 text-left"
-    onclick={() => { open = true; }}
+    onclick={() => { handleOpenChange(true); }}
     {disabled}
   >
     {@render triggerSnippet()}
   </button>
 {:else if triggerText}
-  <Button variant={triggerVariant} size={triggerSize} {disabled} onclick={() => { open = true; }}>
+  <Button variant={triggerVariant} size={triggerSize} {disabled} onclick={() => { handleOpenChange(true); }}>
     {triggerText}
   </Button>
 {/if}
@@ -179,38 +238,45 @@
         {/if}
       </Sheet.Header>
 
-      {#if submitError}
-        <FeedbackNotice tone="danger" message={submitError} />
-      {/if}
-
-      <div class="flex-1 overflow-y-auto p-6 text-sm text-foreground space-y-4">
-        {#if children}
-          {@render children()}
+      <div class="flex-1 px-6 py-4 overflow-y-auto space-y-4">
+        {#if submitError}
+          <FeedbackNotice tone="danger" message={submitError} />
+        {/if}
+        {#if !destroyOnClose || open}
+          {#if children}
+            {@render children()}
+          {/if}
         {/if}
       </div>
 
-      <Sheet.Footer class="gap-2 px-6 py-4 border-t border-border/60 mt-auto">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={busy}
-          onclick={handleCancel}
-        >
-          {cancelText}
-        </Button>
-        <Button
-          type="submit"
-          size="sm"
-          disabled={busy || disabled}
-          class="gap-1.5 min-w-20"
-        >
-          {#if busy}
-            <Loader2 class="h-4 w-4 animate-spin" />
+      {#if footer !== false}
+        <Sheet.Footer class="px-6 py-3 border-t border-border/60 flex flex-row items-center justify-end gap-2 bg-muted/20">
+          {#if footer}
+            {@render footer()}
+          {:else}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onclick={handleCancel}
+            >
+              {cancelText}
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={busy || disabled}
+              class="gap-1.5 min-w-20"
+            >
+              {#if busy}
+                <Loader2 class="h-4 w-4 animate-spin" />
+              {/if}
+              {effectiveSubmitText}
+            </Button>
           {/if}
-          {effectiveSubmitText}
-        </Button>
-      </Sheet.Footer>
+        </Sheet.Footer>
+      {/if}
     </form>
   </Sheet.Content>
 </Sheet.Root>
