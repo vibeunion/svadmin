@@ -83,6 +83,11 @@
     children?: NormalizedTreeSelectOption[] | undefined;
   };
 
+  /** 归一化后的键：宿主可以用 value 或 key，缺省退化为空串。 */
+  function optionKey(option: TreeSelectOption): string | number {
+    return option.value ?? option.key ?? '';
+  }
+
   function normalizeTreeNodes(nodes: TreeSelectOption[]): NormalizedTreeSelectOption[] {
     let changed = false;
     const next = nodes.map((node) => {
@@ -95,7 +100,7 @@
         return {
           ...node,
           value: node.value ?? node.key ?? '',
-          label: node.label ?? node.title ?? String(node.value ?? node.key ?? ''),
+          label: node.label ?? node.title ?? String(optionKey(node) ?? node.key ?? ''),
           ...(nextChildren === undefined ? {} : { children: nextChildren }),
         };
       }
@@ -155,7 +160,7 @@
     const map = new Map<string | number, TreeSelectOption>();
     function traverse(nodes: TreeSelectOption[]) {
       for (const node of nodes) {
-        map.set(node.value ?? node.key ?? '', node);
+        map.set(optionKey(node) ?? node.key ?? '', node);
         if (node.children) traverse(node.children);
       }
     }
@@ -169,7 +174,7 @@
     function visit(nodes: TreeSelectOption[], inherited: boolean): void {
       for (const node of nodes) {
         const unavailable = inherited || node.disabled === true;
-        if (unavailable) keys.add(node.value);
+        if (unavailable) keys.add(optionKey(node));
         if (node.children) visit(node.children, unavailable);
       }
     }
@@ -243,13 +248,13 @@
   }
 
   function lacksLoadCapability(node: TreeSelectOption): boolean {
-    const current = optionMap.get(node.value) ?? node;
+    const current = optionMap.get(optionKey(node)) ?? node;
     return hasChildren(current) && !current.children && !loadChildren;
   }
 
   // 祖先反馈只有在整个可交互子树仍存在缺失加载能力的分支时保留。
   function subtreeLacksLoadCapability(node: TreeSelectOption, depth = 0): boolean {
-    const current = optionMap.get(node.value) ?? node;
+    const current = optionMap.get(optionKey(node)) ?? node;
     if (current.disabled || depth > 64) return false;
     if (hasChildren(current) && !current.children) return !loadChildren;
     return (current.children ?? []).some(child => subtreeLacksLoadCapability(child, depth + 1));
@@ -257,8 +262,8 @@
 
   function isNodeExpanded(node: TreeSelectOption): boolean {
     if (searchQuery.trim()) return true; // Auto expand all on search
-    return expandedOverrides.has(node.value)
-      ? expandedOverrides.get(node.value) === true
+    return expandedOverrides.has(optionKey(node))
+      ? expandedOverrides.get(optionKey(node)) === true
       : !!node.expanded;
   }
 
@@ -274,10 +279,10 @@
   }
 
   function isNodeSelected(node: TreeSelectOption): boolean {
-    node = optionMap.get(node.value) ?? node;
-    if (!multiple || !hasChildren(node)) return isSelected(node.value);
+    node = optionMap.get(optionKey(node)) ?? node;
+    if (!multiple || !hasChildren(node)) return isSelected(optionKey(node));
     const leaves = selectableLeaves(node);
-    return leaves.length > 0 && !hasUnloadedDescendants(node) && leaves.every((leaf) => isSelected(leaf.value));
+    return leaves.length > 0 && !hasUnloadedDescendants(node) && leaves.every((leaf) => isSelected(optionKey(leaf)));
   }
 
   function hasUnloadedDescendants(node: TreeSelectOption): boolean {
@@ -287,17 +292,17 @@
   }
 
   function isPartiallySelected(node: TreeSelectOption): boolean {
-    node = optionMap.get(node.value) ?? node;
+    node = optionMap.get(optionKey(node)) ?? node;
     if (!multiple || !hasChildren(node)) return false;
     const leaves = selectableLeaves(node);
-    const count = leaves.filter((leaf) => isSelected(leaf.value)).length;
+    const count = leaves.filter((leaf) => isSelected(optionKey(leaf))).length;
     return count > 0 && (count < leaves.length || hasUnloadedDescendants(node));
   }
 
   function updateOptionsChildren(nodes: TreeSelectOption[], target: string | number, children: TreeSelectOption[]): TreeSelectOption[] {
     let changed = false;
     const next = nodes.map((node) => {
-      if (node.value === target) {
+      if (optionKey(node) === target) {
         changed = true;
         return { ...node, children, hasChildren: children.length > 0 };
       }
@@ -307,19 +312,19 @@
       changed = true;
       return { ...node, children: updated };
     });
-    return changed ? next : nodes;
+    return (changed ? next : nodes) as NormalizedTreeSelectOption[];
   }
 
   async function ensureChildren(node: TreeSelectOption, selection?: SelectionAttempt): Promise<boolean> {
-    if (!mounted || disabled || disabledValues.has(node.value)) return false;
-    const existing = loads.get(node.value);
+    if (!mounted || disabled || disabledValues.has(optionKey(node))) return false;
+    const existing = loads.get(optionKey(node));
     if (existing) {
       if (selection) existing.selection = selection;
       return existing.promise;
     }
-    if (loadingValues.has(node.value)) return false;
+    if (loadingValues.has(optionKey(node))) return false;
     if (!node.hasChildren || node.children) return true;
-    const currentNode = optionMap.get(node.value);
+    const currentNode = optionMap.get(optionKey(node));
     if (!loadChildren || !currentNode) return false;
     const request: ChildLoad = {
       node: currentNode,
@@ -329,27 +334,27 @@
       promise: Promise.resolve(false),
       retrying: false,
     };
-    loads.set(node.value, request);
-    const current = () => mounted && !disabled && loads.get(node.value) === request
+    loads.set(optionKey(node), request);
+    const current = () => mounted && !disabled && loads.get(optionKey(node)) === request
       && options === observedOptions && treeEpoch === request.treeEpoch
-      && optionMap.has(node.value) && !disabledValues.has(node.value) && loadChildren === request.loader;
-    loadingValues.add(node.value);
-    loadErrors.delete(node.value);
+      && optionMap.has(optionKey(node)) && !disabledValues.has(optionKey(node)) && loadChildren === request.loader;
+    loadingValues.add(optionKey(node));
+    loadErrors.delete(optionKey(node));
     // 展开和级联选择共享包含归属校验、写入与清理的完整请求结果。
     request.promise = (async () => {
       try {
         const children = await request.loader(request.node);
         if (!current()) return false;
-        options = updateOptionsChildren(options, node.value, children);
+        options = updateOptionsChildren(options, optionKey(node), children);
         observedOptions = options;
         return true;
       } catch {
-        if (current()) loadErrors.set(node.value, request);
+        if (current()) loadErrors.set(optionKey(node), request);
         return false;
       } finally {
-        if (mounted && loads.get(node.value) === request) {
-          loads.delete(node.value);
-          loadingValues.delete(node.value);
+        if (mounted && loads.get(optionKey(node)) === request) {
+          loads.delete(optionKey(node));
+          loadingValues.delete(optionKey(node));
         }
       }
     })();
@@ -358,16 +363,16 @@
 
   async function toggleExpandAsync(node: TreeSelectOption, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
-    if (!mounted || disabled || disabledValues.has(node.value)) return;
-    if (loadingValues.has(node.value)) return;
+    if (!mounted || disabled || disabledValues.has(optionKey(node))) return;
+    if (loadingValues.has(optionKey(node))) return;
     if (lacksLoadCapability(node)) {
-      capabilityErrors.add(node.value);
+      capabilityErrors.add(optionKey(node));
       return;
     }
-    capabilityErrors.delete(node.value);
+    capabilityErrors.delete(optionKey(node));
     if (!await ensureChildren(node)) return;
     if (!mounted || disabled) return;
-    toggleExpand(node.value);
+    toggleExpand(optionKey(node));
   }
 
   function ownerTreeItem(event: Event): HTMLElement | null {
@@ -380,20 +385,20 @@
     event.stopPropagation();
     const owner = ownerTreeItem(event);
     owner?.focus();
-    if (selectionErrors.has(node.value)) void handleSelect(node);
+    if (selectionErrors.has(optionKey(node))) void handleSelect(node);
     else void toggleExpandAsync(node);
-    const request = loads.get(node.value);
+    const request = loads.get(optionKey(node));
     if (request) request.retrying = true;
   }
 
   function setMultipleSelection(node: TreeSelectOption): void {
     const leaves = selectableLeaves(node);
     if (leaves.length === 0) return;
-    const leafValues = new Set(leaves.map((leaf) => leaf.value));
-    const shouldRemove = leaves.length > 0 && leaves.every((leaf) => isSelected(leaf.value));
+    const leafValues = new Set(leaves.map((leaf) => optionKey(leaf)));
+    const shouldRemove = leaves.length > 0 && leaves.every((leaf) => isSelected(optionKey(leaf)));
     const next = shouldRemove
       ? selectedValues.filter((value) => !leafValues.has(value))
-      : [...selectedValues, ...leaves.map((leaf) => leaf.value).filter((value) => !isSelected(value))];
+      : [...selectedValues, ...leaves.map((leaf) => optionKey(leaf)).filter((value) => !isSelected(value))];
     value = next;
     onchange?.(next);
   }
@@ -406,11 +411,11 @@
   }
 
   async function selectSubtree(node: TreeSelectOption): Promise<void> {
-    if (selectionAttempt?.key === node.value && isCurrentSelection(selectionAttempt)) return;
-    const attempt: SelectionAttempt = { key: node.value, epoch: treeEpoch, loader: loadChildren, value };
+    if (selectionAttempt?.key === optionKey(node) && isCurrentSelection(selectionAttempt)) return;
+    const attempt: SelectionAttempt = { key: optionKey(node), epoch: treeEpoch, loader: loadChildren, value };
     selectionAttempt = attempt;
-    selectionErrors.delete(node.value);
-    capabilityErrors.delete(node.value);
+    selectionErrors.delete(optionKey(node));
+    capabilityErrors.delete(optionKey(node));
     let visited = 0;
     let requests = 0;
     let missingCapability = false;
@@ -436,15 +441,15 @@
       return true;
     }
     try {
-      if (!await loadSubtree(node.value, 0)) {
+      if (!await loadSubtree(optionKey(node), 0)) {
         if (isCurrentSelection(attempt)) {
-          if (missingCapability) capabilityErrors.add(node.value);
-          else selectionErrors.add(node.value);
+          if (missingCapability) capabilityErrors.add(optionKey(node));
+          else selectionErrors.add(optionKey(node));
         }
         return;
       }
       if (isCurrentSelection(attempt)) {
-        const loaded = optionMap.get(node.value);
+        const loaded = optionMap.get(optionKey(node));
         if (loaded) setMultipleSelection(loaded);
       }
     } finally {
@@ -453,9 +458,9 @@
   }
 
   async function handleSelect(node: TreeSelectOption): Promise<void> {
-    node = optionMap.get(node.value) ?? node;
-    if (disabled || disabledValues.has(node.value)) return;
-    if (selectionAttempt?.key === node.value && isCurrentSelection(selectionAttempt)) return;
+    node = optionMap.get(optionKey(node)) ?? node;
+    if (disabled || disabledValues.has(optionKey(node))) return;
+    if (selectionAttempt?.key === optionKey(node) && isCurrentSelection(selectionAttempt)) return;
     const nodeHasChildren = hasChildren(node);
     if (onlyLeafSelectable && nodeHasChildren) {
       await toggleExpandAsync(node);
@@ -467,20 +472,20 @@
         if (hasUnloadedDescendants(node)) await selectSubtree(node);
         else {
           selectionAttempt = undefined;
-          selectionErrors.delete(node.value);
+          selectionErrors.delete(optionKey(node));
           setMultipleSelection(node);
         }
       }
       else {
         selectionAttempt = undefined;
-        const next = isSelected(node.value)
-          ? selectedValues.filter((selected) => selected !== node.value)
-          : [...selectedValues, node.value];
+        const next = isSelected(optionKey(node))
+          ? selectedValues.filter((selected) => selected !== optionKey(node))
+          : [...selectedValues, optionKey(node)];
         value = next;
         onchange?.(next);
       }
     } else {
-      const next = node.value;
+      const next = optionKey(node);
       value = next;
       onchange?.(next);
       open = false;
@@ -489,7 +494,7 @@
 
   function findParent(nodes: TreeSelectOption[], target: string | number, parent?: TreeSelectOption): TreeSelectOption | undefined {
     for (const node of nodes) {
-      if (node.value === target) return parent;
+      if (optionKey(node) === target) return parent;
       const match = node.children ? findParent(node.children, target, node) : undefined;
       if (match) return match;
     }
@@ -505,7 +510,7 @@
   }
 
   async function focusTreeNode(valueToFocus: string | number): Promise<void> {
-    const index = flatVisibleNodes.findIndex(entry => entry.node.value === valueToFocus);
+    const index = flatVisibleNodes.findIndex(entry => entry.optionKey(node) === valueToFocus);
     if (index < 0) return;
     if (shouldVirtualize && treeRoot) {
       const top = index * rowHeight;
@@ -521,9 +526,9 @@
   }
 
   function focusSibling(nodeValue: string | number, offset: number): void {
-    const index = flatVisibleNodes.findIndex(entry => entry.node.value === nodeValue);
+    const index = flatVisibleNodes.findIndex(entry => entry.optionKey(node) === nodeValue);
     const target = flatVisibleNodes[index + offset];
-    if (target) void focusTreeNode(target.node.value);
+    if (target) void focusTreeNode(target.optionKey(node));
   }
 
   async function handleOpenAutoFocus(event: Event): Promise<void> {
@@ -538,7 +543,7 @@
       return;
     }
     const first = flatVisibleNodes[0];
-    if (first) await focusTreeNode(first.node.value);
+    if (first) await focusTreeNode(first.optionKey(node));
     if (!mounted || !open || panelElement !== panel || !panel.isConnected) return;
     if (!panel.contains(document.activeElement)) panel.focus();
   }
@@ -581,32 +586,32 @@
     const first = flatVisibleNodes[0];
     if (!first) return;
     event.preventDefault();
-    void focusTreeNode(first.node.value);
+    void focusTreeNode(first.optionKey(node));
   }
 
   function handleTreeKeydown(event: KeyboardEvent, node: TreeSelectOption, expanded: boolean): void {
     if (event.target !== event.currentTarget || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    const sourceNode = optionMap.get(node.value) ?? node;
+    const sourceNode = optionMap.get(optionKey(node)) ?? node;
     const nodeHasChildren = hasChildren(sourceNode);
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      if (loads.get(node.value)?.retrying) return;
-      if (loadErrors.has(node.value) || selectionErrors.has(node.value)) retryChildren(sourceNode, event);
+      if (loads.get(optionKey(node))?.retrying) return;
+      if (loadErrors.has(optionKey(node)) || selectionErrors.has(optionKey(node))) retryChildren(sourceNode, event);
       else void handleSelect(node);
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
-      focusSibling(node.value, 1);
+      focusSibling(optionKey(node), 1);
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      focusSibling(node.value, -1);
+      focusSibling(optionKey(node), -1);
     } else if (event.key === 'Home') {
       event.preventDefault();
       const first = flatVisibleNodes[0];
-      if (first) void focusTreeNode(first.node.value);
+      if (first) void focusTreeNode(first.optionKey(node));
     } else if (event.key === 'End') {
       event.preventDefault();
       const last = flatVisibleNodes[flatVisibleNodes.length - 1];
-      if (last) void focusTreeNode(last.node.value);
+      if (last) void focusTreeNode(last.optionKey(node));
     } else if (event.key === 'ArrowRight' && nodeHasChildren) {
       event.preventDefault();
       if (disabled || disabledValues.has(sourceNode.value)) return;
@@ -616,16 +621,16 @@
       }
       else if (!expanded) void toggleExpandAsync(sourceNode);
       else {
-        const index = flatVisibleNodes.findIndex(entry => entry.node.value === node.value);
+        const index = flatVisibleNodes.findIndex(entry => entry.optionKey(node) === optionKey(node));
         const current = flatVisibleNodes[index];
         const next = flatVisibleNodes[index + 1];
-        if (current && next && next.level > current.level) void focusTreeNode(next.node.value);
+        if (current && next && next.level > current.level) void focusTreeNode(next.optionKey(node));
       }
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
-      if (nodeHasChildren && expanded) toggleExpand(node.value);
+      if (nodeHasChildren && expanded) toggleExpand(optionKey(node));
       else {
-        const parent = findParent(options, node.value);
+        const parent = findParent(options, optionKey(node));
         if (parent) void focusTreeNode(parent.value);
       }
     }
@@ -705,9 +710,9 @@
     ? flatVisibleNodes.slice(virtualStart, virtualEnd)
     : flatVisibleNodes);
   // 当前节点被过滤、折叠或滚出渲染窗口时，仍保留一个有效的 Tab 入口。
-  const tabStopValue = $derived(renderedNodes.some(entry => entry.node.value === activeTreeValue)
+  const tabStopValue = $derived(renderedNodes.some(entry => entry.optionKey(node) === activeTreeValue)
     ? activeTreeValue
-    : renderedNodes[0]?.node.value);
+    : renderedNodes[0]?.optionKey(node));
 
   $effect(() => {
     // 搜索和外部数据替换从顶部开始；折叠或数据缩短只钳制窗口。
