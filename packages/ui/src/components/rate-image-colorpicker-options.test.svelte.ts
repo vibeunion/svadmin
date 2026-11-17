@@ -48,7 +48,9 @@ describe('Rate, Image, and ColorPicker option parity', () => {
     const presets = view.container.querySelectorAll('[data-slot="color-picker-presets"] button');
     expect(presets.length).toBe(2);
 
-    await fireEvent.click(presets[1]!);
+    const secondPreset = presets[1];
+    if (secondPreset === undefined) throw new Error('expected a second preset');
+    await fireEvent.click(secondPreset);
     expect(input.value).toBe('#00b42a');
   });
 });

@@ -50,7 +50,9 @@ describe('Slider and RangeSlider option parity', () => {
     const output = container.querySelector('output');
     expect(output?.textContent).toBe('15 - 85');
 
-    await fireEvent.input(sliders[0]!, { target: { value: '25' } });
+    const firstSlider = sliders[0];
+    if (firstSlider === undefined) throw new Error('expected a slider input');
+    await fireEvent.input(firstSlider, { target: { value: '25' } });
     expect(onchange).toHaveBeenCalledWith({ min: 25, max: 85 });
     expect(output?.textContent).toBe('25 - 85');
   });

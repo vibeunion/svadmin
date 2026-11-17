@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/svelte';
 import Link from './Link.svelte';
 import CheckCard from './CheckCard.svelte';
 import StatisticCard from './StatisticCard.svelte';
