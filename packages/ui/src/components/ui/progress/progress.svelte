@@ -19,6 +19,9 @@
     showText,
     steps,
     format,
+    color,
+    trackColor,
+    width,
     class: className,
     ...restProps
   }: {
@@ -35,6 +38,9 @@
     showText?: boolean;
     steps?: number;
     format?: (percentage: number) => string;
+    color?: string;
+    trackColor?: string;
+    width?: number | string;
     class?: string;
   } & Record<string, unknown> = $props();
 
@@ -43,6 +49,7 @@
   const resolvedShowInfo = $derived(showText ?? showInfo);
 
   const numericCircleSize = $derived.by(() => {
+    if (typeof width === 'number') return width;
     if (typeof size === 'number') return size;
     if (size === 'mini') return 48;
     if (size === 'small') return 64;
@@ -82,6 +89,7 @@
     aria-valuenow={resolvedValue}
     aria-valuemin={0}
     aria-valuemax={max}
+    style:width={typeof width === 'number' ? `${width}px` : (width ?? undefined)}
     {...restProps}
   >
     <div class="svadmin-progress-steps" style:--svadmin-progress-height={`${resolvedStrokeWidth}px`}>
@@ -91,6 +99,7 @@
             'svadmin-progress-step-item',
             i < activeSteps ? 'svadmin-progress-step-item--active' : 'svadmin-progress-step-item--inactive'
           )}
+          style:background-color={i < activeSteps ? (color ?? undefined) : (trackColor ?? undefined)}
         ></div>
       {/each}
     </div>
@@ -111,10 +120,11 @@
     aria-valuemax={max}
     style:--svadmin-progress-size={`${numericCircleSize}px`}
     style:--svadmin-progress-stroke={`${resolvedStrokeWidth}px`}
+    style:width={typeof width === 'number' ? `${width}px` : (width ?? undefined)}
     {...restProps}
   >
     <svg viewBox={`0 0 ${numericCircleSize} ${numericCircleSize}`} aria-hidden="true">
-      <circle class="svadmin-progress__track" cx={numericCircleSize / 2} cy={numericCircleSize / 2} r={radius} />
+      <circle class="svadmin-progress__track" cx={numericCircleSize / 2} cy={numericCircleSize / 2} r={radius} style:stroke={trackColor ?? undefined} />
       <circle
         class="svadmin-progress__indicator"
         cx={numericCircleSize / 2}
@@ -122,6 +132,7 @@
         r={radius}
         style:stroke-dasharray={`${circumference} ${circumference}`}
         style:stroke-dashoffset={indeterminate ? circumference * 0.7 : dashOffset}
+        style:stroke={color ?? undefined}
       />
     </svg>
     {#if resolvedShowInfo}<span class="svadmin-progress__info flex items-center justify-center">{#if indeterminate}…{:else if status === "success"}<Check class="size-4 text-success" aria-hidden="true" />{:else if status === "danger"}<X class="size-4 text-destructive" aria-hidden="true" />{:else}{info}{/if}</span>{/if}
@@ -136,15 +147,16 @@
     aria-valuemin={0}
     aria-valuemax={max}
     style:--svadmin-progress-height={`${resolvedStrokeWidth}px`}
+    style:width={typeof width === 'number' ? `${width}px` : (width ?? undefined)}
     {...restProps}
   >
     {#if resolvedShowInfo}
-      <div class="svadmin-progress__line-track">
-        <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
+      <div class="svadmin-progress__line-track" style:background-color={trackColor ?? undefined}>
+        <div class="svadmin-progress-value" style:background-color={color ?? undefined} style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
       </div>
       <span class="svadmin-progress__info flex items-center justify-end">{#if indeterminate}…{:else if status === "success"}<Check class="size-3.5 text-success" aria-hidden="true" />{:else if status === "danger"}<X class="size-3.5 text-destructive" aria-hidden="true" />{:else}{info}{/if}</span>
     {:else}
-      <div class="svadmin-progress-value" style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
+      <div class="svadmin-progress-value" style:background-color={color ?? undefined} style:transform={indeterminate ? undefined : `translateX(-${100 - percentage}%)`}></div>
     {/if}
   </div>
 {/if}
