@@ -12,6 +12,8 @@
     showText?: boolean;
     text?: string;
     showActions?: boolean;
+    bordered?: boolean;
+    color?: string;
     margin?: number;
     class?: string;
   }
@@ -24,6 +26,8 @@
     showText = true,
     text,
     showActions = false,
+    bordered = true,
+    color,
     margin = 8,
     class: className = '',
   }: BarcodeProps = $props();
@@ -147,8 +151,10 @@
 
 <div
   data-svadmin-component="Barcode"
+  data-bordered={bordered ? 'true' : 'false'}
   class={cn(
-    'inline-flex flex-col items-center justify-center rounded-lg border border-border bg-card p-4 shadow-xs select-none transition-all',
+    'inline-flex flex-col items-center justify-center rounded-lg bg-card p-4 select-none transition-all',
+    bordered && 'border border-border shadow-xs',
     className
   )}
 >
@@ -170,7 +176,8 @@
         y={margin}
         width={bar.width}
         height={height - margin * 0.5}
-        class="fill-foreground"
+        fill={color ?? 'currentColor'}
+        class={color ? undefined : 'fill-foreground'}
       />
     {/each}
 
