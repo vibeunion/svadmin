@@ -8,19 +8,28 @@
     title: string;
     description?: string;
     time?: string;
+    /** `time` 的别名，便于宿主沿用列表式字段名。 */
+    label?: string;
     tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
     active?: boolean;
     dot?: Snippet;
+    /** 单个节点自定义颜色，写入 `--timeline-dot-color`。 */
+    dotColor?: string;
+    /** 单个节点连线样式与颜色；未设置时回落到列表级设置。 */
+    lineType?: 'solid' | 'dashed' | 'dotted';
+    lineColor?: string;
   }
 
   interface Props {
     items: TimelineEntry[];
-    mode?: 'vertical' | 'horizontal' | 'alternate';
+    mode?: 'vertical' | 'horizontal' | 'alternate' | 'right';
     direction?: 'horizontal' | 'vertical';
     reverse?: boolean;
     pending?: boolean | string | Snippet;
     pendingDot?: Snippet;
     label?: string;
+    /** 列表级连线样式，节点可用 `lineType` 覆盖。 */
+    lineType?: 'solid' | 'dashed' | 'dotted';
     class?: string;
     dot?: Snippet<[TimelineEntry]>;
     children?: Snippet<[TimelineEntry]>;
@@ -34,6 +43,7 @@
     pending,
     pendingDot,
     label = 'Timeline',
+    lineType = 'solid',
     class: className = '',
     dot,
     children,
@@ -43,6 +53,16 @@
     direction === 'horizontal' ? 'horizontal' : mode
   );
   const displayItems = $derived(reverse ? [...items].reverse() : items);
+  const LINE_STYLES = new Set(['solid', 'dashed', 'dotted']);
+
+  function itemStyle(item: TimelineEntry): string | undefined {
+    const declarations: string[] = [];
+    if (item.dotColor) declarations.push(`--timeline-dot-color: ${item.dotColor}`);
+    const style = item.lineType && LINE_STYLES.has(item.lineType) ? item.lineType : lineType;
+    declarations.push(`--timeline-item-line-style: ${style}`);
+    if (item.lineColor) declarations.push(`--timeline-item-line-color: ${item.lineColor}`);
+    return declarations.join('; ');
+  }
 </script>
 
 <ol class={cn('svadmin-timeline', className)} data-mode={effectiveMode} aria-label={label}>
@@ -53,6 +73,7 @@
       data-tone={item.tone ?? 'neutral'}
       data-active={item.active ? 'true' : undefined}
       data-side={side}
+      style={itemStyle(item)}
     >
       {#if item.dot}
         <span class="svadmin-timeline__custom-dot" aria-hidden="true">{@render item.dot()}</span>
@@ -65,7 +86,7 @@
         {#if children}
           {@render children(item)}
         {:else}
-          {#if item.time}<time class="svadmin-timeline__time">{item.time}</time>{/if}
+          {#if item.time ?? item.label}<time class="svadmin-timeline__time">{item.time ?? item.label}</time>{/if}
           <p class="svadmin-timeline__title">{item.title}</p>
           {#if item.description}<p class="svadmin-timeline__description">{item.description}</p>{/if}
         {/if}

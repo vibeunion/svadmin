@@ -17,7 +17,7 @@
 		defaultIndeterminate,
 		size = "default",
 		class: className,
-		children,
+		children: childrenProp,
 		onchange,
 		onChange,
 		...restProps
@@ -43,14 +43,9 @@
 		size === "small" || size === "mini" ? "compact" : size === "large" ? "default" : size
 	);
 
-	// Computed outside checkboxControl. Inside that snippet, svelte-check treats
-	// `children` as CheckboxPrimitive.Root's children snippet, which shadows the label prop.
-	const controlClass = $derived(cn("svadmin-checkbox", !children && className));
-	const labelledBy = $derived(children && !restProps["aria-label"] ? labelId : undefined);
-
 	function handleCheckedChange(val: boolean | "indeterminate") {
 		const isChecked = val === true;
-		restProps.onCheckedChange?.(isChecked);
+		restProps.onCheckedChange?.(val === true);
 		onChange?.(isChecked);
 		onchange?.(isChecked);
 	}
@@ -61,10 +56,10 @@
 		bind:ref
 		data-slot="checkbox"
 		data-size={normalizedSize}
-		class={controlClass}
+		class={cn("svadmin-checkbox", !childrenProp && className)}
 		bind:checked
 		bind:indeterminate
-		aria-labelledby={labelledBy}
+		aria-labelledby={childrenProp && !restProps["aria-label"] ? labelId : undefined}
 		{...restProps}
 		onCheckedChange={handleCheckedChange}
 	>
@@ -83,10 +78,10 @@
 	</CheckboxPrimitive.Root>
 {/snippet}
 
-{#if children}
+{#if childrenProp}
 	<label class={cn("svadmin-checkbox-wrapper inline-flex items-center gap-2 cursor-pointer select-none text-sm text-foreground", className)}>
 		{@render checkboxControl()}
-		<span id={labelId} class="svadmin-checkbox-label">{@render children()}</span>
+		<span id={labelId} class="svadmin-checkbox-label">{@render childrenProp()}</span>
 	</label>
 {:else}
 	{@render checkboxControl()}

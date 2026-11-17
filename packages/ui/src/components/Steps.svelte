@@ -11,6 +11,8 @@
     description?: string;
     icon?: Snippet;
     disabled?: boolean;
+    /** 单个节点覆盖整体状态（wait / process / finish / error）。 */
+    status?: 'wait' | 'process' | 'finish' | 'error';
   }
 
   interface Props {
@@ -18,12 +20,14 @@
     items: StepItem[];
     direction?: 'horizontal' | 'vertical';
     labelPlacement?: 'horizontal' | 'vertical';
-    type?: 'default' | 'dot';
+    type?: 'default' | 'dot' | 'arrow' | 'navigation';
     size?: 'default' | 'small' | 'mini' | 'large';
     status?: 'wait' | 'process' | 'finish' | 'error';
     clickable?: boolean;
     class?: string;
     onchange?: (index: number) => void;
+    /** `onchange` 的别名，便于宿主沿用 camelCase。 */
+    onChange?: (index: number) => void;
   }
 
   let {
@@ -37,9 +41,12 @@
     clickable = false,
     class: className = '',
     onchange,
+    onChange,
   }: Props = $props();
 
   function state(index: number): 'finish' | 'process' | 'wait' | 'error' {
+    const override = items[index]?.status;
+    if (override) return override;
     if (index < current) return 'finish';
     if (index === current) return status === 'error' ? 'error' : status === 'finish' ? 'finish' : 'process';
     return 'wait';
@@ -49,6 +56,7 @@
     const item = items[index];
     if (!clickable || !item || item.disabled || index === current) return;
     onchange?.(index);
+    onChange?.(index);
   }
 </script>
 
