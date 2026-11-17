@@ -34,8 +34,8 @@ describe("Result extra/subTitle and ColorPicker size/showText enhancements", () 
       },
     });
 
-    const wrap = container.querySelector(".svadmin-color-picker-wrap");
-    expect(wrap?.getAttribute("data-size")).toBe("small");
+    const picker = container.querySelector(".svadmin-color-picker");
+    expect(picker?.getAttribute("data-size")).toBe("small");
     expect(getByText(/#165dff/i)).toBeTruthy();
   });
 });

@@ -19,8 +19,9 @@ describe('interaction contract', () => {
   });
 
   it('keeps form dialogs from closing on the mask and gives message a normal type', () => {
-    expect(modalForm).toContain('closeOnOverlayClick={false}');
-    expect(modalForm).toContain('size="md"');
+    expect(modalForm).toContain('closeOnOverlayClick={maskClosable}');
+    expect(modalForm).toContain('maskClosable = false');
+    expect(modalForm).toContain("size = 'md'");
     expect(toastHost).toContain("case 'normal'");
     expect(toastHost).toContain("placement === 'top' ? 'top-center'");
   });
