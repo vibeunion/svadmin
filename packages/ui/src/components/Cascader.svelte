@@ -9,15 +9,23 @@
   import { useTranslation } from '@svadmin/core/i18n';
 
   export interface CascaderOption {
-    value: string | number;
-    label: string;
+    value?: string | number;
+    key?: string | number;
+    label?: string;
+    title?: string;
     children?: CascaderOption[];
     hasChildren?: boolean;
     disabled?: boolean;
     isLeaf?: boolean;
+    [key: string]: unknown;
   }
 
   export type CascaderPath = (string | number)[];
+
+  /** 归一化后的节点值：宿主可以用 value 或 key，缺省时退化为空串。 */
+  function nodeValue(option: CascaderOption): string | number {
+    return option.value ?? option.key ?? '';
+  }
 
   const i18n = useTranslation();
 
@@ -27,6 +35,7 @@
     describedby?: string | undefined;
     invalid?: boolean | undefined;
     options?: CascaderOption[] | undefined;
+    data?: CascaderOption[] | undefined;
     value?: CascaderPath | CascaderPath[] | undefined;
     separator?: string | undefined;
     placeholder?: string | undefined;
@@ -54,6 +63,7 @@
     describedby,
     invalid = false,
     options = $bindable([]),
+    data,
     value = $bindable(undefined),
     separator = ' / ',
     placeholder,
@@ -133,7 +143,7 @@
   function mergeLoadedChildren(nodes: CascaderOption[], prefix: (string | number)[]): CascaderOption[] {
     let changed = false;
     const next = nodes.map((node) => {
-      const path = [...prefix, node.value];
+      const path = [...prefix, nodeValue(node)];
       const entry = loadedChildren.get(pathId(path));
       const applyLoaded = node.children === undefined && node.isLeaf !== true
         && !!entry && entry.node === node;
@@ -151,14 +161,38 @@
     return changed ? next : nodes;
   }
 
+  function normalizeCascaderNodes(nodes: CascaderOption[]): CascaderOption[] {
+    let changed = false;
+    const next = nodes.map((node) => {
+      const needsVal = node.value === undefined && node.key !== undefined;
+      const needsLab = node.label === undefined && node.title !== undefined;
+      const children = node.children ? normalizeCascaderNodes(node.children) : undefined;
+      if (needsVal || needsLab || (children !== undefined && children !== node.children)) {
+        changed = true;
+        const nextChildren = children ?? node.children;
+        return {
+          ...node,
+          value: nodeValue(node),
+          label: node.label ?? node.title ?? String(nodeValue(node)),
+          ...(nextChildren === undefined ? {} : { children: nextChildren }),
+        };
+      }
+      return node;
+    });
+    return changed ? next : nodes;
+  }
+
+  const rawInputOptions = $derived(data ?? options);
+  const normalizedRawOptions = $derived(normalizeCascaderNodes(rawInputOptions));
+
   // 每次读取都从宿主当前对象重建，避免克隆祖先形成旧快照。
-  const effectiveOptions = $derived(mergeLoadedChildren(options, []));
+  const effectiveOptions = $derived(mergeLoadedChildren(normalizedRawOptions, []));
 
   // 外部替换选项或加载器、禁用字段时，旧请求不得再写入或提交。
   $effect.pre(() => {
-    if (options !== observedOptions) {
+    if (normalizedRawOptions !== observedOptions) {
       // 宿主替换 options 一定推进树版本；内部子级缓存随之失效。
-      observedOptions = options;
+      observedOptions = normalizedRawOptions;
       loadedChildren.clear();
       treeEpoch += 1;
     }
@@ -242,7 +276,7 @@
 
   async function activateOption(colIndex: number, option: CascaderOption, commitSelection: boolean): Promise<{ loaded: boolean; path: (string | number)[] }> {
     if (isOptionDisabled(colIndex, option)) return { loaded: false, path: activePath };
-    const nextPath = [...activePath.slice(0, colIndex), option.value];
+    const nextPath = [...activePath.slice(0, colIndex), nodeValue(option)];
     activePath = nextPath;
     const loaded = await ensureChildren(option, nextPath);
     if (!loaded || !open || !samePath(activePath, nextPath)) return { loaded: false, path: nextPath };
@@ -325,11 +359,11 @@
   }
 
   function treeNode(path: CascaderPath, option: CascaderOption): UiTreeNode {
-    const nodePath = [...path, option.value];
+    const nodePath = [...path, nodeValue(option)];
     const children = option.children?.map((child) => treeNode(nodePath, child));
     return {
       id: pathNodeId(nodePath),
-      label: option.label ?? String(option.value),
+      label: option.label ?? String(nodeValue(option)),
       ...(children === undefined ? {} : { children }),
       ...(option.disabled === true ? { disabled: true } : {}),
       ...(option.isLeaf === true ? { isLeaf: true } : {}),
@@ -405,8 +439,8 @@
     const leaves: SearchLeaf[] = [];
     const walk = (items: CascaderOption[], prefix: CascaderPath, labels: string[]) => {
       for (const item of items) {
-        const path = [...prefix, item.value];
-        const nextLabels = [...labels, item.label];
+        const path = [...prefix, nodeValue(item)];
+        const nextLabels = [...labels, item.label ?? String(nodeValue(item))];
         if (!hasChildren(item)) leaves.push({ path, labels: nextLabels, disabled: item.disabled === true });
         else if (item.children) walk(item.children, path, nextLabels);
       }
