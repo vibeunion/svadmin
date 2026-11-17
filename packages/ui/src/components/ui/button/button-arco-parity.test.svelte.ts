@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
-import Button from './button.svelte';
+import Button, { type ButtonProps } from './button.svelte';
 
 describe('Button Arco Parity Enhancements', () => {
   it('supports loading state with spinner and disabled accessibility', () => {
@@ -42,13 +42,13 @@ describe('Button Arco Parity Enhancements', () => {
   });
 
   it('supports long/block full width and Arco type alias', () => {
-    const { container: longContainer } = render(Button, { props: { long: true, type: 'primary' } });
+    const { container: longContainer } = render(Button, { props: { long: true, type: 'primary' } as ButtonProps });
     const longBtn = longContainer.querySelector('button');
     expect(longBtn?.className).toContain('w-full');
     expect(longBtn?.getAttribute('type')).toBe('button');
     expect(longBtn?.getAttribute('data-variant')).toBe('default');
 
-    const { container: outlineContainer } = render(Button, { props: { type: 'outline' } });
+    const { container: outlineContainer } = render(Button, { props: { type: 'outline' } as ButtonProps });
     const outlineBtn = outlineContainer.querySelector('button');
     expect(outlineBtn?.getAttribute('data-variant')).toBe('outline');
   });
