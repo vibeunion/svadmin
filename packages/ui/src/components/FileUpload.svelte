@@ -21,6 +21,8 @@
     accept?: string | undefined;
     multiple?: boolean | undefined;
     maxFiles?: number | undefined;
+    limit?: number | undefined;
+    showUploadList?: boolean | undefined;
     maxSize?: number | undefined;
     disabled?: boolean | undefined;
     required?: boolean | undefined;
@@ -41,7 +43,9 @@
     name,
     accept = '',
     multiple = false,
-    maxFiles = multiple ? 10 : 1,
+    maxFiles,
+    limit,
+    showUploadList = true,
     maxSize,
     disabled = false,
     required = false,
@@ -208,8 +212,9 @@
     return i18n.t('upload.failed');
   }
 
+  const resolvedMaxFiles = $derived(limit ?? maxFiles);
   const normalizedMaxFiles = $derived(
-    multiple ? (Number.isSafeInteger(maxFiles) && maxFiles > 0 ? maxFiles : 10) : 1,
+    multiple ? (Number.isSafeInteger(resolvedMaxFiles) && resolvedMaxFiles! > 0 ? resolvedMaxFiles! : 10) : 1,
   );
 
   type UploadItemUpdate = Partial<Omit<UploadItem, 'error' | 'url' | 'uploadId' | 'cleanupStatus'>> & {
@@ -446,7 +451,7 @@
     </ul>
   {/if}
 
-  {#if items.length}
+  {#if showUploadList && items.length}
     <ul class="svadmin-file-upload-list" aria-label={i18n.t('upload.selectedFiles')}>
       {#each items as item (item.id)}
         <li>
