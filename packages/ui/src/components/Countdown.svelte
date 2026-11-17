@@ -1,46 +1,76 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { cn } from '../utils.js';
 
   interface Props {
     target?: Date | string | number;
+    value?: Date | string | number;
     duration?: number;
-    title?: string;
-    format?: 'full' | 'clock';
+    now?: number;
+    start?: boolean;
+    title?: string | Snippet;
+    format?: string;
     onfinish?: () => void;
     class?: string;
   }
 
-  let { target, duration, title, format = 'full', onfinish, class: className = '' }: Props = $props();
+  let {
+    target,
+    value,
+    duration,
+    now: initialNow,
+    start = true,
+    title,
+    format = 'full',
+    onfinish,
+    class: className = '',
+  }: Props = $props();
+
+  const effectiveTarget = $derived(value ?? target);
   let remaining = $state(0);
   let finished = $state(false);
 
   function resolveRemaining(): number {
     if (duration !== undefined) return Math.max(0, duration * 1000);
-    if (!target) return 0;
-    const end = target instanceof Date ? target.getTime() : new Date(target).getTime();
-    return Number.isNaN(end) ? 0 : Math.max(0, end - Date.now());
+    if (!effectiveTarget) return 0;
+    const end = effectiveTarget instanceof Date ? effectiveTarget.getTime() : new Date(effectiveTarget).getTime();
+    const current = initialNow !== undefined ? initialNow : Date.now();
+    return Number.isNaN(end) ? 0 : Math.max(0, end - current);
   }
 
-  function formatTime(value: number): string {
-    const total = Math.max(0, Math.floor(value / 1000));
+  function formatTime(val: number): string {
+    const total = Math.max(0, Math.floor(val / 1000));
     const days = Math.floor(total / 86400);
     const hours = Math.floor((total % 86400) / 3600);
     const minutes = Math.floor((total % 3600) / 60);
     const seconds = total % 60;
     const clock = [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':');
-    return format === 'clock' ? clock : days > 0 ? `${days}d ${clock}` : clock;
+
+    if (format === 'clock') return clock;
+    if (format === 'full') return days > 0 ? `${days}d ${clock}` : clock;
+
+    let res = format;
+    res = res.replace(/DD/g, String(days).padStart(2, '0'));
+    res = res.replace(/\bD\b/g, String(days));
+    res = res.replace(/HH/g, String(hours).padStart(2, '0'));
+    res = res.replace(/\bH\b/g, String(hours));
+    res = res.replace(/mm/g, String(minutes).padStart(2, '0'));
+    res = res.replace(/\bm\b/g, String(minutes));
+    res = res.replace(/ss/g, String(seconds).padStart(2, '0'));
+    res = res.replace(/\bs\b/g, String(seconds));
+    return res;
   }
 
   $effect(() => {
     const next = resolveRemaining();
     remaining = next;
     finished = next <= 0;
-    if (next <= 0) return;
+    if (next <= 0 || !start) return;
     const deadline = Date.now() + next;
     const timer = setInterval(() => {
-      const value = Math.max(0, deadline - Date.now());
-      remaining = value;
-      if (value === 0) {
+      const currentVal = Math.max(0, deadline - Date.now());
+      remaining = currentVal;
+      if (currentVal === 0) {
         finished = true;
         clearInterval(timer);
         onfinish?.();
@@ -51,7 +81,11 @@
 </script>
 
 <div class={cn('svadmin-countdown', className)} data-finished={finished ? 'true' : 'false'}>
-  {#if title}<p class="svadmin-countdown__title">{title}</p>{/if}
+  {#if title}
+    <div class="svadmin-countdown__title">
+      {#if typeof title === 'string'}{title}{:else}{@render title()}{/if}
+    </div>
+  {/if}
   <time class="svadmin-countdown__value" aria-live="off">{formatTime(remaining)}</time>
   <span class="svadmin-countdown__sr" aria-live="polite">{finished ? 'Countdown finished' : formatTime(remaining)}</span>
 </div>
