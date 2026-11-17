@@ -29,7 +29,7 @@ describe("Progress states", () => {
     expect(container.querySelector(".text-destructive")).not.toBeNull();
   });
 
-  it("supports Arco Design percent, type, and showText aliases", () => {
+  it("supports the percent, type, and showText aliases", () => {
     const { container } = render(Progress, {
       props: {
         percent: 75,

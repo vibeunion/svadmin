@@ -21,17 +21,21 @@
 
   let {
     items: explicitItems,
+    routes,
     menu,
     separator = 'slash',
     maxItems = 0,
     class: className = 'svadmin-breadcrumbs--spaced',
   }: {
     items?: BreadcrumbItem[] | undefined;
+    routes?: BreadcrumbItem[] | undefined;
     menu?: MenuItem[] | undefined;
-    separator?: 'slash' | 'arrow';
+    separator?: 'slash' | 'arrow' | string;
     maxItems?: number;
     class?: string;
   } = $props();
+
+  const effectiveItems = $derived(explicitItems ?? routes);
 
   interface Crumb { label: string; href?: string; hidden?: boolean; children?: Crumb[]; }
 
@@ -58,9 +62,9 @@
   }
 
   const crumbs = $derived.by<Crumb[]>(() => {
-    if (explicitItems && explicitItems.length > 0) {
+    if (effectiveItems && effectiveItems.length > 0) {
       // exactOptionalPropertyTypes: 不把 undefined 塞进可选 href。
-      return explicitItems.map((item) => (item.href === undefined
+      return effectiveItems.map((item) => (item.href === undefined
         ? { label: item.label }
         : { label: item.label, href: item.href }));
     }
@@ -133,7 +137,7 @@
   });
 </script>
 
-{#if explicitItems ? crumbs.length > 0 : crumbs.length > 1}
+{#if effectiveItems ? crumbs.length > 0 : crumbs.length > 1}
   <Breadcrumb.Root class={cn('svadmin-breadcrumbs', className)}>
     <Breadcrumb.List>
       {#each displayCrumbs as crumb, i (`${crumb.label}-${i}`)}

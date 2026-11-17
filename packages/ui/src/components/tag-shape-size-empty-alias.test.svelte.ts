@@ -4,13 +4,13 @@ import Tag from "./Tag.svelte";
 import EmptyState from "./EmptyState.svelte";
 import { Empty } from "../index.js";
 
-describe("Tag & Empty Arco Parity Enhancements", () => {
+describe("Tag shape and size aliases", () => {
   it("supports round shape and large size in Tag", () => {
     const { container } = render(Tag, {
       props: {
         shape: "round",
         size: "large",
-        color: "arcoblue",
+        color: "blue",
       },
     });
 

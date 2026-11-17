@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
-import Button, { type ButtonProps } from './button.svelte';
+import Button from './button.svelte';
 
-describe('Button Arco Parity Enhancements', () => {
+describe('Button states and aliases', () => {
   it('supports loading state with spinner and disabled accessibility', () => {
     const { container } = render(Button, {
       props: {
@@ -18,7 +18,7 @@ describe('Button Arco Parity Enhancements', () => {
     expect(container.querySelector('.animate-spin')).not.toBeNull();
   });
 
-  it('maps Arco size options mini, small, and large correctly', () => {
+  it('maps the size aliases mini, small, and large correctly', () => {
     const { container: miniContainer } = render(Button, { props: { size: 'mini' } });
     expect(miniContainer.querySelector('button')?.getAttribute('data-size')).toBe('xs');
 
@@ -41,14 +41,14 @@ describe('Button Arco Parity Enhancements', () => {
     expect(circleBtn?.className).toContain('aspect-square');
   });
 
-  it('supports long/block full width and Arco type alias', () => {
-    const { container: longContainer } = render(Button, { props: { long: true, type: 'primary' } as ButtonProps });
+  it('supports long/block full width and the emphasis alias', () => {
+    const { container: longContainer } = render(Button, { props: { long: true, emphasis: 'primary' } });
     const longBtn = longContainer.querySelector('button');
     expect(longBtn?.className).toContain('w-full');
     expect(longBtn?.getAttribute('type')).toBe('button');
     expect(longBtn?.getAttribute('data-variant')).toBe('default');
 
-    const { container: outlineContainer } = render(Button, { props: { type: 'outline' } as ButtonProps });
+    const { container: outlineContainer } = render(Button, { props: { emphasis: 'outline' } });
     const outlineBtn = outlineContainer.querySelector('button');
     expect(outlineBtn?.getAttribute('data-variant')).toBe('outline');
   });

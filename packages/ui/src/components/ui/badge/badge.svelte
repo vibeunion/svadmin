@@ -2,7 +2,8 @@
 	import { badgeVariants as resolveBadgeVariants, type BadgeVariant as BadgeVariantValue } from "./badge-variants.js";
 
 	export { badgeVariants, type BadgeVariant } from "./badge-variants.js";
-	export type BadgeStatus = 'success' | 'processing' | 'default' | 'error' | 'warning';
+	export type BadgeStatus = 'success' | 'processing' | 'default' | 'error' | 'warning' | 'danger' | 'info' | 'primary';
+	export type BadgeSize = "default" | "compact" | "small" | "mini" | "large";
 </script>
 
 <script lang="ts">
@@ -29,7 +30,7 @@
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
 		variant?: BadgeVariantValue;
-		size?: "default" | "compact";
+		size?: BadgeSize;
 		count?: number | string | undefined;
 		overflowCount?: number | undefined;
 		maxCount?: number | undefined;
@@ -43,6 +44,7 @@
 
 	const config = useComponentConfig();
 	const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
+	const isSmall = $derived(size === 'small' || size === 'compact' || size === 'mini');
 
 	const isStatusMode = $derived(count !== undefined || dot || status !== undefined);
 
@@ -72,10 +74,13 @@
 			case 'success':
 				return 'bg-success';
 			case 'processing':
+			case 'primary':
+			case 'info':
 				return 'bg-primary';
 			case 'warning':
 				return 'bg-warning';
 			case 'error':
+			case 'danger':
 				return 'bg-destructive';
 			case 'default':
 			default:
@@ -92,15 +97,16 @@
 		data-svadmin-component="badge"
 		data-slot="badge-status"
 		data-status={status}
+		data-size={size}
 		{href}
 		class={cn('inline-flex items-center gap-2 text-sm text-foreground', className)}
 		{...restProps}
 	>
-		<span class="relative flex h-2 w-2">
+		<span class={cn("relative flex", isSmall ? "h-1.5 w-1.5" : "h-2 w-2")}>
 			{#if status === 'processing'}
 				<span class={cn('absolute inline-flex h-full w-full animate-ping rounded-full opacity-75', statusColorClass)} style={color ? `background-color: ${color}` : undefined}></span>
 			{/if}
-			<span class={cn('relative inline-flex h-2 w-2 rounded-full', statusColorClass)} style={color ? `background-color: ${color}` : undefined}></span>
+			<span class={cn('relative inline-flex rounded-full', isSmall ? 'h-1.5 w-1.5' : 'h-2 w-2', statusColorClass)} style={color ? `background-color: ${color}` : undefined}></span>
 		</span>
 		{#if text}
 			<span class="svadmin-badge-status-text select-none text-xs">{text}</span>
@@ -113,6 +119,7 @@
 		bind:this={ref}
 		data-svadmin-component="badge"
 		data-slot="badge-wrapper"
+		data-size={size}
 		{href}
 		class={cn('relative inline-flex shrink-0 align-middle', className)}
 		{...restProps}
@@ -123,7 +130,8 @@
 				<span
 					data-slot="badge-dot"
 					class={cn(
-						'absolute top-0 right-0 z-10 h-2 w-2 rounded-full ring-2 ring-background transform translate-x-1/2 -translate-y-1/2',
+						'absolute top-0 right-0 z-10 rounded-full ring-2 ring-background transform translate-x-1/2 -translate-y-1/2',
+						isSmall ? 'h-1.5 w-1.5' : 'h-2 w-2',
 						status ? statusColorClass : 'bg-destructive',
 					)}
 					style={`${offsetStyle}${color ? ` background-color: ${color};` : ''}`}
@@ -132,7 +140,8 @@
 				<span
 					data-slot="badge-count"
 					class={cn(
-						'absolute top-0 right-0 z-10 flex min-w-4.5 h-4.5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none shadow-xs ring-2 ring-background transform translate-x-1/2 -translate-y-1/2 whitespace-nowrap',
+						'absolute top-0 right-0 z-10 flex items-center justify-center rounded-full leading-none shadow-xs ring-2 ring-background transform translate-x-1/2 -translate-y-1/2 whitespace-nowrap',
+						isSmall ? 'min-w-3.5 h-3.5 px-1 text-[9px] font-medium' : 'min-w-4.5 h-4.5 px-1.5 text-[11px] font-semibold',
 						status ? cn(statusColorClass, 'text-primary-foreground') : 'bg-destructive text-destructive-foreground',
 					)}
 					style={`${offsetStyle}${color ? ` background-color: ${color};` : ''}`}
@@ -149,19 +158,21 @@
 		bind:this={ref}
 		data-svadmin-component="badge"
 		data-slot="badge-standalone"
+		data-size={size}
 		{href}
 		class={cn('inline-flex items-center align-middle', className)}
 		{...restProps}
 	>
 		{#if dot}
 			<span
-				class={cn('h-2 w-2 rounded-full', status ? statusColorClass : 'bg-destructive')}
+				class={cn('rounded-full', isSmall ? 'h-1.5 w-1.5' : 'h-2 w-2', status ? statusColorClass : 'bg-destructive')}
 				style={color ? `background-color: ${color}` : undefined}
 			></span>
 		{:else if displayCount !== null}
 			<span
 				class={cn(
-					'flex min-w-4.5 h-4.5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none shadow-xs whitespace-nowrap',
+					'flex items-center justify-center rounded-full leading-none shadow-xs whitespace-nowrap',
+					isSmall ? 'min-w-3.5 h-3.5 px-1 text-[9px] font-medium' : 'min-w-4.5 h-4.5 px-1.5 text-[11px] font-semibold',
 					status ? cn(statusColorClass, 'text-primary-foreground') : 'bg-destructive text-destructive-foreground',
 				)}
 				style={color ? `background-color: ${color}` : undefined}

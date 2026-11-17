@@ -16,7 +16,7 @@
     maxVisible?: number | undefined;
     maxCount?: number | undefined;
     label?: string | undefined;
-    size?: 'sm' | 'md' | 'lg' | undefined;
+    size?: 'sm' | 'md' | 'lg' | 'mini' | 'small' | 'default' | 'large' | undefined;
     showStatusDot?: boolean | undefined;
     class?: string | undefined;
     onuserclick?: ((user: PresenceUser) => void) | undefined;
@@ -37,6 +37,14 @@
   const visibleUsers = $derived(users.slice(0, effectiveMax));
   const hiddenCount = $derived(Math.max(0, users.length - effectiveMax));
   const hiddenUsers = $derived(users.slice(effectiveMax));
+
+  const normalizedSize = $derived<'sm' | 'md' | 'lg'>(
+    size === 'mini' || size === 'small' || size === 'sm'
+      ? 'sm'
+      : size === 'large' || size === 'lg'
+        ? 'lg'
+        : 'md'
+  );
 
   const sizeMap = {
     sm: 'h-6 w-6 text-[10px]',
@@ -91,7 +99,7 @@
         type="button"
         class={cn(
           'relative inline-flex shrink-0 items-center justify-center rounded-full border-2 border-background bg-muted font-semibold text-foreground shadow-xs transition-all hover:z-20 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary',
-          sizeMap[size]
+          sizeMap[normalizedSize]
         )}
         title={tooltip}
         aria-label={tooltip}
@@ -109,7 +117,7 @@
           <span
             class={cn(
               'absolute bottom-0 right-0 rounded-full ring-2 ring-background',
-              dotSizeMap[size],
+              dotSizeMap[normalizedSize],
               getStatusIndicator(user.status)
             )}
           >
@@ -125,7 +133,7 @@
       <div
         class={cn(
           'relative inline-flex shrink-0 items-center justify-center rounded-full border-2 border-background bg-secondary font-medium text-secondary-foreground shadow-xs transition-transform hover:scale-105',
-          sizeMap[size]
+          sizeMap[normalizedSize]
         )}
         title={hiddenUsers.map((u) => u.name).join(', ')}
         aria-label={`+${hiddenCount} more users`}

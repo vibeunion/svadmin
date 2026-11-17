@@ -120,7 +120,7 @@ try {
     const scene = await openScene({ view: 'resource-list', state: 'ready', theme: 'light', locale }, viewport);
     const { page } = scene;
     try {
-      const search = page.getByRole('textbox', { name: locale === 'en' ? 'Search customers' : '搜索客户' });
+      const search = page.getByRole('searchbox', { name: locale === 'en' ? 'Search customers' : '搜索客户' });
       await page.getByTestId('filter-pending').click();
       await expect(page.getByTestId('filter-pending')).toHaveAttribute('aria-pressed', 'true');
       await expect(page.locator('tbody tr')).toHaveCount(customers.filter(record => record.status === 'pending').length);
