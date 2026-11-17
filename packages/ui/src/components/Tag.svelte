@@ -5,12 +5,29 @@
   import { badgeVariants, type BadgeVariant } from "./ui/badge/index.js";
   import { useComponentConfig } from "./ConfigProvider.svelte";
 
-  export type TagColor = "blue" | "green" | "orange" | "red" | "purple" | "cyan" | "gray" | string;
+  export type TagColor =
+    | "blue"
+    | "green"
+    | "orange"
+    | "red"
+    | "purple"
+    | "cyan"
+    | "gray"
+    | "arcoblue"
+    | "gold"
+    | "lime"
+    | "magenta"
+    | "pinkpurple"
+    | string;
+
+  export type TagSize = "mini" | "small" | "default" | "large" | "compact";
+  export type TagShape = "square" | "round";
 
   interface Props {
     variant?: BadgeVariant;
     color?: TagColor;
-    size?: "default" | "compact";
+    size?: TagSize;
+    shape?: TagShape;
     bordered?: boolean;
     closable?: boolean;
     checkable?: boolean;
@@ -28,6 +45,7 @@
     variant = "secondary",
     color,
     size: sizeProp,
+    shape = "square",
     bordered = true,
     closable = false,
     checkable = false,
@@ -47,10 +65,15 @@
 
   const presetColorClasses: Record<string, string> = {
     blue: "bg-primary/10 text-primary border-primary/20",
+    arcoblue: "bg-primary/10 text-primary border-primary/20",
     green: "bg-success/10 text-success border-success/20",
+    lime: "bg-success/10 text-success border-success/20",
     orange: "bg-warning/10 text-warning border-warning/20",
+    gold: "bg-warning/10 text-warning border-warning/20",
     red: "bg-destructive/10 text-destructive border-destructive/20",
+    magenta: "bg-destructive/10 text-destructive border-destructive/20",
     purple: "bg-accent text-accent-foreground border-border",
+    pinkpurple: "bg-accent text-accent-foreground border-border",
     cyan: "bg-info/10 text-info border-info/20",
     gray: "bg-muted text-muted-foreground border-border",
   };
@@ -78,6 +101,7 @@
     color && isPresetColor && presetColorClasses[color],
     color && !isPresetColor && "border",
     !bordered && "border-transparent",
+    shape === "round" && "rounded-full px-2.5",
     "svadmin-tag inline-flex items-center",
     className
   )}
@@ -85,6 +109,7 @@
   class:is-disabled={disabled}
   data-slot="tag"
   data-size={size}
+  data-shape={shape !== "square" ? shape : undefined}
   data-color={color}
   data-checked={checkable ? String(checked) : undefined}
 >
@@ -121,7 +146,11 @@
 
 <style>
   .svadmin-tag { gap: 0.25rem; max-width: 100%; min-height: 24px; padding-inline: 8px; border-radius: 2px; font-weight: 500; }
-  .svadmin-tag[data-size="compact"] { min-height: 20px; }
+  .svadmin-tag[data-size="mini"],
+  .svadmin-tag[data-size="compact"] { min-height: 20px; font-size: 0.75rem; padding-inline: 6px; }
+  .svadmin-tag[data-size="small"] { min-height: 24px; font-size: 0.75rem; padding-inline: 8px; }
+  .svadmin-tag[data-size="default"] { min-height: 28px; font-size: 0.8125rem; padding-inline: 8px; }
+  .svadmin-tag[data-size="large"] { min-height: 32px; font-size: 0.875rem; padding-inline: 10px; }
   .svadmin-tag.is-disabled { opacity: 1; color: var(--svadmin-text-4); }
   .svadmin-tag__label { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .svadmin-tag__control,
