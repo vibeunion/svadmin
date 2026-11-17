@@ -41,4 +41,17 @@ describe('Statistic separator and snippet title', () => {
     });
     expect(container.textContent).toContain('1,234,567');
   });
+
+  it('renders tip and tooltip on Statistic component', () => {
+    const { container } = render(Statistic, {
+      props: {
+        title: '活跃用户',
+        value: 9876,
+        tooltip: '统计过去 30 天内活跃的用户总数',
+      },
+    });
+    const tip = container.querySelector('.svadmin-statistic__tip');
+    expect(tip).not.toBeNull();
+    expect(tip?.getAttribute('title')).toBe('统计过去 30 天内活跃的用户总数');
+  });
 });
