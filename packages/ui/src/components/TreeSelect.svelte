@@ -660,11 +660,11 @@
     triggerElement?.focus();
   }
 
-  function filterTree(nodes: TreeSelectOption[], query: string): TreeSelectOption[] {
+  function filterTree(nodes: NormalizedTreeSelectOption[], query: string): NormalizedTreeSelectOption[] {
     const q = query.trim().toLowerCase();
     if (!q) return nodes;
 
-    const filtered: TreeSelectOption[] = [];
+    const filtered: NormalizedTreeSelectOption[] = [];
     for (const node of nodes) {
       const matchSelf = (node.label ?? node.title ?? '').toLowerCase().includes(q);
       const filteredChildren = node.children ? filterTree(node.children, q) : undefined;
