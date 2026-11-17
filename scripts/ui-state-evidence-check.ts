@@ -92,6 +92,8 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/ImagePreview.svelte',
   'packages/ui/src/components/MediaGallery.svelte',
   'packages/ui/src/components/MediaLibraryModal.svelte',
+  // 二维码中心图标是固定尺寸的装饰资源，不承担媒体预览状态。
+  'packages/ui/src/components/QRCode.svelte',
   'packages/ui/src/components/OrgChart.svelte',
   'packages/ui/src/components/PresenceAvatarGroup.svelte',
   'packages/ui/src/components/VirtualCardGrid.svelte',
