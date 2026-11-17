@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { cn } from '../utils.js';
 
   export interface RangeSliderValue {
@@ -8,6 +9,7 @@
 
   interface Props {
     value?: RangeSliderValue;
+    defaultValue?: RangeSliderValue;
     min?: number;
     max?: number;
     step?: number;
@@ -18,13 +20,16 @@
     describedby?: string;
     ariaLabel?: string;
     showValue?: boolean;
+    tooltipVisible?: boolean;
+    reverse?: boolean;
     marks?: Record<number, string>;
     class?: string;
     onchange?: (value: RangeSliderValue) => void;
   }
 
   let {
-    value = $bindable({ min: 0, max: 100 }),
+    value = $bindable(),
+    defaultValue = { min: 0, max: 100 },
     min = 0,
     max = 100,
     step = 1,
@@ -35,17 +40,23 @@
     describedby,
     ariaLabel,
     showValue = false,
+    tooltipVisible = false,
+    reverse = false,
     marks,
     class: className = '',
     onchange,
   }: Props = $props();
 
+  let internalValue = $state(untrack(() => defaultValue));
+  const effectiveValue = $derived(value !== undefined ? value : internalValue);
+
   const boundsValid = $derived(
     Number.isFinite(min) && Number.isFinite(max) && min < max
       && Number.isFinite(step) && step > 0,
   );
-  const lower = $derived(boundsValid ? Math.min(max, Math.max(min, value.min)) : min);
-  const upper = $derived(boundsValid ? Math.min(max, Math.max(lower, value.max)) : max);
+  const lower = $derived(boundsValid ? Math.min(max, Math.max(min, effectiveValue.min)) : min);
+  const upper = $derived(boundsValid ? Math.min(max, Math.max(lower, effectiveValue.max)) : max);
+  const isValueVisible = $derived(showValue || tooltipVisible);
 
   function update(part: 'min' | 'max', raw: string): void {
     if (disabled || !boundsValid) return;
@@ -54,12 +65,21 @@
     const result = part === 'min'
       ? { min: Math.min(next, upper), max: upper }
       : { min: lower, max: Math.max(next, lower) };
-    value = result;
+    if (value !== undefined) {
+      value = result;
+    } else {
+      internalValue = result;
+    }
     onchange?.(result);
   }
 </script>
 
-<div class={cn('svadmin-range-slider', className)} data-invalid={invalid ? 'true' : undefined}>
+<div
+  class={cn('svadmin-range-slider', className)}
+  data-invalid={invalid ? 'true' : undefined}
+  data-reverse={reverse ? 'true' : undefined}
+  style={reverse ? 'direction: rtl;' : undefined}
+>
   <div class="svadmin-range-slider__control">
     {#if minName}<input type="hidden" name={minName} value={lower} />{/if}
     {#if maxName}<input type="hidden" name={maxName} value={upper} />{/if}
@@ -89,7 +109,7 @@
         oninput={(event) => update('max', (event.currentTarget as HTMLInputElement).value)}
       />
     </div>
-    {#if showValue}<output>{lower} - {upper}</output>{/if}
+    {#if isValueVisible}<output>{lower} - {upper}</output>{/if}
   </div>
   {#if marks && Object.keys(marks).length > 0}
     <div data-slot="slider-marks">
