@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { untrack, type Snippet } from "svelte";
   import X from "@lucide/svelte/icons/x";
   import { cn } from "../utils.js";
   import { badgeVariants, type BadgeVariant } from "./ui/badge/index.js";
@@ -31,13 +31,19 @@
     closable?: boolean;
     checkable?: boolean;
     checked?: boolean;
+    defaultChecked?: boolean;
+    visible?: boolean;
+    defaultVisible?: boolean;
     disabled?: boolean;
     closeLabel?: string;
     icon?: Snippet;
     class?: string;
     children?: Snippet;
     onclose?: (event: MouseEvent) => void;
+    onClose?: (event: MouseEvent) => void;
+    afterClose?: () => void;
     onchange?: (checked: boolean) => void;
+    onChange?: (checked: boolean) => void;
   }
 
   let {
@@ -48,15 +54,27 @@
     bordered = true,
     closable = false,
     checkable = false,
-    checked = false,
+    checked: checkedProp,
+    defaultChecked = false,
+    visible: visibleProp,
+    defaultVisible = true,
     disabled = false,
     closeLabel = "Remove tag",
     icon,
     class: className,
     children,
     onclose,
+    onClose,
+    afterClose,
     onchange,
+    onChange,
   }: Props = $props();
+
+  let innerChecked = $state(untrack(() => defaultChecked));
+  const checked = $derived(checkedProp !== undefined ? checkedProp : innerChecked);
+
+  let innerVisible = $state(untrack(() => defaultVisible));
+  const visible = $derived(visibleProp !== undefined ? visibleProp : innerVisible);
 
   const config = useComponentConfig();
   const size = $derived(sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default"));
@@ -84,15 +102,26 @@
 
   function handleCheck(): void {
     if (disabled) return;
-    onchange?.(!checked);
+    const next = !checked;
+    if (checkedProp === undefined) {
+      innerChecked = next;
+    }
+    onchange?.(next);
+    onChange?.(next);
   }
 
   function handleClose(event: MouseEvent): void {
     if (disabled) return;
+    if (visibleProp === undefined) {
+      innerVisible = false;
+    }
     onclose?.(event);
+    onClose?.(event);
+    afterClose?.();
   }
 </script>
 
+{#if visible}
 <span
   class={cn(
     !color && badgeVariants({ variant: resolvedVariant }),
@@ -141,6 +170,7 @@
     </button>
   {/if}
 </span>
+{/if}
 
 <style>
   .svadmin-tag { gap: 0.25rem; max-width: 100%; min-height: 24px; padding-inline: 8px; border-radius: 2px; font-weight: 500; }
