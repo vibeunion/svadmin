@@ -18,7 +18,10 @@
     okText?: string;
     cancelText?: string;
     side?: 'left' | 'right';
+    placement?: 'left' | 'right';
     widthClass?: string;
+    width?: number | string;
+    maskClosable?: boolean;
     isSubmitting?: boolean;
     disabled?: boolean;
     onsubmit?: (() => void | Promise<void>) | undefined;
@@ -39,7 +42,10 @@
     okText,
     cancelText = 'Cancel',
     side = 'right',
+    placement,
     widthClass = 'sm:max-w-md w-full',
+    width,
+    maskClosable = true,
     isSubmitting = false,
     disabled = false,
     onsubmit,
@@ -49,6 +55,14 @@
     children,
   }: Props = $props();
 
+  const resolvedSide = $derived(placement ?? side);
+  const widthStyle = $derived(
+    typeof width === 'number'
+      ? `width: ${width}px; max-width: 100vw;`
+      : typeof width === 'string' && (width.includes('px') || width.includes('%') || width.includes('rem'))
+        ? `width: ${width}; max-width: 100vw;`
+        : undefined
+  );
   const i18n = useTranslation();
   let loading = $state(false);
   let submitError = $state('');
@@ -147,7 +161,15 @@
   </Button>
 {/if}
 
-<Sheet.Root bind:open {side} onClose={handleCancel} onCloseRequest={handleCloseRequest} class={cn(widthClass, 'p-0 overflow-hidden', className)}>
+<Sheet.Root
+  bind:open
+  side={resolvedSide}
+  closeOnOverlayClick={maskClosable}
+  onClose={handleCancel}
+  onCloseRequest={handleCloseRequest}
+  class={cn(widthClass, 'p-0 overflow-hidden', className)}
+  style={widthStyle}
+>
   <Sheet.Content class="flex flex-col h-full gap-0 p-0">
     <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="flex flex-col h-full">
       <Sheet.Header class="px-6 py-4 border-b border-border/60">

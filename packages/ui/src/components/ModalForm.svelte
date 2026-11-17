@@ -18,6 +18,9 @@
     okText?: string;
     cancelText?: string;
     widthClass?: string;
+    width?: number | string;
+    size?: 'sm' | 'md' | 'lg';
+    maskClosable?: boolean;
     isSubmitting?: boolean;
     disabled?: boolean;
     onsubmit?: (() => void | Promise<void>) | undefined;
@@ -38,6 +41,9 @@
     okText,
     cancelText = 'Cancel',
     widthClass = '',
+    width,
+    size = 'md',
+    maskClosable = false,
     isSubmitting = false,
     disabled = false,
     onsubmit,
@@ -47,6 +53,13 @@
     children,
   }: Props = $props();
 
+  const widthStyle = $derived(
+    typeof width === 'number'
+      ? `width: ${width}px; max-width: calc(100vw - 2rem);`
+      : typeof width === 'string' && (width.includes('px') || width.includes('%') || width.includes('rem'))
+        ? `width: ${width}; max-width: calc(100vw - 2rem);`
+        : undefined
+  );
   const i18n = useTranslation();
   let loading = $state(false);
   let submitError = $state('');
@@ -157,7 +170,7 @@
     </Dialog.Trigger>
   {/if}
 
-  <Dialog.Content closeOnOverlayClick={false} size="md" loading={busy} class={cn('svadmin-dialog-form', widthClass, className)}>
+  <Dialog.Content closeOnOverlayClick={maskClosable} {size} loading={busy} class={cn('svadmin-dialog-form', widthClass, className)} style={widthStyle}>
     <form bind:this={formElement} onsubmit={handleSubmit} aria-busy={busy} class="svadmin-dialog-form__body">
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>
