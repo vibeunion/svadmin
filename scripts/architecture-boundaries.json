@@ -11,7 +11,7 @@
     "example/src/features/resource/ExampleResourcePage.svelte": 981,
     "example/src/providers/inMemoryDb.ts": 1399,
     "packages/ui/src/components/ImportWizard.svelte": 916,
-    "packages/ui/src/components/TreeSelect.svelte": 964,
+    "packages/ui/src/components/TreeSelect.svelte": 969,
     "packages/core/src/i18n.svelte.ts": 2302,
     "packages/lite/src/server-adapter.ts": 981,
     "packages/ai-elements/src/components/ChatDialog.svelte": 1417,
