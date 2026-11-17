@@ -132,7 +132,9 @@ describe('QRCode, Calendar, and Tour option parity', () => {
       onChange: onSegChange,
     });
     const buttons = segView.container.querySelectorAll('button');
-    await fireEvent.click(buttons[1]);
+    const weeklySegment = buttons[1];
+    if (weeklySegment === undefined) throw new Error('expected a weekly segment');
+    await fireEvent.click(weeklySegment);
     expect(onSegChange).toHaveBeenCalledWith('Weekly');
 
     const wmView = render(Watermark, {
