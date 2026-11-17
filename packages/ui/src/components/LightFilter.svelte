@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { Filter, X, RotateCcw, ChevronDown, Check } from '@lucide/svelte';
   import * as Popover from './ui/popover/index.js';
   import { cn } from '../utils.js';
@@ -20,9 +21,15 @@
 
   export interface LightFilterProps {
     /** Filter field definitions */
-    items: LightFilterItem[];
+    items?: LightFilterItem[];
+    /** Filter items alias */
+    data?: LightFilterItem[];
     /** Bound values object: key -> value */
     values?: Record<string, unknown>;
+    /** Values alias */
+    value?: Record<string, unknown>;
+    /** Initial values for uncontrolled usage */
+    defaultValue?: Record<string, unknown>;
     /** Callback when filter values change */
     onchange?: (values: Record<string, unknown>) => void;
     /** Callback when all filters are reset */
@@ -42,7 +49,10 @@
 
   let {
     items = [],
-    values = $bindable({}),
+    data,
+    values = $bindable(),
+    value = $bindable(),
+    defaultValue = {},
     onchange,
     onreset,
     bordered = false,
@@ -55,16 +65,21 @@
 
   const i18n = useTranslation();
 
-  const primaryItems = $derived(items.slice(0, maxDisplayCount));
-  const overflowItems = $derived(items.slice(maxDisplayCount));
+  const effectiveItems = $derived(data ?? items);
+  let internalValues = $state(untrack(() => value ?? values ?? defaultValue));
+  const effectiveValues = $derived(value ?? values ?? internalValues);
+
+  const primaryItems = $derived(effectiveItems.slice(0, maxDisplayCount));
+  const overflowItems = $derived(effectiveItems.slice(maxDisplayCount));
 
   const activeCount = $derived(
-    Object.values(values).filter((v) => v !== undefined && v !== '' && v !== null).length
+    Object.values(effectiveValues).filter((v) => v !== undefined && v !== '' && v !== null).length
   );
 
   function setFieldValue(key: string, val: unknown) {
+    const current = effectiveValues;
     const next: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(values)) {
+    for (const [k, v] of Object.entries(current)) {
       if (k !== key && v !== undefined && v !== '' && v !== null) {
         next[k] = v;
       }
@@ -72,7 +87,9 @@
     if (val !== undefined && val !== '' && val !== null) {
       next[key] = val;
     }
-    values = next;
+    if (values !== undefined) values = next;
+    if (value !== undefined) value = next;
+    if (values === undefined && value === undefined) internalValues = next;
     onchange?.(next);
   }
 
@@ -82,13 +99,16 @@
   }
 
   function handleResetAll() {
-    values = {};
+    const next = {};
+    if (values !== undefined) values = next;
+    if (value !== undefined) value = next;
+    if (values === undefined && value === undefined) internalValues = next;
     onreset?.();
     onchange?.({});
   }
 
   function getDisplayLabel(item: LightFilterItem): string {
-    const currentVal = values[item.key];
+    const currentVal = effectiveValues[item.key];
     if (currentVal === undefined || currentVal === '' || currentVal === null) {
       return item.label;
     }
@@ -111,7 +131,7 @@
   {...restProps}
 >
   {#each primaryItems as item (item.key)}
-    {@const hasValue = values[item.key] !== undefined && values[item.key] !== '' && values[item.key] !== null}
+    {@const hasValue = effectiveValues[item.key] !== undefined && effectiveValues[item.key] !== '' && effectiveValues[item.key] !== null}
     <Popover.Root>
       <Popover.Trigger>
         {#snippet child({ props })}
@@ -153,7 +173,7 @@
             <div class="text-xs font-medium text-foreground">{item.label}</div>
             <input
               type="text"
-              value={String(values[item.key] ?? '')}
+              value={String(effectiveValues[item.key] ?? '')}
               placeholder={item.placeholder ?? item.label}
               oninput={(e) => setFieldValue(item.key, (e.target as HTMLInputElement).value)}
               class="w-full h-8 px-2.5 text-xs rounded-[4px] border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
@@ -164,7 +184,7 @@
             <div class="text-xs font-medium text-foreground">{item.label}</div>
             <input
               type="date"
-              value={String(values[item.key] ?? '')}
+              value={String(effectiveValues[item.key] ?? '')}
               onchange={(e) => setFieldValue(item.key, (e.target as HTMLInputElement).value)}
               class="w-full h-8 px-2.5 text-xs rounded-[4px] border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
             />
@@ -177,17 +197,17 @@
               type="button"
               class={cn(
                 'w-full flex items-center justify-between px-2 py-1.5 text-xs rounded-[2px] text-left transition-colors',
-                !values[item.key] ? 'bg-accent text-accent-foreground font-medium' : 'hover:bg-muted text-foreground'
+                !effectiveValues[item.key] ? 'bg-accent text-accent-foreground font-medium' : 'hover:bg-muted text-foreground'
               )}
               onclick={() => setFieldValue(item.key, undefined)}
             >
               <span>{i18n.t('common.all') || 'All'}</span>
-              {#if !values[item.key]}
+              {#if !effectiveValues[item.key]}
                 <Check class="h-3.5 w-3.5 text-primary" />
               {/if}
             </button>
             {#each (item.options ?? []) as opt (opt.value)}
-              {@const selected = String(values[item.key]) === String(opt.value)}
+              {@const selected = String(effectiveValues[item.key]) === String(opt.value)}
               <button
                 type="button"
                 class={cn(
@@ -235,7 +255,7 @@
             {#if item.options}
               <select data-size="compact"
                 class="svadmin-select w-full h-8"
-                value={String(values[item.key] ?? '')}
+                value={String(effectiveValues[item.key] ?? '')}
                 onchange={(e) => setFieldValue(item.key, (e.target as HTMLSelectElement).value)}
               >
                 <option value="">{i18n.t('common.all') || 'All'}</option>
@@ -246,7 +266,7 @@
             {:else}
               <input
                 type="text"
-                value={String(values[item.key] ?? '')}
+                value={String(effectiveValues[item.key] ?? '')}
                 placeholder={item.placeholder ?? item.label}
                 oninput={(e) => setFieldValue(item.key, (e.target as HTMLInputElement).value)}
                 class="w-full h-8 px-2 text-xs rounded-[4px] border border-input bg-background"

@@ -13,12 +13,28 @@
     oncollapse?: (collapsed: boolean) => void;
     /** Callback triggered when search/filter form is submitted */
     onsubmit?: (event?: SubmitEvent) => void;
+    /** Callback alias for onsubmit */
+    onSearch?: (event?: SubmitEvent) => void;
     /** Callback triggered when reset button is clicked */
     onreset?: () => void;
+    /** Callback alias for onreset */
+    onReset?: () => void;
     /** Label text for search button (default: '查询') */
     searchBtnText?: string;
+    /** Search button text alias */
+    searchText?: string;
     /** Label text for reset button (default: '重置') */
     resetBtnText?: string;
+    /** Reset button text alias */
+    resetText?: string;
+    /** Text for collapse button (default: '收起') */
+    collapseText?: string;
+    /** Text for expand button (default: '展开') */
+    expandText?: string;
+    /** Loading state for search action */
+    loading?: boolean;
+    /** Search loading state alias */
+    searchLoading?: boolean;
     /** Whether to show the expand/collapse toggle button (default: true) */
     showCollapseButton?: boolean;
     /** Whether to show the reset button (default: true) */
@@ -39,9 +55,17 @@
     collapsed = $bindable(),
     oncollapse,
     onsubmit,
+    onSearch,
     onreset,
-    searchBtnText = '查询',
-    resetBtnText = '重置',
+    onReset,
+    searchBtnText,
+    searchText,
+    resetBtnText,
+    resetText,
+    collapseText = '收起',
+    expandText = '展开',
+    loading = false,
+    searchLoading = false,
     showCollapseButton = true,
     showResetButton = true,
     layout = 'horizontal',
@@ -49,6 +73,10 @@
     extra,
     class: className = '',
   }: QueryFilterProps = $props();
+
+  const resolvedSearchText = $derived(searchText ?? searchBtnText ?? '查询');
+  const resolvedResetText = $derived(resetText ?? resetBtnText ?? '重置');
+  const isSearchLoading = $derived(loading || searchLoading);
 
   // Internal collapsed state if not externally controlled
   let internalCollapsed = $derived(collapsed ?? defaultCollapsed);
@@ -63,10 +91,12 @@
   function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     onsubmit?.(event);
+    onSearch?.(event);
   }
 
   function handleReset() {
     onreset?.();
+    onReset?.();
   }
 
   let gridColsClass = $derived.by(() => {
@@ -120,7 +150,7 @@
       {#if showResetButton}
         <button
           type="button"
-          aria-label={resetBtnText}
+          aria-label={resolvedResetText}
           class="svadmin-btn-reset inline-flex h-8 items-center justify-center rounded-[4px] border border-border bg-transparent px-3 text-xs font-normal text-muted-foreground transition-colors hover:bg-muted active:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
           onclick={handleReset}
         >
@@ -136,15 +166,23 @@
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
           </svg>
-          {resetBtnText}
+          {resolvedResetText}
         </button>
       {/if}
 
       <button
         type="submit"
-        aria-label={searchBtnText}
-        class="svadmin-btn-search inline-flex h-8 items-center justify-center rounded-[4px] bg-primary px-3.5 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 active:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        disabled={isSearchLoading}
+        aria-busy={isSearchLoading}
+        aria-label={resolvedSearchText}
+        class="svadmin-btn-search inline-flex h-8 items-center justify-center rounded-[4px] bg-primary px-3.5 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 active:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-60 disabled:cursor-not-allowed"
       >
+        {#if isSearchLoading}
+          <svg class="mr-1.5 h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        {:else}
         <svg
           class="mr-1.5 h-3.5 w-3.5"
           viewBox="0 0 24 24"
@@ -157,7 +195,8 @@
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.3-4.3" />
         </svg>
-        {searchBtnText}
+        {/if}
+        {resolvedSearchText}
       </button>
 
       {#if extra}
@@ -168,11 +207,11 @@
         <button
           type="button"
           aria-expanded={!internalCollapsed}
-          aria-label={internalCollapsed ? '展开筛选' : '收起筛选'}
+          aria-label={internalCollapsed ? (expandText ? `${expandText}筛选` : '展开筛选') : (collapseText ? `${collapseText}筛选` : '收起筛选')}
           class="svadmin-btn-collapse ml-1 inline-flex items-center text-xs font-normal text-primary transition-colors hover:text-primary/80 focus-visible:outline-none"
           onclick={toggleCollapse}
         >
-          <span>{internalCollapsed ? '展开' : '收起'}</span>
+          <span>{internalCollapsed ? expandText : collapseText}</span>
           <svg
             class={cn(
               'ml-1 h-3.5 w-3.5 transition-transform duration-200',
