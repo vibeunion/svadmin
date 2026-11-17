@@ -510,7 +510,7 @@
   }
 
   async function focusTreeNode(valueToFocus: string | number): Promise<void> {
-    const index = flatVisibleNodes.findIndex(entry => entry.optionKey(node) === valueToFocus);
+    const index = flatVisibleNodes.findIndex(entry => optionKey(entry.node) === valueToFocus);
     if (index < 0) return;
     if (shouldVirtualize && treeRoot) {
       const top = index * rowHeight;
@@ -526,9 +526,9 @@
   }
 
   function focusSibling(nodeValue: string | number, offset: number): void {
-    const index = flatVisibleNodes.findIndex(entry => entry.optionKey(node) === nodeValue);
+    const index = flatVisibleNodes.findIndex(entry => optionKey(entry.node) === nodeValue);
     const target = flatVisibleNodes[index + offset];
-    if (target) void focusTreeNode(target.optionKey(node));
+    if (target) void focusTreeNode(optionKey(target.node));
   }
 
   async function handleOpenAutoFocus(event: Event): Promise<void> {
@@ -543,7 +543,7 @@
       return;
     }
     const first = flatVisibleNodes[0];
-    if (first) await focusTreeNode(first.optionKey(node));
+    if (first) await focusTreeNode(optionKey(first.node));
     if (!mounted || !open || panelElement !== panel || !panel.isConnected) return;
     if (!panel.contains(document.activeElement)) panel.focus();
   }
@@ -586,7 +586,7 @@
     const first = flatVisibleNodes[0];
     if (!first) return;
     event.preventDefault();
-    void focusTreeNode(first.optionKey(node));
+    void focusTreeNode(optionKey(first.node));
   }
 
   function handleTreeKeydown(event: KeyboardEvent, node: TreeSelectOption, expanded: boolean): void {
@@ -607,11 +607,11 @@
     } else if (event.key === 'Home') {
       event.preventDefault();
       const first = flatVisibleNodes[0];
-      if (first) void focusTreeNode(first.optionKey(node));
+      if (first) void focusTreeNode(optionKey(first.node));
     } else if (event.key === 'End') {
       event.preventDefault();
       const last = flatVisibleNodes[flatVisibleNodes.length - 1];
-      if (last) void focusTreeNode(last.optionKey(node));
+      if (last) void focusTreeNode(optionKey(last.node));
     } else if (event.key === 'ArrowRight' && nodeHasChildren) {
       event.preventDefault();
       if (disabled || disabledValues.has(sourceNode.value)) return;
@@ -621,10 +621,10 @@
       }
       else if (!expanded) void toggleExpandAsync(sourceNode);
       else {
-        const index = flatVisibleNodes.findIndex(entry => entry.optionKey(node) === optionKey(node));
+        const index = flatVisibleNodes.findIndex(entry => optionKey(entry.node) === optionKey(node));
         const current = flatVisibleNodes[index];
         const next = flatVisibleNodes[index + 1];
-        if (current && next && next.level > current.level) void focusTreeNode(next.optionKey(node));
+        if (current && next && next.level > current.level) void focusTreeNode(optionKey(next.node));
       }
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
@@ -710,7 +710,7 @@
     ? flatVisibleNodes.slice(virtualStart, virtualEnd)
     : flatVisibleNodes);
   // 当前节点被过滤、折叠或滚出渲染窗口时，仍保留一个有效的 Tab 入口。
-  const tabStopValue = $derived(renderedNodes.some(entry => entry.optionKey(node) === activeTreeValue)
+  const tabStopValue = $derived(renderedNodes.some(entry => optionKey(entry.node) === activeTreeValue)
     ? activeTreeValue
     : renderedNodes[0]?.optionKey(node));
 
