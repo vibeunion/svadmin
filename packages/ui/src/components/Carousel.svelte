@@ -9,6 +9,7 @@
     count: number;
     index?: number;
     current?: number;
+    defaultCurrent?: number;
     autoPlay?: boolean;
     interval?: number;
     loop?: boolean;
@@ -19,12 +20,14 @@
     children?: Snippet<[number]>;
     class?: string;
     onchange?: (index: number) => void;
+    onChange?: (index: number) => void;
   }
 
   let {
     count,
     index = $bindable(0),
     current,
+    defaultCurrent,
     autoPlay = false,
     interval = 5000,
     loop = true,
@@ -35,7 +38,18 @@
     children,
     class: className = "",
     onchange,
+    onChange,
   }: Props = $props();
+
+  let initialCarouselSync = false;
+  $effect.pre(() => {
+    if (!initialCarouselSync) {
+      initialCarouselSync = true;
+      if (defaultCurrent !== undefined && current === undefined) {
+        index = clamp(defaultCurrent);
+      }
+    }
+  });
 
   const effectiveArrowType = $derived(showArrow ?? arrowType);
   let paused = $state(false);
@@ -52,6 +66,7 @@
     if (value === index) return;
     index = value;
     onchange?.(value);
+    onChange?.(value);
   }
 
   $effect(() => {

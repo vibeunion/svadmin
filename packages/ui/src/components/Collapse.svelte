@@ -40,6 +40,7 @@
     expandIcon?: Snippet;
     class?: string;
     onchange?: (openIds: (string | number)[]) => void;
+    onChange?: (openIds: (string | number)[]) => void;
   }
 
   const toArray = (v: unknown): (string | number)[] =>
@@ -61,6 +62,7 @@
     expandIcon,
     class: className = '',
     onchange,
+    onChange,
   }: Props = $props();
 
   let initialized = false;
@@ -112,6 +114,7 @@
     else next = [...openIds, id];
     openIds = next;
     onchange?.(next);
+    onChange?.(next);
   }
 </script>
 
