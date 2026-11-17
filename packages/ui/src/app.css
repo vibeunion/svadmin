@@ -1713,6 +1713,23 @@ main {
   box-shadow: none;
 }
 
+.svadmin-input[data-input-state="warning"]:not([data-input-type="file"]) {
+  border-color: transparent;
+  background: var(--warning-light-1, #FFF7E8);
+  box-shadow: none;
+}
+
+.svadmin-input[data-input-state="warning"]:not([data-input-type="file"]):hover {
+  border-color: transparent;
+  background: var(--warning-light-2, #FFE4BA);
+}
+
+.svadmin-input[data-input-state="warning"]:not([data-input-type="file"]):focus-visible {
+  border-color: var(--warning);
+  background: var(--card);
+  box-shadow: none;
+}
+
 .svadmin-input[data-input-state="loading"]:not([data-input-type="file"]) {
   cursor: progress;
   background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 18%, transparent), transparent);
@@ -1849,8 +1866,24 @@ main {
   background: var(--danger-light-2, #FDCDC5);
 }
 
+.svadmin-input-wrapper[data-input-state="warning"] {
+  border-color: transparent;
+  background: var(--warning-light-1, #FFF7E8);
+}
+
+.svadmin-input-wrapper[data-input-state="warning"]:hover {
+  border-color: transparent;
+  background: var(--warning-light-2, #FFE4BA);
+}
+
 .svadmin-input-wrapper .svadmin-input[aria-invalid="true"],
 .svadmin-input-wrapper .svadmin-input[data-input-state="error"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.svadmin-input-wrapper .svadmin-input[data-input-state="warning"] {
   border-color: transparent;
   background: transparent;
   box-shadow: none;
@@ -1927,8 +1960,25 @@ main {
   background: var(--danger-light-2, #FDCDC5);
 }
 
+.svadmin-textarea-wrapper[data-input-state="warning"] {
+  border-color: transparent;
+  background: var(--warning-light-1, #FFF7E8);
+  box-shadow: none;
+}
+
+.svadmin-textarea-wrapper[data-input-state="warning"]:hover {
+  border-color: transparent;
+  background: var(--warning-light-2, #FFE4BA);
+}
+
 .svadmin-textarea-wrapper .svadmin-textarea[aria-invalid="true"],
 .svadmin-textarea-wrapper .svadmin-textarea[data-input-state="error"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.svadmin-textarea-wrapper .svadmin-textarea[data-input-state="warning"] {
   border-color: transparent;
   background: transparent;
   box-shadow: none;
@@ -2503,6 +2553,23 @@ button.svadmin-slider__mark:disabled { cursor: not-allowed; color: var(--svadmin
 .svadmin-textarea[aria-invalid="true"]:focus-visible,
 .svadmin-textarea[data-input-state="error"]:focus-visible {
   border-color: var(--destructive);
+  background: var(--card);
+  box-shadow: none;
+}
+
+.svadmin-textarea[data-input-state="warning"] {
+  border-color: transparent;
+  background: var(--warning-light-1, #FFF7E8);
+  box-shadow: none;
+}
+
+.svadmin-textarea[data-input-state="warning"]:hover {
+  border-color: transparent;
+  background: var(--warning-light-2, #FFE4BA);
+}
+
+.svadmin-textarea[data-input-state="warning"]:focus-visible {
+  border-color: var(--warning);
   background: var(--card);
   box-shadow: none;
 }
