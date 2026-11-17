@@ -7,6 +7,8 @@
 		class?: string;
 		loading?: boolean;
 		animation?: boolean;
+		/** Active animation alias for animation */
+		active?: boolean;
 		children?: Snippet;
 	};
 
@@ -15,9 +17,12 @@
 		class: className,
 		loading = true,
 		animation = true,
+		active,
 		children,
 		...restProps
 	}: Props = $props();
+
+	const isAnimated = $derived(active !== undefined ? active : animation);
 </script>
 
 {#if !loading && children}
@@ -26,8 +31,8 @@
 	<div
 		bind:this={ref}
 		data-slot="skeleton"
-		data-animation={animation}
-		class={cn("svadmin-skeleton", !animation && "animate-none", className)}
+		data-animation={isAnimated}
+		class={cn("svadmin-skeleton", !isAnimated && "animate-none", className)}
 		{...restProps}
 	></div>
 {/if}
