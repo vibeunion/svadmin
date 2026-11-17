@@ -363,6 +363,14 @@ import { definedOptions } from '@svadmin/core/options';
       <PageToolbar>
         {#snippet leading()}
           <FilterToolbar bind:query placeholder={isZh ? '搜索原则' : 'Search principles'} clearLabel={isZh ? '清除搜索' : 'Clear search'} advancedLabel={isZh ? '高级筛选' : 'Advanced filters'} activeFilterCount={Number(Boolean(principleFilter))}>
+            {#snippet filters()}
+              <div class="flex items-center gap-2">
+                <Select bind:value={principleFilter} size="compact" aria-label={isZh ? '原则' : 'Principle'}>
+                  <option value="">{isZh ? '全部原则' : 'All principles'}</option>
+                  {#each principles as principle (principle.id)}<option value={principle.id}>{principle.title}</option>{/each}
+                </Select>
+              </div>
+            {/snippet}
             {#snippet advanced()}
               <div class="grid gap-3 sm:grid-cols-2" data-filter-advanced-content>
                 <label class="grid gap-1 text-xs font-medium text-muted-foreground">
@@ -440,33 +448,50 @@ import { definedOptions } from '@svadmin/core/options';
           <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'} disabledReasonSide="bottom">{isZh ? '提交订单' : 'Submit order'}</Button>
         </div>
       </section>
-      <section class="space-y-3" aria-labelledby="enterprise-components-heading" data-enterprise-component-fixture>
-        <SectionHeader
-          id="enterprise-components-heading"
-          title={isZh ? '企业组件组合示例' : 'Enterprise component composition'}
-          description={isZh ? '这里演示 UI 包的 Provider 接入方式；示例数据不代表真实后端能力。' : 'This demonstrates UI package Provider wiring; example data is not real backend capability.'}
-        />
-        <div class="grid gap-3 md:grid-cols-2">
+      <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
+        <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{isZh ? '验收清单示例' : 'Example acceptance checklist'}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '以下是验收目标，不代表自动化或浏览器检查已通过。' : 'These are acceptance targets, not automated or browser test results.'}</p></div><StatusBadge status="neutral" label={isZh ? '待核验' : 'To verify'} /></div>
+        <ul class="mt-4 space-y-3 text-sm text-muted-foreground">
+          <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '一个主任务和一个主反馈面' : 'One primary job and one primary feedback surface'}</li>
+          <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '桌面与移动端不重叠、不横向滚动' : 'No overlap or horizontal scroll on desktop and mobile'}</li>
+          <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '状态不只依赖颜色，按钮有语义标签' : 'Status is not color-only and buttons have semantic labels'}</li>
+        </ul>
+      </div>
+    </aside>
+    </div>
+
+    <section class="space-y-3" aria-labelledby="enterprise-components-heading" data-enterprise-component-fixture>
+      <SectionHeader
+        id="enterprise-components-heading"
+        title={isZh ? '企业组件组合示例' : 'Enterprise component composition'}
+        description={isZh ? '这里演示 UI 包的 Provider 接入方式；示例数据不代表真实后端能力。' : 'This demonstrates UI package Provider wiring; example data is not real backend capability.'}
+      />
+      <div class="grid gap-6 lg:grid-cols-2">
+        <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
           <DashboardView
             provider={dashboardProvider}
             dashboardId="design-principles"
             requestContext={enterpriseRequestContext}
             title={isZh ? '运营仪表盘' : 'Operations dashboard'}
           />
+        </div>
+        <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
           <ApprovalCenter
             provider={approvalProvider}
             requestContext={enterpriseRequestContext}
             title={isZh ? '审批演示' : 'Approval demo'}
           />
         </div>
-      </section>
-      <section class="space-y-3" aria-labelledby="enterprise-inputs-heading" data-enterprise-input-fixture>
-        <SectionHeader
-          id="enterprise-inputs-heading"
-          title={isZh ? '企业输入组件组合' : 'Enterprise input composition'}
-          description={isZh ? '这些控件来自 UI 包；状态只存在于示例页面。' : 'These controls come from the UI package; state belongs only to this example page.'}
-        />
-        <div class="grid gap-3 sm:grid-cols-2">
+      </div>
+    </section>
+
+    <section class="space-y-3" aria-labelledby="enterprise-inputs-heading" data-enterprise-input-fixture>
+      <SectionHeader
+        id="enterprise-inputs-heading"
+        title={isZh ? '企业输入组件组合' : 'Enterprise input composition'}
+        description={isZh ? '这些控件来自 UI 包；状态只存在于示例页面。' : 'These controls come from the UI package; state belongs only to this example page.'}
+      />
+      <div class="rounded-lg border border-border bg-card p-5 shadow-sm">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Input allowClear placeholder={isZh ? '账号' : 'Account'} aria-label={isZh ? '账号' : 'Account'} bind:value={demoAccount}>
             {#snippet prefix()}<span>@</span>{/snippet}
             {#snippet suffix()}<span>.com</span>{/snippet}
@@ -535,29 +560,32 @@ import { definedOptions } from '@svadmin/core/options';
             bind:value={demoRate}
           />
         </div>
-      </section>
-      <section class="space-y-3" aria-labelledby="enterprise-errors-heading" data-enterprise-error-fixture>
-        <SectionHeader
-          id="enterprise-errors-heading"
-          title={isZh ? '表单错误汇总' : 'Form error summary'}
-          description={isZh ? 'ErrorSummary 来自 UI 包，输入值和聚焦状态只属于 example。' : 'ErrorSummary comes from the UI package; input values and focus state belong only to this example.'}
-        />
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="space-y-3">
-            <div class="grid gap-1">
-              <Label for="demo-name">{isZh ? '名称' : 'Name'}</Label>
-              <Input id="demo-name" placeholder={isZh ? '示例名称' : 'Example name'} />
-            </div>
-            <div class="grid gap-1">
-              <Label for="demo-owner">{isZh ? '负责人' : 'Owner'}</Label>
-              <Input id="demo-owner" placeholder={isZh ? '示例负责人' : 'Example owner'} />
-            </div>
-            {#if focusedDemoField}
-              <p class="text-xs text-muted-foreground" data-focused-demo-field>
-                {isZh ? `最近定位：${focusedDemoField}` : `Focused: ${focusedDemoField}`}
-              </p>
-            {/if}
+      </div>
+    </section>
+
+    <section class="space-y-3" aria-labelledby="enterprise-errors-heading" data-enterprise-error-fixture>
+      <SectionHeader
+        id="enterprise-errors-heading"
+        title={isZh ? '表单错误汇总' : 'Form error summary'}
+        description={isZh ? 'ErrorSummary 来自 UI 包，输入值和聚焦状态只属于 example。' : 'ErrorSummary comes from the UI package; input values and focus state belong only to this example.'}
+      />
+      <div class="grid gap-6 lg:grid-cols-2">
+        <div class="space-y-3 rounded-lg border border-border bg-card p-5 shadow-sm">
+          <div class="grid gap-1">
+            <Label for="demo-name">{isZh ? '名称' : 'Name'}</Label>
+            <Input id="demo-name" placeholder={isZh ? '示例名称' : 'Example name'} />
           </div>
+          <div class="grid gap-1">
+            <Label for="demo-owner">{isZh ? '负责人' : 'Owner'}</Label>
+            <Input id="demo-owner" placeholder={isZh ? '示例负责人' : 'Example owner'} />
+          </div>
+          {#if focusedDemoField}
+            <p class="text-xs text-muted-foreground" data-focused-demo-field>
+              {isZh ? `最近定位：${focusedDemoField}` : `Focused: ${focusedDemoField}`}
+            </p>
+          {/if}
+        </div>
+        <div class="rounded-lg border border-border bg-card p-5 shadow-sm">
           <ErrorSummary
             errors={demoFormErrors}
             title={isZh ? '请修正以下错误' : 'Please fix the following errors'}
@@ -565,37 +593,29 @@ import { definedOptions } from '@svadmin/core/options';
             onfocusfield={focusDemoField}
           />
         </div>
-      </section>
-      <section class="space-y-3" aria-labelledby="panel-metrics-heading" data-panel-metrics>
-        <SectionHeader
-          id="panel-metrics-heading"
-          title={isZh ? '面板度量' : 'Panel metrics'}
-          description={isZh ? '日历卡片、图片说明和二维码状态使用同一套文字与遮罩令牌。' : 'The calendar card, image caption, and QR status use the shared type and mask tokens.'}
-        />
-        <div class="flex flex-wrap items-start gap-6">
-          <Calendar card value={demoCalendar} onchange={(value) => { demoCalendar = value; }} />
-          <Image
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160'%3E%3Crect width='240' height='160' fill='%23E8F3FF'/%3E%3Crect x='24' y='36' width='192' height='88' rx='2' fill='%23165DFF'/%3E%3C/svg%3E"
-            alt={isZh ? '示例图片' : 'Sample picture'}
-            title={isZh ? '封面' : 'Cover'}
-            description={isZh ? '图片说明在画面下方。' : 'The caption sits below the picture.'}
-            width={240}
-            height={160}
-            preview
-          />
-          <QRCode value="https://example.com/panel" status="expired" />
-        </div>
-      </section>
-      <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-        <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{isZh ? '验收清单示例' : 'Example acceptance checklist'}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '以下是验收目标，不代表自动化或浏览器检查已通过。' : 'These are acceptance targets, not automated or browser test results.'}</p></div><StatusBadge status="neutral" label={isZh ? '待核验' : 'To verify'} /></div>
-        <ul class="mt-4 space-y-3 text-sm text-muted-foreground">
-          <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '一个主任务和一个主反馈面' : 'One primary job and one primary feedback surface'}</li>
-          <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '桌面与移动端不重叠、不横向滚动' : 'No overlap or horizontal scroll on desktop and mobile'}</li>
-          <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '状态不只依赖颜色，按钮有语义标签' : 'Status is not color-only and buttons have semantic labels'}</li>
-        </ul>
       </div>
-    </aside>
-    </div>
+    </section>
+
+    <section class="space-y-3" aria-labelledby="panel-metrics-heading" data-panel-metrics>
+      <SectionHeader
+        id="panel-metrics-heading"
+        title={isZh ? '面板度量' : 'Panel metrics'}
+        description={isZh ? '日历卡片、图片说明和二维码状态使用同一套文字与遮罩令牌。' : 'The calendar card, image caption, and QR status use the shared type and mask tokens.'}
+      />
+      <div class="flex flex-wrap items-start gap-6 rounded-lg border border-border bg-card p-5 shadow-sm">
+        <Calendar card value={demoCalendar} onchange={(value) => { demoCalendar = value; }} />
+        <Image
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160'%3E%3Crect width='240' height='160' fill='%23E8F3FF'/%3E%3Crect x='24' y='36' width='192' height='88' rx='2' fill='%23165DFF'/%3E%3C/svg%3E"
+          alt={isZh ? '示例图片' : 'Sample picture'}
+          title={isZh ? '封面' : 'Cover'}
+          description={isZh ? '图片说明在画面下方。' : 'The caption sits below the picture.'}
+          width={240}
+          height={160}
+          preview
+        />
+        <QRCode value="https://example.com/panel" status="expired" />
+      </div>
+    </section>
   </div>
 </ContentPageShell>
 </div>
