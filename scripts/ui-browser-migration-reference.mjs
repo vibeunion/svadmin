@@ -111,6 +111,15 @@ export const tableSizeMigration = Object.freeze({
   }),
 });
 
+// #922 added the default rounded-md class to Skeleton. The published utility
+// layer resolves that class against the product radius (4px), so the default
+// skeleton radius is 2px even though the historical component rule was 6px.
+export const componentClassAdditions = Object.freeze({
+  '.svadmin-skeleton.rounded-md': Object.freeze({
+    'border-radius': 'calc(var(--radius) - 2px)',
+  }),
+});
+
 for (const migration of [stripeLightTokenMigration, stripeDarkTokenMigration, bodyStyleMigration]) {
   for (const values of Object.values(migration)) Object.freeze(values);
 }
@@ -176,6 +185,7 @@ export function createMigrationReference(baselineCss) {
   migrateRootDeclarations(root, collapsibleSummarySelector, collapsibleSummaryMigration);
   appendVisualContract(root);
   appendHostNormalization(root);
+  appendComponentClassAdditions(root);
   return root.toString();
 }
 
@@ -199,6 +209,17 @@ function appendHostNormalization(root) {
   const rule = postcss.rule({ selector: hostNormalizationSelector });
   for (const [prop, value] of Object.entries(hostNormalizationDeclarations)) rule.append({ prop, value });
   root.append(rule);
+}
+
+function appendComponentClassAdditions(root) {
+  for (const [selector, declarations] of Object.entries(componentClassAdditions)) {
+    let found = 0;
+    root.walkRules(selector, () => { found += 1; });
+    assert.equal(found, 0, `${selector}: unexpected historical rule`);
+    const rule = postcss.rule({ selector });
+    for (const [prop, value] of Object.entries(declarations)) rule.append({ prop, value });
+    root.append(rule);
+  }
 }
 
 function appendToken(root, selector, prop, value) {
