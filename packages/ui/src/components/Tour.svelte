@@ -13,6 +13,8 @@
   interface Props {
     steps: TourStep[];
     open?: boolean;
+    visible?: boolean;
+    defaultVisible?: boolean;
     current?: number;
     defaultCurrent?: number;
     mask?: boolean;
@@ -21,8 +23,11 @@
     previousText?: string;
     finishText?: string;
     skipText?: string;
+    onFinish?: () => void;
     onfinish?: () => void;
+    onClose?: () => void;
     onclose?: () => void;
+    onChange?: (index: number) => void;
     onstepchange?: (index: number) => void;
     storageKey?: string;
     class?: string;
@@ -32,6 +37,8 @@
   let {
     steps,
     open = $bindable(false),
+    visible,
+    defaultVisible,
     current = $bindable(0),
     defaultCurrent,
     mask = true,
@@ -41,20 +48,47 @@
     finishText = 'Done',
     skipText = 'Skip',
     storageKey,
+    onFinish,
     onfinish,
+    onClose,
     onclose,
+    onChange,
     onstepchange,
     class: className = '',
     children,
   }: Props = $props();
 
+  const emitStepChange = (index: number): void => {
+    onstepchange?.(index);
+    onChange?.(index);
+  };
+  const emitClose = (): void => {
+    onclose?.();
+    onClose?.();
+  };
+  const emitFinish = (): void => {
+    onfinish?.();
+    onFinish?.();
+  };
+
   let initialized = false;
   $effect.pre(() => {
     if (!initialized) {
       initialized = true;
+      if (visible !== undefined) {
+        open = visible;
+      } else if (defaultVisible !== undefined) {
+        open = defaultVisible;
+      }
       if (defaultCurrent !== undefined && current === 0) {
         current = defaultCurrent;
       }
+    }
+  });
+
+  $effect(() => {
+    if (visible !== undefined && open !== visible) {
+      open = visible;
     }
   });
 
@@ -109,14 +143,14 @@
       try { localStorage.setItem(storageKey, 'true'); } catch { /* ignore */ }
     }
     open = false;
-    onclose?.();
+    emitClose();
   }
 
   function move(delta: number): void {
     const next = Math.max(0, Math.min(current + delta, steps.length - 1));
     if (next === current) return;
     current = next;
-    onstepchange?.(next);
+    emitStepChange(next);
   }
 
   function finish(): void {
@@ -124,7 +158,7 @@
       try { localStorage.setItem(storageKey, 'true'); } catch { /* ignore */ }
     }
     open = false;
-    onfinish?.();
+    emitFinish();
   }
 
   function onKeydown(event: KeyboardEvent): void {

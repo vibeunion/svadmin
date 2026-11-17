@@ -25,6 +25,7 @@
     fontColor?: string;
     antiTamper?: boolean;
     class?: string;
+    style?: string;
     children?: Snippet;
   }
 
@@ -43,6 +44,7 @@
     fontColor: explicitFontColor,
     antiTamper = true,
     class: className = '',
+    style,
     children,
   }: Props = $props();
 
@@ -159,6 +161,7 @@
 <div
   bind:this={containerEl}
   class={cn('relative overflow-hidden', className)}
+  {style}
   data-svadmin-watermark-wrapper
 >
   {#key watermarkRevision}
