@@ -14,9 +14,9 @@
 		? number | null | undefined
 		: string | null | undefined;
 
-	type InputStatus = "success" | "error" | "loading";
-	type InputSize = "mini" | "compact" | "sm" | "default" | "lg";
-	type InputState = "default" | "focus" | "selected" | "complete" | "disabled" | "loading" | "success" | "error";
+	type InputStatus = "success" | "error" | "loading" | "warning" | "normal";
+	type InputSize = "mini" | "small" | "compact" | "sm" | "default" | "large" | "lg";
+	type InputState = "default" | "focus" | "selected" | "complete" | "disabled" | "loading" | "success" | "error" | "warning";
 
 	type InputHandlers = {
 		onfocus?: HTMLInputAttributes["onfocus"];
@@ -62,7 +62,9 @@
 	const config = useComponentConfig();
 	const size = $derived.by(() => {
 		const requested = sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default");
-		return requested === "sm" ? "compact" : requested;
+		if (requested === "sm" || requested === "small") return "compact";
+		if (requested === "large") return "lg";
+		return requested;
 	});
 
 	const i18n = useTranslation();
@@ -96,6 +98,7 @@
 		if (disabled) return "disabled";
 		if (status === "loading") return "loading";
 		if (status === "error" || ariaInvalid === true || ariaInvalid === "true") return "error";
+		if (status === "warning") return "warning";
 		if (status === "success") return "success";
 		if (focused && textSelected) return "selected";
 		if (focused) return "focus";

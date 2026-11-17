@@ -3,12 +3,15 @@
 	import { CircleX } from "@lucide/svelte";
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import { textareaRecipe as uiTextarea } from "../../../recipes.js";
+	import { useComponentConfig } from "../../ConfigProvider.svelte";
 
-	type TextareaStatus = "success" | "error" | "loading";
-	type TextareaState = "default" | "focus" | "selected" | "complete" | "disabled" | "loading" | "success" | "error";
+	type TextareaStatus = "success" | "error" | "loading" | "warning" | "normal";
+	type TextareaSize = "mini" | "small" | "compact" | "sm" | "default" | "large" | "lg";
+	type TextareaState = "default" | "focus" | "selected" | "complete" | "disabled" | "loading" | "success" | "error" | "warning";
 
 	type Props = WithElementRef<Omit<HTMLTextareaAttributes, "onfocus" | "onblur" | "onselect">> & {
 		status?: TextareaStatus | undefined;
+		size?: TextareaSize | undefined;
 		maxLength?: number | undefined;
 		showWordLimit?: boolean | undefined;
 		allowClear?: boolean | undefined;
@@ -22,6 +25,7 @@
 		value = $bindable(),
 		disabled,
 		status,
+		size: sizeProp,
 		maxLength,
 		showWordLimit = false,
 		allowClear = false,
@@ -32,6 +36,14 @@
 		onselect,
 		...restProps
 	}: Props = $props();
+
+	const config = useComponentConfig();
+	const size = $derived.by(() => {
+		const requested = sizeProp ?? (config.density === "compact" || config.componentSize === "sm" ? "compact" : "default");
+		if (requested === "sm" || requested === "small") return "compact";
+		if (requested === "large") return "lg";
+		return requested;
+	});
 
 	let focused = $state(false);
 	let textSelected = $state(false);
@@ -50,6 +62,7 @@
 		if (disabled) return "disabled";
 		if (status === "loading") return "loading";
 		if (status === "error" || ariaInvalid === true || ariaInvalid === "true") return "error";
+		if (status === "warning") return "warning";
 		if (status === "success") return "success";
 		if (focused && textSelected) return "selected";
 		if (focused) return "focus";
@@ -86,6 +99,7 @@
 	<textarea
 		bind:this={ref}
 		data-slot="textarea"
+		data-size={size}
 		data-input-state={inputState}
 		aria-invalid={ariaInvalid}
 		aria-busy={inputState === "loading" ? "true" : undefined}
@@ -104,6 +118,7 @@
 	<div
 		class={cn("svadmin-textarea-wrapper", className)}
 		data-slot="textarea-wrapper"
+		data-size={size}
 		data-input-state={inputState}
 	>
 		{@render textareaElement()}
