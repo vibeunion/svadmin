@@ -9,7 +9,7 @@
     children,
     separator = 'slash',
     ...restProps
-  }: HTMLLiAttributes & { children?: Snippet; separator?: 'slash' | 'arrow' } = $props();
+  }: HTMLLiAttributes & { children?: Snippet; separator?: 'slash' | 'arrow' | string } = $props();
 </script>
 
 <li
@@ -24,7 +24,9 @@
     {@render children()}
   {:else if separator === 'arrow'}
     <ChevronRight class="svadmin-breadcrumb-icon" />
-  {:else}
+  {:else if separator === 'slash'}
     <span class="svadmin-breadcrumb-slash">/</span>
+  {:else}
+    <span class="svadmin-breadcrumb-custom">{separator}</span>
   {/if}
 </li>

@@ -5,6 +5,8 @@
   export interface DividerProps {
     /** Direction of the divider */
     type?: 'horizontal' | 'vertical';
+    /** Direction of the divider (Arco Design alias) */
+    direction?: 'horizontal' | 'vertical';
     /** Alignment of the text title inside the horizontal divider */
     orientation?: 'left' | 'center' | 'right';
     /** Whether the divider line is dashed */
@@ -19,7 +21,8 @@
   }
 
   let {
-    type = 'horizontal',
+    type,
+    direction,
     orientation = 'center',
     dashed = false,
     plain = true,
@@ -27,9 +30,11 @@
     children,
     ...restProps
   }: DividerProps = $props();
+
+  const resolvedType = $derived(type ?? direction ?? 'horizontal');
 </script>
 
-{#if type === 'vertical'}
+{#if resolvedType === 'vertical'}
   <span
     role="separator"
     aria-orientation="vertical"
