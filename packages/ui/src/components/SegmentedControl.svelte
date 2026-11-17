@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends string">
+  import { untrack } from 'svelte';
   import { cn } from '../utils.js';
 
   export interface SegmentedControlOption<T extends string = string> {
@@ -7,11 +8,15 @@
     disabled?: boolean;
   }
 
+  export type SegmentedControlItem<T extends string = string> = T | SegmentedControlOption<T>;
+
   interface Props<T extends string = string> {
-    options: readonly SegmentedControlOption<T>[];
+    options: readonly SegmentedControlItem<T>[];
     value?: T | undefined;
+    defaultValue?: T | undefined;
     size?: 'mini' | 'small' | 'default' | 'large';
     disabled?: boolean;
+    block?: boolean;
     ariaLabel: string;
     dir?: 'ltr' | 'rtl';
     class?: string;
@@ -21,22 +26,35 @@
   let {
     options,
     value = $bindable(),
+    defaultValue,
     size = 'default',
     disabled = false,
+    block = false,
     ariaLabel,
     dir,
     class: className = '',
     onchange,
   }: Props<T> = $props();
 
+  const normalizedOptions = $derived<readonly SegmentedControlOption<T>[]>(
+    options.map((opt) => (typeof opt === 'string' ? { value: opt, label: opt } : opt))
+  );
+
+  let internalValue = $state(untrack(() => defaultValue));
+  const effectiveValue = $derived(value !== undefined ? value : internalValue);
+
   let root: HTMLDivElement;
-  const enabledOptions = $derived(options.filter(option => !option.disabled));
-  const tabValue = $derived(enabledOptions.find(option => option.value === value)?.value ?? enabledOptions[0]?.value);
+  const enabledOptions = $derived(normalizedOptions.filter(option => !option.disabled));
+  const tabValue = $derived(enabledOptions.find(option => option.value === effectiveValue)?.value ?? enabledOptions[0]?.value);
 
   function select(option: SegmentedControlOption<T>): void {
     if (disabled || option.disabled) return;
-    if (value !== option.value) {
-      value = option.value;
+    if (effectiveValue !== option.value) {
+      if (value !== undefined) {
+        value = option.value;
+      } else {
+        internalValue = option.value;
+      }
       onchange?.(option.value);
     }
   }
@@ -84,10 +102,11 @@
   aria-label={ariaLabel}
   aria-disabled={disabled ? 'true' : undefined}
   data-size={size}
-  class={cn('svadmin-segmented-control', className)}
+  data-block={block ? 'true' : undefined}
+  class={cn('svadmin-segmented-control', block && 'w-full flex', className)}
 >
-  {#each options as option (option.value)}
-    {@const selected = value === option.value}
+  {#each normalizedOptions as option (option.value)}
+    {@const selected = effectiveValue === option.value}
     {@const enabledIndex = enabledOptions.findIndex(candidate => candidate.value === option.value)}
     <button
       type="button"
@@ -97,7 +116,7 @@
       tabindex={!disabled && !option.disabled && option.value === tabValue ? 0 : -1}
       disabled={disabled || option.disabled}
       data-svadmin-segment-value={option.value}
-      class={cn('svadmin-segmented-control__item', selected && 'svadmin-segmented-control__item--selected')}
+      class={cn('svadmin-segmented-control__item', block && 'flex-1 text-center', selected && 'svadmin-segmented-control__item--selected')}
       onclick={() => select(option)}
       onkeydown={(event) => handleKeydown(event, option, enabledIndex)}
     >
