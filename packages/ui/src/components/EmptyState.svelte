@@ -12,6 +12,7 @@
     title,
     description,
     image,
+    imgSrc,
     imageAlt,
     icon,
     layout = "vertical",
@@ -22,6 +23,8 @@
     description?: string;
     /** Optional illustration URL. Mirrors the reference `image` prop. */
     image?: string;
+    /** Alias for `image` matching Arco Design `imgSrc`. */
+    imgSrc?: string;
     imageAlt?: string;
     /** Optional custom icon slot; ignored when `image` is set. */
     icon?: Snippet;
@@ -38,7 +41,7 @@
   const componentEmpty = $derived(config.componentDefaults["Empty"] ?? {});
   const resolvedTitle = $derived(title ?? emptyDefaults.title ?? textDefault(componentEmpty["title"]) ?? i18n.t("empty.title"));
   const resolvedDescription = $derived(description ?? emptyDefaults.description ?? textDefault(componentEmpty["description"]) ?? i18n.t("empty.description"));
-  const resolvedImage = $derived(image ?? emptyDefaults.image ?? textDefault(componentEmpty["image"]));
+  const resolvedImage = $derived(imgSrc ?? image ?? emptyDefaults.image ?? textDefault(componentEmpty["image"]));
   const resolvedImageAlt = $derived(imageAlt ?? emptyDefaults.imageAlt ?? textDefault(componentEmpty["imageAlt"]) ?? "");
 </script>
 
