@@ -24,6 +24,7 @@ while it uses the fixed minimatch matcher.
 | braces 3.0.3 | GHSA-vfj7-8cjw-p6xm | Hard nesting limit of 128 for braces and parentheses; independent bounds in direct AST compile, expand and stringify walkers. |
 | http-cache-semantics 4.3.0 | GHSA-ch52-4w7c-c8xp | Security restrictions precede max-stale, stale-while-revalidate and stale-if-error reuse; fresh responses and permitted private/public caching remain supported. |
 | deepmerge 4.3.1 | GHSA-gcqx-w48m-w2h4 | `__proto__`, `constructor`, and `prototype` keys are dropped in both merge loops. Results are written with `Object.defineProperty`. Null and undefined targets still merge, and a throwing `in` check stays fail-open so normal keys are not rejected. |
+| picomatch 4.0.7 | GHSA-fc5q-39xc-vjpf | Single-branch repeated extglobs containing wildcards are literalized before regex generation, preventing catastrophic backtracking while preserving ordinary extglob matching. |
 
 Use `bun install --frozen-lockfile` to apply the tracked Bun patches. Package
 versions remain truthful; no version spoofing or advisory ignore flags are used.
