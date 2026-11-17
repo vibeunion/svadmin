@@ -10,6 +10,7 @@
   interface Props<T extends string = string> {
     options: readonly SegmentedControlOption<T>[];
     value?: T | undefined;
+    size?: 'mini' | 'small' | 'default' | 'large';
     disabled?: boolean;
     ariaLabel: string;
     dir?: 'ltr' | 'rtl';
@@ -20,6 +21,7 @@
   let {
     options,
     value = $bindable(),
+    size = 'default',
     disabled = false,
     ariaLabel,
     dir,
@@ -81,6 +83,7 @@
   role="radiogroup"
   aria-label={ariaLabel}
   aria-disabled={disabled ? 'true' : undefined}
+  data-size={size}
   class={cn('svadmin-segmented-control', className)}
 >
   {#each options as option (option.value)}
@@ -143,5 +146,34 @@
   .svadmin-segmented-control__item:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  /* Size variations */
+  .svadmin-segmented-control[data-size='mini'] {
+    padding: 2px;
+    gap: 2px;
+  }
+  .svadmin-segmented-control[data-size='mini'] .svadmin-segmented-control__item {
+    min-height: 22px;
+    padding: 2px 8px;
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
+  .svadmin-segmented-control[data-size='small'] {
+    padding: 2px;
+    gap: 2px;
+  }
+  .svadmin-segmented-control[data-size='small'] .svadmin-segmented-control__item {
+    min-height: 26px;
+    padding: 3px 10px;
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
+  .svadmin-segmented-control[data-size='large'] {
+    padding: 4px;
+    gap: 4px;
+  }
+  .svadmin-segmented-control[data-size='large'] .svadmin-segmented-control__item {
+    min-height: 38px;
+    padding: 6px 16px;
+    font-size: var(--svadmin-text-section, 1rem);
   }
 </style>
