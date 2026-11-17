@@ -13,14 +13,27 @@
 	const uid = $props.id();
 	let {
 		open = $bindable(false),
+		defaultOpen,
 		triggerId = $bindable<string | null>(null),
 		disableHoverableContent,
 		onOpenChange,
 		onOpenChangeComplete,
 		tether,
 		...restProps
-	}: TooltipPrimitive.RootProps<Payload> = $props();
+	}: TooltipPrimitive.RootProps<Payload> & {
+		defaultOpen?: boolean;
+	} = $props();
 	let observedInitialOpen = false;
+
+	let initialSync = false;
+	$effect.pre(() => {
+		if (!initialSync) {
+			initialSync = true;
+			if (defaultOpen !== undefined && !open) {
+				open = defaultOpen;
+			}
+		}
+	});
 
 	function setOpen(value: boolean) {
 		if (open === value) return;
