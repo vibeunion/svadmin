@@ -56,4 +56,36 @@ describe("Skeleton loading and animation options", () => {
     expect(getByTestId("actual-content")).toBeTruthy();
     expect(container.querySelector('[data-slot="skeleton"]')).toBeNull();
   });
+
+  it("renders structured paragraph text skeleton lines", () => {
+    const { container } = render(Skeleton, {
+      props: {
+        text: { rows: 4, width: ['100%', '80%', '60%', 120] },
+        round: true,
+      },
+    });
+
+    const textContainer = container.querySelector('[data-slot="skeleton-text"]');
+    expect(textContainer).not.toBeNull();
+    const lines = container.querySelectorAll('[data-slot="skeleton-line"]');
+    expect(lines.length).toBe(4);
+    expect((lines[3] as HTMLElement).style.width).toBe('120px');
+    expect(lines[0].classList.contains('rounded-full')).toBe(true);
+  });
+
+  it("renders structured image and avatar skeleton block", () => {
+    const { container } = render(Skeleton, {
+      props: {
+        image: { shape: 'circle', size: 'large' },
+        text: true,
+      },
+    });
+
+    const img = container.querySelector('[data-slot="skeleton-image"]');
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute('data-shape')).toBe('circle');
+    expect(img?.getAttribute('data-size')).toBe('large');
+    expect(img?.classList.contains('rounded-full')).toBe(true);
+    expect(container.querySelector('[data-slot="skeleton-text"]')).not.toBeNull();
+  });
 });
