@@ -8,6 +8,7 @@
 
 	type Props = WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		checked?: boolean;
+		defaultChecked?: boolean;
 		disabled?: boolean;
 		loading?: boolean;
 		size?: SwitchSize;
@@ -16,11 +17,14 @@
 		checkedIcon?: Snippet;
 		uncheckedIcon?: Snippet;
 		onCheckedChange?: (checked: boolean) => void;
+		onChange?: (checked: boolean, event?: Event) => void;
+		onchange?: (checked: boolean, event?: Event) => void;
 	};
 
 	let {
 		ref = $bindable(null),
 		checked = $bindable(false),
+		defaultChecked,
 		disabled = false,
 		loading = false,
 		size: sizeProp = "default",
@@ -29,9 +33,21 @@
 		checkedIcon,
 		uncheckedIcon,
 		onCheckedChange,
+		onChange,
+		onchange,
 		class: className,
 		...restProps
 	}: Props = $props();
+
+	let initialized = false;
+	$effect(() => {
+		if (!initialized) {
+			initialized = true;
+			if (defaultChecked !== undefined && !checked) {
+				checked = defaultChecked;
+			}
+		}
+	});
 
 	const size = $derived.by(() => {
 		if (sizeProp === "small" || sizeProp === "mini") return "small";
@@ -40,10 +56,12 @@
 
 	const inactive = $derived(disabled || loading);
 
-	function toggle() {
+	function toggle(event: MouseEvent) {
 		if (inactive) return;
 		checked = !checked;
 		onCheckedChange?.(checked);
+		onChange?.(checked, event);
+		onchange?.(checked, event);
 	}
 </script>
 

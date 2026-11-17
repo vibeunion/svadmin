@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { describe, expect, it, vi } from 'vitest';
+import { createRawSnippet } from 'svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import Card from './ui/card/card.svelte';
 import Checkbox from './ui/checkbox/checkbox.svelte';
 import Result from './Result.svelte';
@@ -33,6 +34,28 @@ describe('Checkbox size options', () => {
     });
     const miniCb = miniContainer.querySelector('[data-slot="checkbox"]');
     expect(miniCb?.getAttribute('data-size')).toBe('compact');
+  });
+
+  it('renders children label and triggers onchange callback', async () => {
+    const onchange = vi.fn();
+    const labelSnippet = createRawSnippet(() => ({ render: () => '<span>Accept terms</span>' }));
+    const { container } = render(Checkbox, {
+      props: {
+        defaultChecked: true,
+        children: labelSnippet,
+        onchange,
+      },
+    });
+
+    const wrapper = container.querySelector('.svadmin-checkbox-wrapper');
+    expect(wrapper).not.toBeNull();
+    expect(container.textContent).toContain('Accept terms');
+
+    const cbButton = container.querySelector('button[role="checkbox"]') as HTMLButtonElement;
+    expect(cbButton.getAttribute('aria-checked')).toBe('true');
+
+    await fireEvent.click(cbButton);
+    expect(onchange).toHaveBeenCalledWith(false);
   });
 });
 
