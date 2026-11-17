@@ -9,7 +9,7 @@
 	import CardContent from "./card-content.svelte";
 
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-		size?: "default" | "sm";
+		size?: "default" | "sm" | "small" | "mini";
 		hoverable?: boolean;
 		bordered?: boolean;
 		loading?: boolean;
@@ -29,12 +29,16 @@
 		extra,
 		...restProps
 	}: Props = $props();
+
+	const normalizedSize = $derived(
+		size === "small" || size === "mini" ? "sm" : size
+	);
 </script>
 
 <div
 	bind:this={ref}
 	data-slot="card"
-	data-size={size}
+	data-size={normalizedSize}
 	data-hoverable={hoverable ? "true" : undefined}
 	class={cn(
 		"svadmin-card",
