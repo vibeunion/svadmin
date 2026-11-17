@@ -83,8 +83,8 @@ export function createNotificationController(): NotificationController {
     const item: NotificationRecord = {
       ...options,
       id: nextId++,
-      key,
-      description: resolvedDescription,
+      ...(key === undefined ? {} : { key }),
+      ...(resolvedDescription === undefined ? {} : { description: resolvedDescription }),
       tone: resolvedTone,
       placement: resolvedPlacement,
       duration: options.duration ?? 3000,
