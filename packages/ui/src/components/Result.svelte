@@ -22,9 +22,9 @@
     children,
   }: {
     status?: ResultStatus;
-    title: string;
-    subtitle?: string;
-    subTitle?: string;
+    title?: string | Snippet;
+    subtitle?: string | Snippet;
+    subTitle?: string | Snippet;
     icon?: Snippet;
     extra?: Snippet;
     children?: Snippet;
@@ -53,8 +53,24 @@
     {/if}
   </div>
   <p class="svadmin-result__status">{status}</p>
-  <h2 class="svadmin-result__title">{title}</h2>
-  {#if resolvedSubtitle}<p class="svadmin-result__subtitle">{resolvedSubtitle}</p>{/if}
+  {#if title}
+    <h2 class="svadmin-result__title">
+      {#if typeof title === "string"}
+        {title}
+      {:else}
+        {@render (title as Snippet)()}
+      {/if}
+    </h2>
+  {/if}
+  {#if resolvedSubtitle}
+    <p class="svadmin-result__subtitle">
+      {#if typeof resolvedSubtitle === "string"}
+        {resolvedSubtitle}
+      {:else}
+        {@render (resolvedSubtitle as Snippet)()}
+      {/if}
+    </p>
+  {/if}
   {#if extra || children}
     <div class="svadmin-result__extra" data-slot="result-extra">
       {#if extra}
