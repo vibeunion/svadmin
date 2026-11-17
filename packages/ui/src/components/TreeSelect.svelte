@@ -346,7 +346,7 @@
         const children = await request.loader(request.node);
         if (!current()) return false;
         options = updateOptionsChildren(options, optionKey(node), children);
-        observedOptions = options;
+        observedOptions = options as NormalizedTreeSelectOption[];
         return true;
       } catch {
         if (current()) loadErrors.set(optionKey(node), request);
@@ -712,7 +712,7 @@
   // 当前节点被过滤、折叠或滚出渲染窗口时，仍保留一个有效的 Tab 入口。
   const tabStopValue = $derived(renderedNodes.some(entry => optionKey(entry.node) === activeTreeValue)
     ? activeTreeValue
-    : renderedNodes[0]?.optionKey(node));
+    : renderedNodes[0]?.node === undefined ? undefined : optionKey(renderedNodes[0].node));
 
   $effect(() => {
     // 搜索和外部数据替换从顶部开始；折叠或数据缩短只钳制窗口。
@@ -945,13 +945,13 @@
         {#if shouldVirtualize}
           <div style={`height:${totalHeight}px;position:relative;`}>
             <div style={`position:absolute;top:${virtualStart * rowHeight}px;left:0;right:0;`}>
-              {#each renderedNodes as entry (treeKey(entry.node.value))}
+              {#each renderedNodes as entry (treeKey(optionKey(entry.node)))}
                 {@render treeNode(entry.node, entry.level, entry.position, entry.size, false)}
               {/each}
             </div>
           </div>
         {:else if visibleOptions.length > 0}
-          {#each visibleOptions as rootNode, index (treeKey(rootNode.value))}
+          {#each visibleOptions as rootNode, index (treeKey(optionKey(rootNode)))}
             {@render treeNode(rootNode, 0, index + 1, visibleOptions.length)}
           {/each}
         {:else}
