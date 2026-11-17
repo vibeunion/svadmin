@@ -122,9 +122,9 @@
   $effect.pre(() => {
     if (initialized) return;
     initialized = true;
-    // 宿主显式传 null 时补齐成空范围，避免后续读取崩溃。
+    // 宿主显式传 null 时保持 null（清空语义），只有默认值才补齐。
     if (value === null || value === undefined) {
-      value = { ...(defaultValue ?? { start: null, end: null }) };
+      if (defaultValue !== undefined && defaultValue !== null) value = { ...defaultValue };
       return;
     }
     if (value.start === null && value.end === null && defaultValue !== undefined && defaultValue !== null) {
