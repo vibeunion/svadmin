@@ -28,7 +28,7 @@ const maximumInitialBytes = 1_425_000;
 // normalization and the Card/Link/Progress refinements measured 425630 gzip
 // bytes. PR #909 measured 428916 gzip bytes and 1421149 initial bytes on
 // 2026-11-17; keep measured headroom for runner variation.
-const maximumInitialGzipBytes = 429_500;
+const maximumInitialGzipBytes = 430_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);

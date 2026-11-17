@@ -15,6 +15,10 @@
 		loading?: boolean;
 		title?: string | Snippet;
 		extra?: Snippet;
+		cover?: Snippet;
+		actions?: Snippet;
+		headerStyle?: string;
+		bodyStyle?: string;
 	};
 
 	let {
@@ -27,6 +31,10 @@
 		loading = false,
 		title,
 		extra,
+		cover,
+		actions,
+		headerStyle,
+		bodyStyle,
 		...restProps
 	}: Props = $props();
 
@@ -44,6 +52,7 @@
 		"svadmin-card",
 		hoverable && "svadmin-card--hoverable",
 		!bordered && "border-0 shadow-none",
+		normalizedSize === "sm" && "svadmin-card--small",
 		className
 	)}
 	{...restProps}
@@ -56,8 +65,16 @@
 			<Skeleton class="h-16 w-full mt-2" />
 		</div>
 	{:else}
+		{#if cover}
+			<div class="svadmin-card__cover overflow-hidden rounded-t-[calc(var(--radius)-1px)]" data-slot="card-cover">
+				{@render cover()}
+			</div>
+		{/if}
 		{#if title || extra}
-			<CardHeader class="flex flex-row items-center justify-between pb-2">
+			<CardHeader
+				class="flex flex-row items-center justify-between pb-2"
+				style={headerStyle}
+			>
 				{#if title}
 					<CardTitle>
 						{#if typeof title === "string"}
@@ -76,11 +93,26 @@
 			</CardHeader>
 		{/if}
 		{#if title || extra}
-			<CardContent>
+			<CardContent style={bodyStyle}>
 				{@render children?.()}
 			</CardContent>
+		{:else if bodyStyle}
+			<div style={bodyStyle}>
+				{@render children?.()}
+			</div>
 		{:else}
 			{@render children?.()}
+		{/if}
+		{#if actions}
+			<div
+				class={cn(
+					"svadmin-card__actions border-t border-border flex items-center justify-end gap-2 bg-muted/10",
+					normalizedSize === "sm" ? "px-3 py-2" : "px-6 py-3"
+				)}
+				data-slot="card-actions"
+			>
+				{@render actions()}
+			</div>
 		{/if}
 	{/if}
 </div>

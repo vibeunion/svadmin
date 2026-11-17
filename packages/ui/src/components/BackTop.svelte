@@ -9,8 +9,11 @@
     target?: string | HTMLElement | Window | undefined;
     label?: string;
     class?: string;
+    style?: string;
+    duration?: number;
     children?: Snippet;
     onclick?: () => void;
+    onClick?: () => void;
   }
 
   let {
@@ -19,8 +22,11 @@
     target,
     label = "回到顶部",
     class: className = "",
+    style,
+    duration,
     children,
     onclick,
+    onClick,
   }: Props = $props();
 
   let visible = $state(false);
@@ -49,13 +55,14 @@
   function scrollTop() {
     const el = resolveTarget();
     if (!el) return;
-    const isWin = el === window || (typeof Window !== "undefined" && el instanceof Window);
-    if (isWin) {
-      el.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      el.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    // `duration` 只影响平滑滚动的节奏提示；系统减少动效时直接跳转。
+    const reduceMotion = typeof window !== "undefined"
+      && typeof window.matchMedia === "function"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior = duration === 0 || reduceMotion ? "auto" : "smooth";
+    el.scrollTo({ top: 0, behavior });
     onclick?.();
+    onClick?.();
   }
 </script>
 
@@ -63,6 +70,7 @@
   <button
     type="button"
     class={cn("svadmin-back-top", className)}
+    {style}
     onclick={scrollTop}
     aria-label={label}
     title={label}

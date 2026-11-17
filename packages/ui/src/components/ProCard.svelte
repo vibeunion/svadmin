@@ -20,6 +20,12 @@
     extra?: Snippet;
     /** Bottom actions slot */
     actions?: Snippet;
+    /** Cover media slot displayed at top */
+    cover?: Snippet;
+    /** Custom style for header */
+    headerStyle?: string;
+    /** Custom style for body */
+    bodyStyle?: string;
     /** Whether the card has an outer border */
     bordered?: boolean;
     /** Whether the card elevates on hover */
@@ -63,6 +69,9 @@
     tooltip,
     extra,
     actions,
+    cover,
+    headerStyle,
+    bodyStyle,
     bordered = true,
     hoverable = false,
     ghost = false,
@@ -140,6 +149,12 @@
     </div>
   {/if}
 
+  {#if cover}
+    <div class="svadmin-procard__cover overflow-hidden rounded-t-[4px]" data-slot="procard-cover">
+      {@render cover()}
+    </div>
+  {/if}
+
   {#if hasHeader}
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
@@ -150,6 +165,7 @@
         isCollapsed && 'border-b-0',
         headerClass
       )}
+      style={headerStyle}
       onclick={collapsible ? toggleCollapse : undefined}
       onkeydown={(e) => {
         if (collapsible && (e.key === 'Enter' || e.key === ' ')) {
@@ -247,6 +263,7 @@
         split === 'horizontal' && 'flex flex-col divide-y divide-border',
         bodyClass
       )}
+      style={bodyStyle}
     >
       {#if children}
         {@render children()}
