@@ -76,7 +76,14 @@
 
   const effectiveSearchable = $derived(showSearch ?? searchable);
 
-  function normalizeTreeNodes(nodes: TreeSelectOption[]): TreeSelectOption[] {
+  /** 归一化后 value / label 一定存在，渲染层按这个类型收窄。 */
+  type NormalizedTreeSelectOption = TreeSelectOption & {
+    value: string | number;
+    label: string;
+    children?: NormalizedTreeSelectOption[] | undefined;
+  };
+
+  function normalizeTreeNodes(nodes: TreeSelectOption[]): NormalizedTreeSelectOption[] {
     let changed = false;
     const next = nodes.map((node) => {
       const needsVal = node.value === undefined && node.key !== undefined;
@@ -84,16 +91,17 @@
       const children = node.children ? normalizeTreeNodes(node.children) : undefined;
       if (needsVal || needsLab || (children !== undefined && children !== node.children)) {
         changed = true;
+        const nextChildren = children ?? node.children;
         return {
           ...node,
           value: node.value ?? node.key ?? '',
           label: node.label ?? node.title ?? String(node.value ?? node.key ?? ''),
-          children: children ?? node.children,
+          ...(nextChildren === undefined ? {} : { children: nextChildren }),
         };
       }
-      return node;
+      return node as NormalizedTreeSelectOption;
     });
-    return changed ? next : nodes;
+    return (changed ? next : nodes) as NormalizedTreeSelectOption[];
   }
 
   const rawInputOptions = $derived(treeData ?? data ?? options);
@@ -147,7 +155,7 @@
     const map = new Map<string | number, TreeSelectOption>();
     function traverse(nodes: TreeSelectOption[]) {
       for (const node of nodes) {
-        map.set(node.value, node);
+        map.set(node.value ?? node.key ?? '', node);
         if (node.children) traverse(node.children);
       }
     }
@@ -716,7 +724,7 @@
   });
 </script>
 
-{#snippet treeNode(node: TreeSelectOption, level: number, position: number, size: number, recursive = true)}
+{#snippet treeNode(node: NormalizedTreeSelectOption, level: number, position: number, size: number, recursive = true)}
   {@const nodeHasChildren = hasChildren(optionMap.get(node.value) ?? node)}
   {@const expanded = isNodeExpanded(node)}
   {@const selected = isNodeSelected(node)}
@@ -804,7 +812,7 @@
 
     {#if recursive && nodeHasChildren && expanded && node.children}
       <div id={`${currentNodeId}-group`} role="group" class="flex flex-col">
-        {#each node.children as child, index (treeKey(child.value))}
+        {#each node.children as child, index (treeKey(child.value ?? child.key ?? ''))}
           {@render treeNode(child, level + 1, index + 1, node.children.length)}
         {/each}
       </div>
