@@ -5,13 +5,27 @@
   import { cn } from '../utils.js';
 
   export type TreeNode = {
-    id: string;
-    label: string;
+    id?: string;
+    key?: string;
+    title?: string;
+    label?: string;
     children?: TreeNode[];
     disabled?: boolean;
     isLeaf?: boolean;
     hasChildren?: boolean;
   };
+
+  function normalizeNode(raw: TreeNode): TreeNode {
+    const id = raw.id ?? raw.key ?? '';
+    const label = raw.label ?? raw.title ?? '';
+    const children = raw.children ? raw.children.map(normalizeNode) : undefined;
+    return {
+      ...raw,
+      id,
+      label,
+      children,
+    };
+  }
 
   export interface TreeCheckInfo {
     checkedKeys: string[];
@@ -26,6 +40,10 @@
 
   interface Props {
     nodes?: TreeNode[];
+    data?: TreeNode[];
+    treeData?: TreeNode[];
+    size?: 'mini' | 'small' | 'default' | 'large';
+    blockNode?: boolean;
     /** Controlled expansion; omit for uncontrolled behavior. */
     expandedKeys?: string[];
     selectedKeys?: string[];
@@ -48,6 +66,10 @@
 
   let {
     nodes = $bindable([]),
+    data,
+    treeData,
+    size = 'default',
+    blockNode = false,
     expandedKeys = $bindable(undefined),
     selectedKeys = $bindable([]),
     checkedKeys = $bindable([]),
@@ -67,7 +89,10 @@
     ondragend,
   }: Props = $props();
 
-  let internalExpanded = $state<string[]>(untrack(() => defaultExpandAll ? collectIds(nodes) : []));
+  const rawInputNodes = $derived(data ?? treeData ?? nodes);
+  const normalizedNodes = $derived(rawInputNodes.map(normalizeNode));
+
+  let internalExpanded = $state<string[]>(untrack(() => defaultExpandAll ? collectIds(untrack(() => rawInputNodes.map(normalizeNode))) : []));
   let loaded = $state<Record<string, TreeNode[]>>({});
   let loading = $state<Record<string, boolean>>({});
   let loadErrors = $state<Record<string, string>>({});
@@ -76,14 +101,14 @@
   let dropTarget = $state<{ id: string; position: TreeDragInfo['position'] } | undefined>(undefined);
 
   function collectIds(items: TreeNode[]): string[] {
-    return items.flatMap((node) => [node.id, ...(node.children ? collectIds(node.children) : [])]);
+    return items.flatMap((node) => [node.id ?? node.key ?? '', ...(node.children ? collectIds(node.children) : [])]);
   }
 
   function childrenOf(node: TreeNode): TreeNode[] | undefined {
-    return loaded[node.id] ?? node.children;
+    return loaded[node.id ?? ''] ?? node.children;
   }
 
-  const effectiveNodes = $derived(nodes.map((node): TreeNode => {
+  const effectiveNodes = $derived(normalizedNodes.map((node): TreeNode => {
     const children = childrenOf(node);
     return children === undefined ? { ...node } : { ...node, children };
   }));
@@ -281,6 +306,8 @@
   aria-multiselectable={multiple || checkable}
   aria-disabled={disabled || undefined}
   data-disabled={disabled || undefined}
+  data-size={size}
+  data-block-node={blockNode ? 'true' : undefined}
 >
   {#each visible as item, position (item.node.id)}
     {@const node = item.node}
@@ -355,6 +382,15 @@
     color: var(--foreground);
     font-size: var(--svadmin-text-body);
     line-height: 1.5715;
+  }
+  .svadmin-tree:is([data-size='small'], [data-size='mini']) {
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
+  .svadmin-tree:is([data-size='small'], [data-size='mini']) .svadmin-tree__indent {
+    min-height: 1.5rem;
+  }
+  .svadmin-tree[data-block-node='true'] .svadmin-tree__row {
+    width: 100%;
   }
   .svadmin-tree__row {
     position: relative;
