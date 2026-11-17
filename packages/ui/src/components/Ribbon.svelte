@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte';
   import { cn } from '../utils.js';
 
-  export type RibbonPlacement = 'start' | 'end';
+  export type RibbonPlacement = 'start' | 'end' | 'left' | 'right';
 
   export interface RibbonProps {
     /** Text or content snippet displayed in the ribbon */
@@ -27,6 +27,10 @@
     ribbonClass = '',
     children,
   }: RibbonProps = $props();
+
+  const resolvedPlacement = $derived<'start' | 'end'>(
+    placement === 'left' ? 'start' : placement === 'right' ? 'end' : placement
+  );
 
   const isPresetColor = $derived(
     ['primary', 'success', 'warning', 'destructive', 'info', 'purple', 'pink'].includes(color),
@@ -63,10 +67,10 @@
 
   {#if text}
     <div
-      data-placement={placement}
+      data-placement={resolvedPlacement}
       class={cn(
         'absolute top-2 z-10 flex h-[22px] items-center px-2 text-[11px] font-semibold tracking-wide shadow-xs select-none',
-        placement === 'end' ? '-right-2 rounded-l-[3px]' : '-left-2 rounded-r-[3px]',
+        resolvedPlacement === 'end' ? '-right-2 rounded-l-[3px]' : '-left-2 rounded-r-[3px]',
         isPresetColor ? presetBgClasses[color] : 'text-white',
         ribbonClass,
       )}
@@ -83,7 +87,7 @@
         aria-hidden="true"
         class={cn(
           'absolute top-full border-[4px] border-transparent',
-          placement === 'end'
+          resolvedPlacement === 'end'
             ? 'right-0 border-t-[4px] border-l-[4px] border-l-transparent'
             : 'left-0 border-t-[4px] border-r-[4px] border-r-transparent',
           isPresetColor ? presetCornerClasses[color] : '',
