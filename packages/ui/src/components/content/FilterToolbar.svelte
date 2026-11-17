@@ -63,6 +63,7 @@
         <Input
           bind:value={query}
           bind:ref={searchInput}
+          type="search"
           {placeholder}
           class="svadmin-filter-toolbar__input"
           aria-label={placeholder}
