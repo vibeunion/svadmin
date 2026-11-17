@@ -5,6 +5,7 @@
 
   interface Props {
     threshold?: number;
+    visibleHeight?: number;
     target?: string | HTMLElement | Window | undefined;
     label?: string;
     class?: string;
@@ -14,6 +15,7 @@
 
   let {
     threshold = 200,
+    visibleHeight,
     target,
     label = "回到顶部",
     class: className = "",
@@ -22,6 +24,7 @@
   }: Props = $props();
 
   let visible = $state(false);
+  const effectiveThreshold = $derived(visibleHeight ?? threshold);
 
   function resolveTarget(): HTMLElement | Window | null {
     if (typeof window === "undefined") return null;
@@ -36,7 +39,7 @@
     const check = () => {
       const isWin = el === window || (typeof Window !== "undefined" && el instanceof Window);
       const scrollY = isWin ? (window.scrollY ?? window.pageYOffset ?? 0) : (el as HTMLElement).scrollTop;
-      visible = scrollY >= threshold;
+      visible = scrollY >= effectiveThreshold;
     };
     check();
     el.addEventListener("scroll", check, { passive: true });
