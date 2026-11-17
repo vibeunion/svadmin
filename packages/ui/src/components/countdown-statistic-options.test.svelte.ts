@@ -3,7 +3,7 @@ import { render } from '@testing-library/svelte';
 import Countdown from './Countdown.svelte';
 import Statistic from './Statistic.svelte';
 
-describe('Countdown Arco Parity (value, format, now, start)', () => {
+describe('Countdown value, format, now, and start options', () => {
   it('supports value alias for target and custom format strings', () => {
     const now = 1000000;
     const target = now + (3600 + 120 + 5) * 1000; // 1h 2m 5s
@@ -31,7 +31,7 @@ describe('Countdown Arco Parity (value, format, now, start)', () => {
   });
 });
 
-describe('Statistic Arco Parity (separator, snippet title)', () => {
+describe('Statistic separator and snippet title', () => {
   it('supports separator alias for groupSeparator', () => {
     const { container } = render(Statistic, {
       props: {

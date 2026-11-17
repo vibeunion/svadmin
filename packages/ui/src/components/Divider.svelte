@@ -5,7 +5,7 @@
   export interface DividerProps {
     /** Direction of the divider */
     type?: 'horizontal' | 'vertical';
-    /** Direction of the divider (Arco Design alias) */
+    /** Direction of the divider (orientation alias) */
     direction?: 'horizontal' | 'vertical';
     /** Alignment of the text title inside the horizontal divider */
     orientation?: 'left' | 'center' | 'right';

@@ -11,9 +11,10 @@
 
 	export type ButtonShape = "square" | "round" | "circle";
 	export type ButtonStatus = "normal" | "warning" | "danger" | "success";
-	export type ArcoButtonType = "primary" | "secondary" | "dashed" | "outline" | "text";
+	/** Emphasis alias: 让 `primary` / `text` 这类语义直接落在 variant 上，同时不占用 HTML `type`。 */
+	export type ButtonEmphasisType = "primary" | "secondary" | "dashed" | "outline" | "text";
 
-	type ButtonElementAttributes = Omit<HTMLButtonAttributes & HTMLAnchorAttributes, "type">;
+	type ButtonElementAttributes = HTMLButtonAttributes & HTMLAnchorAttributes;
 
 	export type ButtonProps = WithElementRef<
 		ButtonElementAttributes,
@@ -26,7 +27,9 @@
 			status?: ButtonStatus;
 			long?: boolean;
 			block?: boolean;
-			type?: "button" | "submit" | "reset" | ArcoButtonType;
+			/** 原生 type 保持 HTML 语义；强调语义统一走 `emphasis`。 */
+			type?: "button" | "submit" | "reset";
+			emphasis?: ButtonEmphasisType;
 			disabledReason?: string;
 			disabledReasonDisplay?: "tooltip" | "inline";
 			disabledReasonSide?: "top" | "bottom" | "left" | "right";
@@ -43,13 +46,13 @@
 	const BUTTON_VARIANTS = new Set(["default", "outline", "secondary", "ghost", "destructive", "link", "dashed", "text"]);
 	const BUTTON_SIZES = new Set(["default", "xs", "sm", "lg", "icon", "icon-xs", "icon-sm", "icon-lg"]);
 
-	const ARCO_SIZE_MAP: Record<string, ButtonSizeValue> = {
+	const SIZE_ALIASES: Record<string, ButtonSizeValue> = {
 		mini: "xs",
 		small: "sm",
 		large: "lg",
 	};
 
-	const ARCO_TYPE_MAP: Record<string, ButtonVariantValue> = {
+	const EMPHASIS_TYPE_MAP: Record<string, ButtonVariantValue> = {
 		primary: "default",
 		secondary: "secondary",
 		dashed: "dashed",
@@ -60,14 +63,14 @@
 	function readButtonVariant(value: unknown): ButtonVariantValue | undefined {
 		if (typeof value !== "string") return undefined;
 		if (BUTTON_VARIANTS.has(value)) return value as ButtonVariantValue;
-		if (value in ARCO_TYPE_MAP) return ARCO_TYPE_MAP[value];
+		if (value in EMPHASIS_TYPE_MAP) return EMPHASIS_TYPE_MAP[value];
 		return undefined;
 	}
 
 	function readButtonSize(value: unknown): ButtonSizeValue | undefined {
 		if (typeof value !== "string") return undefined;
 		if (BUTTON_SIZES.has(value)) return value as ButtonSizeValue;
-		if (value in ARCO_SIZE_MAP) return ARCO_SIZE_MAP[value];
+		if (value in SIZE_ALIASES) return SIZE_ALIASES[value];
 		return undefined;
 	}
 
@@ -84,6 +87,7 @@
 		ref = $bindable(null),
 		href = undefined,
 		type: typeProp = "button",
+		emphasis,
 		disabled,
 		disabledReason = "",
 		disabledReasonDisplay = "tooltip",
@@ -95,13 +99,12 @@
 		...restProps
 	}: ButtonProps = $props();
 
-	const isArcoType = $derived(typeof typeProp === "string" && typeProp in ARCO_TYPE_MAP);
-	const typeVariant = $derived(isArcoType ? ARCO_TYPE_MAP[typeProp as string] : undefined);
-	const htmlType = $derived(isArcoType ? "button" : (typeProp as "button" | "submit" | "reset"));
+	const emphasisVariant = $derived(emphasis ? EMPHASIS_TYPE_MAP[emphasis] : undefined);
+	const htmlType = $derived(emphasis ? "button" : (typeProp as "button" | "submit" | "reset"));
 
 	const config = useComponentConfig();
 	const buttonDefaults = $derived(config.componentDefaults['Button'] ?? {});
-	const baseVariant = $derived(variantProp ?? typeVariant ?? readButtonVariant(buttonDefaults['variant']) ?? "default");
+	const baseVariant = $derived(variantProp ?? emphasisVariant ?? readButtonVariant(buttonDefaults['variant']) ?? "default");
 	const variant = $derived(status === "danger" && baseVariant === "default" ? "destructive" : baseVariant);
 	const size = $derived(readButtonSize(sizeProp) ?? readButtonSize(buttonDefaults['size']) ?? (config.density === "compact" || config.componentSize === "sm" ? "sm" : config.componentSize === "lg" ? "lg" : "default"));
 

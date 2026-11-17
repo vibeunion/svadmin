@@ -3,7 +3,7 @@ import { render } from '@testing-library/svelte';
 import Breadcrumbs from './Breadcrumbs.svelte';
 import Divider from './Divider.svelte';
 
-describe('Breadcrumbs Arco Parity (routes, custom separator)', () => {
+describe('Breadcrumbs routes and custom separator', () => {
   it('renders breadcrumbs using routes prop alias', () => {
     const { container } = render(Breadcrumbs, {
       props: {
@@ -34,7 +34,7 @@ describe('Breadcrumbs Arco Parity (routes, custom separator)', () => {
   });
 });
 
-describe('Divider Arco Parity (direction prop alias)', () => {
+describe('Divider direction alias', () => {
   it('supports direction="vertical" alias for type="vertical"', () => {
     const { container } = render(Divider, {
       props: { direction: 'vertical' },

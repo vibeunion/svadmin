@@ -13,7 +13,6 @@
     | "purple"
     | "cyan"
     | "gray"
-    | "arcoblue"
     | "gold"
     | "lime"
     | "magenta"
@@ -65,7 +64,6 @@
 
   const presetColorClasses: Record<string, string> = {
     blue: "bg-primary/10 text-primary border-primary/20",
-    arcoblue: "bg-primary/10 text-primary border-primary/20",
     green: "bg-success/10 text-success border-success/20",
     lime: "bg-success/10 text-success border-success/20",
     orange: "bg-warning/10 text-warning border-warning/20",

@@ -3,7 +3,7 @@ import { render } from "@testing-library/svelte";
 import Input from "./input.svelte";
 import Textarea from "../textarea/textarea.svelte";
 
-describe("Input Arco parity (size and warning status)", () => {
+describe("Input size and warning status", () => {
 	it("normalizes size='small' to compact and size='large' to lg", () => {
 		const { container, rerender } = render(Input, {
 			props: { size: "small" },
@@ -27,7 +27,7 @@ describe("Input Arco parity (size and warning status)", () => {
 	});
 });
 
-describe("Textarea Arco parity (size and warning status)", () => {
+describe("Textarea size and warning status", () => {
 	it("supports size normalization and warning status on Textarea", () => {
 		const { container, rerender } = render(Textarea, {
 			props: { size: "small", status: "warning" },
