@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { X, CircleX } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   interface Props {
     value?: string[] | undefined;
+    defaultValue?: string[] | undefined;
     name?: string | undefined;
     placeholder?: string | undefined;
     separator?: string | undefined;
@@ -11,6 +13,9 @@
     maxTagCount?: number | undefined;
     allowClear?: boolean | undefined;
     disabled?: boolean | undefined;
+    readonly?: boolean | undefined;
+    size?: 'mini' | 'small' | 'default' | 'large' | undefined;
+    status?: 'error' | 'warning' | 'normal' | undefined;
     required?: boolean | undefined;
     invalid?: boolean | undefined;
     describedby?: string | undefined;
@@ -20,7 +25,8 @@
   }
 
   let {
-    value = $bindable([]),
+    value = $bindable(),
+    defaultValue = [],
     name,
     placeholder = 'Add a tag',
     separator = ',',
@@ -28,6 +34,9 @@
     maxTagCount,
     allowClear = false,
     disabled = false,
+    readonly = false,
+    size = 'default',
+    status = 'normal',
     required = false,
     invalid = false,
     describedby,
@@ -36,10 +45,14 @@
     onchange,
   }: Props = $props();
 
+  let internalValue = $state(untrack(() => defaultValue));
+  const effectiveValue = $derived(value !== undefined ? value : internalValue);
+  const isInteractiveDisabled = $derived(disabled || readonly);
+
   let draft = $state('');
   let composing = $state(false);
-  const displayedTags = $derived(maxTagCount !== undefined && maxTagCount >= 0 ? value.slice(0, maxTagCount) : value);
-  const overflowCount = $derived(maxTagCount !== undefined && maxTagCount >= 0 ? Math.max(0, value.length - maxTagCount) : 0);
+  const displayedTags = $derived(maxTagCount !== undefined && maxTagCount >= 0 ? effectiveValue.slice(0, maxTagCount) : effectiveValue);
+  const overflowCount = $derived(maxTagCount !== undefined && maxTagCount >= 0 ? Math.max(0, effectiveValue.length - maxTagCount) : 0);
 
   function normalized(values: readonly string[]): string[] {
     return [...new Set(values.map(item => item.trim()).filter(Boolean))];
@@ -47,48 +60,55 @@
 
   function update(next: string[]): void {
     const result = normalized(next);
-    value = result;
+    if (value !== undefined) {
+      value = result;
+    } else {
+      internalValue = result;
+    }
     onchange?.(result);
   }
 
   function add(raw: string): void {
-    if (disabled) return;
+    if (isInteractiveDisabled) return;
     const candidates = raw.split(separator).map(item => item.trim()).filter(Boolean);
     if (candidates.length === 0) return;
-    const available = maxItems === undefined ? candidates : candidates.slice(0, Math.max(0, maxItems - value.length));
-    update([...value, ...available]);
+    const available = maxItems === undefined ? candidates : candidates.slice(0, Math.max(0, maxItems - effectiveValue.length));
+    update([...effectiveValue, ...available]);
     draft = '';
   }
 
   function clearAll(): void {
-    if (disabled) return;
+    if (isInteractiveDisabled) return;
     update([]);
   }
 
   function remove(index: number): void {
-    if (disabled) return;
-    update(value.filter((_, itemIndex) => itemIndex !== index));
+    if (isInteractiveDisabled) return;
+    update(effectiveValue.filter((_, itemIndex) => itemIndex !== index));
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    if (disabled || composing) return;
+    if (isInteractiveDisabled || composing) return;
     if (event.key === 'Enter' || event.key === separator) {
       event.preventDefault();
       add(draft);
-    } else if (event.key === 'Backspace' && draft === '' && value.length > 0) {
+    } else if (event.key === 'Backspace' && draft === '' && effectiveValue.length > 0) {
       event.preventDefault();
-      remove(value.length - 1);
+      remove(effectiveValue.length - 1);
     }
   }
 </script>
 
 <div
   class={cn('svadmin-tags-input', className)}
-  data-invalid={invalid ? 'true' : undefined}
+  data-invalid={invalid || status === 'error' ? 'true' : undefined}
+  data-status={status !== 'normal' ? status : undefined}
+  data-size={size !== 'default' ? size : undefined}
   data-disabled={disabled ? 'true' : undefined}
+  data-readonly={readonly ? 'true' : undefined}
 >
   {#if name}
-    {#each value as tag (tag)}
+    {#each effectiveValue as tag (tag)}
       <input type="hidden" {name} value={tag} {disabled} />
     {/each}
   {/if}
@@ -98,7 +118,7 @@
       <button
         type="button"
         aria-label={`Remove ${tag}`}
-        disabled={disabled}
+        disabled={isInteractiveDisabled}
         onclick={() => remove(index)}
       >
         <X size={12} aria-hidden="true" />
@@ -106,24 +126,25 @@
     </span>
   {/each}
   {#if overflowCount > 0}
-    <span class="svadmin-tags-input__tag svadmin-tags-input__tag--overflow" title={value.slice(maxTagCount).join(", ")}>
+    <span class="svadmin-tags-input__tag svadmin-tags-input__tag--overflow" title={effectiveValue.slice(maxTagCount).join(", ")}>
       <span>+{overflowCount}</span>
     </span>
   {/if}
   <input
     value={draft}
     {placeholder}
-    disabled={disabled || (maxItems !== undefined && value.length >= maxItems)}
-    required={required && value.length === 0}
+    disabled={disabled || (maxItems !== undefined && effectiveValue.length >= maxItems)}
+    readonly={readonly}
+    required={required && effectiveValue.length === 0}
     aria-label={ariaLabel}
-    aria-invalid={invalid || undefined}
+    aria-invalid={invalid || status === 'error' || undefined}
     aria-describedby={describedby}
     oninput={(event) => { draft = (event.currentTarget as HTMLInputElement).value; }}
     onkeydown={handleKeydown}
     oncompositionstart={() => { composing = true; }}
     oncompositionend={(event) => { composing = false; draft = (event.currentTarget as HTMLInputElement).value; }}
   />
-  {#if allowClear && value.length > 0 && !disabled}
+  {#if allowClear && effectiveValue.length > 0 && !isInteractiveDisabled}
     <button
       type="button"
       class="svadmin-tags-input__clear"

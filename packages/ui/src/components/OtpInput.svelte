@@ -1,16 +1,19 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { cn } from '../utils.js';
 
   export interface OtpInputProps {
     length?: number;
     value?: string | string[];
+    defaultValue?: string | string[];
     type?: 'number' | 'text' | 'alphanumeric';
     mask?: boolean;
     disabled?: boolean;
+    readonly?: boolean;
     error?: boolean;
+    status?: 'error' | 'warning' | 'normal';
     autoFocus?: boolean;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'mini' | 'small' | 'default' | 'large' | 'sm' | 'md' | 'lg';
     separator?: string;
     class?: string;
     'aria-label'?: string;
@@ -20,11 +23,14 @@
 
   let {
     length = 6,
-    value = $bindable(''),
+    value = $bindable(),
+    defaultValue = '',
     type = 'alphanumeric',
     mask = false,
     disabled = false,
+    readonly = false,
     error = false,
+    status = 'normal',
     autoFocus = false,
     size = 'md',
     separator,
@@ -33,6 +39,16 @@
     onchange,
     oncomplete,
   }: OtpInputProps = $props();
+
+  const isError = $derived(error || status === 'error');
+  const normalizedSize = $derived.by(() => {
+    if (size === 'mini' || size === 'small' || size === 'sm') return 'sm';
+    if (size === 'large' || size === 'lg') return 'lg';
+    return 'md';
+  });
+
+  let internalValue = $state(untrack(() => defaultValue));
+  const effectiveValue = $derived(value !== undefined ? value : internalValue);
 
   let digits = $state<string[]>([]);
   const inputRefs: (HTMLInputElement | null)[] = [];
@@ -59,10 +75,10 @@
   }
 
   function getRawStringValue(): string {
-    if (Array.isArray(value)) {
-      return value.join('');
+    if (Array.isArray(effectiveValue)) {
+      return effectiveValue.join('');
     }
-    return value || '';
+    return effectiveValue || '';
   }
 
   function syncFromValue() {
@@ -74,10 +90,18 @@
 
   function notifyChange() {
     const combined = digits.join('');
-    if (Array.isArray(value)) {
-      value = [...digits];
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        value = [...digits];
+      } else {
+        value = combined;
+      }
     } else {
-      value = combined;
+      if (Array.isArray(internalValue)) {
+        internalValue = [...digits];
+      } else {
+        internalValue = combined;
+      }
     }
     onchange?.(combined);
     if (combined.length === length && digits.every((d) => d !== '')) {
@@ -86,6 +110,7 @@
   }
 
   function handleInput(e: Event, index: number) {
+    if (disabled || readonly) return;
     const input = e.target as HTMLInputElement;
     const rawVal = input.value;
     const char = rawVal.slice(-1);
@@ -103,6 +128,7 @@
   }
 
   function handleKeyDown(e: KeyboardEvent, index: number) {
+    if (disabled || readonly) return;
     if (e.key === 'Backspace') {
       if (digits[index] !== '') {
         digits[index] = '';
@@ -127,6 +153,7 @@
   }
 
   function handlePaste(e: ClipboardEvent) {
+    if (disabled || readonly) return;
     e.preventDefault();
     const pastedText = e.clipboardData?.getData('text') || '';
     if (!pastedText) return;
@@ -194,13 +221,14 @@
       maxlength={1}
       value={digit}
       {disabled}
+      {readonly}
       aria-label={`Digit ${index + 1} of ${length}`}
-      aria-invalid={error ? 'true' : undefined}
+      aria-invalid={isError ? 'true' : undefined}
       class={cn(
         'rounded-sm border text-center font-mono font-semibold transition-all outline-none',
         'focus:border-primary focus:ring-2 focus:ring-primary/20',
-        sizeClasses[size],
-        error
+        sizeClasses[normalizedSize],
+        isError
           ? 'border-destructive text-destructive focus:ring-destructive'
           : 'border-input bg-background text-foreground',
         disabled ? 'cursor-not-allowed bg-muted opacity-50' : 'cursor-text'
