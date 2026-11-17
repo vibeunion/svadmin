@@ -81,6 +81,14 @@
     }
   });
 
+  let loading = $state(false);
+  let submitError = $state('');
+  let round = 0;
+  let nextRequestId = 0;
+  let activeRequest: { id: number; round: number; onsubmit?: Props['onsubmit'] } | undefined;
+  let formElement: HTMLFormElement | undefined;
+  let destroyed = false;
+
   const resolvedSide = $derived(placement ?? side);
   const effectiveSubmit = $derived(onOk ?? onsubmit);
   const effectiveCancel = $derived(onCancel ?? oncancel);
@@ -95,13 +103,6 @@
         : undefined
   );
   const i18n = useTranslation();
-  let loading = $state(false);
-  let submitError = $state('');
-  let round = 0;
-  let nextRequestId = 0;
-  let activeRequest: { id: number; round: number; onsubmit?: Props['onsubmit'] } | undefined;
-  let formElement: HTMLFormElement | undefined;
-  let destroyed = false;
 
   let lastOpen: boolean | undefined = undefined;
   let lastOnsubmit: Props['onsubmit'];
