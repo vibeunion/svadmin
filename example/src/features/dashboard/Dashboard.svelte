@@ -8,7 +8,7 @@
 
   import { captureAdminContext, createEnterpriseRequestContext, useList, type DashboardProvider } from '@svadmin/core';
   import { addTranslations, useTranslation } from '@svadmin/core/i18n';
-  import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, StatusPill, type AuditDataState } from '@svadmin/ui';
+  import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, Progress, StatusPill, type AuditDataState } from '@svadmin/ui';
   import {
     Bell,
     Bot,
@@ -499,9 +499,7 @@
                   <span>{i18n.t('dashboard.section.fastMoving')}</span>
                   <span>{product.stock}</span>
                 </div>
-                <div class="mt-2 h-2 rounded-full bg-muted">
-                  <div class="h-2 rounded-full bg-primary" style:width={`${totalStock ? product.stock / totalStock * 100 : 0}%`}></div>
-                </div>
+                <Progress class="mt-2" percent={totalStock ? Math.round(product.stock / totalStock * 100) : 0} />
               </div>
             </div>
           {/each}

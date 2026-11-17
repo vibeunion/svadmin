@@ -15,6 +15,7 @@
     ContentPageShell,
     DataState,
     MetricBlock,
+    Progress,
     SectionHeader,
   } from '@svadmin/ui';
   import {
@@ -254,7 +255,7 @@
         <SectionHeader title={isZh ? '流向构成' : 'Flow composition'} description={isZh ? '按操作类型汇总当前台账。' : 'Current ledger grouped by movement type.'} />
         <div class="mt-5 space-y-5">
           {#each [[isZh ? '入库' : 'Inbound', inbound.length, 'bg-primary'], [isZh ? '出库' : 'Outbound', outbound.length, 'bg-foreground'], [isZh ? '调整' : 'Adjustments', adjustments.length, 'bg-muted-foreground']] satisfies [string, number, string][] as item (String(item[0]))}
-            <div><div class="flex items-center justify-between text-sm"><span class="text-muted-foreground">{item[0]}</span><span class="font-medium text-foreground">{item[1]}</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class={`h-full rounded-full ${item[2]}`} style:width={`${percent(item[1], rows.length)}%`}></div></div></div>
+            <div><div class="flex items-center justify-between text-sm"><span class="text-muted-foreground">{item[0]}</span><span class="font-medium text-foreground">{item[1]}</span></div><Progress class="mt-2" percent={percent(item[1], rows.length)} /></div>
           {/each}
         </div>
       </aside>
@@ -304,7 +305,7 @@
         <div class="divide-y divide-border">
           {#each rows as row (String(row['id']))}
             {@const completion = percent(numeric(row, 'countedItems'), numeric(row, 'expectedItems'))}
-            <article class="p-4"><div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div class="flex items-center gap-2"><ClipboardCheck class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{text(row, 'countNumber')} · {text(row, 'scope')}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {text(row, 'scheduledDate')}</p></div><div class="flex items-center gap-2"><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge>{#if numeric(row, 'varianceItems') > 0}<Badge variant="outline">{numeric(row, 'varianceItems')} {isZh ? '项差异' : 'variance'}</Badge>{/if}</div></div><div class="mt-4"><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{numeric(row, 'countedItems')} / {numeric(row, 'expectedItems')}</span><span>{completion}%</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${completion}%`}></div></div></div></article>
+            <article class="p-4"><div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div class="flex items-center gap-2"><ClipboardCheck class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{text(row, 'countNumber')} · {text(row, 'scope')}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {text(row, 'scheduledDate')}</p></div><div class="flex items-center gap-2"><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge>{#if numeric(row, 'varianceItems') > 0}<Badge variant="outline">{numeric(row, 'varianceItems')} {isZh ? '项差异' : 'variance'}</Badge>{/if}</div></div><div class="mt-4"><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{numeric(row, 'countedItems')} / {numeric(row, 'expectedItems')}</span><span>{completion}%</span></div><Progress class="mt-2" percent={completion} /></div></article>
           {/each}
         </div>
       </div>
@@ -354,7 +355,7 @@
       <div class="divide-y divide-border">
         {#each rows as row (String(row['id']))}
           {@const coverage = percent(numeric(row, 'minStock'), numeric(row, 'targetStock'))}
-          <article class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.8fr)_auto] lg:items-center"><div><div class="flex items-center gap-2"><Settings2 class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{productName(row['productId'])}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {supplierName(row['supplierId'])}</p></div><div><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{isZh ? '最低 / 目标' : 'Minimum / target'}</span><span>{numeric(row, 'minStock')} / {numeric(row, 'targetStock')}</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${coverage}%`}></div></div></div><div class="flex items-center justify-between gap-3 lg:justify-end"><div class="text-right"><p class="text-sm font-semibold text-foreground">+{numeric(row, 'reorderQuantity')}</p><p class="text-xs text-muted-foreground">{numeric(row, 'leadTimeDays')} {isZh ? '天交期' : 'days lead'}</p></div><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div></article>
+          <article class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.8fr)_auto] lg:items-center"><div><div class="flex items-center gap-2"><Settings2 class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{productName(row['productId'])}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {supplierName(row['supplierId'])}</p></div><div><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{isZh ? '最低 / 目标' : 'Minimum / target'}</span><span>{numeric(row, 'minStock')} / {numeric(row, 'targetStock')}</span></div><Progress class="mt-2" percent={coverage} /></div><div class="flex items-center justify-between gap-3 lg:justify-end"><div class="text-right"><p class="text-sm font-semibold text-foreground">+{numeric(row, 'reorderQuantity')}</p><p class="text-xs text-muted-foreground">{numeric(row, 'leadTimeDays')} {isZh ? '天交期' : 'days lead'}</p></div><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div></article>
         {/each}
       </div>
     </section>
