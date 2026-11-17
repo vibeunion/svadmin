@@ -6,8 +6,8 @@
 
   interface Props {
     gutter?: Gutter | [Gutter, Gutter];
-    align?: 'start' | 'center' | 'end' | 'stretch';
-    justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+    align?: 'start' | 'center' | 'end' | 'stretch' | 'top' | 'middle' | 'bottom';
+    justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'space-between' | 'space-around';
     class?: string;
     children?: Snippet;
   }
@@ -17,8 +17,24 @@
   const gapValue = (value: Gutter): string => typeof value === 'number' ? `${value}px` : `var(--svadmin-space-${value === 'xs' ? '1' : value === 'sm' ? '2' : value === 'md' ? '3' : value === 'lg' ? '4' : '5'})`;
   const columnGap = $derived(Array.isArray(gutter) ? gapValue(gutter[0]) : gapValue(gutter));
   const rowGap = $derived(Array.isArray(gutter) ? gapValue(gutter[1]) : gapValue(gutter));
-  const alignMap = { start: 'start', center: 'center', end: 'end', stretch: 'stretch' } as const;
-  const justifyMap = { start: 'start', center: 'center', end: 'end', between: 'space-between', around: 'space-around' } as const;
+  const alignMap = {
+    start: 'start',
+    top: 'start',
+    center: 'center',
+    middle: 'center',
+    end: 'end',
+    bottom: 'end',
+    stretch: 'stretch',
+  } as const;
+  const justifyMap = {
+    start: 'start',
+    center: 'center',
+    end: 'end',
+    between: 'space-between',
+    'space-between': 'space-between',
+    around: 'space-around',
+    'space-around': 'space-around',
+  } as const;
 </script>
 
 <div

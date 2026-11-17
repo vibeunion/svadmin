@@ -12,6 +12,7 @@
     shape?: 'circle' | 'square';
     type?: 'default' | 'primary';
     badge?: string | number;
+    tooltip?: string;
     disabled?: boolean;
     ariaLabel?: string;
     class?: string;
@@ -28,6 +29,7 @@
     shape = 'circle',
     type = 'default',
     badge,
+    tooltip,
     disabled = false,
     ariaLabel,
     class: className = '',
@@ -48,7 +50,8 @@
     {...(href ? { href, target } : { type: 'button' })}
     class={classes}
     data-type={type}
-    aria-label={ariaLabel ?? label ?? description ?? 'Float button'}
+    title={tooltip}
+    aria-label={ariaLabel ?? tooltip ?? label ?? description ?? 'Float button'}
     aria-disabled={disabled || undefined}
     disabled={!href && disabled ? true : undefined}
     onclick={(event: MouseEvent) => { if (disabled) { event.preventDefault(); return; } onclick?.(event); }}
