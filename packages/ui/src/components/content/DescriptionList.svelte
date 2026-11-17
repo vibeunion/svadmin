@@ -14,24 +14,32 @@
     title?: string;
     extra?: Snippet;
     items?: DescriptionItem[];
+    data?: DescriptionItem[];
     columns?: 1 | 2 | 3 | 4;
+    column?: 1 | 2 | 3 | 4;
     layout?: "vertical" | "horizontal";
     size?: "small" | "default" | "large";
     bordered?: boolean;
+    colon?: boolean;
     class?: string;
   }
 
   let {
     title,
     extra,
-    items = [],
+    items,
+    data,
     columns = 1,
+    column,
     layout = "vertical",
     size = "default",
     bordered = false,
+    colon = false,
     class: className = "",
   }: Props = $props();
 
+  const resolvedItems = $derived(data ?? items ?? []);
+  const resolvedColumns = $derived(column ?? columns);
   const isHorizontal = $derived(layout === "horizontal");
 
   function spanClass(span: number | undefined): string {
@@ -42,7 +50,7 @@
   }
 
   const columnClass = $derived.by(() => {
-    switch (columns) {
+    switch (resolvedColumns) {
       case 4:
         return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
       case 3:
@@ -77,12 +85,12 @@
   {#if bordered}
     <div class="overflow-hidden rounded-lg border border-border bg-card text-foreground">
       <dl class={cn("grid divide-y divide-border/60 sm:divide-y-0", columnClass)}>
-        {#each items as item, idx (item.label ? `${item.label}-${idx}` : idx)}
+        {#each resolvedItems as item, idx (item.label ? `${item.label}-${idx}` : idx)}
           <div
             class={cn(
               "flex flex-col border-b border-r border-border/40 last:border-b-0",
               isHorizontal ? "sm:flex-row" : "",
-              spanClass(Math.min(item.span ?? 1, columns)),
+              spanClass(Math.min(item.span ?? 1, resolvedColumns)),
             )}
           >
             <dt
@@ -92,7 +100,7 @@
                 isHorizontal ? "sm:w-1/3" : "",
               )}
             >
-              {item.label}
+              {item.label}{#if colon}<span class="svadmin-description-list__colon">:</span>{/if}
             </dt>
             <dd class={cn("svadmin-description-list__value bg-card", sizePadding)}>
               {#if item.href}
@@ -116,16 +124,16 @@
         size === "small" ? "gap-x-4 gap-y-3" : size === "large" ? "gap-x-8 gap-y-6" : "gap-x-6 gap-y-5",
       )}
     >
-      {#each items as item, idx (item.label ? `${item.label}-${idx}` : idx)}
+      {#each resolvedItems as item, idx (item.label ? `${item.label}-${idx}` : idx)}
         <div
           class={cn(
             "min-w-0",
             isHorizontal ? "flex items-baseline gap-2" : "",
-            spanClass(Math.min(item.span ?? 1, columns)),
+            spanClass(Math.min(item.span ?? 1, resolvedColumns)),
           )}
         >
           <dt class="svadmin-description-list__label">
-            {item.label}
+            {item.label}{#if colon}<span class="svadmin-description-list__colon">:</span>{/if}
           </dt>
           <dd class="svadmin-description-list__value">
             {#if item.href}
@@ -158,6 +166,11 @@
     font-weight: 400;
     line-height: 1.5715;
     overflow-wrap: anywhere;
+  }
+  .svadmin-description-list__colon {
+    margin-left: 2px;
+    margin-right: 4px;
+    color: var(--muted-foreground);
   }
   div.flex > .svadmin-description-list__label { flex: none; min-width: 5rem; }
   div:not(.flex) > .svadmin-description-list__value { margin-top: 4px; }
