@@ -6,12 +6,14 @@
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		value: string;
 		active?: boolean;
+		destroyOnHide?: boolean;
 	};
 
 	let {
 		ref = $bindable(null),
 		value,
 		active,
+		destroyOnHide: destroyProp,
 		class: className,
 		children,
 		...restProps
@@ -19,13 +21,16 @@
 
 	const tabs = getTabsContext();
 	const isActive = $derived(active ?? tabs.value === value);
+	const shouldDestroy = $derived(destroyProp ?? tabs.destroyOnHide ?? true);
 </script>
 
-{#if isActive}
+{#if shouldDestroy ? isActive : true}
 	<div
 		bind:this={ref}
 		data-slot="tabs-content"
 		role="tabpanel"
+		hidden={!isActive ? true : undefined}
+		style={!isActive ? "display: none;" : undefined}
 		class={cn("svadmin-tabs-content", className)}
 		{...restProps}
 	>

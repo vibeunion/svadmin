@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLButtonAttributes } from "svelte/elements";
-	import { getTabsContext } from "./tabs-context.svelte.js";
+	import { getTabsContext, type TabsSize } from "./tabs-context.svelte.js";
 
 	type Props = WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		value: string;
 		active?: boolean;
+		disabled?: boolean;
+		size?: TabsSize;
 	};
 
 	let {
 		ref = $bindable(null),
 		value,
 		active,
+		disabled = false,
+		size: sizeProp,
 		onclick,
 		onkeydown,
 		tabindex,
@@ -22,15 +26,18 @@
 
 	const tabs = getTabsContext();
 	const isActive = $derived(active ?? tabs.value === value);
+	const size = $derived(sizeProp ?? tabs.size ?? "default");
 	type ButtonMouseEvent = MouseEvent & { currentTarget: EventTarget & HTMLButtonElement };
 	type ButtonKeyboardEvent = KeyboardEvent & { currentTarget: EventTarget & HTMLButtonElement };
 
 	function handleClick(event: ButtonMouseEvent) {
+		if (disabled) return;
 		onclick?.(event);
 		if (!event.defaultPrevented) tabs.select(value);
 	}
 
 	function handleKeydown(event: ButtonKeyboardEvent) {
+		if (disabled) return;
 		onkeydown?.(event);
 		if (event.defaultPrevented) return;
 
@@ -65,6 +72,9 @@
 	role="tab"
 	data-slot="tabs-trigger"
 	data-state={isActive ? "active" : "inactive"}
+	data-size={size}
+	data-disabled={disabled ? "" : undefined}
+	disabled={disabled}
 	aria-selected={isActive}
 	tabindex={tabindex ?? (isActive ? 0 : -1)}
 	class={cn("svadmin-tabs-trigger", className)}
