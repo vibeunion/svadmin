@@ -64,4 +64,25 @@ describe('HighlightText', () => {
     expect(marks.map((mark) => mark.textContent)).toEqual(['alpha', 'beta']);
     expect(marks.every((mark) => mark.classList.contains('custom-mark'))).toBe(true);
   });
+
+  it('supports keyword alias and highlightClassName', () => {
+    const view = render(HighlightText, {
+      text: 'search keyword test',
+      keyword: 'keyword',
+      highlightClassName: 'alias-mark',
+    });
+    const marks = [...view.container.querySelectorAll('mark')];
+    expect(marks).toHaveLength(1);
+    expect(marks[0]?.textContent).toBe('keyword');
+    expect(marks[0]?.classList.contains('alias-mark')).toBe(true);
+  });
+
+  it('supports keywords array alias', () => {
+    const view = render(HighlightText, {
+      text: 'first and second match',
+      keywords: ['first', 'second'],
+    });
+    const marks = [...view.container.querySelectorAll('mark')];
+    expect(marks).toHaveLength(2);
+  });
 });
