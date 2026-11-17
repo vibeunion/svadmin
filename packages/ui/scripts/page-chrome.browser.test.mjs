@@ -46,7 +46,7 @@ test('filter toolbar geometry and recovery survive native input styles', { timeo
           const errors = [];
           page.on('pageerror', error => errors.push(error.message));
           await page.goto(`http://127.0.0.1:${address.port}`);
-          const search = page.getByRole('textbox', { name: 'Search orders' });
+          const search = page.getByRole('searchbox', { name: 'Search orders' });
           await expect(search).toBeVisible();
           await page.evaluate(({ direction, theme }) => {
             document.documentElement.dir = direction;
@@ -94,7 +94,7 @@ test('filter toolbar geometry and recovery survive native input styles', { timeo
           await page.keyboard.type('new query');
           await expect(search).toHaveValue('new query');
           await expect(page.getByLabel('Orders query')).toHaveText('new query');
-          await expect(page.getByRole('textbox', { name: 'Search people' })).toHaveValue('Morgan');
+          await expect(page.getByRole('searchbox', { name: 'Search people' })).toHaveValue('Morgan');
           await expect(page.getByLabel('Owner', { exact: true })).toHaveValue('Casey');
           await expect(page.getByRole('button', { name: 'Filters', exact: true })).toHaveAttribute('aria-expanded', 'true');
           const themedBefore = await inspectGeometry();

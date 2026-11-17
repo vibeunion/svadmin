@@ -82,7 +82,7 @@ describe('PagePattern', () => {
 
   it('filters and clears results in the custom list example', async () => {
     render(PagePatternExample);
-    await fireEvent.input(screen.getByRole('textbox', { name: '搜索客户项目' }), { target: { value: '不存在' } });
+    await fireEvent.input(screen.getByRole('searchbox', { name: '搜索客户项目' }), { target: { value: '不存在' } });
     expect(screen.getByText('没有匹配的项目')).toBeTruthy();
     await fireEvent.click(screen.getByRole('button', { name: '清除筛选' }));
     expect(screen.getByRole('table')).toBeTruthy();
@@ -129,7 +129,7 @@ describe('PagePattern', () => {
     await fireEvent.input(screen.getByRole('textbox', { name: '客户名称' }), { target: { value: '新建验证项目' } });
     await fireEvent.click(screen.getByRole('button', { name: /^保存$/ }));
     expect(screen.getByRole('table').textContent).toContain('新建验证项目');
-    expect((screen.getByRole('textbox', { name: '搜索客户项目' }) as HTMLInputElement).value).toBe('新建验证项目');
+    expect((screen.getByRole('searchbox', { name: '搜索客户项目' }) as HTMLInputElement).value).toBe('新建验证项目');
   });
 
   it('supports status filtering and a contextual batch action in the list example', async () => {
