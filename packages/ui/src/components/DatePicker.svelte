@@ -24,6 +24,12 @@
     placeholder?: string;
     /** 覆盖 ConfigProvider 与 i18n 的面板语言。不传则保持原有默认路径。 */
     locale?: string;
+    /** Whether clear button is enabled (defaults to true) */
+    allowClear?: boolean;
+    /** Size tier */
+    size?: 'mini' | 'small' | 'default' | 'large';
+    /** Status validation styling */
+    status?: 'error' | 'warning' | 'normal';
     onchange?: (value: string | null) => void;
   }
 
@@ -36,6 +42,9 @@
     presets = [],
     placeholder,
     locale: localeProp,
+    allowClear = true,
+    size = 'default',
+    status = 'normal',
     disabled = false,
     class: className,
     onchange,
@@ -202,6 +211,8 @@
           disabled={disabled}
           aria-label={nativeProps.ariaLabel}
           class="svadmin-date-picker__trigger"
+          data-size={size !== 'default' ? size : undefined}
+          data-status={status !== 'normal' ? status : undefined}
         >
           <span class={value ? 'text-foreground' : 'text-muted-foreground'}>{formatValue(value) || resolvedPlaceholder}</span>
           <ChevronRight class="h-4 w-4 rotate-90 opacity-50" />
@@ -263,7 +274,7 @@
             {/each}
           </div>
         {/if}
-        {#if value}
+        {#if value && allowClear && !disabled}
           <div class="mt-1 flex justify-end border-t border-border pt-1">
             <Button type="button" variant="ghost" size="sm" onclick={clear}>{copy.clear}</Button>
           </div>

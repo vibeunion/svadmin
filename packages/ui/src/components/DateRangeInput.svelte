@@ -35,6 +35,11 @@
     describedby?: string | undefined;
     startAriaLabel?: string | undefined;
     endAriaLabel?: string | undefined;
+    separator?: string | undefined;
+    placeholder?: [string, string] | string | undefined;
+    allowClear?: boolean | undefined;
+    size?: 'mini' | 'small' | 'default' | 'large' | undefined;
+    status?: 'error' | 'warning' | 'normal' | undefined;
     class?: string | undefined;
     onchange?: ((value: DateRangeInputValue) => void) | undefined;
   }
@@ -60,11 +65,23 @@
     describedby,
     startAriaLabel,
     endAriaLabel,
+    separator,
+    placeholder,
+    allowClear = true,
+    size = 'default',
+    status = 'normal',
     class: className = '',
     onchange,
   }: Props = $props();
 
   const i18n = useTranslation();
+  const resolvedSeparator = $derived(separator ?? i18n.t('dateInput.to'));
+  const startPlaceholder = $derived(
+    Array.isArray(placeholder) ? placeholder[0] : typeof placeholder === 'string' ? placeholder : undefined
+  );
+  const endPlaceholder = $derived(
+    Array.isArray(placeholder) ? placeholder[1] : typeof placeholder === 'string' ? placeholder : undefined
+  );
   const instantMode = $derived(valueMode === 'instant');
   const startMax = $derived(!instantMode && value?.end && (!max || value.end < max) ? value.end : max);
   const endMin = $derived(!instantMode && value?.start && (!min || value.start > min) ? value.start : min);
@@ -108,9 +125,20 @@
     value = result;
     onchange?.(result);
   }
+
+  function clearRange(): void {
+    const result: DateRangeInputValue = { start: null, end: null };
+    value = result;
+    onchange?.(result);
+  }
 </script>
 
-<div class={cn('flex items-center rounded-md', className)} data-date-range-input>
+<div
+  class={cn('flex items-center rounded-md', className)}
+  data-date-range-input
+  data-size={size !== 'default' ? size : undefined}
+  data-status={status !== 'normal' ? status : undefined}
+>
   {#if presets.length > 0}
     <Select
       value=""
@@ -135,6 +163,7 @@
       timeZone, min, max: startMax, step, disabledDate,
       id: startId, name: startName, describedby,
       maxInstant: instantMode ? validInstant(value?.end) : undefined,
+      placeholder: startPlaceholder,
     })}
     {disabled}
     {required}
@@ -142,7 +171,7 @@
     ariaLabel={startAriaLabel ?? i18n.t('common.startDate')}
     onchange={(next) => update('start', next)}
   />
-  <span aria-hidden="true">{i18n.t('dateInput.to')}</span>
+  <span aria-hidden="true" class="mx-1.5 text-xs text-muted-foreground">{resolvedSeparator}</span>
   <DateTimeInput
     value={value?.end ?? null}
     {mode}
@@ -152,6 +181,7 @@
       timeZone, min: endMin, max, step, disabledDate,
       id: endId, name: endName, describedby,
       minInstant: instantMode ? validInstant(value?.start) : undefined,
+      placeholder: endPlaceholder,
     })}
     {disabled}
     {required}
@@ -159,4 +189,14 @@
     ariaLabel={endAriaLabel ?? i18n.t('common.endDate')}
     onchange={(next) => update('end', next)}
   />
+  {#if allowClear && (value?.start || value?.end) && !disabled}
+    <button
+      type="button"
+      aria-label="Clear date range"
+      class="ml-1 text-muted-foreground hover:text-foreground text-xs p-1 rounded transition-colors"
+      onclick={clearRange}
+    >
+      ✕
+    </button>
+  {/if}
 </div>
