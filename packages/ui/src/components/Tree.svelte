@@ -50,8 +50,11 @@
     blockNode?: boolean;
     /** Controlled expansion; omit for uncontrolled behavior. */
     expandedKeys?: string[];
+    defaultExpandedKeys?: string[];
     selectedKeys?: string[];
+    defaultSelectedKeys?: string[];
     checkedKeys?: string[];
+    defaultCheckedKeys?: string[];
     checkable?: boolean;
     multiple?: boolean;
     defaultExpandAll?: boolean;
@@ -62,9 +65,13 @@
     emptyText?: string;
     class?: string;
     onexpand?: (keys: string[]) => void;
+    onExpand?: (keys: string[]) => void;
     onselect?: (keys: string[], nodes: TreeNode[]) => void;
+    onSelect?: (keys: string[], nodes: TreeNode[]) => void;
     oncheck?: (keys: string[], info: TreeCheckInfo) => void;
+    onCheck?: (keys: string[], info: TreeCheckInfo) => void;
     onload?: (id: string, children: TreeNode[]) => void;
+    onLoad?: (id: string, children: TreeNode[]) => void;
     ondragend?: (info: TreeDragInfo) => void;
   }
 
@@ -75,8 +82,11 @@
     size = 'default',
     blockNode = false,
     expandedKeys = $bindable(undefined),
+    defaultExpandedKeys,
     selectedKeys = $bindable([]),
+    defaultSelectedKeys,
     checkedKeys = $bindable([]),
+    defaultCheckedKeys,
     checkable = false,
     multiple = false,
     defaultExpandAll = false,
@@ -87,22 +97,44 @@
     emptyText = 'No data',
     class: className = '',
     onexpand,
+    onExpand,
     onselect,
+    onSelect,
     oncheck,
+    onCheck,
     onload,
+    onLoad,
     ondragend,
   }: Props = $props();
 
   const rawInputNodes = $derived(data ?? treeData ?? nodes);
   const normalizedNodes = $derived(rawInputNodes.map(normalizeNode));
 
-  let internalExpanded = $state<string[]>(untrack(() => defaultExpandAll ? collectIds(untrack(() => rawInputNodes.map(normalizeNode))) : []));
+  let internalExpanded = $state<string[]>(
+    untrack(() => {
+      if (defaultExpandedKeys !== undefined) return defaultExpandedKeys;
+      return defaultExpandAll ? collectIds(untrack(() => rawInputNodes.map(normalizeNode))) : [];
+    })
+  );
   let loaded = $state<Record<string, TreeNode[]>>({});
   let loading = $state<Record<string, boolean>>({});
   let loadErrors = $state<Record<string, string>>({});
   let focusedId = $state<string | undefined>(undefined);
   let dragId = $state<string | undefined>(undefined);
   let dropTarget = $state<{ id: string; position: TreeDragInfo['position'] } | undefined>(undefined);
+
+  let initialKeySync = false;
+  $effect.pre(() => {
+    if (!initialKeySync) {
+      initialKeySync = true;
+      if (defaultSelectedKeys !== undefined && selectedKeys.length === 0) {
+        selectedKeys = defaultSelectedKeys;
+      }
+      if (defaultCheckedKeys !== undefined && checkedKeys.length === 0) {
+        checkedKeys = defaultCheckedKeys;
+      }
+    }
+  });
 
   function collectIds(items: NormalizedTreeNode[]): string[] {
     return items.flatMap((node) => [node.id, ...(node.children ? collectIds(node.children as NormalizedTreeNode[]) : [])]);
@@ -154,6 +186,7 @@
     if (expandedKeys === undefined) internalExpanded = next;
     else expandedKeys = next;
     onexpand?.(next);
+    onExpand?.(next);
   }
 
   function needsLoad(node: NormalizedTreeNode): boolean {
@@ -168,6 +201,7 @@
       const children = await loadChildren(node);
       loaded = { ...loaded, [node.id]: children };
       onload?.(node.id, children);
+      onLoad?.(node.id, children);
     } catch {
       loadErrors = { ...loadErrors, [node.id]: 'Load failed' };
     } finally {
@@ -191,10 +225,12 @@
       ? (selected.has(node.id) ? selectedKeys.filter((id) => id !== node.id) : [...selectedKeys, node.id])
       : [node.id];
     selectedKeys = next;
-    onselect?.(next, next.flatMap((id) => {
+    const nextNodes = next.flatMap((id) => {
       const entry = index.get(id)?.node;
       return entry === undefined ? [] : [entry];
-    }));
+    });
+    onselect?.(next, nextNodes);
+    onSelect?.(next, nextNodes);
   }
 
   function subtreeIds(node: NormalizedTreeNode): string[] {
@@ -241,7 +277,9 @@
       parentId = index.get(parentId)?.parentId;
     }
     checkedKeys = [...next];
-    oncheck?.(checkedKeys, { checkedKeys, halfCheckedKeys: halfCheckedKeys() });
+    const info = { checkedKeys, halfCheckedKeys: halfCheckedKeys() };
+    oncheck?.(checkedKeys, info);
+    onCheck?.(checkedKeys, info);
   }
 
   function moveFocus(delta: number): void {

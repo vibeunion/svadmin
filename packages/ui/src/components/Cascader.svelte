@@ -54,7 +54,9 @@
     loadChildren?: ((node: CascaderOption) => Promise<CascaderOption[]>) | undefined;
     size?: 'mini' | 'small' | 'default' | 'large' | undefined;
     class?: string | undefined;
+    defaultValue?: CascaderPath | CascaderPath[] | undefined;
     onchange?: (value: CascaderPath | CascaderPath[] | undefined, selectedOptions: CascaderOption[] | CascaderOption[][]) => void;
+    onChange?: (value: CascaderPath | CascaderPath[] | undefined, selectedOptions: CascaderOption[] | CascaderOption[][]) => void;
   }
 
   let {
@@ -65,6 +67,7 @@
     options = $bindable([]),
     data,
     value = $bindable(undefined),
+    defaultValue,
     separator = ' / ',
     placeholder,
     changeOnSelect = false,
@@ -80,7 +83,18 @@
     loadChildren,
     class: className,
     onchange,
+    onChange,
   }: Props = $props();
+
+  let initialCascaderSync = false;
+  $effect.pre(() => {
+    if (!initialCascaderSync) {
+      initialCascaderSync = true;
+      if (defaultValue !== undefined && value === undefined) {
+        value = defaultValue;
+      }
+    }
+  });
 
   const instanceId = $props.id();
   const triggerId = $derived(id ?? `${instanceId}-trigger`);
@@ -287,7 +301,9 @@
       // 同一异步分支在请求期间被重复激活时，只有第一次可以提交。
       if (!multi && (!value || !samePath(value as CascaderPath, nextPath))) {
         value = nextPath;
-        onchange?.(nextPath, getOptionsForPath(nextPath));
+        const opts = getOptionsForPath(nextPath);
+        onchange?.(nextPath, opts);
+        onChange?.(nextPath, opts);
       }
     }
     if (commitSelection && !currentHasChildren) open = false;
@@ -413,7 +429,9 @@
 
   function emitMulti(paths: CascaderPath[]): void {
     value = paths;
-    onchange?.(paths, paths.map((path) => getOptionsForPath(path)));
+    const opts = paths.map((path) => getOptionsForPath(path));
+    onchange?.(paths, opts);
+    onChange?.(paths, opts);
   }
 
   function emitChecked(paths: CascaderPath[]): void {
@@ -430,7 +448,9 @@
   function selectSinglePath(path: CascaderPath): void {
     activePath = path;
     value = path;
-    onchange?.(path, getOptionsForPath(path));
+    const opts = getOptionsForPath(path);
+    onchange?.(path, opts);
+    onChange?.(path, opts);
     open = false;
   }
 
@@ -505,10 +525,12 @@
     if (multi) {
       value = [];
       onchange?.([], []);
+      onChange?.([], []);
     } else {
       value = undefined;
       activePath = [];
       onchange?.(undefined, []);
+      onChange?.(undefined, []);
     }
     searchTerm = '';
   }
