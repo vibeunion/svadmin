@@ -15,6 +15,8 @@
   interface Props {
     items: MenuEntry[];
     mode?: 'vertical' | 'horizontal';
+    theme?: 'light' | 'dark';
+    accordion?: boolean;
     selected?: string;
     openKeys?: string[];
     collapsed?: boolean;
@@ -30,6 +32,8 @@
   let {
     items,
     mode = 'vertical',
+    theme = 'light',
+    accordion = false,
     selected = $bindable(),
     openKeys = $bindable([]),
     collapsed = false,
@@ -47,7 +51,7 @@
   function setOpen(item: MenuEntry, open: boolean): void {
     if (item.disabled) return;
     if (!item.children?.length || isOpen(item) === open) return;
-    const next = open ? [...openKeys, item.id] : openKeys.filter((key) => key !== item.id);
+    const next = open ? (accordion ? [item.id] : [...openKeys, item.id]) : openKeys.filter((key) => key !== item.id);
     openKeys = next;
     onopenchange?.(next);
   }
@@ -177,7 +181,15 @@
   </ul>
 {/snippet}
 
-<nav bind:this={nav} class={cn('svadmin-menu', className)} data-mode={mode} data-collapsed={collapsed ? 'true' : 'false'} aria-label={label}>
+<nav
+  bind:this={nav}
+  class={cn('svadmin-menu', theme === 'dark' && 'svadmin-menu--dark', className)}
+  data-mode={mode}
+  data-theme={theme}
+  data-collapsed={collapsed ? 'true' : 'false'}
+  data-accordion={accordion ? 'true' : undefined}
+  aria-label={label}
+>
   {@render renderItems(items, 0)}
 </nav>
 
@@ -250,5 +262,27 @@
     background: var(--card);
     box-shadow: var(--shadow-lg, 0 12px 30px color-mix(in srgb, var(--foreground) 16%, transparent));
   }
+
+  /* Dark theme */
+  .svadmin-menu[data-theme='dark'] {
+    background: var(--sidebar, var(--card));
+    color: var(--sidebar-foreground, var(--foreground));
+  }
+  .svadmin-menu[data-theme='dark'] .svadmin-menu__link {
+    color: color-mix(in srgb, var(--sidebar-foreground, var(--foreground)) 75%, transparent);
+  }
+  .svadmin-menu[data-theme='dark'] .svadmin-menu__link:hover {
+    background: var(--sidebar-accent, var(--muted));
+    color: var(--sidebar-foreground, var(--foreground));
+  }
+  .svadmin-menu[data-theme='dark'] .svadmin-menu__link[data-selected='true'] {
+    background: var(--sidebar-accent, var(--primary));
+    color: var(--primary);
+  }
+  .svadmin-menu[data-theme='dark'][data-collapsed='true'] .svadmin-menu__list[data-depth]:not([data-depth='0']) {
+    background: var(--sidebar, var(--card));
+    border-color: var(--border);
+  }
+
   @media (prefers-reduced-motion: reduce) { .svadmin-menu__chevron { transition: none; } }
 </style>
