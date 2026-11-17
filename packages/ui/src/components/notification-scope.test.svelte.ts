@@ -44,6 +44,18 @@ describe('notification ownership', () => {
     expect(notification.items.map((item) => item.title)).not.toContain('Alpha only');
   });
 
+  it('supports position and content aliases', () => {
+    const controller = createNotificationController();
+    controller.open({
+      title: 'Upload complete',
+      content: 'All 5 files processed',
+      position: 'topLeft',
+      duration: 0,
+    });
+    expect(controller.items[0]?.description).toBe('All 5 files processed');
+    expect(controller.items[0]?.placement).toBe('top-left');
+  });
+
   it('does not share notifications between two AdminApp hosts', async () => {
     const dataProvider = createDataProvider();
     render(ScopeHost, { label: 'Alpha', dataProvider, resources });
