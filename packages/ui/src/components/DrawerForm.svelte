@@ -85,6 +85,7 @@
   const effectiveSubmit = $derived(onOk ?? onsubmit);
   const effectiveCancel = $derived(onCancel ?? oncancel);
   const effectiveSubmitText = $derived(okText ?? submitText);
+  let loading = $state(false);
   const busy = $derived(loading || isSubmitting || confirmLoading);
 
   const widthStyle = $derived(
@@ -95,8 +96,6 @@
         : undefined
   );
   const i18n = useTranslation();
-  // eslint-disable-next-line no-useless-assignment -- $state 的初值会被 resetRequestState 立即重写，规则误判。
-  let loading = $state(false);
   let submitError = $state('');
   let round = 0;
   let nextRequestId = 0;

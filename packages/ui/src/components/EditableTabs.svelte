@@ -86,7 +86,7 @@
       class={orientation === 'vertical' ? 'min-w-40' : ''}
     >
       {#each items as item (item.value)}
-        <Tabs.Trigger value={item.value} disabled={item.disabled}>
+        <Tabs.Trigger value={item.value} disabled={item.disabled ?? false}>
           <span>{item.label}</span>
           {#if item.closable !== false && !item.disabled}
             <button
