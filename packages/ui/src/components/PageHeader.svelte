@@ -6,12 +6,15 @@
   import { cn } from '../utils.js';
 
   interface Props {
-    title: string;
-    description?: string;
+    title: string | Snippet;
+    description?: string | Snippet;
+    subTitle?: string | Snippet;
     actions?: Snippet;
     extra?: Snippet;
     tags?: Snippet;
     back?: Snippet;
+    breadcrumb?: Snippet;
+    footer?: Snippet;
     onBack?: () => void;
     backLabel?: string;
     showBreadcrumbs?: boolean;
@@ -21,20 +24,28 @@
   let {
     title,
     description,
+    subTitle,
     actions,
     extra,
     tags,
     back,
+    breadcrumb,
+    footer,
     onBack,
     backLabel = 'Back',
     showBreadcrumbs = true,
     class: className = '',
   }: Props = $props();
 
+  const effectiveDescription = $derived(subTitle ?? description);
 </script>
 
 <div class={cn('svadmin-page-header', className)}>
-  {#if showBreadcrumbs}
+  {#if breadcrumb}
+    <div class="svadmin-page-header__breadcrumbs">
+      {@render breadcrumb()}
+    </div>
+  {:else if showBreadcrumbs}
     <Breadcrumbs class="svadmin-page-header__breadcrumbs" />
   {/if}
   <div class="svadmin-page-header__row">
@@ -56,7 +67,11 @@
       <div class="svadmin-page-header__text">
         <div class="svadmin-page-header__title-row">
           <h1 class="svadmin-page-header__title">
-            {title}
+            {#if typeof title === 'function'}
+              {@render title()}
+            {:else}
+              {title}
+            {/if}
           </h1>
           {#if tags}
             <div class="svadmin-page-header__tags">
@@ -64,8 +79,12 @@
             </div>
           {/if}
         </div>
-        {#if description}
-          <p class="svadmin-page-header__description">{description}</p>
+        {#if typeof effectiveDescription === 'function'}
+          <div class="svadmin-page-header__description">
+            {@render effectiveDescription()}
+          </div>
+        {:else if effectiveDescription}
+          <p class="svadmin-page-header__description">{effectiveDescription}</p>
         {/if}
       </div>
     </div>
@@ -80,4 +99,9 @@
       </div>
     {/if}
   </div>
+  {#if footer}
+    <div class="svadmin-page-header__footer mt-3 pt-2 border-t border-border/60">
+      {@render footer()}
+    </div>
+  {/if}
 </div>

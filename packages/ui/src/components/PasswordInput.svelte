@@ -33,8 +33,8 @@
   let {
     id,
     label = 'Password',
-    value = $bindable(''),
     defaultValue = '',
+    value = $bindable(untrack(() => defaultValue)),
     placeholder = '••••••••',
     autocomplete = 'current-password',
     showStrength = false,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
   import { cn } from '../utils';
 
   export interface PageContainerTab {
@@ -20,9 +20,9 @@
 
   export interface PageContainerProps {
     /** Main page title text */
-    title?: string;
+    title?: string | Snippet;
     /** Subtitle or secondary description text */
-    subTitle?: string;
+    subTitle?: string | Snippet;
     /** Breadcrumb trail items */
     breadcrumbs?: PageContainerBreadcrumb[];
     /** Whether to show back navigation button */
@@ -35,6 +35,8 @@
     tabs?: PageContainerTab[];
     /** Currently active tab key */
     activeTab?: string;
+    /** Default active tab for uncontrolled usage */
+    defaultActiveTab?: string;
     /** Callback triggered when a tab is selected */
     ontabchange?: (key: string) => void;
     /** If true, content has no card wrapper background (transparent) */
@@ -64,6 +66,7 @@
     tags,
     tabs,
     activeTab = $bindable(),
+    defaultActiveTab,
     ontabchange,
     ghost = false,
     contentWidth = 'fluid',
@@ -75,12 +78,16 @@
     class: className = '',
   }: PageContainerProps = $props();
 
-  let internalActiveTab = $derived(activeTab ?? tabs?.[0]?.key ?? '');
+  let internalActiveTab = $state(untrack(() => defaultActiveTab ?? tabs?.[0]?.key ?? ''));
+  const effectiveActiveTab = $derived(activeTab ?? internalActiveTab);
 
   function handleTabClick(tab: PageContainerTab) {
     if (tab.disabled) return;
-    internalActiveTab = tab.key;
-    activeTab = tab.key;
+    if (activeTab !== undefined) {
+      activeTab = tab.key;
+    } else {
+      internalActiveTab = tab.key;
+    }
     ontabchange?.(tab.key);
   }
 
@@ -173,13 +180,19 @@
               </button>
             {/if}
 
-            {#if title}
+            {#if typeof title === 'function'}
+              {@render title()}
+            {:else if title}
               <h1 class="text-lg font-semibold tracking-tight text-foreground">
                 {title}
               </h1>
             {/if}
 
-            {#if subTitle}
+            {#if typeof subTitle === 'function'}
+              <div class="hidden sm:inline-block border-l border-border pl-2.5 text-xs text-muted-foreground">
+                {@render subTitle()}
+              </div>
+            {:else if subTitle}
               <span class="hidden sm:inline-block border-l border-border pl-2.5 text-xs text-muted-foreground">
                 {subTitle}
               </span>
@@ -215,11 +228,11 @@
               <button
                 type="button"
                 role="tab"
-                aria-selected={internalActiveTab === tab.key}
+                aria-selected={effectiveActiveTab === tab.key}
                 disabled={tab.disabled}
                 class={cn(
                   'relative py-2.5 text-xs font-medium transition-colors focus-visible:outline-none',
-                  internalActiveTab === tab.key
+                  effectiveActiveTab === tab.key
                     ? 'text-primary font-semibold'
                     : 'text-muted-foreground hover:text-primary',
                   tab.disabled && 'cursor-not-allowed opacity-40 hover:text-inherit'
@@ -227,7 +240,7 @@
                 onclick={() => handleTabClick(tab)}
               >
                 {tab.label}
-                {#if internalActiveTab === tab.key}
+                {#if effectiveActiveTab === tab.key}
                   <span
                     class="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-primary"
                   ></span>
