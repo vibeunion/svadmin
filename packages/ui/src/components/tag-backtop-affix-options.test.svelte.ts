@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createRawSnippet } from 'svelte';
 import { render, fireEvent } from '@testing-library/svelte';
 import Tag from './Tag.svelte';
 import BackTop from './BackTop.svelte';
 import Affix from './Affix.svelte';
 import Anchor from './Anchor.svelte';
+
+const emptySnippet = () => createRawSnippet(() => ({ render: () => '<span></span>' }));
 
 describe('Tag enterprise design system options', () => {
   it('auto-dismisses when closable and uncontrolled, firing onClose and afterClose', async () => {
@@ -24,7 +27,8 @@ describe('Tag enterprise design system options', () => {
     expect(closeBtn).not.toBeNull();
     expect(container.querySelector('.svadmin-tag')).not.toBeNull();
 
-    await fireEvent.click(closeBtn!);
+    if (!(closeBtn instanceof HTMLElement)) throw new Error('expected a tag close button');
+    await fireEvent.click(closeBtn);
 
     expect(onClose).toHaveBeenCalled();
     expect(onclose).toHaveBeenCalled();
@@ -60,7 +64,8 @@ describe('Tag enterprise design system options', () => {
     expect(control).not.toBeNull();
     expect(control?.getAttribute('aria-pressed')).toBe('false');
 
-    await fireEvent.click(control!);
+    if (!(control instanceof HTMLElement)) throw new Error('expected a back top control');
+    await fireEvent.click(control);
 
     expect(onChange).toHaveBeenCalledWith(true);
     expect(onchange).toHaveBeenCalledWith(true);
@@ -90,7 +95,7 @@ describe('BackTop and Affix design system options', () => {
         top: 20,
         style: 'z-index: 50;',
         onChange,
-        children: (() => {}) as any,
+        children: emptySnippet(),
       },
     });
 
@@ -119,6 +124,8 @@ describe('BackTop and Affix design system options', () => {
     const buttons = container.querySelectorAll('.svadmin-anchor button');
     expect(buttons.length).toBe(2);
     // click button when element doesn't exist in DOM won't crash
-    await fireEvent.click(buttons[0]!);
+    const firstAction = buttons[0];
+    if (!(firstAction instanceof HTMLElement)) throw new Error('expected a back top action');
+    await fireEvent.click(firstAction);
   });
 });

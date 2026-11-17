@@ -55,12 +55,12 @@
   function scrollTop() {
     const el = resolveTarget();
     if (!el) return;
-    const isWin = el === window || (typeof Window !== "undefined" && el instanceof Window);
-    if (isWin) {
-      el.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      el.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    // `duration` 只影响平滑滚动的节奏提示；系统减少动效时直接跳转。
+    const reduceMotion = typeof window !== "undefined"
+      && typeof window.matchMedia === "function"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior = duration === 0 || reduceMotion ? "auto" : "smooth";
+    el.scrollTo({ top: 0, behavior });
     onclick?.();
     onClick?.();
   }
