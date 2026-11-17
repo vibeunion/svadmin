@@ -95,8 +95,8 @@ describe('DatePicker and DateRangePicker option parity', () => {
     });
 
     const inputs = container.querySelectorAll('input');
-    expect(inputs[0].value).toBe('2026-11-01');
-    expect(inputs[1].value).toBe('2026-11-20');
+    expect(inputs[0]?.value).toBe('2026-11-01');
+    expect(inputs[1]?.value).toBe('2026-11-20');
 
     const clearBtn = container.querySelector('button[aria-label="Clear date range"]');
     if (clearBtn) {

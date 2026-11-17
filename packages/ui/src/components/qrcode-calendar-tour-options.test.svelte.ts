@@ -119,7 +119,9 @@ describe('QRCode, Calendar, and Tour option parity', () => {
       onChange: onRangeChange,
     });
     const rangeInputs = rangeView.container.querySelectorAll('input[type="range"]');
-    await fireEvent.input(rangeInputs[0], { target: { value: '25' } });
+    const firstRange = rangeInputs[0];
+    if (firstRange === undefined) throw new Error('expected a range input');
+    await fireEvent.input(firstRange, { target: { value: '25' } });
     expect(onRangeChange).toHaveBeenCalledWith({ min: 25, max: 80 });
 
     const onSegChange = vi.fn();
