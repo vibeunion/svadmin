@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { cn } from '../utils.js';
 
   interface Props {
     value?: number;
+    defaultValue?: number;
     min?: number;
     max?: number;
     step?: number;
@@ -14,13 +16,16 @@
     describedby?: string;
     ariaLabel?: string;
     showValue?: boolean;
+    tooltipVisible?: boolean;
+    reverse?: boolean;
     marks?: Record<number, string>;
     class?: string;
     onchange?: (value: number) => void;
   }
 
   let {
-    value = $bindable(0),
+    value = $bindable(),
+    defaultValue = 0,
     min = 0,
     max = 100,
     step = 1,
@@ -32,30 +37,45 @@
     describedby,
     ariaLabel,
     showValue = false,
+    tooltipVisible = false,
+    reverse = false,
     marks,
     class: className = '',
     onchange,
   }: Props = $props();
+
+  let internalValue = $state(untrack(() => defaultValue));
+  const effectiveValue = $derived(value !== undefined ? value : internalValue);
 
   const boundsValid = $derived(
     Number.isFinite(min) && Number.isFinite(max) && min < max
       && Number.isFinite(step) && step > 0,
   );
   const normalizedValue = $derived(
-    boundsValid ? Math.min(max, Math.max(min, Number.isFinite(value) ? value : min)) : min,
+    boundsValid ? Math.min(max, Math.max(min, Number.isFinite(effectiveValue) ? effectiveValue : min)) : min,
   );
+  const isValueVisible = $derived(showValue || tooltipVisible);
 
   function handleInput(event: Event): void {
     const input = event.currentTarget;
     if (!(input instanceof HTMLInputElement) || disabled || !boundsValid) return;
     const next = Number(input.value);
     if (!Number.isFinite(next)) return;
-    value = next;
+    if (value !== undefined) {
+      value = next;
+    } else {
+      internalValue = next;
+    }
     onchange?.(next);
   }
 </script>
 
-<div class={cn('svadmin-slider', className)} data-invalid={invalid ? 'true' : undefined}>
+<div
+  class={cn('svadmin-slider', className)}
+  data-invalid={invalid ? 'true' : undefined}
+  data-reverse={reverse ? 'true' : undefined}
+  style={reverse ? 'direction: rtl;' : undefined}
+>
   <div class="svadmin-slider__control">
     <input
       {id}
@@ -70,10 +90,10 @@
       aria-label={ariaLabel}
       aria-invalid={invalid || undefined}
       aria-describedby={describedby}
-      aria-valuetext={showValue ? String(normalizedValue) : undefined}
+      aria-valuetext={isValueVisible ? String(normalizedValue) : undefined}
       oninput={handleInput}
     />
-    {#if showValue}<output for={id}>{normalizedValue}</output>{/if}
+    {#if isValueVisible}<output for={id}>{normalizedValue}</output>{/if}
   </div>
   {#if marks && Object.keys(marks).length > 0}
     <div data-slot="slider-marks">
