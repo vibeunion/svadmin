@@ -18,4 +18,16 @@ describe('switch sizes', () => {
     await fireEvent.click(control);
     expect(onCheckedChange).not.toHaveBeenCalled();
   });
+
+  it('supports defaultChecked and onchange / onChange callbacks', async () => {
+    const onchange = vi.fn();
+    const onChange = vi.fn();
+    const view = render(Switch, { 'aria-label': 'Toggle option', defaultChecked: true, onchange, onChange });
+    const control = view.getByRole('switch', { name: 'Toggle option' });
+    expect(control.getAttribute('aria-checked')).toBe('true');
+
+    await fireEvent.click(control);
+    expect(onchange).toHaveBeenCalledWith(false, expect.anything());
+    expect(onChange).toHaveBeenCalledWith(false, expect.anything());
+  });
 });
