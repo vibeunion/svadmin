@@ -1,10 +1,13 @@
 <script lang="ts">
   import { Star } from '@lucide/svelte';
+  import type { Snippet } from 'svelte';
   import { cn } from '../utils.js';
 
   interface Props {
     value?: number | undefined;
+    defaultValue?: number | undefined;
     count?: number | undefined;
+    character?: Snippet<[{ index: number; value: number }]> | Snippet | undefined;
     allowClear?: boolean | undefined;
     allowHalf?: boolean | undefined;
     readonly?: boolean | undefined;
@@ -21,7 +24,9 @@
 
   let {
     value = $bindable(0),
+    defaultValue,
     count = 5,
+    character,
     allowClear = true,
     allowHalf = false,
     readonly = false,
@@ -35,6 +40,16 @@
     class: className = '',
     onchange,
   }: Props = $props();
+
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (defaultValue !== undefined && value === 0) {
+        value = defaultValue;
+      }
+    }
+  });
 
   let hoverValue = $state<number | null>(null);
   const normalizedCount = $derived(Number.isSafeInteger(count) && count > 0 && count <= 10 ? count : 5);
@@ -134,7 +149,11 @@
       onkeydown={(event) => handleKeydown(event, index)}
     >
       <span class="svadmin-rate__star-wrapper">
-        {#if isHalf}
+        {#if character}
+          <span class={cn('svadmin-rate__character', isFilled ? 'text-warning' : 'text-muted-foreground')}>
+            {@render character({ index, value: rating })}
+          </span>
+        {:else if isHalf}
           <span class="svadmin-rate__half" aria-hidden="true">
             <Star fill="currentColor" size={starIconSize} />
           </span>

@@ -14,6 +14,7 @@
     rounded?: boolean;
     preview?: boolean;
     fallback?: string;
+    error?: Snippet | undefined;
     class?: string;
     children?: Snippet;
     onclick?: (event: MouseEvent) => void;
@@ -30,6 +31,7 @@
     rounded = false,
     preview = false,
     fallback = 'Image unavailable',
+    error,
     class: className = '',
     children,
     onclick,
@@ -61,10 +63,14 @@
         </span>
       {/if}
     {:else}
-      <span class="svadmin-image__fallback" role="img" aria-label={fallback}>
-        <ImageOff size={20} aria-hidden="true" />
-        {#if fallback}<span>{fallback}</span>{/if}
-      </span>
+      {#if error}
+        {@render error()}
+      {:else}
+        <span class="svadmin-image__fallback" role="img" aria-label={fallback}>
+          <ImageOff size={20} aria-hidden="true" />
+          {#if fallback}<span>{fallback}</span>{/if}
+        </span>
+      {/if}
     {/if}
   </span>
   {#if title || description || children}
