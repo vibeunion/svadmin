@@ -24,7 +24,7 @@ describe("SegmentedControl size and Typography heading alias enhancements", () =
   it("renders Typography with heading alias and bold class", () => {
     const textSnippet = createRawSnippet(() => ({ render: () => "Dashboard Title" }));
 
-    const { container, getByRole } = render(Typography, {
+    const { getByRole } = render(Typography, {
       props: {
         heading: 2,
         bold: true,
