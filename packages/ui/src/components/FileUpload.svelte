@@ -31,6 +31,7 @@
     describedby?: string | undefined;
     upload?: UploadHandler | undefined;
     cancelUpload?: UploadCancelHandler | undefined;
+    onchange?: ((items: UploadItem[]) => void) | undefined;
     onChange?: ((items: UploadItem[]) => void) | undefined;
     onReject?: ((file: File, reason: string) => void) | undefined;
     /** 返回 false 时不移除。异步检查完成前文件仍留在列表里。 */
@@ -54,6 +55,7 @@
     describedby,
     upload,
     cancelUpload,
+    onchange,
     onChange,
     onReject,
     beforeRemove,
@@ -181,6 +183,7 @@
   function emitChange(): void {
     syncNativeInput();
     onChange?.(items.map(item => ({ ...item })));
+    onchange?.(items.map(item => ({ ...item })));
   }
 
   function nextId(): string {

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
 import Transfer from './Transfer.svelte';
 import FileUpload from './FileUpload.svelte';
+import ListPagination from './ListPagination.svelte';
 
 describe('Transfer and FileUpload option parity', () => {
   it('renders Transfer with data, titleText, and value/label items', () => {
@@ -64,5 +65,39 @@ describe('Transfer and FileUpload option parity', () => {
     await fireEvent.change(input, { target: { files: [file1] } });
 
     expect(view.container.querySelector('.svadmin-file-upload-list')).toBeNull();
+  });
+
+  it('Transfer supports defaultTargetKeys and onChange callback alias', async () => {
+    const onChange = vi.fn();
+    const testData = [
+      { key: '1', title: 'Item 1' },
+      { key: '2', title: 'Item 2' },
+    ];
+
+    const view = render(Transfer, {
+      dataSource: testData,
+      defaultTargetKeys: ['2'],
+      onChange,
+    });
+
+    expect(view.container.textContent).toContain('Item 1');
+    expect(view.container.textContent).toContain('Item 2');
+  });
+
+  it('ListPagination supports defaultCurrent, defaultPageSize, and onChange alias', async () => {
+    const onChange = vi.fn();
+    const view = render(ListPagination, {
+      total: 100,
+      totalPages: 10,
+      defaultCurrent: 2,
+      defaultPageSize: 10,
+      onChange,
+    });
+
+    const nextBtn = view.container.querySelector('.svadmin-list-pagination__control:last-child');
+    if (nextBtn) {
+      await fireEvent.click(nextBtn);
+      expect(onChange).toHaveBeenCalledWith(3, 10);
+    }
   });
 });

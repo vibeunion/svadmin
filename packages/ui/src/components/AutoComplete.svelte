@@ -11,6 +11,9 @@
   interface Props {
     resource: string;
     value?: string | number | null;
+    defaultValue?: string | number | null;
+    onChange?: (value: string | number | null) => void;
+    onSelect?: (value: string | number | null) => void;
     onchange?: (value: string | number | null) => void;
     optionLabel?: string;
     optionValue?: string;
@@ -33,6 +36,9 @@
   let {
     resource,
     value = null,
+    defaultValue,
+    onChange,
+    onSelect,
     onchange,
     optionLabel = 'title',
     optionValue = 'id',
@@ -57,6 +63,21 @@
   const inputId = $derived(id ?? `${instanceId}-input`);
   const listboxId = $derived(`${instanceId}-listbox`);
   const optionId = (index: number) => `${instanceId}-option-${index}`;
+
+  const emitChange = (val: string | number | null): void => {
+    onchange?.(val);
+    onChange?.(val);
+  };
+
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (value === null && defaultValue !== undefined) {
+        value = defaultValue;
+      }
+    }
+  });
 
   let open = $state(false);
   let inputValue = $state('');
@@ -319,7 +340,9 @@
     if (!availableOptions.some(candidate => candidate.value === option.value)) return;
     inputValue = option.label;
     closeMenu(false);
-    onchange?.(option.value);
+    value = option.value;
+    emitChange(option.value);
+    onSelect?.(option.value);
   }
 
   function revealActive(): void {
@@ -418,7 +441,8 @@
         event.stopPropagation();
         inputValue = '';
         closeMenu(false);
-        onchange?.(null);
+        value = null;
+        emitChange(null);
       }}
     >
       <X aria-hidden="true" />

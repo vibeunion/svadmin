@@ -8,12 +8,14 @@
   type Props = Omit<HTMLAttributes<HTMLDivElement>, 'class' | 'children'> & {
     page?: number | undefined;
     current?: number | undefined;
+    defaultCurrent?: number | undefined;
     totalPages: number;
     total: number;
     label?: string | undefined;
     rangeStart?: number | undefined;
     rangeEnd?: number | undefined;
     pageSize?: number | undefined;
+    defaultPageSize?: number | undefined;
     pageSizeOptions?: readonly number[] | undefined;
     pageSizeLabel?: string | undefined;
     showSummary?: boolean | undefined;
@@ -22,7 +24,8 @@
     showJumper?: boolean | undefined;
     disabled?: boolean | undefined;
     size?: 'mini' | 'small' | 'default' | 'large' | undefined;
-    onPageChange: (page: number) => void;
+    onPageChange?: (page: number) => void;
+    onChange?: ((page: number, pageSize?: number) => void) | undefined;
     onPageSizeChange?: ((pageSize: number) => void) | undefined;
     class?: string | undefined;
   };
@@ -30,12 +33,14 @@
   let {
     page,
     current,
+    defaultCurrent,
     totalPages,
     total,
     label = '',
     rangeStart = 0,
     rangeEnd = 0,
     pageSize,
+    defaultPageSize,
     pageSizeOptions,
     pageSizeLabel,
     showSummary,
@@ -45,6 +50,7 @@
     disabled = false,
     size,
     onPageChange,
+    onChange,
     onPageSizeChange,
     class: className = '',
     ...restProps
@@ -71,7 +77,7 @@
     return value === 'mini' || value === 'small' || value === 'default' || value === 'large' ? value : undefined;
   }
 
-  const resolvedPage = $derived(page ?? current ?? 1);
+  const resolvedPage = $derived(page ?? current ?? defaultCurrent ?? 1);
   const resolvedDisabled = $derived(Boolean(disabled));
 
   const paginationDefaults = $derived(config.pagination);
@@ -103,6 +109,7 @@
   );
   const resolvedPageSize = $derived(
     pageSize
+      ?? defaultPageSize
       ?? paginationDefaults.pageSize
       ?? numberDefault(paginationComponentDefaults['pageSize']),
   );
@@ -116,7 +123,16 @@
   const items = $derived(listPaginationItems(resolvedPage, totalPages));
   const paginated = $derived(totalPages > 1);
   // 条数选择独立于页码和汇总文字，扩大每页条数后仍能切回原来的值。
-  const showPageSizeControl = $derived(Boolean(onPageSizeChange && resolvedPageSize !== undefined));
+  const showPageSizeControl = $derived(Boolean((onPageSizeChange || onChange) && resolvedPageSize !== undefined));
+
+  const emitPageChange = (nextPage: number): void => {
+    onPageChange?.(nextPage);
+    onChange?.(nextPage, resolvedPageSize);
+  };
+  const emitPageSizeChange = (nextPageSize: number): void => {
+    onPageSizeChange?.(nextPageSize);
+    onChange?.(resolvedPage, nextPageSize);
+  };
 
   function jump(event: Event): void {
     if (resolvedDisabled) return;
@@ -125,7 +141,7 @@
     if (!Number.isFinite(next)) { input.value = String(resolvedPage); return; }
     const clamped = Math.max(1, Math.min(totalPages, Math.trunc(next)));
     input.value = String(clamped);
-    if (clamped !== resolvedPage) onPageChange(clamped);
+    if (clamped !== resolvedPage) emitPageChange(clamped);
   }
 </script>
 
@@ -153,7 +169,7 @@
               disabled={resolvedDisabled}
               aria-label={listText(i18n, 'listPagination.pageSizeAria', { label: label || 'list' })}
               value={resolvedPageSize}
-              onchange={(event) => { if (!resolvedDisabled) onPageSizeChange?.(Number((event.currentTarget as HTMLSelectElement).value)); }}
+              onchange={(event) => { if (!resolvedDisabled) emitPageSizeChange(Number((event.currentTarget as HTMLSelectElement).value)); }}
             >
               {#each resolvedPageSizeOptions as size (size)}<option value={size}>{listText(i18n, 'listPagination.pageSizeOption', { size })}</option>{/each}
             </select>
@@ -165,7 +181,7 @@
       <button type="button" class="svadmin-list-pagination__control" disabled={resolvedDisabled || resolvedPage <= 1}
         title={listText(i18n, resolvedPage <= 1 ? 'listPagination.firstPage' : 'listPagination.previous')}
         aria-label={listText(i18n, 'listPagination.previousAria', { label: label || 'list' })}
-        onclick={() => { if (!resolvedDisabled) onPageChange(resolvedPage - 1); }}>{listText(i18n, 'listPagination.previous')}</button>
+        onclick={() => { if (!resolvedDisabled) emitPageChange(resolvedPage - 1); }}>{listText(i18n, 'listPagination.previous')}</button>
       {#if resolvedSimple}
         <span class="svadmin-list-pagination__simple">{listText(i18n, 'listPagination.simplePage', { page: resolvedPage, total: totalPages })}</span>
       {:else}
@@ -180,7 +196,7 @@
                 aria-current={item === resolvedPage ? 'page' : undefined}
                 title={listText(i18n, item === resolvedPage ? 'listPagination.currentPage' : 'listPagination.goToPage', { page: item })}
                 disabled={resolvedDisabled || item === resolvedPage}
-                onclick={() => { if (!resolvedDisabled) onPageChange(item); }}>{item}</button>
+                onclick={() => { if (!resolvedDisabled) emitPageChange(item); }}>{item}</button>
             {/if}
           {/each}
         </div>
@@ -197,7 +213,7 @@
       <button type="button" class="svadmin-list-pagination__control" disabled={resolvedDisabled || resolvedPage >= totalPages}
         title={listText(i18n, resolvedPage >= totalPages ? 'listPagination.lastPage' : 'listPagination.next')}
         aria-label={listText(i18n, 'listPagination.nextAria', { label: label || 'list' })}
-        onclick={() => { if (!resolvedDisabled) onPageChange(resolvedPage + 1); }}>{listText(i18n, 'listPagination.next')}</button>
+        onclick={() => { if (!resolvedDisabled) emitPageChange(resolvedPage + 1); }}>{listText(i18n, 'listPagination.next')}</button>
     </div>{/if}
   </div>
 {:else if resolvedShowSummary}
