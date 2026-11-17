@@ -75,6 +75,8 @@
     children,
   }: Props = $props();
 
+  let loading = $state(false);
+
   $effect(() => {
     if (visible !== undefined && visible !== open) {
       open = visible;
@@ -95,7 +97,6 @@
         : undefined
   );
   const i18n = useTranslation();
-  let loading = $state(false);
   let submitError = $state('');
   let round = 0;
   let nextRequestId = 0;
