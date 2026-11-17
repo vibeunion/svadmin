@@ -16,6 +16,8 @@
     legend?: string;
     ariaLabel?: string;
     direction?: 'horizontal' | 'vertical';
+    type?: 'radio' | 'button';
+    size?: 'mini' | 'small' | 'default' | 'large';
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
@@ -31,6 +33,8 @@
     legend,
     ariaLabel,
     direction = 'vertical',
+    type = 'radio',
+    size = 'default',
     disabled = false,
     required = false,
     invalid = false,
@@ -246,32 +250,53 @@
     bind:this={groupRoot}
     class={cn('svadmin-radio-group', className)}
     data-svadmin-radio-group
+    data-type={type}
+    data-size={size}
     disabled={disabled}
-  data-invalid={invalid ? 'true' : undefined}
-  aria-describedby={describedby}
-  aria-label={legend ? undefined : ariaLabel}
->
+    data-invalid={invalid ? 'true' : undefined}
+    aria-describedby={describedby}
+    aria-label={legend ? undefined : ariaLabel}
+  >
   {#if legend}<legend>{legend}</legend>{/if}
-  <div class={cn('svadmin-radio-group__options', direction === 'horizontal' && 'svadmin-radio-group__options--horizontal')} data-direction={direction}>
+  <div
+    class={cn(
+      'svadmin-radio-group__options',
+      direction === 'horizontal' && 'svadmin-radio-group__options--horizontal',
+      type === 'button' && 'svadmin-radio-group__options--button',
+    )}
+    data-direction={direction}
+    data-type={type}
+    data-size={size}
+  >
     {#each options as option, index (option.value)}
       {@const inputId = `${instanceId}-radio-${index}`}
-      <label class="svadmin-radio-group__option" class:svadmin-radio-group__option--disabled={disabled || option.disabled} for={inputId}>
+      {@const isChecked = value === option.value}
+      <label
+        class={cn(
+          'svadmin-radio-group__option',
+          type === 'button' && 'svadmin-radio-group__button-option',
+          isChecked && type === 'button' && 'svadmin-radio-group__button-option--checked',
+        )}
+        class:svadmin-radio-group__option--disabled={disabled || option.disabled}
+        for={inputId}
+      >
         <input
           id={inputId}
           type="radio"
           {name}
           value={option.value}
-          checked={value === option.value}
+          checked={isChecked}
           disabled={disabled || option.disabled}
           required={required && Boolean(name)}
           aria-describedby={describedby}
           tabindex={name ? undefined : !disabled && !option.disabled && option.value === tabValue ? 0 : -1}
           onkeydown={handleKeydown}
           onchange={() => select(option)}
+          class={type === 'button' ? 'sr-only' : undefined}
         />
         <span class="svadmin-radio-group__copy">
           <span>{option.label}</span>
-          {#if option.description}<small>{option.description}</small>{/if}
+          {#if option.description && type !== 'button'}<small>{option.description}</small>{/if}
         </span>
       </label>
     {/each}
@@ -304,6 +329,59 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 20px;
+  }
+
+  .svadmin-radio-group__options--button {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    background-color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .svadmin-radio-group__button-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: auto;
+    height: 32px;
+    padding: 0 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    border-radius: calc(var(--radius-sm) - 2px);
+    transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
+  }
+
+  .svadmin-radio-group__button-option:hover:not(.svadmin-radio-group__option--disabled) {
+    color: var(--foreground);
+  }
+
+  .svadmin-radio-group__button-option--checked {
+    background-color: var(--card);
+    color: var(--primary);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+
+  .svadmin-radio-group__options--button[data-size='mini'] .svadmin-radio-group__button-option {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 0.75rem;
+  }
+
+  .svadmin-radio-group__options--button[data-size='small'] .svadmin-radio-group__button-option {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 0.75rem;
+  }
+
+  .svadmin-radio-group__options--button[data-size='large'] .svadmin-radio-group__button-option {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 0.875rem;
   }
 
   .svadmin-radio-group__option {
