@@ -92,6 +92,7 @@
         : undefined
   );
   const i18n = useTranslation();
+  // eslint-disable-next-line no-useless-assignment -- $state 的初值会被 resetRequestState 立即重写，规则误判。
   let loading = $state(false);
   let submitError = $state('');
   let round = 0;
