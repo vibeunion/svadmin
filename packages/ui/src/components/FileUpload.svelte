@@ -213,9 +213,11 @@
   }
 
   const resolvedMaxFiles = $derived(limit ?? maxFiles);
-  const normalizedMaxFiles = $derived(
-    multiple ? (Number.isSafeInteger(resolvedMaxFiles) && resolvedMaxFiles! > 0 ? resolvedMaxFiles! : 10) : 1,
-  );
+  const normalizedMaxFiles = $derived.by(() => {
+    if (!multiple) return 1;
+    const candidate = resolvedMaxFiles;
+    return Number.isSafeInteger(candidate) && candidate > 0 ? candidate : 10;
+  });
 
   type UploadItemUpdate = Partial<Omit<UploadItem, 'error' | 'url' | 'uploadId' | 'cleanupStatus'>> & {
     [K in 'error' | 'url' | 'uploadId' | 'cleanupStatus']?: UploadItem[K] | undefined;

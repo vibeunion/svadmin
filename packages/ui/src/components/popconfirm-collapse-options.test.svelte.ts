@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createRawSnippet } from 'svelte';
 import { render, fireEvent, screen } from '@testing-library/svelte';
 import Popconfirm from './Popconfirm.svelte';
 import Collapse from './Collapse.svelte';
 import PopconfirmHarness from '../../test/fixtures/PopconfirmHarness.svelte';
+
+const emptySnippet = () => createRawSnippet(() => ({ render: () => '<span></span>' }));
 
 describe('Popconfirm and Collapse option parity', () => {
   it('renders Popconfirm with content description, onOk alias, and okLoading', async () => {
@@ -13,7 +16,7 @@ describe('Popconfirm and Collapse option parity', () => {
       okText: '立即执行',
       okLoading: false,
       onOk,
-      children: (() => {}) as any,
+      children: emptySnippet(),
     });
   });
 
@@ -41,12 +44,12 @@ describe('Popconfirm and Collapse option parity', () => {
         {
           key: 'panel-1',
           header: '第一面板',
-          content: (() => {}) as any,
+          content: emptySnippet(),
         },
         {
           key: 'panel-2',
           header: '第二面板',
-          content: (() => {}) as any,
+          content: emptySnippet(),
         },
       ],
       defaultActiveKey: ['panel-1'],
