@@ -25,9 +25,20 @@
     label?: string;
     class?: string;
     onselect?: (id: string) => void;
+    onSelect?: (id: string) => void;
+    onChange?: (id: string) => void;
   }
 
-  let { items, offset = 96, targetOffset, label = 'On this page', class: className = '', onselect }: Props = $props();
+  let {
+    items,
+    offset = 96,
+    targetOffset,
+    label = 'On this page',
+    class: className = '',
+    onselect,
+    onSelect,
+    onChange,
+  }: Props = $props();
   const effectiveOffset = $derived(targetOffset ?? offset);
   let active = $state(untrack(() => items[0] ? resolveItemId(items[0]) : ''));
   let observer: IntersectionObserver | undefined;
@@ -50,6 +61,8 @@
     window.scrollTo({ top, behavior: 'smooth' });
     active = id;
     onselect?.(id);
+    onSelect?.(id);
+    onChange?.(id);
   }
 </script>
 
