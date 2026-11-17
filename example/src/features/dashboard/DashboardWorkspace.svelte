@@ -256,7 +256,7 @@
     <form onsubmit={applyFilters}>
       <label>
         <span>{isZh ? '区域' : 'Region'}</span>
-        <select class="svadmin-select--inline svadmin-select" aria-label="Region filter" bind:value={draftRegion}>
+        <select class="svadmin-select--inline svadmin-select rounded border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary" aria-label="Region filter" bind:value={draftRegion}>
           <option value="">{isZh ? '全部区域' : 'All regions'}</option>
           <option value="east">{isZh ? '东区' : 'East'}</option>
           <option value="west">{isZh ? '西区' : 'West'}</option>
