@@ -21,6 +21,8 @@
     offset?: [number, number];
     opacity?: number;
     font?: WatermarkFont;
+    fontSize?: number;
+    fontColor?: string;
     antiTamper?: boolean;
     class?: string;
     children?: Snippet;
@@ -37,10 +39,18 @@
     offset = [gap[0] / 2, gap[1] / 2],
     opacity = 0.12,
     font = {},
+    fontSize: explicitFontSize,
+    fontColor: explicitFontColor,
     antiTamper = true,
     class: className = '',
     children,
   }: Props = $props();
+
+  const effectiveFont = $derived({
+    ...font,
+    fontSize: explicitFontSize ?? font.fontSize ?? 14,
+    color: explicitFontColor ?? font.color ?? 'currentColor',
+  });
 
   let containerEl: HTMLDivElement | null = $state(null);
   let base64Url = $state<string>('');
@@ -86,7 +96,7 @@
         fontWeight = 'normal',
         fontStyle = 'normal',
         color = 'currentColor',
-      } = font;
+      } = effectiveFont;
 
       ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
       ctx.fillStyle = color === 'currentColor' ? 'rgba(128, 128, 128, 0.85)' : color;
@@ -109,7 +119,7 @@
 
   $effect(() => {
     // Re-generate watermark when inputs change
-    if (content || image || width || height || rotate || gap || offset || opacity || font) {
+    if (content || image || width || height || rotate || gap || offset || opacity || font || explicitFontSize || explicitFontColor) {
       renderWatermark();
     }
   });
