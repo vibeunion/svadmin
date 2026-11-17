@@ -436,7 +436,7 @@
       const loaded = optionMap.get(key);
       if (!loaded) return false;
       for (const child of loaded.children ?? []) {
-        if (!await loadSubtree(child.value, depth + 1)) return false;
+        if (!await loadSubtree(optionKey(child), depth + 1)) return false;
       }
       return true;
     }
@@ -614,9 +614,9 @@
       if (last) void focusTreeNode(optionKey(last.node));
     } else if (event.key === 'ArrowRight' && nodeHasChildren) {
       event.preventDefault();
-      if (disabled || disabledValues.has(sourceNode.value)) return;
+      if (disabled || disabledValues.has(optionKey(sourceNode))) return;
       if (searchQuery.trim() && !sourceNode.children) {
-        if (lacksLoadCapability(sourceNode)) capabilityErrors.add(sourceNode.value);
+        if (lacksLoadCapability(sourceNode)) capabilityErrors.add(optionKey(sourceNode));
         else void ensureChildren(sourceNode);
       }
       else if (!expanded) void toggleExpandAsync(sourceNode);
@@ -631,7 +631,7 @@
       if (nodeHasChildren && expanded) toggleExpand(optionKey(node));
       else {
         const parent = findParent(options, optionKey(node));
-        if (parent) void focusTreeNode(parent.value);
+        if (parent) void focusTreeNode(optionKey(parent));
       }
     }
   }
@@ -666,7 +666,7 @@
 
     const filtered: TreeSelectOption[] = [];
     for (const node of nodes) {
-      const matchSelf = node.label.toLowerCase().includes(q);
+      const matchSelf = (node.label ?? node.title ?? '').toLowerCase().includes(q);
       const filteredChildren = node.children ? filterTree(node.children, q) : undefined;
       const matchChildren = filteredChildren && filteredChildren.length > 0;
 
