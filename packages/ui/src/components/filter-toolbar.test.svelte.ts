@@ -12,6 +12,7 @@ describe('FilterToolbar', () => {
 
     const input = screen.getByLabelText('Search records…') as HTMLInputElement;
     expect(input.value).toBe('test-query');
+    expect(screen.getByRole('searchbox')).toBe(input);
 
     const clearButton = screen.getByRole('button', { name: 'Clear search' });
     expect(clearButton).toBeTruthy();

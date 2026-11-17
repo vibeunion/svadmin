@@ -13,8 +13,10 @@
 	export type ButtonStatus = "normal" | "warning" | "danger" | "success";
 	export type ArcoButtonType = "primary" | "secondary" | "dashed" | "outline" | "text";
 
+	type ButtonElementAttributes = Omit<HTMLButtonAttributes & HTMLAnchorAttributes, "type">;
+
 	export type ButtonProps = WithElementRef<
-		HTMLButtonAttributes & HTMLAnchorAttributes,
+		ButtonElementAttributes,
 		HTMLButtonElement | HTMLAnchorElement
 	> & {
 			variant?: ButtonVariantValue;

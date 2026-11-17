@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import Button from './button.svelte';
 
 describe('Button Arco Parity Enhancements', () => {

@@ -18,7 +18,7 @@ try {
       await page.goto(`http://127.0.0.1:4179/?view=resource-list&locale=${locale}`, { waitUntil: 'networkidle' });
       const region = page.getByRole('region', { name: locale === 'en' ? 'Customer data' : '客户数据', exact: true });
       await expect(region).toHaveAttribute('tabindex', '0');
-      await page.getByRole('textbox', { name: locale === 'en' ? 'Search customers' : '搜索客户' }).focus();
+      await page.getByRole('searchbox', { name: locale === 'en' ? 'Search customers' : '搜索客户' }).focus();
       await page.keyboard.press('Tab');
       await expect(region).toBeFocused();
       const overflow = await region.evaluate(node => node.scrollWidth - node.clientWidth);
