@@ -11,9 +11,9 @@
 
   interface Props {
     direction?: 'horizontal' | 'vertical';
-    size?: SpaceSize;
-    align?: 'start' | 'center' | 'end' | 'baseline' | 'stretch';
-    justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
+    size?: SpaceSize | [SpaceSize, SpaceSize];
+    align?: 'start' | 'center' | 'end' | 'baseline' | 'stretch' | 'top' | 'middle' | 'bottom';
+    justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly' | 'space-between' | 'space-around' | 'space-evenly';
     wrap?: boolean;
     inline?: boolean;
     split?: Snippet;
@@ -64,16 +64,43 @@
     xl: '5',
     large: '5',
   };
-  const gap = $derived(typeof size === 'number' ? `${size}px` : `var(--svadmin-space-${spaceStep[size]})`);
-  const alignMap = { start: 'flex-start', center: 'center', end: 'flex-end', baseline: 'baseline', stretch: 'stretch' } as const;
-  const justifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' } as const;
+  const getSingleGap = (s: SpaceSize): string =>
+    typeof s === 'number' ? `${s}px` : `var(--svadmin-space-${spaceStep[s] ?? '2'})`;
+
+  const gap = $derived.by(() => {
+    if (Array.isArray(size)) {
+      return `${getSingleGap(size[1])} ${getSingleGap(size[0])}`;
+    }
+    return getSingleGap(size);
+  });
+  const alignMap = {
+    start: 'flex-start',
+    top: 'flex-start',
+    center: 'center',
+    middle: 'center',
+    end: 'flex-end',
+    bottom: 'flex-end',
+    baseline: 'baseline',
+    stretch: 'stretch',
+  } as const;
+  const justifyMap = {
+    start: 'flex-start',
+    center: 'center',
+    end: 'flex-end',
+    between: 'space-between',
+    'space-between': 'space-between',
+    around: 'space-around',
+    'space-around': 'space-around',
+    evenly: 'space-evenly',
+    'space-evenly': 'space-evenly',
+  } as const;
 </script>
 
 <div
   bind:this={root}
   class={cn('svadmin-space', className)}
   data-direction={direction}
-  data-size={typeof size === 'number' ? undefined : size}
+  data-size={typeof size === 'number' || Array.isArray(size) ? undefined : size}
   data-inline={inline ? 'true' : 'false'}
   style:--svadmin-space-gap={gap}
   style:align-items={alignMap[align]}

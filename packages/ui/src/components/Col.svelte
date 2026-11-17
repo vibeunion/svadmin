@@ -5,6 +5,8 @@
   interface Props {
     span?: number;
     offset?: number;
+    xs?: number;
+    xsOffset?: number;
     sm?: number;
     smOffset?: number;
     md?: number;
@@ -21,6 +23,8 @@
   let {
     span = 24,
     offset = 0,
+    xs,
+    xsOffset,
     sm,
     smOffset,
     md,
@@ -37,16 +41,16 @@
   const safeSpan = (value: number): number => Math.max(1, Math.min(24, value));
   const safeStart = (value: number | undefined): string => value === undefined || value <= 0 ? 'auto' : `${Math.min(24, value + 1)}`;
   const style = $derived([
-    `--svadmin-col-span:${safeSpan(span)}`,
-    `--svadmin-col-start:${safeStart(offset)}`,
-    `--svadmin-col-sm:${safeSpan(sm ?? span)}`,
-    `--svadmin-col-sm-start:${safeStart(smOffset ?? offset)}`,
-    `--svadmin-col-md:${safeSpan(md ?? sm ?? span)}`,
-    `--svadmin-col-md-start:${safeStart(mdOffset ?? smOffset ?? offset)}`,
-    `--svadmin-col-lg:${safeSpan(lg ?? md ?? sm ?? span)}`,
-    `--svadmin-col-lg-start:${safeStart(lgOffset ?? mdOffset ?? smOffset ?? offset)}`,
-    `--svadmin-col-xl:${safeSpan(xl ?? lg ?? md ?? sm ?? span)}`,
-    `--svadmin-col-xl-start:${safeStart(xlOffset ?? lgOffset ?? mdOffset ?? smOffset ?? offset)}`,
+    `--svadmin-col-span:${safeSpan(xs ?? span)}`,
+    `--svadmin-col-start:${safeStart(xsOffset ?? offset)}`,
+    `--svadmin-col-sm:${safeSpan(sm ?? xs ?? span)}`,
+    `--svadmin-col-sm-start:${safeStart(smOffset ?? xsOffset ?? offset)}`,
+    `--svadmin-col-md:${safeSpan(md ?? sm ?? xs ?? span)}`,
+    `--svadmin-col-md-start:${safeStart(mdOffset ?? smOffset ?? xsOffset ?? offset)}`,
+    `--svadmin-col-lg:${safeSpan(lg ?? md ?? sm ?? xs ?? span)}`,
+    `--svadmin-col-lg-start:${safeStart(lgOffset ?? mdOffset ?? smOffset ?? xsOffset ?? offset)}`,
+    `--svadmin-col-xl:${safeSpan(xl ?? lg ?? md ?? sm ?? xs ?? span)}`,
+    `--svadmin-col-xl-start:${safeStart(xlOffset ?? lgOffset ?? mdOffset ?? smOffset ?? xsOffset ?? offset)}`,
   ].filter(Boolean).join(';'));
 </script>
 
