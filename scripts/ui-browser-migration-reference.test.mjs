@@ -4,6 +4,7 @@ import test from 'node:test';
 import postcss from 'postcss';
 import {
   bodyStyleMigration,
+  componentClassAdditions,
   createMigrationReference,
   lightTokenMigration,
   hostNormalizationSelector,
@@ -23,13 +24,18 @@ import {
 
 const baseline = readFileSync(new URL('../packages/ui/test/style-baselines/components.css', import.meta.url), 'utf8');
 
-test('reference changes only explicitly approved token, body and table declarations', () => {
+test('reference changes only explicitly approved token, body, table and component declarations', () => {
   assert.equal(Object.keys(lightTokenMigration).length, 11);
   assert.equal(Object.keys(stripeLightTokenMigration).length, 5);
   assert.equal(Object.keys(stripeDarkTokenMigration).length, 7);
   assert.equal(Object.keys(productLightTokenMigration).length, 38);
   assert.equal(Object.keys(productDarkTokenMigration).length, 38);
   assert.equal(Object.keys(bodyStyleMigration).length, 2);
+  assert.deepEqual(componentClassAdditions, {
+    '.svadmin-skeleton.rounded-md': {
+      'border-radius': 'calc(var(--radius) - 2px)',
+    },
+  });
   assert.deepEqual(tableSizeMigration, {
     '.svadmin-table-head': {
       height: ['2.25rem', '2.5rem'],
@@ -54,6 +60,9 @@ test('reference changes only explicitly approved token, body and table declarati
   }
   reference.walkRules(visualContractDisabledSelector, (rule) => rule.remove());
   reference.walkRules(hostNormalizationSelector, (rule) => rule.remove());
+  for (const selector of Object.keys(componentClassAdditions)) {
+    reference.walkRules(selector, (rule) => rule.remove());
+  }
   assert.equal(visualContractAdditions.light['--primary-3'], '#94BFFF');
   assert.equal(visualContractAdditions.dark['--primary-3'], '#0E32A6');
   const migrations = [

@@ -240,7 +240,7 @@ try {
     },
     browser: browser.version(),
     screenshotLaunchArgs,
-    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, one body font migration, and the four table height/type declarations from the shared size baseline. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
+    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, one body font migration, the four table height/type declarations from the shared size baseline, and the Skeleton rounded-md class migration. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
     scope: 'Current real Svelte widget/control fixture under baseline, migration reference and published CSS; Chromium only; not full application or unchanged historical appearance certification',
     checks, failures, pageErrors,
   };
