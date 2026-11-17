@@ -45,8 +45,8 @@
     visible?: boolean;
     defaultPopupVisible?: boolean;
     defaultVisible?: boolean;
-    okButtonProps?: Record<string, any>;
-    cancelButtonProps?: Record<string, any>;
+    okButtonProps?: Record<string, unknown>;
+    cancelButtonProps?: Record<string, unknown>;
     onVisibleChange?: (visible: boolean) => void;
     onConfirm?: () => void;
     onOk?: () => void;
