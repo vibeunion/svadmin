@@ -6,6 +6,8 @@
   export interface StepItem {
     id?: string;
     title: string;
+    subTitle?: string;
+    subtitle?: string;
     description?: string;
     icon?: Snippet;
     disabled?: boolean;
@@ -17,7 +19,7 @@
     direction?: 'horizontal' | 'vertical';
     labelPlacement?: 'horizontal' | 'vertical';
     type?: 'default' | 'dot';
-    size?: 'default' | 'small';
+    size?: 'default' | 'small' | 'mini' | 'large';
     status?: 'wait' | 'process' | 'finish' | 'error';
     clickable?: boolean;
     class?: string;
@@ -82,7 +84,12 @@
           {/if}
         </span>
         <span class="svadmin-steps__text">
-          <span class="svadmin-steps__title">{item.title}</span>
+          <span class="svadmin-steps__title">
+            {item.title}
+            {#if item.subTitle || item.subtitle}
+              <span class="svadmin-steps__subtitle">{item.subTitle ?? item.subtitle}</span>
+            {/if}
+          </span>
           {#if item.description}<span class="svadmin-steps__description">{item.description}</span>{/if}
         </span>
       </button>
@@ -140,6 +147,12 @@
   .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 400; line-height: 1.75; }
   .svadmin-steps__item[data-status='process'] .svadmin-steps__title { font-weight: 500; }
   .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 400; }
+  .svadmin-steps__subtitle {
+    margin-inline-start: 0.5rem;
+    font-size: var(--svadmin-text-caption, 0.75rem);
+    font-weight: 400;
+    color: var(--svadmin-text-3, var(--muted-foreground));
+  }
   .svadmin-steps__description { margin-top: 2px; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-steps__connector {
     position: relative;
@@ -174,19 +187,19 @@
   .svadmin-steps__item[data-disabled='true'] { opacity: 1; color: var(--svadmin-text-4); }
 
   /* Small size adjustments */
-  .svadmin-steps[data-size='small'] .svadmin-steps__indicator {
+  .svadmin-steps:is([data-size='small'], [data-size='mini']) .svadmin-steps__indicator {
     width: 1.5rem;
     height: 1.5rem;
     font-size: 0.75rem;
   }
-  .svadmin-steps[data-size='small'] .svadmin-steps__title {
+  .svadmin-steps:is([data-size='small'], [data-size='mini']) .svadmin-steps__title {
     font-size: var(--svadmin-text-body);
     line-height: 1.5rem;
   }
-  .svadmin-steps[data-size='small'] .svadmin-steps__connector {
+  .svadmin-steps:is([data-size='small'], [data-size='mini']) .svadmin-steps__connector {
     margin-block-start: 0.75rem;
   }
-  .svadmin-steps[data-size='small'][data-direction='vertical'] .svadmin-steps__connector {
+  .svadmin-steps:is([data-size='small'], [data-size='mini'])[data-direction='vertical'] .svadmin-steps__connector {
     margin: 0 0 0 0.75rem;
   }
 

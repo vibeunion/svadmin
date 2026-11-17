@@ -1213,8 +1213,9 @@ h6,
 }
 
 .svadmin-avatar:is([data-size="default"], .svadmin-avatar-size--default) { width: 2.5rem; height: 2.5rem; }
-.svadmin-avatar:is([data-size="sm"], .svadmin-avatar-size--sm) { width: 2rem; height: 2rem; }
-.svadmin-avatar:is([data-size="lg"], .svadmin-avatar-size--lg) { width: 3rem; height: 3rem; }
+.svadmin-avatar:is([data-size="mini"], .svadmin-avatar-size--mini) { width: 1.5rem; height: 1.5rem; font-size: 0.75rem; }
+.svadmin-avatar:is([data-size="small"], [data-size="sm"], .svadmin-avatar-size--sm) { width: 2rem; height: 2rem; }
+.svadmin-avatar:is([data-size="large"], [data-size="lg"], .svadmin-avatar-size--lg) { width: 3rem; height: 3rem; }
 .svadmin-avatar:is([data-size="xl"], .svadmin-avatar-size--xl) { width: 4rem; height: 4rem; }
 .svadmin-avatar:is([data-shape="square"], .svadmin-avatar-shape--square) { border-radius: var(--radius-md); }
 
