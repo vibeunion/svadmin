@@ -1,0 +1,47 @@
+diff --git a/lib/parse.js b/lib/parse.js
+index 29207512c60183b4bb9bf5112be3b9b5f4a9a9fd..a3e12c1f360dc0702c2db183f9154a3922cad336 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -139,6 +139,28 @@ const normalizeSimpleBranch = branch => {
+   return value.replace(/\\(.)/g, '$1');
+ };
+ 
++const hasUnescapedWildcard = branch => {
++  let escaped = false;
++
++  for (const ch of branch) {
++    if (escaped === true) {
++      escaped = false;
++      continue;
++    }
++
++    if (ch === '\\') {
++      escaped = true;
++      continue;
++    }
++
++    if (ch === '*' || ch === '?') {
++      return true;
++    }
++  }
++
++  return false;
++};
++
+ const hasRepeatedCharPrefixOverlap = branches => {
+   const values = branches.map(normalizeSimpleBranch).filter(Boolean);
+ 
+@@ -296,6 +318,13 @@ const analyzeRepeatedExtglob = (body, options) => {
+ 
+   const branches = splitTopLevel(body).map(branch => branch.trim());
+ 
++  // A single wildcard branch nests an unbounded quantifier inside the
++  // repeated extglob (`+(*a)`, for example). Treat it as a literal pattern
++  // instead of emitting a regex that can catastrophically backtrack.
++  if (branches.length === 1 && hasUnescapedWildcard(branches[0])) {
++    return { risky: true };
++  }
++
+   if (branches.length > 1) {
+     if (
+       branches.some(branch => branch === '') ||

@@ -49,5 +49,19 @@
     "files": {
       "index.js": "bc51c066d0f681fc99d2404a1b90bc29043c0db92e5d1444c7d3f9628fb19333"
     }
+  },
+  {
+    "name": "picomatch",
+    "version": "4.0.7",
+    "advisory": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+    "advisoryId": 1247710,
+    "affectedRange": "<=4.0.7",
+    "severity": "high",
+    "patch": "patches/picomatch@4.0.7.patch",
+    "sha256": "1f5419ca42513c844bf0d9b76757c1b38a5454e94fe3afe498a90abddd890b17",
+    "reason": "Literalize single-branch repeated extglobs containing wildcards to prevent catastrophic regex backtracking.",
+    "files": {
+      "lib/parse.js": "368bb54545d779adaefe913275412436eebdb3f1247c951c372ba7bbcf9cfb22"
+    }
   }
 ]

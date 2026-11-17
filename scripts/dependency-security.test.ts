@@ -272,6 +272,21 @@ test('cache: private caches, explicit sharing and ordinary expiry keep working',
   expect(policy('max-age=0, stale-while-revalidate=10').useStaleWhileRevalidate()).toBe(false);
 });
 
+const picomatch: {
+  makeRe: (pattern: string) => RegExp;
+  isMatch: (input: string, pattern: string) => boolean;
+} = require('picomatch');
+test('picomatch literalizes single-branch repeated extglobs with wildcards', () => {
+  for (const pattern of ['+(*)', '+(*a)', '*(*)']) {
+    const regex = picomatch.makeRe(pattern);
+    expect(regex.test(pattern)).toBe(true);
+    expect(regex.test('x'.repeat(4096))).toBe(false);
+    expect(regex.source).toContain(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  }
+  expect(picomatch.isMatch('aaa', '+(a)')).toBe(true);
+  expect(picomatch.isMatch('ab', '+(a|b)')).toBe(true);
+});
+
 const bracePatch = patches.find(patch => patch.name === 'braces');
 assert(bracePatch);
 const finding = (url = bracePatch.advisory) => ({
