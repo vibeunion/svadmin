@@ -1,6 +1,6 @@
 <!-- // @vibe-escape: Level 3 Headless / showcase template gallery layout composition -->
 <script lang="ts">
-import { AppearanceSettings, Badge, Button, Checkbox, Grid, Input, JsonSchemaForm, ListPagination, Menu, NotificationsSettings, PageHeader, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
+import { AppearanceSettings, Avatar, Badge, Button, Checkbox, Grid, Input, JsonSchemaForm, ListPagination, Menu, NotificationsSettings, PageHeader, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
   import {
     AdvancedDetailTemplate,
     AdvancedFormTemplate,
@@ -377,7 +377,7 @@ import { AppearanceSettings, Badge, Button, Checkbox, Grid, Input, JsonSchemaFor
     {/snippet}
     {#snippet profile()}
       <div class="svadmin-template-gallery__profile">
-        <span class="svadmin-template-gallery__avatar" aria-hidden="true">AC</span>
+        <Avatar fallback="AC" size="large" aria-hidden="true" />
         <div><h3>Avery Chen</h3><p>Operations lead · Northwind</p></div>
       </div>
     {/snippet}
@@ -671,6 +671,5 @@ import { AppearanceSettings, Badge, Button, Checkbox, Grid, Input, JsonSchemaFor
   .svadmin-template-gallery__profile { display: flex; align-items: center; gap: var(--svadmin-space-3); }
   .svadmin-template-gallery__profile h3 { margin: 0; }
   .svadmin-template-gallery__profile p { margin: var(--svadmin-space-1) 0 0; color: var(--muted-foreground); font-size: var(--svadmin-text-label); }
-  .svadmin-template-gallery__avatar { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 999px; background: var(--accent); color: var(--accent-foreground); font-weight: 650; }
   @media (max-width: 60rem) { .svadmin-template-gallery { grid-template-columns: minmax(0, 1fr); } .svadmin-template-gallery__nav { position: static; } }
 </style>

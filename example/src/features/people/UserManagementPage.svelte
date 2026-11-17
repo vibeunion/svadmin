@@ -8,7 +8,7 @@
 
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
+  import { AutoTable, Avatar, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
   import { Input } from '@svadmin/ui/components/ui/input/index.js';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import * as DropdownMenu from '@svadmin/ui/components/ui/dropdown-menu/index.js';
@@ -631,7 +631,7 @@
             </thead>
             <tbody class="divide-y">
               {#each filteredUsers as user (user.id)}
-                <tr class="transition hover:bg-muted/25"><td class="px-5 py-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials(user.name)}</span><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div></td><td class="px-5 py-4 text-muted-foreground">{roleName(user.roleId)}</td><td class="px-5 py-4"><Badge variant="outline">{statusLabel(user.status)}</Badge></td><td class="px-5 py-4 text-muted-foreground">{user.department}</td><td class="px-5 py-4 text-muted-foreground">{user.lastActiveAt}</td><td class="px-5 py-4"><div class="flex justify-end gap-2"><a class="text-xs font-medium text-primary hover:underline" href={`#/users/show/${user.id}`} aria-label={`${isZh ? '查看' : 'View'} ${user.name}`}>{isZh ? '查看' : 'View'}</a><a class="text-xs font-medium text-primary hover:underline" href={`#/users/edit/${user.id}`} aria-label={`${isZh ? '编辑' : 'Edit'} ${user.name}`}>{isZh ? '编辑' : 'Edit'}</a></div></td></tr>
+                <tr class="transition hover:bg-muted/25"><td class="px-5 py-4"><div class="flex min-w-0 items-center gap-3"><Avatar fallback={initials(user.name)} size="small" class="shrink-0" /><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div></td><td class="px-5 py-4 text-muted-foreground">{roleName(user.roleId)}</td><td class="px-5 py-4"><Badge variant="outline">{statusLabel(user.status)}</Badge></td><td class="px-5 py-4 text-muted-foreground">{user.department}</td><td class="px-5 py-4 text-muted-foreground">{user.lastActiveAt}</td><td class="px-5 py-4"><div class="flex justify-end gap-2"><a class="text-xs font-medium text-primary hover:underline" href={`#/users/show/${user.id}`} aria-label={`${isZh ? '查看' : 'View'} ${user.name}`}>{isZh ? '查看' : 'View'}</a><a class="text-xs font-medium text-primary hover:underline" href={`#/users/edit/${user.id}`} aria-label={`${isZh ? '编辑' : 'Edit'} ${user.name}`}>{isZh ? '编辑' : 'Edit'}</a></div></td></tr>
               {:else}
                 <tr><td colspan="6" class="px-5 py-10 text-center text-sm text-muted-foreground">{isZh ? '没有匹配的用户。' : 'No users match the selected filters.'}</td></tr>
               {/each}
@@ -652,7 +652,7 @@
           <div class="divide-y">
             {#each users as user (user.id)}
               <div class="grid gap-3 px-5 py-4 md:grid-cols-[1fr_auto_auto] md:items-center">
-                <div class="flex min-w-0 items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{initials(user.name)}</span><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div>
+                <div class="flex min-w-0 items-center gap-3"><Avatar fallback={initials(user.name)} size="default" class="shrink-0" /><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div>
                 <Badge variant="outline">{user.department}</Badge>
                 <p class="text-xs text-muted-foreground">{user.lastActiveAt}</p>
               </div>
