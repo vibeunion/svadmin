@@ -23,7 +23,7 @@ describe('ResizeBox and Watermark option parity', () => {
   it('Watermark supports direct fontSize and fontColor props', () => {
     const { container } = render(Watermark, {
       props: {
-        content: 'ARCO WATERMARK',
+        content: 'INTERNAL WATERMARK',
         fontSize: 18,
         fontColor: 'rgba(255, 0, 0, 0.3)',
       },
