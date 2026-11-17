@@ -18,6 +18,10 @@
     invalid?: boolean | undefined;
     describedby?: string | undefined;
     ariaLabel?: string | undefined;
+    /** List of tooltips or labels for each star */
+    tooltips?: string[] | undefined;
+    /** Dynamic color grading based on rating score */
+    grading?: boolean | undefined;
     class?: string | undefined;
     onchange?: ((value: number) => void) | undefined;
   }
@@ -37,6 +41,8 @@
     invalid = false,
     describedby,
     ariaLabel = 'Rating',
+    tooltips,
+    grading = false,
     class: className = '',
     onchange,
   }: Props = $props();
@@ -55,6 +61,13 @@
   const normalizedCount = $derived(Number.isSafeInteger(count) && count > 0 && count <= 10 ? count : 5);
   const normalizedValue = $derived(Math.min(normalizedCount, Math.max(0, allowHalf ? Math.round(value * 2) / 2 : Math.round(value))));
   const displayValue = $derived(hoverValue !== null ? hoverValue : normalizedValue);
+
+  const currentGrade = $derived.by(() => {
+    if (!grading) return undefined;
+    if (displayValue <= 2) return 'low';
+    if (displayValue <= 3) return 'mid';
+    return 'high';
+  });
 
   const starIconSize = $derived.by(() => {
     if (typeof size === 'number') return size;
@@ -125,6 +138,8 @@
   data-invalid={invalid ? 'true' : undefined}
   data-readonly={readonly ? 'true' : undefined}
   data-size={typeof size === 'number' ? undefined : size}
+  data-grading={grading ? 'true' : undefined}
+  data-grade={currentGrade}
   onmouseleave={() => { if (!disabled && !readonly) hoverValue = null; }}
 >
   {#if name}<input type="hidden" {name} value={normalizedValue} required={required} {disabled} />{/if}
@@ -132,10 +147,12 @@
     {@const rating = index + 1}
     {@const isFilled = displayValue >= rating}
     {@const isHalf = allowHalf && displayValue === rating - 0.5}
+    {@const itemTooltip = tooltips?.[index]}
     <button
       type="button"
       role="radio"
-      aria-label={`${rating} of ${normalizedCount}`}
+      title={itemTooltip}
+      aria-label={itemTooltip ?? `${rating} of ${normalizedCount}`}
       aria-checked={normalizedValue >= rating}
       aria-disabled={disabled || readonly ? 'true' : undefined}
       tabindex={disabled || readonly ? -1 : normalizedValue === rating || (normalizedValue === 0 && index === 0) ? 0 : -1}
@@ -216,6 +233,19 @@
   .svadmin-rate button[aria-checked='true'],
   .svadmin-rate button.svadmin-rate__button--filled {
     color: var(--warning);
+  }
+
+  .svadmin-rate[data-grade='low'] button.svadmin-rate__button--filled,
+  .svadmin-rate[data-grade='low'] .svadmin-rate__half {
+    color: var(--destructive);
+  }
+  .svadmin-rate[data-grade='mid'] button.svadmin-rate__button--filled,
+  .svadmin-rate[data-grade='mid'] .svadmin-rate__half {
+    color: var(--warning);
+  }
+  .svadmin-rate[data-grade='high'] button.svadmin-rate__button--filled,
+  .svadmin-rate[data-grade='high'] .svadmin-rate__half {
+    color: var(--success);
   }
 
   .svadmin-rate__star-wrapper {

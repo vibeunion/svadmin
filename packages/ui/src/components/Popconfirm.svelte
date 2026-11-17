@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { untrack } from "svelte";
   import { CircleAlert } from "@lucide/svelte";
   import Button from "./ui/button/button.svelte";
   import * as Popover from "./ui/popover/index.js";
@@ -15,6 +16,9 @@
     icon,
     okLoading = false,
     disabled = false,
+    popupVisible,
+    defaultPopupVisible = false,
+    onVisibleChange,
     onConfirm,
     onOk,
     onCancel,
@@ -33,28 +37,38 @@
     icon?: Snippet;
     okLoading?: boolean;
     disabled?: boolean;
+    popupVisible?: boolean;
+    defaultPopupVisible?: boolean;
+    onVisibleChange?: (visible: boolean) => void;
     onConfirm?: () => void;
     onOk?: () => void;
     onCancel?: () => void;
     children: Snippet;
   } = $props();
 
-  let open = $state(false);
+  let internalOpen = $state(untrack(() => defaultPopupVisible));
+  const isControlled = $derived(popupVisible !== undefined);
+  const open = $derived(isControlled ? popupVisible! : internalOpen);
+
+  function handleOpenChange(next: boolean) {
+    if (!isControlled) internalOpen = next;
+    onVisibleChange?.(next);
+  }
 
   function confirm() {
     if (disabled || okLoading) return;
     (onOk ?? onConfirm)?.();
-    open = false;
+    handleOpenChange(false);
   }
 
   function cancel() {
     onCancel?.();
-    open = false;
+    handleOpenChange(false);
   }
 </script>
 
 {#if risk === "irreversible"}
-  <Dialog.Root bind:open>
+  <Dialog.Root open={open} onOpenChange={handleOpenChange}>
     <Dialog.Trigger disabled={disabled}>
       {#snippet child({ props })}
         <span class="svadmin-popconfirm__trigger" {...props} aria-disabled={disabled || undefined}>{@render children()}</span>
@@ -104,7 +118,7 @@
     </Dialog.Content>
   </Dialog.Root>
 {:else}
-  <Popover.Root bind:open>
+  <Popover.Root open={open} onOpenChange={handleOpenChange}>
     <Popover.Trigger disabled={disabled}>
       {#snippet child({ props })}
         <span class="svadmin-popconfirm__trigger" {...props} aria-disabled={disabled || undefined}>{@render children()}</span>

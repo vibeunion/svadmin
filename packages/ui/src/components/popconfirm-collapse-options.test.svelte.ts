@@ -38,6 +38,18 @@ describe('Popconfirm and Collapse option parity', () => {
     expect(onOk).toHaveBeenCalledTimes(1);
   });
 
+  it('supports popupVisible controlled prop and onVisibleChange in Popconfirm', () => {
+    const onVisibleChange = vi.fn();
+    const view = render(Popconfirm, {
+      title: 'Controlled confirm',
+      popupVisible: true,
+      onVisibleChange,
+      children: emptySnippet(),
+    });
+
+    expect(screen.getByText('Controlled confirm')).toBeDefined();
+  });
+
   it('renders Collapse with key, header, extra and defaultActiveKey', () => {
     const view = render(Collapse, {
       items: [

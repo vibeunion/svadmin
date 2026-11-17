@@ -369,4 +369,13 @@ describe('enterprise date and time inputs', () => {
     expect(onchange).toHaveBeenLastCalledWith({ start: null, end: null });
   });
 
+  it('passes size and status options down to the internal input', () => {
+    const view = render(DateTimeInput, {
+      size: 'small',
+      status: 'error',
+    });
+    const input = view.container.querySelector('input');
+    expect(input?.getAttribute('data-size')).toBe('compact');
+    expect(input?.getAttribute('data-input-state')).toBe('error');
+  });
 });

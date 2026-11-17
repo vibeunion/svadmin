@@ -24,6 +24,8 @@
     invalid?: boolean | undefined;
     describedby?: string | undefined;
     ariaLabel?: string | undefined;
+    size?: 'mini' | 'small' | 'default' | 'large' | undefined;
+    status?: 'error' | 'warning' | 'normal' | undefined;
     class?: string | undefined;
     onchange?: ((value: string | null) => void) | undefined;
     timeZone?: string | undefined;
@@ -47,6 +49,8 @@
     invalid = false,
     describedby,
     ariaLabel,
+    size = 'default',
+    status,
     class: className = '',
     onchange,
     timeZone,
@@ -126,6 +130,8 @@
     {step}
     {disabled}
     {required}
+    {size}
+    {status}
     aria-invalid={invalid || policyInvalid || undefined}
     aria-describedby={describedby}
     aria-label={ariaLabel}
