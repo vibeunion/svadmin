@@ -16,13 +16,17 @@
     status = "info",
     title,
     subtitle = "",
+    subTitle,
     icon,
+    extra,
     children,
   }: {
     status?: ResultStatus;
     title: string;
     subtitle?: string;
+    subTitle?: string;
     icon?: Snippet;
+    extra?: Snippet;
     children?: Snippet;
   } = $props();
 
@@ -37,6 +41,7 @@
   } as const;
 
   const IconComp = $derived(statusIcons[status] ?? Info);
+  const resolvedSubtitle = $derived(subTitle ?? subtitle);
 </script>
 
 <section class="svadmin-result" data-status={status}>
@@ -49,6 +54,14 @@
   </div>
   <p class="svadmin-result__status">{status}</p>
   <h2 class="svadmin-result__title">{title}</h2>
-  {#if subtitle}<p class="svadmin-result__subtitle">{subtitle}</p>{/if}
-  {#if children}<div class="svadmin-result__extra">{@render children()}</div>{/if}
+  {#if resolvedSubtitle}<p class="svadmin-result__subtitle">{resolvedSubtitle}</p>{/if}
+  {#if extra || children}
+    <div class="svadmin-result__extra" data-slot="result-extra">
+      {#if extra}
+        {@render extra()}
+      {:else if children}
+        {@render children()}
+      {/if}
+    </div>
+  {/if}
 </section>
