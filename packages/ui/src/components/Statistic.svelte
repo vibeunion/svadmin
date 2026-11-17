@@ -17,6 +17,7 @@
     trend?: 'up' | 'down' | 'neutral';
     trendLabel?: string;
     loading?: boolean;
+    valueStyle?: string;
     class?: string;
     children?: Snippet;
   }
@@ -35,6 +36,7 @@
     trend,
     trendLabel,
     loading = false,
+    valueStyle,
     class: className = '',
     children,
   }: Props = $props();
@@ -62,7 +64,7 @@
       {/if}
     </div>
   {/if}
-  <p class="svadmin-statistic__value">
+  <p class="svadmin-statistic__value" style={valueStyle}>
     {#if prefix}
       <span class="svadmin-statistic__affix">{#if typeof prefix === 'string'}{prefix}{:else}{@render prefix()}{/if}</span>
     {/if}

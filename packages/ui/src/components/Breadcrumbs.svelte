@@ -10,8 +10,10 @@
   import * as DropdownMenu from './ui/dropdown-menu/index.js';
 
   export interface BreadcrumbItem {
-    label: string;
+    label?: string;
+    breadcrumbName?: string;
     href?: string;
+    path?: string;
   }
 
   const i18n = useTranslation();
@@ -25,6 +27,7 @@
     menu,
     separator = 'slash',
     maxItems = 0,
+    maxCount,
     class: className = 'svadmin-breadcrumbs--spaced',
   }: {
     items?: BreadcrumbItem[] | undefined;
@@ -32,9 +35,11 @@
     menu?: MenuItem[] | undefined;
     separator?: 'slash' | 'arrow' | string;
     maxItems?: number;
+    maxCount?: number;
     class?: string;
   } = $props();
 
+  const resolvedMaxItems = $derived(maxCount ?? maxItems);
   const effectiveItems = $derived(explicitItems ?? routes);
 
   interface Crumb { label: string; href?: string; hidden?: boolean; children?: Crumb[]; }
@@ -64,9 +69,13 @@
   const crumbs = $derived.by<Crumb[]>(() => {
     if (effectiveItems && effectiveItems.length > 0) {
       // exactOptionalPropertyTypes: 不把 undefined 塞进可选 href。
-      return effectiveItems.map((item) => (item.href === undefined
-        ? { label: item.label }
-        : { label: item.label, href: item.href }));
+      return effectiveItems.map((item) => {
+        const itemLabel = item.label ?? item.breadcrumbName ?? '';
+        const itemHref = item.href ?? item.path;
+        return itemHref === undefined
+          ? { label: itemLabel }
+          : { label: itemLabel, href: itemHref };
+      });
     }
 
     const result: Crumb[] = [{ label: i18n.t('common.home') ?? 'Home', href: adminContext.formatLink('/') }];
@@ -125,7 +134,7 @@
   });
 
   const displayCrumbs = $derived.by<Crumb[]>(() => {
-    if (maxItems < 3 || crumbs.length <= maxItems) return crumbs;
+    if (resolvedMaxItems < 3 || crumbs.length <= resolvedMaxItems) return crumbs;
     const first = crumbs[0];
     const last = crumbs[crumbs.length - 1];
     if (!first || !last) return crumbs;
