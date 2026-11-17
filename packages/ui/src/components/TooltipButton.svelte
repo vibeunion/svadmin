@@ -1,10 +1,11 @@
 <script lang="ts">
   import * as Tooltip from './ui/tooltip/index.js';
   import { Button } from './ui/button/index.js';
+  import type { ButtonProps } from './ui/button/index.js';
   import type { Snippet } from 'svelte';
   import type { HTMLButtonAttributes } from 'svelte/elements';
 
-  interface Props extends Omit<HTMLButtonAttributes, 'class' | 'children'> {
+  interface Props extends Omit<HTMLButtonAttributes, 'class' | 'children' | 'type'> {
     tooltip: string;
     href?: string;
     target?: string;
@@ -14,6 +15,7 @@
     side?: 'top' | 'right' | 'bottom' | 'left';
     class?: string;
     onclick?: (e: MouseEvent) => void;
+    type?: ButtonProps['type'];
     children: Snippet;
   }
 
