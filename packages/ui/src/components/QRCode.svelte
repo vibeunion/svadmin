@@ -17,6 +17,14 @@
     value: string;
     /** Rendered size in pixels. */
     size?: number;
+    /** Whether to show border and background. */
+    bordered?: boolean;
+    /** Center icon/logo image URL. */
+    icon?: string;
+    /** Center icon/logo image URL alias. */
+    image?: string;
+    /** Center icon size in pixels. */
+    iconSize?: number;
     /** Quiet-zone width in modules. Keep at least 4 for reliable scanning. */
     margin?: number;
     errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';
@@ -39,6 +47,10 @@
   let {
     value,
     size = 160,
+    bordered = true,
+    icon,
+    image,
+    iconSize,
     margin = 4,
     errorCorrectionLevel = 'M',
     color = 'var(--foreground, black)',
@@ -67,6 +79,9 @@
     empty: componentText(i18n, activeLocale, 'qrCode.empty'),
   });
 
+  const centerIcon = $derived(image ?? icon);
+  const effectiveIconSize = $derived(iconSize ?? Math.round(size / 4.5));
+
   const matrix = $derived.by(() => {
     if (!value) return null;
     try {
@@ -87,20 +102,35 @@
   });
 </script>
 
-<figure class={cn('svadmin-qr-code relative', className)} data-slot="qr-code" data-status={status}>
+<figure
+  class={cn('svadmin-qr-code relative', !bordered && 'border-0 p-0 bg-transparent', className)}
+  data-slot="qr-code"
+  data-status={status}
+  data-bordered={bordered}
+>
   {#if matrix}
-    <svg
-      class="svadmin-qr-code__svg"
-      width={size}
-      height={size}
-      viewBox={`0 0 ${matrix.total} ${matrix.total}`}
-      role="img"
-      aria-label={ariaLabel}
-      shape-rendering="crispEdges"
-    >
-      <rect width={matrix.total} height={matrix.total} fill={background} />
-      <path d={matrix.path} fill={color} />
-    </svg>
+    <div class="relative inline-flex items-center justify-center">
+      <svg
+        class="svadmin-qr-code__svg"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${matrix.total} ${matrix.total}`}
+        role="img"
+        aria-label={ariaLabel}
+        shape-rendering="crispEdges"
+      >
+        <rect width={matrix.total} height={matrix.total} fill={background} />
+        <path d={matrix.path} fill={color} />
+      </svg>
+      {#if centerIcon && status === 'normal'}
+        <img
+          src={centerIcon}
+          alt=""
+          class="absolute rounded-xs bg-background p-0.5 shadow-xs object-contain pointer-events-none"
+          style={`width: ${effectiveIconSize}px; height: ${effectiveIconSize}px;`}
+        />
+      {/if}
+    </div>
     {#if status !== 'normal'}
       <div
         class="svadmin-qr-code__mask"

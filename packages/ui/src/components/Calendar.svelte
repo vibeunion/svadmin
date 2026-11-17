@@ -21,6 +21,7 @@
     min?: string;
     max?: string;
     card?: boolean;
+    panel?: boolean;
     disabled?: boolean;
     class?: string;
     onchange?: (value: string) => void;
@@ -34,11 +35,13 @@
     min,
     max,
     card = false,
+    panel,
     disabled = false,
     class: className = '',
     onchange,
   }: Props = $props();
 
+  const isCard = $derived(panel ?? card);
   const initial = untrack(() => value ? new Date(`${value}T12:00:00`) : new Date());
   let viewYear = $state(initial.getFullYear());
   let viewMonth = $state(initial.getMonth());
@@ -125,8 +128,8 @@
 </script>
 
 <section
-  class={cn('svadmin-calendar', card && 'svadmin-calendar--card', className)}
-  data-card={card}
+  class={cn('svadmin-calendar', isCard && 'svadmin-calendar--card', className)}
+  data-card={isCard}
   aria-label={title}
 >
   <header class="svadmin-calendar__header">

@@ -14,6 +14,8 @@
     steps: TourStep[];
     open?: boolean;
     current?: number;
+    defaultCurrent?: number;
+    mask?: boolean;
     title?: string;
     nextText?: string;
     previousText?: string;
@@ -31,6 +33,8 @@
     steps,
     open = $bindable(false),
     current = $bindable(0),
+    defaultCurrent,
+    mask = true,
     title = 'Guided tour',
     nextText = 'Next',
     previousText = 'Back',
@@ -43,6 +47,16 @@
     class: className = '',
     children,
   }: Props = $props();
+
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (defaultCurrent !== undefined && current === 0) {
+        current = defaultCurrent;
+      }
+    }
+  });
 
   let panel = $state<HTMLElement | null>(null);
   let rect = $state<{ top: number; left: number; width: number; height: number } | null>(null);
@@ -179,12 +193,14 @@
 </script>
 
 {#if open}
-  <div data-svadmin-component="TourGuide" data-targeted={rect ? 'true' : 'false'} class={cn('svadmin-tour', className)}>
+  <div data-svadmin-component="TourGuide" data-targeted={rect ? 'true' : 'false'} data-mask={mask} class={cn('svadmin-tour', className)}>
     <!-- Background dismissal trigger to block click-through -->
-    <button type="button" tabindex="-1" class="svadmin-tour__dismiss" aria-label={skipText} onclick={close}></button>
+    {#if mask}
+      <button type="button" tabindex="-1" class="svadmin-tour__dismiss" aria-label={skipText} onclick={close}></button>
+    {/if}
 
     <!-- Pure SVG Viewport Cutout Mask for Target Element Spotlight -->
-    {#if rect}
+    {#if mask && rect}
       <svg class="svadmin-tour__svg-mask fixed inset-0 w-full h-full pointer-events-none z-[61]" aria-hidden="true">
         <defs>
           <mask id={maskId}>
