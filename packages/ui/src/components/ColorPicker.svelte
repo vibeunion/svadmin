@@ -5,10 +5,13 @@
 
   interface Props {
     value?: string | undefined;
+    defaultValue?: string | undefined;
     name?: string | undefined;
     id?: string | undefined;
     size?: ColorPickerSize | undefined;
     showText?: boolean | undefined;
+    presetColors?: string[] | undefined;
+    historyColors?: string[] | undefined;
     disabled?: boolean | undefined;
     required?: boolean | undefined;
     invalid?: boolean | undefined;
@@ -20,10 +23,13 @@
 
   let {
     value = $bindable(''),
+    defaultValue,
     name,
     id,
     size = 'default',
     showText = false,
+    presetColors,
+    historyColors,
     disabled = false,
     required = false,
     invalid = false,
@@ -33,6 +39,18 @@
     onchange,
   }: Props = $props();
 
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (defaultValue !== undefined && !value) {
+        value = defaultValue;
+      }
+    }
+  });
+
+  const swatches = $derived(presetColors ?? historyColors);
+
   function handleInput(event: Event): void {
     const input = event.currentTarget;
     if (!(input instanceof HTMLInputElement) || disabled) return;
@@ -41,8 +59,8 @@
   }
 </script>
 
-{#if showText}
-  <span class={cn('svadmin-color-picker-wrap inline-flex items-center gap-2', className)} data-size={size}>
+<div class={cn('svadmin-color-picker-root inline-flex flex-col gap-1.5', className)}>
+  <div class="inline-flex items-center gap-2">
     <input
       class="svadmin-color-picker"
       data-size={size}
@@ -57,24 +75,26 @@
       aria-describedby={describedby}
       oninput={handleInput}
     />
-    <span class="svadmin-color-picker__text font-mono text-xs text-foreground uppercase">{value || '—'}</span>
-  </span>
-{:else}
-  <input
-    class={cn('svadmin-color-picker', className)}
-    data-size={size}
-    {id}
-    {name}
-    type="color"
-    value={value}
-    {disabled}
-    {required}
-    aria-label={ariaLabel}
-    aria-invalid={invalid || undefined}
-    aria-describedby={describedby}
-    oninput={handleInput}
-  />
-{/if}
+    {#if showText}
+      <span class="svadmin-color-picker__text font-mono text-xs text-foreground uppercase">{value || '—'}</span>
+    {/if}
+  </div>
+  {#if swatches && swatches.length > 0}
+    <div class="svadmin-color-picker__presets flex flex-wrap gap-1" data-slot="color-picker-presets">
+      {#each swatches as swatchColor (swatchColor)}
+        <button
+          type="button"
+          class="h-5 w-5 rounded-xs border border-border cursor-pointer transition-transform hover:scale-110"
+          style={`background-color: ${swatchColor};`}
+          disabled={disabled}
+          title={swatchColor}
+          aria-label={swatchColor}
+          onclick={() => { if (!disabled) { value = swatchColor; onchange?.(swatchColor); } }}
+        ></button>
+      {/each}
+    </div>
+  {/if}
+</div>
 
 <style>
   .svadmin-color-picker {
