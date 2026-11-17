@@ -9,7 +9,7 @@
   import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
   import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageHeader, ContentPageShell } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, Progress } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import { Bot, CalendarDays, CheckCircle2, Circle, Flag, ListTodo, Tag } from '@lucide/svelte';
   import { readHashView } from '../../utils/hashView';
@@ -246,7 +246,7 @@
             <p class="text-2xl font-semibold">{completedCount} / {boardTodos.length}</p>
             <Badge variant="outline">{isZh ? '全部任务' : 'all tasks'}</Badge>
           </div>
-          <div class="mt-3 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${progress}%`}></div></div>
+          <Progress class="mt-3" percent={progress} />
         </div>
         <p class="rounded-lg rounded-tl-sm border bg-muted/25 p-4 text-sm text-muted-foreground">{isZh ? '建议先处理高优先级库存告警，再确认供应商到货窗口。' : 'Start with high-priority stock alerts, then confirm supplier delivery windows.'}</p>
         <Button class="w-full" onclick={() => window.location.hash = '/todos?view=priority'}>{isZh ? '查看优先任务' : 'View priority tasks'}</Button>
