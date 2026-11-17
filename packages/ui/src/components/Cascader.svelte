@@ -43,6 +43,7 @@
     maxTagCount?: number | undefined;
     displayRender?: ((labels: string[], selectedOptions: CascaderOption[][]) => string) | undefined;
     loadChildren?: ((node: CascaderOption) => Promise<CascaderOption[]>) | undefined;
+    size?: 'mini' | 'small' | 'default' | 'large' | undefined;
     class?: string | undefined;
     onchange?: (value: CascaderPath | CascaderPath[] | undefined, selectedOptions: CascaderOption[] | CascaderOption[][]) => void;
   }
@@ -58,6 +59,7 @@
     placeholder,
     changeOnSelect = false,
     disabled = false,
+    size = 'default',
     allowClear = true,
     multiple = false,
     checkable = false,
@@ -577,7 +579,7 @@
   });
 </script>
 
-<div class={cn('relative w-full', className)} data-testid="cascader">
+<div class={cn('relative w-full', className)} data-size={size} data-testid="cascader">
   <Popover.Root bind:open>
     <div class="cascader-control">
     <Popover.Trigger id={triggerId} {disabled} class="w-full">
@@ -593,6 +595,9 @@
           {disabled}
           class={cn(
             'flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-left',
+            size === 'mini' && 'min-h-6 h-6 px-2 text-[11px]',
+            size === 'small' && 'min-h-7 h-7 px-2.5 text-xs',
+            size === 'large' && 'min-h-10 h-10 px-3.5 text-sm',
             open && 'ring-2 ring-ring ring-offset-2'
           )}
         >
