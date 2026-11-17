@@ -103,7 +103,6 @@
   const resolvedTabs = $derived(tabList ?? tabsProp);
   // callbacks resolved on demand
 
-  // svelte-ignore state_referenced_locally
   let internalActiveTab = $state(untrack(() => (defaultTabActiveKey ?? defaultActiveTab) ?? (tabList ?? tabsProp)?.[0]?.key ?? ''));
   const effectiveActiveTab = $derived(tabActiveKey ?? activeTab ?? internalActiveTab);
 

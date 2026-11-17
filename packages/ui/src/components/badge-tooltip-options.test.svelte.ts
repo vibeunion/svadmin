@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { Badge } from './ui/badge/index.js';
-import * as Tooltip from './ui/tooltip/index.js';
 
 const textSnippet = (text: string) =>
   createRawSnippet(() => ({

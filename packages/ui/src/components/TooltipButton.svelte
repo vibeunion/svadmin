@@ -39,6 +39,7 @@
   }: Props = $props();
 
   let open = $state(false);
+  const tooltipContentProps = $derived(color === undefined ? {} : { color });
 
   function handleClick(event: MouseEvent, primitiveOnclick?: (event: MouseEvent) => void) {
     primitiveOnclick?.(event);
@@ -70,5 +71,5 @@
       </Button>
     {/snippet}
   </Tooltip.Trigger>
-  <Tooltip.Content {side} {color}>{tooltip}</Tooltip.Content>
+  <Tooltip.Content {side} {...tooltipContentProps}>{tooltip}</Tooltip.Content>
 </Tooltip.Root>
