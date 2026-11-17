@@ -10,7 +10,10 @@
     minHeight?: number;
     maxWidth?: number;
     maxHeight?: number;
+    min?: number | [number, number];
+    max?: number | [number, number];
     direction?: 'both' | 'horizontal' | 'vertical';
+    directions?: Array<'left' | 'right' | 'top' | 'bottom'>;
     disabled?: boolean;
     label?: string;
     class?: string;
@@ -20,16 +23,43 @@
   let {
     width = $bindable(),
     height = $bindable(),
-    minWidth = 120,
-    minHeight = 80,
+    minWidth,
+    minHeight,
     maxWidth,
     maxHeight,
+    min,
+    max,
     direction = 'both',
+    directions,
     disabled = false,
     label = 'Resize panel',
     class: className = '',
     children,
   }: Props = $props();
+
+  const resolvedMinWidth = $derived(
+    minWidth ?? (Array.isArray(min) ? min[0] : typeof min === 'number' ? min : 120)
+  );
+  const resolvedMinHeight = $derived(
+    minHeight ?? (Array.isArray(min) ? min[1] : typeof min === 'number' ? min : 80)
+  );
+  const resolvedMaxWidth = $derived(
+    maxWidth ?? (Array.isArray(max) ? max[0] : typeof max === 'number' ? max : undefined)
+  );
+  const resolvedMaxHeight = $derived(
+    maxHeight ?? (Array.isArray(max) ? max[1] : typeof max === 'number' ? max : undefined)
+  );
+
+  const resolvedDirection = $derived.by(() => {
+    if (directions && directions.length > 0) {
+      const hasHorizontal = directions.includes('left') || directions.includes('right');
+      const hasVertical = directions.includes('top') || directions.includes('bottom');
+      if (hasHorizontal && hasVertical) return 'both';
+      if (hasHorizontal) return 'horizontal';
+      if (hasVertical) return 'vertical';
+    }
+    return direction;
+  });
 
   let element = $state<HTMLDivElement | null>(null);
   const initialWidth = width;
@@ -40,8 +70,8 @@
   const clamp = (value: number, min: number, max?: number): number => Math.min(max ?? value, Math.max(min, value));
 
   function resize(nextWidth: number, nextHeight: number): void {
-    if (direction !== 'vertical') width = clamp(nextWidth, minWidth, maxWidth);
-    if (direction !== 'horizontal') height = clamp(nextHeight, minHeight, maxHeight);
+    if (resolvedDirection !== 'vertical') width = clamp(nextWidth, resolvedMinWidth, resolvedMaxWidth);
+    if (resolvedDirection !== 'horizontal') height = clamp(nextHeight, resolvedMinHeight, resolvedMaxHeight);
   }
 
   function onPointerMove(event: PointerEvent): void {
@@ -93,7 +123,7 @@
   bind:this={element}
   class={cn('svadmin-resize-box', className)}
   data-dragging={dragging ? 'true' : 'false'}
-  data-direction={direction}
+  data-direction={resolvedDirection}
   style:width={width === undefined ? undefined : `${width}px`}
   style:height={height === undefined ? undefined : `${height}px`}
 >
@@ -106,10 +136,10 @@
       role="separator"
       tabindex="0"
       aria-label={`${label}: use arrow keys to resize, double click to reset`}
-      aria-orientation={direction === 'vertical' ? 'horizontal' : 'vertical'}
-      aria-valuenow={direction === 'vertical' ? (height ?? element?.offsetHeight ?? minHeight) : (width ?? element?.offsetWidth ?? minWidth)}
-      aria-valuemin={direction === 'vertical' ? minHeight : minWidth}
-      aria-valuemax={direction === 'vertical' ? (maxHeight ?? undefined) : (maxWidth ?? undefined)}
+      aria-orientation={resolvedDirection === 'vertical' ? 'horizontal' : 'vertical'}
+      aria-valuenow={resolvedDirection === 'vertical' ? (height ?? element?.offsetHeight ?? resolvedMinHeight) : (width ?? element?.offsetWidth ?? resolvedMinWidth)}
+      aria-valuemin={resolvedDirection === 'vertical' ? resolvedMinHeight : resolvedMinWidth}
+      aria-valuemax={resolvedDirection === 'vertical' ? (resolvedMaxHeight ?? undefined) : (resolvedMaxWidth ?? undefined)}
       onpointerdown={startResize}
       onkeydown={onKeydown}
       ondblclick={reset}
