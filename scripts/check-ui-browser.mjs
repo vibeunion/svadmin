@@ -6,7 +6,6 @@ import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { chromium, expect } from '@playwright/test';
-import sharp from 'sharp';
 import { surfaceTableRecipe } from '../packages/ui/dist/recipes.js';
 import { stableScreenshot } from './stable-screenshot.mjs';
 import { verifyPrimitiveFallbacks } from './ui-fallback-evidence.mjs';
@@ -31,34 +30,6 @@ for (const file of readdirSync(output)) {
   }
 }
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
-const compareScreenshotPixels = async (left, right) => {
-  const [before, after] = await Promise.all([
-    sharp(left).raw().toBuffer({ resolveWithObject: true }),
-    sharp(right).raw().toBuffer({ resolveWithObject: true }),
-  ]);
-  if (before.info.width !== after.info.width
-    || before.info.height !== after.info.height
-    || before.info.channels !== after.info.channels) {
-    return {
-      changedPixels: Number.POSITIVE_INFINITY,
-      maxChannelDelta: Number.POSITIVE_INFINITY,
-      dimensionsDiffer: true,
-    };
-  }
-  let changedPixels = 0;
-  let maxChannelDelta = 0;
-  for (let index = 0; index < before.data.length; index += before.info.channels) {
-    let pixelDelta = 0;
-    for (let channel = 0; channel < before.info.channels; channel += 1) {
-      pixelDelta = Math.max(pixelDelta, Math.abs(before.data[index + channel] - after.data[index + channel]));
-    }
-    if (pixelDelta > 0) {
-      changedPixels += 1;
-      maxChannelDelta = Math.max(maxChannelDelta, pixelDelta);
-    }
-  }
-  return { changedPixels, maxChannelDelta, dimensionsDiffer: false };
-};
 const manifest = JSON.parse(read('packages/ui/styles-compatibility.json'));
 const baselineSources = Object.entries(manifest.files).map(([path, historicalSha256]) => {
   const css = read(`packages/ui/test/style-baselines/${path}`);
@@ -169,13 +140,7 @@ try {
       await replaceStylesheet(`variants=0&dark=${dark}`);
       const after = await capture(page, `${name}-published`);
       assert.deepEqual(after.styles, reference.styles, `${name}: published CSS exceeded the finite token migration reference`);
-      if (!reference.image.equals(after.image)) {
-        const screenshotDiff = await compareScreenshotPixels(reference.image, after.image);
-        assert.ok(
-          screenshotDiff.changedPixels <= 128 && screenshotDiff.maxChannelDelta <= 16,
-          `${name}: published screenshot differs from the finite token migration reference (${JSON.stringify(screenshotDiff)})`,
-        );
-      }
+      assert.ok(reference.image.equals(after.image), `${name}: published screenshot differs from the finite token migration reference`);
     } finally { await page.close(); }
   }
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
@@ -275,7 +240,7 @@ try {
     },
     browser: browser.version(),
     screenshotLaunchArgs,
-    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, one body font migration, and the four table height/type declarations from the shared size baseline. Same DOM; two stable frames; exact computed-style equality and bounded rasterization tolerance for stylesheet replacement.',
+    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, one body font migration, the four table height/type declarations from the shared size baseline, and the Skeleton rounded-md class migration. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
     scope: 'Current real Svelte widget/control fixture under baseline, migration reference and published CSS; Chromium only; not full application or unchanged historical appearance certification',
     checks, failures, pageErrors,
   };
