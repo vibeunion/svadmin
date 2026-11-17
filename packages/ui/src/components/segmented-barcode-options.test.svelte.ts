@@ -23,7 +23,9 @@ describe('SegmentedControl and Barcode option parity', () => {
     expect(items.length).toBe(3);
     expect(items[1]?.getAttribute('aria-checked')).toBe('true');
 
-    await fireEvent.click(items[2]!);
+    const monthly = items[2];
+    if (monthly === undefined) throw new Error('expected a third segmented option');
+    await fireEvent.click(monthly);
     expect(onchange).toHaveBeenCalledWith('Monthly');
     expect(items[2]?.getAttribute('aria-checked')).toBe('true');
   });
