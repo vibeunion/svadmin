@@ -2,13 +2,18 @@ import { getContext, onDestroy, setContext } from 'svelte';
 
 export type NotificationTone = 'info' | 'success' | 'warning' | 'danger';
 export type NotificationPlacement = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+export type NotificationPosition = NotificationPlacement | 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
 
 export interface NotificationOptions {
   key?: string;
+  id?: string;
   title: string;
   description?: string;
+  content?: string;
   tone?: NotificationTone;
+  type?: NotificationTone;
   placement?: NotificationPlacement;
+  position?: NotificationPosition;
   duration?: number;
   actionLabel?: string;
   onAction?: () => void;
@@ -59,12 +64,29 @@ export function createNotificationController(): NotificationController {
   }
 
   function open(options: NotificationOptions): number {
-    if (options.key) closeByKey(options.key);
+    const key = options.key ?? options.id;
+    if (key) closeByKey(key);
+    const placementMap: Record<string, NotificationPlacement> = {
+      topRight: 'top-right',
+      topLeft: 'top-left',
+      bottomRight: 'bottom-right',
+      bottomLeft: 'bottom-left',
+      'top-right': 'top-right',
+      'top-left': 'top-left',
+      'bottom-right': 'bottom-right',
+      'bottom-left': 'bottom-left',
+    };
+    const resolvedPlacement = placementMap[options.placement ?? options.position ?? 'top-right'] ?? 'top-right';
+    const resolvedDescription = options.description ?? options.content;
+    const resolvedTone = options.tone ?? options.type ?? 'info';
+
     const item: NotificationRecord = {
       ...options,
       id: nextId++,
-      tone: options.tone ?? 'info',
-      placement: options.placement ?? 'top-right',
+      key,
+      description: resolvedDescription,
+      tone: resolvedTone,
+      placement: resolvedPlacement,
       duration: options.duration ?? 3000,
     };
     items = [...items, item];
