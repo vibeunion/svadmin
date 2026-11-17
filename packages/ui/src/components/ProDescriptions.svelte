@@ -14,17 +14,21 @@
 
   export interface ProDescriptionsProps {
     /** Title of the descriptions card */
-    title?: string;
+    title?: string | Snippet;
     /** Whether to display a border around the container and between cells (default: true) */
     bordered?: boolean;
     /** Number of columns in a row (1, 2, 3, or 4, default: 3) */
     columns?: 1 | 2 | 3 | 4;
-    /** Density / size of the cells: 'small' | 'default' | 'large' (default: 'default') */
-    size?: 'small' | 'default' | 'large';
+    column?: 1 | 2 | 3 | 4;
+    /** Density / size of the cells: 'mini' | 'small' | 'default' | 'large' (default: 'default') */
+    size?: 'mini' | 'small' | 'default' | 'large';
     /** Layout direction of label and value: 'horizontal' | 'vertical' (default: 'horizontal') */
     layout?: 'horizontal' | 'vertical';
     /** List of description items to render */
     items?: ProDescriptionItem[];
+    data?: ProDescriptionItem[];
+    /** Whether to show a colon after the label in horizontal layout */
+    colon?: boolean;
     /** Whether inline editing is enabled globally */
     editable?: boolean;
     /** Callback triggered when a field value is saved */
@@ -40,16 +44,22 @@
   let {
     title,
     bordered = true,
-    columns = 3,
+    columns,
+    column,
     size = 'default',
     layout = 'horizontal',
-    items = [],
+    items,
+    data,
+    colon = false,
     editable = false,
     onedit,
     extra,
     children,
     class: className = '',
   }: ProDescriptionsProps = $props();
+
+  const effectiveColumns = $derived(column ?? columns ?? 3);
+  const effectiveItems = $derived(data ?? items ?? []);
 
   let editingKey = $state<string | null>(null);
   let editValue = $state<unknown>('');
@@ -79,8 +89,10 @@
     }
   }
 
-  function getPaddingClass(size: 'small' | 'default' | 'large'): string {
+  function getPaddingClass(size: 'mini' | 'small' | 'default' | 'large'): string {
     switch (size) {
+      case 'mini':
+        return 'px-2.5 py-1 text-xs';
       case 'small':
         return 'px-3 py-1.5 text-xs';
       case 'large':
@@ -108,7 +120,7 @@
   }
 
   let gridColsClass = $derived.by(() => {
-    switch (columns) {
+    switch (effectiveColumns) {
       case 1:
         return 'grid-cols-1';
       case 2:
@@ -133,7 +145,11 @@
     <div class="mb-3 flex items-center justify-between gap-3">
       {#if title}
         <h3 class="text-sm font-semibold tracking-tight text-foreground">
-          {title}
+          {#if typeof title === 'string'}
+            {title}
+          {:else}
+            {@render title()}
+          {/if}
         </h3>
       {/if}
       {#if extra}
@@ -144,7 +160,7 @@
     </div>
   {/if}
 
-  {#if items && items.length > 0}
+  {#if effectiveItems && effectiveItems.length > 0}
     <div
       class={cn(
         'grid overflow-hidden rounded-[4px]',
@@ -152,8 +168,8 @@
         gridColsClass
       )}
     >
-      {#each items as item (item.key)}
-        {@const span = Math.min(item.span || 1, columns)}
+      {#each effectiveItems as item (item.key)}
+        {@const span = Math.min(item.span || 1, effectiveColumns)}
         {@const isItemEditable = editable || item.editable}
         <div
           class={cn(
@@ -176,7 +192,7 @@
               layout === 'horizontal' ? 'sm:w-36 shrink-0 sm:border-r' : 'border-b'
             )}
           >
-            {item.label}
+          {item.label}{colon && layout === 'horizontal' ? ' :' : ''}
           </div>
 
           <!-- Value -->
