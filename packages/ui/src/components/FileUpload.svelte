@@ -216,7 +216,7 @@
   const normalizedMaxFiles = $derived.by(() => {
     if (!multiple) return 1;
     const candidate = resolvedMaxFiles;
-    return Number.isSafeInteger(candidate) && candidate > 0 ? candidate : 10;
+    return typeof candidate === 'number' && Number.isSafeInteger(candidate) && candidate > 0 ? candidate : 10;
   });
 
   type UploadItemUpdate = Partial<Omit<UploadItem, 'error' | 'url' | 'uploadId' | 'cleanupStatus'>> & {

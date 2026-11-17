@@ -683,14 +683,14 @@
   const visibleOptions = $derived(filterTree(effectiveOptions, searchQuery));
 
   interface VisibleNode {
-    node: TreeSelectOption;
+    node: NormalizedTreeSelectOption;
     level: number;
     position: number;
     size: number;
   }
   const flatVisibleNodes = $derived.by(() => {
     const result: VisibleNode[] = [];
-    function visit(nodes: TreeSelectOption[], level: number): void {
+    function visit(nodes: NormalizedTreeSelectOption[], level: number): void {
       nodes.forEach((node, index) => {
         result.push({ node, level, position: index + 1, size: nodes.length });
         if (hasChildren(node) && isNodeExpanded(node) && node.children) visit(node.children, level + 1);
