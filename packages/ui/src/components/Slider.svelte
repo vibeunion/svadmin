@@ -20,6 +20,7 @@
     reverse?: boolean;
     marks?: Record<number, string>;
     class?: string;
+    onChange?: (value: number) => void;
     onchange?: (value: number) => void;
   }
 
@@ -41,8 +42,14 @@
     reverse = false,
     marks,
     class: className = '',
+    onChange,
     onchange,
   }: Props = $props();
+
+  const emitChange = (next: number): void => {
+    onchange?.(next);
+    onChange?.(next);
+  };
 
   let internalValue = $state(untrack(() => defaultValue));
   const effectiveValue = $derived(value !== undefined ? value : internalValue);
@@ -66,7 +73,7 @@
     } else {
       internalValue = next;
     }
-    onchange?.(next);
+    emitChange(next);
   }
 </script>
 
@@ -105,7 +112,7 @@
           class="svadmin-slider__mark"
           style={`left: ${pct}%;`}
           disabled={disabled}
-          onclick={() => { if (!disabled) { value = valNum; onchange?.(valNum); } }}
+          onclick={() => { if (!disabled) { value = valNum; emitChange(valNum); } }}
         >
           {label}
         </button>

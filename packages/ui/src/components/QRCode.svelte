@@ -36,6 +36,8 @@
     status?: QRCodeStatus;
     /** Custom status text displayed on overlay */
     statusText?: string;
+    /** Callback when user clicks the refresh button in expired status (alias) */
+    onRefresh?: () => void;
     /** Callback when user clicks the refresh button in expired status */
     onrefresh?: () => void;
     /** Overrides ConfigProvider and i18n for the status copy. */
@@ -57,6 +59,7 @@
     background = 'var(--background, white)',
     status = 'normal',
     statusText,
+    onRefresh,
     onrefresh,
     locale,
     ariaLabel = 'QR code',
@@ -78,6 +81,10 @@
     scanned: componentText(i18n, activeLocale, 'qrCode.scanned'),
     empty: componentText(i18n, activeLocale, 'qrCode.empty'),
   });
+  const emitRefresh = (): void => {
+    onrefresh?.();
+    onRefresh?.();
+  };
 
   const centerIcon = $derived(image ?? icon);
   const effectiveIconSize = $derived(iconSize ?? Math.round(size / 4.5));
@@ -145,7 +152,7 @@
           <button
             type="button"
             class="svadmin-qr-code__refresh-btn"
-            onclick={onrefresh}
+            onclick={emitRefresh}
             aria-label={copy.refreshLabel}
           >
             <RefreshCw size={12} />

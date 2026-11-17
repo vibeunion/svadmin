@@ -24,6 +24,7 @@
     reverse?: boolean;
     marks?: Record<number, string>;
     class?: string;
+    onChange?: (value: RangeSliderValue) => void;
     onchange?: (value: RangeSliderValue) => void;
   }
 
@@ -44,8 +45,14 @@
     reverse = false,
     marks,
     class: className = '',
+    onChange,
     onchange,
   }: Props = $props();
+
+  const emitChange = (result: RangeSliderValue): void => {
+    onchange?.(result);
+    onChange?.(result);
+  };
 
   let internalValue = $state(untrack(() => defaultValue));
   const effectiveValue = $derived(value !== undefined ? value : internalValue);
@@ -70,7 +77,7 @@
     } else {
       internalValue = result;
     }
-    onchange?.(result);
+    emitChange(result);
   }
 </script>
 

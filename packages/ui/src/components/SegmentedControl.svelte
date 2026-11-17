@@ -20,6 +20,7 @@
     ariaLabel: string;
     dir?: 'ltr' | 'rtl';
     class?: string;
+    onChange?: (value: T) => void;
     onchange?: (value: T) => void;
   }
 
@@ -33,6 +34,7 @@
     ariaLabel,
     dir,
     class: className = '',
+    onChange,
     onchange,
   }: Props<T> = $props();
 
@@ -64,6 +66,7 @@
       previousExternal = option.value;
       internalValue = option.value;
       onchange?.(option.value);
+      onChange?.(option.value);
     }
   }
 
