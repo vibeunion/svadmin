@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.136.0](https://github.com/vibeunion/svadmin/compare/ui-v0.135.0...ui-v0.136.0) (2026-11-17)
+
+
+### 🚀 Features
+
+* **ui:** add card mode option to Calendar ([#856](https://github.com/vibeunion/svadmin/issues/856)) ([dbdc2e1](https://github.com/vibeunion/svadmin/commit/dbdc2e1737192c4ba809bc82a9629cc420aed09a))
+* **ui:** add compact option to InputGroup, okText to ModalForm/DrawerForm, and maxCount to Badge ([#861](https://github.com/vibeunion/svadmin/issues/861)) ([f8389a7](https://github.com/vibeunion/svadmin/commit/f8389a7f9c27cf02f3909d4e76ec2bfd70d26b6b))
+* **ui:** add loading, animation, and children slots to Skeleton ([#857](https://github.com/vibeunion/svadmin/issues/857)) ([38de7dd](https://github.com/vibeunion/svadmin/commit/38de7dd8d69cf0a43e91f4a6471b44358cfa3ed5))
+* **ui:** add size options to Collapse and type context to Tabs ([#860](https://github.com/vibeunion/svadmin/issues/860)) ([2094ecb](https://github.com/vibeunion/svadmin/commit/2094ecbd7683ec80042e9fa7880100328be804e6))
+* **ui:** add status overlay and refresh options to QRCode ([#854](https://github.com/vibeunion/svadmin/issues/854)) ([eeb3cd0](https://github.com/vibeunion/svadmin/commit/eeb3cd02c818523d5d10f4f98b27a8d941be0899))
+* **ui:** add title and extra props to Card and type alias to Alert ([#859](https://github.com/vibeunion/svadmin/issues/859)) ([0a2e4a5](https://github.com/vibeunion/svadmin/commit/0a2e4a56149b5db6752389decb4d04d4d5fcbdbb))
+* **ui:** add title, description, and hover preview overlay to Image ([#855](https://github.com/vibeunion/svadmin/issues/855)) ([dc4838b](https://github.com/vibeunion/svadmin/commit/dc4838b5d72fe721c327404ca4fca8e84a9182d5))
+* **ui:** align calendar, image, and QR panel metrics ([#858](https://github.com/vibeunion/svadmin/issues/858)) ([99468b3](https://github.com/vibeunion/svadmin/commit/99468b38f4299a63d0d59db36163a04f6fc008b7))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** narrow the Card title snippet for the type checker ([44d273d](https://github.com/vibeunion/svadmin/commit/44d273dacdc956ac7666294981ba9362f61811ff))
+
+
+### 📝 Documentation
+
+* **ui:** neutralize the remaining upstream brand references ([d8ee460](https://github.com/vibeunion/svadmin/commit/d8ee46091e274d598b1f764a93d56da22abab13c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.17
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.2
+
 ## [0.135.0](https://github.com/vibeunion/svadmin/compare/ui-v0.134.0...ui-v0.135.0) (2026-11-16)
 
 

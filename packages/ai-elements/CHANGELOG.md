@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.5](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.15.4...ai-elements-v0.15.5) (2026-11-17)
+
+
+### 📝 Documentation
+
+* **ui:** neutralize the remaining upstream brand references ([d8ee460](https://github.com/vibeunion/svadmin/commit/d8ee46091e274d598b1f764a93d56da22abab13c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.2
+
 ## [0.15.4](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.15.3...ai-elements-v0.15.4) (2026-11-16)
 
 

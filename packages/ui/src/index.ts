@@ -45,7 +45,7 @@ export { default as RadioGroup, default as Radio, type RadioGroupOption } from '
 export { default as TagsInput, default as InputTag } from './components/TagsInput.svelte';
 export { default as Slider } from './components/Slider.svelte';
 export { default as RangeSlider, type RangeSliderValue } from './components/RangeSlider.svelte';
-export { default as ColorPicker } from './components/ColorPicker.svelte';
+export { default as ColorPicker, type ColorPickerSize } from './components/ColorPicker.svelte';
 export { default as Rate } from './components/Rate.svelte';
 export { default as PivotExportButton } from './components/PivotExportButton.svelte';
 export type { PivotCache } from '@svadmin/core/pivot';

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/typesense",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Typesense instant in-memory search & faceted DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
