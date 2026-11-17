@@ -69,8 +69,11 @@ describe("Skeleton loading and animation options", () => {
     expect(textContainer).not.toBeNull();
     const lines = container.querySelectorAll('[data-slot="skeleton-line"]');
     expect(lines.length).toBe(4);
-    expect((lines[3] as HTMLElement).style.width).toBe('120px');
-    expect(lines[0].classList.contains('rounded-full')).toBe(true);
+    const lastLine = lines[3];
+    const firstLine = lines[0];
+    if (lastLine === undefined || firstLine === undefined) throw new Error('expected four skeleton lines');
+    expect((lastLine as HTMLElement).style.width).toBe('120px');
+    expect(firstLine.classList.contains('rounded-full')).toBe(true);
   });
 
   it("renders structured image and avatar skeleton block", () => {

@@ -32,16 +32,19 @@ describe('Collapse, Carousel, Calendar, and MentionsInput option parity', () => 
       count: 3,
       defaultCurrent: 1,
       onChange,
-      children: createRawSnippet((getIndex) => ({
+      children: createRawSnippet<[number]>((getIndex: () => number) => ({
         render: () => `<div>Slide ${getIndex?.() ?? 0}</div>`,
       })),
     });
 
     const dots = view.container.querySelectorAll('.svadmin-carousel__dots button');
     expect(dots.length).toBe(3);
-    expect(dots[1].getAttribute('aria-selected')).toBe('true');
+    const selectedDot = dots[1];
+    const nextDot = dots[2];
+    if (selectedDot === undefined || nextDot === undefined) throw new Error('expected three carousel dots');
+    expect(selectedDot.getAttribute('aria-selected')).toBe('true');
 
-    await fireEvent.click(dots[2]);
+    await fireEvent.click(nextDot);
     expect(onChange).toHaveBeenCalledWith(2);
   });
 
