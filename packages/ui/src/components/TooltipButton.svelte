@@ -13,6 +13,7 @@
     variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
     size?: 'default' | 'sm' | 'lg' | 'icon' | 'icon-sm';
     side?: 'top' | 'right' | 'bottom' | 'left';
+    color?: string;
     class?: string;
     onclick?: (e: MouseEvent) => void;
     type?: ButtonProps['type'];
@@ -24,6 +25,7 @@
     variant = 'ghost',
     size = 'icon',
     side = 'top',
+    color,
     class: className = '',
     onclick,
     disabled = false,
@@ -68,5 +70,5 @@
       </Button>
     {/snippet}
   </Tooltip.Trigger>
-  <Tooltip.Content {side}>{tooltip}</Tooltip.Content>
+  <Tooltip.Content {side} {color}>{tooltip}</Tooltip.Content>
 </Tooltip.Root>

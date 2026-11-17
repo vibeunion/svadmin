@@ -26,6 +26,8 @@
 		offset,
 		showZero = false,
 		color,
+		countStyle,
+		dotStyle,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
@@ -40,6 +42,8 @@
 		offset?: [number, number] | undefined;
 		showZero?: boolean | undefined;
 		color?: string | undefined;
+		countStyle?: string | undefined;
+		dotStyle?: string | undefined;
 	} = $props();
 
 	const config = useComponentConfig();
@@ -134,7 +138,7 @@
 						isSmall ? 'h-1.5 w-1.5' : 'h-2 w-2',
 						status ? statusColorClass : 'bg-destructive',
 					)}
-					style={`${offsetStyle}${color ? ` background-color: ${color};` : ''}`}
+					style={`${offsetStyle}${color ? ` background-color: ${color};` : ''}${dotStyle ? ` ${dotStyle};` : ''}`}
 				></span>
 			{:else if displayCount !== null}
 				<span
@@ -144,7 +148,7 @@
 						isSmall ? 'min-w-3.5 h-3.5 px-1 text-[9px] font-medium' : 'min-w-4.5 h-4.5 px-1.5 text-[11px] font-semibold',
 						status ? cn(statusColorClass, 'text-primary-foreground') : 'bg-destructive text-destructive-foreground',
 					)}
-					style={`${offsetStyle}${color ? ` background-color: ${color};` : ''}`}
+					style={`${offsetStyle}${color ? ` background-color: ${color};` : ''}${countStyle ? ` ${countStyle};` : ''}`}
 				>
 					{displayCount}
 				</span>
@@ -166,7 +170,7 @@
 		{#if dot}
 			<span
 				class={cn('rounded-full', isSmall ? 'h-1.5 w-1.5' : 'h-2 w-2', status ? statusColorClass : 'bg-destructive')}
-				style={color ? `background-color: ${color}` : undefined}
+				style={[color ? `background-color: ${color}` : undefined, dotStyle].filter(Boolean).join('; ') || undefined}
 			></span>
 		{:else if displayCount !== null}
 			<span
@@ -175,7 +179,7 @@
 					isSmall ? 'min-w-3.5 h-3.5 px-1 text-[9px] font-medium' : 'min-w-4.5 h-4.5 px-1.5 text-[11px] font-semibold',
 					status ? cn(statusColorClass, 'text-primary-foreground') : 'bg-destructive text-destructive-foreground',
 				)}
-				style={color ? `background-color: ${color}` : undefined}
+				style={[color ? `background-color: ${color}` : undefined, countStyle].filter(Boolean).join('; ') || undefined}
 			>
 				{displayCount}
 			</span>

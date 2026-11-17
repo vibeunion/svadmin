@@ -72,6 +72,7 @@
 		arrowClasses?: string;
 		portalProps?: WithoutChildrenOrChild<ComponentProps<typeof TooltipPortal>>;
 		size?: "default" | "mini";
+		color?: string;
 	};
 
 	let {
@@ -107,6 +108,7 @@
 		arrowClasses,
 		portalProps,
 		size = "default",
+		color,
 		...domProps
 	}: TooltipContentProps = $props();
 
@@ -159,6 +161,7 @@
 	const contentStyle = $derived(
 		[
 			serializeStyle(style),
+			color ? `background-color: ${color}` : undefined,
 			`position: ${strategy}`,
 			`left: ${x}px`,
 			`top: ${y}px`,
@@ -324,7 +327,7 @@
 					bind:this={arrowRef}
 					aria-hidden="true"
 					data-side={resolvedSide}
-					style={arrowStyle}
+					style={[arrowStyle, color ? `background-color: ${color}` : undefined].filter(Boolean).join('; ')}
 					class={cn("svadmin-tooltip-arrow", arrowClasses)}
 				></div>
 			</div>
