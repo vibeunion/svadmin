@@ -3,7 +3,7 @@ import { render } from '@testing-library/svelte';
 import Spin from './Spin.svelte';
 import Badge from './ui/badge/badge.svelte';
 
-describe('Spin Arco Parity (dot, size options)', () => {
+describe('Spin dot and size options', () => {
   it('renders dot indicator when dot=true', () => {
     const { container } = render(Spin, {
       props: { dot: true, loading: true },
@@ -33,7 +33,7 @@ describe('Spin Arco Parity (dot, size options)', () => {
   });
 });
 
-describe('Badge Arco Parity (danger, primary, info status and small/mini size)', () => {
+describe('Badge status and small/mini size', () => {
   it('maps status="danger" to destructive color class', () => {
     const { container } = render(Badge, {
       props: { status: 'danger', text: '错误警告' },

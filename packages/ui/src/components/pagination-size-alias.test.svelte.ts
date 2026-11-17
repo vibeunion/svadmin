@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render as renderBare } from '@testing-library/svelte';
 import ListPagination from './ListPagination.svelte';
 
-describe('ListPagination Arco parity (size, disabled, showTotal, current)', () => {
+describe('ListPagination size, disabled, showTotal, and current options', () => {
   it('renders with size="mini", "small", "large", and "default"', () => {
     const { container, rerender } = renderBare(ListPagination, {
       props: { page: 1, totalPages: 5, total: 50, size: 'mini', onPageChange: vi.fn() },

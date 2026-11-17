@@ -23,7 +23,7 @@
     description?: string;
     /** Optional illustration URL. Mirrors the reference `image` prop. */
     image?: string;
-    /** Alias for `image` matching Arco Design `imgSrc`. */
+    /** Alias for `image` matching the `imgSrc` convention. */
     imgSrc?: string;
     imageAlt?: string;
     /** Optional custom icon slot; ignored when `image` is set. */

@@ -451,6 +451,11 @@ h1, h2, h3, h4, h5, h6, [data-slot="card-title"] {
     justify-content: center;
     border-radius: 999px;
   }
+  .svadmin-avatar:is([data-size="mini"], .svadmin-avatar-size--mini) {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+  }
   .svadmin-avatar:is([data-size="default"], .svadmin-avatar-size--default) {
     width: 2.5rem;
     height: 2.5rem;

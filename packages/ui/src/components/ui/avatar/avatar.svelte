@@ -22,14 +22,32 @@
 		shape = "circle",
 		fallback,
 		class: className,
+		style,
 		...restProps
 	}: Props = $props();
+
+	const isNumericSize = $derived(typeof size === "number");
+	const sizeStyle = $derived(
+		isNumericSize
+			? `width: ${size}px; height: ${size}px; font-size: ${Math.round((size as number) * 0.45)}px;`
+			: undefined
+	);
+
+	const mergedStyle = $derived.by(() => {
+		if (sizeStyle && style) return `${sizeStyle} ${style}`;
+		return sizeStyle ?? style;
+	});
 
 	let imgError = $state(false);
 </script>
 
 {#if src && !imgError}
-	<span data-size={size} data-shape={shape} class={cn(resolveAvatarVariants({ size, shape }), className)}>
+	<span
+		data-size={size}
+		data-shape={shape}
+		style={mergedStyle}
+		class={cn(resolveAvatarVariants({ size, shape }), className)}
+	>
 		<img
 			bind:this={ref}
 			data-slot="avatar"
@@ -45,6 +63,7 @@
 		data-slot="avatar-fallback"
 		data-size={size}
 		data-shape={shape}
+		style={mergedStyle}
 		class={cn(
 			resolveAvatarVariants({ size, shape }),
 			"svadmin-avatar-fallback",

@@ -6,6 +6,8 @@
   export interface StepItem {
     id?: string;
     title: string;
+    subTitle?: string;
+    subtitle?: string;
     description?: string;
     icon?: Snippet;
     disabled?: boolean;
@@ -17,7 +19,7 @@
     direction?: 'horizontal' | 'vertical';
     labelPlacement?: 'horizontal' | 'vertical';
     type?: 'default' | 'dot';
-    size?: 'default' | 'small';
+    size?: 'default' | 'small' | 'mini' | 'large';
     status?: 'wait' | 'process' | 'finish' | 'error';
     clickable?: boolean;
     class?: string;
@@ -30,12 +32,14 @@
     direction = 'horizontal',
     labelPlacement = 'horizontal',
     type = 'default',
-    size = 'default',
+    size: sizeProp = 'default',
     status = 'process',
     clickable = false,
     class: className = '',
     onchange,
   }: Props = $props();
+
+  const size = $derived(sizeProp === 'small' || sizeProp === 'mini' ? 'small' : 'default');
 
   function state(index: number): 'finish' | 'process' | 'wait' | 'error' {
     if (index < current) return 'finish';
@@ -82,7 +86,12 @@
           {/if}
         </span>
         <span class="svadmin-steps__text">
-          <span class="svadmin-steps__title">{item.title}</span>
+          <span class="svadmin-steps__title">
+            {item.title}
+            {#if item.subTitle || item.subtitle}
+              <span class="svadmin-steps__subtitle">{item.subTitle ?? item.subtitle}</span>
+            {/if}
+          </span>
           {#if item.description}<span class="svadmin-steps__description">{item.description}</span>{/if}
         </span>
       </button>
@@ -140,6 +149,7 @@
   .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 400; line-height: 1.75; }
   .svadmin-steps__item[data-status='process'] .svadmin-steps__title { font-weight: 500; }
   .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 400; }
+  .svadmin-steps__subtitle { margin-inline-start: 0.5rem; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); font-weight: normal; }
   .svadmin-steps__description { margin-top: 2px; color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
   .svadmin-steps__connector {
     position: relative;
