@@ -46,7 +46,9 @@
     viewportHeight?: number | undefined;
     size?: 'mini' | 'small' | 'default' | 'large' | undefined;
     class?: string | undefined;
+    defaultValue?: string | number | (string | number)[] | undefined;
     onchange?: (value: string | number | (string | number)[] | undefined) => void;
+    onChange?: (value: string | number | (string | number)[] | undefined) => void;
   }
 
   let {
@@ -58,6 +60,7 @@
     treeData,
     data,
     value = $bindable(undefined),
+    defaultValue,
     multiple = false,
     placeholder,
     searchable = true,
@@ -72,7 +75,18 @@
     viewportHeight = 280,
     class: className,
     onchange,
+    onChange,
   }: Props = $props();
+
+  let initialTreeSelectSync = false;
+  $effect.pre(() => {
+    if (!initialTreeSelectSync) {
+      initialTreeSelectSync = true;
+      if (defaultValue !== undefined && value === undefined) {
+        value = defaultValue;
+      }
+    }
+  });
 
   const effectiveSearchable = $derived(showSearch ?? searchable);
 
@@ -401,6 +415,7 @@
       : [...selectedValues, ...leaves.map((leaf) => optionKey(leaf)).filter((value) => !isSelected(value))];
     value = next;
     onchange?.(next);
+    onChange?.(next);
   }
 
   function isCurrentSelection(attempt: SelectionAttempt): boolean {
@@ -483,11 +498,13 @@
           : [...selectedValues, optionKey(node)];
         value = next;
         onchange?.(next);
+        onChange?.(next);
       }
     } else {
       const next = optionKey(node);
       value = next;
       onchange?.(next);
+      onChange?.(next);
       open = false;
     }
   }
@@ -644,6 +661,7 @@
     const next = multiple ? [] : undefined;
     value = next;
     onchange?.(next);
+    onChange?.(next);
     triggerElement?.focus();
   }
 
@@ -656,6 +674,7 @@
       const next = selectedValues.filter((v) => v !== val);
       value = next;
       onchange?.(next);
+      onChange?.(next);
     }
     triggerElement?.focus();
   }
