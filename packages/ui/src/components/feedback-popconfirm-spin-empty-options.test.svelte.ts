@@ -62,10 +62,12 @@ describe('Feedback components option parity (EmptyState, Spin, Popconfirm, Rate)
     const buttons = getAllByRole('radio');
     expect(buttons.length).toBe(5);
 
-    await fireEvent.mouseEnter(buttons[3]);
+    const fourthStar = buttons[3];
+    if (fourthStar === undefined) throw new Error('expected five stars');
+    await fireEvent.mouseEnter(fourthStar);
     expect(onHoverChange).toHaveBeenCalledWith(4);
 
-    await fireEvent.click(buttons[3]);
+    await fireEvent.click(fourthStar);
     expect(onChange).toHaveBeenCalledWith(4);
   });
 });
