@@ -11,6 +11,7 @@
     allowClear?: boolean | undefined;
     allowHalf?: boolean | undefined;
     readonly?: boolean | undefined;
+    readOnly?: boolean | undefined;
     size?: 'mini' | 'small' | 'default' | 'large' | number | undefined;
     name?: string | undefined;
     disabled?: boolean | undefined;
@@ -24,6 +25,8 @@
     grading?: boolean | undefined;
     class?: string | undefined;
     onchange?: ((value: number) => void) | undefined;
+    onChange?: ((value: number) => void) | undefined;
+    onHoverChange?: ((value: number) => void) | undefined;
   }
 
   let {
@@ -34,6 +37,7 @@
     allowClear = true,
     allowHalf = false,
     readonly = false,
+    readOnly,
     size = 'default',
     name,
     disabled = false,
@@ -45,7 +49,11 @@
     grading = false,
     class: className = '',
     onchange,
+    onChange,
+    onHoverChange,
   }: Props = $props();
+
+  const resolvedReadonly = $derived(readOnly ?? readonly);
 
   let initialized = false;
   $effect.pre(() => {
@@ -78,27 +86,29 @@
   });
 
   function choose(next: number): void {
-    if (disabled || readonly) return;
+    if (disabled || resolvedReadonly) return;
     const selected = allowClear && normalizedValue === next ? 0 : next;
     value = selected;
     hoverValue = null;
     onchange?.(selected);
+    onChange?.(selected);
   }
 
   function handlePointerMove(event: MouseEvent, rating: number): void {
-    if (disabled || readonly) return;
-    if (!allowHalf) {
-      hoverValue = rating;
-      return;
+    if (disabled || resolvedReadonly) return;
+    let nextHover = rating;
+    if (allowHalf) {
+      const target = event.currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      const isLeftHalf = (event.clientX - rect.left) < rect.width / 2;
+      nextHover = isLeftHalf ? rating - 0.5 : rating;
     }
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const isLeftHalf = (event.clientX - rect.left) < rect.width / 2;
-    hoverValue = isLeftHalf ? rating - 0.5 : rating;
+    hoverValue = nextHover;
+    onHoverChange?.(nextHover);
   }
 
   function handleClick(event: MouseEvent, rating: number): void {
-    if (disabled || readonly) return;
+    if (disabled || resolvedReadonly) return;
     let next = rating;
     if (allowHalf) {
       const target = event.currentTarget as HTMLElement;
@@ -110,7 +120,7 @@
   }
 
   function handleKeydown(event: KeyboardEvent, _index: number): void {
-    if (disabled || readonly) return;
+    if (disabled || resolvedReadonly) return;
     const delta = allowHalf ? 0.5 : 1;
     if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
       event.preventDefault();
@@ -136,11 +146,16 @@
   aria-invalid={invalid || undefined}
   aria-describedby={describedby}
   data-invalid={invalid ? 'true' : undefined}
-  data-readonly={readonly ? 'true' : undefined}
+  data-readonly={resolvedReadonly ? 'true' : undefined}
   data-size={typeof size === 'number' ? undefined : size}
   data-grading={grading ? 'true' : undefined}
   data-grade={currentGrade}
-  onmouseleave={() => { if (!disabled && !readonly) hoverValue = null; }}
+  onmouseleave={() => {
+    if (!disabled && !resolvedReadonly) {
+      hoverValue = null;
+      onHoverChange?.(0);
+    }
+  }}
 >
   {#if name}<input type="hidden" {name} value={normalizedValue} required={required} {disabled} />{/if}
   {#each Array(normalizedCount) as _, index (index)}
@@ -154,12 +169,12 @@
       title={itemTooltip}
       aria-label={itemTooltip ?? `${rating} of ${normalizedCount}`}
       aria-checked={normalizedValue >= rating}
-      aria-disabled={disabled || readonly ? 'true' : undefined}
-      tabindex={disabled || readonly ? -1 : normalizedValue === rating || (normalizedValue === 0 && index === 0) ? 0 : -1}
+      aria-disabled={disabled || resolvedReadonly ? 'true' : undefined}
+      tabindex={disabled || resolvedReadonly ? -1 : normalizedValue === rating || (normalizedValue === 0 && index === 0) ? 0 : -1}
       disabled={disabled}
       class:svadmin-rate__button--filled={isFilled || isHalf}
       class:svadmin-rate__button--half={isHalf}
-      class:svadmin-rate__button--readonly={readonly}
+      class:svadmin-rate__button--readonly={resolvedReadonly}
       onmouseenter={(event) => handlePointerMove(event, rating)}
       onmousemove={(event) => handlePointerMove(event, rating)}
       onclick={(event) => handleClick(event, rating)}

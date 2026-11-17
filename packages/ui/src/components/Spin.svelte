@@ -6,10 +6,12 @@
 
   interface Props {
     loading?: boolean;
-    tip?: string;
+    tip?: string | Snippet;
     size?: SpinSize;
     dot?: boolean;
     icon?: Snippet;
+    element?: Snippet;
+    delay?: number;
     class?: string;
     children?: Snippet;
   }
@@ -20,9 +22,31 @@
     size = "default",
     dot = false,
     icon,
+    element,
+    delay = 0,
     class: className = "",
     children,
   }: Props = $props();
+
+  const resolvedIcon = $derived(element ?? icon);
+
+  // svelte-ignore state_referenced_locally
+  let visibleLoading = $state(loading && delay <= 0);
+
+  $effect(() => {
+    if (!loading) {
+      visibleLoading = false;
+      return;
+    }
+    if (delay <= 0) {
+      visibleLoading = true;
+      return;
+    }
+    const timer = setTimeout(() => {
+      visibleLoading = true;
+    }, delay);
+    return () => clearTimeout(timer);
+  });
 
   const isNumericSize = $derived(typeof size === "number");
   const sizeStyle = $derived(isNumericSize ? `width: ${size}px; height: ${size}px;` : undefined);
@@ -59,9 +83,9 @@
 </script>
 
 {#snippet spinIndicator()}
-  {#if icon}
+  {#if resolvedIcon}
     <span class="svadmin-spin__custom-icon" style={sizeStyle} aria-hidden="true">
-      {@render icon()}
+      {@render resolvedIcon()}
     </span>
   {:else if dot}
     <span
@@ -85,20 +109,36 @@
 
 {#if children}
   <div class={cn("svadmin-spin-container relative", className)}>
-    <div class={cn("svadmin-spin-children transition-opacity duration-200", loading && "opacity-40 pointer-events-none select-none")}>
+    <div class={cn("svadmin-spin-children transition-opacity duration-200", visibleLoading && "opacity-40 pointer-events-none select-none")}>
       {@render children()}
     </div>
-    {#if loading}
+    {#if visibleLoading}
       <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10" role="status" aria-live="polite">
         {@render spinIndicator()}
-        {#if tip}<span class="svadmin-spin__tip text-xs font-medium">{tip}</span>{/if}
+        {#if tip}
+          <span class="svadmin-spin__tip text-xs font-medium">
+            {#if typeof tip === "string"}
+              {tip}
+            {:else}
+              {@render tip()}
+            {/if}
+          </span>
+        {/if}
       </div>
     {/if}
   </div>
-{:else if loading}
+{:else if visibleLoading}
   <div class={cn("svadmin-spin inline-flex items-center gap-2", className)} role="status" aria-live="polite">
     {@render spinIndicator()}
-    {#if tip}<span class="svadmin-spin__tip text-xs">{tip}</span>{/if}
+    {#if tip}
+      <span class="svadmin-spin__tip text-xs">
+        {#if typeof tip === "string"}
+          {tip}
+        {:else}
+          {@render tip()}
+        {/if}
+      </span>
+    {/if}
   </div>
 {/if}
 
