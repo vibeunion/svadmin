@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack, type Snippet } from 'svelte';
-  import { cn } from '../utils';
+  import { cn } from '../utils.js';
 
   export interface PageContainerTab {
     key: string;
@@ -25,26 +25,40 @@
     subTitle?: string | Snippet;
     /** Breadcrumb trail items */
     breadcrumbs?: PageContainerBreadcrumb[];
+    /** Alias for breadcrumbs */
+    breadcrumb?: PageContainerBreadcrumb[];
     /** Whether to show back navigation button */
     backIcon?: boolean;
     /** Callback when back button is clicked */
     onback?: () => void;
+    /** Alias for onback */
+    onBack?: () => void;
     /** Status tags or badges displayed next to the title */
     tags?: PageContainerTag[];
     /** Header tabs navigation items */
     tabs?: PageContainerTab[];
+    /** Alias for tabs */
+    tabList?: PageContainerTab[];
     /** Currently active tab key */
     activeTab?: string;
+    /** Alias for activeTab */
+    tabActiveKey?: string;
     /** Default active tab for uncontrolled usage */
     defaultActiveTab?: string;
+    /** Alias for defaultActiveTab */
+    defaultTabActiveKey?: string;
     /** Callback triggered when a tab is selected */
     ontabchange?: (key: string) => void;
+    /** Alias for ontabchange */
+    onTabChange?: (key: string) => void;
     /** If true, content has no card wrapper background (transparent) */
     ghost?: boolean;
     /** Content container width layout ('fluid' or 'fixed') */
     contentWidth?: 'fluid' | 'fixed';
     /** Whether header is fixed at top */
     fixedHeader?: boolean;
+    /** Content area below title in header */
+    content?: string | Snippet;
     /** Main content body */
     children?: Snippet;
     /** Custom complete header slot */
@@ -60,17 +74,24 @@
   let {
     title,
     subTitle,
-    breadcrumbs,
+    breadcrumbs: breadcrumbsProp,
+    breadcrumb: breadcrumbProp,
     backIcon = false,
     onback,
+    onBack,
     tags,
-    tabs,
+    tabs: tabsProp,
+    tabList,
     activeTab = $bindable(),
+    tabActiveKey = $bindable(),
     defaultActiveTab,
+    defaultTabActiveKey,
     ontabchange,
+    onTabChange,
     ghost = false,
     contentWidth = 'fluid',
     fixedHeader = false,
+    content,
     children,
     header,
     extra,
@@ -78,21 +99,30 @@
     class: className = '',
   }: PageContainerProps = $props();
 
-  let internalActiveTab = $state(untrack(() => defaultActiveTab ?? tabs?.[0]?.key ?? ''));
-  const effectiveActiveTab = $derived(activeTab ?? internalActiveTab);
+  const resolvedBreadcrumbs = $derived(breadcrumbProp ?? breadcrumbsProp);
+  const resolvedTabs = $derived(tabList ?? tabsProp);
+  // callbacks resolved on demand
+
+  // svelte-ignore state_referenced_locally
+  let internalActiveTab = $state(untrack(() => (defaultTabActiveKey ?? defaultActiveTab) ?? (tabList ?? tabsProp)?.[0]?.key ?? ''));
+  const effectiveActiveTab = $derived(tabActiveKey ?? activeTab ?? internalActiveTab);
 
   function handleTabClick(tab: PageContainerTab) {
     if (tab.disabled) return;
     if (activeTab !== undefined) {
       activeTab = tab.key;
-    } else {
+    }
+    if (tabActiveKey !== undefined) {
+      tabActiveKey = tab.key;
+    }
+    if (activeTab === undefined && tabActiveKey === undefined) {
       internalActiveTab = tab.key;
     }
-    ontabchange?.(tab.key);
+    (onTabChange ?? ontabchange)?.(tab.key);
   }
 
   function handleBack() {
-    onback?.();
+    (onBack ?? onback)?.();
   }
 
   function getTagToneClasses(tone?: PageContainerTag['tone']): string {
@@ -122,7 +152,7 @@
   <!-- Page Header Container -->
   {#if header}
     {@render header()}
-  {:else if title || breadcrumbs || extra || tabs}
+  {:else if title || resolvedBreadcrumbs || extra || resolvedTabs || content}
     <header
       class={cn(
         'svadmin-page-header border-b border-border bg-card px-6 pt-4 pb-0 transition-all',
@@ -136,9 +166,9 @@
         )}
       >
         <!-- Breadcrumb row -->
-        {#if breadcrumbs && breadcrumbs.length > 0}
+        {#if resolvedBreadcrumbs && resolvedBreadcrumbs.length > 0}
           <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            {#each breadcrumbs as item, index (item.href ?? `${item.label}-${index}`)}
+            {#each resolvedBreadcrumbs as item, index (item.href ?? `${item.label}-${index}`)}
               {#if index > 0}
                 <span class="text-muted select-none">/</span>
               {/if}
@@ -159,7 +189,7 @@
         <!-- Title & Extra row -->
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4">
           <div class="flex flex-wrap items-center gap-2.5">
-            {#if backIcon || onback}
+            {#if backIcon || onBack || onback}
               <button
                 type="button"
                 aria-label="返回上一页"
@@ -221,10 +251,20 @@
           {/if}
         </div>
 
+        {#if content}
+          <div class="pb-3 text-xs text-muted-foreground">
+            {#if typeof content === 'function'}
+              {@render content()}
+            {:else}
+              {content}
+            {/if}
+          </div>
+        {/if}
+
         <!-- Header Tabs -->
-        {#if tabs && tabs.length > 0}
+        {#if resolvedTabs && resolvedTabs.length > 0}
           <div role="tablist" class="flex items-center gap-6 border-t border-border/60 -mb-[1px]">
-            {#each tabs as tab (tab.key)}
+            {#each resolvedTabs as tab (tab.key)}
               <button
                 type="button"
                 role="tab"

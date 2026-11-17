@@ -13,11 +13,13 @@
     extra?: Snippet;
     tags?: Snippet;
     back?: Snippet;
+    backIcon?: Snippet | boolean;
     breadcrumb?: Snippet;
     footer?: Snippet;
     onBack?: () => void;
     backLabel?: string;
     showBreadcrumbs?: boolean;
+    headerStyle?: string;
     class?: string;
   }
 
@@ -29,18 +31,20 @@
     extra,
     tags,
     back,
+    backIcon,
     breadcrumb,
     footer,
     onBack,
     backLabel = 'Back',
     showBreadcrumbs = true,
+    headerStyle,
     class: className = '',
   }: Props = $props();
 
   const effectiveDescription = $derived(subTitle ?? description);
 </script>
 
-<div class={cn('svadmin-page-header', className)}>
+<div class={cn('svadmin-page-header', className)} style={headerStyle}>
   {#if breadcrumb}
     <div class="svadmin-page-header__breadcrumbs">
       {@render breadcrumb()}
@@ -52,7 +56,18 @@
     <div class="svadmin-page-header__heading">
       {#if back}
         {@render back()}
-      {:else if onBack}
+      {:else if typeof backIcon === 'function'}
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          class="svadmin-page-header__back"
+          onclick={onBack}
+          aria-label={backLabel}
+          title={backLabel}
+        >
+          {@render backIcon()}
+        </Button>
+      {:else if onBack || backIcon === true}
         <Button
           variant="ghost"
           size="icon-xs"
