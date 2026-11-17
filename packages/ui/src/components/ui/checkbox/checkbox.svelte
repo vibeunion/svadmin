@@ -7,6 +7,8 @@
 
 	export type CheckboxSize = "default" | "compact" | "small" | "mini" | "large";
 
+	let labelId = `svadmin-cb-${Math.random().toString(36).slice(2, 9)}`;
+
 	let {
 		ref = $bindable(null),
 		checked = $bindable(false),
@@ -57,6 +59,7 @@
 		class={cn("svadmin-checkbox", !children && className)}
 		bind:checked
 		bind:indeterminate
+		aria-labelledby={children && !restProps["aria-label"] ? labelId : undefined}
 		{...restProps}
 		onCheckedChange={handleCheckedChange}
 	>
@@ -78,7 +81,7 @@
 {#if children}
 	<label class={cn("svadmin-checkbox-wrapper inline-flex items-center gap-2 cursor-pointer select-none text-sm text-foreground", className)}>
 		{@render checkboxControl()}
-		<span class="svadmin-checkbox-label">{@render children()}</span>
+		<span id={labelId} class="svadmin-checkbox-label">{@render children()}</span>
 	</label>
 {:else}
 	{@render checkboxControl()}

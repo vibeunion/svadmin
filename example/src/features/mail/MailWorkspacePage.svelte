@@ -2,7 +2,7 @@
   import { beforeEach, captureAdminContext, useCreate, useInvalidate, useList, useUpdateMany } from '@svadmin/core';
   import { onMount } from 'svelte';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageShell, ContentPageHeader } from '@svadmin/ui';
+  import { Badge, Button, Checkbox, ContentPageShell, ContentPageHeader, Input, Textarea } from '@svadmin/ui';
   import { Plus, Send, Save, Reply, Forward, Archive } from '@lucide/svelte';
   import { demoContract, demoContracts } from '../../resource-contracts';
   import { demoRenderers } from '../../resource-rendering';
@@ -207,9 +207,9 @@
     {#if refreshNeeded}<p role="alert">{isZh ? '写入已完成，但列表刷新失败。请刷新列表，不要重复提交。' : 'Write completed, but list refresh failed. Refresh the list; do not resubmit.'}</p><Button variant="outline" disabled={busy} onclick={() => void refreshMail()}>{isZh ? '刷新邮件列表' : 'Refresh mail lists'}</Button>{/if}
     {#if composerOpen}
       <form class="space-y-3 border-y py-4" onsubmit={(event) => { event.preventDefault(); void saveMail(true); }}>
-        <label class="block text-sm">{isZh ? '收件人' : 'To'}<input type="email" class="mt-1 w-full rounded-md border bg-background p-2" bind:value={recipient} disabled={busy} /></label>
-        <label class="block text-sm">{isZh ? '主题' : 'Subject'}<input class="mt-1 w-full rounded-md border bg-background p-2" bind:value={subject} disabled={busy} required /></label>
-        <label class="block text-sm">{isZh ? '正文' : 'Body'}<textarea class="mt-1 min-h-32 w-full rounded-md border bg-background p-2" bind:value={body} disabled={busy} required></textarea></label>
+        <label class="block text-sm">{isZh ? '收件人' : 'To'}<Input type="email" class="mt-1" bind:value={recipient} disabled={busy} /></label>
+        <label class="block text-sm">{isZh ? '主题' : 'Subject'}<Input class="mt-1" bind:value={subject} disabled={busy} required /></label>
+        <label class="block text-sm">{isZh ? '正文' : 'Body'}<Textarea class="mt-1 min-h-32" bind:value={body} disabled={busy} required /></label>
         <div class="flex flex-wrap gap-3"><Button type="submit" disabled={busy}><Send class="size-4" />{isZh ? '发送到本地' : 'Send locally'}</Button><Button type="button" variant="outline" disabled={busy} onclick={() => void saveMail(false)}><Save class="size-4" />{isZh ? '保存草稿' : 'Save draft'}</Button><Button type="button" variant="ghost" disabled={busy} onclick={() => composerOpen = false}>{isZh ? '收起' : 'Collapse'}</Button></div>
       </form>
     {/if}
@@ -219,7 +219,7 @@
         <a class="block px-2 py-2 text-sm text-primary" href="#/user_settings?view=mail">{isZh ? '邮件设置' : 'Mail settings'}</a>
       </nav>
       <section class="min-w-0 space-y-4">
-        <div class="flex flex-wrap items-center gap-3"><label class="min-w-0 flex-1 text-sm">{isZh ? '搜索邮件' : 'Search mail'}<input class="mt-1 w-full rounded-md border bg-background p-2" bind:value={search} /></label>{#if isReceivedFolder}<label class="flex items-center gap-2 text-sm"><input type="checkbox" bind:checked={unreadOnly} />{isZh ? '仅未读' : 'Unread only'}</label>{/if}</div>
+        <div class="flex flex-wrap items-center gap-3"><label class="min-w-0 flex-1 text-sm">{isZh ? '搜索邮件' : 'Search mail'}<Input class="mt-1" bind:value={search} allowClear /></label>{#if isReceivedFolder}<div class="mt-6"><Checkbox bind:checked={unreadOnly}>{isZh ? '仅未读' : 'Unread only'}</Checkbox></div>{/if}</div>
         <WorkspaceQueryState {query} count={filtered.length} hasActiveFilters={Boolean(search.trim() || unreadOnly)}>
           <div class="grid gap-5 xl:grid-cols-[minmax(14rem,0.8fr)_minmax(0,1.2fr)]">
             <div class="divide-y">{#each filtered as message (message.id)}<button class="block w-full px-2 py-3 text-left" aria-pressed={selected?.id === message.id} onclick={() => selectedId = message.id}><strong class="block break-words text-sm">{message.subject}</strong><span class="mt-1 block break-words text-xs text-muted-foreground">{message.sender || message.to} · {message.date}</span></button>{/each}</div>

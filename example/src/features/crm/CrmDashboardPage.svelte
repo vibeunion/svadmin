@@ -1,7 +1,7 @@
 <script lang="ts">
   import { formatAdminCurrency, useList, useUpdateMany } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageShell, ContentPageHeader } from '@svadmin/ui';
+  import { Badge, Button, ContentPageShell, ContentPageHeader, Input } from '@svadmin/ui';
   import { demoContracts } from '../../resource-contracts';
   import { demoRenderers } from '../../resource-rendering';
   import { readHashView } from '../../utils/hashView';
@@ -112,7 +112,7 @@
         </section>
       </WorkspaceQueryState>
     {/if}
-    <label class="flex flex-wrap items-center gap-3 text-sm">{isZh ? '搜索' : 'Search'}<input class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" bind:value={search} /><Button variant="ghost" onclick={() => search = ''}>{isZh ? '清除' : 'Clear'}</Button></label>
+    <label class="flex flex-wrap items-center gap-3 text-sm">{isZh ? '搜索' : 'Search'}<Input class="min-w-0 flex-1" bind:value={search} allowClear /><Button variant="ghost" onclick={() => search = ''}>{isZh ? '清除' : 'Clear'}</Button></label>
     {#if feedback}<p role="status">{feedback}</p>{/if}
     <WorkspaceQueryState query={current.query} count={visibleCount} hasActiveFilters={Boolean(search.trim()) || view === 'tasks' || view === 'notes'}>
       <section class="divide-y" aria-label={current.title}>

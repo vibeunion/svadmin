@@ -1,6 +1,6 @@
 <!-- // @vibe-escape: Level 3 Headless / showcase template gallery layout composition -->
 <script lang="ts">
-  import { AppearanceSettings, Badge, Button, Grid, Input, JsonSchemaForm, ListPagination, Menu, NotificationsSettings, PageHeader, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
+import { AppearanceSettings, Badge, Button, Checkbox, Grid, Input, JsonSchemaForm, ListPagination, Menu, NotificationsSettings, PageHeader, ProfilePage, SecuritySettings, SegmentedControl, Statistic, Steps, Textarea, Timeline, TwoFactorStepper } from '@svadmin/ui';
   import {
     AdvancedDetailTemplate,
     AdvancedFormTemplate,
@@ -356,10 +356,9 @@
         <label>Name<Input aria-label="Workspace name" placeholder="Workspace name" bind:value={formName} /></label>
         <label>Owner<Input aria-label="Workspace owner" placeholder="Owner" bind:value={formOwner} /></label>
         <label>Description<Textarea aria-label="Workspace description" rows={4} placeholder="What should this workspace contain?" bind:value={formDescription} /></label>
-        <label class="svadmin-template-gallery__check">
-          <input type="checkbox" bind:checked={simulateFailure} />
-          Simulate publish failure
-        </label>
+        <div class="pt-1">
+          <Checkbox bind:checked={simulateFailure}>Simulate publish failure</Checkbox>
+        </div>
       </div>
     {/snippet}
     {#snippet summary()}
@@ -658,7 +657,6 @@
   .svadmin-template-gallery__status[data-submission='failed'] { color: var(--destructive); }
   .svadmin-template-gallery__status[data-submission='published'],
   .svadmin-template-gallery__status[data-submission='draft-saved'] { color: var(--foreground); }
-  .svadmin-template-gallery__form label.svadmin-template-gallery__check { display: flex; flex-direction: row; align-items: center; gap: var(--svadmin-space-2); color: var(--foreground); }
   .svadmin-template-gallery__table { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); }
   .svadmin-template-gallery__table [role='row'] { display: grid; grid-template-columns: minmax(12rem, 2fr) repeat(3, minmax(7rem, 1fr)); gap: var(--svadmin-space-3); padding: var(--svadmin-space-2) var(--svadmin-space-3); border-block-end: 1px solid var(--border); font-size: var(--svadmin-text-label); }
   .svadmin-template-gallery__table [role='row']:last-child { border-block-end: 0; }

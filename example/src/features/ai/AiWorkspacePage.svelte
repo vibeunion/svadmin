@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { captureAdminContext, useCreate, useDeleteMany, useList, useUpdateMany, type ChatMessage, type ChatMessagePart } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageHeader, ContentPageShell } from '@svadmin/ui';
+  import { Badge, Button, Checkbox, ContentPageHeader, ContentPageShell, Textarea } from '@svadmin/ui';
   import { Heart, Plus, Send, Copy } from '@lucide/svelte';
   import { demoContracts } from '../../resource-contracts';
   import { demoRenderers } from '../../resource-rendering';
@@ -147,7 +147,7 @@
     {:else}
       <div class="grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
         <aside class="min-w-0 border-b pb-4 lg:border-b-0 lg:border-r lg:pr-4">
-          <label class="mb-3 flex items-center gap-2 text-sm"><input type="checkbox" bind:checked={favoritesOnly} />{isZh ? '仅收藏' : 'Favorites only'}</label>
+          <div class="mb-3"><Checkbox bind:checked={favoritesOnly}>{isZh ? '仅收藏' : 'Favorites only'}</Checkbox></div>
           <WorkspaceQueryState {query} count={conversations.filter(item => !favoritesOnly || favorites.includes(item.id)).length} hasActiveFilters={favoritesOnly}>
             {#each conversations.filter(item => !favoritesOnly || favorites.includes(item.id)) as thread (thread.id)}
               <div class="flex items-start gap-2 border-b py-3"><a class="min-w-0 flex-1 break-words text-sm text-primary" href={`#/ai_conversations?thread=${thread.id}`}>{thread.title}</a><Button size="icon" variant="ghost" aria-label={isZh ? '收藏会话' : 'Favorite thread'} aria-pressed={favorites.includes(thread.id)} onclick={() => toggleFavorite(thread.id)}><Heart class={favorites.includes(thread.id) ? 'size-4 fill-primary text-primary' : 'size-4'} /></Button></div>
@@ -160,7 +160,7 @@
           {#if selected}<WorkspaceRecordLinks resource="ai_conversations" id={selected.id} />{/if}
           <div class="space-y-4" aria-live="polite">{#each messages as message (message.id)}<article class="border-b py-3"><Badge variant="outline">{message.role === 'user' ? (isZh ? '你' : 'You') : (isZh ? '本地助手' : 'Local assistant')}</Badge><p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{messageText(message)}</p></article>{:else}<p class="text-sm text-muted-foreground">{isZh ? '输入问题，或选择运营模板。' : 'Enter a question or choose an operations template.'}</p>{/each}</div>
           <form class="space-y-3" onsubmit={(event) => { event.preventDefault(); void send(); }}>
-            <label class="block text-sm">{isZh ? '问题' : 'Question'}<textarea class="mt-2 min-h-28 w-full rounded-md border bg-background p-3" bind:value={draft} disabled={busy} required></textarea></label>
+            <label class="block text-sm">{isZh ? '问题' : 'Question'}<Textarea class="mt-2 min-h-28" bind:value={draft} disabled={busy} required /></label>
             <Button type="submit" disabled={busy || !query.isSuccess || !draft.trim()}><Send class="size-4" />{busy ? (isZh ? '查询中…' : 'Querying…') : (isZh ? '发送' : 'Send')}</Button>
           </form>
         </section>
