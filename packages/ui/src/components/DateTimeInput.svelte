@@ -27,6 +27,8 @@
     size?: 'mini' | 'small' | 'default' | 'large' | undefined;
     status?: 'error' | 'warning' | 'normal' | undefined;
     class?: string | undefined;
+    defaultValue?: string | null | undefined;
+    onChange?: ((value: string | null) => void) | undefined;
     onchange?: ((value: string | null) => void) | undefined;
     timeZone?: string | undefined;
     valueMode?: DateTimeValueMode | undefined;
@@ -35,6 +37,7 @@
 
   let {
     value = $bindable(null),
+    defaultValue,
     mode = 'date',
     min,
     max,
@@ -52,6 +55,7 @@
     size = 'default',
     status,
     class: className = '',
+    onChange,
     onchange,
     timeZone,
     valueMode = 'civil',
@@ -75,7 +79,8 @@
     const instant = civilDateTimeToInstant(next, timeZone, disambiguation);
     return instant === undefined ? null : new Date(instant).toISOString();
   }
-  let draft = $state(untrack(() => toDraft(value)));
+  // svelte-ignore state_referenced_locally
+  let draft = $state(untrack(() => toDraft(value ?? defaultValue ?? null)));
   let inputRef = $state<HTMLInputElement | null>(null);
   const instantMode = $derived(valueMode === 'instant');
   function instantAllowed(next: string | null): boolean {
@@ -94,7 +99,14 @@
     !dateInputAllowed(draft, mode, min, max, disabledDate)
     || instantMode && (toValue(draft) === null || !instantAllowed(toValue(draft)))
   ));
+  let initialized = false;
   $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (value === null && defaultValue !== undefined) {
+        value = defaultValue;
+      }
+    }
     void mode;
     draft = toDraft(value);
   });
@@ -112,6 +124,7 @@
     if (!instantAllowed(next)) return;
     value = next;
     onchange?.(next);
+    onChange?.(next);
   }
 </script>
 

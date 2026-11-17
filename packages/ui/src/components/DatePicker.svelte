@@ -30,6 +30,8 @@
     size?: 'mini' | 'small' | 'default' | 'large';
     /** Status validation styling */
     status?: 'error' | 'warning' | 'normal';
+    defaultValue?: string | null;
+    onChange?: (value: string | null) => void;
     onchange?: (value: string | null) => void;
   }
 
@@ -37,6 +39,7 @@
 
   let {
     value = $bindable(null),
+    defaultValue,
     panel = false,
     picker = 'date',
     presets = [],
@@ -47,6 +50,7 @@
     status = 'normal',
     disabled = false,
     class: className,
+    onChange,
     onchange,
     ...nativeProps
   }: Props = $props();
@@ -68,6 +72,19 @@
   });
   const resolvedPlaceholder = $derived(placeholder ?? copy.selectDate);
   const weekdays = $derived(weekdayLabels(activeLocale));
+  const emitChange = (val: string | null): void => {
+    onchange?.(val);
+    onChange?.(val);
+  };
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (value === null && defaultValue !== undefined) {
+        value = defaultValue;
+      }
+    }
+  });
   let open = $state(false);
   let viewMode = $state<'day' | 'month' | 'year'>(untrack(() => picker === 'year' ? 'year' : picker === 'month' ? 'month' : 'day'));
   let viewDate = $state(initialView(value));
@@ -151,7 +168,7 @@
   function chooseDay(iso: string, isDisabled: boolean): void {
     if (isDisabled) return;
     value = iso;
-    onchange?.(iso);
+    emitChange(iso);
     open = false;
   }
 
@@ -159,7 +176,7 @@
     const next = new Date(viewDate.getFullYear(), month, 1);
     if (picker === 'month') {
       value = toMonth(next);
-      onchange?.(value);
+      emitChange(value);
       open = false;
       return;
     }
@@ -172,7 +189,7 @@
     next.setFullYear(year);
     if (picker === 'year') {
       value = String(year);
-      onchange?.(value);
+      emitChange(value);
       open = false;
       return;
     }
@@ -183,13 +200,13 @@
   function chooseQuarter(index: number): void {
     const key = `${viewDate.getFullYear()}-Q${index + 1}`;
     value = key;
-    onchange?.(key);
+    emitChange(key);
     open = false;
   }
 
   function clear(): void {
     value = null;
-    onchange?.(null);
+    emitChange(null);
     open = false;
   }
 
@@ -200,7 +217,7 @@
 </script>
 
 {#if !panel}
-  <DateTimeInput {...nativeProps} mode="date" bind:value {disabled} class={className} onchange={(next) => onchange?.(next)} />
+  <DateTimeInput {...nativeProps} mode="date" bind:value {defaultValue} {disabled} class={className} onchange={emitChange} />
 {:else}
   <Popover.Root bind:open>
     <Popover.Trigger {disabled} class={cn('w-full', className)}>
@@ -270,7 +287,7 @@
         {#if presets.length > 0}
           <div class="mt-2 flex flex-wrap gap-1 border-t border-border pt-2">
             {#each presets as preset (preset.value)}
-              <Button type="button" variant="ghost" size="sm" onclick={() => { value = preset.value; onchange?.(preset.value); open = false; }}>{preset.label}</Button>
+              <Button type="button" variant="ghost" size="sm" onclick={() => { value = preset.value; emitChange(preset.value); open = false; }}>{preset.label}</Button>
             {/each}
           </div>
         {/if}

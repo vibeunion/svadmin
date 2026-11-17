@@ -41,11 +41,14 @@
     size?: 'mini' | 'small' | 'default' | 'large' | undefined;
     status?: 'error' | 'warning' | 'normal' | undefined;
     class?: string | undefined;
+    defaultValue?: DateRangeInputValue | null | undefined;
+    onChange?: ((value: DateRangeInputValue) => void) | undefined;
     onchange?: ((value: DateRangeInputValue) => void) | undefined;
   }
 
   let {
     value = $bindable({ start: null, end: null }),
+    defaultValue,
     mode = 'date',
     valueMode = 'civil',
     timeZone,
@@ -71,6 +74,7 @@
     size = 'default',
     status = 'normal',
     class: className = '',
+    onChange,
     onchange,
   }: Props = $props();
 
@@ -109,6 +113,21 @@
       && dateInputAllowed(end, mode, min, max, disabledDate);
   }
 
+  const emitChange = (result: DateRangeInputValue): void => {
+    onchange?.(result);
+    onChange?.(result);
+  };
+
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (value.start === null && value.end === null && defaultValue !== undefined && defaultValue !== null) {
+        value = { ...defaultValue };
+      }
+    }
+  });
+
   function choosePreset(event: Event): void {
     const select = event.currentTarget;
     if (!(select instanceof HTMLSelectElement)) return;
@@ -117,19 +136,19 @@
     if (disabled || !preset || !presetAllowed(preset)) return;
     const result = { ...preset.value };
     value = result;
-    onchange?.(result);
+    emitChange(result);
   }
 
   function update(part: 'start' | 'end', next: string | null): void {
     const result: DateRangeInputValue = { start: value?.start ?? null, end: value?.end ?? null, [part]: next };
     value = result;
-    onchange?.(result);
+    emitChange(result);
   }
 
   function clearRange(): void {
     const result: DateRangeInputValue = { start: null, end: null };
     value = result;
-    onchange?.(result);
+    emitChange(result);
   }
 </script>
 
