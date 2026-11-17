@@ -18,6 +18,7 @@
 		size: sizeProp,
 		count,
 		overflowCount = 99,
+		maxCount,
 		dot = false,
 		status,
 		text,
@@ -31,6 +32,7 @@
 		size?: "default" | "compact";
 		count?: number | string | undefined;
 		overflowCount?: number | undefined;
+		maxCount?: number | undefined;
 		dot?: boolean | undefined;
 		status?: BadgeStatus | undefined;
 		text?: string | undefined;
@@ -44,11 +46,13 @@
 
 	const isStatusMode = $derived(count !== undefined || dot || status !== undefined);
 
+	const effectiveOverflowCount = $derived(maxCount ?? overflowCount);
+
 	const displayCount = $derived.by(() => {
 		if (count === undefined) return null;
 		if (typeof count === 'number') {
 			if (count === 0 && !showZero) return null;
-			if (count > overflowCount) return `${overflowCount}+`;
+			if (count > effectiveOverflowCount) return `${effectiveOverflowCount}+`;
 			return String(count);
 		}
 		return count;
