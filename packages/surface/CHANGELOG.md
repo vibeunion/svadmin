@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.22.10](https://github.com/vibeunion/svadmin/compare/surface-v0.22.9...surface-v0.22.10) (2026-11-17)
+
+
+### 📝 Documentation
+
+* **ui:** neutralize the remaining upstream brand references ([d8ee460](https://github.com/vibeunion/svadmin/commit/d8ee46091e274d598b1f764a93d56da22abab13c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.82.0 <0.85.0 to >=0.84.2
+    * @svadmin/ui bumped from >=0.127.0 <0.136.0 to >=0.136.0
+
 ## [0.22.9](https://github.com/vibeunion/svadmin/compare/surface-v0.22.8...surface-v0.22.9) (2026-11-16)
 
 

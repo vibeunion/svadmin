@@ -2,6 +2,15 @@
 
 All notable changes to `@svadmin/typesense` will be documented in this file.
 
+## [0.2.3](https://github.com/vibeunion/svadmin/compare/typesense-v0.2.2...typesense-v0.2.3) (2026-11-17)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.2
+
 ## [0.2.2](https://github.com/vibeunion/svadmin/compare/typesense-v0.2.1...typesense-v0.2.2) (2026-11-16)
 
 

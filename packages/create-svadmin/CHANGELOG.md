@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.59.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.58.0...create-svadmin-v0.59.0) (2026-11-17)
+
+
+### 🚀 Features
+
+* **ui:** align calendar, image, and QR panel metrics ([#858](https://github.com/vibeunion/svadmin/issues/858)) ([99468b3](https://github.com/vibeunion/svadmin/commit/99468b38f4299a63d0d59db36163a04f6fc008b7))
+
+
+### 📝 Documentation
+
+* **ui:** neutralize the remaining upstream brand references ([d8ee460](https://github.com/vibeunion/svadmin/commit/d8ee46091e274d598b1f764a93d56da22abab13c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.84.2
+
 ## [0.58.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.57.10...create-svadmin-v0.58.0) (2026-11-16)
 
 
