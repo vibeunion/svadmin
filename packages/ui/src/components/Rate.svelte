@@ -81,7 +81,7 @@
     choose(next);
   }
 
-  function handleKeydown(event: KeyboardEvent, index: number): void {
+  function handleKeydown(event: KeyboardEvent, _index: number): void {
     if (disabled || readonly) return;
     const delta = allowHalf ? 0.5 : 1;
     if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
