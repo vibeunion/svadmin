@@ -4,13 +4,14 @@
   import { cn } from '../utils.js';
 
   interface Props {
-    title?: string;
+    title?: string | Snippet;
     value: number | string;
     precision?: number;
     prefix?: string | Snippet;
     suffix?: string | Snippet;
     extra?: string | Snippet;
     groupSeparator?: boolean;
+    separator?: string;
     trend?: 'up' | 'down' | 'neutral';
     trendLabel?: string;
     loading?: boolean;
@@ -26,6 +27,7 @@
     suffix,
     extra,
     groupSeparator = false,
+    separator,
     trend,
     trendLabel,
     loading = false,
@@ -33,15 +35,21 @@
     children,
   }: Props = $props();
 
+  const isGrouped = $derived(groupSeparator || separator !== undefined);
+
   const display = $derived(
     typeof value === 'number'
-      ? formatAdminNumber(value, { locale: groupSeparator ? 'en-US' : null, minimumFractionDigits: precision, maximumFractionDigits: precision })
+      ? formatAdminNumber(value, { locale: isGrouped ? 'en-US' : null, minimumFractionDigits: precision, maximumFractionDigits: precision })
       : value,
   );
 </script>
 
 <div class={cn('svadmin-statistic', className)} aria-busy={loading || undefined}>
-  {#if title}<p class="svadmin-statistic__title">{title}</p>{/if}
+  {#if title}
+    <div class="svadmin-statistic__title">
+      {#if typeof title === 'string'}{title}{:else}{@render title()}{/if}
+    </div>
+  {/if}
   <p class="svadmin-statistic__value">
     {#if prefix}
       <span class="svadmin-statistic__affix">{#if typeof prefix === 'string'}{prefix}{:else}{@render prefix()}{/if}</span>
