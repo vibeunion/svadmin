@@ -13,9 +13,11 @@
 
   export interface StatisticCardProps {
     /** Card title */
-    title?: string;
+    title?: string | Snippet;
     /** Tooltip explanation text */
     tip?: string;
+    /** Tooltip alias */
+    tooltip?: string;
     /** Main numerical value */
     value?: string | number;
     /** Prefix symbol (e.g. '¥', '$') */
@@ -24,6 +26,8 @@
     suffix?: string;
     /** Decimal precision */
     precision?: number;
+    /** Loading state */
+    loading?: boolean;
     /** Array of trend comparisons (e.g. YoY / MoM) */
     trends?: StatisticTrendItem[];
     /** Custom extra action in header */
@@ -44,10 +48,12 @@
   let {
     title,
     tip,
+    tooltip,
     value = 0,
     prefix,
     suffix,
     precision,
+    loading = false,
     trends = [],
     extra,
     chart,
@@ -58,6 +64,7 @@
     ...restProps
   }: StatisticCardProps = $props();
 
+  const resolvedTip = $derived(tooltip ?? tip);
   const formattedValue = $derived.by(() => {
     if (typeof value === 'number' && precision !== undefined) {
       return value.toFixed(precision);
@@ -79,12 +86,14 @@
   {#if title || extra}
     <div class="flex items-center justify-between pb-2 border-b border-border/60">
       <div class="flex items-center gap-1.5 min-w-0">
-        {#if title}
+        {#if typeof title === 'function'}
+          {@render title()}
+        {:else if title}
           <span class="font-medium text-xs text-muted-foreground truncate">{title}</span>
         {/if}
-        {#if tip}
+        {#if resolvedTip}
           <span
-            title={tip}
+            title={resolvedTip}
             class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-muted text-[10px] text-muted-foreground/80 cursor-help"
           >
             ?
@@ -99,6 +108,12 @@
     </div>
   {/if}
 
+  {#if loading}
+    <div class="my-4 space-y-2 animate-pulse" aria-busy="true">
+      <div class="h-7 bg-muted rounded w-2/3"></div>
+      <div class="h-4 bg-muted rounded w-1/3"></div>
+    </div>
+  {:else}
   <!-- Main Metric Number -->
   <div class="my-2.5">
     <div class="flex items-baseline gap-1">
@@ -143,6 +158,7 @@
       </div>
     {/if}
   </div>
+  {/if}
 
   <!-- Chart / Sparkline Slot -->
   {#if chart}

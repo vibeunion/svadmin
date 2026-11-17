@@ -8,10 +8,12 @@
     checked?: boolean;
     /** Default checked state for uncontrolled usage */
     defaultChecked?: boolean;
+    /** Value for form/group association */
+    value?: unknown;
     /** Title of the card */
-    title?: string;
+    title?: string | Snippet;
     /** Description or secondary text */
-    description?: string;
+    description?: string | Snippet;
     /** Disabled state */
     disabled?: boolean;
     /** Loading state */
@@ -34,6 +36,7 @@
   let {
     checked,
     defaultChecked = false,
+    value,
     title,
     description,
     disabled = false,
@@ -77,6 +80,7 @@
   onclick={handleClick}
   onkeydown={handleKeyDown}
   data-svadmin-component="CheckCard"
+  data-value={value !== undefined ? String(value) : undefined}
   class={cn(
     'svadmin-check-card relative flex flex-col justify-between border transition-all select-none cursor-pointer rounded-[4px] bg-card text-card-foreground',
     size === 'small' ? 'p-3 text-xs min-w-[140px]' : 'p-4 text-sm min-w-[180px]',
@@ -119,7 +123,9 @@
             {@render avatar()}
           </div>
         {/if}
-        {#if title}
+        {#if typeof title === 'function'}
+          {@render title()}
+        {:else if title}
           <span class="font-semibold text-foreground truncate leading-snug">
             {title}
           </span>
@@ -134,7 +140,11 @@
   {/if}
 
   <!-- Description -->
-  {#if description}
+  {#if typeof description === 'function'}
+    <div class="text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-0.5">
+      {@render description()}
+    </div>
+  {:else if description}
     <p class="text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-0.5">
       {description}
     </p>
