@@ -16,6 +16,7 @@
     readonly showSummary?: boolean;
     readonly simple?: boolean;
     readonly showJumper?: boolean;
+    readonly size?: 'mini' | 'small' | 'default' | 'large';
   }
 
   /**
