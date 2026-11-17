@@ -9,6 +9,7 @@
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
+  import { Input } from '@svadmin/ui/components/ui/input/index.js';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import * as DropdownMenu from '@svadmin/ui/components/ui/dropdown-menu/index.js';
   import {
@@ -419,8 +420,8 @@
             </div>
             {#if selectedRole}
             <div class="flex flex-wrap gap-2">
-              <a class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition hover:bg-primary/90" href={`#/permissions?view=role-${selectedRole?.id ?? ''}`}>{isZh ? '配置权限' : 'Configure permissions'}</a>
-              <a class="inline-flex h-9 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium transition hover:bg-muted" href={`#/roles/edit/${selectedRole?.id ?? ''}`}>{isZh ? '编辑角色' : 'Edit role'}</a>
+              <Button size="sm" href={`#/permissions?view=role-${selectedRole?.id ?? ''}`}>{isZh ? '配置权限' : 'Configure permissions'}</Button>
+              <Button size="sm" variant="outline" href={`#/roles/edit/${selectedRole?.id ?? ''}`}>{isZh ? '编辑角色' : 'Edit role'}</Button>
             </div>
             {/if}
           </div>
@@ -437,14 +438,14 @@
         </Card.Header>
         <Card.Content class="p-0">
           <div class="flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between">
-            <label class="relative block md:w-80">
-              <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
+            <div class="relative block md:w-80">
+              <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+              <Input
                 bind:value={roleSearch}
-                class="h-10 w-full rounded-lg border bg-background pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                class="pl-9"
                 placeholder={isZh ? '搜索角色' : 'Search roles'}
               />
-            </label>
+            </div>
             <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <Badge variant="outline">{filteredRoleCards.length} {isZh ? '个角色' : 'roles'}</Badge>
               <Badge variant="outline">
