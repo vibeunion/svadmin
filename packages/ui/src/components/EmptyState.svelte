@@ -14,20 +14,25 @@
     image,
     imgSrc,
     imageAlt,
+    imgStyle,
     icon,
+    extra,
     layout = "vertical",
     class: className = "",
     children,
   }: {
     title?: string;
-    description?: string;
+    description?: string | Snippet;
     /** Optional illustration URL. Mirrors the reference `image` prop. */
     image?: string;
     /** Alias for `image` matching the `imgSrc` convention. */
     imgSrc?: string;
     imageAlt?: string;
+    imgStyle?: string;
     /** Optional custom icon slot; ignored when `image` is set. */
     icon?: Snippet;
+    /** Extra actions slot. */
+    extra?: Snippet;
     layout?: "vertical" | "horizontal";
     class?: string;
     children?: Snippet;
@@ -53,7 +58,7 @@
 >
   <span class="empty-state__icon" aria-hidden="true">
     {#if resolvedImage}
-      <img class="empty-state__image" src={resolvedImage} alt={resolvedImageAlt} loading="lazy" decoding="async" />
+      <img class="empty-state__image" src={resolvedImage} alt={resolvedImageAlt} style={imgStyle} loading="lazy" decoding="async" />
     {:else if icon}
       {@render icon()}
     {:else}
@@ -62,8 +67,18 @@
   </span>
   <div class="empty-state__body">
     <h3>{resolvedTitle}</h3>
-    {#if resolvedDescription}<p>{resolvedDescription}</p>{/if}
-    {#if children}
+    {#if resolvedDescription}
+      {#if typeof resolvedDescription === "string"}
+        <p>{resolvedDescription}</p>
+      {:else}
+        <div class="empty-state__description">{@render resolvedDescription()}</div>
+      {/if}
+    {/if}
+    {#if extra}
+      <div class="empty-state__action">
+        {@render extra()}
+      </div>
+    {:else if children}
       <div class="empty-state__action">
         {@render children()}
       </div>
@@ -78,6 +93,7 @@
   .empty-state--horizontal .empty-state__body { min-width: 0; flex: 1; overflow-wrap: anywhere; }
   .empty-state--horizontal h3 { margin: 0; font-size: var(--svadmin-text-body); line-height: 1.5715; font-weight: 500; letter-spacing: 0; }
   .empty-state--horizontal p { margin: 4px 0 0; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--muted-foreground); }
+  .empty-state--horizontal .empty-state__description { margin-top: 4px; font-size: var(--svadmin-text-body); line-height: 1.5715; color: var(--muted-foreground); }
   .empty-state--horizontal .empty-state__action { margin-top: 12px; }
 
   .empty-state--vertical { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; text-align: center; }
@@ -85,6 +101,7 @@
   .empty-state--vertical .empty-state__body { display: flex; flex-direction: column; align-items: center; max-width: 24rem; }
   .empty-state--vertical h3 { margin: 0; font-size: var(--svadmin-text-section); font-weight: 600; color: var(--foreground); }
   .empty-state--vertical p { margin: 4px 0 0; font-size: var(--svadmin-text-body); color: var(--muted-foreground); line-height: 1.5715; }
+  .empty-state--vertical .empty-state__description { margin-top: 4px; font-size: var(--svadmin-text-body); color: var(--muted-foreground); line-height: 1.5715; }
   .empty-state--vertical .empty-state__action { margin-top: 16px; }
 
   .empty-state__image { width: 100%; height: 100%; object-fit: contain; }

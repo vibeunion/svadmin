@@ -17,7 +17,11 @@
     okLoading = false,
     disabled = false,
     popupVisible,
+    visible,
     defaultPopupVisible = false,
+    defaultVisible,
+    okButtonProps,
+    cancelButtonProps,
     onVisibleChange,
     onConfirm,
     onOk,
@@ -38,7 +42,11 @@
     okLoading?: boolean;
     disabled?: boolean;
     popupVisible?: boolean;
+    visible?: boolean;
     defaultPopupVisible?: boolean;
+    defaultVisible?: boolean;
+    okButtonProps?: Record<string, any>;
+    cancelButtonProps?: Record<string, any>;
     onVisibleChange?: (visible: boolean) => void;
     onConfirm?: () => void;
     onOk?: () => void;
@@ -46,9 +54,10 @@
     children: Snippet;
   } = $props();
 
-  let internalOpen = $state(untrack(() => defaultPopupVisible));
-  const isControlled = $derived(popupVisible !== undefined);
-  const open = $derived(popupVisible ?? internalOpen);
+  const resolvedDefaultVisible = untrack(() => defaultVisible ?? defaultPopupVisible);
+  let internalOpen = $state(resolvedDefaultVisible);
+  const isControlled = $derived(popupVisible !== undefined || visible !== undefined);
+  const open = $derived(visible ?? popupVisible ?? internalOpen);
 
   function handleOpenChange(next: boolean) {
     if (!isControlled) internalOpen = next;
@@ -112,8 +121,8 @@
         </div>
       </div>
       <Dialog.Footer>
-        <Button type="button" variant="outline" size="sm" disabled={okLoading} onclick={cancel}>{cancelText}</Button>
-        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="sm" loading={okLoading} disabled={okLoading} onclick={confirm}>{okText}</Button>
+        <Button type="button" variant="outline" size="sm" disabled={okLoading} onclick={cancel} {...cancelButtonProps}>{cancelText}</Button>
+        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="sm" loading={okLoading} disabled={okLoading} onclick={confirm} {...okButtonProps}>{okText}</Button>
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>
@@ -151,8 +160,8 @@
         </div>
       </div>
       <div class="svadmin-popconfirm__actions">
-        <Button type="button" variant="outline" size="xs" disabled={okLoading} onclick={cancel}>{cancelText}</Button>
-        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="xs" loading={okLoading} disabled={okLoading} onclick={confirm}>{okText}</Button>
+        <Button type="button" variant="outline" size="xs" disabled={okLoading} onclick={cancel} {...cancelButtonProps}>{cancelText}</Button>
+        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="xs" loading={okLoading} disabled={okLoading} onclick={confirm} {...okButtonProps}>{okText}</Button>
       </div>
     </Popover.Content>
   </Popover.Root>
