@@ -40,7 +40,7 @@ describe('Popconfirm and Collapse option parity', () => {
 
   it('supports popupVisible controlled prop and onVisibleChange in Popconfirm', () => {
     const onVisibleChange = vi.fn();
-    const view = render(Popconfirm, {
+    render(Popconfirm, {
       title: 'Controlled confirm',
       popupVisible: true,
       onVisibleChange,

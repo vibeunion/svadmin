@@ -44,7 +44,7 @@
 
   let expandedState = $state<boolean | undefined>(undefined);
   const isControlled = $derived(controlledExpanded !== undefined);
-  const currentExpanded = $derived(isControlled ? controlledExpanded! : (expandedState ?? defaultExpanded));
+  const currentExpanded = $derived(controlledExpanded ?? expandedState ?? defaultExpanded);
 
   const effectiveLines = $derived(rows ?? maxLines);
   const actualExpandText = $derived(expandText ?? i18n.t('common.expand'));

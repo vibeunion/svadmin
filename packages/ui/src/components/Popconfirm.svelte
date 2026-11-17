@@ -48,7 +48,7 @@
 
   let internalOpen = $state(untrack(() => defaultPopupVisible));
   const isControlled = $derived(popupVisible !== undefined);
-  const open = $derived(isControlled ? popupVisible! : internalOpen);
+  const open = $derived(popupVisible ?? internalOpen);
 
   function handleOpenChange(next: boolean) {
     if (!isControlled) internalOpen = next;
