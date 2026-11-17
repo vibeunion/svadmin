@@ -15,15 +15,19 @@
     hasChildren?: boolean;
   };
 
-  function normalizeNode(raw: TreeNode): TreeNode {
+  /** 归一化后 id / label 一定存在，后续索引与渲染都按这个类型收窄。 */
+  type NormalizedTreeNode = TreeNode & { id: string; label: string };
+  /** 子节点来源既可能是归一化结果，也可能是调用方传入的原始节点。 */
+  type NaiveNodeLike = TreeNode;
+
+  function normalizeNode(raw: TreeNode): NormalizedTreeNode {
     const id = raw.id ?? raw.key ?? '';
     const label = raw.label ?? raw.title ?? '';
-    const children = raw.children ? raw.children.map(normalizeNode) : undefined;
     return {
       ...raw,
       id,
       label,
-      children,
+      ...(raw.children === undefined ? {} : { children: raw.children.map(normalizeNode) }),
     };
   }
 
@@ -100,22 +104,24 @@
   let dragId = $state<string | undefined>(undefined);
   let dropTarget = $state<{ id: string; position: TreeDragInfo['position'] } | undefined>(undefined);
 
-  function collectIds(items: TreeNode[]): string[] {
-    return items.flatMap((node) => [node.id ?? node.key ?? '', ...(node.children ? collectIds(node.children) : [])]);
+  function collectIds(items: NormalizedTreeNode[]): string[] {
+    return items.flatMap((node) => [node.id, ...(node.children ? collectIds(node.children as NormalizedTreeNode[]) : [])]);
   }
 
-  function childrenOf(node: TreeNode): TreeNode[] | undefined {
-    return loaded[node.id ?? ''] ?? node.children;
+  function childrenOf(node: NaiveNodeLike): NormalizedTreeNode[] | undefined {
+    const overridden = node.id === undefined ? undefined : loaded[node.id];
+    if (overridden) return overridden.map(normalizeNode);
+    return node.children?.map(normalizeNode);
   }
 
-  const effectiveNodes = $derived(normalizedNodes.map((node): TreeNode => {
+  const effectiveNodes = $derived(normalizedNodes.map((node): NormalizedTreeNode => {
     const children = childrenOf(node);
     return children === undefined ? { ...node } : { ...node, children };
   }));
 
   const index = $derived.by(() => {
-    const map = new Map<string, { node: TreeNode; parentId?: string; depth: number }>();
-    const walk = (items: TreeNode[], depth: number, parentId?: string) => {
+    const map = new Map<string, { node: NormalizedTreeNode; parentId?: string; depth: number }>();
+    const walk = (items: NormalizedTreeNode[], depth: number, parentId?: string) => {
       for (const node of items) {
         map.set(node.id, { node, depth, ...(parentId === undefined ? {} : { parentId }) });
         const children = childrenOf(node);
@@ -129,8 +135,8 @@
   const expanded = $derived(new Set(expandedKeys ?? internalExpanded));
 
   const visible = $derived.by(() => {
-    const out: Array<{ node: TreeNode; depth: number; parentId?: string }> = [];
-    const walk = (items: TreeNode[], depth: number, parentId?: string) => {
+    const out: Array<{ node: NormalizedTreeNode; depth: number; parentId?: string }> = [];
+    const walk = (items: NormalizedTreeNode[], depth: number, parentId?: string) => {
       for (const node of items) {
         out.push({ node, depth, ...(parentId === undefined ? {} : { parentId }) });
         const children = childrenOf(node);
@@ -150,11 +156,11 @@
     onexpand?.(next);
   }
 
-  function needsLoad(node: TreeNode): boolean {
+  function needsLoad(node: NormalizedTreeNode): boolean {
     return Boolean(loadChildren) && childrenOf(node) === undefined && node.isLeaf !== true && node.hasChildren !== false;
   }
 
-  async function loadNode(node: TreeNode): Promise<void> {
+  async function loadNode(node: NormalizedTreeNode): Promise<void> {
     if (!loadChildren || loading[node.id]) return;
     loading = { ...loading, [node.id]: true };
     loadErrors = Object.fromEntries(Object.entries(loadErrors).filter(([key]) => key !== node.id));
@@ -169,7 +175,7 @@
     }
   }
 
-  async function toggleExpand(node: TreeNode): Promise<void> {
+  async function toggleExpand(node: NormalizedTreeNode): Promise<void> {
     if (disabled || node.disabled) return;
     if (expanded.has(node.id)) {
       setExpanded([...expanded].filter((id) => id !== node.id));
@@ -179,21 +185,24 @@
     setExpanded([...expanded, node.id]);
   }
 
-  function selectNode(node: TreeNode): void {
+  function selectNode(node: NormalizedTreeNode): void {
     if (disabled || node.disabled) return;
     const next = multiple
       ? (selected.has(node.id) ? selectedKeys.filter((id) => id !== node.id) : [...selectedKeys, node.id])
       : [node.id];
     selectedKeys = next;
-    onselect?.(next, next.map((id) => index.get(id)?.node).filter((value): value is TreeNode => value !== undefined));
+    onselect?.(next, next.flatMap((id) => {
+      const entry = index.get(id)?.node;
+      return entry === undefined ? [] : [entry];
+    }));
   }
 
-  function subtreeIds(node: TreeNode): string[] {
+  function subtreeIds(node: NormalizedTreeNode): string[] {
     const children = childrenOf(node);
     return [node.id, ...(children ? children.flatMap(subtreeIds) : [])];
   }
 
-  function checkState(node: TreeNode, keys: ReadonlySet<string> = checked): 'checked' | 'half' | 'none' {
+  function checkState(node: NormalizedTreeNode, keys: ReadonlySet<string> = checked): 'checked' | 'half' | 'none' {
     const children = childrenOf(node);
     if (!children?.length) return keys.has(node.id) ? 'checked' : 'none';
     const states = children.map((child) => checkState(child, keys));
@@ -209,7 +218,7 @@
     });
   }
 
-  function toggleCheck(node: TreeNode): void {
+  function toggleCheck(node: NormalizedTreeNode): void {
     if (disabled || node.disabled) return;
     const ids = subtreeIds(node).filter((id) => {
       const target = index.get(id)?.node;
@@ -245,7 +254,7 @@
     queueMicrotask(() => document.getElementById(`svadmin-tree-node-${target.node.id}`)?.focus());
   }
 
-  function handleKeydown(event: KeyboardEvent, item: { node: TreeNode; parentId?: string }): void {
+  function handleKeydown(event: KeyboardEvent, item: { node: NormalizedTreeNode; parentId?: string }): void {
     if (disabled) return;
     const node = item.node;
     switch (event.key) {
@@ -271,14 +280,14 @@
     }
   }
 
-  function handleDragStart(event: DragEvent, node: TreeNode): void {
+  function handleDragStart(event: DragEvent, node: NormalizedTreeNode): void {
     if (!draggable || disabled || node.disabled) return;
     dragId = node.id;
     event.dataTransfer?.setData('text/plain', node.id);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
   }
 
-  function handleDragOver(event: DragEvent, node: TreeNode): void {
+  function handleDragOver(event: DragEvent, node: NormalizedTreeNode): void {
     if (!draggable || disabled || node.disabled || dragId === undefined || dragId === node.id) return;
     event.preventDefault();
     const target = event.currentTarget as HTMLElement;
@@ -288,7 +297,7 @@
     dropTarget = { id: node.id, position };
   }
 
-  function handleDrop(event: DragEvent, node: TreeNode): void {
+  function handleDrop(event: DragEvent, node: NormalizedTreeNode): void {
     if (!draggable || dragId === undefined) return;
     event.preventDefault();
     const position = dropTarget?.id === node.id ? dropTarget.position : 'inside';
@@ -297,7 +306,7 @@
     dropTarget = undefined;
   }
 
-  const toggleable = (node: TreeNode): boolean => Boolean(childrenOf(node)?.length) || needsLoad(node);
+  const toggleable = (node: NormalizedTreeNode): boolean => Boolean(childrenOf(node)?.length) || needsLoad(node);
 </script>
 
 <div

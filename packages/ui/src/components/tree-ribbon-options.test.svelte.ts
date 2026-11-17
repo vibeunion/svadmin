@@ -15,8 +15,8 @@ describe('Tree treeData alias and key/title node properties', () => {
     });
     const labels = container.querySelectorAll('.svadmin-tree__label');
     expect(labels.length).toBe(2);
-    expect(labels[0].textContent?.trim()).toBe('Parent Node');
-    expect(labels[1].textContent?.trim()).toBe('Second Node');
+    expect(labels[0]?.textContent?.trim()).toBe('Parent Node');
+    expect(labels[1]?.textContent?.trim()).toBe('Second Node');
   });
 
   it('supports size="small" and blockNode options', () => {

@@ -329,7 +329,7 @@
     const children = option.children?.map((child) => treeNode(nodePath, child));
     return {
       id: pathNodeId(nodePath),
-      label: option.label,
+      label: option.label ?? String(option.value),
       ...(children === undefined ? {} : { children }),
       ...(option.disabled === true ? { disabled: true } : {}),
       ...(option.isLeaf === true ? { isLeaf: true } : {}),
@@ -344,7 +344,7 @@
     const lowered = term.toLowerCase();
     return items.flatMap((node) => {
       const children = node.children ? searchTreeNodes(node.children, term) : undefined;
-      const matched = node.label.toLowerCase().includes(lowered);
+      const matched = (node.label ?? '').toLowerCase().includes(lowered);
       if (!matched && (!children || children.length === 0)) return [];
       return [{ ...node, ...(children === undefined ? {} : { children }) }];
     });
@@ -357,7 +357,7 @@
     const ids: string[] = [];
     const walk = (items: UiTreeNode[]) => {
       for (const node of items) {
-        if (node.children?.length) { ids.push(node.id); walk(node.children); }
+        if (node.children?.length && node.id !== undefined) { ids.push(node.id); walk(node.children); }
       }
     };
     walk(filteredTreeNodes);
@@ -369,6 +369,7 @@
   }
 
   async function treeLoadChildren(node: UiTreeNode): Promise<UiTreeNode[]> {
+    if (node.id === undefined) return [];
     const path = JSON.parse(node.id) as CascaderPath;
     const current = getOptionsForPath(path).at(-1);
     if (!current) return [];
