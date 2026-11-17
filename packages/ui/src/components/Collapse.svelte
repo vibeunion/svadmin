@@ -4,16 +4,23 @@
   import { cn } from '../utils.js';
 
   export interface CollapseItem {
-    id: string;
-    title: string;
+    id?: string | number;
+    key?: string | number;
+    name?: string | number;
+    title?: string;
+    header?: string;
     description?: string;
+    extra?: Snippet;
     content: Snippet;
     disabled?: boolean;
+    [key: string]: unknown;
   }
 
   interface Props {
     items: CollapseItem[];
-    openIds?: string[];
+    openIds?: (string | number)[];
+    activeKey?: string | number | (string | number)[];
+    defaultActiveKey?: string | number | (string | number)[];
     /** 是否允许多个面板同时展开；accordion 仍优先。 */
     multiple?: boolean;
     accordion?: boolean;
@@ -32,12 +39,17 @@
     /** 自定义展开图标，替代默认 ChevronDown。 */
     expandIcon?: Snippet;
     class?: string;
-    onchange?: (openIds: string[]) => void;
+    onchange?: (openIds: (string | number)[]) => void;
   }
+
+  const toArray = (v: unknown): (string | number)[] =>
+    Array.isArray(v) ? v : (v !== undefined && v !== null ? [v as string | number] : []);
 
   let {
     items,
     openIds = $bindable([]),
+    activeKey,
+    defaultActiveKey,
     multiple = true,
     accordion = false,
     bordered = true,
@@ -51,24 +63,50 @@
     onchange,
   }: Props = $props();
 
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (activeKey !== undefined) {
+        openIds = toArray(activeKey);
+      } else if (defaultActiveKey !== undefined && openIds.length === 0) {
+        openIds = toArray(defaultActiveKey);
+      }
+    } else if (activeKey !== undefined) {
+      openIds = toArray(activeKey);
+    }
+  });
+
+  const normalizedItems = $derived(
+    items.map((item, index) => {
+      const id = String(item.id ?? item.key ?? item.name ?? index);
+      const title = item.title ?? item.header ?? '';
+      return {
+        ...item,
+        id,
+        title,
+      };
+    })
+  );
+
   // 记录已经展开过的面板，供 lazyload 判断“首次展开后才挂载”。
-  let openedIds = $state<string[]>([]);
+  let openedIds = $state<(string | number)[]>([]);
   $effect(() => {
     const unseen = openIds.filter((id) => !openedIds.includes(id));
     if (unseen.length) openedIds = [...openedIds, ...unseen];
   });
 
-  function shouldMount(item: CollapseItem, open: boolean): boolean {
+  function shouldMount(item: { id: string | number }, open: boolean): boolean {
     if (open) return true;
     if (destroyOnHide) return false;
     if (lazyload && !openedIds.includes(item.id)) return false;
     return true;
   }
 
-  function toggle(id: string, disabled = false): void {
+  function toggle(id: string | number, disabled = false): void {
     if (disabled) return;
     const isOpen = openIds.includes(id);
-    let next: string[];
+    let next: (string | number)[];
     if (isOpen) next = openIds.filter((value) => value !== id);
     else if (!multiple || accordion) next = [id];
     else next = [...openIds, id];
@@ -83,7 +121,7 @@
   data-expand-icon-position={expandIconPosition}
   data-size={size}
 >
-  {#each items as item (item.id)}
+  {#each normalizedItems as item (item.id)}
     {@const open = openIds.includes(item.id)}
     <section class="svadmin-collapse__item" data-state={open ? 'open' : 'closed'}>
       <button
@@ -103,6 +141,16 @@
           <strong>{item.title}</strong>
           {#if item.description}<small>{item.description}</small>{/if}
         </span>
+        {#if item.extra}
+          <span
+            class="svadmin-collapse__extra"
+            role="presentation"
+            onclick={(e) => e.stopPropagation()}
+            onkeydown={(e) => e.stopPropagation()}
+          >
+            {@render item.extra()}
+          </span>
+        {/if}
         {#if showExpandIcon && expandIconPosition === 'right'}
           <span class="svadmin-collapse__icon" aria-hidden="true">
             {#if expandIcon}{@render expandIcon()}{:else}<ChevronDown class="svadmin-collapse__chevron" size={16} />{/if}
@@ -159,6 +207,13 @@
   .svadmin-collapse__label strong { font-size: var(--svadmin-text-body); font-weight: 400; }
   .svadmin-collapse__trigger[aria-expanded='true'] .svadmin-collapse__label strong { font-weight: 500; }
   .svadmin-collapse__label small { color: var(--muted-foreground); font-size: var(--svadmin-text-caption); }
+  .svadmin-collapse__extra {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-end: var(--svadmin-space-2, 0.5rem);
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-caption, 0.75rem);
+  }
   .svadmin-collapse__icon { display: inline-flex; flex: 0 0 auto; color: var(--muted-foreground); transition: transform var(--svadmin-motion-fast) var(--svadmin-motion-easing); }
   .svadmin-collapse__trigger.is-open .svadmin-collapse__icon { transform: rotate(180deg); }
   .svadmin-collapse__trigger:disabled { cursor: not-allowed; opacity: 1; color: var(--svadmin-text-4); }
