@@ -1,3 +1,4 @@
+import { createRawSnippet } from 'svelte';
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import ProSkeleton from './ProSkeleton.svelte';
@@ -70,5 +71,25 @@ describe('ProSkeleton', () => {
     expect(pro.container.querySelector('[aria-label="正在加载列表"]')).toBeTruthy();
     expect(page.container.querySelector('[data-svadmin-component="PageSkeleton"]')?.getAttribute('aria-busy')).toBe('true');
     expect(page.container.querySelector('[aria-label="正在加载页面"]')).toBeTruthy();
+  });
+
+  it('supports animation alias and renders children when loading is false', () => {
+    const { container: animated } = render(ProSkeleton, {
+      type: 'form',
+      animation: false,
+    });
+    const formRoot = animated.querySelector('[data-svadmin-component="ProSkeleton"]');
+    expect(formRoot?.getAttribute('data-active')).toBe('false');
+    expect(formRoot?.className).not.toContain('animate-pulse');
+
+    const content = createRawSnippet(() => ({
+      render: () => '<div data-testid="actual-pro-content">Real loaded content</div>',
+    }));
+    const { getByTestId, container: loadedContainer } = render(ProSkeleton, {
+      loading: false,
+      children: content,
+    });
+    expect(getByTestId('actual-pro-content')).toBeTruthy();
+    expect(loadedContainer.querySelector('[data-svadmin-component="ProSkeleton"]')).toBeNull();
   });
 });

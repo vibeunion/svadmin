@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { cn } from '../utils.js';
 
   export type ProSkeletonType = 'table' | 'descriptions' | 'form' | 'list' | 'result';
@@ -8,6 +9,10 @@
     type?: ProSkeletonType;
     /** Whether skeleton elements have pulsing animation */
     active?: boolean;
+    /** Animation alias for active */
+    animation?: boolean;
+    /** Whether content is loading; when false and children is provided, renders children */
+    loading?: boolean;
     /** Number of rows to render */
     rows?: number;
     /** Number of columns for table or descriptions */
@@ -20,26 +25,35 @@
     class?: string;
     /** Accessible label for the loading region */
     ariaLabel?: string;
+    /** Content to render when loading is false */
+    children?: Snippet;
   }
 
   let {
     type = 'table',
     active = true,
+    animation,
+    loading = true,
     rows = 5,
     columns = 4,
     avatar = false,
     statistic = 0,
     class: className = '',
     ariaLabel = 'Loading content',
+    children,
   }: ProSkeletonProps = $props();
 
-  const pulseClass = $derived(active ? 'animate-pulse' : '');
+  const isAnimated = $derived(animation !== undefined ? animation : active);
+  const pulseClass = $derived(isAnimated ? 'animate-pulse' : '');
 </script>
 
+{#if !loading && children}
+  {@render children()}
+{:else}
 <div
   data-svadmin-component="ProSkeleton"
   data-type={type}
-  data-active={active}
+  data-active={isAnimated}
   class={cn('w-full space-y-4 select-none', pulseClass, className)}
   aria-busy="true"
   aria-live="polite"
@@ -188,3 +202,4 @@
     </div>
   {/if}
 </div>
+{/if}

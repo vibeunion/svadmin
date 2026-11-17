@@ -29,6 +29,18 @@ describe("Skeleton loading and animation options", () => {
     expect(el?.classList.contains("animate-none")).toBe(true);
   });
 
+  it("supports active option as an alias for animation", () => {
+    const { container } = render(Skeleton, {
+      props: {
+        active: false,
+      },
+    });
+
+    const el = container.querySelector('[data-slot="skeleton"]');
+    expect(el?.getAttribute("data-animation")).toBe("false");
+    expect(el?.classList.contains("animate-none")).toBe(true);
+  });
+
   it("renders children content when loading is false", () => {
     const content = createRawSnippet(() => ({
       render: () => '<p data-testid="actual-content">Loaded data</p>',
