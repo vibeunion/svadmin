@@ -17,7 +17,7 @@
 		defaultIndeterminate,
 		size = "default",
 		class: className,
-		children,
+		children: childrenProp,
 		onchange,
 		onChange,
 		...restProps
@@ -45,7 +45,7 @@
 
 	function handleCheckedChange(val: boolean | "indeterminate") {
 		const isChecked = val === true;
-		restProps.onCheckedChange?.(val);
+		restProps.onCheckedChange?.(val === true);
 		onChange?.(isChecked);
 		onchange?.(isChecked);
 	}
@@ -56,10 +56,10 @@
 		bind:ref
 		data-slot="checkbox"
 		data-size={normalizedSize}
-		class={cn("svadmin-checkbox", !children && className)}
+		class={cn("svadmin-checkbox", !childrenProp && className)}
 		bind:checked
 		bind:indeterminate
-		aria-labelledby={children && !restProps["aria-label"] ? labelId : undefined}
+		aria-labelledby={childrenProp && !restProps["aria-label"] ? labelId : undefined}
 		{...restProps}
 		onCheckedChange={handleCheckedChange}
 	>
@@ -78,10 +78,10 @@
 	</CheckboxPrimitive.Root>
 {/snippet}
 
-{#if children}
+{#if childrenProp}
 	<label class={cn("svadmin-checkbox-wrapper inline-flex items-center gap-2 cursor-pointer select-none text-sm text-foreground", className)}>
 		{@render checkboxControl()}
-		<span id={labelId} class="svadmin-checkbox-label">{@render children()}</span>
+		<span id={labelId} class="svadmin-checkbox-label">{@render childrenProp()}</span>
 	</label>
 {:else}
 	{@render checkboxControl()}

@@ -19,7 +19,7 @@ export interface NotificationOptions {
   onAction?: () => void;
 }
 
-export interface NotificationRecord extends NotificationOptions {
+export interface NotificationRecord extends Omit<NotificationOptions, 'id'> {
   id: number;
   tone: NotificationTone;
   placement: NotificationPlacement;
