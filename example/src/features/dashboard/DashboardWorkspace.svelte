@@ -6,6 +6,7 @@
   import DashboardView from '../../../../packages/ui/src/components/DashboardView.svelte';
   import { Button } from '../../../../packages/ui/src/components/ui/button/index.js';
   import { Input } from '../../../../packages/ui/src/components/ui/input/index.js';
+  import { Select } from '../../../../packages/ui/src/components/ui/select/index.js';
   import { onMount, untrack } from 'svelte';
   import type { WorkspaceDrilldownTarget } from './dashboard-workspace-data';
 
@@ -256,11 +257,11 @@
     <form onsubmit={applyFilters}>
       <label>
         <span>{isZh ? '区域' : 'Region'}</span>
-        <select class="svadmin-select--inline svadmin-select rounded border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary" aria-label="Region filter" bind:value={draftRegion}>
+        <Select class="svadmin-select--inline min-w-[7rem]" size="small" aria-label="Region filter" bind:value={draftRegion}>
           <option value="">{isZh ? '全部区域' : 'All regions'}</option>
           <option value="east">{isZh ? '东区' : 'East'}</option>
           <option value="west">{isZh ? '西区' : 'West'}</option>
-        </select>
+        </Select>
       </label>
       <label>
         <span>{isZh ? '开始' : 'From'}</span>
@@ -326,7 +327,7 @@
   .dashboard-workspace__filters form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
   .dashboard-workspace__filters label { display: grid; gap: 4px; min-width: 0; font-size: 12px; color: var(--muted-foreground); }
   .dashboard-workspace__filters :global(.svadmin-input),
-  .dashboard-workspace__filters select { min-width: 0; max-width: 180px; }
+  .dashboard-workspace__filters :global(.svadmin-select) { min-width: 0; max-width: 180px; }
   .dashboard-workspace__drilldown { border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
   .dashboard-workspace__drilldown h3 { margin: 0 0 6px; font-size: 14px; }
   .dashboard-workspace__drilldown p { margin: 0 0 8px; font-size: 13px; }
@@ -337,6 +338,6 @@
   @media (max-width: 800px) {
     .dashboard-workspace__filters form { display: grid; grid-template-columns: minmax(0, 1fr); }
     .dashboard-workspace__filters :global(.svadmin-input),
-    .dashboard-workspace__filters select { max-width: none; width: 100%; }
+    .dashboard-workspace__filters :global(.svadmin-select) { max-width: none; width: 100%; }
   }
 </style>
