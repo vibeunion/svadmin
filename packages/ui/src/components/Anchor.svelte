@@ -3,9 +3,19 @@
   import { cn } from '../utils.js';
 
   export interface AnchorItem {
-    id: string;
-    label: string;
+    id?: string;
+    href?: string;
+    title?: string;
+    label?: string;
     level?: number;
+  }
+
+  function resolveItemId(item: AnchorItem): string {
+    return item.id ?? (item.href?.startsWith('#') ? item.href.slice(1) : item.href) ?? '';
+  }
+
+  function resolveItemLabel(item: AnchorItem): string {
+    return item.title ?? item.label ?? '';
   }
 
   interface Props {
@@ -19,11 +29,11 @@
 
   let { items, offset = 96, targetOffset, label = 'On this page', class: className = '', onselect }: Props = $props();
   const effectiveOffset = $derived(targetOffset ?? offset);
-  let active = $state(untrack(() => items[0]?.id ?? ''));
+  let active = $state(untrack(() => items[0] ? resolveItemId(items[0]) : ''));
   let observer: IntersectionObserver | undefined;
 
   onMount(() => {
-    const elements = items.map((item) => document.getElementById(item.id)).filter((value): value is HTMLElement => Boolean(value));
+    const elements = items.map((item) => document.getElementById(resolveItemId(item))).filter((value): value is HTMLElement => Boolean(value));
     if (elements.length === 0) return;
     observer = new IntersectionObserver((entries) => {
       const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -46,9 +56,11 @@
 <nav class={cn('svadmin-anchor', className)} aria-label={label}>
   <p class="svadmin-anchor__title">{label}</p>
   <ul>
-    {#each items as item (item.id)}
+    {#each items as item (resolveItemId(item))}
+      {@const itemId = resolveItemId(item)}
+      {@const itemLabel = resolveItemLabel(item)}
       <li style:padding-inline-start={`${Math.max(0, (item.level ?? 1) - 1) * 0.75}rem`}>
-        <button type="button" class:is-active={active === item.id} aria-current={active === item.id ? 'location' : undefined} onclick={() => jump(item.id)}>{item.label}</button>
+        <button type="button" class:is-active={active === itemId} aria-current={active === itemId ? 'location' : undefined} onclick={() => jump(itemId)}>{itemLabel}</button>
       </li>
     {/each}
   </ul>

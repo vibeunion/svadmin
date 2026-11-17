@@ -8,10 +8,12 @@
   interface Props {
     count: number;
     index?: number;
+    current?: number;
     autoPlay?: boolean;
     interval?: number;
     loop?: boolean;
     arrowType?: "always" | "hover" | "never";
+    showArrow?: "always" | "hover" | "never";
     indicatorType?: "dot" | "line";
     ariaLabel?: string;
     children?: Snippet<[number]>;
@@ -22,10 +24,12 @@
   let {
     count,
     index = $bindable(0),
+    current,
     autoPlay = false,
     interval = 5000,
     loop = true,
     arrowType = "hover",
+    showArrow,
     indicatorType = "dot",
     ariaLabel = "Carousel",
     children,
@@ -33,6 +37,7 @@
     onchange,
   }: Props = $props();
 
+  const effectiveArrowType = $derived(showArrow ?? arrowType);
   let paused = $state(false);
   let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -48,6 +53,12 @@
     index = value;
     onchange?.(value);
   }
+
+  $effect(() => {
+    if (current !== undefined && current !== index) {
+      index = clamp(current);
+    }
+  });
 
   $effect(() => {
     if (timer) clearInterval(timer);
@@ -67,7 +78,7 @@
 
 <section
   class={cn("svadmin-carousel", className)}
-  data-arrow-type={arrowType}
+  data-arrow-type={effectiveArrowType}
   data-indicator-type={indicatorType}
   aria-label={ariaLabel}
   aria-roledescription="carousel"
@@ -84,13 +95,13 @@
         </div>
       {/each}
     </div>
-    {#if count > 1 && arrowType !== "never"}
+    {#if count > 1 && effectiveArrowType !== "never"}
       <Button
         variant="secondary"
         size="icon-sm"
         class={cn(
           "svadmin-carousel__prev shadow-md transition-opacity duration-200",
-          arrowType === "hover" && "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+          effectiveArrowType === "hover" && "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
         )}
         aria-label="Previous slide"
         onclick={() => go(index - 1)}
@@ -102,7 +113,7 @@
         size="icon-sm"
         class={cn(
           "svadmin-carousel__next shadow-md transition-opacity duration-200",
-          arrowType === "hover" && "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+          effectiveArrowType === "hover" && "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
         )}
         aria-label="Next slide"
         onclick={() => go(index + 1)}
