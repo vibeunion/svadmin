@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.60.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.59.1...create-svadmin-v0.60.0) (2026-11-17)
+
+
+### 🚀 Features
+
+* **ecosystem:** add provider adapters and admin UI capabilities ([#657](https://github.com/vibeunion/svadmin/issues/657)) ([3c4663e](https://github.com/vibeunion/svadmin/commit/3c4663e24a29c0367e4e6adb7c2e31f5fdaef11f))
+* **ecosystem:** govern materials, theme contrast, and schema layout ([fb97091](https://github.com/vibeunion/svadmin/commit/fb97091a517fcef385f12cede79b826e1fd2ddc7))
+* **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
+* **platform:** expand materials and adaptive AI surfaces ([9fea775](https://github.com/vibeunion/svadmin/commit/9fea775b31f09e2d6d62b795f3a4a732fefc5f5c))
+* **ui:** align admin UI and workspace scope ([9714dfb](https://github.com/vibeunion/svadmin/commit/9714dfba3d4bab9f6c340780d63bf6e5ce63ee94))
+* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align calendar, image, and QR panel metrics ([#858](https://github.com/vibeunion/svadmin/issues/858)) ([99468b3](https://github.com/vibeunion/svadmin/commit/99468b38f4299a63d0d59db36163a04f6fc008b7))
+
+
+### 🐛 Bug Fixes
+
+* **clickhouse:** preserve and validate filter semantics ([9234a60](https://github.com/vibeunion/svadmin/commit/9234a602dd5be40730dd7a1399831eb279993363))
+* **create-svadmin:** derive block UI peer range from the scaffold manifest ([5883ba2](https://github.com/vibeunion/svadmin/commit/5883ba2403a7eecc2523780f1ad5d3242d6fd8a2))
+* **ecosystem:** repair main checks and document lifecycle ([41b2d62](https://github.com/vibeunion/svadmin/commit/41b2d62748610ef4da8071a901c9485a541e2b89))
+* **ecosystem:** repair main checks and document lifecycle ([c6bc3a2](https://github.com/vibeunion/svadmin/commit/c6bc3a2d2456cddef20610251fb155daef47cd0a))
+* **release:** register charts and dock, repair the verify gate ([f66ca03](https://github.com/vibeunion/svadmin/commit/f66ca038b69db5d1e7018d2ba9d101b7759fe63d))
+* **release:** register charts and dock, repair the verify gate ([f4266b4](https://github.com/vibeunion/svadmin/commit/f4266b41e8f86a850fc1b9aa80bac865169d4255))
+* **ui:** harden session guard and merge release baseline ([403dea8](https://github.com/vibeunion/svadmin/commit/403dea84438e79e9db1cc1824f38fcc87597e146))
+* **ui:** preserve text controls and merge release baseline ([a7e9700](https://github.com/vibeunion/svadmin/commit/a7e97009cdac2de4eaee17ba87bac82711cab375))
+
+
+### 📝 Documentation
+
+* **create:** default AI business schemas to TypeBox ([#817](https://github.com/vibeunion/svadmin/issues/817)) ([bcd47c1](https://github.com/vibeunion/svadmin/commit/bcd47c1e0097a61043f39feebd3c23a973e865d4))
+* **ui:** neutralize the remaining upstream brand references ([d8ee460](https://github.com/vibeunion/svadmin/commit/d8ee46091e274d598b1f764a93d56da22abab13c))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade workspace dependencies to latest ([#703](https://github.com/vibeunion/svadmin/issues/703)) ([d18b595](https://github.com/vibeunion/svadmin/commit/d18b59506375207193d3d9f76d71c33afc023066))
+* **merge:** reconcile latest main with fullscreen PR ([2916430](https://github.com/vibeunion/svadmin/commit/29164305c99608b6eaee9d7ef43d48750fcfdc7a))
+* **release:** synchronize workspace metadata ([6399934](https://github.com/vibeunion/svadmin/commit/6399934237a422e2e53e094c0f4d089048eaf6d9))
+* **release:** synchronize workspace metadata ([617b10e](https://github.com/vibeunion/svadmin/commit/617b10e8a433b6f31b07b3c94cc636a202fce40b))
+
 ## [0.59.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.59.0...create-svadmin-v0.59.1) (2026-11-17)
 
 
