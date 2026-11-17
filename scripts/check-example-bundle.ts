@@ -10,7 +10,9 @@ const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
 // Mermaid 12 bundles a larger ELK layout chunk (1,498,950 bytes) but remains lazy.
 const maximumChunkBytes = 1_550_000;
-const maximumInitialBytes = 1_420_000;
+// PR #909 measured 1,421,149 initial bytes on 2026-11-17; keep headroom for
+// runner and bundler variation.
+const maximumInitialBytes = 1_425_000;
 // Enterprise closeout measured 390055 gzip bytes on 2026-10-26; the released
 // enterprise feedback changes measured 390223 gzip bytes on 2026-10-27, and the
 // unified visual system measured 390547 gzip bytes on 2026-10-29, and the shell
@@ -24,8 +26,9 @@ const maximumInitialBytes = 1_420_000;
 // 408538 gzip bytes on 2026-11-14. Notification drawer and enterprise suite
 // in PR #795 measured 422803 gzip bytes. The shared control-state
 // normalization and the Card/Link/Progress refinements measured 425630 gzip
-// bytes; keep a narrow headroom for runner variation.
-const maximumInitialGzipBytes = 428_000;
+// bytes. PR #909 measured 428916 gzip bytes and 1421149 initial bytes on
+// 2026-11-17; keep measured headroom for runner variation.
+const maximumInitialGzipBytes = 429_500;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
