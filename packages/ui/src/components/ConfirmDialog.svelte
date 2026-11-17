@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import * as AlertDialog from './ui/alert-dialog/index.js';
   import { Button } from './ui/button/index.js';
   import { Loader2 } from '@lucide/svelte';
@@ -10,17 +11,33 @@
     open?: boolean;
     title?: string;
     message?: string;
+    content?: string | Snippet;
     confirmText?: string;
+    okText?: string;
     cancelText?: string;
     variant?: 'danger' | 'warning' | 'info';
     confirming?: boolean;
+    loading?: boolean;
+    confirmLoading?: boolean;
     onconfirm: () => void;
     oncancel: () => void;
   };
 
-  let { open = $bindable(false), title, message = '',
-    confirmText, cancelText, variant = 'danger',
-    confirming = false, onconfirm, oncancel }: Props = $props();
+  let {
+    open = $bindable(false),
+    title,
+    message = '',
+    content,
+    confirmText,
+    okText,
+    cancelText,
+    variant = 'danger',
+    confirming = false,
+    loading,
+    confirmLoading,
+    onconfirm,
+    oncancel,
+  }: Props = $props();
 
   const variantMap = {
     danger: 'destructive' as const,
@@ -29,8 +46,10 @@
   };
 
   const resolvedTitle = $derived(title ?? i18n.t('common.confirmAction'));
-  const resolvedConfirmText = $derived(confirmText ?? i18n.t('common.confirm'));
+  const resolvedConfirmText = $derived(okText ?? confirmText ?? i18n.t('common.confirm'));
   const resolvedCancelText = $derived(cancelText ?? i18n.t('common.cancel'));
+  const resolvedContent = $derived(content ?? message);
+  const resolvedLoading = $derived(loading ?? confirmLoading ?? confirming);
 
   let confirmed = $state(false);
 
@@ -51,20 +70,26 @@
   <AlertDialog.Content>
     <AlertDialog.Header>
       <AlertDialog.Title>{resolvedTitle}</AlertDialog.Title>
-      <AlertDialog.Description>{message}</AlertDialog.Description>
+      <AlertDialog.Description>
+        {#if typeof resolvedContent === 'string'}
+          {resolvedContent}
+        {:else if resolvedContent}
+          {@render resolvedContent()}
+        {/if}
+      </AlertDialog.Description>
     </AlertDialog.Header>
     <AlertDialog.Footer>
       <AlertDialog.Cancel>
         {#snippet child({ props })}
-          <Button variant="outline" {...props} disabled={confirming}>
+          <Button variant="outline" {...props} disabled={resolvedLoading}>
             {resolvedCancelText}
           </Button>
         {/snippet}
       </AlertDialog.Cancel>
       <AlertDialog.Action>
         {#snippet child({ props })}
-          <Button {...props} variant={variantMap[variant as keyof typeof variantMap]} data-status={variant === 'warning' ? 'warning' : undefined} disabled={confirming} onclick={handleConfirm}>
-            {#if confirming}
+          <Button {...props} variant={variantMap[variant as keyof typeof variantMap]} data-status={variant === 'warning' ? 'warning' : undefined} disabled={resolvedLoading} onclick={handleConfirm}>
+            {#if resolvedLoading}
               <Loader2 class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             {/if}
             {resolvedConfirmText}

@@ -4,6 +4,8 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import MinusIcon from '@lucide/svelte/icons/minus';
 
+	export type CheckboxSize = "default" | "compact" | "small" | "mini" | "large";
+
 	let {
 		ref = $bindable(null),
 		checked = $bindable(false),
@@ -12,14 +14,18 @@
 		class: className,
 		...restProps
 	}: Omit<WithoutChildrenOrChild<CheckboxPrimitive.RootProps>, "size"> & {
-		size?: "default" | "compact";
+		size?: CheckboxSize;
 	} = $props();
+
+	const normalizedSize = $derived(
+		size === "small" || size === "mini" ? "compact" : size === "large" ? "default" : size
+	);
 </script>
 
 <CheckboxPrimitive.Root
 	bind:ref
 	data-slot="checkbox"
-	data-size={size}
+	data-size={normalizedSize}
 	class={cn("svadmin-checkbox", className)}
 	bind:checked
 	bind:indeterminate
