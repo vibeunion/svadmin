@@ -13,6 +13,7 @@
 
   interface Props {
     value?: string;
+    defaultValue?: string;
     placeholder?: string;
     triggers?: string[];
     prefix?: string | string[];
@@ -23,11 +24,13 @@
     rows?: number;
     disabled?: boolean;
     onchange?: (value: string) => void;
+    onChange?: (value: string) => void;
     class?: string;
   }
 
   let {
     value = $bindable(''),
+    defaultValue,
     placeholder = 'Type @ to mention team members, or # to link tags…',
     triggers = ['@', '#'],
     prefix,
@@ -38,8 +41,19 @@
     rows = 3,
     disabled = false,
     onchange,
+    onChange,
     class: className = '',
   }: Props = $props();
+
+  let initialMentionsSync = false;
+  $effect.pre(() => {
+    if (!initialMentionsSync) {
+      initialMentionsSync = true;
+      if (defaultValue && !value) {
+        value = defaultValue;
+      }
+    }
+  });
 
   const effectiveTriggers = $derived.by<string[]>(() => {
     if (prefix !== undefined) {
@@ -70,6 +84,7 @@
     const target = e.currentTarget as HTMLTextAreaElement;
     value = target.value;
     onchange?.(value);
+    onChange?.(value);
 
     const cursorPos = target.selectionStart ?? 0;
     const textBeforeCursor = value.slice(0, cursorPos);
@@ -108,6 +123,7 @@
     const mentionToken = `${activeTrigger}${opt.label}${split}`;
     value = `${before}${mentionToken}${after}`;
     onchange?.(value);
+    onChange?.(value);
     showDropdown = false;
     activeTrigger = null;
 

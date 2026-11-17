@@ -15,6 +15,7 @@
 
   interface Props {
     value?: string;
+    defaultValue?: string;
     events?: CalendarEvent[];
     locale?: string;
     weekStartsOn?: 0 | 1;
@@ -25,10 +26,12 @@
     disabled?: boolean;
     class?: string;
     onchange?: (value: string) => void;
+    onChange?: (value: string) => void;
   }
 
   let {
-    value = '',
+    value = $bindable(''),
+    defaultValue,
     events = [],
     locale,
     weekStartsOn = 0,
@@ -39,12 +42,26 @@
     disabled = false,
     class: className = '',
     onchange,
+    onChange,
   }: Props = $props();
 
   const isCard = $derived(panel ?? card);
-  const initial = untrack(() => value ? new Date(`${value}T12:00:00`) : new Date());
+  const initial = untrack(() => {
+    const target = value || defaultValue;
+    return target ? new Date(`${target}T12:00:00`) : new Date();
+  });
   let viewYear = $state(initial.getFullYear());
   let viewMonth = $state(initial.getMonth());
+
+  let initialCalendarSync = false;
+  $effect.pre(() => {
+    if (!initialCalendarSync) {
+      initialCalendarSync = true;
+      if (defaultValue && !value) {
+        value = defaultValue;
+      }
+    }
+  });
 
   const config = useComponentConfig();
   const i18n = useTranslation();
@@ -123,7 +140,9 @@
 
   function select(iso: string, isDisabled: boolean): void {
     if (isDisabled) return;
+    value = iso;
     onchange?.(iso);
+    onChange?.(iso);
   }
 </script>
 
