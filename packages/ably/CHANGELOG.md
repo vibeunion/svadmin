@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.9](https://github.com/vibeunion/svadmin/compare/ably-v0.2.8...ably-v0.2.9) (2026-11-17)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.2
+
 ## [0.2.8](https://github.com/vibeunion/svadmin/compare/ably-v0.2.7...ably-v0.2.8) (2026-11-16)
 
 

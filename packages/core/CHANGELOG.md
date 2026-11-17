@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.2](https://github.com/vibeunion/svadmin/compare/core-v0.84.1...core-v0.84.2) (2026-11-17)
+
+
+### 📝 Documentation
+
+* **ui:** neutralize the remaining upstream brand references ([d8ee460](https://github.com/vibeunion/svadmin/commit/d8ee46091e274d598b1f764a93d56da22abab13c))
+
 ## [0.84.1](https://github.com/vibeunion/svadmin/compare/core-v0.84.0...core-v0.84.1) (2026-11-16)
 
 
