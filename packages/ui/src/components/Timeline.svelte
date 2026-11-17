@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { Loader2 } from '@lucide/svelte';
   import { cn } from '../utils.js';
 
   export interface TimelineEntry {
@@ -15,7 +16,10 @@
   interface Props {
     items: TimelineEntry[];
     mode?: 'vertical' | 'horizontal' | 'alternate';
+    direction?: 'horizontal' | 'vertical';
     reverse?: boolean;
+    pending?: boolean | string | Snippet;
+    pendingDot?: Snippet;
     label?: string;
     class?: string;
     dot?: Snippet<[TimelineEntry]>;
@@ -25,17 +29,23 @@
   let {
     items,
     mode = 'vertical',
+    direction,
     reverse = false,
+    pending,
+    pendingDot,
     label = 'Timeline',
     class: className = '',
     dot,
     children,
   }: Props = $props();
 
+  const effectiveMode = $derived(
+    direction === 'horizontal' ? 'horizontal' : mode
+  );
   const displayItems = $derived(reverse ? [...items].reverse() : items);
 </script>
 
-<ol class={cn('svadmin-timeline', className)} data-mode={mode} aria-label={label}>
+<ol class={cn('svadmin-timeline', className)} data-mode={effectiveMode} aria-label={label}>
   {#each displayItems as item, index (item.id)}
     {@const side = mode === 'alternate' ? (index % 2 === 0 ? 'left' : 'right') : undefined}
     <li
@@ -62,6 +72,26 @@
       </div>
     </li>
   {/each}
+  {#if pending}
+    <li class="svadmin-timeline__item" data-pending="true">
+      <span class="svadmin-timeline__custom-dot" aria-hidden="true">
+        {#if pendingDot}
+          {@render pendingDot()}
+        {:else}
+          <Loader2 class="size-3.5 animate-spin text-primary" />
+        {/if}
+      </span>
+      <div class="svadmin-timeline__content">
+        {#if typeof pending === 'string'}
+          <p class="svadmin-timeline__title">{pending}</p>
+        {:else if typeof pending === 'boolean'}
+          <p class="svadmin-timeline__title text-muted-foreground">...</p>
+        {:else}
+          {@render (pending as Snippet)()}
+        {/if}
+      </div>
+    </li>
+  {/if}
 </ol>
 
 <style>
