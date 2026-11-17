@@ -4,7 +4,7 @@
 	import { alertVariants as resolveAlertVariants, type AlertVariant as AlertVariantValue } from "./alert-variants.js";
 
 	export { alertVariants, type AlertVariant } from "./alert-variants.js";
-	export type AlertType = "info" | "success" | "warning" | "error" | AlertVariantValue;
+	export type AlertType = "info" | "success" | "warning" | "error" | "normal" | AlertVariantValue;
 </script>
 
 <script lang="ts">
@@ -17,7 +17,9 @@
 		type?: AlertType;
 		closable?: boolean;
 		closeLabel?: string;
-		title?: string;
+		closeText?: string | Snippet;
+		title?: string | Snippet;
+		content?: string | Snippet;
 		showIcon?: boolean;
 		banner?: boolean;
 		action?: Snippet;
@@ -30,9 +32,11 @@
 		ref = $bindable(null),
 		variant: variantProp,
 		type: typeProp,
-		closable = false,
+		closable: closableProp,
 		closeLabel = "Dismiss alert",
+		closeText,
 		title,
+		content,
 		showIcon = false,
 		banner = false,
 		action,
@@ -43,10 +47,12 @@
 		...restProps
 	}: Props = $props();
 
+	const closable = $derived(closableProp ?? Boolean(closeText));
+
 	const variant = $derived.by<AlertVariantValue>(() => {
 		if (variantProp) return variantProp;
 		if (typeProp === "error") return "destructive";
-		if (typeProp === "info") return "default";
+		if (typeProp === "info" || typeProp === "normal") return "default";
 		if (typeProp === "success" || typeProp === "warning") return typeProp;
 		return (typeProp as AlertVariantValue) ?? "default";
 	});
@@ -82,7 +88,16 @@
 	{/if}
 
 	{#if title}
-		<div data-slot="alert-title" class="svadmin-alert-title font-semibold">{title}</div>
+		<div data-slot="alert-title" class="svadmin-alert-title font-semibold">
+			<!-- string | Snippet 的联合在模板里无法自动收窄，这里显式断言。 -->
+			{#if typeof title === "string"}{title}{:else}{@render (title as Snippet)()}{/if}
+		</div>
+	{/if}
+
+	{#if content}
+		<div data-slot="alert-description" class="svadmin-alert-description">
+			{#if typeof content === "string"}{content}{:else}{@render (content as Snippet)()}{/if}
+		</div>
 	{/if}
 
 	{@render children?.()}
@@ -94,8 +109,17 @@
 	{/if}
 
 	{#if closable}
-		<button type="button" class="svadmin-alert__close" aria-label={closeLabel} onclick={(event) => onclose?.(event)}>
-			<X size={14} aria-hidden="true" />
+		<button
+			type="button"
+			class={cn("svadmin-alert__close", closeText && "svadmin-alert__close--text w-auto h-auto px-1.5 py-0.5 text-xs font-medium")}
+			aria-label={closeLabel}
+			onclick={(event) => onclose?.(event)}
+		>
+			{#if closeText}
+				{#if typeof closeText === "string"}{closeText}{:else}{@render (closeText as Snippet)()}{/if}
+			{:else}
+				<X size={14} aria-hidden="true" />
+			{/if}
 		</button>
 	{/if}
 </div>
