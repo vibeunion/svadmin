@@ -100,7 +100,7 @@
     {/if}
   </div>
   {#if footer}
-    <div class="svadmin-page-header__footer mt-3 pt-2 border-t border-border/60">
+    <div class="svadmin-page-header__footer">
       {@render footer()}
     </div>
   {/if}

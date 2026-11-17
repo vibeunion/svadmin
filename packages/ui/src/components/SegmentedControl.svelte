@@ -40,8 +40,17 @@
     options.map((opt) => (typeof opt === 'string' ? { value: opt, label: opt } : opt))
   );
 
-  let internalValue = $state(untrack(() => defaultValue));
-  const effectiveValue = $derived(value !== undefined ? value : internalValue);
+  let internalValue = $state<T | undefined>(untrack(() => defaultValue));
+  let previousExternal = $state<T | undefined>(value);
+  const effectiveValue = $derived(value ?? internalValue);
+
+  // 宿主显式回写（含清空成 undefined）时同步本地值，避免非受控残留。
+  $effect(() => {
+    if (value !== previousExternal) {
+      previousExternal = value;
+      internalValue = value;
+    }
+  });
 
   let root: HTMLDivElement;
   const enabledOptions = $derived(normalizedOptions.filter(option => !option.disabled));
@@ -50,11 +59,10 @@
   function select(option: SegmentedControlOption<T>): void {
     if (disabled || option.disabled) return;
     if (effectiveValue !== option.value) {
-      if (value !== undefined) {
-        value = option.value;
-      } else {
-        internalValue = option.value;
-      }
+      // 同时写入绑定值与本地值：宿主绑了 undefined 也能拿到选择，未绑定时仍可用。
+      value = option.value;
+      previousExternal = option.value;
+      internalValue = option.value;
       onchange?.(option.value);
     }
   }

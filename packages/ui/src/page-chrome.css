@@ -69,6 +69,11 @@
     line-height: var(--svadmin-leading-body);
     overflow-wrap: anywhere;
   }
+  .svadmin-page-header__footer {
+    margin-block-start: var(--svadmin-space-3);
+    padding-block-start: var(--svadmin-space-2);
+    border-block-start: 1px solid var(--border);
+  }
   .svadmin-page-header .svadmin-page-header__back {
     flex-shrink: 0;
     color: var(--muted-foreground);
