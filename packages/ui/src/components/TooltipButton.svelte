@@ -62,7 +62,7 @@
   <Tooltip.Trigger aria-describedby={restProps['aria-describedby']}>
     {#snippet child({ props })}
       {@const primitiveOnclick = props['onclick'] as ((event: MouseEvent) => void) | undefined}
-      {@const buttonProps = { ...mergeButtonProps(props), href, target, rel, variant, size, type, class: className, 'aria-label': typeof restProps['aria-label'] === 'string' ? restProps['aria-label'] : tooltip, 'aria-describedby': typeof props['aria-describedby'] === 'string' ? props['aria-describedby'] : undefined, onclick: (event: MouseEvent) => handleClick(event, primitiveOnclick), disabled, tabindex }}
+      {@const buttonProps = { ...mergeButtonProps(props), href, target, rel, variant, size, type: type ?? 'button', class: className, 'aria-label': typeof restProps['aria-label'] === 'string' ? restProps['aria-label'] : tooltip, 'aria-describedby': typeof props['aria-describedby'] === 'string' ? props['aria-describedby'] : undefined, onclick: (event: MouseEvent) => handleClick(event, primitiveOnclick), disabled, tabindex }}
       <Button {...buttonProps}>
         {@render children()}
       </Button>

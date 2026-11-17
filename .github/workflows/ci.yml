@@ -32,6 +32,11 @@ on:
         required: false
         type: boolean
         default: false
+      publish_tag:
+        description: Optional npm dist-tag for historical backfills; leave empty for normal latest publishing
+        required: false
+        type: string
+        default: ""
 
 jobs:
   test:
@@ -369,6 +374,7 @@ jobs:
       - name: Publish released packages
         env:
           RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}
+          NPM_PUBLISH_TAG: ${{ inputs.publish_tag }}
         run: |
           set -u
           if [ -z "$RELEASE_DIRS" ]; then
@@ -406,7 +412,11 @@ jobs:
                 fi
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
                 PUBLISH_LOG="$RUNNER_TEMP/npm-publish-$(echo "$pkg_dir" | tr '/' '-').log"
-                if (cd "$pkg_dir" && npm publish --provenance --access public) > "$PUBLISH_LOG" 2>&1; then
+                PUBLISH_ARGS=(--provenance --access public)
+                if [ -n "$NPM_PUBLISH_TAG" ]; then
+                  PUBLISH_ARGS+=(--tag "$NPM_PUBLISH_TAG")
+                fi
+                if (cd "$pkg_dir" && npm publish "${PUBLISH_ARGS[@]}") > "$PUBLISH_LOG" 2>&1; then
                   cat "$PUBLISH_LOG"
                 else
                   cat "$PUBLISH_LOG"

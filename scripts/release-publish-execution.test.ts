@@ -79,6 +79,7 @@ fi
         PUBLICATION_SCAFFOLD_DEPENDENCY: String(scenario.scaffoldDependency ?? false),
         PUBLICATION_UI_READY: join(root, 'ui-published'),
         PUBLICATION_UI_STATUS_AFTER: scenario.uiRegistryStatusAfterPublish ?? 'published',
+        NPM_PUBLISH_TAG: '',
         // 即使存在旧配置，OIDC 失败也不能使用它进行第二次发布。
         NPM_BOOTSTRAP_TOKEN: 'test-only-unused-token',
       },

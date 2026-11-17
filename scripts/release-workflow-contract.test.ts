@@ -397,7 +397,10 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).not.toContain('secrets.NPM_TOKEN');
     expect(ciWorkflow).not.toContain('NPM_BOOTSTRAP_TOKEN');
     expect(ciWorkflow).not.toContain('NODE_AUTH_TOKEN=');
-    expect(ciWorkflow).toContain('npm publish --provenance --access public');
+    expect(ciWorkflow).toContain('PUBLISH_ARGS=(--provenance --access public)');
+    expect(ciWorkflow).toContain('PUBLISH_ARGS+=(--tag "$NPM_PUBLISH_TAG")');
+    expect(ciWorkflow).toContain('npm publish "${PUBLISH_ARGS[@]}"');
+    expect(ciWorkflow).toContain('NPM_PUBLISH_TAG: ${{ inputs.publish_tag }}');
     expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts');
     expect(ciWorkflow).toContain('id: release_plan');
     expect(ciWorkflow).toContain('RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}');
