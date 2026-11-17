@@ -7,15 +7,21 @@
 
   let {
     title,
+    content,
     okText = "确定",
     cancelText = "取消",
     okType = "primary",
     risk = "light",
     icon,
+    okLoading = false,
+    disabled = false,
     onConfirm,
+    onOk,
+    onCancel,
     children,
   }: {
-    title: string;
+    title: string | Snippet;
+    content?: string | Snippet;
     okText?: string;
     cancelText?: string;
     okType?: "primary" | "danger";
@@ -25,28 +31,44 @@
      */
     risk?: "light" | "irreversible";
     icon?: Snippet;
+    okLoading?: boolean;
+    disabled?: boolean;
     onConfirm?: () => void;
+    onOk?: () => void;
+    onCancel?: () => void;
     children: Snippet;
   } = $props();
 
   let open = $state(false);
 
   function confirm() {
-    onConfirm?.();
+    if (disabled || okLoading) return;
+    (onOk ?? onConfirm)?.();
+    open = false;
+  }
+
+  function cancel() {
+    onCancel?.();
     open = false;
   }
 </script>
 
 {#if risk === "irreversible"}
   <Dialog.Root bind:open>
-    <Dialog.Trigger>
+    <Dialog.Trigger disabled={disabled}>
       {#snippet child({ props })}
-        <span class="svadmin-popconfirm__trigger" {...props}>{@render children()}</span>
+        <span class="svadmin-popconfirm__trigger" {...props} aria-disabled={disabled || undefined}>{@render children()}</span>
       {/snippet}
     </Dialog.Trigger>
     <Dialog.Content size="sm" closeOnOverlayClick={true} data-confirm-weight="irreversible">
       <Dialog.Header>
-        <Dialog.Title>{title}</Dialog.Title>
+        <Dialog.Title>
+          {#if typeof title === "string"}
+            {title}
+          {:else if title}
+            {@render title()}
+          {/if}
+        </Dialog.Title>
       </Dialog.Header>
       <div class="svadmin-dialog-body">
         <div class="flex items-start gap-2">
@@ -55,20 +77,37 @@
           {:else}
             <CircleAlert class="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
           {/if}
-          <p class="leading-5">{title}</p>
+          <div class="flex-1">
+            <p class="leading-5">
+              {#if typeof title === "string"}
+                {title}
+              {:else if title}
+                {@render title()}
+              {/if}
+            </p>
+            {#if content}
+              <div class="mt-1 text-xs text-muted-foreground">
+                {#if typeof content === "string"}
+                  {content}
+                {:else}
+                  {@render content()}
+                {/if}
+              </div>
+            {/if}
+          </div>
         </div>
       </div>
       <Dialog.Footer>
-        <Button type="button" variant="outline" size="sm" onclick={() => (open = false)}>{cancelText}</Button>
-        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="sm" onclick={confirm}>{okText}</Button>
+        <Button type="button" variant="outline" size="sm" disabled={okLoading} onclick={cancel}>{cancelText}</Button>
+        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="sm" loading={okLoading} disabled={okLoading} onclick={confirm}>{okText}</Button>
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>
 {:else}
   <Popover.Root bind:open>
-    <Popover.Trigger>
+    <Popover.Trigger disabled={disabled}>
       {#snippet child({ props })}
-        <span class="svadmin-popconfirm__trigger" {...props}>{@render children()}</span>
+        <span class="svadmin-popconfirm__trigger" {...props} aria-disabled={disabled || undefined}>{@render children()}</span>
       {/snippet}
     </Popover.Trigger>
     <Popover.Content class="svadmin-popconfirm" data-confirm-weight="light" sideOffset={8}>
@@ -78,11 +117,28 @@
         {:else}
           <CircleAlert class="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
         {/if}
-        <p class="svadmin-popconfirm__title leading-5">{title}</p>
+        <div class="flex-1">
+          <div class="svadmin-popconfirm__title leading-5">
+            {#if typeof title === "string"}
+              {title}
+            {:else if title}
+              {@render title()}
+            {/if}
+          </div>
+          {#if content}
+            <div class="svadmin-popconfirm__content mt-1 text-xs text-muted-foreground">
+              {#if typeof content === "string"}
+                {content}
+              {:else}
+                {@render content()}
+              {/if}
+            </div>
+          {/if}
+        </div>
       </div>
       <div class="svadmin-popconfirm__actions">
-        <Button type="button" variant="outline" size="xs" onclick={() => (open = false)}>{cancelText}</Button>
-        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="xs" onclick={confirm}>{okText}</Button>
+        <Button type="button" variant="outline" size="xs" disabled={okLoading} onclick={cancel}>{cancelText}</Button>
+        <Button type="button" variant={okType === "danger" ? "destructive" : "default"} size="xs" loading={okLoading} disabled={okLoading} onclick={confirm}>{okText}</Button>
       </div>
     </Popover.Content>
   </Popover.Root>

@@ -10,10 +10,13 @@
   import { useTranslation } from '@svadmin/core/i18n';
 
   export interface TransferItem {
-    key: string | number;
-    title: string;
+    key?: string | number;
+    value?: string | number;
+    title?: string;
+    label?: string;
     description?: string;
     disabled?: boolean;
+    [key: string]: unknown;
   }
 
   const i18n = useTranslation();
@@ -24,9 +27,13 @@
     describedby?: string | undefined;
     invalid?: boolean | undefined;
     dataSource?: TransferItem[] | undefined;
+    data?: TransferItem[] | undefined;
     targetKeys?: (string | number)[] | undefined;
     titles?: [string, string] | undefined;
+    titleText?: [string, string] | undefined;
     searchable?: boolean | undefined;
+    showSearch?: boolean | undefined;
+    oneWay?: boolean | undefined;
     disabled?: boolean | undefined;
     class?: string | undefined;
     onchange?: (
@@ -43,18 +50,37 @@
     describedby,
     invalid = false,
     dataSource = [],
+    data,
     targetKeys = $bindable([]),
     titles = ['源列表', '目标列表'],
+    titleText,
     searchable = true,
+    showSearch,
+    oneWay = false,
     disabled = false,
     class: className,
     onchange,
     renderItem,
   }: Props = $props();
 
+  const effectiveTitles = $derived(titleText ?? titles);
+  const effectiveSearchable = $derived(showSearch ?? searchable);
+  const rawDataSource = $derived(data ?? dataSource);
+  const normalizedDataSource = $derived(
+    rawDataSource.map((item) => {
+      const key = item.key ?? item.value ?? '';
+      const title = item.title ?? item.label ?? String(key);
+      return {
+        ...item,
+        key,
+        title,
+      };
+    })
+  );
+
   let leftSearch = $state('');
   let rightSearch = $state('');
-  let observedSearchable = $state(untrack(() => searchable));
+  let observedSearchable = $state(untrack(() => effectiveSearchable));
 
   const leftSelected = new SvelteSet<string | number>();
   const rightSelected = new SvelteSet<string | number>();
@@ -62,11 +88,11 @@
   const targetKeySet = $derived(new Set(targetKeys));
 
   const leftDataSource = $derived(
-    dataSource.filter((item) => !targetKeySet.has(item.key))
+    normalizedDataSource.filter((item) => !targetKeySet.has(item.key))
   );
 
   const rightDataSource = $derived(
-    dataSource.filter((item) => targetKeySet.has(item.key))
+    normalizedDataSource.filter((item) => targetKeySet.has(item.key))
   );
 
   $effect.pre(() => {
@@ -85,8 +111,8 @@
   });
 
   $effect.pre(() => {
-    if (observedSearchable === searchable) return;
-    observedSearchable = searchable;
+    if (observedSearchable === effectiveSearchable) return;
+    observedSearchable = effectiveSearchable;
     leftSearch = '';
     rightSearch = '';
   });
@@ -194,7 +220,7 @@
   id={id}
   role="group"
   aria-labelledby={labelledby}
-  aria-label={labelledby ? undefined : titles.join(' / ')}
+  aria-label={labelledby ? undefined : effectiveTitles.join(' / ')}
   aria-describedby={describedby}
   aria-disabled={disabled || undefined}
   data-invalid={invalid || undefined}
@@ -206,25 +232,25 @@
     <div class="flex items-center justify-between border-b border-border/80 px-3 py-2 bg-muted/30">
       <div class="flex items-center gap-2">
         <Checkbox
-          aria-label={titles[0]}
+          aria-label={effectiveTitles[0]}
           checked={filteredLeft.some((i) => !i.disabled) && filteredLeft.filter((i) => !i.disabled).every((i) => leftSelected.has(i.key))}
           disabled={disabled || filteredLeft.filter((i) => !i.disabled).length === 0}
           onCheckedChange={toggleAllLeft}
         />
-        <span class="text-xs font-medium text-foreground">{titles[0]}</span>
+        <span class="text-xs font-medium text-foreground">{effectiveTitles[0]}</span>
       </div>
       <span class="text-[11px] text-muted-foreground tabular-nums">
         {leftSelected.size} / {leftDataSource.length}
       </span>
     </div>
 
-    {#if searchable}
+    {#if effectiveSearchable}
       <div class="p-2 border-b border-border/40">
         <div class="relative">
           <Search class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             type="text"
-            aria-label={titles[0]}
+            aria-label={effectiveTitles[0]}
             bind:value={leftSearch}
             placeholder={i18n.t('common.search', undefined) ?? '搜索…'}
             class="h-8 pl-8 pr-2 text-xs"
@@ -296,6 +322,7 @@
       <ChevronRight class="h-4 w-4" />
     </Button>
 
+    {#if !oneWay}
     <Button
       type="button"
       variant="outline"
@@ -306,6 +333,7 @@
     >
       <ChevronLeft class="h-4 w-4" />
     </Button>
+    {/if}
 
     <Button
       type="button"
@@ -318,6 +346,7 @@
       <ChevronsRight class="h-4 w-4" />
     </Button>
 
+    {#if !oneWay}
     <Button
       type="button"
       variant="ghost"
@@ -328,6 +357,7 @@
     >
       <ChevronsLeft class="h-4 w-4" />
     </Button>
+    {/if}
   </div>
 
   <!-- Right Panel -->
@@ -335,25 +365,25 @@
     <div class="flex items-center justify-between border-b border-border/80 px-3 py-2 bg-muted/30">
       <div class="flex items-center gap-2">
         <Checkbox
-          aria-label={titles[1]}
+          aria-label={effectiveTitles[1]}
           checked={filteredRight.some((i) => !i.disabled) && filteredRight.filter((i) => !i.disabled).every((i) => rightSelected.has(i.key))}
           disabled={disabled || filteredRight.filter((i) => !i.disabled).length === 0}
           onCheckedChange={toggleAllRight}
         />
-        <span class="text-xs font-medium text-foreground">{titles[1]}</span>
+        <span class="text-xs font-medium text-foreground">{effectiveTitles[1]}</span>
       </div>
       <span class="text-[11px] text-muted-foreground tabular-nums">
         {rightSelected.size} / {rightDataSource.length}
       </span>
     </div>
 
-    {#if searchable}
+    {#if effectiveSearchable}
       <div class="p-2 border-b border-border/40">
         <div class="relative">
           <Search class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             type="text"
-            aria-label={titles[1]}
+            aria-label={effectiveTitles[1]}
             bind:value={rightSearch}
             placeholder={i18n.t('common.search', undefined) ?? '搜索…'}
             class="h-8 pl-8 pr-2 text-xs"

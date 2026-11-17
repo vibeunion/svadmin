@@ -455,7 +455,7 @@ describe('Cascader async child loading', () => {
   it('isolates pending requests and children for equal values under different parents', async () => {
     const pending = new Map<string, (children: CascaderOption[]) => void>();
     const loadChildren = vi.fn((node: CascaderOption) => new Promise<CascaderOption[]>(resolve => {
-      pending.set(node.label, resolve);
+      pending.set(node.label ?? '', resolve);
     }));
     const onchange = vi.fn();
     const view = render(Cascader, {
