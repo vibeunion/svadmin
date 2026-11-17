@@ -29,6 +29,7 @@
     dataSource?: TransferItem[] | undefined;
     data?: TransferItem[] | undefined;
     targetKeys?: (string | number)[] | undefined;
+    defaultTargetKeys?: (string | number)[] | undefined;
     titles?: [string, string] | undefined;
     titleText?: [string, string] | undefined;
     searchable?: boolean | undefined;
@@ -36,6 +37,11 @@
     oneWay?: boolean | undefined;
     disabled?: boolean | undefined;
     class?: string | undefined;
+    onChange?: (
+      nextTargetKeys: (string | number)[],
+      direction: 'left' | 'right',
+      moveKeys: (string | number)[]
+    ) => void;
     onchange?: (
       nextTargetKeys: (string | number)[],
       direction: 'left' | 'right',
@@ -52,6 +58,7 @@
     dataSource = [],
     data,
     targetKeys = $bindable([]),
+    defaultTargetKeys,
     titles = ['源列表', '目标列表'],
     titleText,
     searchable = true,
@@ -59,9 +66,29 @@
     oneWay = false,
     disabled = false,
     class: className,
+    onChange,
     onchange,
     renderItem,
   }: Props = $props();
+
+  const emitChange = (
+    next: (string | number)[],
+    direction: 'left' | 'right',
+    moveKeys: (string | number)[]
+  ): void => {
+    onchange?.(next, direction, moveKeys);
+    onChange?.(next, direction, moveKeys);
+  };
+
+  let initialized = false;
+  $effect.pre(() => {
+    if (!initialized) {
+      initialized = true;
+      if (targetKeys.length === 0 && defaultTargetKeys && defaultTargetKeys.length > 0) {
+        targetKeys = [...defaultTargetKeys];
+      }
+    }
+  });
 
   const effectiveTitles = $derived(titleText ?? titles);
   const effectiveSearchable = $derived(showSearch ?? searchable);
@@ -177,7 +204,7 @@
     const next = [...targetKeys, ...moveKeys];
     targetKeys = next;
     leftSelected.clear();
-    onchange?.(next, 'right', moveKeys);
+    emitChange(next, 'right', moveKeys);
   }
 
   export function moveToLeft() {
@@ -191,7 +218,7 @@
     const next = targetKeys.filter((k) => !moveKeySet.has(k));
     targetKeys = next;
     rightSelected.clear();
-    onchange?.(next, 'left', moveKeys);
+    emitChange(next, 'left', moveKeys);
   }
 
   export function moveAllToRight() {
@@ -201,7 +228,7 @@
     const next = [...targetKeys, ...moveKeys];
     targetKeys = next;
     leftSelected.clear();
-    onchange?.(next, 'right', moveKeys);
+    emitChange(next, 'right', moveKeys);
   }
 
   export function moveAllToLeft() {
@@ -212,7 +239,7 @@
     const next = targetKeys.filter((k) => !moveKeySet.has(k));
     targetKeys = next;
     rightSelected.clear();
-    onchange?.(next, 'left', moveKeys);
+    emitChange(next, 'left', moveKeys);
   }
 </script>
 
