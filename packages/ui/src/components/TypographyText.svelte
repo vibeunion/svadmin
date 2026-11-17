@@ -5,7 +5,7 @@
   import TypographyEllipsis from './TypographyEllipsis.svelte';
   import { cn } from '../utils.js';
 
-  export type TypographyType = 'default' | 'secondary' | 'success' | 'warning' | 'danger';
+  export type TypographyType = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
 
   export interface TypographyEllipsisConfig {
     rows?: number;
@@ -19,6 +19,8 @@
     text?: string;
     type?: TypographyType;
     strong?: boolean;
+    bold?: boolean;
+    disabled?: boolean;
     italic?: boolean;
     underline?: boolean;
     delete?: boolean;
@@ -44,6 +46,8 @@
     text = $bindable(''),
     type = 'default',
     strong = false,
+    bold = false,
+    disabled = false,
     italic = false,
     underline = false,
     delete: strikethrough = false,
@@ -65,6 +69,7 @@
     oncopied,
   }: TypographyTextProps = $props();
 
+  const isStrong = $derived(bold || strong);
   const isSingleEllipsis = $derived(ellipsis === true || (typeof ellipsis === 'object' && (!ellipsis.rows || ellipsis.rows === 1)));
   const multiEllipsis = $derived(typeof ellipsis === 'object' && typeof ellipsis.rows === 'number' && ellipsis.rows > 1 ? ellipsis : null);
   const ellipsisTooltip = $derived.by(() => {
@@ -115,9 +120,10 @@
 </script>
 
 <span
-  class={cn('svadmin-typography-text', className)}
+  class={cn('svadmin-typography-text', disabled && 'opacity-50 cursor-not-allowed select-none', className)}
   data-type={type}
-  class:is-strong={strong}
+  data-disabled={disabled || undefined}
+  class:is-strong={isStrong}
   class:is-italic={italic}
   class:is-underline={underline}
   class:is-delete={strikethrough}
@@ -182,6 +188,7 @@
     font-size: var(--svadmin-text-label);
     line-height: var(--svadmin-leading-body);
   }
+  .svadmin-typography-text[data-type='primary'] { color: var(--primary); }
   .svadmin-typography-text[data-type='secondary'] { color: var(--muted-foreground); }
   .svadmin-typography-text[data-type='success'] { color: var(--success); }
   .svadmin-typography-text[data-type='warning'] { color: var(--warning); }

@@ -15,8 +15,11 @@
     value?: string;
     placeholder?: string;
     triggers?: string[];
+    prefix?: string | string[];
     users?: MentionOption[];
     tags?: MentionOption[];
+    options?: MentionOption[];
+    split?: string;
     rows?: number;
     disabled?: boolean;
     onchange?: (value: string) => void;
@@ -27,13 +30,24 @@
     value = $bindable(''),
     placeholder = 'Type @ to mention team members, or # to link tags…',
     triggers = ['@', '#'],
+    prefix,
     users = [],
     tags = [],
+    options,
+    split = ' ',
     rows = 3,
     disabled = false,
     onchange,
     class: className = '',
   }: Props = $props();
+
+  const effectiveTriggers = $derived.by<string[]>(() => {
+    if (prefix !== undefined) {
+      return Array.isArray(prefix) ? prefix : [prefix];
+    }
+    return triggers;
+  });
+  const effectiveUsers = $derived(options ?? users);
 
   let textareaEl: HTMLTextAreaElement | undefined = $state();
   let showDropdown = $state(false);
@@ -44,7 +58,7 @@
 
   const activeOptions = $derived<MentionOption[]>(
     (() => {
-      const list = activeTrigger === '#' ? tags : users;
+      const list = activeTrigger === '#' ? tags : effectiveUsers;
       if (!searchQuery.trim()) return list;
       return list.filter((item) =>
         item.label.toLowerCase().includes(searchQuery.toLowerCase().trim())
@@ -63,7 +77,7 @@
     let matchTrigger: string | null = null;
     let matchIdx = -1;
 
-    for (const trig of triggers) {
+    for (const trig of effectiveTriggers) {
       const idx = textBeforeCursor.lastIndexOf(trig);
       if (idx !== -1 && (idx === 0 || /\s/.test(textBeforeCursor.charAt(idx - 1)))) {
         const query = textBeforeCursor.slice(idx + 1);
@@ -91,7 +105,7 @@
     if (!textareaEl || triggerIndex === -1 || !activeTrigger) return;
     const before = value.slice(0, triggerIndex);
     const after = value.slice(textareaEl.selectionStart ?? triggerIndex);
-    const mentionToken = `${activeTrigger}${opt.label} `;
+    const mentionToken = `${activeTrigger}${opt.label}${split}`;
     value = `${before}${mentionToken}${after}`;
     onchange?.(value);
     showDropdown = false;
