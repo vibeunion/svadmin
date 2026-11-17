@@ -79,17 +79,10 @@
     }
   });
 
-  let loading = $state(false);
-  let submitError = $state('');
-  let round = 0;
-  let nextRequestId = 0;
-  let activeRequest: { id: number; round: number; onsubmit?: Props['onsubmit'] } | undefined;
-  let formElement: HTMLFormElement | undefined;
-  let destroyed = false;
-
   const effectiveSubmit = $derived(onOk ?? onsubmit);
   const effectiveCancel = $derived(onCancel ?? oncancel);
   const effectiveSubmitText = $derived(okText ?? submitText);
+  let loading = $state(false);
   const busy = $derived(loading || isSubmitting || confirmLoading);
 
   const widthStyle = $derived(
@@ -100,6 +93,12 @@
         : undefined
   );
   const i18n = useTranslation();
+  let submitError = $state('');
+  let round = 0;
+  let nextRequestId = 0;
+  let activeRequest: { id: number; round: number; onsubmit?: Props['onsubmit'] } | undefined;
+  let formElement: HTMLFormElement | undefined;
+  let destroyed = false;
 
   let lastOpen: boolean | undefined = undefined;
   let lastOnsubmit: Props['onsubmit'];
