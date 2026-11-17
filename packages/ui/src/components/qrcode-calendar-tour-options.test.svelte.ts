@@ -119,9 +119,9 @@ describe('QRCode, Calendar, and Tour option parity', () => {
       onChange: onRangeChange,
     });
     const rangeInputs = rangeView.container.querySelectorAll('input[type="range"]');
-    const firstRangeInput = rangeInputs[0];
-    if (firstRangeInput === undefined) throw new Error('expected a range slider input');
-    await fireEvent.input(firstRangeInput, { target: { value: '25' } });
+    const firstRange = rangeInputs[0];
+    if (firstRange === undefined) throw new Error('expected a range input');
+    await fireEvent.input(firstRange, { target: { value: '25' } });
     expect(onRangeChange).toHaveBeenCalledWith({ min: 25, max: 80 });
 
     const onSegChange = vi.fn();
@@ -132,9 +132,9 @@ describe('QRCode, Calendar, and Tour option parity', () => {
       onChange: onSegChange,
     });
     const buttons = segView.container.querySelectorAll('button');
-    const weeklyButton = buttons[1];
-    if (weeklyButton === undefined) throw new Error('expected the weekly segment button');
-    await fireEvent.click(weeklyButton);
+    const weeklySegment = buttons[1];
+    if (weeklySegment === undefined) throw new Error('expected a weekly segment');
+    await fireEvent.click(weeklySegment);
     expect(onSegChange).toHaveBeenCalledWith('Weekly');
 
     const wmView = render(Watermark, {

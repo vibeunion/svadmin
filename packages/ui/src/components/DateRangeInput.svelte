@@ -120,11 +120,15 @@
 
   let initialized = false;
   $effect.pre(() => {
-    if (!initialized) {
-      initialized = true;
-      if (value?.start === null && value?.end === null && defaultValue !== undefined && defaultValue !== null) {
-        value = { ...defaultValue };
-      }
+    if (initialized) return;
+    initialized = true;
+    // 宿主显式传 null 时补齐成空范围，避免后续读取崩溃。
+    if (value === null || value === undefined) {
+      value = { ...(defaultValue ?? { start: null, end: null }) };
+      return;
+    }
+    if (value.start === null && value.end === null && defaultValue !== undefined && defaultValue !== null) {
+      value = { ...defaultValue };
     }
   });
 
