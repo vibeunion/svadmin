@@ -326,6 +326,34 @@ describe('AutoTable interactions', () => {
     expect(onListStateChange).toHaveBeenCalledTimes(calls);
   });
 
+  it('refreshes an uncontrolled later page from page one', async () => {
+    const pages: number[] = [];
+    const onGetList = vi.fn((params: Parameters<DataProvider['getList']>[0]) => {
+      const page = params.pagination?.current ?? 1;
+      pages.push(page);
+    });
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      onGetList,
+      includeSecondRecord: true,
+      initialListState: {
+        search: '',
+        filters: [],
+        sorters: [],
+        pagination: { current: 2, pageSize: 1 },
+      },
+    });
+
+    await waitFor(() => expect(onGetList).toHaveBeenCalledWith(expect.objectContaining({
+      pagination: expect.objectContaining({ current: 2, pageSize: 1 }),
+    })));
+    const refresh = await view.findByRole('button', { name: '刷新' });
+
+    await fireEvent.click(refresh);
+    await waitFor(() => expect(pages.at(-1)).toBe(1));
+    expect(pages).toContain(1);
+  });
+
   it('retires a mounted initial snapshot after a scope switch and does not revive it', async () => {
     const initialListState = {
       search: 'Ada',
