@@ -19,6 +19,7 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "bun run check:architecture && bun run check:type-boundaries && bun run check:types && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.svelte-check.json && bun run --cwd packages/surface check && bun run --cwd packages/flow check && bun run --cwd packages/charts check && bun run --cwd packages/dock check && bun run --cwd example check && bun run --cwd packages/lite/example check",
     "check:architecture": "bun scripts/check-architecture.ts",
+    "check:brand": "bun scripts/check-brand-neutral.ts",
     "check:vibe-governance": "bun scripts/check-vibe-governance.ts",
     "check:type-boundaries": "bun scripts/check-type-boundaries.ts",
     "check:types": "bun scripts/check-type-contracts.ts",
