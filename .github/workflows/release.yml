@@ -91,6 +91,12 @@ jobs:
           # `bun install` 时重写锁文件，发布 tag 与锁文件就会不一致。
           bun scripts/verify-workspace-lockfile.ts
 
+      - name: Neutralize historical changelog vocabulary
+        if: steps.release-pr.outputs.branch != ''
+        run: |
+          git checkout origin/main -- scripts/sanitize-changelog-brand.ts
+          bun scripts/sanitize-changelog-brand.ts
+
       - name: Commit synchronized release artifacts
         id: release-sync
         if: steps.release-pr.outputs.branch != ''
