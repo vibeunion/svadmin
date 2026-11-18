@@ -3,7 +3,7 @@
   import type { AutoTableGridState } from './auto-table-grid.js';
   import { definedOptions } from '@svadmin/core/options';
 
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { cn } from '../utils.js';
   import {
     createTable,
@@ -949,7 +949,38 @@
     markSavedViewDirty();
     listState.pagination = { ...pagination, current: page };
   }
-  function refreshList() {
+  async function refreshList(): Promise<void> {
+    if (!canRead || query.isFetching) return;
+    const previousPage = pagination.current ?? 1;
+    // 受控分页由宿主决定；内部列表刷新只对非受控分页回到第一页。
+    if (previousPage === 1 || externalPagination) {
+      await listResult.refetch();
+      return;
+    }
+
+    markSavedViewDirty();
+    listState.pagination = { ...pagination, current: 1 };
+    try {
+      await tick();
+      const tenant = adminContext.queryKeyMatcher(resourceName).tenant;
+      const matchesFirstPage = (candidate: { queryKey: readonly unknown[] }): boolean => {
+        const descriptor = parseQueryKey(candidate.queryKey);
+        if (!descriptor || descriptor.kind !== 'data' || descriptor.action !== 'list'
+          || descriptor.resource !== resourceName
+          || (binding.dataProviderName ?? 'default') !== descriptor.provider
+          || descriptor.tenant !== tenant) return false;
+        if (!descriptor.params || typeof descriptor.params !== 'object' || Array.isArray(descriptor.params)) return false;
+        const params = descriptor.params as { pagination?: { current?: unknown }; filters?: unknown; sorters?: unknown };
+        return params.pagination?.current === 1
+          && JSON.stringify(params.filters ?? []) === JSON.stringify(queryFilters)
+          && JSON.stringify(params.sorters ?? []) === JSON.stringify(querySorters);
+      };
+      await queryClient.refetchQueries({ type: 'active', predicate: matchesFirstPage });
+    } catch {
+      // The first-page query owns the error state and remains retryable in place.
+    }
+  }
+  function retryList(): void {
     if (canRead && !query.isFetching) void listResult.refetch();
   }
   function refreshPermission() {
@@ -1541,7 +1572,7 @@
       <DataState
         state="error"
         description={i18n.t('common.operationFailed')}
-        retry={refreshList}
+        retry={retryList}
       />
     {:else if gridBody && pageRecords.data.length > 0}
       {@render gridBody({ records: pageRecords.data.map(copyTableRecord), columns: gridColumns, primaryKey: 'id',
