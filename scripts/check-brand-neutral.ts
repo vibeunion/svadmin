@@ -27,9 +27,12 @@ const TEXT_EXTENSIONS = /\.(?:ts|mts|cts|js|mjs|cjs|svelte|css|md|mdx|json|ya?ml
 
 const forbidden = /\b(?:arco|antd)\b/iu;
 
+// 守卫脚本自身必须写出禁用词才算守卫，扫描时排除它。
+const SELF_PATH = 'scripts/check-brand-neutral.ts';
+
 const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
   .split('\n')
-  .filter((file) => file.length > 0 && TEXT_EXTENSIONS.test(file));
+  .filter((file) => file.length > 0 && file !== SELF_PATH && TEXT_EXTENSIONS.test(file));
 
 const violations: string[] = [];
 for (const file of files) {
