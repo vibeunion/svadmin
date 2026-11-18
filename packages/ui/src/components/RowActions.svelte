@@ -116,6 +116,10 @@
       event.preventDefault();
       initialMenuFocus = event.key === 'ArrowUp' ? 'last' : 'first';
       trigger.click();
+    } else if (trigger && event.key === 'Escape' && overflowOpen) {
+      event.preventDefault();
+      restoreFocusOnClose = true;
+      overflowOpen = false;
     } else if (content && event.key === 'Escape') {
       event.preventDefault();
       restoreFocusOnClose = true;
