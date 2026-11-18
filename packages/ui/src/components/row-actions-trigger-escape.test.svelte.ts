@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import RowActions from './RowActions.svelte';
 
 describe('RowActions trigger Escape', () => {
+  // A disabled-only menu keeps focus on its trigger, so Escape must be handled
+  // by RowActions rather than relying on a menu item to receive the event.
   it('closes a menu that contains only disabled actions', async () => {
     const view = render(RowActions, {
       actions: [{ label: 'Approve', disabled: true, disabledReason: '缺少签名' }],
