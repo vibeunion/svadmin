@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.60.0...create-svadmin-v0.60.1) (2026-11-18)
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** guard the repository vocabulary against upstream brand names ([64d9540](https://github.com/vibeunion/svadmin/commit/64d9540fbc5136cdf6f72dbd1867ae4a02073a1f))
+
 ## [0.60.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.59.1...create-svadmin-v0.60.0) (2026-11-17)
 
 

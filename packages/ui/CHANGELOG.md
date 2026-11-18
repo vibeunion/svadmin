@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.137.1](https://github.com/vibeunion/svadmin/compare/ui-v0.137.0...ui-v0.137.1) (2026-11-18)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** close row action menus with trigger Escape ([#940](https://github.com/vibeunion/svadmin/issues/940)) ([de2458b](https://github.com/vibeunion/svadmin/commit/de2458b9ea4baa5053d21becc98fbf807323e85a))
+
 ## [0.137.0](https://github.com/vibeunion/svadmin/compare/ui-v0.136.0...ui-v0.137.0) (2026-11-17)
 
 
