@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.137.2](https://github.com/vibeunion/svadmin/compare/ui-v0.137.1...ui-v0.137.2) (2026-11-18)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** reset auto table refresh to first page ([#942](https://github.com/vibeunion/svadmin/issues/942)) ([719b491](https://github.com/vibeunion/svadmin/commit/719b491f84a5a692ddfc97a64efcda19dbe1f210))
+
 ## [0.137.1](https://github.com/vibeunion/svadmin/compare/ui-v0.137.0...ui-v0.137.1) (2026-11-18)
 
 
