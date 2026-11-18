@@ -9,7 +9,7 @@
 * **platform:** expand materials and adaptive AI surfaces ([332600e](https://github.com/vibeunion/svadmin/commit/332600ef14e32902d9b614d41d9d5480e6be55d4))
 * **platform:** expand materials and adaptive AI surfaces ([9fea775](https://github.com/vibeunion/svadmin/commit/9fea775b31f09e2d6d62b795f3a4a732fefc5f5c))
 * **ui:** align admin UI and workspace scope ([9714dfb](https://github.com/vibeunion/svadmin/commit/9714dfba3d4bab9f6c340780d63bf6e5ce63ee94))
-* **ui:** align Arco visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
+* **ui:** align shared visual tokens and interaction contracts ([#784](https://github.com/vibeunion/svadmin/issues/784)) ([279bbf1](https://github.com/vibeunion/svadmin/commit/279bbf15d9fc5915080911d3ec013a4f31350287))
 * **ui:** align calendar, image, and QR panel metrics ([#858](https://github.com/vibeunion/svadmin/issues/858)) ([99468b3](https://github.com/vibeunion/svadmin/commit/99468b38f4299a63d0d59db36163a04f6fc008b7))
 
 
