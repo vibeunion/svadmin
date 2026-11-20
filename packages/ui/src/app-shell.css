@@ -108,6 +108,28 @@
     min-width: 0;
     padding: var(--svadmin-space-3) var(--svadmin-space-2);
   }
+  .svadmin-app-shell__sidebar[data-sidebar-footer="true"] {
+    overflow: clip;
+  }
+  .svadmin-app-shell__sidebar[data-sidebar-footer="true"] > .svadmin-app-shell__sidebar-inner {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .svadmin-app-shell__sidebar-footer {
+    flex: 0 0 auto;
+    min-width: 0;
+    border-block-start: 1px solid var(--sidebar-border, var(--border));
+    padding: var(--svadmin-space-3) var(--svadmin-space-2);
+  }
+
+  @media (min-width: 64rem) {
+    .svadmin-app-shell__sidebar[data-sidebar-footer="true"] {
+      position: sticky;
+      inset-block-start: 0;
+      max-height: calc(100dvh - var(--svadmin-shell-topbar-h));
+    }
+  }
 
   .svadmin-app-shell__main {
     grid-area: main;

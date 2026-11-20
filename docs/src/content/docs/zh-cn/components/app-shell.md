@@ -28,10 +28,12 @@ description: 为自带路由和数据层的宿主提供的路由无关应用外�
 
 <AppShellPage width="wide" label="主导航">
   {#snippet sidebar()}
-    <nav>
-      <a href="#/orders" aria-current="page">订单</a>
-      <a href="#/reports">报告</a>
-    </nav>
+    <a href="#/orders" aria-current="page">订单</a>
+    <a href="#/reports">报告</a>
+  {/snippet}
+
+  {#snippet sidebarFooter()}
+    <span>李明 · 审核员</span>
   {/snippet}
 
   {#snippet topbar()}
@@ -54,6 +56,7 @@ description: 为自带路由和数据层的宿主提供的路由无关应用外�
 | --- | --- | --- | --- |
 | `children` | `Snippet` | — | 主内容，通常是 `PagePattern` 或 `ContentPageShell`。 |
 | `sidebar` | `Snippet` | — | 导航区域。省略时外壳渲染单列布局。 |
+| `sidebarFooter` | `Snippet` | — | 紧凑的侧栏底部区域，例如当前账号。需要同时传入 `sidebar`。传入后仅导航区滚动；省略时仍由整个侧栏滚动。 |
 | `topbarStart` | `Snippet` | — | 顶栏前段（品牌、面包屑根）。 |
 | `topbar` | `Snippet` | — | 顶栏中段（搜索、上下文切换）。 |
 | `topbarEnd` | `Snippet` | — | 顶栏后段（通知、账户）。 |
@@ -83,6 +86,7 @@ description: 为自带路由和数据层的宿主提供的路由无关应用外�
 | --- | --- |
 | `data-slot="app-shell-topbar"` | 顶栏 |
 | `data-slot="app-shell-sidebar"` | 导航地标 |
+| `data-slot="app-shell-sidebar-footer"` | 侧栏内不随菜单滚动的底部区域 |
 | `data-slot="app-shell-body"` / `app-shell-content` | 内容宽度 |
 | `data-slot="app-shell-aside"` | 次要列 |
 | `data-slot="app-shell-footer"` | 页脚 |

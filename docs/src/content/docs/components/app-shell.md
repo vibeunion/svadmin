@@ -36,6 +36,10 @@ system next to svadmin's. `AppShellPage` closes that gap with presentation only:
     <a href="#/reports">Reports</a>
   {/snippet}
 
+  {#snippet sidebarFooter()}
+    <span>Sam Lee · Reviewer</span>
+  {/snippet}
+
   {#snippet topbar()}
     <input type="search" placeholder="Search" aria-label="Search" />
   {/snippet}
@@ -56,6 +60,7 @@ system next to svadmin's. `AppShellPage` closes that gap with presentation only:
 | --- | --- | --- | --- |
 | `children` | `Snippet` | — | Primary page content; usually `PagePattern` or `ContentPageShell`. |
 | `sidebar` | `Snippet` | — | Navigation region. Omit it and the shell renders a single column. |
+| `sidebarFooter` | `Snippet` | — | Compact bottom region, such as the signed-in account. Requires `sidebar`. When supplied, navigation scrolls independently; otherwise the whole sidebar scrolls as before. |
 | `topbarStart` | `Snippet` | — | Leading topbar region (brand, breadcrumb root). |
 | `topbar` | `Snippet` | — | Middle topbar region (search, context switcher). |
 | `topbarEnd` | `Snippet` | — | Trailing topbar actions (notifications, account). |
@@ -86,6 +91,7 @@ host that needs larger or tighter controls overrides the size tokens once:
 | --- | --- |
 | `data-slot="app-shell-topbar"` | Topbar |
 | `data-slot="app-shell-sidebar"` | Navigation landmark |
+| `data-slot="app-shell-sidebar-footer"` | Non-scrolling bottom region inside the sidebar |
 | `data-slot="app-shell-body"` / `app-shell-content` | Content width owner |
 | `data-slot="app-shell-aside"` | Secondary column |
 | `data-slot="app-shell-footer"` | Footer |

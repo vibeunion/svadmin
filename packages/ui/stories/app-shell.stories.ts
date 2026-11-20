@@ -10,3 +10,5 @@ export const Default = { args: {} };
 export const Wide = { args: { width: 'wide' } };
 export const Narrow = { args: { width: 'narrow' } };
 export const CollapsedRail = { args: { collapsed: true } };
+export const SidebarFooter = { args: { withSidebarFooter: true } };
+export const CollapsedSidebarFooter = { args: { withSidebarFooter: true, collapsed: true } };

@@ -22,6 +22,28 @@ describe('AppShellPage', () => {
     expect(container.querySelector('.svadmin-app-shell')?.getAttribute('data-sidebar')).toBeNull();
   });
 
+  it('renders a sidebar footer outside the navigation scroll area and separately from the page footer', () => {
+    const { container } = renderShell({
+      sidebar: snippet('<a href="#/orders">Orders</a>'),
+      sidebarFooter: snippet('<button type="button">Account</button>'),
+      footer: snippet('<span>Version 1.0</span>'),
+    });
+    const nav = container.querySelector('[data-slot="app-shell-sidebar"]');
+    const menu = nav?.querySelector('.svadmin-app-shell__sidebar-inner');
+    const sidebarFooter = nav?.querySelector('[data-slot="app-shell-sidebar-footer"]');
+
+    expect(nav?.getAttribute('data-sidebar-footer')).toBe('true');
+    expect(menu?.nextElementSibling).toBe(sidebarFooter);
+    expect(sidebarFooter?.contains(screen.getByRole('button', { name: 'Account' }))).toBe(true);
+    expect(container.querySelector('footer')?.contains(screen.getByText('Version 1.0'))).toBe(true);
+  });
+
+  it('does not create a sidebar when only a sidebar footer is supplied', () => {
+    const { container } = renderShell({ sidebarFooter: snippet('<p>Account</p>') });
+    expect(container.querySelector('nav')).toBeNull();
+    expect(screen.queryByText('Account')).toBeNull();
+  });
+
   it('exposes a labelled navigation landmark and a skip link that targets main', () => {
     const { container } = renderShell({
       sidebar: snippet('<a href="#/orders">Orders</a>'),
@@ -29,6 +51,8 @@ describe('AppShellPage', () => {
     });
     expect(container.querySelector('nav')?.getAttribute('aria-label')).toBe('Primary');
     const nav = container.querySelector('nav') as HTMLElement;
+    expect(nav.hasAttribute('data-sidebar-footer')).toBe(false);
+    expect(nav.querySelector('[data-slot="app-shell-sidebar-footer"]')).toBeNull();
     const toggle = container.querySelector('[data-slot="app-shell-mobile-toggle"]') as HTMLButtonElement;
     expect(toggle.getAttribute('aria-controls')).toBe(nav.id);
     const skip = container.querySelector('.svadmin-app-shell__skip') as HTMLAnchorElement;

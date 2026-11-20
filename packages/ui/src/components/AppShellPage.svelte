@@ -11,6 +11,8 @@
     children: Snippet;
     /** Navigation region. The host owns links and routing; the shell owns layout. */
     sidebar?: Snippet;
+    /** Optional bottom region outside the scrollable navigation. Requires `sidebar`. */
+    sidebarFooter?: Snippet;
     /** Leading topbar region, rendered before the mobile navigation trigger. */
     topbarStart?: Snippet;
     /** Topbar region between the leading and trailing slots (search, breadcrumbs…). */
@@ -35,6 +37,7 @@
   let {
     children,
     sidebar,
+    sidebarFooter,
     topbarStart,
     topbar,
     topbarEnd,
@@ -115,8 +118,19 @@
   </header>
 
   {#if sidebar}
-    <nav id={sidebarId} class="svadmin-app-shell__sidebar" aria-label={resolvedLabel} data-slot="app-shell-sidebar">
+    <nav
+      id={sidebarId}
+      class="svadmin-app-shell__sidebar"
+      aria-label={resolvedLabel}
+      data-slot="app-shell-sidebar"
+      data-sidebar-footer={sidebarFooter ? 'true' : undefined}
+    >
       <div class="svadmin-app-shell__sidebar-inner">{@render sidebar()}</div>
+      {#if sidebarFooter}
+        <div class="svadmin-app-shell__sidebar-footer" data-slot="app-shell-sidebar-footer">
+          {@render sidebarFooter()}
+        </div>
+      {/if}
     </nav>
     <button
       type="button"
