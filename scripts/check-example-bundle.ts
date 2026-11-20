@@ -10,7 +10,9 @@ const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
 // Mermaid 12 bundles a larger ELK layout chunk (1,498,950 bytes) but remains lazy.
 const maximumChunkBytes = 1_550_000;
-const maximumInitialBytes = 1_425_000;
+// Chrome 105 主题回退将首屏从 1,424,923 增至 1,426,039 字节；
+// 按测得的兼容性成本调整原始体积预算，gzip 预算保持不变。
+const maximumInitialBytes = 1_427_000;
 // Enterprise closeout measured 390055 gzip bytes on 2026-10-26; the released
 // enterprise feedback changes measured 390223 gzip bytes on 2026-10-27, and the
 // unified visual system measured 390547 gzip bytes on 2026-10-29, and the shell

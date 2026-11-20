@@ -42,7 +42,10 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(css).toContain('@source "./";');
     expect(css).toContain('@import "tailwindcss/utilities.css"');
     expect(css).not.toContain('tailwindcss/preflight.css');
-    expect(readRepositoryFile('example/vite.config.ts')).toContain('tailwindcss()');
+    const config = readRepositoryFile('example/vite.config.ts');
+    // CSS 统一由 Vite 按宿主浏览器目标转换，避免独立优化提前丢失兼容回退。
+    expect(config).toContain('tailwindcss({ optimize: false })');
+    expect(config).toContain("cssMinify: 'lightningcss'");
   });
 
   it('uses precompiled CSS for both the example and generated apps', () => {
