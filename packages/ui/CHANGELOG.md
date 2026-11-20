@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.138.0](https://github.com/vibeunion/svadmin/compare/ui-v0.137.2...ui-v0.138.0) (2026-11-20)
+
+
+### 🚀 Features
+
+* **ui:** add an opt-in AppShellPage sidebar footer ([#947](https://github.com/vibeunion/svadmin/issues/947)) ([12891c8](https://github.com/vibeunion/svadmin/commit/12891c8819893523ec43e2a1092aabc28e2420cf))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** add desktop Chrome 105 theme fallbacks ([#945](https://github.com/vibeunion/svadmin/issues/945)) ([e0f48d1](https://github.com/vibeunion/svadmin/commit/e0f48d123e356f0834279a318dd9db5e10c66d21))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.18
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.6
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.3
+
 ## [0.137.2](https://github.com/vibeunion/svadmin/compare/ui-v0.137.1...ui-v0.137.2) (2026-11-18)
 
 

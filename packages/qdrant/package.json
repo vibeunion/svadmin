@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/qdrant",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Qdrant vector database and hybrid similarity search DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

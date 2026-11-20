@@ -1,5 +1,14 @@
 # @svadmin/clickhouse
 
+## [0.2.11](https://github.com/vibeunion/svadmin/compare/clickhouse-v0.2.10...clickhouse-v0.2.11) (2026-11-20)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.3
+
 ## [0.2.10](https://github.com/vibeunion/svadmin/compare/clickhouse-v0.2.9...clickhouse-v0.2.10) (2026-11-17)
 
 
