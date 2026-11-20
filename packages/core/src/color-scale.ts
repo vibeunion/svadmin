@@ -261,6 +261,14 @@ function parseOklchColor(color: string): { l: number; c: number; h: number } | u
   return { l: Number(match[1]), c: Number(match[2]), h: Number(match[3]) };
 }
 
+/** Preserve arbitrary CSS values; only lower the opaque OKLCH literals used by the theme engine. */
+export function srgbThemeColor(value: string): string {
+  const match = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/i.exec(value.trim());
+  if (!match) return value;
+  const [, l, c, h] = match.map(Number);
+  return Number.isFinite(l + c + h) ? oklchToHex(l, c, h) : value;
+}
+
 /**
  * Hover / pressed / disabled fills for one brand color.
  * Known reference bases return the pinned hex. Every other color shifts lightness
