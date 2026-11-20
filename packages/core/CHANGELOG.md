@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.3](https://github.com/vibeunion/svadmin/compare/core-v0.84.2...core-v0.84.3) (2026-11-20)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** add desktop Chrome 105 theme fallbacks ([#945](https://github.com/vibeunion/svadmin/issues/945)) ([e0f48d1](https://github.com/vibeunion/svadmin/commit/e0f48d123e356f0834279a318dd9db5e10c66d21))
+
 ## [0.84.2](https://github.com/vibeunion/svadmin/compare/core-v0.84.1...core-v0.84.2) (2026-11-17)
 
 

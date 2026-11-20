@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/postgrest",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Native PostgREST DataProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,

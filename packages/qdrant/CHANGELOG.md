@@ -2,6 +2,15 @@
 
 All notable changes to `@svadmin/qdrant` will be documented in this file.
 
+## [0.2.4](https://github.com/vibeunion/svadmin/compare/qdrant-v0.2.3...qdrant-v0.2.4) (2026-11-20)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.3
+
 ## [0.2.3](https://github.com/vibeunion/svadmin/compare/qdrant-v0.2.2...qdrant-v0.2.3) (2026-11-17)
 
 

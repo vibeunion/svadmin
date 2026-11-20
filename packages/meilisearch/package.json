@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/meilisearch",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Meilisearch instant search & faceted DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
