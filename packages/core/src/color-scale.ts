@@ -265,7 +265,9 @@ function parseOklchColor(color: string): { l: number; c: number; h: number } | u
 export function srgbThemeColor(value: string): string {
   const match = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/i.exec(value.trim());
   if (!match) return value;
-  const [, l, c, h] = match.map(Number);
+  const l = Number(match[1]);
+  const c = Number(match[2]);
+  const h = Number(match[3]);
   return Number.isFinite(l + c + h) ? oklchToHex(l, c, h) : value;
 }
 
