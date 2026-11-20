@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Bell, Inbox, LayoutDashboard, Search, Settings } from '@lucide/svelte';
+  import { Bell, Inbox, LayoutDashboard, Search, Settings, UserRound } from '@lucide/svelte';
   import AppShellPage from '../src/components/AppShellPage.svelte';
   import PagePattern from '../src/components/PagePattern.svelte';
   import { Input } from '../src/components/ui/input/index.js';
@@ -8,9 +8,11 @@
   let {
     width = 'default',
     collapsed = false,
+    withSidebarFooter = false,
   }: {
     width?: 'narrow' | 'default' | 'wide' | 'full';
     collapsed?: boolean;
+    withSidebarFooter?: boolean;
   } = $props();
 
   const groups = [
@@ -18,6 +20,7 @@
     { label: '业务', icon: Inbox, items: ['委托单', '报告编制', '任务分派'] },
     { label: '设置', icon: Settings, items: ['组织与成员'] },
   ];
+  const archives = Array.from({ length: 40 }, (_, index) => ({ id: index + 1, label: `项目归档 ${index + 1}` }));
 
   let mobileOpen = $state(false);
   let query = $state('');
@@ -30,11 +33,21 @@
   );
 </script>
 
+{#snippet account()}
+  <div class="demo-account" aria-label="李明，审核员" title="李明，审核员">
+    <UserRound size={16} aria-hidden="true" />
+    {#if !collapsed}
+      <div><strong>李明</strong><span>审核员</span></div>
+    {/if}
+  </div>
+{/snippet}
+
 <AppShellPage
   {width}
   {collapsed}
   bind:mobileOpen
   label="主导航"
+  sidebarFooter={withSidebarFooter ? account : undefined}
 >
   {#snippet sidebar()}
     {#each groups as group (group.label)}
@@ -48,6 +61,16 @@
         {/each}
       </div>
     {/each}
+    {#if withSidebarFooter}
+      <div class="demo-group">
+        {#each archives as archive (archive.id)}
+          <a class="demo-nav-item" href={`#/archives/${archive.id}`} aria-label={archive.label}>
+            <Inbox size={16} aria-hidden="true" />
+            {#if !collapsed}<span>{archive.label}</span>{/if}
+          </a>
+        {/each}
+      </div>
+    {/if}
   {/snippet}
 
   {#snippet topbar()}
@@ -124,7 +147,19 @@
     color: var(--sidebar-foreground, var(--foreground));
     font-size: var(--svadmin-text-body);
     text-align: start;
+    text-decoration: none;
     cursor: pointer;
+  }
+  .demo-account {
+    display: flex;
+    align-items: center;
+    gap: var(--svadmin-space-2);
+    padding-inline: var(--svadmin-space-2);
+    font-size: var(--svadmin-text-caption);
+  }
+  .demo-account span {
+    display: block;
+    color: var(--muted-foreground);
   }
   .demo-nav-item:hover {
     background: var(--muted);
