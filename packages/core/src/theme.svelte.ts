@@ -4,6 +4,7 @@ import {
   exportThemeTokens,
   interactionRamps,
   parseThemeTokens,
+  srgbThemeColor,
   withPrimaryInteractionRamps,
   type DerivedColorPreset,
   type ThemeTokenDocument,
@@ -422,7 +423,7 @@ function applyThemeClasses(themeMode: ThemeMode,config: ThemeConfig): void {
   if(!config.disableColorScheme) root.style.colorScheme=resolved;
 }
 
-function applyColorPreset(preset: ColorPreset,themeMode: ThemeMode): void {
+function applyColorPreset(preset: ColorPreset,themeMode: ThemeMode,themeValue: (value: string) => string): void {
   if(typeof document==='undefined') return;
   const resolved=themeMode==='system'? getSystemPreference():themeMode;
   const variables=withPrimaryInteractionRamps(resolved==='dark'? preset.dark:preset.light);
@@ -430,7 +431,7 @@ function applyColorPreset(preset: ColorPreset,themeMode: ThemeMode): void {
 
   for(const [key,value] of Object.entries(variables)) {
     const cssVar=key.startsWith('--')? key:'--'+key;
-    root.style.setProperty(cssVar,value);
+    root.style.setProperty(cssVar,themeValue(value));
     activePresetVars.push(cssVar);
   }
 }
@@ -443,7 +444,7 @@ const SEMANTIC_RAMP_BASES = [
   ['--info', '--info-5', '--info-7', '--info-3'],
 ] as const;
 
-function applyOverrideRamps(overrides: Record<string, string>, root: HTMLElement): void {
+function applyOverrideRamps(overrides: Record<string, string>, root: HTMLElement, themeValue: (value: string) => string): void {
   const explicit = new Set(Object.keys(overrides).map((key) => key.startsWith('--') ? key : `--${key}`));
   for (const [base, hover, pressed, disabled] of SEMANTIC_RAMP_BASES) {
     const value = overrides[base] ?? overrides[base.slice(2)];
@@ -455,22 +456,22 @@ function applyOverrideRamps(overrides: Record<string, string>, root: HTMLElement
       continue;
     }
     for (const [key, ramp] of [[hover, ramps.hover], [pressed, ramps.pressed], [disabled, ramps.disabled]] as const) {
-      root.style.setProperty(key, ramp);
+      root.style.setProperty(key, themeValue(ramp));
       activeCssOverrideVars.push(key);
     }
   }
 }
 
-function applyCssOverrides(overrides: Record<string,string>): void {
+function applyCssOverrides(overrides: Record<string,string>,themeValue: (value: string) => string): void {
   if(typeof document==='undefined') return;
   const root=document.documentElement;
 
   for(const [key,value] of Object.entries(overrides)) {
     const cssVar=key.startsWith('--')? key:'--'+key;
-    root.style.setProperty(cssVar,value);
+    root.style.setProperty(cssVar,themeValue(value));
     activeCssOverrideVars.push(cssVar);
   }
-  applyOverrideRamps(overrides, root);
+  applyOverrideRamps(overrides, root, themeValue);
 }
 
 function applyEffectiveTheme(): void {
@@ -496,8 +497,11 @@ function applyEffectiveTheme(): void {
   clearAppliedArtifacts();
   applyThemeClasses(mode,themeConfig);
   document.documentElement.setAttribute('data-theme',colorTheme);
-  if(preset) applyColorPreset(preset,mode);
-  if(themeConfig.cssOverrides) applyCssOverrides(themeConfig.cssOverrides);
+  const themeValue = globalThis.CSS?.supports?.('color', 'oklch(0.5 0 0)') === false
+    ? srgbThemeColor
+    : (value: string) => value;
+  if(preset) applyColorPreset(preset,mode,themeValue);
+  if(themeConfig.cssOverrides) applyCssOverrides(themeConfig.cssOverrides,themeValue);
 }
 
 /**

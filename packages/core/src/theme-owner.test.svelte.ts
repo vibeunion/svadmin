@@ -270,6 +270,30 @@ describe('theme owners', () => {
     expect(document.documentElement.getAttribute('data-theme')).toBe('blue');
   });
 
+  it.each([false, true])('applies presets and override ramps when OKLCH support is %s', (supportsOklch) => {
+    vi.stubGlobal('CSS', { supports: () => supportsOklch });
+    try {
+      const value = 'oklch(0.5 0 0)';
+      const expected = supportsOklch ? value : '#636363';
+      const style = document.documentElement.style;
+      const colorFormat = supportsOklch ? /^oklch\(/ : /^#[0-9A-F]{6}$/;
+      setTheme('light');
+      setColorTheme('blue');
+      expect(style.getPropertyValue('--primary')).toMatch(colorFormat);
+      expect(style.getPropertyValue('--primary-5')).toMatch(colorFormat);
+      const lightPrimary = style.getPropertyValue('--primary');
+      setTheme('dark');
+      expect(style.getPropertyValue('--primary')).toMatch(colorFormat);
+      expect(style.getPropertyValue('--primary')).not.toBe(lightPrimary);
+      configureTheme({ cssOverrides: { '--success': value, '--custom': 'var(--success)' } });
+      expect(style.getPropertyValue('--success')).toBe(expected);
+      expect(style.getPropertyValue('--success-5')).toMatch(colorFormat);
+      expect(style.getPropertyValue('--custom')).toBe('var(--success)');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('normalizes unknown or retired color ids to the default preset', () => {
     setColorTheme('retired-preset' as never);
 

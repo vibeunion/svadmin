@@ -51,8 +51,10 @@ export function assertExampleLayoutCss(css: string): void {
     }
     for (const required of requirements) {
       if (!(required.rtl ? rtlClasses : classes).has(required.className)) continue;
-      const expected = required.viewport === 'desktop' ? ['@media (min-width:48rem)', '@media (min-width:768px)']
-        : ['@media (max-width:47.9375rem)', '@media (max-width:767px)'];
+      // Lightning CSS 会将 min/max-width 改写为等价的包含边界范围语法。
+      const expected = required.viewport === 'desktop'
+        ? ['@media (min-width:48rem)', '@media (min-width:768px)', '@media (width>=48rem)', '@media (width>=768px)']
+        : ['@media (max-width:47.9375rem)', '@media (max-width:767px)', '@media (width<=47.9375rem)', '@media (width<=767px)'];
       if (required.viewport ? conditions.length !== 1 || !expected.includes(conditions[0] ?? '') : conditions.length !== 0) continue;
       for (const node of rule.nodes) {
         if (node.type !== 'decl') continue;

@@ -705,20 +705,22 @@
     --chart-1: oklch(0.541 0.281 293.009);
   }
 
-  /* Non-default presets only change --primary. Primary light steps keep tracking the brand. */
-  :is(
-    [data-theme="neutral"],
-    [data-theme="indigo"],
-    [data-theme="stripe"],
-    [data-theme="blue"],
-    [data-theme="green"],
-    [data-theme="rose"],
-    [data-theme="orange"],
-    [data-theme="violet"]
-  ) {
-    --primary-light-1: color-mix(in srgb, var(--primary) 12%, var(--card));
-    --primary-light-2: color-mix(in srgb, var(--primary) 20%, var(--card));
-    --primary-light-4: color-mix(in srgb, var(--primary) 35%, var(--card));
+  /* 无法混色时沿用所在明暗主题的浅色阶，避免变量到计算值阶段才失效。 */
+  @supports (color: color-mix(in srgb, black, white)) {
+    :is(
+      [data-theme="neutral"],
+      [data-theme="indigo"],
+      [data-theme="stripe"],
+      [data-theme="blue"],
+      [data-theme="green"],
+      [data-theme="rose"],
+      [data-theme="orange"],
+      [data-theme="violet"]
+    ) {
+      --primary-light-1: color-mix(in srgb, var(--primary) 12%, var(--card));
+      --primary-light-2: color-mix(in srgb, var(--primary) 20%, var(--card));
+      --primary-light-4: color-mix(in srgb, var(--primary) 35%, var(--card));
+    }
   }
 
 }

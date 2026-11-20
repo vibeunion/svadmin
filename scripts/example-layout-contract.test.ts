@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { transform } from 'lightningcss';
 import { parse } from 'svelte/compiler';
 import { assertExampleLayoutCss } from './example-layout-contract.js';
 
@@ -27,6 +28,22 @@ test('desktop, mobile and RTL offsets retain exact breakpoint and direction cove
   expect(() => assertExampleLayoutCss(css.replaceAll('margin-right: 252px', 'margin-right: 253px'))).toThrow('RTL right offset');
   expect(() => assertExampleLayoutCss(css.replaceAll('margin-right: 70px', 'margin-right: 71px'))).toThrow('RTL right offset');
   expect(() => assertExampleLayoutCss(css.replaceAll('[dir="rtl"]', '[dir="ltr"]'))).toThrow('RTL');
+});
+
+test('Lightning CSS output retains the same desktop, mobile and RTL layout contract', () => {
+  const emitted = transform({
+    filename: 'layout.css',
+    code: Buffer.from(css),
+    minify: true,
+    targets: { chrome: 105 << 16 },
+  }).code.toString();
+  expect(emitted).toContain('(width>=768px)');
+  expect(emitted).toContain('(width<=767px)');
+  expect(() => assertExampleLayoutCss(emitted)).not.toThrow();
+  expect(() => assertExampleLayoutCss(emitted.replaceAll('(width>=768px)', '(width>768px)'))).toThrow('desktop');
+  expect(() => assertExampleLayoutCss(emitted.replaceAll('(width<=767px)', '(width<767px)'))).toThrow('mobile');
+  expect(() => assertExampleLayoutCss(emitted.replaceAll('(width>=768px)', '(width>=769px)'))).toThrow('desktop');
+  expect(() => assertExampleLayoutCss(emitted.replaceAll('(width<=767px)', '(width<=766px)'))).toThrow('mobile');
 });
 
 test('comments, conditional or qualified hooks cannot satisfy unconditional declarations', () => {

@@ -23,7 +23,7 @@ function manualChunks(id: string): string | undefined {
 
 export default defineConfig({
   plugins: [
-    tailwindcss(),
+    tailwindcss({ optimize: false }),
     svelte(),
   ],
   server: {
@@ -36,7 +36,9 @@ export default defineConfig({
     exclude: ['@svadmin/core', '@svadmin/ai-elements', '@svadmin/surface', '@svadmin/ui', '@svadmin/supabase'],
   },
   build: {
-    cssMinify: 'esbuild',
+    // 仅降低 Chromium 的基线，保留 Vite 原有的其他浏览器目标。
+    target: ['chrome105', 'edge105', 'firefox114', 'safari16.4', 'ios16.4'],
+    cssMinify: 'lightningcss',
     manifest: true,
     rolldownOptions: {
       output: {
