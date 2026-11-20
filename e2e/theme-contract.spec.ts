@@ -18,7 +18,8 @@ test('dark color-scheme contract works without JavaScript and keeps switch hit a
 
   const probe = page.locator('#theme-probe');
   await expect(probe).toBeVisible();
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--background').trim())).toBe('#17171A');
+  // 十六进制颜色不区分大小写，生产 CSS 压缩器可能统一输出小写。
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--background').trim().toLowerCase())).toBe('#17171a');
 
   const switchBox = await probe.getByRole('switch').boundingBox();
   expect(switchBox?.width).toBe(40);
