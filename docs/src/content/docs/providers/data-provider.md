@@ -119,6 +119,216 @@ const dataProvider = await createDrizzleDataProvider({ connection: db, schema })
 
 Direct database access via Drizzle ORM — supports SQLite, PostgreSQL, MySQL, and Cloudflare D1. Includes built-in soft delete, relations, transactions, aggregations, and security guard. See the [Drizzle ORM guide](/providers/drizzle) for full documentation.
 
+### Airtable
+
+```typescript
+// bun add @svadmin/airtable @refinedev/airtable
+import { createAirtableDataProvider } from '@svadmin/airtable';
+
+const dataProvider = await createAirtableDataProvider('base-id', process.env.AIRTABLE_API_KEY);
+```
+
+### Directus
+
+```typescript
+import { createDirectusDataProvider } from '@svadmin/directus';
+
+const dataProvider = createDirectusDataProvider('https://directus.example.com', process.env.DIRECTUS_TOKEN);
+```
+
+### Firebase
+
+```typescript
+// Pass an initialized @refinedev/firebase (or compatible) provider.
+import { createFirebaseDataProvider } from '@svadmin/firebase';
+
+const dataProvider = createFirebaseDataProvider(refineFirebaseProvider);
+```
+
+### Hasura
+
+```typescript
+// bun add @svadmin/hasura @refinedev/hasura graphql-request
+import { createHasuraDataProvider } from '@svadmin/hasura';
+
+const dataProvider = await createHasuraDataProvider({ endpoint: 'https://api.example.com/v1/graphql' });
+```
+
+### Medusa
+
+```typescript
+// bun add @svadmin/medusa @refinedev/medusa
+import { createMedusaDataProvider } from '@svadmin/medusa';
+
+const dataProvider = await createMedusaDataProvider('https://medusa.example.com');
+```
+
+### NestJS Query and NestJSX CRUD
+
+```typescript
+// bun add @svadmin/nestjs-query @refinedev/nestjs-query
+import { createNestjsQueryDataProvider } from '@svadmin/nestjs-query';
+const queryProvider = await createNestjsQueryDataProvider('https://api.example.com/graphql');
+
+// bun add @svadmin/nestjsx-crud @refinedev/nestjsx-crud
+import { createNestjsxCrudDataProvider } from '@svadmin/nestjsx-crud';
+const crudProvider = await createNestjsxCrudDataProvider('https://api.example.com');
+```
+
+### Sanity
+
+```typescript
+import { createSanityDataProvider } from '@svadmin/sanity';
+
+const dataProvider = createSanityDataProvider('project-id', 'production', process.env.SANITY_TOKEN);
+```
+
+### Strapi and Strapi GraphQL
+
+```typescript
+// bun add @svadmin/strapi @refinedev/strapi-v4
+import { createStrapiDataProvider } from '@svadmin/strapi';
+const restProvider = await createStrapiDataProvider('https://strapi.example.com');
+
+// bun add @svadmin/strapi-graphql @refinedev/strapi-graphql
+import { createStrapiGraphQLDataProvider } from '@svadmin/strapi-graphql';
+const graphqlProvider = await createStrapiGraphQLDataProvider('https://strapi.example.com/graphql');
+```
+
+### Generic REST bridge
+
+```typescript
+// bun add @svadmin/rest @refinedev/rest @nestjsx/crud-request
+import { createRestDataProvider } from '@svadmin/rest';
+
+const dataProvider = await createRestDataProvider('https://api.example.com');
+```
+
+### PostgREST
+
+```typescript
+import { createPostgrestDataProvider } from '@svadmin/postgrest';
+
+const dataProvider = createPostgrestDataProvider({
+  apiUrl: 'https://api.example.com',
+  headers: () => ({ Authorization: `Bearer ${token}` }),
+});
+```
+
+### JSON:API
+
+```typescript
+import { createJsonApiDataProvider } from '@svadmin/jsonapi';
+
+const dataProvider = createJsonApiDataProvider({ apiUrl: 'https://api.example.com' });
+```
+
+### Meilisearch
+
+```typescript
+import { createMeilisearchDataProvider } from '@svadmin/meilisearch';
+
+const dataProvider = createMeilisearchDataProvider({
+  host: 'https://search.example.com',
+  apiKey: process.env.MEILISEARCH_KEY,
+});
+```
+
+### Typesense
+
+```typescript
+import { createTypesenseDataProvider } from '@svadmin/typesense';
+
+const dataProvider = createTypesenseDataProvider({
+  host: 'https://typesense.example.com',
+  apiKey: process.env.TYPESENSE_KEY,
+});
+```
+
+### Elasticsearch and OpenSearch
+
+```typescript
+import { createElasticsearchDataProvider } from '@svadmin/elasticsearch';
+
+const dataProvider = createElasticsearchDataProvider({
+  node: 'https://search.example.com',
+  apiKey: process.env.ELASTICSEARCH_API_KEY,
+});
+```
+
+### ClickHouse
+
+```typescript
+import { createClickHouseDataProvider } from '@svadmin/clickhouse';
+
+const dataProvider = createClickHouseDataProvider({
+  url: 'https://clickhouse.example.com',
+  database: 'analytics',
+  authorization: `Basic ${btoa('default:')}`,
+});
+```
+
+### Qdrant
+
+```typescript
+import { createQdrantDataProvider } from '@svadmin/qdrant';
+
+const dataProvider = createQdrantDataProvider({
+  host: 'https://qdrant.example.com',
+  apiKey: process.env.QDRANT_API_KEY,
+});
+```
+
+### S3-compatible object listing
+
+`@svadmin/s3` is a read-only data provider for listing bucket objects. Use
+`@svadmin/storage` for uploads, presigned URLs, and deletes. Run it on a trusted
+server; never ship access keys to the browser.
+
+```typescript
+import { createS3DataProvider } from '@svadmin/s3';
+
+const objects = createS3DataProvider({
+  endpoint: process.env.S3_ENDPOINT,
+  region: process.env.S3_REGION ?? 'us-east-1',
+  bucket: process.env.S3_BUCKET,
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  forcePathStyle: true,
+});
+```
+
+## Provider index
+
+| Package | Factory | Notes |
+|---------|---------|-------|
+| `@svadmin/simple-rest` | `createSimpleRestDataProvider` | Generic REST envelope |
+| `@svadmin/rest` | `createRestDataProvider` | Refine REST bridge |
+| `@svadmin/jsonapi` | `createJsonApiDataProvider` | JSON:API 1.0 |
+| `@svadmin/postgrest` | `createPostgrestDataProvider` | PostgREST |
+| `@svadmin/supabase` | `createSupabaseDataProvider` | Data + auth + live |
+| `@svadmin/pocketbase` | `createPocketBaseDataProvider` | Data + auth + live |
+| `@svadmin/appwrite` | `createAppwriteDataProvider` | Data + auth + live |
+| `@svadmin/graphql` | `createGraphQLDataProvider` | Generic GraphQL |
+| `@svadmin/hasura` | `createHasuraDataProvider` | Refine Hasura bridge |
+| `@svadmin/nestjs-query` | `createNestjsQueryDataProvider` | Refine bridge |
+| `@svadmin/nestjsx-crud` | `createNestjsxCrudDataProvider` | Refine bridge |
+| `@svadmin/strapi` | `createStrapiDataProvider` | Refine bridge |
+| `@svadmin/strapi-graphql` | `createStrapiGraphQLDataProvider` | Refine bridge |
+| `@svadmin/directus` | `createDirectusDataProvider` | Native Directus client |
+| `@svadmin/firebase` | `createFirebaseDataProvider` | Refine Firebase bridge |
+| `@svadmin/airtable` | `createAirtableDataProvider` | Refine Airtable bridge |
+| `@svadmin/medusa` | `createMedusaDataProvider` | Refine Medusa bridge |
+| `@svadmin/sanity` | `createSanityDataProvider` | Native Sanity client |
+| `@svadmin/meilisearch` | `createMeilisearchDataProvider` | Search and facets |
+| `@svadmin/typesense` | `createTypesenseDataProvider` | Typo-tolerant search |
+| `@svadmin/elasticsearch` | `createElasticsearchDataProvider` | Elasticsearch / OpenSearch |
+| `@svadmin/clickhouse` | `createClickHouseDataProvider` | Analytical queries |
+| `@svadmin/qdrant` | `createQdrantDataProvider` | Vector search |
+| `@svadmin/drizzle` | `createDrizzleDataProvider` | Direct database access |
+| `@svadmin/elysia` | `createElysiaDataProvider` | End-to-end type inference |
+| `@svadmin/s3` | `createS3DataProvider` | Read-only object listing |
+
 ## Multiple Data Providers
 
 Use different backends for different resources:
@@ -143,15 +353,21 @@ const resources = [
 
 ## Filter Operators
 
-svadmin supports 16 filter operators:
+svadmin supports 28 field operators plus logical `and` / `or`:
 
 | Operator | Description |
 |----------|-------------|
 | `eq`, `ne` | Equal, not equal |
+| `eqs`, `nes` | Strict equal, strict not equal |
 | `lt`, `gt`, `lte`, `gte` | Comparisons |
-| `contains`, `ncontains` | String contains / not contains |
-| `startswith`, `endswith` | String prefix / suffix |
 | `in`, `nin` | In array / not in array |
+| `ina`, `nina` | In array (array field) / not in array (array field) |
+| `contains`, `ncontains` | Case-insensitive contains / not contains |
+| `containss`, `ncontainss` | Case-sensitive contains / not contains |
+| `startswith`, `nstartswith` | Prefix / not prefix (case-insensitive) |
+| `startswiths`, `nstartswiths` | Prefix / not prefix (case-sensitive) |
+| `endswith`, `nendswith` | Suffix / not suffix (case-insensitive) |
+| `endswiths`, `nendswiths` | Suffix / not suffix (case-sensitive) |
 | `null`, `nnull` | Is null / not null |
 | `between`, `nbetween` | Range / not in range |
 

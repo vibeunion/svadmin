@@ -119,6 +119,215 @@ const dataProvider = await createDrizzleDataProvider({ connection: db, schema })
 
 通过 Drizzle ORM 直接访问数据库 — 支持 SQLite、PostgreSQL、MySQL 和 Cloudflare D1。内置软删除、关联查询、事务、聚合查询和安全控制。详见 [Drizzle ORM 指南](/zh-cn/providers/drizzle)。
 
+### Airtable
+
+```typescript
+// bun add @svadmin/airtable @refinedev/airtable
+import { createAirtableDataProvider } from '@svadmin/airtable';
+
+const dataProvider = await createAirtableDataProvider('base-id', process.env.AIRTABLE_API_KEY);
+```
+
+### Directus
+
+```typescript
+import { createDirectusDataProvider } from '@svadmin/directus';
+
+const dataProvider = createDirectusDataProvider('https://directus.example.com', process.env.DIRECTUS_TOKEN);
+```
+
+### Firebase
+
+```typescript
+// 传入已初始化的 @refinedev/firebase（或兼容）Provider。
+import { createFirebaseDataProvider } from '@svadmin/firebase';
+
+const dataProvider = createFirebaseDataProvider(refineFirebaseProvider);
+```
+
+### Hasura
+
+```typescript
+// bun add @svadmin/hasura @refinedev/hasura graphql-request
+import { createHasuraDataProvider } from '@svadmin/hasura';
+
+const dataProvider = await createHasuraDataProvider({ endpoint: 'https://api.example.com/v1/graphql' });
+```
+
+### Medusa
+
+```typescript
+// bun add @svadmin/medusa @refinedev/medusa
+import { createMedusaDataProvider } from '@svadmin/medusa';
+
+const dataProvider = await createMedusaDataProvider('https://medusa.example.com');
+```
+
+### NestJS Query 与 NestJSX CRUD
+
+```typescript
+// bun add @svadmin/nestjs-query @refinedev/nestjs-query
+import { createNestjsQueryDataProvider } from '@svadmin/nestjs-query';
+const queryProvider = await createNestjsQueryDataProvider('https://api.example.com/graphql');
+
+// bun add @svadmin/nestjsx-crud @refinedev/nestjsx-crud
+import { createNestjsxCrudDataProvider } from '@svadmin/nestjsx-crud';
+const crudProvider = await createNestjsxCrudDataProvider('https://api.example.com');
+```
+
+### Sanity
+
+```typescript
+import { createSanityDataProvider } from '@svadmin/sanity';
+
+const dataProvider = createSanityDataProvider('project-id', 'production', process.env.SANITY_TOKEN);
+```
+
+### Strapi 与 Strapi GraphQL
+
+```typescript
+// bun add @svadmin/strapi @refinedev/strapi-v4
+import { createStrapiDataProvider } from '@svadmin/strapi';
+const restProvider = await createStrapiDataProvider('https://strapi.example.com');
+
+// bun add @svadmin/strapi-graphql @refinedev/strapi-graphql
+import { createStrapiGraphQLDataProvider } from '@svadmin/strapi-graphql';
+const graphqlProvider = await createStrapiGraphQLDataProvider('https://strapi.example.com/graphql');
+```
+
+### 通用 REST 桥接
+
+```typescript
+// bun add @svadmin/rest @refinedev/rest @nestjsx/crud-request
+import { createRestDataProvider } from '@svadmin/rest';
+
+const dataProvider = await createRestDataProvider('https://api.example.com');
+```
+
+### PostgREST
+
+```typescript
+import { createPostgrestDataProvider } from '@svadmin/postgrest';
+
+const dataProvider = createPostgrestDataProvider({
+  apiUrl: 'https://api.example.com',
+  headers: () => ({ Authorization: `Bearer ${token}` }),
+});
+```
+
+### JSON:API
+
+```typescript
+import { createJsonApiDataProvider } from '@svadmin/jsonapi';
+
+const dataProvider = createJsonApiDataProvider({ apiUrl: 'https://api.example.com' });
+```
+
+### Meilisearch
+
+```typescript
+import { createMeilisearchDataProvider } from '@svadmin/meilisearch';
+
+const dataProvider = createMeilisearchDataProvider({
+  host: 'https://search.example.com',
+  apiKey: process.env.MEILISEARCH_KEY,
+});
+```
+
+### Typesense
+
+```typescript
+import { createTypesenseDataProvider } from '@svadmin/typesense';
+
+const dataProvider = createTypesenseDataProvider({
+  host: 'https://typesense.example.com',
+  apiKey: process.env.TYPESENSE_KEY,
+});
+```
+
+### Elasticsearch 与 OpenSearch
+
+```typescript
+import { createElasticsearchDataProvider } from '@svadmin/elasticsearch';
+
+const dataProvider = createElasticsearchDataProvider({
+  node: 'https://search.example.com',
+  apiKey: process.env.ELASTICSEARCH_API_KEY,
+});
+```
+
+### ClickHouse
+
+```typescript
+import { createClickHouseDataProvider } from '@svadmin/clickhouse';
+
+const dataProvider = createClickHouseDataProvider({
+  url: 'https://clickhouse.example.com',
+  database: 'analytics',
+  authorization: `Basic ${btoa('default:')}`,
+});
+```
+
+### Qdrant
+
+```typescript
+import { createQdrantDataProvider } from '@svadmin/qdrant';
+
+const dataProvider = createQdrantDataProvider({
+  host: 'https://qdrant.example.com',
+  apiKey: process.env.QDRANT_API_KEY,
+});
+```
+
+### S3 兼容对象列表
+
+`@svadmin/s3` 是只读对象列表数据 Provider。上传、预签名 URL 和删除请使用
+`@svadmin/storage`。它只能在可信服务端运行，不要把访问密钥打进浏览器包。
+
+```typescript
+import { createS3DataProvider } from '@svadmin/s3';
+
+const objects = createS3DataProvider({
+  endpoint: process.env.S3_ENDPOINT,
+  region: process.env.S3_REGION ?? 'us-east-1',
+  bucket: process.env.S3_BUCKET,
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  forcePathStyle: true,
+});
+```
+
+## Provider 索引
+
+| 包 | 工厂函数 | 说明 |
+|----|----------|------|
+| `@svadmin/simple-rest` | `createSimpleRestDataProvider` | 通用 REST |
+| `@svadmin/rest` | `createRestDataProvider` | Refine REST 桥接 |
+| `@svadmin/jsonapi` | `createJsonApiDataProvider` | JSON:API 1.0 |
+| `@svadmin/postgrest` | `createPostgrestDataProvider` | PostgREST |
+| `@svadmin/supabase` | `createSupabaseDataProvider` | 数据 + 认证 + 实时 |
+| `@svadmin/pocketbase` | `createPocketBaseDataProvider` | 数据 + 认证 + 实时 |
+| `@svadmin/appwrite` | `createAppwriteDataProvider` | 数据 + 认证 + 实时 |
+| `@svadmin/graphql` | `createGraphQLDataProvider` | 通用 GraphQL |
+| `@svadmin/hasura` | `createHasuraDataProvider` | Refine Hasura 桥接 |
+| `@svadmin/nestjs-query` | `createNestjsQueryDataProvider` | Refine 桥接 |
+| `@svadmin/nestjsx-crud` | `createNestjsxCrudDataProvider` | Refine 桥接 |
+| `@svadmin/strapi` | `createStrapiDataProvider` | Refine 桥接 |
+| `@svadmin/strapi-graphql` | `createStrapiGraphQLDataProvider` | Refine 桥接 |
+| `@svadmin/directus` | `createDirectusDataProvider` | Directus 原生客户端 |
+| `@svadmin/firebase` | `createFirebaseDataProvider` | Refine Firebase 桥接 |
+| `@svadmin/airtable` | `createAirtableDataProvider` | Refine Airtable 桥接 |
+| `@svadmin/medusa` | `createMedusaDataProvider` | Refine Medusa 桥接 |
+| `@svadmin/sanity` | `createSanityDataProvider` | Sanity 原生客户端 |
+| `@svadmin/meilisearch` | `createMeilisearchDataProvider` | 搜索与聚合 |
+| `@svadmin/typesense` | `createTypesenseDataProvider` | 容错搜索 |
+| `@svadmin/elasticsearch` | `createElasticsearchDataProvider` | Elasticsearch / OpenSearch |
+| `@svadmin/clickhouse` | `createClickHouseDataProvider` | 分析查询 |
+| `@svadmin/qdrant` | `createQdrantDataProvider` | 向量检索 |
+| `@svadmin/drizzle` | `createDrizzleDataProvider` | 直连数据库 |
+| `@svadmin/elysia` | `createElysiaDataProvider` | 端到端类型推导 |
+| `@svadmin/s3` | `createS3DataProvider` | 只读对象列表 |
+
 ## 多数据 Provider
 
 为不同资源使用不同后端：
@@ -143,15 +352,21 @@ const resources = [
 
 ## 过滤操作符
 
-svadmin 支持 16 种过滤操作符：
+svadmin 支持 28 种字段操作符，以及逻辑 `and` / `or`：
 
 | 操作符 | 说明 |
 |--------|------|
 | `eq`、`ne` | 等于、不等于 |
+| `eqs`、`nes` | 严格等于、严格不等于 |
 | `lt`、`gt`、`lte`、`gte` | 比较运算 |
-| `contains`、`ncontains` | 包含 / 不包含 |
-| `startswith`、`endswith` | 前缀 / 后缀匹配 |
 | `in`、`nin` | 在数组中 / 不在数组中 |
+| `ina`、`nina` | 数组字段包含 / 不包含 |
+| `contains`、`ncontains` | 忽略大小写包含 / 不包含 |
+| `containss`、`ncontainss` | 区分大小写包含 / 不包含 |
+| `startswith`、`nstartswith` | 前缀 / 非前缀（忽略大小写） |
+| `startswiths`、`nstartswiths` | 前缀 / 非前缀（区分大小写） |
+| `endswith`、`nendswith` | 后缀 / 非后缀（忽略大小写） |
+| `endswiths`、`nendswiths` | 后缀 / 非后缀（区分大小写） |
 | `null`、`nnull` | 为空 / 不为空 |
 | `between`、`nbetween` | 范围内 / 范围外 |
 

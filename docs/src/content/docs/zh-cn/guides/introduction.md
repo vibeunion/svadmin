@@ -19,7 +19,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 - 🎯 **Provider 架构** — 切换后端无需修改 UI 代码
 - ⚡ **TanStack Query** — 自动缓存、请求去重、后台刷新
 - 🧩 **预构建组件** — AutoTable、AutoForm、CRUD 页面、认证页面、CommandPalette、Sheet、Drawer、StepsForm
-- 🔠 **16 个字段组件** — 完整的字段显示和输入组件集（Text、Image、JSON、RichText、Combobox、MultiSelect 等）
+- 🔠 **27 个字段组件** — 完整的字段显示和输入组件集（Text、Image、JSON、RichText、Combobox、MultiSelect、Date、Number、Currency 等）
 - 🔑 **认证系统** — 9 个 Hook + 4 个可配置认证页面变体
 - 📡 **实时数据** — WebSocket 和 SSE 实时 Provider，支持自动重连
 - 🎨 **可主题化** — 9 套配色预设，默认配色，以及亮/暗色模式和可配置布局风格
@@ -30,7 +30,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 - 🔄 **变更模式** — 悲观、乐观和可撤销三种变更模式
 - 📤 **数据导入导出** — CSV 导出/导入，支持批量操作
 - 🧰 **工具函数** — `unionFilters`、`unionSorters`、`file2Base64`、`getDefaultFilter`、`getDefaultSortOrder`
-- 📦 **16 个数据 Provider** — REST、Supabase、PocketBase、Appwrite、GraphQL、Elysia、Drizzle ORM、Strapi、Directus、Firebase、Hasura、Sanity、Airtable、Medusa、NestJS 等
+- 📦 **24 个数据 Provider** — REST、Supabase、PocketBase、Appwrite、GraphQL、Elysia、Drizzle ORM、Strapi、Directus、Firebase、Hasura、Sanity、Airtable、Medusa、NestJS 等，以及搜索、分析和向量数据库
 
 ## 包列表
 
@@ -38,7 +38,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 |------|------|
 | `@svadmin/core` | Hooks、Providers、类型、资源类型注册表、工具函数 |
 | [`@svadmin/ai-elements`](/zh-cn/components/ai-components) | 可组合的 Svelte 5 AI 对话与 Agent 组件 |
-| `@svadmin/ui` | 预构建 Svelte 5 组件（表单、表格、16 个字段、shadcn） |
+| `@svadmin/ui` | 预构建 Svelte 5 组件（表单、表格、27 个字段、shadcn） |
 | [`@svadmin/surface`](/zh-cn/guides/declarative-surface) | 带只读资源绑定和严格校验的声明式仪表盘 |
 | [`@svadmin/flow`](/zh-cn/guides/flow) | 面向客户端图编辑器的可选拖拽节点画布 |
 | `@svadmin/simple-rest` | REST API 数据 Provider |
