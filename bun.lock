@@ -21,7 +21,7 @@
         "@types/papaparse": "^5.5.2",
         "@typescript/native": "npm:typescript@^7.0.2",
         "cac": "^7.1.1",
-        "devframe": "1.4.0",
+        "devframe": "1.3.6",
         "eslint": "^10.15.0",
         "eslint-plugin-svelte": "^3.24.1",
         "globals": "^17.14.0",
@@ -888,7 +888,7 @@
         "@vibeunion/devtools-devframe": "^0.1.2",
         "bits-ui": "^2.22.0",
         "cn": "^0.5.2",
-        "devframe": "1.4.0",
+        "devframe": "1.3.6",
         "esm-env": "^1.2.2",
         "ip-address": "10.7.6",
         "svelte-sonner": "^1.2.3",
@@ -981,7 +981,6 @@
     "@tanstack/svelte-query@6.4.5": "patches/@tanstack%2Fsvelte-query@6.4.5.patch",
     "http-cache-semantics@4.3.0": "patches/http-cache-semantics@4.3.0.patch",
     "@supabase/auth-js@2.119.0": "patches/@supabase%2Fauth-js@2.119.0.patch",
-    "devframe@1.4.0": "patches/devframe@1.4.0.patch",
     "@refinedev/core@5.0.12": "patches/@refinedev%2Fcore@5.0.12.patch",
     "braces@3.0.3": "patches/braces@3.0.3.patch",
     "deepmerge@4.3.1": "patches/deepmerge@4.3.1.patch",
@@ -999,7 +998,7 @@
     "decode-uri-component": "0.5.1",
     "deepmerge": "4.3.1",
     "devalue": "5.9.4",
-    "devframe": "1.4.0",
+    "devframe": "1.3.6",
     "dompurify": "3.4.17",
     "esbuild": "0.28.2",
     "exceljs@4.4.0": {
@@ -2604,7 +2603,7 @@
 
     "devalue": ["devalue@5.9.4", "", {}, "sha512-sPAT4pztbu6586/hrhOnMKS17IJrvg12mXiSPSS3W5qDeN2RGgvZ0diZCm31dBbnevfVmujNO3IM2wrS4Y2Rhg=="],
 
-    "devframe": ["devframe@1.4.0", "", { "dependencies": { "crossws": "^0.4.17", "h3": "^2.0.8", "nostics": "^1.4.0", "pathe": "^2.0.3" }, "peerDependencies": { "@devframes/agentic": "1.4.0", "cac": "^7.0.0" }, "optionalPeers": ["@devframes/agentic", "cac"], "bin": { "devframe": "./bin/devframe.mjs" } }, "sha512-NwXHetQRcBTbAVBSF8duDPFmaB4h673VBLr6oJ6BOGcAxfUc9XLB2FqsRzWkTeRbTIRqPp/dT//PhhqokETz/Q=="],
+    "devframe": ["devframe@1.3.6", "", { "dependencies": { "crossws": "^0.4.17", "h3": "^2.0.8", "nostics": "^1.4.0", "pathe": "^2.0.3" }, "peerDependencies": { "@devframes/agentic": "1.3.6", "cac": "^7.0.0" }, "optionalPeers": ["@devframes/agentic", "cac"], "bin": { "devframe": "./bin/devframe.mjs" } }, "sha512-je8tURHXKcyYD+WGgbCYqYptqOsjVX91PtIjrY69ufotRQpHNCpxfhZniSmCsnnXXV4TmRGUO00xqUQREjjz+A=="],
 
     "devlop": ["devlop@1.1.0", "", { "dependencies": { "dequal": "^2.0.0" } }, "sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA=="],
 
