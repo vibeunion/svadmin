@@ -2248,7 +2248,10 @@ export function getI18nProvider(): I18nProvider | undefined {
 
 export function setLocale(locale: string): void {
   const scope = readCurrentI18nScope();
-  if (scope) { scope.setLocale(locale); return; }
+  if (scope) {
+    scope.setLocale(locale);
+    return;
+  }
   setLegacyLocale(locale);
 }
 
@@ -2274,7 +2277,10 @@ export function resetI18n(): void {
   i18nProvider = undefined;
 }
 
-/** useTranslation — Svelte 5 reactive translation hook tracking locale changes natively. */
+/**
+ * useTranslation — Svelte 5 reactive translation hook
+ * Tracks locale changes natively.
+ */
 export function useTranslation() {
   // Capture context while the component is initializing. Event handlers and
   // async continuations cannot safely call getContext later.

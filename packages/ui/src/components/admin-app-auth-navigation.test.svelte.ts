@@ -7,6 +7,7 @@ import type { AccessControlProvider, AuthProvider, CheckResult, DataProvider, Re
 import { resetContext } from '@svadmin/core';
 import AdminApp from './AdminApp.svelte';
 import TestPage from './admin-app-auth-navigation.test-page.svelte';
+import CustomRouteTestPage from './admin-app-custom-route.test-page.svelte';
 
 function createDataProvider(): DataProvider {
   return {
@@ -450,7 +451,7 @@ describe('AdminApp authenticated navigation', () => {
         {
           path: '/live-desk',
           title: '盘中监控席位',
-          component: TestPage,
+          component: CustomRouteTestPage,
           access: false,
         },
       ],
