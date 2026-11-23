@@ -149,10 +149,16 @@ const dataProvider = createFirebaseDataProvider(refineFirebaseProvider);
 
 ```typescript
 // bun add @svadmin/hasura @refinedev/hasura graphql-request
+import { GraphQLClient } from 'graphql-request';
 import { createHasuraDataProvider } from '@svadmin/hasura';
 
-const dataProvider = await createHasuraDataProvider({ endpoint: 'https://api.example.com/v1/graphql' });
+const client = new GraphQLClient('https://api.example.com/v1/graphql', {
+  headers: { 'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET ?? '' },
+});
+const dataProvider = await createHasuraDataProvider(client);
 ```
+
+Keep the Hasura admin secret on the server. Browser clients should send a Hasura JWT or role header instead.
 
 ### Medusa
 

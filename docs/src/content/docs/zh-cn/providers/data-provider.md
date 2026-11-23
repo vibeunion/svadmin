@@ -149,10 +149,16 @@ const dataProvider = createFirebaseDataProvider(refineFirebaseProvider);
 
 ```typescript
 // bun add @svadmin/hasura @refinedev/hasura graphql-request
+import { GraphQLClient } from 'graphql-request';
 import { createHasuraDataProvider } from '@svadmin/hasura';
 
-const dataProvider = await createHasuraDataProvider({ endpoint: 'https://api.example.com/v1/graphql' });
+const client = new GraphQLClient('https://api.example.com/v1/graphql', {
+  headers: { 'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET ?? '' },
+});
+const dataProvider = await createHasuraDataProvider(client);
 ```
+
+Hasura admin secret 只能放在服务端。浏览器端应改为 Hasura JWT 或角色请求头。
 
 ### Medusa
 
