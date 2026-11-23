@@ -390,7 +390,7 @@ function assertUiDependencyContract(manifest: PackageManifest): void {
     '@svadmin/ui: cmdk-sv must not reintroduce the Svelte 4-only @melt-ui/svelte dependency chain',
   );
   assert(
-    manifest.peerDependencies?.['svelte'] === '^5.56.10',
+    manifest.peerDependencies?.['svelte'] === '^5.59.1',
     '@svadmin/ui: Svelte peer range must match the supported Svelte 5 release line',
   );
 }

@@ -36,7 +36,7 @@
     }
   },
   "peerDependencies": {
-    "svelte": "^5.56.10",
+    "svelte": "^5.59.1",
     "@svadmin/core": "workspace:*"
   },
   "dependencies": {
