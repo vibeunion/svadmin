@@ -981,6 +981,7 @@
     "@tanstack/svelte-query@6.4.5": "patches/@tanstack%2Fsvelte-query@6.4.5.patch",
     "http-cache-semantics@4.3.0": "patches/http-cache-semantics@4.3.0.patch",
     "@supabase/auth-js@2.119.0": "patches/@supabase%2Fauth-js@2.119.0.patch",
+    "devframe@1.4.0": "patches/devframe@1.4.0.patch",
     "@refinedev/core@5.0.12": "patches/@refinedev%2Fcore@5.0.12.patch",
     "braces@3.0.3": "patches/braces@3.0.3.patch",
     "deepmerge@4.3.1": "patches/deepmerge@4.3.1.patch",

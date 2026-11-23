@@ -25,6 +25,10 @@ repository-wide type safety. `check:types:dependencies` must remain enabled.
   expanding `keyof` across their DOM-property unions. Original prop unions,
   binding names, and setter parameter types remain intact. Floating CSS output
   refers to the installed `csstype` properties rather than stale expanded aliases.
+- `devframe@1.4.0`: widen the namespace-scoped `sharedState` overload so it does
+  not index the remapped `ScopedSharedStates<NS>` type with a generic parameter.
+  The runtime contract is unchanged; the scoped helper still enforces the
+  namespace prefix.
 - `svelte-toolbelt@0.10.7`: import `Expand` explicitly in the box declarations and
   derive the sleep handle from `ReturnType<typeof setTimeout>`. Browser-only
   fixtures no longer depend on an accidental global utility or Node timer type.

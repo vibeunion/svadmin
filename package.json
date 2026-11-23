@@ -161,7 +161,8 @@
     "@tanstack/svelte-table@9.3.1": "patches/@tanstack%2Fsvelte-table@9.3.1.patch",
     "http-cache-semantics@4.3.0": "patches/http-cache-semantics@4.3.0.patch",
     "vidstack@1.15.7": "patches/vidstack@1.15.7.patch",
-    "picomatch@4.0.7": "patches/picomatch@4.0.7.patch"
+    "picomatch@4.0.7": "patches/picomatch@4.0.7.patch",
+    "devframe@1.4.0": "patches/devframe@1.4.0.patch"
   },
   "main": "eslint.config.js",
   "directories": {
