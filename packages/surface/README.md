@@ -7,7 +7,7 @@
 ## Install
 
 The declared minimum combination is Core 0.82.0, UI 0.127.0, and Svelte
-5.56.10, matching the published UI peer requirements. `compatibility.json`
+5.59.1, matching the published UI peer requirements. `compatibility.json`
 lists verification targets, not proof of a successful run. Acceptance requires
 the `minimum-supported` strict install and consumer checks in `pack:check` to
 pass against registry artifacts; workspace tarballs do not replace that check.

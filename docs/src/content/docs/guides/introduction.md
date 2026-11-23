@@ -19,7 +19,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 - 🎯 **Provider Architecture** — Swap backends without changing UI code
 - ⚡ **TanStack Query** — Automatic caching, deduplication, background refetch
 - 🧩 **Pre-built Components** — AutoTable, AutoForm, CRUD pages, auth pages, CommandPalette, Sheet, Drawer, StepsForm
-- 🔠 **16 Field Components** — Complete set of mapped display and input fields (Text, Image, JSON, RichText, Combobox, MultiSelect, etc.)
+- 🔠 **27 Field Components** — Complete set of mapped display and input fields (Text, Image, JSON, RichText, Combobox, MultiSelect, Date, Number, Currency, and more)
 - 🔑 **Auth System** — 9 hooks + 4 configurable auth page variants
 - 📡 **Real-time** — WebSocket & SSE live providers with auto-reconnect
 - 🎨 **Themeable** — 9 color presets, the built-in preset by default, light/dark mode, and configurable layout presets
@@ -30,7 +30,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 - 🔄 **Mutation Modes** — Pessimistic, optimistic, and undoable mutations
 - 📤 **Data Transfer** — CSV export/import with batch support
 - 🧰 **Helpers** — `unionFilters`, `unionSorters`, `file2Base64`, `getDefaultFilter`, `getDefaultSortOrder`
-- 📦 **16 Data Providers** — REST, Supabase, PocketBase, Appwrite, GraphQL, Elysia, Drizzle ORM, Strapi, Directus, Firebase, Hasura, Sanity, Airtable, Medusa, NestJS variants
+- 📦 **24 Data Providers** — REST, Supabase, PocketBase, Appwrite, GraphQL, Elysia, Drizzle ORM, Strapi, Directus, Firebase, Hasura, Sanity, Airtable, Medusa, NestJS variants, search, analytics, and vector databases
 
 ## Packages
 
@@ -38,7 +38,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 |---------|-------------|
 | `@svadmin/core` | Hooks, providers, types, Resource Type Registry, utilities |
 | [`@svadmin/ai-elements`](/components/ai-components) | Composable Svelte 5 AI conversation and agent components |
-| `@svadmin/ui` | Pre-built Svelte 5 components (Forms, Tables, 16 Fields, shadcn) |
+| `@svadmin/ui` | Pre-built Svelte 5 components (Forms, Tables, 27 Fields, shadcn) |
 | [`@svadmin/surface`](/guides/declarative-surface) | Validated declarative dashboards with read-only resource bindings |
 | [`@svadmin/flow`](/guides/flow) | Optional draggable node canvas for client-side graph editors |
 | `@svadmin/simple-rest` | REST API data provider |

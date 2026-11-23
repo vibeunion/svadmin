@@ -7,7 +7,7 @@ repository-wide type safety. `check:types:dependencies` must remain enabled.
 - `@refinedev/core@5.0.12`: replace the unresolved build-time `@definitions/index`
   alias with the shipped relative definitions entry in all three declaration
   formats. `@types/papaparse` supplies the actual CSV library declarations.
-- `@tanstack/svelte-query@6.4.1` and `@tanstack/svelte-table@9.3.1`: point
+- `@tanstack/svelte-query@6.4.5` and `@tanstack/svelte-table@9.3.1`: point
   reactive-module declaration imports at the shipped `.svelte.js` modules.
   Extensionless `.svelte` imports caused Svelte checking to invent component
   default exports. Actual component imports are unchanged.
@@ -21,7 +21,7 @@ repository-wide type safety. `check:types:dependencies` must remain enabled.
   the ES2024 ambient type requirement and fixes `fitView()` in ES2022
   environments without a native `Promise.withResolvers`. The public canvas API
   has a regression with that native method unavailable.
-- `bits-ui@2.20.6`: express the Button/Calendar component signatures without
+- `bits-ui@2.22.0`: express the Button/Calendar component signatures without
   expanding `keyof` across their DOM-property unions. Original prop unions,
   binding names, and setter parameter types remain intact. Floating CSS output
   refers to the installed `csstype` properties rather than stale expanded aliases.

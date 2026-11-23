@@ -14,10 +14,10 @@
 ## ✨ Features
 
 - 🎯 **Headless Architecture** — DataProvider / AuthProvider / RouterProvider / LiveProvider, swap backends freely
-- ⚡ **30+ Reactive Hooks** — `useList`, `useOne`, `useCreate`, `useUpdate`, `useDelete`, `useTable`, `useForm`, `useSelect`, `useInfiniteList`, `useShow`, `useStepsForm`, `useModal`, `useDrawer`, etc.
+- ⚡ **60+ Reactive Hooks** — `useList`, `useOne`, `useCreate`, `useUpdate`, `useDelete`, `useTable`, `useForm`, `useSelect`, `useInfiniteList`, `useShow`, `useStepsForm`, `useModal`, `useDrawer`, etc.
 - 🔑 **Auth Hooks** — `useLogin`, `useLogout`, `useRegister`, `useForgotPassword`, `useUpdatePassword`, `useGetIdentity`, `useIsAuthenticated`, `useOnError`, `usePermissions`
 - 🧩 **Pre-built UI** — AdminApp, AutoTable, AutoForm, ShowPage, Sidebar, Layout, SettingsPage, SecuritySettings, IntegrationsSettings, NotificationsSettings, ApiSettings, ErrorPage, StepsForm, CommandPalette, Sheet, Drawer, Collapsible, Tooltip (shadcn-svelte)
-- 🔠 **16 Field Components** — TextField, UrlField, EmailField, BooleanField, TagField, FileField, ImageField, MarkdownField, RichTextField, SelectField, MultiSelectField, RelationField, JsonField, ComboboxField, PasswordInput
+- 🔠 **27 Field Components** — TextField, UrlField, EmailField, BooleanField, TagField, FileField, ImageField, MarkdownField, RichTextField, SelectField, MultiSelectField, RelationField, JsonField, ComboboxField, PasswordInput, DateField, NumberField, CurrencyField, and more
 - 🔘 **CRUD Buttons** — CreateButton, EditButton, DeleteButton, ShowButton, ListButton, RefreshButton, ExportButton, ImportButton, SaveButton, CloneButton
 - 🛡️ **`<Authenticated>`** — Conditionally render based on auth state with loading/fallback
 - ⚙️ **ConfigErrorScreen** — Restrained configuration error screen for missing env vars with copy-to-clipboard
@@ -39,10 +39,10 @@
 ## ✨ 特性
 
 - 🎯 **Headless 架构** — DataProvider / AuthProvider / RouterProvider / LiveProvider，自由切换后端
-- ⚡ **30+ 响应式 Hook** — `useList`、`useOne`、`useCreate`、`useUpdate`、`useDelete`、`useTable`、`useForm`、`useSelect`、`useInfiniteList`、`useShow`、`useStepsForm`、`useModal`、`useDrawer` 等
+- ⚡ **60+ 响应式 Hook** — `useList`、`useOne`、`useCreate`、`useUpdate`、`useDelete`、`useTable`、`useForm`、`useSelect`、`useInfiniteList`、`useShow`、`useStepsForm`、`useModal`、`useDrawer` 等
 - 🔑 **Auth Hooks** — `useLogin`、`useLogout`、`useRegister`、`useForgotPassword`、`useUpdatePassword`、`useGetIdentity`、`useIsAuthenticated`、`useOnError`、`usePermissions`
 - 🧩 **开箱即用 UI** — AdminApp、AutoTable、AutoForm、ShowPage、Sidebar、Layout、SettingsPage、SecuritySettings、IntegrationsSettings、NotificationsSettings、ApiSettings、ErrorPage、StepsForm、CommandPalette、Sheet、Drawer、Collapsible、Tooltip（基于 shadcn-svelte）
-- 🔠 **16 种字段组件** — TextField、UrlField、EmailField、BooleanField、TagField、FileField、ImageField、MarkdownField、RichTextField、SelectField、MultiSelectField、RelationField、JsonField、ComboboxField、PasswordInput
+- 🔠 **27 种字段组件** — TextField、UrlField、EmailField、BooleanField、TagField、FileField、ImageField、MarkdownField、RichTextField、SelectField、MultiSelectField、RelationField、JsonField、ComboboxField、PasswordInput、DateField、NumberField、CurrencyField 等
 - 🔘 **CRUD 按钮** — CreateButton、EditButton、DeleteButton、ShowButton、ListButton、RefreshButton、ExportButton、ImportButton、SaveButton、CloneButton
 - 🛡️ **`<Authenticated>`** — 根据认证状态条件渲染，支持 loading/fallback
 - ⚙️ **ConfigErrorScreen** — 环境变量缺失提示页，克制的企业风格，支持一键复制
@@ -470,10 +470,10 @@ const myProvider: DataProvider = {
 ├──────────────────────────────────────────┤
 │           @svadmin/ui                     │
 │  AdminApp · AutoTable · AutoForm          │
-│  ShowPage · 16 Fields · shadcn-svelte     │
+│  ShowPage · 27 Fields · shadcn-svelte     │
 ├──────────────────────────────────────────┤
 │           @svadmin/core                   │
-│  30+ Hooks · Context · Router · i18n      │
+│  60+ Hooks · Context · Router · i18n      │
 │  Permissions · Audit · Theme              │
 │  Resource Type Registry · Helpers         │
 ├──────────┬───────────┬───────────────────┤

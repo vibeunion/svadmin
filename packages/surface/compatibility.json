@@ -3,14 +3,14 @@
   "minimumSupported": {
     "@svadmin/core": "0.82.0",
     "@svadmin/ui": "0.127.0",
-    "svelte": "5.56.10"
+    "svelte": "5.59.1"
   },
   "testedCombinations": [
     {
       "name": "minimum-supported",
       "core": "0.82.0",
       "ui": "0.127.0",
-      "svelte": "5.56.10"
+      "svelte": "5.59.1"
     },
     {
       "name": "workspace-packed",

@@ -16,11 +16,12 @@ import { definedOptions } from '@svadmin/core/options';
  *   resources: ['posts', 'users', 'orders'],
  * });
  *
- * // Start stdio transport (for Claude Desktop / Cursor)
- * server.listen();
- *
- * // Or get the handler for HTTP transport
- * const handler = server.createHandler();
+ * // Handle a JSON-RPC request from your transport (stdio or HTTP)
+ * const response = await server.handleRequest({
+ *   jsonrpc: '2.0',
+ *   id: 1,
+ *   method: 'tools/list',
+ * });
  * ```
  */
 

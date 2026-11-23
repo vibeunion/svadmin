@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@svar-ui/svelte-grid": "2.7.6",
-    "svelte": "5.57.3"
+    "svelte": "5.59.1"
   },
   "overrides": {
     "@svar-ui/lib-state": "1.9.7"

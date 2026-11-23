@@ -118,7 +118,7 @@
   <PackageInfo.Description>Streaming Markdown renderer</PackageInfo.Description>
   <PackageInfo.Content>
     <PackageInfo.Dependencies>
-      <PackageInfo.Dependency name="svelte" version="^5.56.10" />
+      <PackageInfo.Dependency name="svelte" version="^5.59.1" />
     </PackageInfo.Dependencies>
   </PackageInfo.Content>
 </PackageInfo.Root>

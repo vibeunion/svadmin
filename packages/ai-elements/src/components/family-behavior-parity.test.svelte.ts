@@ -110,7 +110,7 @@ describe('official family behavior parity', () => {
     expect(screen.getByText('streamdown-svelte')).not.toBeNull();
     expect(screen.getByText('Streaming Markdown renderer')).not.toBeNull();
     expect(screen.getByText('Dependencies')).not.toBeNull();
-    expect(screen.getByText('svelte').parentElement?.textContent).toContain('^5.56.10');
+    expect(screen.getByText('svelte').parentElement?.textContent).toContain('^5.59.1');
   });
 
   it('reports clipboard failures without exposing or changing disclosure state', async () => {
