@@ -86,4 +86,21 @@ describe('KpiCard Component', () => {
     const skeleton = container.querySelector('.animate-pulse');
     expect(skeleton).toBeTruthy();
   });
+
+  it('keeps CJK value and badge non-wrapping alongside sparkline', () => {
+    const { getByText } = render(KpiCard, {
+      props: {
+        title: '市场情绪周期',
+        value: '发酵期',
+        badge: '主线聚焦',
+        sparklineData: [38, 45, 52, 68],
+      },
+    });
+
+    const badge = getByText('主线聚焦');
+    expect(badge.className).toContain('whitespace-nowrap');
+    expect(badge.className).toContain('shrink-0');
+    const valueRow = getByText('发酵期').parentElement;
+    expect(valueRow?.className).toContain('whitespace-nowrap');
+  });
 });

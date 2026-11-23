@@ -433,6 +433,8 @@
 
     if (resource) {
       pageLabel = resource.label || resource.name;
+    } else if (customRouteMatch) {
+      pageLabel = customRouteMatch.candidate.title || customRouteMatch.candidate.path;
     } else if (renderedRoute.startsWith('/settings') || renderedRoute === '/account/:tab') {
       const tab = renderedParams['tab'] === 'api-keys'
         ? 'api'

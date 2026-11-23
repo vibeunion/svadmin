@@ -439,6 +439,26 @@ describe('AdminApp authenticated navigation', () => {
     await waitFor(() => expect(document.title).toContain('Page not found'));
   });
 
+  it('uses matched pageRoutes title for document.title instead of not-found', async () => {
+    window.location.hash = '#/live-desk';
+    render(AdminApp, {
+      locale: 'zh-CN',
+      title: 'Quant Desk',
+      dataProvider: createDataProvider(),
+      resources: [],
+      pageRoutes: [
+        {
+          path: '/live-desk',
+          title: '盘中监控席位',
+          component: TestPage,
+          access: false,
+        },
+      ],
+    });
+
+    await waitFor(() => expect(document.title).toBe('盘中监控席位 - Quant Desk'));
+  });
+
   it('removes the layout and redirects when a route recheck fails', async () => {
     const recheck = deferredCheck();
     const check = vi.fn<AuthProvider['check']>()

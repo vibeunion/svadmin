@@ -60,6 +60,8 @@
     color?: string | undefined;
     /** Whether to display current status badge below value (default: true) */
     showBadge?: boolean | undefined;
+    /** Whether to render outer card border and surface background (default: true) */
+    bordered?: boolean | undefined;
     /** Additional CSS classes for the outer container */
     class?: string | undefined;
     /** Optional bottom actions or extra details slot */
@@ -92,6 +94,7 @@
     formatter,
     color,
     showBadge = true,
+    bordered = true,
     class: className = '',
     footer,
   }: GaugeChartProps = $props();
@@ -302,8 +305,10 @@
   data-svadmin-component="GaugeChart"
   data-tone={activeTone}
   data-gauge-type={type}
+  data-bordered={bordered}
   class={cn(
-    'relative flex flex-col items-center justify-between rounded-md border border-border bg-card p-4 text-card-foreground shadow-sm transition-all',
+    'relative flex flex-col items-center justify-between transition-all',
+    bordered && 'rounded-md border border-border bg-card p-4 text-card-foreground shadow-sm',
     className,
   )}
   style="width: {widthPx}px;"

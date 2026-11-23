@@ -28,6 +28,24 @@ describe('FunnelChart and SankeyChart suite', () => {
     expect(view.container.textContent).toContain('30%');
   });
 
+  it('supports borderless embedded mode and handles non-monotonic stage expansion cleanly', () => {
+    const stages: FunnelStageItem[] = [
+      { id: '1', label: '空间高标', value: 2 },
+      { id: '2', label: '首板涨停池', value: 25 },
+    ];
+
+    const view = render(ConversionFunnel, {
+      stages,
+      bordered: false,
+    });
+
+    const root = view.container.querySelector('[data-svadmin-component="ConversionFunnel"]');
+    expect(root?.getAttribute('data-bordered')).toBe('false');
+    expect(root?.className).not.toContain('border-border');
+    expect(view.container.textContent).not.toContain('-0%');
+    expect(view.container.textContent).toContain('增长');
+  });
+
   it('renders SankeyChart with flow nodes and links', () => {
     const nodes: SankeyNode[] = [
       { id: 'organic', label: '自然搜索', value: 500 },
