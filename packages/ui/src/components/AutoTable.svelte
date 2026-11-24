@@ -1,6 +1,7 @@
 <script lang="ts">
   import { bindResourceRendering, type ResourceRendering } from '../rendering/index.js';
   import type { AutoTableGridState } from './auto-table-grid.js';
+  import { listText } from './list-i18n.js';
   import { definedOptions } from '@svadmin/core/options';
 
   import { tick, untrack } from 'svelte';
@@ -1402,17 +1403,17 @@
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
-              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
+              <TooltipButton tooltip={listText(i18n, "common.density")} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
                 <Rows class="h-4 w-4" aria-hidden="true" />
               </TooltipButton>
             {/snippet}
           </DropdownMenu.Trigger>
           <DropdownMenu.Content align="end" class="w-36">
             <DropdownMenu.Item onclick={() => { densityOverride = "comfortable"; }} class={currentDensity === "comfortable" ? "font-semibold text-primary" : ""}>
-              {i18n.t("common.densityComfortable")}
+              {listText(i18n, "common.densityComfortable")}
             </DropdownMenu.Item>
             <DropdownMenu.Item onclick={() => { densityOverride = "compact"; }} class={currentDensity === "compact" ? "font-semibold text-primary" : ""}>
-              {i18n.t("common.densityCompact")}
+              {listText(i18n, "common.densityCompact")}
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
@@ -1850,11 +1851,11 @@
   <!-- Pagination (shadcn) -->
   {#if totalPages > 0}
   <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 py-2 text-sm text-muted-foreground">
-    <div class="flex shrink-0 items-center gap-3 leading-8">
-      <span class="shrink-0 whitespace-nowrap tabular-nums">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
+    <div class="flex shrink-0 items-center gap-3">
+      <span class="shrink-0 whitespace-nowrap tabular-nums leading-8">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
       <Select.Root
         aria-label={i18n.t('common.perPage')}
-        class="h-8 w-[78px] shrink-0 tabular-nums"
+        class="h-8 w-[78px] py-0 leading-tight shrink-0 tabular-nums"
         value={String(pagination.pageSize ?? 10)}
         onchange={(e: Event) => {
           if (!(e.currentTarget instanceof HTMLSelectElement)) return;

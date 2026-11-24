@@ -114,6 +114,7 @@
   .svadmin-steps { display: flex; gap: var(--svadmin-space-3); margin: 0; padding: 0; list-style: none; }
   .svadmin-steps[data-direction='vertical'] { flex-direction: column; }
   .svadmin-steps__item { position: relative; display: flex; flex: 1; min-width: 0; align-items: flex-start; gap: var(--svadmin-space-2); }
+  .svadmin-steps[data-direction='horizontal'] .svadmin-steps__item:last-child { flex: 0 1 auto; }
   .svadmin-steps[data-direction='vertical'] .svadmin-steps__item { flex: none; flex-direction: column; gap: var(--svadmin-space-1); }
   .svadmin-steps__action {
     display: flex;
@@ -153,6 +154,7 @@
   .svadmin-steps__text { display: grid; min-width: 0; gap: 0.15rem; }
   /* Official step title is 16px. Only the active step is weight 500. */
   .svadmin-steps__title { color: var(--foreground); font-size: var(--svadmin-text-section); font-weight: 400; line-height: 1.75; }
+  .svadmin-steps[data-direction='horizontal'] .svadmin-steps__title { white-space: nowrap; }
   .svadmin-steps__item[data-status='process'] .svadmin-steps__title { font-weight: 500; }
   .svadmin-steps__item[data-status='wait'] .svadmin-steps__title { color: var(--muted-foreground); font-weight: 400; }
   .svadmin-steps__subtitle {
@@ -165,11 +167,13 @@
   .svadmin-steps__connector {
     position: relative;
     flex: 1;
+    min-width: 1rem;
     height: 1px;
     margin-block-start: 0.875rem;
     background: var(--border);
     overflow: hidden;
   }
+  .svadmin-steps[data-direction='vertical'] .svadmin-steps__connector { min-width: 0; }
   .svadmin-steps__connector-fill {
     position: absolute;
     inset-block: 0;

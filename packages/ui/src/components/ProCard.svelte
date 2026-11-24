@@ -159,7 +159,7 @@
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
       class={cn(
-        'flex items-center justify-between border-b border-border/60 transition-colors',
+        'flex items-center justify-between flex-wrap gap-2.5 border-b border-border/60 transition-colors',
         size === 'small' ? 'px-3 py-2' : 'px-4 py-3',
         collapsible && 'cursor-pointer select-none hover:bg-muted/40',
         isCollapsed && 'border-b-0',
@@ -178,7 +178,7 @@
       aria-expanded={collapsible ? !isCollapsed : undefined}
     >
       <!-- Title & Subtitle Section -->
-      <div class="flex items-center gap-2 min-w-0">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
         {#if collapsible}
           <ChevronRight
             class={cn(
@@ -188,7 +188,7 @@
           />
         {/if}
 
-        <div class="flex items-center gap-1.5 flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap min-w-0">
           {#if title}
             <span class={cn('font-semibold text-foreground truncate', size === 'small' ? 'text-xs' : 'text-sm')}>
               {#if typeof title === 'string'}
@@ -218,9 +218,9 @@
       </div>
 
       <!-- Tabs or Extra Section -->
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center flex-wrap gap-2 max-w-full min-w-0">
         {#if tabs && tabs.length > 0}
-          <div class="flex items-center gap-1 bg-muted/60 p-0.5 rounded-[4px] border border-border/40">
+          <div class="flex items-center flex-wrap gap-1 max-w-full bg-muted/60 p-0.5 rounded-[4px] border border-border/40">
             {#each tabs as tab (tab.key)}
               {@const active = currentTab === tab.key}
               <button
