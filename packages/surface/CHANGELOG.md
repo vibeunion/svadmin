@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.22.15](https://github.com/vibeunion/svadmin/compare/surface-v0.22.14...surface-v0.22.15) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.82.0 <0.85.0
+    * @svadmin/ui remains compatible with >=0.127.0 <0.139.0
+
 ## [0.22.14](https://github.com/vibeunion/svadmin/compare/surface-v0.22.13...surface-v0.22.14) (2026-11-20)
 
 

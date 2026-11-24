@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.33.4](https://github.com/vibeunion/svadmin/compare/lite-v0.33.3...lite-v0.33.4) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.85.0
+
 ## [0.33.3](https://github.com/vibeunion/svadmin/compare/lite-v0.33.2...lite-v0.33.3) (2026-11-20)
 
 

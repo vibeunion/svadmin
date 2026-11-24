@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.138.1](https://github.com/vibeunion/svadmin/compare/ui-v0.138.0...ui-v0.138.1) (2026-11-24)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** resolve responsive layout, density i18n, and pageRoutes title ([#950](https://github.com/vibeunion/svadmin/issues/950)) ([ba5ad17](https://github.com/vibeunion/svadmin/commit/ba5ad17d8f70f94becdbcf3ee635d00710fd3d4b))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.19
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.7
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.4
+
 ## [0.138.0](https://github.com/vibeunion/svadmin/compare/ui-v0.137.2...ui-v0.138.0) (2026-11-20)
 
 
