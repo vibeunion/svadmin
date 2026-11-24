@@ -33,7 +33,7 @@ const TOKEN_BOUND_RECIPES = [
 
 // Structural geometry, not a design decision: hairlines, percentage fills,
 // viewport units and focus/stacking-independent values.
-const STRUCTURAL_LENGTHS = new Set(['0', '1px', '50%', '100%', '-100%', '100dvh', '85vw']);
+const STRUCTURAL_LENGTHS = new Set(['0', '0px', '1px', '50%', '100%', '-100%', '100vh', '100dvh', '85vw']);
 const LENGTH = /(?<![\w.-])-?\d*\.?\d+(?:px|rem|em|%|vw|vh|dvh|ch|ex|pt)\b/g;
 // Page width is the one deliberate exception: it must not follow the shell's
 // width override, otherwise an explicit `width` prop would be silently ignored.

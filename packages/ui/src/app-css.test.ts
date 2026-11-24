@@ -277,4 +277,19 @@ describe('native component CSS', () => {
     expect(css).toContain('outline: var(--svadmin-focus-width) solid Highlight;');
     expect(css).toContain('.svadmin-button, .svadmin-input, .svadmin-select, .svadmin-textarea, .svadmin-switch');
   });
+
+  it('includes mobile safe-area insets, 100vh/100dvh fallbacks, horizontal scroll containment, and coarse-pointer input zoom protection', () => {
+    const shellCss = readAppShellCss();
+    expect(shellCss).toMatch(/\.svadmin-app-shell\s*\{[\s\S]*?min-height:\s*100vh;[\s\S]*?min-height:\s*100dvh;/);
+    expect(shellCss).toContain('env(safe-area-inset-top, 0px)');
+    expect(shellCss).toContain('env(safe-area-inset-bottom, 0px)');
+    expect(shellCss).toContain('.svadmin-app-shell__body:has(> .svadmin-app-shell__content > [data-svadmin-component="PageContainer"])');
+
+    const css = readAppCss();
+    expect(css).toMatch(/\.svadmin-dialog-content\s*\{[\s\S]*?max-height:\s*100vh;[\s\S]*?max-height:\s*100dvh;/);
+    expect(css).toContain('-webkit-backdrop-filter: blur(4px);');
+    expect(css).toContain('overscroll-behavior-x: contain;');
+    expect(css).toContain('-webkit-overflow-scrolling: touch;');
+    expect(css).toMatch(/@media \(max-width: 48rem\) and \(hover: none\) and \(pointer: coarse\) \{[\s\S]*?font-size: 1rem;/);
+  });
 });

@@ -164,6 +164,16 @@
   // Swipe gesture for mobile menu
   let touchStartX = $state(0);
   let touchEndX = $state(0);
+  let touchIgnored = $state(false);
+
+  function isHorizontalScrollableTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof Element)) return false;
+    return Boolean(
+      target.closest(
+        '[data-slot="table-container"], [data-slot="data-table-shell-viewport"], .svadmin-table-container, .svadmin-scroll-area-horizontal, .svadmin-grouped-table, .svadmin-top-navigation, [role="tablist"], input, textarea, select, [data-slot="slider"]'
+      )
+    );
+  }
 
   function ownsLayoutEvent(event: Event): boolean {
     const target = event.target instanceof Element ? event.target : document.activeElement;
@@ -187,7 +197,9 @@
   }
 
   function handleTouchStart(e: TouchEvent) {
-    if (!ownsLayoutEvent(e)) return;
+    if (!showSidebar || !ownsLayoutEvent(e)) return;
+    touchIgnored = isHorizontalScrollableTarget(e.target);
+    if (touchIgnored) return;
     const touch = e.touches.item(0);
     if (e.touches.length === 1 && touch) {
       touchStartX = touch.clientX;
@@ -196,7 +208,7 @@
   }
 
   function handleTouchMove(e: TouchEvent) {
-    if (!ownsLayoutEvent(e)) return;
+    if (!showSidebar || touchIgnored || !ownsLayoutEvent(e)) return;
     const touch = e.touches.item(0);
     if (e.touches.length === 1 && touch) {
       touchEndX = touch.clientX;
@@ -204,7 +216,10 @@
   }
 
   function handleTouchEnd(e: TouchEvent) {
-    if (!ownsLayoutEvent(e)) return;
+    if (!showSidebar || touchIgnored || !ownsLayoutEvent(e)) {
+      touchIgnored = false;
+      return;
+    }
     // Only trigger swipe-to-open if starting near the left edge (e.g., within 30px)
     // and swiping right by at least 50px
     if (touchStartX < 30 && touchEndX - touchStartX > 50) {
@@ -388,6 +403,13 @@
 {/if}
 
 <style>
+  [data-svadmin-layout] {
+    height: 100vh;
+    height: 100dvh;
+  }
+  [data-svadmin-layout-footer] {
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+  }
   .svadmin-top-navigation {
     display: flex;
     align-items: center;
@@ -395,6 +417,8 @@
     min-width: 0;
     padding: var(--svadmin-space-2) var(--svadmin-space-5);
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
     border-block-end: 1px solid var(--border);
     background: var(--background);
   }

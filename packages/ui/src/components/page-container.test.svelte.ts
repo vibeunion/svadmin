@@ -60,4 +60,45 @@ describe('PageContainer', () => {
 
     expect(onback).toHaveBeenCalledTimes(1);
   });
+
+  it('applies compact mobile spacing, wrapping badges, and horizontal touch-scroll tabs', () => {
+    const { container } = render(PageContainer, {
+      title: '移动端适配页面',
+      breadcrumbs: [
+        { label: '首页', href: '/' },
+        { label: '监控中心', href: '/monitor' },
+        { label: '实时席位' },
+      ],
+      tags: [
+        { label: 'LIVE', tone: 'success' },
+        { label: 'DELAYED', tone: 'warning' },
+      ],
+      tabs: [
+        { key: 'tab1', label: '核心总览' },
+        { key: 'tab2', label: '资金归因' },
+        { key: 'tab3', label: '风险矩阵' },
+        { key: 'tab4', label: '审计流水' },
+      ],
+      activeTab: 'tab1',
+    });
+
+    const header = container.querySelector('.svadmin-page-header');
+    expect(header?.className).toContain('px-3.5');
+    expect(header?.className).toContain('sm:px-6');
+
+    const breadcrumbNav = container.querySelector('nav[aria-label="Breadcrumb"]');
+    expect(breadcrumbNav?.className).toContain('flex-wrap');
+
+    const tablist = screen.getByRole('tablist');
+    expect(tablist.className).toContain('svadmin-page-container__tablist');
+    expect(tablist.className).toContain('overflow-x-auto');
+
+    const firstTab = screen.getByRole('tab', { name: '核心总览' });
+    expect(firstTab.className).toContain('shrink-0');
+    expect(firstTab.className).toContain('whitespace-nowrap');
+
+    const main = container.querySelector('main');
+    expect(main?.className).toContain('p-3');
+    expect(main?.className).toContain('sm:p-6');
+  });
 });

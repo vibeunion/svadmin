@@ -2137,6 +2137,7 @@ button.svadmin-slider__mark:disabled { cursor: not-allowed; color: var(--svadmin
   flex-direction: column;
   width: 100%;
   max-width: min(32rem, calc(100% - 2rem));
+  max-height: 100vh;
   max-height: 100dvh;
   gap: 0;
   overflow: hidden;
@@ -2219,6 +2220,7 @@ button.svadmin-slider__mark:disabled { cursor: not-allowed; color: var(--svadmin
 
 .svadmin-overlay-blur,
 [data-svadmin-overlay-blur="on"] :is(.svadmin-dialog-overlay, .svadmin-alert-dialog-overlay, .svadmin-sheet-overlay, .svadmin-drawer-overlay) {
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
@@ -2873,6 +2875,7 @@ button.svadmin-slider__mark:disabled { cursor: not-allowed; color: var(--svadmin
   gap: 12px;
   margin-top: auto;
   padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border);
 }
 
@@ -6280,4 +6283,47 @@ html.layout-clean-flat[data-theme="default"] body {
   border-color: var(--destructive);
   background-color: var(--card);
   box-shadow: none;
+}
+
+/* Mobile & embedded WebView ergonomics:
+ * 1. Contain horizontal scroll gestures so wide tables and tab strips do not
+ *    trigger host WebView edge-back navigation.
+ * 2. Eliminate tap delay and tap-highlight flash on interactive controls.
+ * 3. Enforce >=16px (1rem) font-size on form inputs on coarse-pointer narrow
+ *    viewports so mobile WebKit / WKWebView does not force page zoom on focus. */
+.svadmin-table-container,
+[data-slot="table-container"],
+[data-slot="data-table-shell-viewport"],
+.svadmin-scroll-area-horizontal,
+.svadmin-grouped-table,
+.svadmin-page-container__tablist {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+:is(
+  .svadmin-button,
+  [data-slot="button"],
+  [role="tab"],
+  .svadmin-pagination-item,
+  .svadmin-switch
+) {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 48rem) and (hover: none) and (pointer: coarse) {
+  :root body :is(
+    .svadmin-input,
+    .svadmin-textarea,
+    .svadmin-select,
+    .svadmin-ui-input__control:not([data-input-type="file"]),
+    [data-svadmin-auth-page] form input,
+    [data-svadmin-filter-toolbar] [data-slot="input"],
+    [data-slot="input"]:not([data-input-type="file"]),
+    [data-slot="textarea"],
+    [data-slot="select"]
+  ) {
+    font-size: 1rem;
+  }
 }

@@ -154,7 +154,7 @@
   {:else if title || resolvedBreadcrumbs || extra || resolvedTabs || content}
     <header
       class={cn(
-        'svadmin-page-header border-b border-border bg-card px-6 pt-4 pb-0 transition-all',
+        'svadmin-page-header border-b border-border bg-card px-3.5 pt-3 pb-0 sm:px-6 sm:pt-4 transition-all',
         fixedHeader && 'sticky top-0 z-20 shadow-xs'
       )}
     >
@@ -166,7 +166,7 @@
       >
         <!-- Breadcrumb row -->
         {#if resolvedBreadcrumbs && resolvedBreadcrumbs.length > 0}
-          <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <nav aria-label="Breadcrumb" class="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
             {#each resolvedBreadcrumbs as item, index (item.href ?? `${item.label}-${index}`)}
               {#if index > 0}
                 <span class="text-muted select-none">/</span>
@@ -186,13 +186,13 @@
         {/if}
 
         <!-- Title & Extra row -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pb-4">
-          <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 sm:pb-4">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 min-w-0">
             {#if backIcon || onBack || onback}
               <button
                 type="button"
                 aria-label="返回上一页"
-                class="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-primary active:bg-accent"
+                class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[4px] border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-primary active:bg-accent"
                 onclick={handleBack}
               >
                 <svg
@@ -212,7 +212,7 @@
             {#if typeof title === 'function'}
               {@render title()}
             {:else if title}
-              <h1 class="text-lg font-semibold tracking-tight text-foreground">
+              <h1 class="min-w-0 break-words text-base sm:text-lg font-semibold tracking-tight text-foreground">
                 {title}
               </h1>
             {/if}
@@ -228,7 +228,7 @@
             {/if}
 
             {#if tags && tags.length > 0}
-              <div class="ml-1 flex items-center gap-1.5">
+              <div class="flex max-w-full flex-wrap items-center gap-1.5 sm:ml-1">
                 {#each tags as tag (tag.label)}
                   <span
                     class={cn(
@@ -244,7 +244,7 @@
           </div>
 
           {#if extra}
-            <div class="flex items-center gap-2">
+            <div class="flex max-w-full min-w-0 flex-wrap items-center gap-2">
               {@render extra()}
             </div>
           {/if}
@@ -262,7 +262,7 @@
 
         <!-- Header Tabs -->
         {#if resolvedTabs && resolvedTabs.length > 0}
-          <div role="tablist" class="flex items-center gap-6 border-t border-border/60 -mb-[1px]">
+          <div role="tablist" class="svadmin-page-container__tablist flex max-w-full items-center gap-4 sm:gap-6 overflow-x-auto border-t border-border/60 -mb-[1px]">
             {#each resolvedTabs as tab (tab.key)}
               <button
                 type="button"
@@ -270,7 +270,7 @@
                 aria-selected={effectiveActiveTab === tab.key}
                 disabled={tab.disabled}
                 class={cn(
-                  'relative py-2.5 text-xs font-medium transition-colors focus-visible:outline-none',
+                  'relative shrink-0 whitespace-nowrap py-2.5 text-xs font-medium transition-colors focus-visible:outline-none',
                   effectiveActiveTab === tab.key
                     ? 'text-primary font-semibold'
                     : 'text-muted-foreground hover:text-primary',
@@ -299,12 +299,12 @@
   {/if}
 
   <!-- Content Container -->
-  <main class="w-full p-5 sm:p-6">
+  <main class="w-full p-3 sm:p-6">
     <div
       class={cn(
         'mx-auto w-full transition-all',
         contentWidth === 'fixed' && 'max-w-7xl',
-        !ghost && 'rounded-[4px] border border-border bg-card p-5 shadow-xs'
+        !ghost && 'rounded-[4px] border border-border bg-card p-3.5 sm:p-5 shadow-xs'
       )}
     >
       {#if children}
