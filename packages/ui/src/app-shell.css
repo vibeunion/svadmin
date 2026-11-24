@@ -243,7 +243,7 @@
     .svadmin-app-shell__topbar {
       gap: var(--svadmin-space-2);
     }
-    .svadmin-app-shell__body:has(> .svadmin-app-shell__content > .svadmin-page-container) {
+    .svadmin-app-shell__body:has(> .svadmin-app-shell__content > [data-svadmin-component="PageContainer"]) {
       padding: 0;
       padding-block-end: env(safe-area-inset-bottom, 0px);
     }

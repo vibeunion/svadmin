@@ -283,7 +283,7 @@ describe('native component CSS', () => {
     expect(shellCss).toMatch(/\.svadmin-app-shell\s*\{[\s\S]*?min-height:\s*100vh;[\s\S]*?min-height:\s*100dvh;/);
     expect(shellCss).toContain('env(safe-area-inset-top, 0px)');
     expect(shellCss).toContain('env(safe-area-inset-bottom, 0px)');
-    expect(shellCss).toContain('.svadmin-app-shell__body:has(> .svadmin-app-shell__content > .svadmin-page-container)');
+    expect(shellCss).toContain('.svadmin-app-shell__body:has(> .svadmin-app-shell__content > [data-svadmin-component="PageContainer"])');
 
     const css = readAppCss();
     expect(css).toMatch(/\.svadmin-dialog-content\s*\{[\s\S]*?max-height:\s*100vh;[\s\S]*?max-height:\s*100dvh;/);
