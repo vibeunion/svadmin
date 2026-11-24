@@ -73,4 +73,20 @@ describe('ProCard', () => {
     expect(card?.getAttribute('data-ghost')).toBe('true');
     expect(card?.classList.contains('bg-transparent')).toBe(true);
   });
+
+  it('allows header title and multi-tab bar to wrap cleanly without overlapping', () => {
+    const { container } = render(ProCard, {
+      title: 'Long Operational Workspace Title',
+      subTitle: 'Secondary context subtitle',
+      tabs: [
+        { key: 't1', label: 'Tab One' },
+        { key: 't2', label: 'Tab Two' },
+        { key: 't3', label: 'Tab Three' },
+      ],
+      children: bodySnippet,
+    });
+
+    const header = container.querySelector('[data-svadmin-component="ProCard"] > div:first-child');
+    expect(header?.className).toContain('flex-wrap');
+  });
 });

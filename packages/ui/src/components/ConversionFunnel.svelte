@@ -17,6 +17,7 @@
     description?: string | undefined;
     showPercentages?: boolean | undefined;
     showDropoff?: boolean | undefined;
+    bordered?: boolean | undefined;
     valuePrefix?: string | undefined;
     valueSuffix?: string | undefined;
     height?: number | undefined;
@@ -30,6 +31,7 @@
     description,
     showPercentages = true,
     showDropoff = true,
+    bordered = true,
     valuePrefix = '',
     valueSuffix = '',
     height = 360,
@@ -67,23 +69,27 @@
 
 <div
   data-svadmin-component="ConversionFunnel"
+  data-bordered={bordered}
   style="min-height: {height}px;"
   class={cn(
-    'w-full rounded-md border border-border bg-card text-card-foreground shadow-xs p-6 space-y-4',
+    'w-full space-y-4',
+    bordered && 'rounded-md border border-border bg-card text-card-foreground shadow-xs p-6',
     className,
   )}
 >
-  <div class="flex items-center justify-between border-b border-border/60 pb-3">
-    <div class="flex items-center gap-2.5">
-      <div class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
-        <Filter class="h-4 w-4" />
-      </div>
-      <div>
-        <h3 class="text-sm font-semibold text-foreground">{resolvedTitle}</h3>
-        <p class="text-xs text-muted-foreground">{resolvedDesc}</p>
+  {#if bordered || title !== undefined || description !== undefined}
+    <div class="flex items-center justify-between border-b border-border/60 pb-3">
+      <div class="flex items-center gap-2.5">
+        <div class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
+          <Filter class="h-4 w-4" />
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-foreground">{resolvedTitle}</h3>
+          <p class="text-xs text-muted-foreground">{resolvedDesc}</p>
+        </div>
       </div>
     </div>
-  </div>
+  {/if}
 
   <!-- Funnel Visual Stack -->
   <div class="space-y-2 py-2">
@@ -102,19 +108,19 @@
         <!-- Funnel Bar Segment -->
         <div
           class={cn(
-            'relative flex h-14 items-center justify-between px-4 rounded-sm transition-all duration-200 cursor-pointer shadow-xs border',
+            'relative flex h-14 items-center justify-between gap-2 px-4 rounded-sm transition-all duration-200 cursor-pointer shadow-xs border',
             isHovered ? 'ring-2 ring-primary border-primary scale-[1.01]' : 'border-border/80 hover:border-primary/50',
           )}
-          style="width: {widthPct}%; background: {stage.color ?? 'var(--card)'};"
+          style="width: {widthPct}%; min-width: min(100%, 14rem); background: {stage.color ?? 'var(--card)'};"
         >
-          <div class="flex items-center gap-2 truncate">
+          <div class="flex items-center gap-2 min-w-0">
             <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
               {idx + 1}
             </span>
             <span class="text-xs font-semibold text-foreground truncate">{stage.label}</span>
           </div>
 
-          <div class="flex items-center gap-3 shrink-0 font-mono text-xs">
+          <div class="flex items-center gap-2.5 shrink-0 font-mono text-xs whitespace-nowrap">
             <span class="font-bold text-foreground">
               {valuePrefix}{stage.value.toLocaleString()}{valueSuffix}
             </span>
@@ -130,10 +136,17 @@
         {#if idx < computedStages.length - 1 && showDropoff}
           {@const nextStage = computedStages[idx + 1]}
           {#if nextStage}
+            {@const delta = stage.value - nextStage.value}
             <div class="my-1 flex items-center gap-1.5 text-xs text-muted-foreground/80 font-mono">
               <ArrowDown class="h-3 w-3 text-muted-foreground/60" />
-              <span class="text-destructive font-medium">-{nextStage.dropoff}% 流失</span>
-              <span>({valuePrefix}{(stage.value - nextStage.value).toLocaleString()})</span>
+              {#if delta >= 0}
+                <span class="text-destructive font-medium">-{nextStage.dropoff}% 流失</span>
+                <span>({valuePrefix}{delta.toLocaleString()})</span>
+              {:else}
+                {@const gainPct = stage.value > 0 ? Math.round((Math.abs(delta) / stage.value) * 100) : 0}
+                <span class="text-success font-medium">+{gainPct}% 增长</span>
+                <span>(+{valuePrefix}{Math.abs(delta).toLocaleString()})</span>
+              {/if}
             </div>
           {/if}
         {/if}

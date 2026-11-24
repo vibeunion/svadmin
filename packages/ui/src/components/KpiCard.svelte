@@ -140,11 +140,11 @@
   {:else}
     <!-- Header -->
     <div class="flex items-start justify-between gap-3">
-      <div class="space-y-1">
-        <div class="flex items-center gap-2">
+      <div class="space-y-1 min-w-0">
+        <div class="flex items-center flex-wrap gap-2 min-w-0">
           <span class="text-xs font-medium text-muted-foreground tracking-wide">{title}</span>
           {#if badge}
-            <span class="rounded-sm bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
+            <span class="shrink-0 whitespace-nowrap rounded-sm bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
               {badge}
             </span>
           {/if}
@@ -162,8 +162,8 @@
     </div>
 
     <!-- Main Metric Value & Trend / Sparkline -->
-    <div class="my-3 flex items-baseline justify-between gap-4">
-      <div class="flex items-baseline gap-1 font-mono tracking-tight">
+    <div class="my-3 flex items-baseline justify-between gap-3 min-w-0">
+      <div class="flex items-baseline gap-1 font-mono tracking-tight whitespace-nowrap min-w-0">
         {#if prefix}
           <span class="text-base font-semibold text-muted-foreground">{prefix}</span>
         {/if}
@@ -176,7 +176,7 @@
       <!-- Sparkline Mini Chart -->
       {#if sparklinePoints}
         <div class="shrink-0 flex items-center" title="历史走势">
-          <svg class="h-9 w-28 overflow-visible" viewBox="0 0 120 36">
+          <svg class="h-9 w-24 max-w-full overflow-visible" viewBox="0 0 120 36">
             <polyline
               fill="none"
               stroke={sparklineStroke}

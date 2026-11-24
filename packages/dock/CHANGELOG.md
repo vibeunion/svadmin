@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/vibeunion/svadmin/compare/dock-v0.2.2...dock-v0.2.3) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
 ## [0.2.2](https://github.com/vibeunion/svadmin/compare/dock-v0.2.1...dock-v0.2.2) (2026-11-10)
 
 

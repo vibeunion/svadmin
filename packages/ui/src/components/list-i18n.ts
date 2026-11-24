@@ -2,6 +2,9 @@ import type { useTranslation } from '@svadmin/core/i18n';
 
 const english = {
   'common.total': 'Total: {total}',
+  'common.density': 'Density',
+  'common.densityComfortable': 'Comfortable',
+  'common.densityCompact': 'Compact',
   'listPagination.navigation': '{label} pagination',
   'listPagination.range': '{start}–{end} of {total} records',
   'listPagination.pageSizeLabel': 'Rows per page',
@@ -35,6 +38,9 @@ const english = {
 type ListMessageKey = keyof typeof english;
 const chinese: Record<ListMessageKey, string> = {
   'common.total': '共 {total} 条',
+  'common.density': '密度',
+  'common.densityComfortable': '宽松',
+  'common.densityCompact': '紧凑',
   'listPagination.navigation': '{label}分页导航',
   'listPagination.range': '第 {start}–{end} 条 / 共 {total} 条',
   'listPagination.pageSizeLabel': '每页条数',

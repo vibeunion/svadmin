@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.61.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.61.1...create-svadmin-v0.61.2) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.84.4
+
 ## [0.61.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.61.0...create-svadmin-v0.61.1) (2026-11-20)
 
 
