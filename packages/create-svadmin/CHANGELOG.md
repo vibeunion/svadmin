@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.61.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.61.2...create-svadmin-v0.61.3) (2026-11-24)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** improve mobile safe-area, PageContainer spacing, and WebView touch ergonomics ([#951](https://github.com/vibeunion/svadmin/issues/951)) ([071ec53](https://github.com/vibeunion/svadmin/commit/071ec53a2b6be91ef68ebb8bc91d8c2d94e495ce))
+
 ## [0.61.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.61.1...create-svadmin-v0.61.2) (2026-11-24)
 
 

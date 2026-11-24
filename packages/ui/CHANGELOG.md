@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.138.2](https://github.com/vibeunion/svadmin/compare/ui-v0.138.1...ui-v0.138.2) (2026-11-24)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** improve mobile safe-area, PageContainer spacing, and WebView touch ergonomics ([#951](https://github.com/vibeunion/svadmin/issues/951)) ([071ec53](https://github.com/vibeunion/svadmin/commit/071ec53a2b6be91ef68ebb8bc91d8c2d94e495ce))
+
 ## [0.138.1](https://github.com/vibeunion/svadmin/compare/ui-v0.138.0...ui-v0.138.1) (2026-11-24)
 
 
