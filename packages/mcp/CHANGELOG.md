@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.19](https://github.com/vibeunion/svadmin/compare/mcp-v0.6.18...mcp-v0.6.19) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.4
+    * @svadmin/devtools bumped to 0.6.19
+
 ## [0.6.18](https://github.com/vibeunion/svadmin/compare/mcp-v0.6.17...mcp-v0.6.18) (2026-11-20)
 
 

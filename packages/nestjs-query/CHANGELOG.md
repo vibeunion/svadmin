@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.41](https://github.com/vibeunion/svadmin/compare/nestjs-query-v0.12.40...nestjs-query-v0.12.41) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.20
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.4
+
 ## [0.12.40](https://github.com/vibeunion/svadmin/compare/nestjs-query-v0.12.39...nestjs-query-v0.12.40) (2026-11-20)
 
 

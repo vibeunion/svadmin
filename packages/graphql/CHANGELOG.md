@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.41](https://github.com/vibeunion/svadmin/compare/graphql-v0.12.40...graphql-v0.12.41) (2026-11-24)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.20
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.4
+
 ## [0.12.40](https://github.com/vibeunion/svadmin/compare/graphql-v0.12.39...graphql-v0.12.40) (2026-11-20)
 
 

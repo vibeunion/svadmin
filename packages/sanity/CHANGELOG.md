@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.41](https://github.com/vibeunion/svadmin/compare/sanity-v0.11.40...sanity-v0.11.41) (2026-11-24)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** refresh parity docs and Svelte toolchain ([#948](https://github.com/vibeunion/svadmin/issues/948)) ([262971f](https://github.com/vibeunion/svadmin/commit/262971ff1f48d935885b6539fe9b88558ee20d1b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.4
+
 ## [0.11.40](https://github.com/vibeunion/svadmin/compare/sanity-v0.11.39...sanity-v0.11.40) (2026-11-20)
 
 
