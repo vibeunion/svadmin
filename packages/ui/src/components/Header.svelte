@@ -63,7 +63,7 @@
 </script>
 
 <header data-svadmin-topbar class="sticky top-0 z-30 flex h-[70px] w-full shrink-0 items-center justify-between border-b border-border/40 bg-background/95 backdrop-blur-sm px-4 md:px-6">
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-2 sm:gap-4 min-w-0">
     {#if children}
       {@render children()}
     {/if}
@@ -75,7 +75,7 @@
       {/if}
     {/if}
   </div>
-  <div class="ml-auto flex items-center gap-2">
+  <div class="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
     {#if rightActions}
       {@render rightActions()}
     {/if}
@@ -145,7 +145,15 @@
   header[data-svadmin-topbar] {
     height: auto;
     min-height: 4.375rem;
-    padding-block: 0.75rem;
+    padding-block-start: max(0.75rem, env(safe-area-inset-top, 0px));
+    padding-block-end: 0.75rem;
+    padding-inline: max(1rem, env(safe-area-inset-left, 0px)) max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  @media (min-width: 768px) {
+    header[data-svadmin-topbar] {
+      padding-inline: max(1.5rem, env(safe-area-inset-left, 0px)) max(1.5rem, env(safe-area-inset-right, 0px));
+    }
   }
 
   header[data-svadmin-topbar] > div:first-child {

@@ -239,4 +239,36 @@ describe('Layout auth scope', () => {
     expect(view.queryAllByText('stale layout user')).toHaveLength(0);
     expect(view.getByTestId('layout-auth-content')).not.toBeNull();
   });
+
+  it('ignores left-edge drawer swipe gestures started inside horizontal scroll containers', async () => {
+    initRouter();
+    const view = render(LayoutAuthScopeHost, {
+      authProvider: undefined,
+      tenant: { tenantId: 'tenant-layout-touch-scroll' },
+    });
+
+    await waitFor(() => expect(view.getByTestId('layout-auth-content')).not.toBeNull());
+    const contentNode = view.getByTestId('layout-auth-content');
+    const tableScroll = document.createElement('div');
+    tableScroll.setAttribute('data-slot', 'table-container');
+    const cell = document.createElement('span');
+    tableScroll.appendChild(cell);
+    contentNode.appendChild(tableScroll);
+
+    const makeTouches = (clientX: number) => ({
+      length: 1,
+      item: (index: number) => (index === 0 ? ({ clientX } as Touch) : null),
+    });
+
+    await fireEvent.touchStart(cell, { touches: makeTouches(12) });
+    await fireEvent.touchMove(cell, { touches: makeTouches(96) });
+    await fireEvent.touchEnd(cell);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+    await fireEvent.touchStart(contentNode, { touches: makeTouches(12) });
+    await fireEvent.touchMove(contentNode, { touches: makeTouches(96) });
+    await fireEvent.touchEnd(contentNode);
+    await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull());
+    view.unmount();
+  });
 });
