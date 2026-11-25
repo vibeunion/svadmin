@@ -10,10 +10,10 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@svadmin/core": "^0.84.4",
-    "@svadmin/app": "^0.2.40",
-    "@svadmin/ai-elements": "^0.15.7",
-    "@svadmin/ui": "^0.138.2",
+    "@svadmin/core": "^0.84.5",
+    "@svadmin/app": "^0.2.41",
+    "@svadmin/ai-elements": "^0.15.8",
+    "@svadmin/ui": "^0.138.3",
     "typebox": "^1.3.34",
     "@tanstack/svelte-query": "^6.4.5",
     "@lucide/svelte": "^1.71.0"
@@ -43,76 +43,76 @@
         "graphql": "^16.8.0"
       },
       "simple-rest": {
-        "@svadmin/simple-rest": "^0.12.41",
+        "@svadmin/simple-rest": "^0.12.42",
         "@refinedev/simple-rest": "^6.0.1"
       },
       "supabase": {
-        "@svadmin/supabase": "^0.22.23",
+        "@svadmin/supabase": "^0.22.24",
         "@supabase/supabase-js": "^2.112.4",
         "@refinedev/supabase": "^6.0.2"
       },
       "graphql": {
-        "@svadmin/graphql": "^0.12.41",
+        "@svadmin/graphql": "^0.12.42",
         "@refinedev/graphql": "^8.0.1",
         "graphql-request": "^7.4.0",
         "graphql": "^16.8.0"
       },
       "rest": {
-        "@svadmin/rest": "^0.2.40",
+        "@svadmin/rest": "^0.2.41",
         "@refinedev/rest": "^2.1.1",
         "@nestjsx/crud-request": "^5.0.0-alpha.3"
       },
       "airtable": {
-        "@svadmin/airtable": "^0.12.41",
+        "@svadmin/airtable": "^0.12.42",
         "@refinedev/airtable": "^5.0.1"
       },
       "appwrite": {
-        "@svadmin/appwrite": "^0.11.41",
+        "@svadmin/appwrite": "^0.11.42",
         "appwrite": ">=26.2.0",
         "@refinedev/appwrite": "^8.0.1"
       },
       "directus": {
-        "@svadmin/directus": "^0.11.41"
+        "@svadmin/directus": "^0.11.42"
       },
       "drizzle": {
-        "@svadmin/drizzle": "^0.14.38",
+        "@svadmin/drizzle": "^0.14.39",
         "drizzle-orm": "^1.0.0-rc.1",
         "refine-sqlx": "^0.10.3"
       },
       "elysia": {
-        "@svadmin/elysia": "^0.14.41",
+        "@svadmin/elysia": "^0.14.42",
         "elysia": ">=1.4.30",
         "@elysiajs/eden": ">=1.4.9"
       },
       "firebase": {
-        "@svadmin/firebase": "^0.12.41"
+        "@svadmin/firebase": "^0.12.42"
       },
       "hasura": {
-        "@svadmin/hasura": "^0.12.41",
+        "@svadmin/hasura": "^0.12.42",
         "@refinedev/hasura": "^7.0.1",
         "graphql-request": "^7.4.0"
       },
       "medusa": {
-        "@svadmin/medusa": "^0.12.41",
+        "@svadmin/medusa": "^0.12.42",
         "@refinedev/medusa": "^4.0.1"
       },
       "nestjs-query": {
-        "@svadmin/nestjs-query": "^0.12.41",
+        "@svadmin/nestjs-query": "^0.12.42",
         "@refinedev/nestjs-query": "^2.0.1"
       },
       "nestjsx-crud": {
-        "@svadmin/nestjsx-crud": "^0.12.41",
+        "@svadmin/nestjsx-crud": "^0.12.42",
         "@refinedev/nestjsx-crud": "^6.0.1"
       },
       "pocketbase": {
-        "@svadmin/pocketbase": "^0.14.10",
+        "@svadmin/pocketbase": "^0.14.11",
         "pocketbase": ">=0.28.0"
       },
       "sanity": {
-        "@svadmin/sanity": "^0.11.41"
+        "@svadmin/sanity": "^0.11.42"
       },
       "strapi": {
-        "@svadmin/strapi": "^0.12.41",
+        "@svadmin/strapi": "^0.12.42",
         "@refinedev/strapi-v4": "^7.0.1"
       }
     },

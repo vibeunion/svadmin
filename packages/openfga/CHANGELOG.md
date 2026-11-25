@@ -1,5 +1,14 @@
 # @svadmin/openfga
 
+## [0.2.13](https://github.com/vibeunion/svadmin/compare/openfga-v0.2.12...openfga-v0.2.13) (2026-11-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.5
+
 ## [0.2.12](https://github.com/vibeunion/svadmin/compare/openfga-v0.2.11...openfga-v0.2.12) (2026-11-24)
 
 

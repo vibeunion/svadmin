@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.42](https://github.com/vibeunion/svadmin/compare/firebase-v0.12.41...firebase-v0.12.42) (2026-11-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.15.21
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.5
+
 ## [0.12.41](https://github.com/vibeunion/svadmin/compare/firebase-v0.12.40...firebase-v0.12.41) (2026-11-24)
 
 
