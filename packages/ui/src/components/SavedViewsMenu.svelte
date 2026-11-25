@@ -105,7 +105,7 @@
         <div class="space-y-1 border-t border-border pt-2">
           {#each savedViews.availableSavedViews as view (view.id)}
             <div class="flex items-center justify-between gap-2 text-sm">
-              <span class="min-w-0 truncate">{view.name}</span>
+              <span class="min-w-0 truncate" title={view.name}>{view.name}</span>
               {#if (view.source === 'team' || view.source === 'system') && savedViews.provider?.setDefault}
                 <button
                   type="button"

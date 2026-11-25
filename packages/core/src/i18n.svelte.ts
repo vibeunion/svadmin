@@ -1,6 +1,8 @@
 // Minimal i18n — simple key-value translation
 
 import { createContext } from 'svelte';
+import type { I18nProvider, I18nScope, I18nScopeOptions } from './i18n-types';
+export type { I18nProvider, I18nScope, I18nScopeOptions } from './i18n-types';
 
 const baseLocales: Record<string, Record<string, string>> = {
   'zh-CN': {
@@ -1026,6 +1028,20 @@ const baseLocales: Record<string, Record<string, string>> = {
     'pivot.drilldownTitle': '多维分析下钻详情',
     'pivot.filterCriteria': '当前切片过滤条件',
     'pivot.totalRecords': '关联明细共 {count} 条',
+    'auth.orContinueWith': '或通过以下方式继续', 'auth.signIn': '登录', 'common.apply': '应用', 'common.columnSettings': '列设置', 'common.compact': '紧凑', 'common.standard': '标准',
+    'common.history': '历史记录', 'common.keyboardShortcuts': '键盘快捷键', 'common.warnUnsavedChanges': '有未保存的修改，确定要离开吗？', 'common.empty': '暂无数据', 'common.filters': '筛选条件', 'common.items': '项',
+    'common.select': '选择', 'common.profile': '个人资料', 'common.more': '更多', 'common.toggleDensity': '切换密度', 'common.unableToLoadPage': '无法加载此页面。', 'common.dataProviderRequired': '需要配置 DataProvider',
+    'conflict.title': '并发修改冲突', 'documentTitle.default': '管理后台', 'editor.image.apply': '插入图片', 'columnSettings.requiredColumn': '必选列', 'columnSettings.pinLeft': '固定到左侧', 'columnSettings.unpin': '取消固定列',
+    'permissions.title': '权限矩阵', 'permissions.description': '按角色查看和配置各资源的访问权限。', 'permissions.roles': '角色', 'permissions.resources': '资源', 'permissions.currentRole': '当前角色', 'permissions.noneSelected': '未选择角色',
+    'permissions.noRoles': '暂无角色', 'permissions.noResources': '暂无受控资源', 'permissions.conflicts': '权限冲突', 'permissions.toggleHint': '点击切换该角色的操作权限',
+    'notificationCenter.title': '消息通知', 'notificationCenter.empty': '暂无新通知', 'notificationCenter.markAllRead': '全部标为已读', 'notificationCenter.unreadAria': '{title}，{count} 条未读', 'notificationCenter.categoriesAria': '通知分类', 'notificationCenter.openDrawer': '查看全部通知 →',
+    'themeSettings.description': '在不离开当前页面的情况下调整主题、导航与显示密度。', 'themeSettings.triggerLabel': '外观设置', 'themeSettings.navigation': '导航', 'themeSettings.navigationMode': '导航模式', 'themeSettings.navSplit': '分栏侧边栏', 'themeSettings.navigationTheme': '导航栏主题',
+    'themeSettings.followTheme': '跟随主题', 'themeSettings.widthWide': '宽屏', 'themeSettings.display': '显示', 'themeSettings.compactDensity': '紧凑密度', 'themeSettings.compactDensityDesc': '缩小表格与表单间距。', 'themeSettings.colorSafe': '色弱辅助模式',
+    'themeSettings.colorSafeDesc': '增强文本与边框区分度。', 'themeSettings.pageTransitions': '页面切换动画', 'themeSettings.pageTransitionsDesc': '路由内容切换时启用过渡动画。', 'themeSettings.motion': '动态效果', 'themeSettings.motionReduced': '减少动态效果', 'themeSettings.cornerRadius': '圆角大小',
+    'themeSettings.radiusDefault': '默认', 'themeSettings.radiusRounded': '圆润', 'shortcuts.groupNavigation': '导航', 'shortcuts.openCommandPalette': '打开命令面板', 'shortcuts.showShortcuts': '显示键盘快捷键', 'shortcuts.groupTable': '表格与弹窗',
+    'shortcuts.focusSearch': '聚焦搜索框', 'shortcuts.closeDialog': '关闭弹窗 / 取消', 'shortcuts.groupTheme': '主题', 'shortcuts.toggleDarkMode': '切换深色模式', 'headerFilter.filterField': '筛选 {label}', 'headerFilter.operator': '条件',
+    'headerFilter.value': '筛选值', 'headerFilter.searchPlaceholder': '搜索{label}…', 'headerFilter.op.eqNum': '= 等于', 'headerFilter.op.gt': '> 大于', 'headerFilter.op.gte': '>= 大于等于', 'headerFilter.op.lt': '< 小于',
+    'headerFilter.op.lte': '<= 小于等于', 'headerFilter.op.onDate': '= 指定日期', 'headerFilter.op.afterOrOn': '>= 不早于', 'headerFilter.op.beforeOrOn': '<= 不晚于', 'headerFilter.op.is': '等于', 'headerFilter.op.contains': '包含', 'headerFilter.op.equals': '等于', 'headerFilter.op.notEquals': '不等于',
   },
   'en': {
     'common.list': 'List',
@@ -2050,6 +2066,20 @@ const baseLocales: Record<string, Record<string, string>> = {
     'pivot.drilldownTitle': 'Pivot Drilldown Details',
     'pivot.filterCriteria': 'Active Slice Filters',
     'pivot.totalRecords': '{count} records found',
+    'auth.orContinueWith': 'Or continue with', 'auth.signIn': 'Sign in', 'common.apply': 'Apply', 'common.columnSettings': 'Columns', 'common.compact': 'Compact', 'common.standard': 'Standard',
+    'common.history': 'History', 'common.keyboardShortcuts': 'Keyboard Shortcuts', 'common.warnUnsavedChanges': 'You have unsaved changes. Are you sure you want to leave?', 'common.empty': 'No data', 'common.filters': 'Filters', 'common.items': 'Items',
+    'common.select': 'Select', 'common.profile': 'Profile', 'common.more': 'More', 'common.toggleDensity': 'Toggle density', 'common.unableToLoadPage': 'Unable to load this page.', 'common.dataProviderRequired': 'DataProvider is required',
+    'conflict.title': 'Concurrent Modification Conflict', 'documentTitle.default': 'Admin', 'editor.image.apply': 'Insert', 'columnSettings.requiredColumn': 'Required column', 'columnSettings.pinLeft': 'Fix column left', 'columnSettings.unpin': 'Cancel fixed column',
+    'permissions.title': 'Permission Matrix', 'permissions.description': 'Inspect and configure resource access permissions by role.', 'permissions.roles': 'Roles', 'permissions.resources': 'Resources', 'permissions.currentRole': 'Current role', 'permissions.noneSelected': 'No role selected',
+    'permissions.noRoles': 'No roles available', 'permissions.noResources': 'No resources available', 'permissions.conflicts': 'Permission conflicts', 'permissions.toggleHint': 'Click to toggle permission for this role',
+    'notificationCenter.title': 'Notifications', 'notificationCenter.empty': 'No new notifications', 'notificationCenter.markAllRead': 'Mark all as read', 'notificationCenter.unreadAria': '{title}, {count} unread', 'notificationCenter.categoriesAria': 'Notification categories', 'notificationCenter.openDrawer': 'Open Full Drawer →',
+    'themeSettings.description': 'Tune the shell without leaving the page.', 'themeSettings.triggerLabel': 'Appearance settings', 'themeSettings.navigation': 'Navigation', 'themeSettings.navigationMode': 'Navigation mode', 'themeSettings.navSplit': 'Split sidebar', 'themeSettings.navigationTheme': 'Navigation theme',
+    'themeSettings.followTheme': 'Follow theme', 'themeSettings.widthWide': 'Wide', 'themeSettings.display': 'Display', 'themeSettings.compactDensity': 'Compact density', 'themeSettings.compactDensityDesc': 'Reduce table and form spacing.', 'themeSettings.colorSafe': 'Color-safe mode',
+    'themeSettings.colorSafeDesc': 'Increase reliance on text and borders.', 'themeSettings.pageTransitions': 'Page transitions', 'themeSettings.pageTransitionsDesc': 'Animate route content changes.', 'themeSettings.motion': 'Motion', 'themeSettings.motionReduced': 'Reduced motion', 'themeSettings.cornerRadius': 'Corner radius',
+    'themeSettings.radiusDefault': 'Default', 'themeSettings.radiusRounded': 'Rounded', 'shortcuts.groupNavigation': 'Navigation', 'shortcuts.openCommandPalette': 'Open command palette', 'shortcuts.showShortcuts': 'Show keyboard shortcuts', 'shortcuts.groupTable': 'Table',
+    'shortcuts.focusSearch': 'Focus search', 'shortcuts.closeDialog': 'Close dialog / cancel', 'shortcuts.groupTheme': 'Theme', 'shortcuts.toggleDarkMode': 'Toggle dark mode', 'headerFilter.filterField': 'Filter {label}', 'headerFilter.operator': 'Operator',
+    'headerFilter.value': 'Value', 'headerFilter.searchPlaceholder': 'Search {label}...', 'headerFilter.op.eqNum': '= Equal', 'headerFilter.op.gt': '> Greater than', 'headerFilter.op.gte': '>= Greater equal', 'headerFilter.op.lt': '< Less than',
+    'headerFilter.op.lte': '<= Less equal', 'headerFilter.op.onDate': '= On date', 'headerFilter.op.afterOrOn': '>= After or on', 'headerFilter.op.beforeOrOn': '<= Before or on', 'headerFilter.op.is': 'Is', 'headerFilter.op.contains': 'Contains', 'headerFilter.op.equals': 'Equals', 'headerFilter.op.notEquals': 'Not equals',
   },
 };
 let locales = $state(structuredClone(baseLocales));
@@ -2069,40 +2099,6 @@ function detectLocale(): string {
 }
 
 let currentLocale = $state(detectLocale());
-/**
- * I18nProvider — pluggable translation boundary.
- * When set, all t/getLocale/getAvailableLocales delegates to it first,
- * falling back to the built-in locale tables. This lets apps integrate
- * existing i18n systems (svelte-i18n, paraglide, etc.) without rewriting callsites.
- */
-export interface I18nProvider {
-  translate: (key: string, params?: Record<string, string | number>) => string;
-  getLocale: () => string;
-  setLocale: (locale: string) => void;
-  getAvailableLocales?: () => string[];
-}
-
-/** Owner-controlled values for one component-tree i18n scope. */
-export interface I18nScopeOptions {
-  locale?: string;
-  provider?: I18nProvider;
-  onLocaleChange?: (locale: string) => void;
-}
-
-/**
- * Tree-local i18n state. `updateOwner` synchronizes props without emitting a
- * change event, while `setLocale` represents a change requested inside the tree.
- */
-export interface I18nScope {
-  readonly locale: string;
-  readonly provider: I18nProvider | undefined;
-  translate: (key: string, params?: Record<string, string | number>) => string;
-  setLocale: (locale: string) => void;
-  setProvider: (provider: I18nProvider | undefined) => void;
-  getAvailableLocales: () => string[];
-  updateOwner: (options: I18nScopeOptions) => void;
-}
-
 const [readI18nScopeContext, writeI18nScopeContext] = createContext<I18nScope>();
 
 function translateFromTables(

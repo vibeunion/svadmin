@@ -190,7 +190,10 @@
 
         <div class="flex items-center gap-1.5 flex-wrap min-w-0">
           {#if title}
-            <span class={cn('font-semibold text-foreground truncate', size === 'small' ? 'text-xs' : 'text-sm')}>
+            <span
+              class={cn('font-semibold text-foreground truncate', size === 'small' ? 'text-xs' : 'text-sm')}
+              title={typeof title === 'string' ? title : undefined}
+            >
               {#if typeof title === 'string'}
                 {title}
               {:else}
@@ -200,7 +203,10 @@
           {/if}
 
           {#if subTitle}
-            <span class="text-xs text-muted-foreground font-normal truncate">
+            <span
+              class="text-xs text-muted-foreground font-normal truncate"
+              title={typeof subTitle === 'string' ? subTitle : undefined}
+            >
               {#if typeof subTitle === 'string'}
                 {subTitle}
               {:else}

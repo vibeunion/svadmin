@@ -110,17 +110,18 @@
     <div class="mt-2 first:mt-0">
       <Collapsible.Root bind:open={isOpen}>
         <Collapsible.Trigger
+          title={label}
           class="svadmin-collapsible-trigger sidebar-menu-item flex w-full items-center justify-between rounded-md py-[7px] text-[13px] font-medium transition-colors duration-150
           {childActive
             ? 'text-sidebar-foreground'
             : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'}"
           style="padding-left: {indentPx}px; padding-right: 10px"
         >
-          <span class="flex items-center gap-2.5">
+          <span class="flex items-center gap-2.5 min-w-0">
             <Icon class="h-[18px] w-[18px] flex-shrink-0 {childActive ? 'text-primary' : 'text-sidebar-foreground/50'}" />
-            <span>{label}</span>
+            <span class="truncate">{label}</span>
           </span>
-          <ChevronDown class="h-3.5 w-3.5 text-sidebar-foreground/40 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
+          <ChevronDown class="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/40 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
         </Collapsible.Trigger>
         <Collapsible.Content>
           <div class="relative mt-[2px]">
@@ -137,17 +138,18 @@
   {:else}
     <Collapsible.Root bind:open={isOpen}>
       <Collapsible.Trigger
+        title={label}
         class="svadmin-collapsible-trigger sidebar-menu-item flex w-full items-center justify-between rounded-md py-[6px] text-[13px] font-normal transition-colors duration-150
         {childActive
           ? 'text-primary font-medium'
           : 'text-sidebar-foreground/65 hover:text-sidebar-foreground'}"
         style="padding-left: {indentPx}px; padding-right: 10px"
       >
-        <span class="flex items-center gap-2.5">
+        <span class="flex items-center gap-2.5 min-w-0">
           <Circle class="h-[5px] w-[5px] flex-shrink-0 {childActive ? 'fill-primary text-primary' : 'fill-sidebar-foreground/30 text-sidebar-foreground/30'}" />
-          <span>{label}</span>
+          <span class="truncate">{label}</span>
         </span>
-        <ChevronDown class="h-3 w-3 text-sidebar-foreground/35 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
+        <ChevronDown class="h-3 w-3 shrink-0 text-sidebar-foreground/35 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
       </Collapsible.Trigger>
       <Collapsible.Content>
         <div class="space-y-[1px] mt-[1px]">
@@ -186,6 +188,7 @@
       href={finalHref}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
+      title={label}
       class="sidebar-menu-item flex items-center gap-2.5 rounded-md py-[7px] text-[13px] font-medium transition-colors duration-150
       {active
         ? 'sidebar-menu-item-active text-primary bg-sidebar-accent'
@@ -193,7 +196,7 @@
       style="padding-left: {indentPx}px; padding-right: 10px"
     >
       <Icon class="h-[18px] w-[18px] flex-shrink-0 {active ? 'text-primary' : 'text-sidebar-foreground/50'}" />
-      <span class="flex-1">{label}</span>
+      <span class="flex-1 truncate">{label}</span>
       {#if soon}
         <Badge variant="secondary" class="h-[18px] px-1.5 text-[10px] font-medium">Soon</Badge>
       {/if}
@@ -206,6 +209,7 @@
       href={finalHref}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
+      title={label}
       class="sidebar-menu-item flex items-center gap-2.5 rounded-md py-[6px] text-[13px] font-normal transition-colors duration-150
       {active
         ? 'sidebar-menu-item-active text-primary font-medium'
@@ -213,7 +217,7 @@
       style="padding-left: {indentPx}px; padding-right: 10px"
     >
       <Circle class="h-[5px] w-[5px] flex-shrink-0 {active ? 'fill-primary text-primary' : 'fill-sidebar-foreground/30 text-sidebar-foreground/30'}" />
-      <span class="flex-1">{label}</span>
+      <span class="flex-1 truncate">{label}</span>
       {#if soon}
         <Badge variant="secondary" class="h-[18px] px-1.5 text-[10px] font-medium">Soon</Badge>
       {/if}

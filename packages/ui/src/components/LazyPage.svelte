@@ -22,6 +22,10 @@
 </script>
 
 <script lang="ts">
+  import { useTranslation } from '@svadmin/core/i18n';
+
+  const i18n = useTranslation();
+
   let {
     loader,
     props,
@@ -35,13 +39,13 @@
 
 {#await pagePromise}
   <div class="flex min-h-40 items-center justify-center" role="status" aria-live="polite">
-    <span class="text-sm text-muted-foreground">Loading…</span>
+    <span class="text-sm text-muted-foreground">{i18n.t('common.loading')}</span>
   </div>
 {:then pageModule}
   {@const Page = pageModule.default as unknown as Component<Record<string, unknown>>}
   <Page {...props} />
 {:catch}
   <div class="flex min-h-40 items-center justify-center" role="alert">
-    <span class="text-sm text-destructive">Unable to load this page.</span>
+    <span class="text-sm text-destructive">{i18n.t('common.unableToLoadPage')}</span>
   </div>
 {/await}

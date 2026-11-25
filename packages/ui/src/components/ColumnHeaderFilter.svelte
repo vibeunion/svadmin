@@ -37,27 +37,27 @@
       case 'number':
       case 'currency':
         return [
-          { value: 'eq' as const, label: '= Equal' },
-          { value: 'gt' as const, label: '> Greater than' },
-          { value: 'gte' as const, label: '>= Greater equal' },
-          { value: 'lt' as const, label: '< Less than' },
-          { value: 'lte' as const, label: '<= Less equal' },
+          { value: 'eq' as const, label: i18n.t('headerFilter.op.eqNum') },
+          { value: 'gt' as const, label: i18n.t('headerFilter.op.gt') },
+          { value: 'gte' as const, label: i18n.t('headerFilter.op.gte') },
+          { value: 'lt' as const, label: i18n.t('headerFilter.op.lt') },
+          { value: 'lte' as const, label: i18n.t('headerFilter.op.lte') },
         ];
       case 'date':
         return [
-          { value: 'eq' as const, label: '= On date' },
-          { value: 'gte' as const, label: '>= After or on' },
-          { value: 'lte' as const, label: '<= Before or on' },
+          { value: 'eq' as const, label: i18n.t('headerFilter.op.onDate') },
+          { value: 'gte' as const, label: i18n.t('headerFilter.op.afterOrOn') },
+          { value: 'lte' as const, label: i18n.t('headerFilter.op.beforeOrOn') },
         ];
       case 'boolean':
         return [
-          { value: 'eq' as const, label: 'Is' },
+          { value: 'eq' as const, label: i18n.t('headerFilter.op.is') },
         ];
       default:
         return [
-          { value: 'contains' as const, label: 'Contains' },
-          { value: 'eq' as const, label: 'Equals' },
-          { value: 'ne' as const, label: 'Not equals' },
+          { value: 'contains' as const, label: i18n.t('headerFilter.op.contains') },
+          { value: 'eq' as const, label: i18n.t('headerFilter.op.equals') },
+          { value: 'ne' as const, label: i18n.t('headerFilter.op.notEquals') },
         ];
     }
   });
@@ -92,7 +92,7 @@
             : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/50',
           className
         )}
-        aria-label="Filter {field.label}"
+        aria-label={i18n.t('headerFilter.filterField', { label: field.label })}
       >
         <Filter class="h-3 w-3" />
       </button>
@@ -100,12 +100,12 @@
   </Popover.Trigger>
   <Popover.Content class="w-64 p-3 text-xs" align="start">
     <div class="space-y-3">
-      <div class="font-medium text-foreground pb-1 border-b border-border/50">
-        Filter {field.label}
+      <div class="font-medium text-foreground pb-1 border-b border-border/50 truncate" title={i18n.t('headerFilter.filterField', { label: field.label })}>
+        {i18n.t('headerFilter.filterField', { label: field.label })}
       </div>
 
       <div class="space-y-1">
-        <label class="block text-[11px] text-muted-foreground" for="header_filter_op_{field.key}">Operator</label>
+        <label class="block text-[11px] text-muted-foreground" for="header_filter_op_{field.key}">{i18n.t('headerFilter.operator')}</label>
         <select data-size="compact"
           id="header_filter_op_{field.key}"
           bind:value={operator}
@@ -118,14 +118,14 @@
       </div>
 
       <div class="space-y-1">
-        <label class="block text-[11px] text-muted-foreground" for="header_filter_val_{field.key}">Value</label>
+        <label class="block text-[11px] text-muted-foreground" for="header_filter_val_{field.key}">{i18n.t('headerFilter.value')}</label>
         {#if field.type === 'select' && field.options}
           <select data-size="compact"
             id="header_filter_val_{field.key}"
             bind:value={filterVal}
             class="svadmin-select h-7.5 w-full"
           >
-            <option value="">All</option>
+            <option value="">{i18n.t('common.all')}</option>
             {#each field.options as opt (opt.value)}
               <option value={String(opt.value)}>{opt.label}</option>
             {/each}
@@ -153,7 +153,7 @@
             id="header_filter_val_{field.key}"
             type="text"
             bind:value={filterVal}
-            placeholder="Search {field.label}..."
+            placeholder={i18n.t('headerFilter.searchPlaceholder', { label: field.label })}
             class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
         {/if}

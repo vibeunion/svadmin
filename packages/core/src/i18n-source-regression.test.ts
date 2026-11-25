@@ -19,6 +19,7 @@ test('base locale dictionaries contain unique keys and retain processing labels'
   if (!initializer || !ts.isObjectLiteralExpression(initializer)) throw new Error('Missing base locale dictionaries');
 
   const locales = new Set<string>();
+  const keysByLocale = new Map<string, Set<string>>();
   const processing = new Map<string, string>();
   for (const locale of initializer.properties) {
     if (!ts.isPropertyAssignment(locale) || !ts.isObjectLiteralExpression(locale.initializer)) {
@@ -37,8 +38,27 @@ test('base locale dictionaries contain unique keys and retain processing labels'
         processing.set(localeName, entry.initializer.text);
       }
     }
+    keysByLocale.set(localeName, keys);
   }
   expect(locales.size).toBeGreaterThanOrEqual(2);
   expect(processing.get('zh-CN')).toBe('处理中…');
   expect([...processing.values()]).toContain('Processing…');
+
+  const zhKeys = keysByLocale.get('zh-CN') ?? new Set<string>();
+  const enKeys = keysByLocale.get('en') ?? new Set<string>();
+  expect([...enKeys].filter((k) => !zhKeys.has(k))).toEqual([]);
+  expect([...zhKeys].filter((k) => !enKeys.has(k))).toEqual([]);
+  for (const requiredKey of [
+    'common.apply',
+    'common.columnSettings',
+    'common.keyboardShortcuts',
+    'common.warnUnsavedChanges',
+    'permissions.title',
+    'notificationCenter.title',
+    'themeSettings.description',
+    'headerFilter.filterField',
+  ]) {
+    expect(zhKeys.has(requiredKey)).toBe(true);
+    expect(enKeys.has(requiredKey)).toBe(true);
+  }
 });

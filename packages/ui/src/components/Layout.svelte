@@ -28,10 +28,16 @@
   import { getComponentRegistry } from '../component-registry.svelte.js';
   import { Button } from './ui/button/index.js';
   import { cn } from '../utils.js';
+  import { attachOverflowTooltips } from '../overflow-tooltip.js';
   import { uiPreferences } from '../ui-preferences.svelte.js';
   import type { NotificationItem } from './NotificationCenter.svelte';
 
   const i18n = useTranslation();
+
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+    return attachOverflowTooltips(document);
+  });
 
   let commandOpen = $state(false);
   let shortcutsOpen = $state(false);

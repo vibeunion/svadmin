@@ -67,7 +67,7 @@
         <button class="relative flex min-w-0 flex-col items-center gap-2 rounded-lg border p-4 transition-colors {active ? 'border-primary bg-primary/5' : 'border-border hover:bg-accent/50'}" onclick={() => setTheme(option.value)} aria-pressed={active}>
           {#if active}<Check class="absolute right-2 top-2 size-3.5 text-primary" />{/if}
           <span class="flex size-10 items-center justify-center rounded-md {active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}"><option.icon class="size-5" /></span>
-          <span class="truncate text-xs font-medium {active ? 'text-primary' : 'text-muted-foreground'}">{i18n.t(option.label)}</span>
+          <span class="truncate text-xs font-medium {active ? 'text-primary' : 'text-muted-foreground'}" title={i18n.t(option.label)}>{i18n.t(option.label)}</span>
         </button>
       {/each}
     </div>
@@ -76,19 +76,22 @@
     <div class="flex flex-wrap gap-3">
       {#each presets as preset (preset.name)}
         {@const active = currentColor === preset.name}
-        <button class="relative size-9 rounded-full border border-border transition-opacity {active ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-70 hover:opacity-100'}" style="background-color: {preset.color}" onclick={() => setColorTheme(preset.name as Parameters<typeof setColorTheme>[0])} aria-label={colorLabel(preset.name, preset.label)} aria-pressed={active}>{#if active}<Check class="absolute inset-0 m-auto size-4 text-white drop-shadow-sm" />{/if}</button>
+        {@const label = colorLabel(preset.name, preset.label)}
+        <button class="relative size-9 rounded-full border border-border transition-opacity {active ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-70 hover:opacity-100'}" style="background-color: {preset.color}" onclick={() => setColorTheme(preset.name as Parameters<typeof setColorTheme>[0])} aria-label={label} title={label} aria-pressed={active}>{#if active}<Check class="absolute inset-0 m-auto size-4 text-white drop-shadow-sm" />{/if}</button>
       {/each}
     </div>
   </SettingsGroup>
   <SettingsGroup title={i18n.t('settings.interface')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <div class="divide-y divide-border">
-      <SettingsFieldRow label={i18n.t('settings.language')} description={localeNames[currentLocale] ?? currentLocale} controlId={`${controlId}-language`}>
-        {#snippet control()}
-          <select id={`${controlId}-language`} class="svadmin-select h-9 max-w-44" value={currentLocale} onchange={(event) => i18n.setLocale((event.target as HTMLSelectElement).value)}>
-            {#each availableLocales as locale (locale)}<option value={locale}>{localeNames[locale] ?? locale}</option>{/each}
-          </select>
-        {/snippet}
-      </SettingsFieldRow>
+      {#if availableLocales.length > 1}
+        <SettingsFieldRow label={i18n.t('settings.language')} description={localeNames[currentLocale] ?? currentLocale} controlId={`${controlId}-language`}>
+          {#snippet control()}
+            <select id={`${controlId}-language`} class="svadmin-select h-9 max-w-44" value={currentLocale} onchange={(event) => i18n.setLocale((event.target as HTMLSelectElement).value)}>
+              {#each availableLocales as locale (locale)}<option value={locale}>{localeNames[locale] ?? locale}</option>{/each}
+            </select>
+          {/snippet}
+        </SettingsFieldRow>
+      {/if}
       <SettingsFieldRow label={i18n.t('settings.sidebarDensity')}>
         {#snippet control()}
           <div class="flex overflow-hidden rounded-md border border-input">
