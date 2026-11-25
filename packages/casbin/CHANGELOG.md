@@ -1,5 +1,14 @@
 # @svadmin/casbin
 
+## [0.2.12](https://github.com/vibeunion/svadmin/compare/casbin-v0.2.11...casbin-v0.2.12) (2026-11-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.5
+
 ## [0.2.11](https://github.com/vibeunion/svadmin/compare/casbin-v0.2.10...casbin-v0.2.11) (2026-11-24)
 
 

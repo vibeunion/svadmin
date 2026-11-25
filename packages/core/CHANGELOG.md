@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.5](https://github.com/vibeunion/svadmin/compare/core-v0.84.4...core-v0.84.5) (2026-11-25)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** complete zh-CN translations and expose overflow tooltips ([#953](https://github.com/vibeunion/svadmin/issues/953)) ([d6a323f](https://github.com/vibeunion/svadmin/commit/d6a323f84d6f4e3ed5256855a8443fa5112d57f4))
+
 ## [0.84.4](https://github.com/vibeunion/svadmin/compare/core-v0.84.3...core-v0.84.4) (2026-11-24)
 
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.32](https://github.com/vibeunion/svadmin/compare/editor-v0.7.31...editor-v0.7.32) (2026-11-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.5
+
 ## [0.7.31](https://github.com/vibeunion/svadmin/compare/editor-v0.7.30...editor-v0.7.31) (2026-11-24)
 
 

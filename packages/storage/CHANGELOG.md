@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.16](https://github.com/vibeunion/svadmin/compare/storage-v0.2.15...storage-v0.2.16) (2026-11-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.5
+
 ## [0.2.15](https://github.com/vibeunion/svadmin/compare/storage-v0.2.14...storage-v0.2.15) (2026-11-24)
 
 
