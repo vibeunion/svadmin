@@ -15,7 +15,7 @@ async function expectDesktopGeometry(
   viewportWidth: number,
   sidebarWidth: 252 | 70,
 ): Promise<void> {
-  const sidebar = page.getByRole('complementary', { name: 'Sidebar navigation', exact: true });
+  const sidebar = page.getByRole('complementary', { name: /navigation|主导航/i });
   const main = page.getByRole('main');
   await expect(sidebar).toHaveCSS('width', `${sidebarWidth}px`);
   // 检查可见内容边界，不依赖布局容器属性或 margin 的实现方式。
@@ -50,7 +50,7 @@ for (const direction of ['ltr', 'rtl'] as const) {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await login(page);
       await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
-      const sidebar = page.getByRole('complementary', { name: 'Sidebar navigation', exact: true });
+      const sidebar = page.getByRole('complementary', { name: /navigation|主导航/i });
       const main = page.getByRole('main');
       await expect(sidebar).toHaveCount(1);
       await expect(main).toHaveCount(1);

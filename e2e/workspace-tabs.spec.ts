@@ -274,7 +274,7 @@ async function readWorkspaceLifecycleProbe(page: Page): Promise<WorkspaceLifecyc
 }
 
 async function clickSidebarMenu(page: Page, name: RegExp): Promise<void> {
-  const sidebar = page.getByRole('complementary', { name: 'Sidebar navigation', exact: true });
+  const sidebar = page.getByRole('complementary', { name: /navigation|主导航/i });
   await sidebar.getByRole('link', { name }).click();
 }
 

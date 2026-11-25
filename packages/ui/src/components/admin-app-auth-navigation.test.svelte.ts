@@ -281,11 +281,11 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).toBeNull();
     expect(view.getByText('Loading…')).not.toBeNull();
 
     initialCheck.resolve({ authenticated: true });
-    await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
+    await waitFor(() => expect(view.getByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull());
   });
 
   it('keeps the authenticated layout mounted while a route recheck is pending', async () => {
@@ -305,12 +305,12 @@ describe('AdminApp authenticated navigation', () => {
     });
 
     const postsLink = await waitFor(() => view.getByRole('link', { name: 'Posts' }));
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull();
 
     await fireEvent.click(postsLink);
     await waitFor(() => expect(check).toHaveBeenCalledTimes(2));
 
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull();
     expect(view.queryByRole('region', { name: 'Posts page' })).toBeNull();
     expect(pageMounted).not.toHaveBeenCalled();
     expect(window.location.hash).toBe('#/');
@@ -331,7 +331,7 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
+    await waitFor(() => expect(view.getByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull());
 
     await view.rerender({
       dataProvider,
@@ -339,11 +339,11 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).toBeNull();
     expect(view.getByText('Loading…')).not.toBeNull();
 
     replacementCheck.resolve({ authenticated: true });
-    await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
+    await waitFor(() => expect(view.getByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull());
   });
 
   it('does not mount a protected standalone page before an external route recheck completes', async () => {
@@ -357,13 +357,13 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
+    await waitFor(() => expect(view.getByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull());
 
     window.location.hash = '#/2fa';
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     await waitFor(() => expect(check).toHaveBeenCalledTimes(2));
 
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull();
     expect(view.container.querySelector('[data-svadmin-content-page="auth-2fa"]')).toBeNull();
     expect(view.getByText('Loading…')).not.toBeNull();
 
@@ -395,13 +395,13 @@ describe('AdminApp authenticated navigation', () => {
       routerProvider: router,
       resources,
     });
-    await waitFor(() => expect(view.getByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull());
+    await waitFor(() => expect(view.getByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull());
 
     navigation.resolve();
     await navigation.promise;
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).not.toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).not.toBeNull();
     expect(view.queryByText('Loading…')).toBeNull();
   });
 
@@ -425,7 +425,7 @@ describe('AdminApp authenticated navigation', () => {
     recheck.resolve({ authenticated: false, redirectTo: '/login' });
 
     await waitFor(() => expect(window.location.hash).toBe('#/login'));
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).toBeNull();
     expect(view.queryByRole('region', { name: 'Posts page' })).toBeNull();
   });
 
@@ -481,7 +481,7 @@ describe('AdminApp authenticated navigation', () => {
     recheck.reject(new Error('session check failed'));
 
     await waitFor(() => expect(window.location.hash).toBe('#/login'));
-    expect(view.queryByRole('complementary', { name: 'Sidebar navigation' })).toBeNull();
+    expect(view.queryByRole('complementary', { name: /navigation|主导航/i })).toBeNull();
     expect(view.queryByRole('region', { name: 'Posts page' })).toBeNull();
   });
 });

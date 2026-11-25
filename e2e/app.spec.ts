@@ -146,7 +146,7 @@ test.describe('Navigation', () => {
   });
 
   test('sidebar navigation works', async ({ page }) => {
-    const sidebar = page.getByRole('complementary', { name: 'Sidebar navigation' });
+    const sidebar = page.getByRole('complementary', { name: /navigation|主导航/i });
     await sidebar.getByRole('button', { name: 'Apps', exact: true }).click();
     await sidebar.getByRole('button', { name: 'Inventory', exact: true }).click();
     await sidebar.getByRole('button', { name: 'Catalog', exact: true }).click();
