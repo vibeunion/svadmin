@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.138.3](https://github.com/vibeunion/svadmin/compare/ui-v0.138.2...ui-v0.138.3) (2026-11-25)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** complete zh-CN translations and expose overflow tooltips ([#953](https://github.com/vibeunion/svadmin/issues/953)) ([d6a323f](https://github.com/vibeunion/svadmin/commit/d6a323f84d6f4e3ed5256855a8443fa5112d57f4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.6.20
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.15.8
+  * peerDependencies
+    * @svadmin/core bumped to 0.84.5
+
 ## [0.138.2](https://github.com/vibeunion/svadmin/compare/ui-v0.138.1...ui-v0.138.2) (2026-11-24)
 
 
