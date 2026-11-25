@@ -257,7 +257,7 @@
       {#each filteredColumns as col (col.key)}
         {@const realIdx = columns.findIndex((c) => c.key === col.key)}
         <div class="flex items-center justify-between p-1 rounded-md hover:bg-muted/50 group transition-colors">
-          <label class="flex items-center gap-2 cursor-pointer select-none truncate flex-1 pr-2">
+          <label class="flex items-center gap-2 cursor-pointer select-none truncate flex-1 pr-2" title={col.label}>
             <Checkbox
               checked={col.visible}
               disabled={col.required}
@@ -265,11 +265,11 @@
               data-column-required={col.required ? col.key : undefined}
               onCheckedChange={() => toggleColumn(col.key)}
             />
-            <span class="truncate text-foreground {col.visible ? '' : 'text-muted-foreground line-through opacity-60'}">
+            <span class="truncate text-foreground {col.visible ? '' : 'text-muted-foreground line-through opacity-60'}" title={col.label}>
               {col.label}
             </span>
             {#if col.required}
-              <Lock class="h-3 w-3" aria-label="Required column" data-column-required={col.key} />
+              <Lock class="h-3 w-3 shrink-0" aria-label={i18n.t('columnSettings.requiredColumn')} data-column-required={col.key} />
             {/if}
           </label>
 
@@ -278,7 +278,8 @@
               variant="ghost"
               size="icon"
               class="h-5 w-5 text-muted-foreground hover:text-foreground"
-              aria-label={col.fixed ? 'Cancel fixed column' : 'Fix column left'}
+              aria-label={col.fixed ? i18n.t('columnSettings.unpin') : i18n.t('columnSettings.pinLeft')}
+              title={col.fixed ? i18n.t('columnSettings.unpin') : i18n.t('columnSettings.pinLeft')}
               aria-pressed={Boolean(col.fixed)}
               data-column-fixed={col.fixed ?? 'none'}
               onclick={() => toggleFixed(col.key)}
@@ -292,7 +293,8 @@
               class="h-5 w-5 text-muted-foreground hover:text-foreground"
               disabled={realIdx === 0}
               onclick={() => moveColumn(realIdx, 'up')}
-              aria-label="Move up"
+              aria-label={i18n.t('common.moveUp')}
+              title={i18n.t('common.moveUp')}
             >
               <ArrowUp class="h-3 w-3" />
             </Button>
@@ -302,7 +304,8 @@
               class="h-5 w-5 text-muted-foreground hover:text-foreground"
               disabled={realIdx === columns.length - 1}
               onclick={() => moveColumn(realIdx, 'down')}
-              aria-label="Move down"
+              aria-label={i18n.t('common.moveDown')}
+              title={i18n.t('common.moveDown')}
             >
               <ArrowDown class="h-3 w-3" />
             </Button>

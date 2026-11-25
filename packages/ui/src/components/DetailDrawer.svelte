@@ -1,5 +1,6 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
+  import { useTranslation } from '@svadmin/core/i18n';
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
   import { cn, type WithElementRef } from "../utils.js";
@@ -37,7 +38,7 @@
     "aria-describedby": ariaDescribedby,
     titleId,
     descriptionId,
-    closeLabel = "Close",
+    closeLabel,
     statusLabel = "",
     statusTone = 'neutral',
     onClose,
@@ -47,6 +48,9 @@
     extra,
     ...restProps
   }: Props = $props();
+
+  const i18n = useTranslation();
+  const resolvedCloseLabel = $derived(closeLabel ?? i18n.t('common.close'));
 
   function handleClose() {
     open = false;
@@ -60,12 +64,12 @@
   {side}
   onClose={handleClose}
   {...definedOptions({ onCloseRequest })}
-  {closeLabel}
+  closeLabel={resolvedCloseLabel}
   class={cn("gap-0 p-0 overflow-hidden", width, className)}
   data-svadmin-component="DetailDrawer"
   role="dialog"
   aria-modal="true"
-  aria-label={(ariaLabelledby || titleId) ? ariaLabel : (ariaLabel || title || "Details")}
+  aria-label={(ariaLabelledby || titleId) ? ariaLabel : (ariaLabel || title || i18n.t('common.detail'))}
   aria-labelledby={ariaLabelledby || (titleId ? titleId : undefined)}
   aria-describedby={ariaDescribedby || (descriptionId ? descriptionId : undefined)}
   {...restProps}

@@ -69,8 +69,8 @@
   <div class="flex flex-wrap items-center gap-2.5 min-w-0">
     {#if title || description}
       <div class="min-w-0 pr-2">
-        {#if title}<h3 class="text-sm font-semibold text-foreground truncate leading-tight">{title}</h3>{/if}
-        {#if description}<p class="text-xs text-muted-foreground truncate mt-0.5">{description}</p>{/if}
+        {#if title}<h3 class="text-sm font-semibold text-foreground truncate leading-tight" title={title}>{title}</h3>{/if}
+        {#if description}<p class="text-xs text-muted-foreground truncate mt-0.5" title={description}>{description}</p>{/if}
       </div>
     {/if}
     {#if actions}
@@ -106,7 +106,7 @@
         size="icon"
         class="h-8 w-8 text-muted-foreground hover:text-foreground"
         title={density === "compact" ? i18n.t("common.standard", { defaultValue: "Standard" }) : i18n.t("common.compact", { defaultValue: "Compact" })}
-        aria-label="Toggle density"
+        aria-label={i18n.t("common.toggleDensity", { defaultValue: "Toggle density" })}
         aria-pressed={density === "compact"}
         onclick={toggleDensity}
       >

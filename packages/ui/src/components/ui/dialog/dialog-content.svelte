@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from "bits-ui";
+	import { useTranslation } from '@svadmin/core/i18n';
 	import DialogPortal from "./dialog-portal.svelte";
 	import type { Snippet } from "svelte";
 	import * as Dialog from "./index.js";
@@ -29,6 +30,8 @@
 		/** 加载中时正文区保持最小高度，避免标题和按钮跳动。 */
 		loading?: boolean;
 	} = $props();
+
+	const i18n = useTranslation();
 </script>
 
 <DialogPortal {...portalProps}>
@@ -53,7 +56,7 @@
 				{#snippet child({ props })}
 					<Button variant="ghost" class="svadmin-dialog-dismiss absolute top-2 right-2" size="icon-sm" {...props}>
 						<XIcon  />
-						<span class="svadmin-sr-only">Close</span>
+						<span class="svadmin-sr-only">{i18n.t('common.close')}</span>
 					</Button>
 				{/snippet}
 			</DialogPrimitive.Close>

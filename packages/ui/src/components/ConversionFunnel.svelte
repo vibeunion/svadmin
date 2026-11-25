@@ -117,7 +117,7 @@
             <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
               {idx + 1}
             </span>
-            <span class="text-xs font-semibold text-foreground truncate">{stage.label}</span>
+            <span class="text-xs font-semibold text-foreground truncate" title={stage.label}>{stage.label}</span>
           </div>
 
           <div class="flex items-center gap-2.5 shrink-0 font-mono text-xs whitespace-nowrap">

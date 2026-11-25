@@ -11,9 +11,10 @@ const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
 // Mermaid 12 bundles a larger ELK layout chunk (1,498,950 bytes) but remains lazy.
 const maximumChunkBytes = 1_550_000;
 // Chrome 105 主题回退将首屏从 1,424,923 增至 1,426,039 字节；
-// Svelte 5.59 与 bits-ui 2.22 升级后首屏为 1,439,428 字节；
-// 按测得的兼容性成本调整原始体积预算，gzip 预算保持不变。
-const maximumInitialBytes = 1_445_000;
+// Svelte 5.59 与 bits-ui 2.22 升级后首屏为 1,439,428 字节；完整 zh-CN
+// 字典与溢出提示监听测得 1,452,381 字节。按实测成本调整原始体积预算，
+// gzip 预算保持不变。
+const maximumInitialBytes = 1_455_000;
 // Enterprise closeout measured 390055 gzip bytes on 2026-10-26; the released
 // enterprise feedback changes measured 390223 gzip bytes on 2026-10-27, and the
 // unified visual system measured 390547 gzip bytes on 2026-10-29, and the shell
@@ -29,8 +30,9 @@ const maximumInitialBytes = 1_445_000;
 // normalization and the Card/Link/Progress refinements measured 425630 gzip
 // bytes; the enterprise component parity enhancements across Skeleton, Badge,
 // Tree, and form controls measured 430060 gzip bytes. Svelte 5.59 and
-// bits-ui 2.22 measured 436148 gzip bytes after the toolchain refresh.
-const maximumInitialGzipBytes = 437_000;
+// bits-ui 2.22 measured 436148 gzip bytes after the toolchain refresh; the
+// complete zh-CN dictionary and overflow-tooltip observer measured 439820.
+const maximumInitialGzipBytes = 441_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);

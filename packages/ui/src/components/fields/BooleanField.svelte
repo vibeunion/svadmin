@@ -3,8 +3,11 @@
 </script>
 
 <script lang="ts">
+  import { useTranslation } from '@svadmin/core/i18n';
   import { Badge } from '../ui/badge/index.js';
   import { cn } from '../../utils.js';
+
+  const i18n = useTranslation();
 
   interface Props {
     value: boolean | null | undefined;
@@ -24,13 +27,16 @@
     mode = 'icon',
     trueIcon = '✓',
     falseIcon = '✗',
-    trueLabel = 'Yes',
-    falseLabel = 'No',
+    trueLabel,
+    falseLabel,
     nullLabel = '—',
     trueTone = 'success',
     falseTone = 'danger',
     class: className = '',
   }: Props = $props();
+
+  const resolvedTrueLabel = $derived(trueLabel ?? i18n.t('common.yes'));
+  const resolvedFalseLabel = $derived(falseLabel ?? i18n.t('common.no'));
 
   const toneClass: Record<BooleanTone, string> = {
     success: 'border-success/30 bg-success/10 text-success',
@@ -52,7 +58,7 @@
       className
     )}
   >
-    {value ? trueLabel : falseLabel}
+    {value ? resolvedTrueLabel : resolvedFalseLabel}
   </Badge>
 {:else if mode === 'text'}
   <span
@@ -68,7 +74,7 @@
       className
     )}
   >
-    {value ? trueLabel : falseLabel}
+    {value ? resolvedTrueLabel : resolvedFalseLabel}
   </span>
 {:else}
   {#if value}

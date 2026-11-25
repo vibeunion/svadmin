@@ -142,15 +142,15 @@
     <div class="flex items-start justify-between gap-3">
       <div class="space-y-1 min-w-0">
         <div class="flex items-center flex-wrap gap-2 min-w-0">
-          <span class="text-xs font-medium text-muted-foreground tracking-wide">{title}</span>
+          <span class="text-xs font-medium text-muted-foreground tracking-wide truncate" title={title}>{title}</span>
           {#if badge}
-            <span class="shrink-0 whitespace-nowrap rounded-sm bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
+            <span class="shrink-0 whitespace-nowrap rounded-sm bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary" title={badge}>
               {badge}
             </span>
           {/if}
         </div>
         {#if subtitle}
-          <p class="text-xs text-muted-foreground">{subtitle}</p>
+          <p class="text-xs text-muted-foreground" title={subtitle}>{subtitle}</p>
         {/if}
       </div>
 
@@ -163,11 +163,14 @@
 
     <!-- Main Metric Value & Trend / Sparkline -->
     <div class="my-3 flex items-baseline justify-between gap-3 min-w-0">
-      <div class="flex items-baseline gap-1 font-mono tracking-tight whitespace-nowrap min-w-0">
+      <div
+        class="flex items-baseline gap-1 font-mono tracking-tight whitespace-nowrap min-w-0"
+        title={`${prefix ?? ''}${formattedValue}${suffix ? ` ${suffix}` : ''}`}
+      >
         {#if prefix}
           <span class="text-base font-semibold text-muted-foreground">{prefix}</span>
         {/if}
-        <span class="text-3xl font-bold text-foreground">{formattedValue}</span>
+        <span class="text-3xl font-bold text-foreground truncate">{formattedValue}</span>
         {#if suffix}
           <span class="text-xs font-medium text-muted-foreground">{suffix}</span>
         {/if}
@@ -237,7 +240,7 @@
           {:else}
             <AlertTriangle class="h-3.5 w-3.5 shrink-0" />
           {/if}
-          <span class="truncate">{alertMessage}</span>
+          <span class="truncate" title={alertMessage}>{alertMessage}</span>
         </div>
       {/if}
 

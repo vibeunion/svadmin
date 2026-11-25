@@ -11,28 +11,28 @@
     label: string;
   }
 
-  const shortcuts: { group: string; items: Shortcut[] }[] = [
+  const shortcuts = $derived<{ group: string; items: Shortcut[] }[]>([
     {
-      group: 'Navigation',
+      group: i18n.t('shortcuts.groupNavigation'),
       items: [
-        { keys: ['⌘', 'K'], label: 'Open command palette' },
-        { keys: ['?'], label: 'Show keyboard shortcuts' },
+        { keys: ['⌘', 'K'], label: i18n.t('shortcuts.openCommandPalette') },
+        { keys: ['?'], label: i18n.t('shortcuts.showShortcuts') },
       ],
     },
     {
-      group: 'Table',
+      group: i18n.t('shortcuts.groupTable'),
       items: [
-        { keys: ['⌘', 'F'], label: 'Focus search' },
-        { keys: ['Esc'], label: 'Close dialog / cancel' },
+        { keys: ['⌘', 'F'], label: i18n.t('shortcuts.focusSearch') },
+        { keys: ['Esc'], label: i18n.t('shortcuts.closeDialog') },
       ],
     },
     {
-      group: 'Theme',
+      group: i18n.t('shortcuts.groupTheme'),
       items: [
-        { keys: ['⌘', 'D'], label: 'Toggle dark mode' },
+        { keys: ['⌘', 'D'], label: i18n.t('shortcuts.toggleDarkMode') },
       ],
     },
-  ];
+  ]);
 </script>
 
 <Dialog.Root bind:open>

@@ -4,7 +4,10 @@
   import { Button } from './ui/button/index.js';
   import * as Popover from './ui/popover/index.js';
   import { formatAdminTime } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../utils.js';
+
+  const i18n = useTranslation();
 
   export interface NotificationItem {
     id: string;
@@ -40,14 +43,14 @@
 
   let {
     items = [],
-    title = 'Notifications',
-    emptyText = 'No new notifications',
-    markAllText = 'Mark all as read',
+    title,
+    emptyText,
+    markAllText,
     unreadCount,
     showFilters = false,
     categories,
     category = $bindable('all'),
-    allLabel = 'All',
+    allLabel,
     loading = false,
     open = $bindable(false),
     showDrawerButton = false,
@@ -58,6 +61,11 @@
     onopen,
     class: className = '',
   }: Props = $props();
+
+  const resolvedTitle = $derived(title ?? i18n.t('notificationCenter.title'));
+  const resolvedEmptyText = $derived(emptyText ?? i18n.t('notificationCenter.empty'));
+  const resolvedMarkAllText = $derived(markAllText ?? i18n.t('notificationCenter.markAllRead'));
+  const resolvedAllLabel = $derived(allLabel ?? i18n.t('common.all'));
 
   const resolvedUnread = $derived(unreadCount ?? items.filter((item) => !item.read).length);
   const resolvedCategories = $derived(
@@ -74,7 +82,7 @@
     if (!value) return '';
     const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return formatAdminTime(date, { dateStyle: 'medium', seconds: false });
+    return formatAdminTime(date, { dateStyle: 'medium', seconds: false, locale: i18n.locale });
   }
 
   async function read(item: NotificationItem): Promise<void> {
@@ -92,7 +100,7 @@
   <Popover.Trigger>
     {#snippet child({ props })}
       <span class="svadmin-notification-center__trigger-wrap" data-svadmin-component="NotificationCenter">
-        <Button {...props} variant="ghost" size="icon-sm" aria-label={`${title}${resolvedUnread ? `, ${resolvedUnread} unread` : ''}`} class={className}>
+        <Button {...props} variant="ghost" size="icon-sm" aria-label={resolvedUnread ? i18n.t('notificationCenter.unreadAria', { title: resolvedTitle, count: resolvedUnread }) : resolvedTitle} class={className}>
           <Bell size={16} aria-hidden="true" />
           {#if resolvedUnread > 0}
             <span class="svadmin-notification-center__count" aria-hidden="true">{resolvedUnread > 99 ? '99+' : resolvedUnread}</span>
@@ -103,16 +111,16 @@
   </Popover.Trigger>
   <Popover.Content align="end" sideOffset={8} class="svadmin-notification-center">
     <header class="svadmin-notification-center__header">
-      <h2>{title}</h2>
+      <h2>{resolvedTitle}</h2>
       {#if resolvedUnread > 0 && onreadall}
         <Button variant="ghost" size="sm" onclick={() => onreadall()}>
           <CheckCheck size={14} aria-hidden="true" />
-          {markAllText}
+          {resolvedMarkAllText}
         </Button>
       {/if}
     </header>
     {#if showFilters && resolvedCategories.length > 0}
-      <div class="svadmin-notification-center__filters" role="tablist" aria-label="Notification categories">
+      <div class="svadmin-notification-center__filters" role="tablist" aria-label={i18n.t('notificationCenter.categoriesAria')}>
         <button
           type="button"
           role="tab"
@@ -120,7 +128,7 @@
           aria-selected={activeCategory === 'all'}
           onclick={() => (category = 'all')}
         >
-          {allLabel}
+          {resolvedAllLabel}
         </button>
         {#each resolvedCategories as value (value)}
           <button
@@ -137,9 +145,9 @@
     {/if}
     <div class="svadmin-notification-center__body" aria-busy={loading}>
       {#if loading}
-        <p class="svadmin-notification-center__state">Loading…</p>
+        <p class="svadmin-notification-center__state">{i18n.t('common.loading')}</p>
       {:else if visibleItems.length === 0}
-        <p class="svadmin-notification-center__state">{emptyText}</p>
+        <p class="svadmin-notification-center__state">{resolvedEmptyText}</p>
       {:else}
         <ul class="svadmin-notification-center__list">
           {#each visibleItems as item (item.id)}
@@ -148,6 +156,7 @@
                 type="button"
                 class={cn('svadmin-notification-center__item', !item.read && 'is-unread')}
                 data-tone={item.tone ?? 'neutral'}
+                title={item.description ? `${item.title}\n${item.description}` : item.title}
                 onclick={() => activate(item)}
               >
                 <span class="svadmin-notification-center__dot" aria-hidden="true"></span>
@@ -175,7 +184,7 @@
               onopendrawer?.();
             }}
           >
-            Open Full Drawer →
+            {i18n.t('notificationCenter.openDrawer')}
           </Button>
         </div>
       {/if}

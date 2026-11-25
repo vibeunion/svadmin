@@ -174,8 +174,10 @@
 
   $effect(() => {
     if (typeof window === 'undefined') return;
+    const available = i18n.getAvailableLocales();
+    if (available.length <= 1) return;
     const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (storedLocale && i18n.getAvailableLocales().includes(storedLocale)) {
+    if (storedLocale && available.includes(storedLocale)) {
       i18n.setLocale(storedLocale);
     }
   });
@@ -243,25 +245,27 @@
 </script>
 
 {#snippet languageMenu(collapsed: boolean)}
-  <select
-    aria-label={i18n.t('common.switchLanguage')}
-    value={i18n.locale}
-    onchange={(event) => selectLocale((event.target as HTMLSelectElement).value)}
-    class={collapsed
-      ? 'h-8 w-auto min-w-0 max-w-full appearance-none rounded-md border border-border bg-sidebar px-1 text-center text-[10px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'
-      : 'h-8 w-auto min-w-0 max-w-full rounded-md border border-border bg-sidebar px-1.5 text-[11px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'}
-  >
-    {#each i18n.getAvailableLocales() as locale (locale)}
-      <option value={locale}>{localeName(locale)}</option>
-    {/each}
-  </select>
+  {#if i18n.getAvailableLocales().length > 1}
+    <select
+      aria-label={i18n.t('common.switchLanguage')}
+      value={i18n.locale}
+      onchange={(event) => selectLocale((event.target as HTMLSelectElement).value)}
+      class={collapsed
+        ? 'h-8 w-auto min-w-0 max-w-full appearance-none rounded-md border border-border bg-sidebar px-1 text-center text-[10px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'
+        : 'h-8 w-auto min-w-0 max-w-full rounded-md border border-border bg-sidebar px-1.5 text-[11px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'}
+    >
+      {#each i18n.getAvailableLocales() as locale (locale)}
+        <option value={locale}>{localeName(locale)}</option>
+      {/each}
+    </select>
+  {/if}
 {/snippet}
 
 
 
 <aside
   data-svadmin-sidebar
-  aria-label="Sidebar navigation"
+  aria-label={i18n.t('common.mainNavigation')}
   class="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-border/40 transition-all duration-300"
   style="background-color: var(--sidebar);"
   class:svadmin-sidebar-expanded={!collapsed}
@@ -269,15 +273,16 @@
 >
   <div class="flex h-[70px] items-center shrink-0" class:px-5={!collapsed} class:justify-center={collapsed}>
     {#if !collapsed}
-      <a href={formatSidebarLink('/')} class="group flex items-center gap-2.5" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
+      <a href={formatSidebarLink('/')} class="group flex items-center gap-2.5 min-w-0" title={title} onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
         <SvadminLogo />
-        <span class="font-semibold text-[15px] tracking-[-0.01em] text-sidebar-foreground">{title}</span>
+        <span class="font-semibold text-[15px] tracking-[-0.01em] text-sidebar-foreground truncate">{title}</span>
       </a>
     {:else}
       <a
         href={formatSidebarLink('/')}
         class="group"
         aria-label={title}
+        title={title}
         onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}
       >
         <SvadminLogo />
@@ -286,7 +291,7 @@
   </div>
 
   <ScrollArea class="flex-1 sidebar-scroll">
-  <nav aria-label="Main menu" class={collapsed ? 'pb-4 px-2' : 'pb-4 px-[10px]'}>
+  <nav aria-label={i18n.t('common.menu')} class={collapsed ? 'pb-4 px-2' : 'pb-4 px-[10px]'}>
     {#if menu && menu.length > 0}
       <div class="space-y-[2px]">
         {#each customMenuItems as item (item.name)}
@@ -408,6 +413,7 @@
     {/if}
 
     {#if !collapsed && identity}
+      {@const identityRole = String(((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? i18n.t('common.user'))}
       <div class="px-3 pb-3 pt-1">
         <div class="flex items-center gap-2.5 rounded-lg p-2 transition-colors hover:bg-sidebar-accent/40 cursor-pointer">
           <Avatar
@@ -417,11 +423,13 @@
             size="sm"
           />
           <div class="flex-1 min-w-0">
-            <p class="truncate text-[13px] font-medium text-sidebar-foreground">{identity.name}</p>
-            <p class="truncate text-[11px] text-sidebar-foreground/45">{((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? i18n.t('common.user')}</p>
+            <p class="truncate text-[13px] font-medium text-sidebar-foreground" title={identity.name}>{identity.name}</p>
+            <p class="truncate text-[11px] text-sidebar-foreground/45" title={identityRole}>{identityRole}</p>
           </div>
           <button
             class="h-7 w-7 flex items-center justify-center rounded-md text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+            aria-label={i18n.t('common.logout')}
+            title={i18n.t('common.logout')}
             onclick={onLogout}
           >
             <LogOut class="h-3.5 w-3.5" />
