@@ -317,9 +317,9 @@ The CSS entries do not scan component sources. Remove obsolete SVAdmin `@source`
 
 For the opt-in Surface semantic variants, also import `@svadmin/surface/styles.css` and follow [Surface styling](packages/surface/STYLING.md). The default `svadmin/v1` contract is unchanged.
 
-**Chrome 111 (desktop) / 桌面兼容:** For a Vite 8 production build, use the [example's build target and CSS minifier](example/vite.config.ts). If the host uses `@tailwindcss/vite`, let Vite do the final CSS conversion with `tailwindcss({ optimize: false })`. Chromium 111+ keeps the framework's OKLCH theme tokens and color-mix effects natively; hosts that must support older Chromium builds can lower the Vite target, which converts opaque OKLCH tokens to sRGB and degrades some color-mix effects. This is not a compatibility guarantee for host CSS, optional integrations, or all components.
+**Chrome 105 (desktop) / 桌面兼容:** For a Vite 8 production build, use the [example's build target and CSS minifier](example/vite.config.ts). If the host uses `@tailwindcss/vite`, let Vite do the final CSS conversion with `tailwindcss({ optimize: false })`. UI theme colors fall back to sRGB for the framework's opaque OKLCH tokens; some color-mix effects can degrade. This is not a compatibility guarantee for host CSS, optional integrations, or all components.
 
-Vite 8 宿主可参考示例配置，生产构建以 Chrome/Edge 111 为 Chromium 基线，原生保留框架的 OKLCH 主题色与 color-mix 效果。宿主如使用 `@tailwindcss/vite`，关闭其独立优化，由 Vite 统一转换；如必须兼容更旧的 Chromium，可自行下调构建目标，此时不透明 OKLCH 色值会回退到 sRGB，部分混色效果会降级。宿主自有样式和可选集成仍需单独验收。
+Vite 8 宿主可参考示例配置为生产构建保留 Chrome 105 的 CSS 回退。宿主如使用 `@tailwindcss/vite`，关闭其独立优化，由 Vite 统一转换；框架主题的不透明 OKLCH 色值会回退到 sRGB，部分混色效果会降级。宿主自有样式和可选集成仍需单独验收。
 
 **2. Configure Vite `optimizeDeps` / 配置 Vite `optimizeDeps`:**
 
